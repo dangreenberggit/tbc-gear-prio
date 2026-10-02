@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "forkSha": "2117d52710add1344d9264d2357deff2755e5a95",
+  "forkSha": "04de6a46ba84dee680e2aca87b251f94058ba403",
   "forkDirty": false,
   "spec": "feral",
   "phase": 3,
@@ -89,10 +89,10 @@
       }
     ]
   },
-  "recordedAt": "2026-09-28T00:13:08.682Z",
+  "recordedAt": "2026-10-02T15:06:49.570Z",
   "iterations": 3000,
   "ranking": {
-    "contentHash": "{\"candidateCap\":364,\"candidates\":[{\"itemId\":8345,\"slot\":\"head\"},{\"itemId\":24114,\"slot\":\"neck\"},{\"itemId\":24259,\"slot\":\"back\"},{\"itemId\":25685,\"slot\":\"hands\"},{\"itemId\":25686,\"slot\":\"feet\"},{\"itemId\":28034,\"slot\":\"trinket\"},{\"itemId\":28453,\"slot\":\"wrist\"},{\"itemId\":28476,\"slot\":\"weapon\"},{\"itemId\":28477,\"slot\":\"wrist\"},{\"itemId\":28506,\"slot\":\"hands\"},{\"itemId\":28507,\"slot\":\"hands\"},{\"itemId\":28508,\"slot\":\"hands\"},{\"itemId\":28509,\"slot\":\"neck\"},{\"itemId\":28510,\"slot\":\"finger\"},{\"itemId\":28511,\"slot\":\"wrist\"},{\"itemId\":28514,\"slot\":\"wrist\"},{\"itemId\":28515,\"slot\":\"wrist\"},{\"itemId\":28516,\"slot\":\"neck\"},{\"itemId\":28517,\"slot\":\"feet\"},{\"itemId\":28521,\"slot\":\"hands\"},{\"itemId\":28522,\"slot\":\"weapon\"},{\"itemId\":28524,\"slot\":\"weapon\"},{\"itemId\":28525,\"slot\":\"weapon\"},{\"itemId\":28528,\"slot\":\"trinket\"},{\"itemId\":28529,\"slot\":\"back\"},{\"itemId\":28530,\"slot\":\"neck\"},{\"itemId\":28545,\"slot\":\"feet\"},{\"itemId\":28565,\"slot\":\"waist\"},{\"itemId\":28570,\"slot\":\"back\"},{\"itemId\":28572,\"slot\":\"weapon\"},{\"itemId\":28578,\"slot\":\"chest\"},{\"itemId\":28579,\"slot\":\"trinket\"},{\"itemId\":28582,\"slot\":\"back\"},{\"itemId\":28584,\"slot\":\"weapon\"},{\"itemId\":28585,\"slot\":\"feet\"},{\"itemId\":28586,\"slot\":\"head\"},{\"itemId\":28591,\"slot\":\"legs\"},{\"itemId\":28594,\"slot\":\"legs\"},{\"itemId\":28600,\"slot\":\"chest\"},{\"itemId\":28601,\"slot\":\"chest\"},{\"itemId\":28602,\"slot\":\"chest\"},{\"itemId\":28603,\"slot\":\"weapon\"},{\"itemId\":28604,\"slot\":\"weapon\"},{\"itemId\":28609,\"slot\":\"neck\"},{\"itemId\":28612,\"slot\":\"shoulder\"},{\"itemId\":28633,\"slot\":\"weapon\"},{\"itemId\":28647,\"slot\":\"shoulder\"},{\"itemId\":28649,\"slot\":\"finger\"},{\"itemId\":28652,\"slot\":\"waist\"},{\"itemId\":28653,\"slot\":\"back\"},{\"itemId\":28654,\"slot\":\"waist\"},{\"itemId\":28655,\"slot\":\"waist\"},{\"itemId\":28657,\"slot\":\"weapon\"},{\"itemId\":28658,\"slot\":\"weapon\"},{\"itemId\":28660,\"slot\":\"back\"},{\"itemId\":28661,\"slot\":\"finger\"},{\"itemId\":28663,\"slot\":\"feet\"},{\"itemId\":28669,\"slot\":\"feet\"},{\"itemId\":28670,\"slot\":\"feet\"},{\"itemId\":28672,\"slot\":\"back\"},{\"itemId\":28674,\"slot\":\"neck\"},{\"itemId\":28675,\"slot\":\"finger\"},{\"itemId\":28726,\"slot\":\"shoulder\"},{\"itemId\":28727,\"slot\":\"trinket\"},{\"itemId\":28728,\"slot\":\"weapon\"},{\"itemId\":28730,\"slot\":\"finger\"},{\"itemId\":28731,\"slot\":\"neck\"},{\"itemId\":28732,\"slot\":\"head\"},{\"itemId\":28734,\"slot\":\"weapon\"},{\"itemId\":28741,\"slot\":\"legs\"},{\"itemId\":28742,\"slot\":\"legs\"},{\"itemId\":28744,\"slot\":\"head\"},{\"itemId\":28745,\"slot\":\"neck\"},{\"itemId\":28750,\"slot\":\"waist\"},{\"itemId\":28752,\"slot\":\"feet\"},{\"itemId\":28753,\"slot\":\"finger\"},{\"itemId\":28755,\"slot\":\"shoulder\"},{\"itemId\":28756,\"slot\":\"head\"},{\"itemId\":28757,\"slot\":\"finger\"},{\"itemId\":28762,\"slot\":\"neck\"},{\"itemId\":28763,\"slot\":\"finger\"},{\"itemId\":28764,\"slot\":\"back\"},{\"itemId\":28765,\"slot\":\"back\"},{\"itemId\":28766,\"slot\":\"back\"},{\"itemId\":28768,\"slot\":\"weapon\"},{\"itemId\":28770,\"slot\":\"weapon\"},{\"itemId\":28771,\"slot\":\"weapon\"},{\"itemId\":28776,\"slot\":\"hands\"},{\"itemId\":28777,\"slot\":\"back\"},{\"itemId\":28780,\"slot\":\"hands\"},{\"itemId\":28781,\"slot\":\"weapon\"},{\"itemId\":28782,\"slot\":\"weapon\"},{\"itemId\":28785,\"slot\":\"trinket\"},{\"itemId\":28789,\"slot\":\"trinket\"},{\"itemId\":28796,\"slot\":\"head\"},{\"itemId\":28797,\"slot\":\"back\"},{\"itemId\":28799,\"slot\":\"waist\"},{\"itemId\":28800,\"slot\":\"weapon\"},{\"itemId\":28803,\"slot\":\"head\"},{\"itemId\":28804,\"slot\":\"head\"},{\"itemId\":28822,\"slot\":\"neck\"},{\"itemId\":28828,\"slot\":\"waist\"},{\"itemId\":28830,\"slot\":\"trinket\"},{\"itemId\":29096,\"slot\":\"chest\"},{\"itemId\":29097,\"slot\":\"hands\"},{\"itemId\":29098,\"slot\":\"head\"},{\"itemId\":29099,\"slot\":\"legs\"},{\"itemId\":29100,\"slot\":\"shoulder\"},{\"itemId\":29119,\"slot\":\"neck\"},{\"itemId\":29171,\"slot\":\"weapon\"},{\"itemId\":29294,\"slot\":\"finger\"},{\"itemId\":29295,\"slot\":\"finger\"},{\"itemId\":29296,\"slot\":\"finger\"},{\"itemId\":29297,\"slot\":\"finger\"},{\"itemId\":29298,\"slot\":\"finger\"},{\"itemId\":29299,\"slot\":\"finger\"},{\"itemId\":29300,\"slot\":\"finger\"},{\"itemId\":29301,\"slot\":\"finger\"},{\"itemId\":29302,\"slot\":\"finger\"},{\"itemId\":29303,\"slot\":\"finger\"},{\"itemId\":29304,\"slot\":\"finger\"},{\"itemId\":29305,\"slot\":\"finger\"},{\"itemId\":29306,\"slot\":\"finger\"},{\"itemId\":29307,\"slot\":\"finger\"},{\"itemId\":29308,\"slot\":\"finger\"},{\"itemId\":29309,\"slot\":\"finger\"},{\"itemId\":29381,\"slot\":\"neck\"},{\"itemId\":29382,\"slot\":\"back\"},{\"itemId\":29383,\"slot\":\"trinket\"},{\"itemId\":29390,\"slot\":\"ranged\"},{\"itemId\":29507,\"slot\":\"hands\"},{\"itemId\":29525,\"slot\":\"chest\"},{\"itemId\":29918,\"slot\":\"wrist\"},{\"itemId\":29920,\"slot\":\"finger\"},{\"itemId\":29922,\"slot\":\"finger\"},{\"itemId\":29923,\"slot\":\"weapon\"},{\"itemId\":29925,\"slot\":\"back\"},{\"itemId\":29947,\"slot\":\"hands\"},{\"itemId\":29962,\"slot\":\"weapon\"},{\"itemId\":29966,\"slot\":\"wrist\"},{\"itemId\":29972,\"slot\":\"legs\"},{\"itemId\":29977,\"slot\":\"legs\"},{\"itemId\":29981,\"slot\":\"weapon\"},{\"itemId\":29984,\"slot\":\"waist\"},{\"itemId\":29986,\"slot\":\"head\"},{\"itemId\":29987,\"slot\":\"hands\"},{\"itemId\":29988,\"slot\":\"weapon\"},{\"itemId\":29989,\"slot\":\"back\"},{\"itemId\":29990,\"slot\":\"head\"},{\"itemId\":29992,\"slot\":\"back\"},{\"itemId\":29994,\"slot\":\"back\"},{\"itemId\":29995,\"slot\":\"legs\"},{\"itemId\":29996,\"slot\":\"weapon\"},{\"itemId\":29997,\"slot\":\"finger\"},{\"itemId\":30017,\"slot\":\"neck\"},{\"itemId\":30020,\"slot\":\"waist\"},{\"itemId\":30021,\"slot\":\"weapon\"},{\"itemId\":30022,\"slot\":\"neck\"},{\"itemId\":30024,\"slot\":\"shoulder\"},{\"itemId\":30028,\"slot\":\"finger\"},{\"itemId\":30029,\"slot\":\"hands\"},{\"itemId\":30039,\"slot\":\"feet\"},{\"itemId\":30040,\"slot\":\"waist\"},{\"itemId\":30041,\"slot\":\"feet\"},{\"itemId\":30042,\"slot\":\"waist\"},{\"itemId\":30049,\"slot\":\"weapon\"},{\"itemId\":30050,\"slot\":\"feet\"},{\"itemId\":30052,\"slot\":\"finger\"},{\"itemId\":30055,\"slot\":\"shoulder\"},{\"itemId\":30056,\"slot\":\"chest\"},{\"itemId\":30058,\"slot\":\"weapon\"},{\"itemId\":30059,\"slot\":\"neck\"},{\"itemId\":30060,\"slot\":\"feet\"},{\"itemId\":30061,\"slot\":\"finger\"},{\"itemId\":30062,\"slot\":\"wrist\"},{\"itemId\":30064,\"slot\":\"waist\"},{\"itemId\":30067,\"slot\":\"feet\"},{\"itemId\":30075,\"slot\":\"chest\"},{\"itemId\":30079,\"slot\":\"shoulder\"},{\"itemId\":30083,\"slot\":\"finger\"},{\"itemId\":30090,\"slot\":\"weapon\"},{\"itemId\":30092,\"slot\":\"feet\"},{\"itemId\":30098,\"slot\":\"back\"},{\"itemId\":30099,\"slot\":\"neck\"},{\"itemId\":30100,\"slot\":\"feet\"},{\"itemId\":30101,\"slot\":\"chest\"},{\"itemId\":30103,\"slot\":\"weapon\"},{\"itemId\":30106,\"slot\":\"waist\"},{\"itemId\":30107,\"slot\":\"chest\"},{\"itemId\":30108,\"slot\":\"weapon\"},{\"itemId\":30109,\"slot\":\"finger\"},{\"itemId\":30110,\"slot\":\"finger\"},{\"itemId\":30111,\"slot\":\"shoulder\"},{\"itemId\":30222,\"slot\":\"chest\"},{\"itemId\":30223,\"slot\":\"hands\"},{\"itemId\":30228,\"slot\":\"head\"},{\"itemId\":30229,\"slot\":\"legs\"},{\"itemId\":30230,\"slot\":\"shoulder\"},{\"itemId\":30365,\"slot\":\"finger\"},{\"itemId\":30620,\"slot\":\"trinket\"},{\"itemId\":30621,\"slot\":\"trinket\"},{\"itemId\":30626,\"slot\":\"trinket\"},{\"itemId\":30627,\"slot\":\"trinket\"},{\"itemId\":30629,\"slot\":\"trinket\"},{\"itemId\":30642,\"slot\":\"back\"},{\"itemId\":30644,\"slot\":\"hands\"},{\"itemId\":30664,\"slot\":\"trinket\"},{\"itemId\":30666,\"slot\":\"neck\"},{\"itemId\":30667,\"slot\":\"finger\"},{\"itemId\":30668,\"slot\":\"hands\"},{\"itemId\":30673,\"slot\":\"waist\"},{\"itemId\":30674,\"slot\":\"feet\"},{\"itemId\":30675,\"slot\":\"waist\"},{\"itemId\":30676,\"slot\":\"waist\"},{\"itemId\":30680,\"slot\":\"feet\"},{\"itemId\":30681,\"slot\":\"feet\"},{\"itemId\":30684,\"slot\":\"wrist\"},{\"itemId\":30685,\"slot\":\"wrist\"},{\"itemId\":30723,\"slot\":\"weapon\"},{\"itemId\":30725,\"slot\":\"hands\"},{\"itemId\":30726,\"slot\":\"neck\"},{\"itemId\":30727,\"slot\":\"legs\"},{\"itemId\":30729,\"slot\":\"back\"},{\"itemId\":30730,\"slot\":\"chest\"},{\"itemId\":30732,\"slot\":\"weapon\"},{\"itemId\":30734,\"slot\":\"legs\"},{\"itemId\":30735,\"slot\":\"back\"},{\"itemId\":30736,\"slot\":\"finger\"},{\"itemId\":30737,\"slot\":\"feet\"},{\"itemId\":30738,\"slot\":\"finger\"},{\"itemId\":30834,\"slot\":\"finger\"},{\"itemId\":30863,\"slot\":\"wrist\"},{\"itemId\":30865,\"slot\":\"weapon\"},{\"itemId\":30868,\"slot\":\"wrist\"},{\"itemId\":30870,\"slot\":\"wrist\"},{\"itemId\":30871,\"slot\":\"wrist\"},{\"itemId\":30872,\"slot\":\"weapon\"},{\"itemId\":30879,\"slot\":\"waist\"},{\"itemId\":30883,\"slot\":\"weapon\"},{\"itemId\":30884,\"slot\":\"shoulder\"},{\"itemId\":30885,\"slot\":\"feet\"},{\"itemId\":30886,\"slot\":\"feet\"},{\"itemId\":30888,\"slot\":\"waist\"},{\"itemId\":30891,\"slot\":\"feet\"},{\"itemId\":30894,\"slot\":\"feet\"},{\"itemId\":30895,\"slot\":\"waist\"},{\"itemId\":30898,\"slot\":\"legs\"},{\"itemId\":30899,\"slot\":\"chest\"},{\"itemId\":30901,\"slot\":\"weapon\"},{\"itemId\":30905,\"slot\":\"chest\"},{\"itemId\":30908,\"slot\":\"weapon\"},{\"itemId\":30911,\"slot\":\"weapon\"},{\"itemId\":30912,\"slot\":\"legs\"},{\"itemId\":30913,\"slot\":\"chest\"},{\"itemId\":30914,\"slot\":\"waist\"},{\"itemId\":30916,\"slot\":\"legs\"},{\"itemId\":30917,\"slot\":\"shoulder\"},{\"itemId\":30918,\"slot\":\"weapon\"},{\"itemId\":31034,\"slot\":\"hands\"},{\"itemId\":31039,\"slot\":\"head\"},{\"itemId\":31042,\"slot\":\"chest\"},{\"itemId\":31044,\"slot\":\"legs\"},{\"itemId\":31048,\"slot\":\"shoulder\"},{\"itemId\":31255,\"slot\":\"back\"},{\"itemId\":31275,\"slot\":\"neck\"},{\"itemId\":31334,\"slot\":\"weapon\"},{\"itemId\":32014,\"slot\":\"weapon\"},{\"itemId\":32235,\"slot\":\"head\"},{\"itemId\":32237,\"slot\":\"weapon\"},{\"itemId\":32238,\"slot\":\"finger\"},{\"itemId\":32239,\"slot\":\"feet\"},{\"itemId\":32240,\"slot\":\"head\"},{\"itemId\":32247,\"slot\":\"finger\"},{\"itemId\":32252,\"slot\":\"chest\"},{\"itemId\":32256,\"slot\":\"waist\"},{\"itemId\":32257,\"slot\":\"ranged\"},{\"itemId\":32260,\"slot\":\"neck\"},{\"itemId\":32261,\"slot\":\"finger\"},{\"itemId\":32262,\"slot\":\"weapon\"},{\"itemId\":32265,\"slot\":\"waist\"},{\"itemId\":32266,\"slot\":\"finger\"},{\"itemId\":32269,\"slot\":\"weapon\"},{\"itemId\":32270,\"slot\":\"wrist\"},{\"itemId\":32271,\"slot\":\"legs\"},{\"itemId\":32273,\"slot\":\"shoulder\"},{\"itemId\":32323,\"slot\":\"back\"},{\"itemId\":32324,\"slot\":\"wrist\"},{\"itemId\":32327,\"slot\":\"chest\"},{\"itemId\":32328,\"slot\":\"hands\"},{\"itemId\":32329,\"slot\":\"head\"},{\"itemId\":32331,\"slot\":\"back\"},{\"itemId\":32332,\"slot\":\"weapon\"},{\"itemId\":32335,\"slot\":\"finger\"},{\"itemId\":32337,\"slot\":\"back\"},{\"itemId\":32338,\"slot\":\"shoulder\"},{\"itemId\":32339,\"slot\":\"waist\"},{\"itemId\":32340,\"slot\":\"chest\"},{\"itemId\":32344,\"slot\":\"weapon\"},{\"itemId\":32347,\"slot\":\"hands\"},{\"itemId\":32349,\"slot\":\"neck\"},{\"itemId\":32350,\"slot\":\"weapon\"},{\"itemId\":32351,\"slot\":\"wrist\"},{\"itemId\":32352,\"slot\":\"feet\"},{\"itemId\":32353,\"slot\":\"hands\"},{\"itemId\":32361,\"slot\":\"weapon\"},{\"itemId\":32362,\"slot\":\"neck\"},{\"itemId\":32366,\"slot\":\"feet\"},{\"itemId\":32367,\"slot\":\"legs\"},{\"itemId\":32370,\"slot\":\"neck\"},{\"itemId\":32374,\"slot\":\"weapon\"},{\"itemId\":32377,\"slot\":\"shoulder\"},{\"itemId\":32389,\"slot\":\"legs\"},{\"itemId\":32390,\"slot\":\"waist\"},{\"itemId\":32391,\"slot\":\"feet\"},{\"itemId\":32392,\"slot\":\"wrist\"},{\"itemId\":32393,\"slot\":\"waist\"},{\"itemId\":32394,\"slot\":\"feet\"},{\"itemId\":32395,\"slot\":\"wrist\"},{\"itemId\":32396,\"slot\":\"legs\"},{\"itemId\":32420,\"slot\":\"back\"},{\"itemId\":32471,\"slot\":\"weapon\"},{\"itemId\":32483,\"slot\":\"trinket\"},{\"itemId\":32486,\"slot\":\"trinket\"},{\"itemId\":32496,\"slot\":\"trinket\"},{\"itemId\":32497,\"slot\":\"finger\"},{\"itemId\":32501,\"slot\":\"trinket\"},{\"itemId\":32505,\"slot\":\"trinket\"},{\"itemId\":32513,\"slot\":\"wrist\"},{\"itemId\":32516,\"slot\":\"wrist\"},{\"itemId\":32518,\"slot\":\"shoulder\"},{\"itemId\":32519,\"slot\":\"waist\"},{\"itemId\":32524,\"slot\":\"back\"},{\"itemId\":32525,\"slot\":\"head\"},{\"itemId\":32526,\"slot\":\"finger\"},{\"itemId\":32527,\"slot\":\"finger\"},{\"itemId\":32528,\"slot\":\"finger\"},{\"itemId\":32580,\"slot\":\"wrist\"},{\"itemId\":32589,\"slot\":\"neck\"},{\"itemId\":32590,\"slot\":\"back\"},{\"itemId\":32591,\"slot\":\"neck\"},{\"itemId\":32593,\"slot\":\"feet\"},{\"itemId\":32609,\"slot\":\"feet\"},{\"itemId\":32647,\"slot\":\"wrist\"},{\"itemId\":32654,\"slot\":\"trinket\"},{\"itemId\":32814,\"slot\":\"wrist\"},{\"itemId\":32943,\"slot\":\"weapon\"},{\"itemId\":32944,\"slot\":\"weapon\"},{\"itemId\":32946,\"slot\":\"weapon\"},{\"itemId\":33054,\"slot\":\"finger\"},{\"itemId\":33055,\"slot\":\"finger\"},{\"itemId\":33058,\"slot\":\"finger\"},{\"itemId\":33122,\"slot\":\"back\"},{\"itemId\":33672,\"slot\":\"head\"},{\"itemId\":33673,\"slot\":\"legs\"},{\"itemId\":33674,\"slot\":\"shoulder\"},{\"itemId\":33675,\"slot\":\"chest\"},{\"itemId\":33716,\"slot\":\"weapon\"},{\"itemId\":33879,\"slot\":\"waist\"},{\"itemId\":33880,\"slot\":\"feet\"},{\"itemId\":33881,\"slot\":\"wrist\"},{\"itemId\":33893,\"slot\":\"wrist\"},{\"itemId\":34009,\"slot\":\"weapon\"},{\"itemId\":34010,\"slot\":\"back\"},{\"itemId\":34012,\"slot\":\"back\"}],\"character\":{\"name\":\"player\",\"realm\":\"current-page\",\"region\":\"us\"},\"engineVersion\":6,\"epWeights\":{\"0\":0.78,\"1\":1.16,\"17\":0.35,\"19\":0.35,\"20\":1.02,\"21\":0.77,\"22\":0.41,\"23\":0.16,\"24\":1.02,\"41\":3.13},\"fight\":{\"fightId\":0,\"reportCode\":\"current-page\"},\"fullPool\":true,\"gear\":[{\"enchant\":368,\"gems\":[],\"id\":29994,\"slot\":\"back\"},{\"enchant\":2661,\"gems\":[24028,24028,24028],\"id\":29096,\"slot\":\"chest\"},{\"enchant\":2939,\"gems\":[24028,24028],\"id\":28545,\"slot\":\"feet\"},{\"enchant\":2929,\"gems\":[],\"id\":29997,\"slot\":\"finger1\"},{\"enchant\":2929,\"gems\":[],\"id\":30052,\"slot\":\"finger2\"},{\"enchant\":2564,\"gems\":[],\"id\":29947,\"slot\":\"hands\"},{\"enchant\":3003,\"gems\":[],\"id\":8345,\"slot\":\"head\"},{\"enchant\":3012,\"gems\":[],\"id\":29995,\"slot\":\"legs\"},{\"enchant\":2670,\"gems\":[],\"id\":32014,\"slot\":\"mainhand\"},{\"enchant\":0,\"gems\":[],\"id\":30017,\"slot\":\"neck\"},{\"enchant\":0,\"gems\":[],\"id\":0,\"slot\":\"offhand\"},{\"enchant\":0,\"gems\":[],\"id\":32387,\"slot\":\"ranged\"},{\"enchant\":2986,\"gems\":[24028,24028],\"id\":29100,\"slot\":\"shoulder\"},{\"enchant\":0,\"gems\":[],\"id\":30627,\"slot\":\"trinket1\"},{\"enchant\":0,\"gems\":[],\"id\":29383,\"slot\":\"trinket2\"},{\"enchant\":0,\"gems\":[24028,30549],\"id\":30106,\"slot\":\"waist\"},{\"enchant\":2647,\"gems\":[24028],\"id\":29966,\"slot\":\"wrist\"}],\"gemPaletteIds\":[22459,22460,23094,23095,23096,23097,23098,23099,23100,23101,23103,23104,23105,23106,23108,23109,23110,23111,23113,23114,23115,23116,23118,23119,23120,23121,24027,24028,24029,24030,24031,24032,24033,24035,24036,24037,24039,24047,24048,24050,24051,24052,24053,24054,24055,24056,24057,24058,24059,24060,24061,24062,24065,24066,24067,25890,25893,25894,25895,25896,25897,25898,25899,25901,27679,27777,27785,27786,27809,27812,27820,28118,28119,28120,28123,28290,28360,28361,28362,28363,28556,28557,28595,30546,30547,30548,30549,30550,30551,30552,30553,30554,30555,30556,30558,30559,30560,30563,30564,30565,30566,30571,30572,30573,30574,30575,30581,30582,30583,30584,30585,30586,30587,30588,30589,30590,30591,30592,30593,30594,30598,30600,30601,30602,30603,30604,30605,30606,30607,30608,31116,31117,31118,31860,31861,31862,31863,31864,31865,31866,31867,31868,31869,32193,32194,32195,32196,32197,32198,32199,32200,32201,32202,32203,32204,32205,32206,32207,32208,32209,32210,32211,32212,32213,32214,32215,32216,32217,32218,32219,32220,32221,32222,32223,32224,32225,32226,32409,32410,32634,32635,32636,32637,32638,32639,32640,32641,32833,32836,33131,33133,33134,33135,33140,33143,33144,33782,34220,34256,34627,34831,35487,35488,35501,35503,35707,35758,37503],\"iterations\":3000,\"maxPhase\":3,\"presetId\":\"feral/current-page-settings\",\"promoteTopK\":null,\"race\":\"RaceNightElf\",\"screenIterations\":null,\"seeds\":[11,22,33,44,55],\"simVersion\":\"api-v14\",\"skeleton\":{\"encounter\":{\"apiVersion\":14,\"duration\":180,\"durationVariation\":5,\"executeProportion20\":0.2,\"executeProportion25\":0.25,\"executeProportion35\":0.35,\"executeProportion45\":0.45,\"executeProportion90\":0.9,\"targets\":[{\"canCrush\":true,\"damageSpread\":0.5,\"id\":31146,\"level\":73,\"minBaseDamage\":15113,\"mobType\":\"MobTypeMechanical\",\"name\":\"Raid Target\",\"parryHaste\":true,\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,320,0,0,0,0,0,0,0,0,0,54,0,0,0,7685,0,6070400,0,0,0,0,0,0,0,0],\"swingSpeed\":2}]},\"raid\":{\"buffs\":{\"arcaneBrilliance\":true,\"bloodlust\":true,\"divineSpirit\":\"TristateEffectImproved\",\"giftOfTheWild\":\"TristateEffectImproved\",\"powerWordFortitude\":\"TristateEffectImproved\",\"shadowProtection\":true},\"debuffs\":{\"bloodFrenzy\":true,\"curseOfRecklessness\":true,\"exposeArmor\":\"TristateEffectImproved\",\"exposeWeaknessHunterAgility\":1210,\"exposeWeaknessUptime\":0.9,\"faerieFire\":\"TristateEffectImproved\",\"giftOfArthas\":true,\"huntersMark\":\"TristateEffectImproved\",\"improvedSealOfTheCrusader\":\"TristateEffectImproved\",\"judgementOfWisdom\":true,\"misery\":true,\"sunderArmor\":true},\"numActiveParties\":5,\"parties\":[{\"buffs\":{\"battleShout\":\"TristateEffectImproved\",\"drums\":\"LesserDrumsOfBattle\",\"ferociousInspiration\":2,\"graceOfAirTotem\":\"TristateEffectImproved\",\"manaSpringTotem\":\"TristateEffectRegular\",\"strengthOfEarthTotem\":\"TristateEffectImproved\",\"totemTwisting\":true,\"windfuryTotem\":\"TristateEffectImproved\"},\"players\":[{\"apiVersion\":14,\"bonusStats\":{\"apiVersion\":14,\"pseudoStats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},\"buffs\":{\"blessingOfKings\":true,\"blessingOfMight\":\"TristateEffectImproved\",\"unleashedRage\":true},\"class\":\"ClassDruid\",\"consumables\":{\"battleElixirId\":22831,\"conjuredId\":12662,\"conjuredItems\":[22105,12662,22788],\"foodId\":27664,\"goblinSapper\":true,\"guardianElixirId\":32067,\"mhImbueId\":34340,\"potId\":22838,\"potions\":[13442,18253,20002,22828,22832,22836,22837,22838,22850,28101,31677,32948,33935,34440],\"scrollAgi\":true,\"scrollStr\":true,\"superSapper\":true},\"cooldowns\":{},\"database\":{\"consumables\":[{\"buffDuration\":20,\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[696085],\"id\":13442,\"name\":\"Mighty Rage Potion\",\"stats\":[60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[699637,699638],\"id\":18253,\"name\":\"Major Rejuvenation Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":12,\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[701180,701181],\"id\":20002,\"name\":\"Greater Dreamless Sleep Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":15,\"categoryCooldownDuration\":120,\"categoryId\":4,\"id\":22828,\"name\":\"Insane Strength Potion\",\"stats\":[120,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-75,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847151],\"id\":22832,\"name\":\"Super Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":12,\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847239,847240],\"id\":22836,\"name\":\"Major Dreamless Sleep Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":15,\"categoryCooldownDuration\":120,\"categoryId\":4,\"id\":22837,\"name\":\"Heroic Potion\",\"stats\":[70,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,700,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":15,\"categoryCooldownDuration\":120,\"categoryId\":4,\"id\":22838,\"name\":\"Haste Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,400,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847514,847515],\"id\":22850,\"name\":\"Super Rejuvenation Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[695996],\"id\":28101,\"name\":\"Unstable Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":24,\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[858752,858753,858755],\"id\":31677,\"name\":\"Fel Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847151],\"id\":32948,\"name\":\"Auchenai Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847151],\"id\":33935,\"name\":\"Crystal Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[864802,864803],\"id\":34440,\"name\":\"Mad Alchemist's Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":1153,\"effectIds\":[846788],\"id\":22105,\"name\":\"Master Healthstone\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeOther\"},{\"categoryCooldownDuration\":120,\"categoryId\":1153,\"effectIds\":[694074],\"id\":12662,\"name\":\"Demonic Rune\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\"buffDuration\":60,\"categoryCooldownDuration\":180,\"categoryId\":1153,\"id\":22788,\"name\":\"Flame Cap\",\"stats\":[0,0,0,0,0,0,0,80,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeHerb\"},{\"buffDuration\":3600,\"categoryCooldownDuration\":3,\"categoryId\":79,\"id\":22831,\"name\":\"Elixir of Major Agility\",\"stats\":[0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeBattleElixir\"},{\"buffDuration\":3600,\"categoryCooldownDuration\":3,\"categoryId\":79,\"id\":32067,\"name\":\"Elixir of Draenic Wisdom\",\"stats\":[0,0,0,30,0,0,0,0,0,0,0,0,0,0,0,0,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeGuardianElixir\"},{\"buffDuration\":30,\"categoryCooldownDuration\":1,\"categoryId\":11,\"id\":27664,\"name\":\"Grilled Mudfish\",\"stats\":[0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeFood\"}],\"enchants\":[{\"effectId\":3003,\"name\":\"Glyph of Ferocity\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,34,0,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeHead\"},{\"effectId\":2986,\"name\":\"Greater Inscription of Vengeance\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,30,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeShoulder\"},{\"effectId\":368,\"name\":\"Enchant Cloak - Greater Agility\",\"stats\":[0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeBack\"},{\"effectId\":2661,\"name\":\"Enchant Chest - Exceptional Stats\",\"stats\":[6,6,6,6,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeChest\"},{\"effectId\":2647,\"name\":\"Enchant Bracer - Brawn\",\"stats\":[12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeWrist\"},{\"effectId\":2564,\"name\":\"Enchant Gloves - Superior Agility\",\"stats\":[0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeHands\"},{\"effectId\":3012,\"name\":\"Nethercobra Leg Armor\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,50,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeLegs\"},{\"effectId\":2939,\"name\":\"Enchant Boots - Cat's Swiftness\",\"stats\":[0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeFeet\"},{\"effectId\":2929,\"name\":\"Enchant Ring - Striking\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],\"type\":\"ItemTypeFinger\"},{\"effectId\":2670,\"enchantType\":\"EnchantTypeTwoHand\",\"name\":\"Enchant 2H Weapon - Major Agility\",\"stats\":[0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeWeapon\"}],\"gems\":[{\"color\":\"GemColorRed\",\"id\":24028,\"name\":\"Delicate Living Ruby\",\"stats\":[0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\"color\":\"GemColorPurple\",\"id\":30549,\"name\":\"Shifting Tanzanite\",\"stats\":[0,5,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],\"itemEffectRandPropPoints\":[{\"ilvl\":138,\"randPropPoints\":85},{\"ilvl\":120,\"randPropPoints\":75},{\"ilvl\":128,\"randPropPoints\":78},{\"ilvl\":115,\"randPropPoints\":73},{\"ilvl\":110,\"randPropPoints\":72},{\"ilvl\":136,\"randPropPoints\":83}],\"items\":[{\"armorType\":\"ArmorTypeLeather\",\"id\":8345,\"itemEffects\":[{\"buffId\":17768,\"buffName\":\"Wolfshead Helm (17768)\",\"effectDurationMs\":-1}],\"name\":\"Wolfshead Helm\",\"scalingOptions\":{\"0\":{\"ilvl\":45,\"randPropPoints\":26,\"stats\":{\"16\":10,\"31\":109}}},\"type\":\"ItemTypeHead\"},{\"id\":30017,\"name\":\"Telonicus's Pendant of Mayhem\",\"scalingOptions\":{\"0\":{\"ilvl\":138,\"randPropPoints\":48,\"stats\":{\"1\":27,\"2\":26,\"17\":70,\"18\":70}}},\"type\":\"ItemTypeNeck\"},{\"armorType\":\"ArmorTypeLeather\",\"gemSockets\":[\"GemColorBlue\",\"GemColorBlue\"],\"id\":29100,\"name\":\"Mantle of Malorne\",\"scalingOptions\":{\"0\":{\"ilvl\":120,\"randPropPoints\":56,\"stats\":{\"0\":33,\"1\":27,\"2\":25,\"3\":9,\"31\":284,\"32\":126}}},\"setId\":640,\"setName\":\"Malorne Harness\",\"socketBonus\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeShoulder\"},{\"armorType\":\"ArmorTypeCloth\",\"id\":29994,\"name\":\"Thalassian Wildercloak\",\"scalingOptions\":{\"0\":{\"ilvl\":138,\"randPropPoints\":48,\"stats\":{\"1\":28,\"2\":28,\"17\":68,\"18\":68,\"31\":116}}},\"type\":\"ItemTypeBack\"},{\"armorType\":\"ArmorTypeLeather\",\"gemSockets\":[\"GemColorYellow\",\"GemColorBlue\",\"GemColorRed\"],\"id\":29096,\"name\":\"Breastplate of Malorne\",\"scalingOptions\":{\"0\":{\"ilvl\":120,\"randPropPoints\":75,\"stats\":{\"0\":33,\"1\":34,\"2\":36,\"3\":13,\"31\":379,\"32\":280}}},\"setId\":640,\"setName\":\"Malorne Harness\",\"socketBonus\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeChest\"},{\"armorType\":\"ArmorTypeLeather\",\"gemSockets\":[\"GemColorBlue\"],\"id\":29966,\"name\":\"Vambraces of Ending\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":44,\"stats\":{\"1\":24,\"2\":24,\"17\":52,\"18\":52,\"31\":177}}},\"socketBonus\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeWrist\"},{\"armorType\":\"ArmorTypeLeather\",\"id\":29947,\"name\":\"Gloves of the Searing Grip\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":59,\"stats\":{\"1\":33,\"2\":37,\"17\":66,\"18\":66,\"24\":18,\"31\":252}}},\"type\":\"ItemTypeHands\"},{\"armorType\":\"ArmorTypeLeather\",\"gemSockets\":[\"GemColorRed\",\"GemColorBlue\"],\"id\":30106,\"name\":\"Belt of One-Hundred Deaths\",\"scalingOptions\":{\"0\":{\"ilvl\":138,\"randPropPoints\":64,\"stats\":{\"1\":29,\"2\":25,\"17\":74,\"18\":74,\"24\":25,\"31\":244}}},\"socketBonus\":[0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeWaist\"},{\"armorType\":\"ArmorTypeLeather\",\"id\":29995,\"name\":\"Leggings of Murderous Intent\",\"scalingOptions\":{\"0\":{\"ilvl\":138,\"randPropPoints\":85,\"stats\":{\"1\":45,\"2\":31,\"17\":92,\"18\":92,\"21\":37,\"31\":380}}},\"type\":\"ItemTypeLegs\"},{\"armorType\":\"ArmorTypeLeather\",\"gemSockets\":[\"GemColorRed\",\"GemColorYellow\"],\"id\":28545,\"name\":\"Edgewalker Longboots\",\"scalingOptions\":{\"0\":{\"ilvl\":115,\"randPropPoints\":55,\"stats\":{\"1\":29,\"2\":28,\"17\":44,\"18\":44,\"20\":13,\"31\":250}}},\"socketBonus\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeFeet\"},{\"id\":29997,\"name\":\"Band of the Ranger-General\",\"scalingOptions\":{\"0\":{\"ilvl\":138,\"randPropPoints\":48,\"stats\":{\"2\":27,\"17\":56,\"18\":56,\"20\":18,\"21\":28}}},\"type\":\"ItemTypeFinger\",\"unique\":true},{\"id\":30052,\"name\":\"Ring of Lethality\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":44,\"stats\":{\"1\":24,\"2\":19,\"17\":50,\"18\":50,\"20\":19}}},\"type\":\"ItemTypeFinger\",\"unique\":true},{\"id\":30627,\"itemEffects\":[{\"buffId\":42084,\"buffName\":\"Fury of the Crashing Waves (42083)\",\"effectDurationMs\":10000,\"proc\":{\"icdMs\":45000,\"procChance\":0.1},\"scalingOptions\":{\"0\":{\"stats\":{\"17\":340,\"18\":340}}}}],\"name\":\"Tsunami Talisman\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":59,\"stats\":{\"20\":10,\"21\":38}}},\"type\":\"ItemTypeTrinket\",\"unique\":true},{\"id\":29383,\"itemEffects\":[{\"buffId\":35166,\"buffName\":\"Lust for Battle (35166)\",\"effectDurationMs\":20000,\"onUse\":{\"categoryCooldownMs\":20000,\"categoryId\":1141,\"cooldownMs\":120000},\"scalingOptions\":{\"0\":{\"stats\":{\"17\":278,\"18\":278}}}}],\"name\":\"Bloodlust Brooch\",\"scalingOptions\":{\"0\":{\"ilvl\":110,\"randPropPoints\":54,\"stats\":{\"17\":72,\"18\":72}}},\"type\":\"ItemTypeTrinket\",\"unique\":true},{\"handType\":\"HandTypeTwoHand\",\"id\":32014,\"name\":\"Merciless Gladiator's Maul\",\"qualityModifier\":-56.29999923706055,\"scalingOptions\":{\"0\":{\"ilvl\":136,\"randPropPoints\":83,\"stats\":{\"0\":42,\"2\":55,\"19\":1010,\"20\":18,\"21\":42,\"30\":33},\"weaponDamageMax\":192,\"weaponDamageMin\":90}},\"type\":\"ItemTypeWeapon\",\"weaponSpeed\":2,\"weaponType\":\"WeaponTypeMace\"},{\"id\":32387,\"itemEffects\":[{\"buffId\":39926,\"buffName\":\"Improved Party Auras (39926)\"}],\"name\":\"Idol of the Raven Goddess\",\"rangedWeaponType\":\"RangedWeaponTypeIdol\",\"scalingOptions\":{\"0\":{\"ilvl\":115,\"randPropPoints\":35}},\"type\":\"ItemTypeRanged\",\"unique\":true}],\"spellEffects\":[{\"durationMs\":20000,\"effectSpread\":301,\"id\":696085,\"minEffectSize\":449,\"resourceType\":\"ResourceTypeRage\",\"spellId\":17528,\"type\":\"EffectTypeResourceGain\"},{\"effectSpread\":321,\"id\":699637,\"minEffectSize\":1439,\"resourceType\":\"ResourceTypeMana\",\"spellId\":22729,\"type\":\"EffectTypeResourceGain\"},{\"effectSpread\":321,\"id\":699638,\"index\":1,\"minEffectSize\":1439,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":22729,\"type\":\"EffectTypeHeal\"},{\"auraPeriodMs\":3000,\"durationMs\":12000,\"effectSpread\":1,\"id\":701180,\"index\":1,\"minEffectSize\":524,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":24360,\"type\":6},{\"auraPeriodMs\":3000,\"durationMs\":12000,\"effectSpread\":1,\"id\":701181,\"index\":2,\"minEffectSize\":524,\"resourceType\":\"ResourceTypeMana\",\"spellId\":24360,\"type\":6},{\"effectSpread\":1201,\"id\":847151,\"minEffectSize\":1799,\"resourceType\":\"ResourceTypeMana\",\"spellId\":28499,\"type\":\"EffectTypeResourceGain\"},{\"auraPeriodMs\":3000,\"durationMs\":12000,\"effectSpread\":1,\"id\":847239,\"index\":1,\"minEffectSize\":899,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":28504,\"type\":6},{\"auraPeriodMs\":3000,\"durationMs\":12000,\"effectSpread\":1,\"id\":847240,\"index\":2,\"minEffectSize\":899,\"resourceType\":\"ResourceTypeMana\",\"spellId\":28504,\"type\":6},{\"effectSpread\":1101,\"id\":847514,\"minEffectSize\":1649,\"resourceType\":\"ResourceTypeMana\",\"spellId\":28517,\"type\":\"EffectTypeResourceGain\"},{\"effectSpread\":1101,\"id\":847515,\"index\":1,\"minEffectSize\":1649,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":28517,\"type\":\"EffectTypeHeal\"},{\"effectSpread\":901,\"id\":695996,\"minEffectSize\":1349,\"resourceType\":\"ResourceTypeMana\",\"spellId\":17531,\"type\":\"EffectTypeResourceGain\"},{\"durationMs\":900000,\"effectSpread\":1,\"id\":858752,\"minEffectSize\":-26,\"spellId\":38927,\"stats\":[0,0,0,0,0,-25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":6},{\"durationMs\":900000,\"effectSpread\":1,\"id\":858753,\"index\":1,\"minEffectSize\":-51,\"spellId\":38927,\"stats\":[0,0,0,0,-50,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":6},{\"auraPeriodMs\":3000,\"durationMs\":24000,\"effectSpread\":1,\"id\":858755,\"minEffectSize\":399,\"resourceType\":\"ResourceTypeMana\",\"spellId\":38929,\"type\":6},{\"effectSpread\":1101,\"id\":864802,\"minEffectSize\":1649,\"resourceType\":\"ResourceTypeMana\",\"spellId\":45051,\"type\":\"EffectTypeResourceGain\"},{\"effectSpread\":1101,\"id\":864803,\"index\":1,\"minEffectSize\":1649,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":45051,\"type\":\"EffectTypeHeal\"},{\"effectSpread\":1,\"id\":846788,\"minEffectSize\":2495,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":27237,\"type\":\"EffectTypeHeal\"},{\"effectSpread\":601,\"id\":694074,\"minEffectSize\":899,\"resourceType\":\"ResourceTypeMana\",\"spellId\":16666,\"type\":\"EffectTypeResourceGain\"}]},\"equipment\":{\"items\":[{\"enchant\":3003,\"id\":8345},{\"id\":30017},{\"enchant\":2986,\"gems\":[24028,24028],\"id\":29100},{\"enchant\":368,\"id\":29994},{\"enchant\":2661,\"gems\":[24028,24028,24028],\"id\":29096},{\"enchant\":2647,\"gems\":[24028],\"id\":29966},{\"enchant\":2564,\"id\":29947},{\"gems\":[24028,30549],\"id\":30106},{\"enchant\":3012,\"id\":29995},{\"enchant\":2939,\"gems\":[24028,24028],\"id\":28545},{\"enchant\":2929,\"id\":29997},{\"enchant\":2929,\"id\":30052},{\"id\":30627},{\"id\":29383},{\"enchant\":2670,\"id\":32014},{},{\"id\":32387}]},\"feralCatDruid\":{\"options\":{}},\"healingModel\":{},\"itemSwap\":{\"items\":[{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}],\"prepullBonusStats\":{\"apiVersion\":14,\"pseudoStats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}},\"name\":\"Player\",\"profession1\":\"Engineering\",\"profession2\":\"Enchanting\",\"race\":\"RaceNightElf\",\"reactionTimeMs\":250,\"rotation\":{\"groups\":[{\"actions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":35476}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":35476,\"tag\":-1}}}}],\"name\":\"Drums\"},{\"actions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":23827}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":10646}}}}],\"name\":\"Engineering\"},{\"actions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":28485}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":28485}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":33831}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":33831}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":21670}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":21670}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":29383}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":29383}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":38287}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":38287}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":23041}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":23041}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":28288}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":28288}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":22954}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":22954}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":28041}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":28041}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":28121}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":28121}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":35702}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":35702}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":24128}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":24128}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":29387}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":29387}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":25937}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":25937}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":29776}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":29776}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":32654}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":32654}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":32658}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":32658}}}}}],\"name\":\"CD: Trinkets\"},{\"actions\":[{\"action\":{\"condition\":{\"and\":{\"vals\":[{\"gcdIsReady\":{}},{\"cmp\":{\"lhs\":{\"currentMana\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"spellId\":768}}}}}]}},\"groupReference\":{\"groupName\":\"Engineering\"}}},{\"action\":{\"condition\":{\"gcdIsReady\":{}},\"groupReference\":{\"groupName\":\"CD: Trinkets\"}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":12662}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"math\":{\"lhs\":{\"maxMana\":{}},\"op\":\"OpSub\",\"rhs\":{\"currentMana\":{}}}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"1200\"}}}},{\"gcdIsReady\":{}},{\"selectedConjured\":{\"conjuredId\":{\"itemId\":12662}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":22788}},\"condition\":{\"and\":{\"vals\":[{\"gcdIsReady\":{}},{\"selectedConjured\":{\"conjuredId\":{\"itemId\":22788}}},{\"cmp\":{\"lhs\":{\"currentMana\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"spellId\":768}}}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"otherId\":\"OtherActionPotion\"}},\"condition\":{\"and\":{\"vals\":[{\"gcdIsReady\":{}},{\"or\":{\"vals\":[{\"not\":{\"val\":{\"selectedPotion\":{\"potionId\":{\"itemId\":22832}}}}},{\"cmp\":{\"lhs\":{\"math\":{\"lhs\":{\"maxMana\":{}},\"op\":\"OpSub\",\"rhs\":{\"currentMana\":{}}}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"2300\"}}}}]}},{\"or\":{\"vals\":[{\"not\":{\"val\":{\"selectedPotion\":{\"potionId\":{\"itemId\":31677}}}}},{\"cmp\":{\"lhs\":{\"math\":{\"lhs\":{\"maxMana\":{}},\"op\":\"OpSub\",\"rhs\":{\"currentMana\":{}}}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"2000\"}}}}]}},{\"or\":{\"vals\":[{\"selectedPotion\":{\"potionId\":{\"itemId\":22832}}},{\"selectedPotion\":{\"potionId\":{\"itemId\":31677}}},{\"cmp\":{\"lhs\":{\"currentMana\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"spellId\":768}}}}}]}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":768}}}}],\"name\":\"Powershifting\"}],\"prepullActions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":768}}},\"doAtValue\":{\"const\":{\"val\":\"-10s\"}}}],\"priorityList\":[{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":1,\"spellId\":2825,\"tag\":-1}},\"condition\":{\"cmp\":{\"lhs\":{\"currentTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}}}}}},{\"action\":{\"condition\":{\"cmp\":{\"lhs\":{\"currentTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"0s\"}}}},\"groupReference\":{\"groupName\":\"Drums\"}}},{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":27011}},\"condition\":{\"auraIsInactive\":{\"auraId\":{\"rank\":5,\"spellId\":26993},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27008}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentMana\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"spellId\":768}}}}},{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip CP\"}}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"10s\"}}}},{\"auraIsInactive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":3,\"spellId\":33983}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentMana\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"spellId\":768}}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":33876},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27002}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentMana\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"spellId\":768}}}}}]}}}},{\"action\":{\"condition\":{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"10\"}}}},\"groupReference\":{\"groupName\":\"Powershifting\"}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27008}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip CP\"}}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}}}},{\"auraIsInactive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":7,\"spellId\":27008}}}}},{\"auraIsActive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}}]}}]}}}},{\"action\":{\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip CP\"}}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}}}},{\"auraIsInactive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"variableRef\":{\"name\":\"Max Wait Time\"}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":7,\"spellId\":27008}}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}}]}}]}},\"groupReference\":{\"groupName\":\"Powershifting\"}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":3,\"spellId\":33983}},\"condition\":{\"and\":{\"vals\":[{\"auraIsInactive\":{\"auraId\":{\"spellId\":33876},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}}}},{\"auraIsActive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}}]}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":3,\"spellId\":33983}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}},\"op\":\"OpEq\",\"rhs\":{\"const\":{\"val\":\"35\"}}}},{\"cmp\":{\"lhs\":{\"variableRef\":{\"name\":\"Rip CP\"}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\"5\"}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}},{\"or\":{\"vals\":[{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"variableRef\":{\"name\":\"Trick Window\"}}}},{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"2\"}}}},{\"cmp\":{\"lhs\":{\"auraRemainingTime\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"2s\"}}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"math\":{\"lhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}},\"op\":\"OpAdd\",\"rhs\":{\"const\":{\"val\":\"2s\"}}}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"80\"}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"87\"}}}}]}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\"1.0s\"}}}},{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"3\"}}}},{\"cmp\":{\"lhs\":{\"auraRemainingTime\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"1s\"}}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"math\":{\"lhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}},\"op\":\"OpAdd\",\"rhs\":{\"const\":{\"val\":\"1s\"}}}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"45\"}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"52\"}}}}]}}]}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":6,\"spellId\":24248}},\"condition\":{\"and\":{\"vals\":[{\"or\":{\"vals\":[{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Bite Trick CP (Wolfshead)\"}}}},{\"auraIsKnown\":{\"auraId\":{\"spellId\":17768}}}]}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Bite Trick CP (Wolfsheadless)\"}}}},{\"not\":{\"val\":{\"auraIsKnown\":{\"auraId\":{\"spellId\":17768}}}}}]}}]}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLe\",\"rhs\":{\"variableRef\":{\"name\":\"Bite Trick Max Energy\"}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":6,\"spellId\":24248}}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"variableRef\":{\"name\":\"Trick Window\"}}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27008}},\"condition\":{\"and\":{\"vals\":[{\"or\":{\"vals\":[{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip  Trick CP\"}}}},{\"auraIsKnown\":{\"auraId\":{\"spellId\":17768}}}]}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip  Trick CP\"}}}},{\"not\":{\"val\":{\"auraIsKnown\":{\"auraId\":{\"spellId\":17768}}}}}]}}]}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":7,\"spellId\":27002}}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":7,\"spellId\":27008}}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"variableRef\":{\"name\":\"Trick Window\"}}}},{\"auraIsInactive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":5,\"spellId\":27003}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":5,\"spellId\":27003}}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"variableRef\":{\"name\":\"Trick Window\"}}}}]}}},\"hide\":true},{\"action\":{\"condition\":{\"and\":{\"vals\":[{\"auraIsInactive\":{\"auraId\":{\"spellId\":33876},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"math\":{\"lhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}},\"op\":\"OpSub\",\"rhs\":{\"const\":{\"val\":\"20\"}}}}}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"variableRef\":{\"name\":\"Max Wait Time\"}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}}]}}]}}]}},\"groupReference\":{\"groupName\":\"Powershifting\"}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":3,\"spellId\":33983}},\"condition\":{\"and\":{\"vals\":[{\"auraIsInactive\":{\"auraId\":{\"spellId\":33876},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27002}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Bite CP\"}}}},{\"or\":{\"vals\":[{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"57\"}}}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\"1.0s\"}}}}]}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"77\"}}}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"const\":{\"val\":\"1.0s\"}}}}]}},{\"and\":{\"vals\":[{\"or\":{\"vals\":[{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"15\"}}}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\"1.0s\"}}}}]}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"35\"}}}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"const\":{\"val\":\"1.0s\"}}}}]}}]}},{\"auraIsActive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}}]}}]}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":6,\"spellId\":24248}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Bite CP\"}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":6,\"spellId\":24248}}}}}]}}}},{\"action\":{\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Bite CP\"}}}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"22\"}}}},{\"auraIsInactive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"cmp\":{\"lhs\":{\"auraRemainingTime\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},\"op\":\"OpGt\",\"rhs\":{\"timeToNextEnergyTick\":{}}}}]}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"15\"}}}},{\"and\":{\"vals\":[{\"auraIsActive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"cmp\":{\"lhs\":{\"auraRemainingTime\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},\"op\":\"OpLe\",\"rhs\":{\"timeToNextEnergyTick\":{}}}},{\"cmp\":{\"lhs\":{\"math\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpSub\",\"rhs\":{\"auraRemainingTime\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}}}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}}}}]}}]}},{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Rip Next\"}}}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"20\"}}}},{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Mangle Next\"}}}}]}}]}},\"groupReference\":{\"groupName\":\"Powershifting\"}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27002}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"22\"}}}},{\"auraIsActive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":3,\"spellId\":33983}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"22\"}}}},{\"cmp\":{\"lhs\":{\"math\":{\"lhs\":{\"const\":{\"val\":\"2\"}},\"op\":\"OpMul\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}}}},\"op\":\"OpLe\",\"rhs\":{\"math\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpAdd\",\"rhs\":{\"const\":{\"val\":\"20\"}}}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"math\":{\"lhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}},\"op\":\"OpAdd\",\"rhs\":{\"const\":{\"val\":\"22\"}}}}}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\"1.0\"}}}},{\"cmp\":{\"lhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}},\"op\":\"OpEq\",\"rhs\":{\"const\":{\"val\":\"35\"}}}}]}}},\"hide\":true},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27002}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":7,\"spellId\":27002}}}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":3,\"spellId\":33983}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}}}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Trick Window\"}}}}]}}}},{\"action\":{\"condition\":{\"or\":{\"vals\":[{\"and\":{\"vals\":[{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Rip Next\"}}}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"math\":{\"lhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}},\"op\":\"OpSub\",\"rhs\":{\"const\":{\"val\":\"20\"}}}}}},{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Wait To Mangle\"}}}}]}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"22\"}}}}]}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Max Wait Time\"}}}}]}},\"groupReference\":{\"groupName\":\"Powershifting\"}}}],\"type\":\"TypeAuto\",\"valueVariables\":[{\"name\":\"Bloodlust Time\",\"value\":{\"const\":{\"val\":\"5s\"}}},{\"name\":\"Max Wait Time\",\"value\":{\"const\":{\"val\":\"1s\"}}},{\"name\":\"Rip CP\",\"value\":{\"const\":{\"val\":\"4\"}}},{\"name\":\"Bite CP\",\"value\":{\"const\":{\"val\":\"4\"}}},{\"name\":\"Bite Trick CP (Wolfsheadless)\",\"value\":{\"const\":{\"val\":\"4\"}}},{\"name\":\"Bite Trick CP (Wolfshead)\",\"value\":{\"const\":{\"val\":\"4\"}}},{\"name\":\"Bite Trick Max Energy\",\"value\":{\"const\":{\"val\":\"39\"}}},{\"name\":\"Rip  Trick CP\",\"value\":{\"const\":{\"val\":\"3\"}}},{\"name\":\"Trick Window\",\"value\":{\"const\":{\"val\":\"1.0s\"}}},{\"name\":\"Bite Energy Cutoff Mod\",\"value\":{\"math\":{\"lhs\":{\"const\":{\"val\":\"20\"}},\"op\":\"OpMul\",\"rhs\":{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"const\":{\"val\":\"1.0s\"}}}}}}},{\"name\":\"Rip End Threshold\",\"value\":{\"const\":{\"val\":\"10s\"}}},{\"name\":\"Rip Now\",\"value\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip CP\"}}}},{\"auraIsInactive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}}}}]}}},{\"name\":\"Rip Next\",\"value\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip CP\"}}}},{\"cmp\":{\"lhs\":{\"auraRemainingTime\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},\"op\":\"OpLe\",\"rhs\":{\"timeToNextEnergyTick\":{}}}},{\"cmp\":{\"lhs\":{\"math\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpSub\",\"rhs\":{\"timeToNextEnergyTick\":{}}}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}}}}]}}},{\"name\":\"Mangle Now\",\"value\":{\"and\":{\"vals\":[{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Rip Now\"}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":33876},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}}]}}},{\"name\":\"Mangle Next\",\"value\":{\"and\":{\"vals\":[{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Rip Next\"}}}},{\"cmp\":{\"lhs\":{\"auraRemainingTime\":{\"auraId\":{\"spellId\":33876},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},\"op\":\"OpLe\",\"rhs\":{\"timeToNextEnergyTick\":{}}}}]}}},{\"name\":\"Wait To Mangle\",\"value\":{\"or\":{\"vals\":[{\"variableRef\":{\"name\":\"Mangle Next\"}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\"38\"}}}},{\"not\":{\"val\":{\"auraIsKnown\":{\"auraId\":{\"spellId\":17768}}}}}]}}]}}}]},\"talentsString\":\"-503032132322105301251-05503301\"},{},{},{},{}]},{\"buffs\":{},\"players\":[{},{},{},{},{}]},{\"buffs\":{},\"players\":[{},{},{},{},{}]},{\"buffs\":{},\"players\":[{},{},{},{},{}]},{\"buffs\":{},\"players\":[{},{},{},{},{}]}]},\"type\":\"SimTypeIndividual\"},\"spec\":\"feral\"}",
+    "contentHash": "{\"candidateCap\":364,\"candidates\":[{\"itemId\":8345,\"slot\":\"head\"},{\"itemId\":24114,\"slot\":\"neck\"},{\"itemId\":24259,\"slot\":\"back\"},{\"itemId\":25685,\"slot\":\"hands\"},{\"itemId\":25686,\"slot\":\"feet\"},{\"itemId\":28034,\"slot\":\"trinket\"},{\"itemId\":28453,\"slot\":\"wrist\"},{\"itemId\":28476,\"slot\":\"weapon\"},{\"itemId\":28477,\"slot\":\"wrist\"},{\"itemId\":28506,\"slot\":\"hands\"},{\"itemId\":28507,\"slot\":\"hands\"},{\"itemId\":28508,\"slot\":\"hands\"},{\"itemId\":28509,\"slot\":\"neck\"},{\"itemId\":28510,\"slot\":\"finger\"},{\"itemId\":28511,\"slot\":\"wrist\"},{\"itemId\":28514,\"slot\":\"wrist\"},{\"itemId\":28515,\"slot\":\"wrist\"},{\"itemId\":28516,\"slot\":\"neck\"},{\"itemId\":28517,\"slot\":\"feet\"},{\"itemId\":28521,\"slot\":\"hands\"},{\"itemId\":28522,\"slot\":\"weapon\"},{\"itemId\":28524,\"slot\":\"weapon\"},{\"itemId\":28525,\"slot\":\"weapon\"},{\"itemId\":28528,\"slot\":\"trinket\"},{\"itemId\":28529,\"slot\":\"back\"},{\"itemId\":28530,\"slot\":\"neck\"},{\"itemId\":28545,\"slot\":\"feet\"},{\"itemId\":28565,\"slot\":\"waist\"},{\"itemId\":28570,\"slot\":\"back\"},{\"itemId\":28572,\"slot\":\"weapon\"},{\"itemId\":28578,\"slot\":\"chest\"},{\"itemId\":28579,\"slot\":\"trinket\"},{\"itemId\":28582,\"slot\":\"back\"},{\"itemId\":28584,\"slot\":\"weapon\"},{\"itemId\":28585,\"slot\":\"feet\"},{\"itemId\":28586,\"slot\":\"head\"},{\"itemId\":28591,\"slot\":\"legs\"},{\"itemId\":28594,\"slot\":\"legs\"},{\"itemId\":28600,\"slot\":\"chest\"},{\"itemId\":28601,\"slot\":\"chest\"},{\"itemId\":28602,\"slot\":\"chest\"},{\"itemId\":28603,\"slot\":\"weapon\"},{\"itemId\":28604,\"slot\":\"weapon\"},{\"itemId\":28609,\"slot\":\"neck\"},{\"itemId\":28612,\"slot\":\"shoulder\"},{\"itemId\":28633,\"slot\":\"weapon\"},{\"itemId\":28647,\"slot\":\"shoulder\"},{\"itemId\":28649,\"slot\":\"finger\"},{\"itemId\":28652,\"slot\":\"waist\"},{\"itemId\":28653,\"slot\":\"back\"},{\"itemId\":28654,\"slot\":\"waist\"},{\"itemId\":28655,\"slot\":\"waist\"},{\"itemId\":28657,\"slot\":\"weapon\"},{\"itemId\":28658,\"slot\":\"weapon\"},{\"itemId\":28660,\"slot\":\"back\"},{\"itemId\":28661,\"slot\":\"finger\"},{\"itemId\":28663,\"slot\":\"feet\"},{\"itemId\":28669,\"slot\":\"feet\"},{\"itemId\":28670,\"slot\":\"feet\"},{\"itemId\":28672,\"slot\":\"back\"},{\"itemId\":28674,\"slot\":\"neck\"},{\"itemId\":28675,\"slot\":\"finger\"},{\"itemId\":28726,\"slot\":\"shoulder\"},{\"itemId\":28727,\"slot\":\"trinket\"},{\"itemId\":28728,\"slot\":\"weapon\"},{\"itemId\":28730,\"slot\":\"finger\"},{\"itemId\":28731,\"slot\":\"neck\"},{\"itemId\":28732,\"slot\":\"head\"},{\"itemId\":28734,\"slot\":\"weapon\"},{\"itemId\":28741,\"slot\":\"legs\"},{\"itemId\":28742,\"slot\":\"legs\"},{\"itemId\":28744,\"slot\":\"head\"},{\"itemId\":28745,\"slot\":\"neck\"},{\"itemId\":28750,\"slot\":\"waist\"},{\"itemId\":28752,\"slot\":\"feet\"},{\"itemId\":28753,\"slot\":\"finger\"},{\"itemId\":28755,\"slot\":\"shoulder\"},{\"itemId\":28756,\"slot\":\"head\"},{\"itemId\":28757,\"slot\":\"finger\"},{\"itemId\":28762,\"slot\":\"neck\"},{\"itemId\":28763,\"slot\":\"finger\"},{\"itemId\":28764,\"slot\":\"back\"},{\"itemId\":28765,\"slot\":\"back\"},{\"itemId\":28766,\"slot\":\"back\"},{\"itemId\":28768,\"slot\":\"weapon\"},{\"itemId\":28770,\"slot\":\"weapon\"},{\"itemId\":28771,\"slot\":\"weapon\"},{\"itemId\":28776,\"slot\":\"hands\"},{\"itemId\":28777,\"slot\":\"back\"},{\"itemId\":28780,\"slot\":\"hands\"},{\"itemId\":28781,\"slot\":\"weapon\"},{\"itemId\":28782,\"slot\":\"weapon\"},{\"itemId\":28785,\"slot\":\"trinket\"},{\"itemId\":28789,\"slot\":\"trinket\"},{\"itemId\":28796,\"slot\":\"head\"},{\"itemId\":28797,\"slot\":\"back\"},{\"itemId\":28799,\"slot\":\"waist\"},{\"itemId\":28800,\"slot\":\"weapon\"},{\"itemId\":28803,\"slot\":\"head\"},{\"itemId\":28804,\"slot\":\"head\"},{\"itemId\":28822,\"slot\":\"neck\"},{\"itemId\":28828,\"slot\":\"waist\"},{\"itemId\":28830,\"slot\":\"trinket\"},{\"itemId\":29096,\"slot\":\"chest\"},{\"itemId\":29097,\"slot\":\"hands\"},{\"itemId\":29098,\"slot\":\"head\"},{\"itemId\":29099,\"slot\":\"legs\"},{\"itemId\":29100,\"slot\":\"shoulder\"},{\"itemId\":29119,\"slot\":\"neck\"},{\"itemId\":29171,\"slot\":\"weapon\"},{\"itemId\":29294,\"slot\":\"finger\"},{\"itemId\":29295,\"slot\":\"finger\"},{\"itemId\":29296,\"slot\":\"finger\"},{\"itemId\":29297,\"slot\":\"finger\"},{\"itemId\":29298,\"slot\":\"finger\"},{\"itemId\":29299,\"slot\":\"finger\"},{\"itemId\":29300,\"slot\":\"finger\"},{\"itemId\":29301,\"slot\":\"finger\"},{\"itemId\":29302,\"slot\":\"finger\"},{\"itemId\":29303,\"slot\":\"finger\"},{\"itemId\":29304,\"slot\":\"finger\"},{\"itemId\":29305,\"slot\":\"finger\"},{\"itemId\":29306,\"slot\":\"finger\"},{\"itemId\":29307,\"slot\":\"finger\"},{\"itemId\":29308,\"slot\":\"finger\"},{\"itemId\":29309,\"slot\":\"finger\"},{\"itemId\":29381,\"slot\":\"neck\"},{\"itemId\":29382,\"slot\":\"back\"},{\"itemId\":29383,\"slot\":\"trinket\"},{\"itemId\":29390,\"slot\":\"ranged\"},{\"itemId\":29507,\"slot\":\"hands\"},{\"itemId\":29525,\"slot\":\"chest\"},{\"itemId\":29918,\"slot\":\"wrist\"},{\"itemId\":29920,\"slot\":\"finger\"},{\"itemId\":29922,\"slot\":\"finger\"},{\"itemId\":29923,\"slot\":\"weapon\"},{\"itemId\":29925,\"slot\":\"back\"},{\"itemId\":29947,\"slot\":\"hands\"},{\"itemId\":29962,\"slot\":\"weapon\"},{\"itemId\":29966,\"slot\":\"wrist\"},{\"itemId\":29972,\"slot\":\"legs\"},{\"itemId\":29977,\"slot\":\"legs\"},{\"itemId\":29981,\"slot\":\"weapon\"},{\"itemId\":29984,\"slot\":\"waist\"},{\"itemId\":29986,\"slot\":\"head\"},{\"itemId\":29987,\"slot\":\"hands\"},{\"itemId\":29988,\"slot\":\"weapon\"},{\"itemId\":29989,\"slot\":\"back\"},{\"itemId\":29990,\"slot\":\"head\"},{\"itemId\":29992,\"slot\":\"back\"},{\"itemId\":29994,\"slot\":\"back\"},{\"itemId\":29995,\"slot\":\"legs\"},{\"itemId\":29996,\"slot\":\"weapon\"},{\"itemId\":29997,\"slot\":\"finger\"},{\"itemId\":30017,\"slot\":\"neck\"},{\"itemId\":30020,\"slot\":\"waist\"},{\"itemId\":30021,\"slot\":\"weapon\"},{\"itemId\":30022,\"slot\":\"neck\"},{\"itemId\":30024,\"slot\":\"shoulder\"},{\"itemId\":30028,\"slot\":\"finger\"},{\"itemId\":30029,\"slot\":\"hands\"},{\"itemId\":30039,\"slot\":\"feet\"},{\"itemId\":30040,\"slot\":\"waist\"},{\"itemId\":30041,\"slot\":\"feet\"},{\"itemId\":30042,\"slot\":\"waist\"},{\"itemId\":30049,\"slot\":\"weapon\"},{\"itemId\":30050,\"slot\":\"feet\"},{\"itemId\":30052,\"slot\":\"finger\"},{\"itemId\":30055,\"slot\":\"shoulder\"},{\"itemId\":30056,\"slot\":\"chest\"},{\"itemId\":30058,\"slot\":\"weapon\"},{\"itemId\":30059,\"slot\":\"neck\"},{\"itemId\":30060,\"slot\":\"feet\"},{\"itemId\":30061,\"slot\":\"finger\"},{\"itemId\":30062,\"slot\":\"wrist\"},{\"itemId\":30064,\"slot\":\"waist\"},{\"itemId\":30067,\"slot\":\"feet\"},{\"itemId\":30075,\"slot\":\"chest\"},{\"itemId\":30079,\"slot\":\"shoulder\"},{\"itemId\":30083,\"slot\":\"finger\"},{\"itemId\":30090,\"slot\":\"weapon\"},{\"itemId\":30092,\"slot\":\"feet\"},{\"itemId\":30098,\"slot\":\"back\"},{\"itemId\":30099,\"slot\":\"neck\"},{\"itemId\":30100,\"slot\":\"feet\"},{\"itemId\":30101,\"slot\":\"chest\"},{\"itemId\":30103,\"slot\":\"weapon\"},{\"itemId\":30106,\"slot\":\"waist\"},{\"itemId\":30107,\"slot\":\"chest\"},{\"itemId\":30108,\"slot\":\"weapon\"},{\"itemId\":30109,\"slot\":\"finger\"},{\"itemId\":30110,\"slot\":\"finger\"},{\"itemId\":30111,\"slot\":\"shoulder\"},{\"itemId\":30222,\"slot\":\"chest\"},{\"itemId\":30223,\"slot\":\"hands\"},{\"itemId\":30228,\"slot\":\"head\"},{\"itemId\":30229,\"slot\":\"legs\"},{\"itemId\":30230,\"slot\":\"shoulder\"},{\"itemId\":30365,\"slot\":\"finger\"},{\"itemId\":30620,\"slot\":\"trinket\"},{\"itemId\":30621,\"slot\":\"trinket\"},{\"itemId\":30626,\"slot\":\"trinket\"},{\"itemId\":30627,\"slot\":\"trinket\"},{\"itemId\":30629,\"slot\":\"trinket\"},{\"itemId\":30642,\"slot\":\"back\"},{\"itemId\":30644,\"slot\":\"hands\"},{\"itemId\":30664,\"slot\":\"trinket\"},{\"itemId\":30666,\"slot\":\"neck\"},{\"itemId\":30667,\"slot\":\"finger\"},{\"itemId\":30668,\"slot\":\"hands\"},{\"itemId\":30673,\"slot\":\"waist\"},{\"itemId\":30674,\"slot\":\"feet\"},{\"itemId\":30675,\"slot\":\"waist\"},{\"itemId\":30676,\"slot\":\"waist\"},{\"itemId\":30680,\"slot\":\"feet\"},{\"itemId\":30681,\"slot\":\"feet\"},{\"itemId\":30684,\"slot\":\"wrist\"},{\"itemId\":30685,\"slot\":\"wrist\"},{\"itemId\":30723,\"slot\":\"weapon\"},{\"itemId\":30725,\"slot\":\"hands\"},{\"itemId\":30726,\"slot\":\"neck\"},{\"itemId\":30727,\"slot\":\"legs\"},{\"itemId\":30729,\"slot\":\"back\"},{\"itemId\":30730,\"slot\":\"chest\"},{\"itemId\":30732,\"slot\":\"weapon\"},{\"itemId\":30734,\"slot\":\"legs\"},{\"itemId\":30735,\"slot\":\"back\"},{\"itemId\":30736,\"slot\":\"finger\"},{\"itemId\":30737,\"slot\":\"feet\"},{\"itemId\":30738,\"slot\":\"finger\"},{\"itemId\":30834,\"slot\":\"finger\"},{\"itemId\":30863,\"slot\":\"wrist\"},{\"itemId\":30865,\"slot\":\"weapon\"},{\"itemId\":30868,\"slot\":\"wrist\"},{\"itemId\":30870,\"slot\":\"wrist\"},{\"itemId\":30871,\"slot\":\"wrist\"},{\"itemId\":30872,\"slot\":\"weapon\"},{\"itemId\":30879,\"slot\":\"waist\"},{\"itemId\":30883,\"slot\":\"weapon\"},{\"itemId\":30884,\"slot\":\"shoulder\"},{\"itemId\":30885,\"slot\":\"feet\"},{\"itemId\":30886,\"slot\":\"feet\"},{\"itemId\":30888,\"slot\":\"waist\"},{\"itemId\":30891,\"slot\":\"feet\"},{\"itemId\":30894,\"slot\":\"feet\"},{\"itemId\":30895,\"slot\":\"waist\"},{\"itemId\":30898,\"slot\":\"legs\"},{\"itemId\":30899,\"slot\":\"chest\"},{\"itemId\":30901,\"slot\":\"weapon\"},{\"itemId\":30905,\"slot\":\"chest\"},{\"itemId\":30908,\"slot\":\"weapon\"},{\"itemId\":30911,\"slot\":\"weapon\"},{\"itemId\":30912,\"slot\":\"legs\"},{\"itemId\":30913,\"slot\":\"chest\"},{\"itemId\":30914,\"slot\":\"waist\"},{\"itemId\":30916,\"slot\":\"legs\"},{\"itemId\":30917,\"slot\":\"shoulder\"},{\"itemId\":30918,\"slot\":\"weapon\"},{\"itemId\":31034,\"slot\":\"hands\"},{\"itemId\":31039,\"slot\":\"head\"},{\"itemId\":31042,\"slot\":\"chest\"},{\"itemId\":31044,\"slot\":\"legs\"},{\"itemId\":31048,\"slot\":\"shoulder\"},{\"itemId\":31255,\"slot\":\"back\"},{\"itemId\":31275,\"slot\":\"neck\"},{\"itemId\":31334,\"slot\":\"weapon\"},{\"itemId\":32014,\"slot\":\"weapon\"},{\"itemId\":32235,\"slot\":\"head\"},{\"itemId\":32237,\"slot\":\"weapon\"},{\"itemId\":32238,\"slot\":\"finger\"},{\"itemId\":32239,\"slot\":\"feet\"},{\"itemId\":32240,\"slot\":\"head\"},{\"itemId\":32247,\"slot\":\"finger\"},{\"itemId\":32252,\"slot\":\"chest\"},{\"itemId\":32256,\"slot\":\"waist\"},{\"itemId\":32257,\"slot\":\"ranged\"},{\"itemId\":32260,\"slot\":\"neck\"},{\"itemId\":32261,\"slot\":\"finger\"},{\"itemId\":32262,\"slot\":\"weapon\"},{\"itemId\":32265,\"slot\":\"waist\"},{\"itemId\":32266,\"slot\":\"finger\"},{\"itemId\":32269,\"slot\":\"weapon\"},{\"itemId\":32270,\"slot\":\"wrist\"},{\"itemId\":32271,\"slot\":\"legs\"},{\"itemId\":32273,\"slot\":\"shoulder\"},{\"itemId\":32323,\"slot\":\"back\"},{\"itemId\":32324,\"slot\":\"wrist\"},{\"itemId\":32327,\"slot\":\"chest\"},{\"itemId\":32328,\"slot\":\"hands\"},{\"itemId\":32329,\"slot\":\"head\"},{\"itemId\":32331,\"slot\":\"back\"},{\"itemId\":32332,\"slot\":\"weapon\"},{\"itemId\":32335,\"slot\":\"finger\"},{\"itemId\":32337,\"slot\":\"back\"},{\"itemId\":32338,\"slot\":\"shoulder\"},{\"itemId\":32339,\"slot\":\"waist\"},{\"itemId\":32340,\"slot\":\"chest\"},{\"itemId\":32344,\"slot\":\"weapon\"},{\"itemId\":32347,\"slot\":\"hands\"},{\"itemId\":32349,\"slot\":\"neck\"},{\"itemId\":32350,\"slot\":\"weapon\"},{\"itemId\":32351,\"slot\":\"wrist\"},{\"itemId\":32352,\"slot\":\"feet\"},{\"itemId\":32353,\"slot\":\"hands\"},{\"itemId\":32361,\"slot\":\"weapon\"},{\"itemId\":32362,\"slot\":\"neck\"},{\"itemId\":32366,\"slot\":\"feet\"},{\"itemId\":32367,\"slot\":\"legs\"},{\"itemId\":32370,\"slot\":\"neck\"},{\"itemId\":32374,\"slot\":\"weapon\"},{\"itemId\":32377,\"slot\":\"shoulder\"},{\"itemId\":32389,\"slot\":\"legs\"},{\"itemId\":32390,\"slot\":\"waist\"},{\"itemId\":32391,\"slot\":\"feet\"},{\"itemId\":32392,\"slot\":\"wrist\"},{\"itemId\":32393,\"slot\":\"waist\"},{\"itemId\":32394,\"slot\":\"feet\"},{\"itemId\":32395,\"slot\":\"wrist\"},{\"itemId\":32396,\"slot\":\"legs\"},{\"itemId\":32420,\"slot\":\"back\"},{\"itemId\":32471,\"slot\":\"weapon\"},{\"itemId\":32483,\"slot\":\"trinket\"},{\"itemId\":32486,\"slot\":\"trinket\"},{\"itemId\":32496,\"slot\":\"trinket\"},{\"itemId\":32497,\"slot\":\"finger\"},{\"itemId\":32501,\"slot\":\"trinket\"},{\"itemId\":32505,\"slot\":\"trinket\"},{\"itemId\":32513,\"slot\":\"wrist\"},{\"itemId\":32516,\"slot\":\"wrist\"},{\"itemId\":32518,\"slot\":\"shoulder\"},{\"itemId\":32519,\"slot\":\"waist\"},{\"itemId\":32524,\"slot\":\"back\"},{\"itemId\":32525,\"slot\":\"head\"},{\"itemId\":32526,\"slot\":\"finger\"},{\"itemId\":32527,\"slot\":\"finger\"},{\"itemId\":32528,\"slot\":\"finger\"},{\"itemId\":32580,\"slot\":\"wrist\"},{\"itemId\":32589,\"slot\":\"neck\"},{\"itemId\":32590,\"slot\":\"back\"},{\"itemId\":32591,\"slot\":\"neck\"},{\"itemId\":32593,\"slot\":\"feet\"},{\"itemId\":32609,\"slot\":\"feet\"},{\"itemId\":32647,\"slot\":\"wrist\"},{\"itemId\":32654,\"slot\":\"trinket\"},{\"itemId\":32814,\"slot\":\"wrist\"},{\"itemId\":32943,\"slot\":\"weapon\"},{\"itemId\":32944,\"slot\":\"weapon\"},{\"itemId\":32946,\"slot\":\"weapon\"},{\"itemId\":33054,\"slot\":\"finger\"},{\"itemId\":33055,\"slot\":\"finger\"},{\"itemId\":33058,\"slot\":\"finger\"},{\"itemId\":33122,\"slot\":\"back\"},{\"itemId\":33672,\"slot\":\"head\"},{\"itemId\":33673,\"slot\":\"legs\"},{\"itemId\":33674,\"slot\":\"shoulder\"},{\"itemId\":33675,\"slot\":\"chest\"},{\"itemId\":33716,\"slot\":\"weapon\"},{\"itemId\":33879,\"slot\":\"waist\"},{\"itemId\":33880,\"slot\":\"feet\"},{\"itemId\":33881,\"slot\":\"wrist\"},{\"itemId\":33893,\"slot\":\"wrist\"},{\"itemId\":34009,\"slot\":\"weapon\"},{\"itemId\":34010,\"slot\":\"back\"},{\"itemId\":34012,\"slot\":\"back\"}],\"character\":{\"name\":\"player\",\"realm\":\"current-page\",\"region\":\"us\"},\"engineVersion\":6,\"epWeights\":{\"0\":0.78,\"1\":1.16,\"17\":0.35,\"19\":0.35,\"20\":1.02,\"21\":0.77,\"22\":0.41,\"23\":0.16,\"24\":1.02,\"41\":3.13},\"fight\":{\"fightId\":0,\"reportCode\":\"current-page\"},\"fullPool\":true,\"gear\":[{\"enchant\":368,\"gems\":[],\"id\":29994,\"slot\":\"back\"},{\"enchant\":2661,\"gems\":[24028,24028,24028],\"id\":29096,\"slot\":\"chest\"},{\"enchant\":2939,\"gems\":[24028,24028],\"id\":28545,\"slot\":\"feet\"},{\"enchant\":2929,\"gems\":[],\"id\":29997,\"slot\":\"finger1\"},{\"enchant\":2929,\"gems\":[],\"id\":30052,\"slot\":\"finger2\"},{\"enchant\":2564,\"gems\":[],\"id\":29947,\"slot\":\"hands\"},{\"enchant\":3003,\"gems\":[],\"id\":8345,\"slot\":\"head\"},{\"enchant\":3012,\"gems\":[],\"id\":29995,\"slot\":\"legs\"},{\"enchant\":2670,\"gems\":[],\"id\":32014,\"slot\":\"mainhand\"},{\"enchant\":0,\"gems\":[],\"id\":30017,\"slot\":\"neck\"},{\"enchant\":0,\"gems\":[],\"id\":0,\"slot\":\"offhand\"},{\"enchant\":0,\"gems\":[],\"id\":32387,\"slot\":\"ranged\"},{\"enchant\":2986,\"gems\":[24028,24028],\"id\":29100,\"slot\":\"shoulder\"},{\"enchant\":0,\"gems\":[],\"id\":30627,\"slot\":\"trinket1\"},{\"enchant\":0,\"gems\":[],\"id\":29383,\"slot\":\"trinket2\"},{\"enchant\":0,\"gems\":[24028,30549],\"id\":30106,\"slot\":\"waist\"},{\"enchant\":2647,\"gems\":[24028],\"id\":29966,\"slot\":\"wrist\"}],\"gemPaletteIds\":[22459,22460,23094,23095,23096,23097,23098,23099,23100,23101,23103,23104,23105,23106,23108,23109,23110,23111,23113,23114,23115,23116,23118,23119,23120,23121,24027,24028,24029,24030,24031,24032,24033,24035,24036,24037,24039,24047,24048,24050,24051,24052,24053,24054,24055,24056,24057,24058,24059,24060,24061,24062,24065,24066,24067,25890,25893,25894,25895,25896,25897,25898,25899,25901,27679,27777,27785,27786,27809,27812,27820,28118,28119,28120,28123,28290,28360,28361,28362,28363,28556,28557,28595,30546,30547,30548,30549,30550,30551,30552,30553,30554,30555,30556,30558,30559,30560,30563,30564,30565,30566,30571,30572,30573,30574,30575,30581,30582,30583,30584,30585,30586,30587,30588,30589,30590,30591,30592,30593,30594,30598,30600,30601,30602,30603,30604,30605,30606,30607,30608,31116,31117,31118,31860,31861,31862,31863,31864,31865,31866,31867,31868,31869,32193,32194,32195,32196,32197,32198,32199,32200,32201,32202,32203,32204,32205,32206,32207,32208,32209,32210,32211,32212,32213,32214,32215,32216,32217,32218,32219,32220,32221,32222,32223,32224,32225,32226,32409,32410,32634,32635,32636,32637,32638,32639,32640,32641,32833,32836,33131,33133,33134,33135,33140,33143,33144,33782,34220,34256,34627,34831,35487,35488,35501,35503,35707,35758,37503],\"iterations\":3000,\"maxPhase\":3,\"presetId\":\"feral/current-page-settings\",\"promoteTopK\":null,\"race\":\"RaceNightElf\",\"screenIterations\":null,\"seeds\":[11,22,33,44,55],\"setScreen\":\"on\",\"simVersion\":\"api-v14\",\"skeleton\":{\"encounter\":{\"apiVersion\":14,\"duration\":180,\"durationVariation\":5,\"executeProportion20\":0.2,\"executeProportion25\":0.25,\"executeProportion35\":0.35,\"executeProportion45\":0.45,\"executeProportion90\":0.9,\"targets\":[{\"canCrush\":true,\"damageSpread\":0.5,\"id\":31146,\"level\":73,\"minBaseDamage\":15113,\"mobType\":\"MobTypeMechanical\",\"name\":\"Raid Target\",\"parryHaste\":true,\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,320,0,0,0,0,0,0,0,0,0,54,0,0,0,7685,0,6070400,0,0,0,0,0,0,0,0],\"swingSpeed\":2}]},\"raid\":{\"buffs\":{\"arcaneBrilliance\":true,\"bloodlust\":true,\"divineSpirit\":\"TristateEffectImproved\",\"giftOfTheWild\":\"TristateEffectImproved\",\"powerWordFortitude\":\"TristateEffectImproved\",\"shadowProtection\":true},\"debuffs\":{\"bloodFrenzy\":true,\"curseOfRecklessness\":true,\"exposeArmor\":\"TristateEffectImproved\",\"exposeWeaknessHunterAgility\":1210,\"exposeWeaknessUptime\":0.9,\"faerieFire\":\"TristateEffectImproved\",\"giftOfArthas\":true,\"huntersMark\":\"TristateEffectImproved\",\"improvedSealOfTheCrusader\":\"TristateEffectImproved\",\"judgementOfWisdom\":true,\"misery\":true,\"sunderArmor\":true},\"numActiveParties\":5,\"parties\":[{\"buffs\":{\"battleShout\":\"TristateEffectImproved\",\"drums\":\"LesserDrumsOfBattle\",\"ferociousInspiration\":2,\"graceOfAirTotem\":\"TristateEffectImproved\",\"manaSpringTotem\":\"TristateEffectRegular\",\"strengthOfEarthTotem\":\"TristateEffectImproved\",\"totemTwisting\":true,\"windfuryTotem\":\"TristateEffectImproved\"},\"players\":[{\"apiVersion\":14,\"bonusStats\":{\"apiVersion\":14,\"pseudoStats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},\"buffs\":{\"blessingOfKings\":true,\"blessingOfMight\":\"TristateEffectImproved\",\"unleashedRage\":true},\"class\":\"ClassDruid\",\"consumables\":{\"battleElixirId\":22831,\"conjuredId\":12662,\"conjuredItems\":[22105,12662,22788],\"foodId\":27664,\"goblinSapper\":true,\"guardianElixirId\":32067,\"mhImbueId\":34340,\"potId\":22838,\"potions\":[13442,18253,20002,22828,22832,22836,22837,22838,22850,28101,31677,32948,33935,34440],\"scrollAgi\":true,\"scrollStr\":true,\"superSapper\":true},\"cooldowns\":{},\"database\":{\"consumables\":[{\"buffDuration\":20,\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[696085],\"id\":13442,\"name\":\"Mighty Rage Potion\",\"stats\":[60,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[699637,699638],\"id\":18253,\"name\":\"Major Rejuvenation Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":12,\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[701180,701181],\"id\":20002,\"name\":\"Greater Dreamless Sleep Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":15,\"categoryCooldownDuration\":120,\"categoryId\":4,\"id\":22828,\"name\":\"Insane Strength Potion\",\"stats\":[120,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-75,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847151],\"id\":22832,\"name\":\"Super Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":12,\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847239,847240],\"id\":22836,\"name\":\"Major Dreamless Sleep Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":15,\"categoryCooldownDuration\":120,\"categoryId\":4,\"id\":22837,\"name\":\"Heroic Potion\",\"stats\":[70,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,700,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":15,\"categoryCooldownDuration\":120,\"categoryId\":4,\"id\":22838,\"name\":\"Haste Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,400,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847514,847515],\"id\":22850,\"name\":\"Super Rejuvenation Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[695996],\"id\":28101,\"name\":\"Unstable Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"buffDuration\":24,\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[858752,858753,858755],\"id\":31677,\"name\":\"Fel Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847151],\"id\":32948,\"name\":\"Auchenai Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[847151],\"id\":33935,\"name\":\"Crystal Mana Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":4,\"effectIds\":[864802,864803],\"id\":34440,\"name\":\"Mad Alchemist's Potion\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypePotion\"},{\"categoryCooldownDuration\":120,\"categoryId\":1153,\"effectIds\":[846788],\"id\":22105,\"name\":\"Master Healthstone\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeOther\"},{\"categoryCooldownDuration\":120,\"categoryId\":1153,\"effectIds\":[694074],\"id\":12662,\"name\":\"Demonic Rune\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\"buffDuration\":60,\"categoryCooldownDuration\":180,\"categoryId\":1153,\"id\":22788,\"name\":\"Flame Cap\",\"stats\":[0,0,0,0,0,0,0,80,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeHerb\"},{\"buffDuration\":3600,\"categoryCooldownDuration\":3,\"categoryId\":79,\"id\":22831,\"name\":\"Elixir of Major Agility\",\"stats\":[0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeBattleElixir\"},{\"buffDuration\":3600,\"categoryCooldownDuration\":3,\"categoryId\":79,\"id\":32067,\"name\":\"Elixir of Draenic Wisdom\",\"stats\":[0,0,0,30,0,0,0,0,0,0,0,0,0,0,0,0,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeGuardianElixir\"},{\"buffDuration\":30,\"categoryCooldownDuration\":1,\"categoryId\":11,\"id\":27664,\"name\":\"Grilled Mudfish\",\"stats\":[0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ConsumableTypeFood\"}],\"enchants\":[{\"effectId\":3003,\"name\":\"Glyph of Ferocity\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,34,0,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeHead\"},{\"effectId\":2986,\"name\":\"Greater Inscription of Vengeance\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,30,30,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeShoulder\"},{\"effectId\":368,\"name\":\"Enchant Cloak - Greater Agility\",\"stats\":[0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeBack\"},{\"effectId\":2661,\"name\":\"Enchant Chest - Exceptional Stats\",\"stats\":[6,6,6,6,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeChest\"},{\"effectId\":2647,\"name\":\"Enchant Bracer - Brawn\",\"stats\":[12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeWrist\"},{\"effectId\":2564,\"name\":\"Enchant Gloves - Superior Agility\",\"stats\":[0,15,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeHands\"},{\"effectId\":3012,\"name\":\"Nethercobra Leg Armor\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,50,50,0,0,12,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeLegs\"},{\"effectId\":2939,\"name\":\"Enchant Boots - Cat's Swiftness\",\"stats\":[0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeFeet\"},{\"effectId\":2929,\"name\":\"Enchant Ring - Striking\",\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2],\"type\":\"ItemTypeFinger\"},{\"effectId\":2670,\"enchantType\":\"EnchantTypeTwoHand\",\"name\":\"Enchant 2H Weapon - Major Agility\",\"stats\":[0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeWeapon\"}],\"gems\":[{\"color\":\"GemColorRed\",\"id\":24028,\"name\":\"Delicate Living Ruby\",\"stats\":[0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},{\"color\":\"GemColorPurple\",\"id\":30549,\"name\":\"Shifting Tanzanite\",\"stats\":[0,5,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}],\"itemEffectRandPropPoints\":[{\"ilvl\":138,\"randPropPoints\":85},{\"ilvl\":120,\"randPropPoints\":75},{\"ilvl\":128,\"randPropPoints\":78},{\"ilvl\":115,\"randPropPoints\":73},{\"ilvl\":110,\"randPropPoints\":72},{\"ilvl\":136,\"randPropPoints\":83}],\"items\":[{\"armorType\":\"ArmorTypeLeather\",\"id\":8345,\"itemEffects\":[{\"buffId\":17768,\"buffName\":\"Wolfshead Helm (17768)\",\"effectDurationMs\":-1}],\"name\":\"Wolfshead Helm\",\"scalingOptions\":{\"0\":{\"ilvl\":45,\"randPropPoints\":26,\"stats\":{\"16\":10,\"31\":109}}},\"type\":\"ItemTypeHead\"},{\"id\":30017,\"name\":\"Telonicus's Pendant of Mayhem\",\"scalingOptions\":{\"0\":{\"ilvl\":138,\"randPropPoints\":48,\"stats\":{\"1\":27,\"2\":26,\"17\":70,\"18\":70}}},\"type\":\"ItemTypeNeck\"},{\"armorType\":\"ArmorTypeLeather\",\"gemSockets\":[\"GemColorBlue\",\"GemColorBlue\"],\"id\":29100,\"name\":\"Mantle of Malorne\",\"scalingOptions\":{\"0\":{\"ilvl\":120,\"randPropPoints\":56,\"stats\":{\"0\":33,\"1\":27,\"2\":25,\"3\":9,\"31\":284,\"32\":126}}},\"setId\":640,\"setName\":\"Malorne Harness\",\"socketBonus\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeShoulder\"},{\"armorType\":\"ArmorTypeCloth\",\"id\":29994,\"name\":\"Thalassian Wildercloak\",\"scalingOptions\":{\"0\":{\"ilvl\":138,\"randPropPoints\":48,\"stats\":{\"1\":28,\"2\":28,\"17\":68,\"18\":68,\"31\":116}}},\"type\":\"ItemTypeBack\"},{\"armorType\":\"ArmorTypeLeather\",\"gemSockets\":[\"GemColorYellow\",\"GemColorBlue\",\"GemColorRed\"],\"id\":29096,\"name\":\"Breastplate of Malorne\",\"scalingOptions\":{\"0\":{\"ilvl\":120,\"randPropPoints\":75,\"stats\":{\"0\":33,\"1\":34,\"2\":36,\"3\":13,\"31\":379,\"32\":280}}},\"setId\":640,\"setName\":\"Malorne Harness\",\"socketBonus\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeChest\"},{\"armorType\":\"ArmorTypeLeather\",\"gemSockets\":[\"GemColorBlue\"],\"id\":29966,\"name\":\"Vambraces of Ending\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":44,\"stats\":{\"1\":24,\"2\":24,\"17\":52,\"18\":52,\"31\":177}}},\"socketBonus\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeWrist\"},{\"armorType\":\"ArmorTypeLeather\",\"id\":29947,\"name\":\"Gloves of the Searing Grip\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":59,\"stats\":{\"1\":33,\"2\":37,\"17\":66,\"18\":66,\"24\":18,\"31\":252}}},\"type\":\"ItemTypeHands\"},{\"armorType\":\"ArmorTypeLeather\",\"gemSockets\":[\"GemColorRed\",\"GemColorBlue\"],\"id\":30106,\"name\":\"Belt of One-Hundred Deaths\",\"scalingOptions\":{\"0\":{\"ilvl\":138,\"randPropPoints\":64,\"stats\":{\"1\":29,\"2\":25,\"17\":74,\"18\":74,\"24\":25,\"31\":244}}},\"socketBonus\":[0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeWaist\"},{\"armorType\":\"ArmorTypeLeather\",\"id\":29995,\"name\":\"Leggings of Murderous Intent\",\"scalingOptions\":{\"0\":{\"ilvl\":138,\"randPropPoints\":85,\"stats\":{\"1\":45,\"2\":31,\"17\":92,\"18\":92,\"21\":37,\"31\":380}}},\"type\":\"ItemTypeLegs\"},{\"armorType\":\"ArmorTypeLeather\",\"gemSockets\":[\"GemColorRed\",\"GemColorYellow\"],\"id\":28545,\"name\":\"Edgewalker Longboots\",\"scalingOptions\":{\"0\":{\"ilvl\":115,\"randPropPoints\":55,\"stats\":{\"1\":29,\"2\":28,\"17\":44,\"18\":44,\"20\":13,\"31\":250}}},\"socketBonus\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":\"ItemTypeFeet\"},{\"id\":29997,\"name\":\"Band of the Ranger-General\",\"scalingOptions\":{\"0\":{\"ilvl\":138,\"randPropPoints\":48,\"stats\":{\"2\":27,\"17\":56,\"18\":56,\"20\":18,\"21\":28}}},\"type\":\"ItemTypeFinger\",\"unique\":true},{\"id\":30052,\"name\":\"Ring of Lethality\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":44,\"stats\":{\"1\":24,\"2\":19,\"17\":50,\"18\":50,\"20\":19}}},\"type\":\"ItemTypeFinger\",\"unique\":true},{\"id\":30627,\"itemEffects\":[{\"buffId\":42084,\"buffName\":\"Fury of the Crashing Waves (42083)\",\"effectDurationMs\":10000,\"proc\":{\"icdMs\":45000,\"procChance\":0.1},\"scalingOptions\":{\"0\":{\"stats\":{\"17\":340,\"18\":340}}}}],\"name\":\"Tsunami Talisman\",\"scalingOptions\":{\"0\":{\"ilvl\":128,\"randPropPoints\":59,\"stats\":{\"20\":10,\"21\":38}}},\"type\":\"ItemTypeTrinket\",\"unique\":true},{\"id\":29383,\"itemEffects\":[{\"buffId\":35166,\"buffName\":\"Lust for Battle (35166)\",\"effectDurationMs\":20000,\"onUse\":{\"categoryCooldownMs\":20000,\"categoryId\":1141,\"cooldownMs\":120000},\"scalingOptions\":{\"0\":{\"stats\":{\"17\":278,\"18\":278}}}}],\"name\":\"Bloodlust Brooch\",\"scalingOptions\":{\"0\":{\"ilvl\":110,\"randPropPoints\":54,\"stats\":{\"17\":72,\"18\":72}}},\"type\":\"ItemTypeTrinket\",\"unique\":true},{\"handType\":\"HandTypeTwoHand\",\"id\":32014,\"name\":\"Merciless Gladiator's Maul\",\"qualityModifier\":-56.29999923706055,\"scalingOptions\":{\"0\":{\"ilvl\":136,\"randPropPoints\":83,\"stats\":{\"0\":42,\"2\":55,\"19\":1010,\"20\":18,\"21\":42,\"30\":33},\"weaponDamageMax\":192,\"weaponDamageMin\":90}},\"type\":\"ItemTypeWeapon\",\"weaponSpeed\":2,\"weaponType\":\"WeaponTypeMace\"},{\"id\":32387,\"itemEffects\":[{\"buffId\":39926,\"buffName\":\"Improved Party Auras (39926)\"}],\"name\":\"Idol of the Raven Goddess\",\"rangedWeaponType\":\"RangedWeaponTypeIdol\",\"scalingOptions\":{\"0\":{\"ilvl\":115,\"randPropPoints\":35}},\"type\":\"ItemTypeRanged\",\"unique\":true}],\"spellEffects\":[{\"durationMs\":20000,\"effectSpread\":301,\"id\":696085,\"minEffectSize\":449,\"resourceType\":\"ResourceTypeRage\",\"spellId\":17528,\"type\":\"EffectTypeResourceGain\"},{\"effectSpread\":321,\"id\":699637,\"minEffectSize\":1439,\"resourceType\":\"ResourceTypeMana\",\"spellId\":22729,\"type\":\"EffectTypeResourceGain\"},{\"effectSpread\":321,\"id\":699638,\"index\":1,\"minEffectSize\":1439,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":22729,\"type\":\"EffectTypeHeal\"},{\"auraPeriodMs\":3000,\"durationMs\":12000,\"effectSpread\":1,\"id\":701180,\"index\":1,\"minEffectSize\":524,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":24360,\"type\":6},{\"auraPeriodMs\":3000,\"durationMs\":12000,\"effectSpread\":1,\"id\":701181,\"index\":2,\"minEffectSize\":524,\"resourceType\":\"ResourceTypeMana\",\"spellId\":24360,\"type\":6},{\"effectSpread\":1201,\"id\":847151,\"minEffectSize\":1799,\"resourceType\":\"ResourceTypeMana\",\"spellId\":28499,\"type\":\"EffectTypeResourceGain\"},{\"auraPeriodMs\":3000,\"durationMs\":12000,\"effectSpread\":1,\"id\":847239,\"index\":1,\"minEffectSize\":899,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":28504,\"type\":6},{\"auraPeriodMs\":3000,\"durationMs\":12000,\"effectSpread\":1,\"id\":847240,\"index\":2,\"minEffectSize\":899,\"resourceType\":\"ResourceTypeMana\",\"spellId\":28504,\"type\":6},{\"effectSpread\":1101,\"id\":847514,\"minEffectSize\":1649,\"resourceType\":\"ResourceTypeMana\",\"spellId\":28517,\"type\":\"EffectTypeResourceGain\"},{\"effectSpread\":1101,\"id\":847515,\"index\":1,\"minEffectSize\":1649,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":28517,\"type\":\"EffectTypeHeal\"},{\"effectSpread\":901,\"id\":695996,\"minEffectSize\":1349,\"resourceType\":\"ResourceTypeMana\",\"spellId\":17531,\"type\":\"EffectTypeResourceGain\"},{\"durationMs\":900000,\"effectSpread\":1,\"id\":858752,\"minEffectSize\":-26,\"spellId\":38927,\"stats\":[0,0,0,0,0,-25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":6},{\"durationMs\":900000,\"effectSpread\":1,\"id\":858753,\"index\":1,\"minEffectSize\":-51,\"spellId\":38927,\"stats\":[0,0,0,0,-50,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"type\":6},{\"auraPeriodMs\":3000,\"durationMs\":24000,\"effectSpread\":1,\"id\":858755,\"minEffectSize\":399,\"resourceType\":\"ResourceTypeMana\",\"spellId\":38929,\"type\":6},{\"effectSpread\":1101,\"id\":864802,\"minEffectSize\":1649,\"resourceType\":\"ResourceTypeMana\",\"spellId\":45051,\"type\":\"EffectTypeResourceGain\"},{\"effectSpread\":1101,\"id\":864803,\"index\":1,\"minEffectSize\":1649,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":45051,\"type\":\"EffectTypeHeal\"},{\"effectSpread\":1,\"id\":846788,\"minEffectSize\":2495,\"resourceType\":\"ResourceTypeHealth\",\"spellId\":27237,\"type\":\"EffectTypeHeal\"},{\"effectSpread\":601,\"id\":694074,\"minEffectSize\":899,\"resourceType\":\"ResourceTypeMana\",\"spellId\":16666,\"type\":\"EffectTypeResourceGain\"}]},\"equipment\":{\"items\":[{\"enchant\":3003,\"id\":8345},{\"id\":30017},{\"enchant\":2986,\"gems\":[24028,24028],\"id\":29100},{\"enchant\":368,\"id\":29994},{\"enchant\":2661,\"gems\":[24028,24028,24028],\"id\":29096},{\"enchant\":2647,\"gems\":[24028],\"id\":29966},{\"enchant\":2564,\"id\":29947},{\"gems\":[24028,30549],\"id\":30106},{\"enchant\":3012,\"id\":29995},{\"enchant\":2939,\"gems\":[24028,24028],\"id\":28545},{\"enchant\":2929,\"id\":29997},{\"enchant\":2929,\"id\":30052},{\"id\":30627},{\"id\":29383},{\"enchant\":2670,\"id\":32014},{},{\"id\":32387}]},\"feralCatDruid\":{\"options\":{}},\"healingModel\":{},\"itemSwap\":{\"items\":[{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{}],\"prepullBonusStats\":{\"apiVersion\":14,\"pseudoStats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\"stats\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}},\"name\":\"Player\",\"profession1\":\"Engineering\",\"profession2\":\"Enchanting\",\"race\":\"RaceNightElf\",\"reactionTimeMs\":250,\"rotation\":{\"groups\":[{\"actions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":35476}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":35476,\"tag\":-1}}}}],\"name\":\"Drums\"},{\"actions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":23827}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":10646}}}}],\"name\":\"Engineering\"},{\"actions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":28485}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":28485}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":33831}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":33831}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":21670}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":21670}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":29383}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":29383}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":38287}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":38287}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":23041}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":23041}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":28288}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":28288}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":22954}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":22954}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":28041}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":28041}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":28121}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":28121}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":35702}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":35702}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":24128}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":24128}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":29387}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":29387}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":25937}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":25937}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":29776}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":29776}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":32654}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":32654}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":32658}},\"condition\":{\"multipleCdUsages\":{\"baseSpellId\":{\"spellId\":2825,\"tag\":-1},\"offset\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}},\"targetSpellId\":{\"itemId\":32658}}}}}],\"name\":\"CD: Trinkets\"},{\"actions\":[{\"action\":{\"condition\":{\"and\":{\"vals\":[{\"gcdIsReady\":{}},{\"cmp\":{\"lhs\":{\"currentMana\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"spellId\":768}}}}}]}},\"groupReference\":{\"groupName\":\"Engineering\"}}},{\"action\":{\"condition\":{\"gcdIsReady\":{}},\"groupReference\":{\"groupName\":\"CD: Trinkets\"}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":12662}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"math\":{\"lhs\":{\"maxMana\":{}},\"op\":\"OpSub\",\"rhs\":{\"currentMana\":{}}}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"1200\"}}}},{\"gcdIsReady\":{}},{\"selectedConjured\":{\"conjuredId\":{\"itemId\":12662}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"itemId\":22788}},\"condition\":{\"and\":{\"vals\":[{\"gcdIsReady\":{}},{\"selectedConjured\":{\"conjuredId\":{\"itemId\":22788}}},{\"cmp\":{\"lhs\":{\"currentMana\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"spellId\":768}}}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"otherId\":\"OtherActionPotion\"}},\"condition\":{\"and\":{\"vals\":[{\"gcdIsReady\":{}},{\"or\":{\"vals\":[{\"not\":{\"val\":{\"selectedPotion\":{\"potionId\":{\"itemId\":22832}}}}},{\"cmp\":{\"lhs\":{\"math\":{\"lhs\":{\"maxMana\":{}},\"op\":\"OpSub\",\"rhs\":{\"currentMana\":{}}}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"2300\"}}}}]}},{\"or\":{\"vals\":[{\"not\":{\"val\":{\"selectedPotion\":{\"potionId\":{\"itemId\":31677}}}}},{\"cmp\":{\"lhs\":{\"math\":{\"lhs\":{\"maxMana\":{}},\"op\":\"OpSub\",\"rhs\":{\"currentMana\":{}}}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"2000\"}}}}]}},{\"or\":{\"vals\":[{\"selectedPotion\":{\"potionId\":{\"itemId\":22832}}},{\"selectedPotion\":{\"potionId\":{\"itemId\":31677}}},{\"cmp\":{\"lhs\":{\"currentMana\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"spellId\":768}}}}}]}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":768}}}}],\"name\":\"Powershifting\"}],\"prepullActions\":[{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":768}}},\"doAtValue\":{\"const\":{\"val\":\"-10s\"}}}],\"priorityList\":[{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":1,\"spellId\":2825,\"tag\":-1}},\"condition\":{\"cmp\":{\"lhs\":{\"currentTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Bloodlust Time\"}}}}}},{\"action\":{\"condition\":{\"cmp\":{\"lhs\":{\"currentTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"0s\"}}}},\"groupReference\":{\"groupName\":\"Drums\"}}},{\"action\":{\"castSpell\":{\"spellId\":{\"spellId\":27011}},\"condition\":{\"auraIsInactive\":{\"auraId\":{\"rank\":5,\"spellId\":26993},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27008}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentMana\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"spellId\":768}}}}},{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip CP\"}}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"10s\"}}}},{\"auraIsInactive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":3,\"spellId\":33983}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentMana\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"spellId\":768}}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":33876},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27002}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentMana\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"spellId\":768}}}}}]}}}},{\"action\":{\"condition\":{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"10\"}}}},\"groupReference\":{\"groupName\":\"Powershifting\"}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27008}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip CP\"}}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}}}},{\"auraIsInactive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":7,\"spellId\":27008}}}}},{\"auraIsActive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}}]}}]}}}},{\"action\":{\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip CP\"}}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}}}},{\"auraIsInactive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"variableRef\":{\"name\":\"Max Wait Time\"}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":7,\"spellId\":27008}}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}}]}}]}},\"groupReference\":{\"groupName\":\"Powershifting\"}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":3,\"spellId\":33983}},\"condition\":{\"and\":{\"vals\":[{\"auraIsInactive\":{\"auraId\":{\"spellId\":33876},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}}}},{\"auraIsActive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}}]}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":3,\"spellId\":33983}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}},\"op\":\"OpEq\",\"rhs\":{\"const\":{\"val\":\"35\"}}}},{\"cmp\":{\"lhs\":{\"variableRef\":{\"name\":\"Rip CP\"}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\"5\"}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}},{\"or\":{\"vals\":[{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"variableRef\":{\"name\":\"Trick Window\"}}}},{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"2\"}}}},{\"cmp\":{\"lhs\":{\"auraRemainingTime\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"2s\"}}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"math\":{\"lhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}},\"op\":\"OpAdd\",\"rhs\":{\"const\":{\"val\":\"2s\"}}}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"80\"}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"87\"}}}}]}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\"1.0s\"}}}},{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"3\"}}}},{\"cmp\":{\"lhs\":{\"auraRemainingTime\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"1s\"}}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"math\":{\"lhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}},\"op\":\"OpAdd\",\"rhs\":{\"const\":{\"val\":\"1s\"}}}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"45\"}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"52\"}}}}]}}]}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":6,\"spellId\":24248}},\"condition\":{\"and\":{\"vals\":[{\"or\":{\"vals\":[{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Bite Trick CP (Wolfshead)\"}}}},{\"auraIsKnown\":{\"auraId\":{\"spellId\":17768}}}]}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Bite Trick CP (Wolfsheadless)\"}}}},{\"not\":{\"val\":{\"auraIsKnown\":{\"auraId\":{\"spellId\":17768}}}}}]}}]}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLe\",\"rhs\":{\"variableRef\":{\"name\":\"Bite Trick Max Energy\"}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":6,\"spellId\":24248}}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"variableRef\":{\"name\":\"Trick Window\"}}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27008}},\"condition\":{\"and\":{\"vals\":[{\"or\":{\"vals\":[{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip  Trick CP\"}}}},{\"auraIsKnown\":{\"auraId\":{\"spellId\":17768}}}]}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip  Trick CP\"}}}},{\"not\":{\"val\":{\"auraIsKnown\":{\"auraId\":{\"spellId\":17768}}}}}]}}]}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":7,\"spellId\":27002}}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":7,\"spellId\":27008}}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"variableRef\":{\"name\":\"Trick Window\"}}}},{\"auraIsInactive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":5,\"spellId\":27003}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":5,\"spellId\":27003}}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"variableRef\":{\"name\":\"Trick Window\"}}}}]}}},\"hide\":true},{\"action\":{\"condition\":{\"and\":{\"vals\":[{\"auraIsInactive\":{\"auraId\":{\"spellId\":33876},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"math\":{\"lhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}},\"op\":\"OpSub\",\"rhs\":{\"const\":{\"val\":\"20\"}}}}}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"variableRef\":{\"name\":\"Max Wait Time\"}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}}]}}]}}]}},\"groupReference\":{\"groupName\":\"Powershifting\"}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":3,\"spellId\":33983}},\"condition\":{\"and\":{\"vals\":[{\"auraIsInactive\":{\"auraId\":{\"spellId\":33876},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27002}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Bite CP\"}}}},{\"or\":{\"vals\":[{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"57\"}}}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\"1.0s\"}}}}]}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"77\"}}}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"const\":{\"val\":\"1.0s\"}}}}]}},{\"and\":{\"vals\":[{\"or\":{\"vals\":[{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"15\"}}}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\"1.0s\"}}}}]}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"35\"}}}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"const\":{\"val\":\"1.0s\"}}}}]}}]}},{\"auraIsActive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}}]}}]}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":6,\"spellId\":24248}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Bite CP\"}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":6,\"spellId\":24248}}}}}]}}}},{\"action\":{\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Bite CP\"}}}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"22\"}}}},{\"auraIsInactive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"cmp\":{\"lhs\":{\"auraRemainingTime\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},\"op\":\"OpGt\",\"rhs\":{\"timeToNextEnergyTick\":{}}}}]}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"15\"}}}},{\"and\":{\"vals\":[{\"auraIsActive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"cmp\":{\"lhs\":{\"auraRemainingTime\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},\"op\":\"OpLe\",\"rhs\":{\"timeToNextEnergyTick\":{}}}},{\"cmp\":{\"lhs\":{\"math\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpSub\",\"rhs\":{\"auraRemainingTime\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}}}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}}}}]}}]}},{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Rip Next\"}}}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"20\"}}}},{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Mangle Next\"}}}}]}}]}},\"groupReference\":{\"groupName\":\"Powershifting\"}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27002}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"22\"}}}},{\"auraIsActive\":{\"auraId\":{\"spellId\":16870},\"includeReactionTime\":true}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":3,\"spellId\":33983}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"const\":{\"val\":\"22\"}}}},{\"cmp\":{\"lhs\":{\"math\":{\"lhs\":{\"const\":{\"val\":\"2\"}},\"op\":\"OpMul\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}}}},\"op\":\"OpLe\",\"rhs\":{\"math\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpAdd\",\"rhs\":{\"const\":{\"val\":\"20\"}}}}}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"math\":{\"lhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}},\"op\":\"OpAdd\",\"rhs\":{\"const\":{\"val\":\"22\"}}}}}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\"1.0\"}}}},{\"cmp\":{\"lhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}},\"op\":\"OpEq\",\"rhs\":{\"const\":{\"val\":\"35\"}}}}]}}},\"hide\":true},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":7,\"spellId\":27002}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":7,\"spellId\":27002}}}}}]}}}},{\"action\":{\"castSpell\":{\"spellId\":{\"rank\":3,\"spellId\":33983}},\"condition\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpGe\",\"rhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}}}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Trick Window\"}}}}]}}}},{\"action\":{\"condition\":{\"or\":{\"vals\":[{\"and\":{\"vals\":[{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Rip Next\"}}}},{\"or\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"math\":{\"lhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}},\"op\":\"OpSub\",\"rhs\":{\"const\":{\"val\":\"20\"}}}}}},{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Wait To Mangle\"}}}}]}},{\"cmp\":{\"lhs\":{\"currentEnergy\":{}},\"op\":\"OpLt\",\"rhs\":{\"const\":{\"val\":\"22\"}}}}]}},{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Max Wait Time\"}}}}]}},\"groupReference\":{\"groupName\":\"Powershifting\"}}}],\"type\":\"TypeAuto\",\"valueVariables\":[{\"name\":\"Bloodlust Time\",\"value\":{\"const\":{\"val\":\"5s\"}}},{\"name\":\"Max Wait Time\",\"value\":{\"const\":{\"val\":\"1s\"}}},{\"name\":\"Rip CP\",\"value\":{\"const\":{\"val\":\"4\"}}},{\"name\":\"Bite CP\",\"value\":{\"const\":{\"val\":\"4\"}}},{\"name\":\"Bite Trick CP (Wolfsheadless)\",\"value\":{\"const\":{\"val\":\"4\"}}},{\"name\":\"Bite Trick CP (Wolfshead)\",\"value\":{\"const\":{\"val\":\"4\"}}},{\"name\":\"Bite Trick Max Energy\",\"value\":{\"const\":{\"val\":\"39\"}}},{\"name\":\"Rip  Trick CP\",\"value\":{\"const\":{\"val\":\"3\"}}},{\"name\":\"Trick Window\",\"value\":{\"const\":{\"val\":\"1.0s\"}}},{\"name\":\"Bite Energy Cutoff Mod\",\"value\":{\"math\":{\"lhs\":{\"const\":{\"val\":\"20\"}},\"op\":\"OpMul\",\"rhs\":{\"cmp\":{\"lhs\":{\"timeToNextEnergyTick\":{}},\"op\":\"OpGt\",\"rhs\":{\"const\":{\"val\":\"1.0s\"}}}}}}},{\"name\":\"Rip End Threshold\",\"value\":{\"const\":{\"val\":\"10s\"}}},{\"name\":\"Rip Now\",\"value\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip CP\"}}}},{\"auraIsInactive\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},{\"cmp\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}}}}]}}},{\"name\":\"Rip Next\",\"value\":{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"currentComboPoints\":{}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip CP\"}}}},{\"cmp\":{\"lhs\":{\"auraRemainingTime\":{\"auraId\":{\"rank\":7,\"spellId\":27008},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},\"op\":\"OpLe\",\"rhs\":{\"timeToNextEnergyTick\":{}}}},{\"cmp\":{\"lhs\":{\"math\":{\"lhs\":{\"remainingTime\":{}},\"op\":\"OpSub\",\"rhs\":{\"timeToNextEnergyTick\":{}}}},\"op\":\"OpGe\",\"rhs\":{\"variableRef\":{\"name\":\"Rip End Threshold\"}}}}]}}},{\"name\":\"Mangle Now\",\"value\":{\"and\":{\"vals\":[{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Rip Now\"}}}},{\"auraIsInactive\":{\"auraId\":{\"spellId\":33876},\"includeReactionTime\":true,\"sourceUnit\":{\"type\":\"CurrentTarget\"}}}]}}},{\"name\":\"Mangle Next\",\"value\":{\"and\":{\"vals\":[{\"not\":{\"val\":{\"variableRef\":{\"name\":\"Rip Next\"}}}},{\"cmp\":{\"lhs\":{\"auraRemainingTime\":{\"auraId\":{\"spellId\":33876},\"sourceUnit\":{\"type\":\"CurrentTarget\"}}},\"op\":\"OpLe\",\"rhs\":{\"timeToNextEnergyTick\":{}}}}]}}},{\"name\":\"Wait To Mangle\",\"value\":{\"or\":{\"vals\":[{\"variableRef\":{\"name\":\"Mangle Next\"}},{\"and\":{\"vals\":[{\"cmp\":{\"lhs\":{\"spellCurrentCost\":{\"spellId\":{\"rank\":3,\"spellId\":33983}}},\"op\":\"OpLe\",\"rhs\":{\"const\":{\"val\":\"38\"}}}},{\"not\":{\"val\":{\"auraIsKnown\":{\"auraId\":{\"spellId\":17768}}}}}]}}]}}}]},\"talentsString\":\"-503032132322105301251-05503301\"},{},{},{},{}]},{\"buffs\":{},\"players\":[{},{},{},{},{}]},{\"buffs\":{},\"players\":[{},{},{},{},{}]},{\"buffs\":{},\"players\":[{},{},{},{},{}]},{\"buffs\":{},\"players\":[{},{},{},{},{}]}]},\"type\":\"SimTypeIndividual\"},\"spec\":\"feral\"}",
     "cutoff": {
       "absDps": 3.6,
       "pct": 0.15
@@ -458,48 +458,69 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
+          "stepRanking": true,
           "futureBonuses": [
             {
               "threshold": 2,
               "piecesNeeded": 2,
               "dps": 74.13782822874418,
+              "sameGearDps": 75.29494915307623,
+              "sameGearSe": 2.043162383873583,
+              "partnerRule": "close-calls",
               "pieces": [
                 {
                   "itemId": 31044,
-                  "name": "Thunderheart Leggings",
-                  "dps": -11.608427906883207
+                  "name": "Thunderheart Leggings"
                 }
-              ]
+              ],
+              "stepGearDps": 66.25681622226057,
+              "stepGearSe": 2.072983383662673
+            },
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 1.937900283773771,
+              "belowGate": true
             },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 114.19019366940302,
+              "dps": 114.10546415572526,
+              "sameGearDps": 75.5893261829774,
+              "sameGearSe": 1.997466091492472,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 31048,
+                  "name": "Thunderheart Pauldrons"
+                },
+                {
+                  "itemId": 31042,
+                  "name": "Thunderheart Chestguard"
+                },
+                {
+                  "itemId": 31044,
+                  "name": "Thunderheart Leggings"
+                }
+              ],
               "breaks": [
                 {
                   "setId": 640,
                   "setName": "Malorne Harness",
                   "threshold": 2,
-                  "dps": 96.17560347969038
+                  "dps": 96.26033299336814
                 }
               ],
-              "pieces": [
-                {
-                  "itemId": 31048,
-                  "name": "Thunderheart Pauldrons",
-                  "dps": 14.605795413270698
-                },
-                {
-                  "itemId": 31042,
-                  "name": "Thunderheart Chestguard",
-                  "dps": 18.080110136076655
-                },
-                {
-                  "itemId": 31044,
-                  "name": "Thunderheart Leggings",
-                  "dps": -11.608427906883207
-                }
-              ]
+              "stepGearDps": 116.95731196132056,
+              "stepGearSe": 2.0806079997295095
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 5,
+              "sameGearDps": 0,
+              "sameGearSe": 2.1895055270001187,
+              "belowGate": true
             }
           ],
           "commitBreaks": [
@@ -507,7 +528,7 @@
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
           ],
           "commitPackageDeltaDps": 116.95731196132056,
@@ -532,7 +553,8 @@
               ],
               "piecesNeeded": 4
             }
-          ]
+          ],
+          "singleDeltaDps": 3.727415900399592
         }
       },
       {
@@ -885,7 +907,9 @@
           "piecesAfterSwap": 2,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "commitPackageDeltaDps": -36.4312115825328
+          "stepRanking": true,
+          "commitPackageDeltaDps": -36.4312115825328,
+          "singleDeltaDps": 0
         }
       },
       {
@@ -929,7 +953,9 @@
           "piecesAfterSwap": 2,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "commitPackageDeltaDps": -36.4312115825328
+          "stepRanking": true,
+          "commitPackageDeltaDps": -36.4312115825328,
+          "singleDeltaDps": 0
         }
       },
       {
@@ -1949,7 +1975,9 @@
           "piecesWornBefore": 0,
           "piecesAfterSwap": 1,
           "nextThreshold": null,
-          "crossesThreshold": false
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": -10.664466287931646
         }
       },
       {
@@ -2052,48 +2080,69 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
+          "stepRanking": true,
           "futureBonuses": [
             {
               "threshold": 2,
               "piecesNeeded": 2,
               "dps": 74.13782822874418,
+              "sameGearDps": 75.29494915307623,
+              "sameGearSe": 2.043162383873583,
+              "partnerRule": "close-calls",
               "pieces": [
                 {
                   "itemId": 31034,
-                  "name": "Thunderheart Gauntlets",
-                  "dps": 3.727415900399592
+                  "name": "Thunderheart Gauntlets"
                 }
-              ]
+              ],
+              "stepGearDps": 66.25681622226057,
+              "stepGearSe": 2.072983383662673
+            },
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 1.937900283773771,
+              "belowGate": true
             },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 114.19019366940302,
+              "dps": 114.10546415572526,
+              "sameGearDps": 75.5893261829774,
+              "sameGearSe": 1.997466091492472,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 31048,
+                  "name": "Thunderheart Pauldrons"
+                },
+                {
+                  "itemId": 31042,
+                  "name": "Thunderheart Chestguard"
+                },
+                {
+                  "itemId": 31034,
+                  "name": "Thunderheart Gauntlets"
+                }
+              ],
               "breaks": [
                 {
                   "setId": 640,
                   "setName": "Malorne Harness",
                   "threshold": 2,
-                  "dps": 96.17560347969038
+                  "dps": 96.26033299336814
                 }
               ],
-              "pieces": [
-                {
-                  "itemId": 31048,
-                  "name": "Thunderheart Pauldrons",
-                  "dps": 14.605795413270698
-                },
-                {
-                  "itemId": 31042,
-                  "name": "Thunderheart Chestguard",
-                  "dps": 18.080110136076655
-                },
-                {
-                  "itemId": 31034,
-                  "name": "Thunderheart Gauntlets",
-                  "dps": 3.727415900399592
-                }
-              ]
+              "stepGearDps": 116.95731196132056,
+              "stepGearSe": 2.0806079997295095
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 5,
+              "sameGearDps": 0,
+              "sameGearSe": 2.1895055270001187,
+              "belowGate": true
             }
           ],
           "commitBreaks": [
@@ -2101,7 +2150,7 @@
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
           ],
           "commitPackageDeltaDps": 116.95731196132056,
@@ -2126,7 +2175,8 @@
               ],
               "piecesNeeded": 4
             }
-          ]
+          ],
+          "singleDeltaDps": -11.608427906883207
         }
       },
       {
@@ -2416,36 +2466,60 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
+          "stepRanking": true,
           "futureBonuses": [
+            {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "sameGearDps": 0,
+              "sameGearSe": 2.0420529172597073,
+              "belowGate": true
+            },
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 1.9704528286262342,
+              "belowGate": true
+            },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 60.499681295629216,
+              "dps": 60.41495178195146,
+              "sameGearDps": 46.6674838259496,
+              "sameGearSe": 1.9817521260003237,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 30230,
+                  "name": "Nordrassil Feral-Mantle"
+                },
+                {
+                  "itemId": 30222,
+                  "name": "Nordrassil Chestplate"
+                },
+                {
+                  "itemId": 30229,
+                  "name": "Nordrassil Feral-Kilt"
+                }
+              ],
               "breaks": [
                 {
                   "setId": 640,
                   "setName": "Malorne Harness",
                   "threshold": 2,
-                  "dps": 96.17560347969038
+                  "dps": 96.26033299336814
                 }
               ],
-              "pieces": [
-                {
-                  "itemId": 30230,
-                  "name": "Nordrassil Feral-Mantle",
-                  "dps": 9.438425978937175
-                },
-                {
-                  "itemId": 30222,
-                  "name": "Nordrassil Chestplate",
-                  "dps": 5.572103275694644
-                },
-                {
-                  "itemId": 30229,
-                  "name": "Nordrassil Feral-Kilt",
-                  "dps": -19.780671638843614
-                }
-              ]
+              "stepGearDps": -55.28881743892998,
+              "stepGearSe": 2.06385954325688
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 5,
+              "sameGearDps": 0,
+              "sameGearSe": 2.0759321710338074,
+              "belowGate": true
             }
           ],
           "commitBreaks": [
@@ -2453,7 +2527,7 @@
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
           ],
           "commitPackageDeltaDps": -55.28881743892998,
@@ -2469,7 +2543,8 @@
               ],
               "piecesNeeded": 4
             }
-          ]
+          ],
+          "singleDeltaDps": -14.842752870657023
         }
       },
       {
@@ -2715,36 +2790,60 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
+          "stepRanking": true,
           "futureBonuses": [
+            {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "sameGearDps": 0,
+              "sameGearSe": 2.0420529172597073,
+              "belowGate": true
+            },
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 1.9704528286262342,
+              "belowGate": true
+            },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 60.499681295629216,
+              "dps": 60.41495178195146,
+              "sameGearDps": 46.6674838259496,
+              "sameGearSe": 1.9817521260003237,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 30230,
+                  "name": "Nordrassil Feral-Mantle"
+                },
+                {
+                  "itemId": 30222,
+                  "name": "Nordrassil Chestplate"
+                },
+                {
+                  "itemId": 30223,
+                  "name": "Nordrassil Handgrips"
+                }
+              ],
               "breaks": [
                 {
                   "setId": 640,
                   "setName": "Malorne Harness",
                   "threshold": 2,
-                  "dps": 96.17560347969038
+                  "dps": 96.26033299336814
                 }
               ],
-              "pieces": [
-                {
-                  "itemId": 30230,
-                  "name": "Nordrassil Feral-Mantle",
-                  "dps": 9.438425978937175
-                },
-                {
-                  "itemId": 30222,
-                  "name": "Nordrassil Chestplate",
-                  "dps": 5.572103275694644
-                },
-                {
-                  "itemId": 30223,
-                  "name": "Nordrassil Handgrips",
-                  "dps": -14.842752870657023
-                }
-              ]
+              "stepGearDps": -55.28881743892998,
+              "stepGearSe": 2.06385954325688
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 5,
+              "sameGearDps": 0,
+              "sameGearSe": 2.0759321710338074,
+              "belowGate": true
             }
           ],
           "commitBreaks": [
@@ -2752,7 +2851,7 @@
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
           ],
           "commitPackageDeltaDps": -55.28881743892998,
@@ -2768,7 +2867,8 @@
               ],
               "piecesNeeded": 4
             }
-          ]
+          ],
+          "singleDeltaDps": -19.780671638843614
         }
       },
       {
@@ -2936,18 +3036,30 @@
           "piecesAfterSwap": 3,
           "nextThreshold": 4,
           "crossesThreshold": false,
+          "stepRanking": true,
           "futureBonuses": [
             {
               "threshold": 4,
               "piecesNeeded": 2,
               "dps": 21.31639754190246,
+              "sameGearDps": 23.056313565787605,
+              "sameGearSe": 2.096708250790676,
+              "partnerRule": "close-calls",
               "pieces": [
                 {
                   "itemId": 29099,
-                  "name": "Greaves of Malorne",
-                  "dps": -36.49087157765507
+                  "name": "Greaves of Malorne"
                 }
-              ]
+              ],
+              "stepGearDps": -36.4312115825328,
+              "stepGearSe": 2.1127534190366966
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 2.208678281719791,
+              "belowGate": true
             }
           ],
           "commitPackageDeltaDps": -36.4312115825328,
@@ -2961,7 +3073,8 @@
               ],
               "piecesNeeded": 2
             }
-          ]
+          ],
+          "singleDeltaDps": -21.256737546780187
         }
       },
       {
@@ -3135,7 +3248,9 @@
           "piecesWornBefore": 0,
           "piecesAfterSwap": 1,
           "nextThreshold": null,
-          "crossesThreshold": false
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": -23.70710169743961
         }
       },
       {
@@ -3257,7 +3372,9 @@
           "piecesWornBefore": 0,
           "piecesAfterSwap": 1,
           "nextThreshold": null,
-          "crossesThreshold": false
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": -26.84284321666837
         }
       },
       {
@@ -3424,18 +3541,30 @@
           "piecesAfterSwap": 3,
           "nextThreshold": 4,
           "crossesThreshold": false,
+          "stepRanking": true,
           "futureBonuses": [
             {
               "threshold": 4,
               "piecesNeeded": 2,
               "dps": 21.31639754190246,
+              "sameGearDps": 23.056313565787605,
+              "sameGearSe": 2.096708250790676,
+              "partnerRule": "close-calls",
               "pieces": [
                 {
                   "itemId": 29097,
-                  "name": "Gauntlets of Malorne",
-                  "dps": -21.256737546780187
+                  "name": "Gauntlets of Malorne"
                 }
-              ]
+              ],
+              "stepGearDps": -36.4312115825328,
+              "stepGearSe": 2.1127534190366966
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 2.208678281719791,
+              "belowGate": true
             }
           ],
           "commitPackageDeltaDps": -36.4312115825328,
@@ -3449,7 +3578,8 @@
               ],
               "piecesNeeded": 2
             }
-          ]
+          ],
+          "singleDeltaDps": -36.49087157765507
         }
       },
       {
@@ -6697,14 +6827,16 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
+          "stepRanking": true,
           "singleBreaks": [
             {
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
-          ]
+          ],
+          "singleDeltaDps": -71.32160674835586
         }
       },
       {
@@ -7246,12 +7378,13 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
+          "stepRanking": true,
           "singleBreaks": [
             {
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
           ],
           "futureBonuses": [
@@ -7259,35 +7392,71 @@
               "threshold": 2,
               "piecesNeeded": 2,
               "dps": 74.13782822874418,
+              "sameGearDps": 75.29494915307623,
+              "sameGearSe": 2.043162383873583,
+              "partnerRule": "close-calls",
               "pieces": [
                 {
-                  "itemId": 31034,
-                  "name": "Thunderheart Gauntlets",
-                  "dps": 3.727415900399592
+                  "itemId": 31048,
+                  "name": "Thunderheart Pauldrons"
                 }
-              ]
+              ],
+              "breaks": [
+                {
+                  "setId": 640,
+                  "setName": "Malorne Harness",
+                  "threshold": 2,
+                  "dps": 96.26033299336814
+                }
+              ],
+              "stepGearDps": 47.74938610717527,
+              "stepGearSe": 2.0271945093891155
+            },
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 1.937900283773771,
+              "belowGate": true
             },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 114.19019366940302,
+              "dps": 114.10546415572526,
+              "sameGearDps": 75.5893261829774,
+              "sameGearSe": 1.997466091492472,
+              "partnerRule": "close-calls",
               "pieces": [
                 {
                   "itemId": 31048,
-                  "name": "Thunderheart Pauldrons",
-                  "dps": 14.605795413270698
+                  "name": "Thunderheart Pauldrons"
                 },
                 {
                   "itemId": 31034,
-                  "name": "Thunderheart Gauntlets",
-                  "dps": 3.727415900399592
+                  "name": "Thunderheart Gauntlets"
                 },
                 {
                   "itemId": 31044,
-                  "name": "Thunderheart Leggings",
-                  "dps": -11.608427906883207
+                  "name": "Thunderheart Leggings"
                 }
-              ]
+              ],
+              "breaks": [
+                {
+                  "setId": 640,
+                  "setName": "Malorne Harness",
+                  "threshold": 2,
+                  "dps": 96.26033299336814
+                }
+              ],
+              "stepGearDps": 116.95731196132056,
+              "stepGearSe": 2.0806079997295095
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 5,
+              "sameGearDps": 0,
+              "sameGearSe": 2.1895055270001187,
+              "belowGate": true
             }
           ],
           "commitPackageDeltaDps": 116.95731196132056,
@@ -7312,7 +7481,8 @@
               ],
               "piecesNeeded": 4
             }
-          ]
+          ],
+          "singleDeltaDps": -78.09549334361373
         }
       },
       {
@@ -7450,14 +7620,16 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
+          "stepRanking": true,
           "singleBreaks": [
             {
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
-          ]
+          ],
+          "singleDeltaDps": -80.44458849830426
         }
       },
       {
@@ -7533,12 +7705,13 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
+          "stepRanking": true,
           "singleBreaks": [
             {
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
           ],
           "futureBonuses": [
@@ -7546,35 +7719,71 @@
               "threshold": 2,
               "piecesNeeded": 2,
               "dps": 74.13782822874418,
+              "sameGearDps": 75.29494915307623,
+              "sameGearSe": 2.043162383873583,
+              "partnerRule": "close-calls",
               "pieces": [
                 {
-                  "itemId": 31034,
-                  "name": "Thunderheart Gauntlets",
-                  "dps": 3.727415900399592
+                  "itemId": 31042,
+                  "name": "Thunderheart Chestguard"
                 }
-              ]
+              ],
+              "breaks": [
+                {
+                  "setId": 640,
+                  "setName": "Malorne Harness",
+                  "threshold": 2,
+                  "dps": 96.26033299336814
+                }
+              ],
+              "stepGearDps": 47.74938610717527,
+              "stepGearSe": 2.0271945093891155
+            },
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 1.937900283773771,
+              "belowGate": true
             },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 114.19019366940302,
+              "dps": 114.10546415572526,
+              "sameGearDps": 75.5893261829774,
+              "sameGearSe": 1.997466091492472,
+              "partnerRule": "close-calls",
               "pieces": [
                 {
                   "itemId": 31042,
-                  "name": "Thunderheart Chestguard",
-                  "dps": 18.080110136076655
+                  "name": "Thunderheart Chestguard"
                 },
                 {
                   "itemId": 31034,
-                  "name": "Thunderheart Gauntlets",
-                  "dps": 3.727415900399592
+                  "name": "Thunderheart Gauntlets"
                 },
                 {
                   "itemId": 31044,
-                  "name": "Thunderheart Leggings",
-                  "dps": -11.608427906883207
+                  "name": "Thunderheart Leggings"
                 }
-              ]
+              ],
+              "breaks": [
+                {
+                  "setId": 640,
+                  "setName": "Malorne Harness",
+                  "threshold": 2,
+                  "dps": 96.26033299336814
+                }
+              ],
+              "stepGearDps": 116.95731196132056,
+              "stepGearSe": 2.0806079997295095
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 5,
+              "sameGearDps": 0,
+              "sameGearSe": 2.1895055270001187,
+              "belowGate": true
             }
           ],
           "commitPackageDeltaDps": 116.95731196132056,
@@ -7599,7 +7808,8 @@
               ],
               "piecesNeeded": 4
             }
-          ]
+          ],
+          "singleDeltaDps": -81.56980806641968
         }
       },
       {
@@ -7781,36 +7991,68 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
+          "stepRanking": true,
           "singleBreaks": [
             {
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
           ],
           "futureBonuses": [
             {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "sameGearDps": 0,
+              "sameGearSe": 2.0420529172597073,
+              "belowGate": true
+            },
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 1.9704528286262342,
+              "belowGate": true
+            },
+            {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 60.499681295629216,
+              "dps": 60.41495178195146,
+              "sameGearDps": 46.6674838259496,
+              "sameGearSe": 1.9817521260003237,
+              "partnerRule": "close-calls",
               "pieces": [
                 {
                   "itemId": 30222,
-                  "name": "Nordrassil Chestplate",
-                  "dps": 5.572103275694644
+                  "name": "Nordrassil Chestplate"
                 },
                 {
                   "itemId": 30223,
-                  "name": "Nordrassil Handgrips",
-                  "dps": -14.842752870657023
+                  "name": "Nordrassil Handgrips"
                 },
                 {
                   "itemId": 30229,
-                  "name": "Nordrassil Feral-Kilt",
-                  "dps": -19.780671638843614
+                  "name": "Nordrassil Feral-Kilt"
                 }
-              ]
+              ],
+              "breaks": [
+                {
+                  "setId": 640,
+                  "setName": "Malorne Harness",
+                  "threshold": 2,
+                  "dps": 96.26033299336814
+                }
+              ],
+              "stepGearDps": -55.28881743892998,
+              "stepGearSe": 2.06385954325688
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 5,
+              "sameGearDps": 0,
+              "sameGearSe": 2.0759321710338074,
+              "belowGate": true
             }
           ],
           "commitPackageDeltaDps": -55.28881743892998,
@@ -7826,7 +8068,8 @@
               ],
               "piecesNeeded": 4
             }
-          ]
+          ],
+          "singleDeltaDps": -86.7371775007532
         }
       },
       {
@@ -7893,36 +8136,68 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
+          "stepRanking": true,
           "singleBreaks": [
             {
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
           ],
           "futureBonuses": [
             {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "sameGearDps": 0,
+              "sameGearSe": 2.0420529172597073,
+              "belowGate": true
+            },
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 1.9704528286262342,
+              "belowGate": true
+            },
+            {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 60.499681295629216,
+              "dps": 60.41495178195146,
+              "sameGearDps": 46.6674838259496,
+              "sameGearSe": 1.9817521260003237,
+              "partnerRule": "close-calls",
               "pieces": [
                 {
                   "itemId": 30230,
-                  "name": "Nordrassil Feral-Mantle",
-                  "dps": 9.438425978937175
+                  "name": "Nordrassil Feral-Mantle"
                 },
                 {
                   "itemId": 30223,
-                  "name": "Nordrassil Handgrips",
-                  "dps": -14.842752870657023
+                  "name": "Nordrassil Handgrips"
                 },
                 {
                   "itemId": 30229,
-                  "name": "Nordrassil Feral-Kilt",
-                  "dps": -19.780671638843614
+                  "name": "Nordrassil Feral-Kilt"
                 }
-              ]
+              ],
+              "breaks": [
+                {
+                  "setId": 640,
+                  "setName": "Malorne Harness",
+                  "threshold": 2,
+                  "dps": 96.26033299336814
+                }
+              ],
+              "stepGearDps": -55.28881743892998,
+              "stepGearSe": 2.06385954325688
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 5,
+              "sameGearDps": 0,
+              "sameGearSe": 2.0759321710338074,
+              "belowGate": true
             }
           ],
           "commitPackageDeltaDps": -55.28881743892998,
@@ -7938,7 +8213,8 @@
               ],
               "piecesNeeded": 4
             }
-          ]
+          ],
+          "singleDeltaDps": -90.60350020399574
         }
       },
       {
@@ -8546,14 +8822,16 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
+          "stepRanking": true,
           "singleBreaks": [
             {
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
-          ]
+          ],
+          "singleDeltaDps": -113.50726853333344
         }
       },
       {
@@ -9371,7 +9649,9 @@
           "piecesWornBefore": 0,
           "piecesAfterSwap": 1,
           "nextThreshold": null,
-          "crossesThreshold": false
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": -181.35427063313227
         }
       },
       {
@@ -9476,48 +9756,69 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
+          "stepRanking": true,
           "futureBonuses": [
             {
               "threshold": 2,
               "piecesNeeded": 2,
               "dps": 74.13782822874418,
+              "sameGearDps": 75.29494915307623,
+              "sameGearSe": 2.043162383873583,
+              "partnerRule": "close-calls",
               "pieces": [
                 {
                   "itemId": 31034,
-                  "name": "Thunderheart Gauntlets",
-                  "dps": 3.727415900399592
+                  "name": "Thunderheart Gauntlets"
                 }
-              ]
+              ],
+              "stepGearDps": -20.358152547084046,
+              "stepGearSe": 2.1083831454610045
+            },
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 1.937900283773771,
+              "belowGate": true
             },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 114.19019366940302,
+              "dps": 114.10546415572526,
+              "sameGearDps": 75.5893261829774,
+              "sameGearSe": 1.997466091492472,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 31048,
+                  "name": "Thunderheart Pauldrons"
+                },
+                {
+                  "itemId": 31042,
+                  "name": "Thunderheart Chestguard"
+                },
+                {
+                  "itemId": 31034,
+                  "name": "Thunderheart Gauntlets"
+                }
+              ],
               "breaks": [
                 {
                   "setId": 640,
                   "setName": "Malorne Harness",
                   "threshold": 2,
-                  "dps": 96.17560347969038
+                  "dps": 96.26033299336814
                 }
               ],
-              "pieces": [
-                {
-                  "itemId": 31034,
-                  "name": "Thunderheart Gauntlets",
-                  "dps": 3.727415900399592
-                },
-                {
-                  "itemId": 31044,
-                  "name": "Thunderheart Leggings",
-                  "dps": -11.608427906883207
-                },
-                {
-                  "itemId": 31042,
-                  "name": "Thunderheart Chestguard",
-                  "dps": 18.080110136076655
-                }
-              ]
+              "stepGearDps": 35.411593919518964,
+              "stepGearSe": 2.168785077454371
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 5,
+              "sameGearDps": 0,
+              "sameGearSe": 2.1895055270001187,
+              "belowGate": true
             }
           ],
           "commitBreaks": [
@@ -9525,10 +9826,11 @@
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
           ],
-          "commitPackageDeltaDps": 116.95731196132056
+          "commitPackageDeltaDps": 116.95731196132056,
+          "singleDeltaDps": -194.5627255943632
         }
       },
       {
@@ -9575,21 +9877,34 @@
           "piecesAfterSwap": 3,
           "nextThreshold": 4,
           "crossesThreshold": false,
+          "stepRanking": true,
           "futureBonuses": [
             {
               "threshold": 4,
               "piecesNeeded": 2,
               "dps": 21.31639754190246,
+              "sameGearDps": 23.056313565787605,
+              "sameGearSe": 2.096708250790676,
+              "partnerRule": "close-calls",
               "pieces": [
                 {
                   "itemId": 29097,
-                  "name": "Gauntlets of Malorne",
-                  "dps": -21.256737546780187
+                  "name": "Gauntlets of Malorne"
                 }
-              ]
+              ],
+              "stepGearDps": -193.65343114366487,
+              "stepGearSe": 2.1771653051972155
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 2.208678281719791,
+              "belowGate": true
             }
           ],
-          "commitPackageDeltaDps": -36.4312115825328
+          "commitPackageDeltaDps": -36.4312115825328,
+          "singleDeltaDps": -202.13111382825673
         }
       },
       {
@@ -9642,36 +9957,60 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
+          "stepRanking": true,
           "futureBonuses": [
+            {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "sameGearDps": 0,
+              "sameGearSe": 2.0420529172597073,
+              "belowGate": true
+            },
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "sameGearDps": 0,
+              "sameGearSe": 1.9704528286262342,
+              "belowGate": true
+            },
             {
               "threshold": 4,
               "piecesNeeded": 4,
-              "dps": 60.499681295629216,
+              "dps": 60.41495178195146,
+              "sameGearDps": 46.6674838259496,
+              "sameGearSe": 1.9817521260003237,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 30230,
+                  "name": "Nordrassil Feral-Mantle"
+                },
+                {
+                  "itemId": 30222,
+                  "name": "Nordrassil Chestplate"
+                },
+                {
+                  "itemId": 30223,
+                  "name": "Nordrassil Handgrips"
+                }
+              ],
               "breaks": [
                 {
                   "setId": 640,
                   "setName": "Malorne Harness",
                   "threshold": 2,
-                  "dps": 96.17560347969038
+                  "dps": 96.26033299336814
                 }
               ],
-              "pieces": [
-                {
-                  "itemId": 30223,
-                  "name": "Nordrassil Handgrips",
-                  "dps": -14.842752870657023
-                },
-                {
-                  "itemId": 30229,
-                  "name": "Nordrassil Feral-Kilt",
-                  "dps": -19.780671638843614
-                },
-                {
-                  "itemId": 30230,
-                  "name": "Nordrassil Feral-Mantle",
-                  "dps": 9.438425978937175
-                }
-              ]
+              "stepGearDps": -254.4671329356811,
+              "stepGearSe": 2.0901813778590728
+            },
+            {
+              "threshold": 5,
+              "piecesNeeded": 5,
+              "sameGearDps": 0,
+              "sameGearSe": 2.0759321710338074,
+              "belowGate": true
             }
           ],
           "commitBreaks": [
@@ -9679,10 +10018,11 @@
               "setId": 640,
               "setName": "Malorne Harness",
               "threshold": 2,
-              "dps": 96.17560347969038
+              "dps": 96.26033299336814
             }
           ],
-          "commitPackageDeltaDps": -55.28881743892998
+          "commitPackageDeltaDps": -55.28881743892998,
+          "singleDeltaDps": -206.4394598938652
         }
       },
       {
@@ -10212,7 +10552,9 @@
           "piecesWornBefore": 0,
           "piecesAfterSwap": 1,
           "nextThreshold": null,
-          "crossesThreshold": false
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": -328.91916502213417
         }
       },
       {
@@ -10962,16 +11304,7 @@
         "piecesWorn": 0,
         "packageItemIds": [],
         "packageDeltaDps": 0,
-        "unmeasured": "not-implemented-in-sim"
-      },
-      {
-        "setId": 584,
-        "setName": "Gladiator's Sanctuary",
-        "threshold": 4,
-        "piecesWorn": 0,
-        "packageItemIds": [],
-        "packageDeltaDps": 0,
-        "unmeasured": "not-implemented-in-sim"
+        "unmeasured": "screened-out"
       },
       {
         "setId": 676,
@@ -10985,7 +11318,24 @@
         "packageDeltaDps": 66.25681622226057,
         "bonusDps": 74.13782822874418,
         "se": 2.929005823878205,
+        "sameGearDps": 75.29494915307623,
+        "sameGearSe": 2.043162383873583,
         "bonusDpsNet": 74.13782822874418
+      },
+      {
+        "setId": 676,
+        "setName": "Thunderheart Harness",
+        "threshold": 3,
+        "piecesWorn": 0,
+        "packageItemIds": [
+          31042,
+          31034,
+          31044
+        ],
+        "packageDeltaDps": 0,
+        "sameGearDps": 0,
+        "sameGearSe": 1.937900283773771,
+        "belowGate": true
       },
       {
         "setId": 676,
@@ -11001,6 +11351,8 @@
         "packageDeltaDps": 116.95731196132056,
         "bonusDps": 210.3657971490934,
         "se": 3.554024315739638,
+        "sameGearDps": 75.5893261829774,
+        "sameGearSe": 1.997466091492472,
         "breaks": [
           {
             "setId": 640,
@@ -11010,16 +11362,53 @@
             "piecesAfter": 0
           }
         ],
-        "bonusDpsNet": 114.19019366940302
+        "bonusDpsNet": 114.10546415572526
+      },
+      {
+        "setId": 676,
+        "setName": "Thunderheart Harness",
+        "threshold": 5,
+        "piecesWorn": 0,
+        "packageItemIds": [
+          31039,
+          31048,
+          31042,
+          31034,
+          31044
+        ],
+        "packageDeltaDps": 0,
+        "sameGearDps": 0,
+        "sameGearSe": 2.1895055270001187,
+        "belowGate": true
       },
       {
         "setId": 641,
         "setName": "Nordrassil Harness",
         "threshold": 2,
         "piecesWorn": 0,
-        "packageItemIds": [],
+        "packageItemIds": [
+          30223,
+          30229
+        ],
         "packageDeltaDps": 0,
-        "unmeasured": "not-implemented-in-sim"
+        "sameGearDps": 0,
+        "sameGearSe": 2.0420529172597073,
+        "belowGate": true
+      },
+      {
+        "setId": 641,
+        "setName": "Nordrassil Harness",
+        "threshold": 3,
+        "piecesWorn": 0,
+        "packageItemIds": [
+          30230,
+          30223,
+          30229
+        ],
+        "packageDeltaDps": 0,
+        "sameGearDps": 0,
+        "sameGearSe": 1.9704528286262342,
+        "belowGate": true
       },
       {
         "setId": 641,
@@ -11035,6 +11424,8 @@
         "packageDeltaDps": -55.28881743892998,
         "bonusDps": 156.6752847753196,
         "se": 3.5385840308507923,
+        "sameGearDps": 46.6674838259496,
+        "sameGearSe": 1.9817521260003237,
         "breaks": [
           {
             "setId": 640,
@@ -11044,7 +11435,35 @@
             "piecesAfter": 0
           }
         ],
-        "bonusDpsNet": 60.499681295629216
+        "bonusDpsNet": 60.41495178195146
+      },
+      {
+        "setId": 641,
+        "setName": "Nordrassil Harness",
+        "threshold": 5,
+        "piecesWorn": 0,
+        "packageItemIds": [
+          30228,
+          30230,
+          30222,
+          30223,
+          30229
+        ],
+        "packageDeltaDps": 0,
+        "sameGearDps": 0,
+        "sameGearSe": 2.0759321710338074,
+        "belowGate": true
+      },
+      {
+        "setId": 640,
+        "setName": "Malorne Harness",
+        "threshold": 3,
+        "piecesWorn": 2,
+        "packageItemIds": [
+          29097
+        ],
+        "packageDeltaDps": 0,
+        "unmeasured": "unmeasurable-at-this-worn-count"
       },
       {
         "setId": 640,
@@ -11058,25 +11477,33 @@
         "packageDeltaDps": -36.4312115825328,
         "bonusDps": 21.31639754190246,
         "se": 2.9660109450814307,
+        "sameGearDps": 23.056313565787605,
+        "sameGearSe": 2.096708250790676,
         "bonusDpsNet": 21.31639754190246
       },
       {
+        "setId": 640,
+        "setName": "Malorne Harness",
+        "threshold": 5,
+        "piecesWorn": 2,
+        "packageItemIds": [
+          29098,
+          29097,
+          29099
+        ],
+        "packageDeltaDps": 0,
+        "sameGearDps": 0,
+        "sameGearSe": 2.208678281719791,
+        "belowGate": true
+      },
+      {
         "setId": 619,
         "setName": "Primal Intent",
         "threshold": 2,
         "piecesWorn": 0,
         "packageItemIds": [],
         "packageDeltaDps": 0,
-        "unmeasured": "not-implemented-in-sim"
-      },
-      {
-        "setId": 619,
-        "setName": "Primal Intent",
-        "threshold": 4,
-        "piecesWorn": 0,
-        "packageItemIds": [],
-        "packageDeltaDps": 0,
-        "unmeasured": "not-implemented-in-sim"
+        "unmeasured": "insufficient-pieces"
       },
       {
         "setId": 573,
@@ -11085,16 +11512,7 @@
         "piecesWorn": 0,
         "packageItemIds": [],
         "packageDeltaDps": 0,
-        "unmeasured": "not-implemented-in-sim"
-      },
-      {
-        "setId": 573,
-        "setName": "Fel Skin",
-        "threshold": 4,
-        "piecesWorn": 0,
-        "packageItemIds": [],
-        "packageDeltaDps": 0,
-        "unmeasured": "not-implemented-in-sim"
+        "unmeasured": "screened-out"
       },
       {
         "setId": 719,
@@ -11103,16 +11521,7 @@
         "piecesWorn": 0,
         "packageItemIds": [],
         "packageDeltaDps": 0,
-        "unmeasured": "not-implemented-in-sim"
-      },
-      {
-        "setId": 719,
-        "setName": "The Fists of Fury",
-        "threshold": 4,
-        "piecesWorn": 0,
-        "packageItemIds": [],
-        "packageDeltaDps": 0,
-        "unmeasured": "not-implemented-in-sim"
+        "unmeasured": "insufficient-pieces"
       }
     ],
     "brokenSetValues": [
@@ -11120,18 +11529,148 @@
         "setId": 640,
         "setName": "Malorne Harness",
         "threshold": 2,
-        "dps": 96.17560347969038,
-        "se": 2.879788733136398,
-        "vacatedItemIds": [
-          29100,
-          29096
-        ],
-        "replacementItemIds": [
-          33674,
-          33675
-        ]
+        "dps": 96.26033299336814,
+        "se": 2.060026735668182
       }
     ],
+    "wornSetLadder": [
+      {
+        "setId": 640,
+        "setName": "Malorne Harness",
+        "count": 2,
+        "dps": 96.26033299336814,
+        "se": 2.060026735668182,
+        "counted": true
+      }
+    ],
+    "crossingGates": [
+      {
+        "setId": 640,
+        "count": 3,
+        "itemId": 29097,
+        "dps": 0,
+        "se": 2.096594808151823,
+        "cleared": false
+      }
+    ],
+    "setStepSims": {
+      "partnerRule": "close-calls",
+      "gears": 9,
+      "simmed": 17,
+      "fromStore": 10
+    },
+    "setScreen": {
+      "mode": "on",
+      "seed": 11,
+      "iterations": 300,
+      "rule": {
+        "measure": "M2",
+        "iterations": 300,
+        "keep": 2,
+        "bandC": 1,
+        "dropExactZero": true,
+        "sigmaBoundScale": 1
+      },
+      "sigma": 6.702276792082286,
+      "sets": [
+        {
+          "setId": 573,
+          "worn": 0,
+          "reach": 2,
+          "packageItemIds": [
+            25685,
+            25686
+          ],
+          "pair": {
+            "dps": 0,
+            "pairedSe": 0
+          },
+          "bestStats": -50.54994491410798,
+          "measure": -50.54994491410798,
+          "kept": false,
+          "reason": "exact-zero"
+        },
+        {
+          "setId": 584,
+          "worn": 0,
+          "reach": 4,
+          "packageItemIds": [
+            33672,
+            33674,
+            33675,
+            33673
+          ],
+          "pair": {
+            "dps": 0,
+            "pairedSe": 0
+          },
+          "bestStats": -66.17032854122363,
+          "measure": -66.17032854122363,
+          "kept": false,
+          "reason": "exact-zero"
+        },
+        {
+          "setId": 640,
+          "worn": 2,
+          "reach": 5,
+          "packageItemIds": [
+            29098,
+            29097,
+            29099
+          ],
+          "pair": {
+            "dps": 21.063908162342614,
+            "pairedSe": 0.04696612202499519
+          },
+          "bestStats": -21.256737546780187,
+          "measure": -0.19282938443757303,
+          "kept": true,
+          "reason": "band"
+        },
+        {
+          "setId": 641,
+          "worn": 0,
+          "reach": 5,
+          "packageItemIds": [
+            30228,
+            30230,
+            30222,
+            30223,
+            30229
+          ],
+          "pair": {
+            "dps": 35.97309108509944,
+            "pairedSe": 0.14981985729054803
+          },
+          "bestStats": -34.62342450950064,
+          "measure": 1.3496665755988033,
+          "kept": true,
+          "reason": "top-k"
+        },
+        {
+          "setId": 676,
+          "worn": 0,
+          "reach": 5,
+          "packageItemIds": [
+            31039,
+            31048,
+            31042,
+            31034,
+            31044
+          ],
+          "pair": {
+            "dps": 273.96282268540654,
+            "pairedSe": 6.384293386170462
+          },
+          "bestStats": -7.8810120064836156,
+          "measure": 266.0818106789229,
+          "kept": true,
+          "reason": "top-k"
+        }
+      ],
+      "simmed": 10,
+      "fromStore": 0
+    },
     "plausibilityWarnings": [
       {
         "kind": "implausible-set-bonus",

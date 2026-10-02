@@ -228,9 +228,11 @@ function ownFromRow(row: Row, setBonuses: SetBonus[]): number | undefined {
 }
 
 // ON top 16 of the tab's view, from the ticket 502 stage recordings (a stage
-// tool's independent R1 walk over each file, printed at 4 decimals). In
-// ret-p3-p2 no row gets Set potential: every Lightbringer bonus is below the
-// noise floor, and a Crystalforge or Justicar row does better alone.
+// tool's independent R1 walk over each file, printed at 4 decimals). The
+// ret-p3-p2 entry was re-derived on the ticket 511 re-record (a stage tool's
+// independent step-rule walk) and did not change: no ret row gets Set
+// potential, because no ret bonus clears its same-gear gate and the screen
+// drops Justicar.
 const PINNED_ON_TOP16: Record<string, Array<[string, number]>> = {
   "feral-p3-nordrassil4": [
     ["Thunderheart Gauntlets", 179.1494],
@@ -270,9 +272,12 @@ const PINNED_ON_TOP16: Record<string, Array<[string, number]>> = {
   ],
 };
 
+// Identity rows are counted on rankings without the step rule only. A step
+// ranking (feral-p3-p2bis since the ticket 511 re-record) checks its credited
+// rows against their stop gear's sim in check 4s instead.
 const FIXTURES: Array<{ name: string; identityRows: number }> = [
   { name: "feral-p3-nordrassil4", identityRows: 6 },
-  { name: "feral-p3-p2bis", identityRows: 7 },
+  { name: "feral-p3-p2bis", identityRows: 0 },
   { name: "feral-p3-th-hands-legs", identityRows: 4 },
   { name: "feral-p2-malorne4", identityRows: 0 },
   { name: "ret-p3-p2", identityRows: 0 },
