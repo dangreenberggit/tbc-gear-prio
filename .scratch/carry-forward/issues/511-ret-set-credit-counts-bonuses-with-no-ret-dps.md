@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/feat-tab-signoff-followups.md (targeted engine review 2026-09-25, finding D1)
 Blocks: none
@@ -56,3 +56,112 @@ ticket on their own. The redesign is handed to a future session:
 bonus value carries a gear-dependent residue), 515 (no phase-1 universe),
 516 (Burning Rage 2pc break reads about 0). The owner decided on
 2026-09-25 that this ticket is fixed before the merge. It stays open.
+
+2026-10-02 (stage-gate 511-512-set-credit, chunk K7): closed. The stage
+folder `.scratch/stage-gate/511-512-set-credit/` (below, `S/`) is
+gitignored; the design is in `docs/adr/0035-set-rows-valued-by-simmed-gear.md`.
+
+**Item 1.** Item 1 is met by option (a) applied to the same-gear
+measurement: a bonus counts only when its same-gear value, measured with
+set-less copies on identical gear, clears max(floor, 2·se); this is why
+Justicar 4pc and Crystalforge 4pc, which read about 0 on identical gear, no
+longer earn credit.
+
+**The method** (ADR-0035). With Set potential on, a set row is credited at
+the bonus with the best total. The total is one sim of the current gear
+plus the row's item plus one partner set, chosen by the "close-calls"
+rule, minus the sim of the current gear. Each bonus is gated first by its
+same-gear value (set-kept against set-less copies on the same gear), with
+no list of implemented bonuses and no cap on the piece count. Worn-set
+breaks come from a ladder of the same copies on the current gear. A set
+screen of cheap paired sims drops sets that cannot be worth collecting.
+
+**Justicar 626 and Crystalforge 629 on ret P2 gear at phase 3.**
+
+| Set | K1, same gear, 10,000 iterations | Committed fixture, 3000 iterations, screen on |
+| --- | --- | --- |
+| Justicar 4pc | +0.0000 | Set dropped by the screen: "below-zero" (M2 −56.92; pair −0.494, paired se 0.309) |
+| Crystalforge 4pc | +1.5851 (se 1.725) | Set kept (top-k, M2 −19.53); 4pc gate +0.204 (se 3.164), at or below the gate (floor 4.81) |
+
+K1: `S/k1-measurements.md` lines 88-111. Fixture: `data/tab-fixtures/ret-p3-p2.json`,
+read by `S/k7/ana.py` into `S/k7/ana-ret.out`.
+
+**Item 2, the fixtures.** The rule is pinned in
+`packages/core/test/fork-set-net.test.ts`, with every literal derived in
+`docs/set-bonus-fixture-derivations.md`. At main `0fb1b1e8` and fork
+`f09d218e` (= the lock's `commit`), under node v22.17.1,
+`npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/fork-sim-database.test.ts packages/core/test/wowsims-fork-parity.test.ts --reporter=verbose; echo rc=$?`
+printed `rc=0` (89 passed, 1 skipped). It has one passing line each for
+511-C, 511-I, 511-G, 511-G2, 511-H, 511-M, 511-R, 511-S2, 511-P4, 511-O,
+511-U, 511-K, 511-T, 511-X, 511-E, 511-PS, 511-PB, 511-PR, 511-PN, 511-CB,
+511-A3R, 476-D, 522-G, 511-SR, 511-SZ, 511-SF, 511-SU, 511-SN, 511-SB,
+511-SD, 511-SA, 511-SL, 511-SH, 511-LS, 511-LN, 511-LR, 511-L2, 511-LF and
+511-LV, three for 511-PC, and the E-W3 parity line. CI skips these files,
+because the fork clone is gitignored.
+
+**The `ret-p3-p2` re-record** (main `4f19a468`, fork `04de6a46`, screen
+on). Baseline 2084.163576929428, the same as before. No ret row gets set
+credit. The screen dropped Justicar 626 (below-zero), Burning Rage 566 and
+Gladiator's Vindication 583 (exact-zero). It kept Crystalforge 629 and
+Lightbringer 680, and every gated entry of both is at or below the gate.
+The ON top 16 is unchanged. `feral-p3-p2bis` was re-recorded after the
+split (main `5251fb23`, fork `f09d218e`). Every row's figure and rank equal
+the `4f19a468` recording's (`S/k7/compare-feral.out`, "RESULT PASS").
+
+**Item 3, the SME verdicts.**
+
+- First verdict, on both re-recorded fixtures: **trust-with-caveats**
+  (`.scratch/handoffs/sme-rank-judgment-511-set-credit-k7.md`). Ret gets no
+  set credit, which is right for this gear. The feral Thunderheart rows are
+  valued by the sim of the pieces worn together. Every screened-out set is
+  one a player of the spec would not collect on this gear. **F1 stands**
+  (see below).
+- Follow-up after the split: **trust-with-caveats**
+  (`.scratch/handoffs/sme-rank-judgment-511-set-credit-k7-followup.md`).
+  The split Breaks lines (Malorne Harness 2pc −59.17 on the Gauntlets and
+  Leggings rows, −57.46 on the Cover row, against 96.26 on current gear)
+  read right: they repeat on a second character (61.63 and 58.47 at 10,000
+  iterations), and the drop matches the opposite measurement (Thunderheart
+  2pc with and without Malorne 2pc, −35.9 against −37.1). Caveat: the same
+  lost bonus shows −96.3 on rows that break it from current gear and −59.1
+  on a step, and the popover does not say which gear each is measured on.
+  **F1 stands, narrowed.**
+- **F1** (Burning Rage 2pc reads exactly 0 on `ret-p3-p2`): the first
+  verdict's evidence, the tab's "58.6 below the hit cap", is withdrawn,
+  because that readout omits Improved Faerie Fire and enchant hit (ticket
+  521), and the sim puts the base gear 4.7 hit rating over the cap
+  (`S/diag/report.md`). But the screen's pair is measured on the Burning
+  Rage package gear, which loses 14 hit rating net and is about 9.3 below
+  the cap before gems. The exact 0 is right only if that package's gems
+  add at least 9.3 hit, and the fixture does not record them. No row
+  changes: the screen's rule 2 drops the set either way. What closes F1:
+  read the hit rating of that package request (one `/computeStats` call or
+  a dump of the composed request, no DPS sim).
+
+**K5ON's result** (the set screen's "on" mode; ADR-0035, "The set
+screen").
+
+- **The rule:** M2, N = 300, K = 2, c = 1, rule 1 on,
+  σ = 1.0 × √2·stdev/√N (the runner-up of the two best rules, by the Gate C
+  ruling).
+- **Item swap on (33.1):** pass. On enhancement P5 gear with a swap of
+  non-set items only, a real bonus read 37.709 and two no-bonus pairs read
+  exactly 0 on the server, on one WASM worker and on the 4-worker runner.
+- **Enhancement ranking (33.2):** only Skyshatter Harness 682 was worth
+  collecting (+131.35 at 4 pieces); the rule kept 530 (readings absent,
+  ticket 532), 636 and 682. Pass.
+- **Parity:** the engine's rule keeps the scorer's sets on 22 of 22
+  offline cases; four live runs keep exactly the scorer's sets and reasons.
+- **Cost on C1** (phase-5 warrior), estimates: the set phase drops from 239
+  to 29 full sims plus 66 screen sims, about 96.9 s → 17.8 s on the desktop
+  server and about 59.8 → 9.0 min in one browser worker. Measured wall
+  times, screen on against record mode: C6 36.2 s against 53.9 s, C5 42.2
+  against 118.4, C1 108.2 against 330.9, the enhancement character 120.3
+  against 372.3.
+
+**The popover** shows "steps that add up", and a step that newly breaks a
+worn set bonus is split into "Breaks {set} {n}pc" −Y and the pieces line +X,
+which add up to the old step exactly (chunk K6B; fork `f09d218e`, main
+`7921a69a`; live checks `S/k6b/compare-FX-A.out` and
+`S/k6b/compare-HUN-C3.out`, both "RESULT PASS"). The split is built, not
+an open option.

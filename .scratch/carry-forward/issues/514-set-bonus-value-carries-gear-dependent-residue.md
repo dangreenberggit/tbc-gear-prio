@@ -52,3 +52,42 @@ admits both inert bonuses.
    Malorne) as positive. The handoff lists candidate methods.
 2. The chosen method's result on the two gear sets above, recorded here
    with the command that produced it.
+
+## Comments
+
+2026-10-02 (stage-gate 511-512-set-credit, chunk K7): stays open. One
+reading that item 2 asks for is missing.
+
+- **Item 1, the method, is agreed.** The owner approved the same-gear
+  measurement (stage decision log, "set measure" line: "The proposed
+  method sims the same gear twice ". thats fine. its important to get
+  these right. and the alternatives dont look good."). It sims the same
+  gear twice, with the set's pieces as set-less and as set-kept copies, so
+  the items' own stats are on both sides of the difference
+  (`docs/adr/0035-set-rows-valued-by-simmed-gear.md`, "The measurement").
+- **On the ret P2 gear at phase 3** (10,000 iterations, K1): Justicar 4pc
+  +0.0000 and Crystalforge 4pc +1.5851 (se 1.725). The feral tier bonuses
+  read positive: Thunderheart 2pc +75.91 and 4pc +75.61, Nordrassil 4pc
+  +46.66, Malorne 4pc +23.04
+  (`.scratch/stage-gate/511-512-set-credit/k1-measurements.md` lines
+  88-111; gitignored).
+- **Missing: the ret pre-raid gear at phase 2.** No same-gear Justicar 4pc
+  or Crystalforge 4pc reading by this method exists on that gear. No step
+  of the stage measured it, and the stage ruled that no new sims run for
+  it (decision log, 2026-10-02). That reading is what closes this ticket.
+- **The cause of the residue, measured.** On ret P2 gear it is real sim
+  behaviour. The gear is 4.69 hit rating over the melee cap once Improved
+  Faerie Fire is counted, and expertise counts only in whole points. The
+  Justicar gap is +13.58 ± 0.68 at independent seeds
+  (`.scratch/stage-gate/511-512-set-credit/diag/report.md`, `diag/h2.out`).
+  On feral, the four Thunderheart pieces with their bonuses off are worth
+  5.87 ± 0.46 DPS more worn together than one at a time
+  (`k2-thunderheart-seeds.md` in the same folder). K1's single-seed 9.59
+  is within the upper-bound noise of this figure.
+- **Earlier break values.** The vacate method's Wastewalker figures
+  (2pc 25.87-27.66, 4pc 21.41 ± 1.48) included the replacement items' own
+  stats. The ladder gives 2pc 24.44 ± 1.04 and 4pc 21.14 ± 1.05 at 4 worn
+  (k1-measurements.md line 114). The vacate sims were deleted in chunk K4.
+- **The tab no longer uses "package minus singles" on its path.** Each set
+  row's total is one sim of wearable gear, and a bonus counts only when its
+  same-gear value clears the noise gate (ADR-0035).

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/feat-tab-signoff-followups.md (targeted engine review 2026-09-25, finding D3)
 Blocks: none
@@ -245,3 +245,35 @@ revision 7 ruled that the break side has no fixed count cap: it measures
 every count from 2 up to the worn count
 (`.scratch/stage-gate/511-512-set-credit/decision-log.md`, ruling R2).
 The ticket stays open.
+
+2026-10-02 (stage-gate 511-512-set-credit, chunk K7): closed. Each
+closing check holds at main `0fb1b1e8`, fork `f09d218e`:
+
+- **The cases.** Under node v22.17.1,
+  `npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/fork-sim-database.test.ts packages/core/test/wowsims-fork-parity.test.ts --reporter=verbose; echo rc=$?`
+  printed `rc=0` (89 passed, 1 skipped), with one passing line whose title
+  contains each of 512-W, 512-P, 512-N, 512-H and 512-C. This command runs
+  the ticket's file plus three others.
+- **The kinds of scenario they cover:** a worn bonus from a set that no
+  hand-kept table lists (512-W); a set whose only bonus needs 3 pieces
+  (512-P); a swap that removes a piece but no bonus (512-N); a set piece
+  with its own id-keyed Go effect (512-H); bonuses above 4 pieces (512-C).
+- **The fork clone is at the lock.** `git -C vendor/tbc-new-fork rev-parse HEAD`
+  prints `f09d218ed4e9afc2d1a1350f3b67572c33b5cd0b`, the `commit` in
+  `data/wowsims-fork.lock.json`.
+- **No list came back.**
+  `git -C vendor/tbc-new-fork diff 063600a3 HEAD -- ui/core/components/individual_sim_ui/upgrades/engine/set-value.ts`
+  adds no `IMPLEMENTED_IN_SIM` entry. A reading of the engine diff since
+  `063600a3` finds no other table of set ids or bonus piece counts. Its only
+  new numeric arrays are the set screen's iteration counts
+  (`SCREEN_PAIR_ITERATIONS`, `SCREEN_LADDER_ITERATIONS`).
+- **The request check, with no sim.** A stage script ran the committed
+  `measureWornSetLadder` on a captured tab request. Every rung kept the
+  base request's other fields, and the copy ids and copy rows were right
+  (`.scratch/stage-gate/511-512-set-credit/probe/spot.out`, "RESULT PASS";
+  gitignored). `set-less-copies.ts` has not changed since.
+- **Scope.** The cases run the break model against the test's controlled
+  DPS model, not a sim. They show which bonuses the model charges. They do
+  not show that a real bonus clears the noise gate in a sim run.
+
+The design is recorded in `docs/adr/0035-set-rows-valued-by-simmed-gear.md`.

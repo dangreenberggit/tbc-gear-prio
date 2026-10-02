@@ -257,3 +257,17 @@ untested):
 - a fix that only adds a figure to non-set rows changes none of them;
 - a fix that credits set pieces for making a move possible would change
   set-row figures in every phase.
+
+2026-10-02 (stage-gate 511-512-set-credit, chunk K7): the rule shipped
+for set rows is ADR-0035's option A
+(`docs/adr/0035-set-rows-valued-by-simmed-gear.md`). With Set potential
+on, a set row is credited at the bonus with the best total. The total is
+one sim of the current gear plus the row's item plus one partner set,
+chosen by the "close-calls" rule. A bonus counts only when its same-gear
+value clears the noise gate, and worn-set breaks come from the ladder. The
+rule values one row's path to a bonus. It does not value moving a worn set
+to other slots, so this ticket's gap remains. FER-P3P5 (feral, phase 5,
+the owner's example with 4 tier pieces worn; ADR-0035's K5P table) is an
+example of this ticket's case. The partner-rule check did not score that
+move. ADR-0035, "Relation to ticket 523", keeps the verifier's reasoning
+that the gap can leave rows too low, never too high.
