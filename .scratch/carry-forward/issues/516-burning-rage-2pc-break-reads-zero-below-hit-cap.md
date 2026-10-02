@@ -66,3 +66,22 @@ reading. The ticket stays open; the stage plan asks only for a comment.
   `.scratch/stage-gate/511-512-set-credit/diag/report.md`), so +20 hit adds
   nothing. Ticket 521 records that the tab's hit readout omits debuff and
   enchant hit. The SME seat's judgment of this is in ticket 511 ("F1").
+
+2026-10-02 (F1 hit-cap check): the hypothesis in the last bullet above is
+confirmed for the screen's pair on the ret P2 gear at phase 3. The figures
+and commands are in ticket 511's comment of the same date.
+
+- The set screen sims Burning Rage on the package gear: Ragesteel
+  Breastplate and Ragesteel Shoulders, with two Rigid Dawnstone in the
+  Shoulders. `/computeStats` reads that gear at 54 melee hit rating and
+  6.4244% melee hit before the bonus. The sim's cap is 6.0% once Improved
+  Faerie Fire is counted, so the gear is 6.69 rating over the cap.
+- On the set-kept side the bonus is active ("Burning Rage (2pc)" in
+  `/computeStats` `sets`; the request sends Blacksmithing), and the hit is
+  74 rating. The two pair sims are identical (2024.1456, seed 11, 300
+  iterations).
+- So on this gear the 2pc is worth nothing because of the hit cap. The
+  profession gate and the copies work. This says nothing about the ret
+  pre-raid gear. There, K1's +6.5966 (above) shows the bonus is worth DPS
+  below the cap. The ticket's title, "below the hit cap", fits that gear
+  and not the P2 gear.

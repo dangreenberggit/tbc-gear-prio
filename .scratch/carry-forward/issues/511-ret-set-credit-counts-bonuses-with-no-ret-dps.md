@@ -165,3 +165,62 @@ which add up to the old step exactly (chunk K6B; fork `f09d218e`, main
 `7921a69a`; live checks `S/k6b/compare-FX-A.out` and
 `S/k6b/compare-HUN-C3.out`, both "RESULT PASS"). The split is built, not
 an open option.
+
+2026-10-02 (F1 hit-cap check): **F1 closed.** The Burning Rage package
+gear is over the sim's melee hit cap before the bonus, so the +20 hit is
+wasted and the exact-0 pair is right. In the SME's words, "exact-zero" here
+means a bonus in reach that this gear cannot use, not "no bonus in reach".
+The ranking is unchanged.
+
+The screen's own request for set 566's pair was rebuilt on the tab's code
+path (main `d119fc82`, fork `f09d218e` = the lock's `commit`). The tab
+loaded the `ret-p3-p2` fixture gear at phase 3 with `setScreen: "on"`,
+under a fake `run()` that sends no sim. Readings from the :3333 backend's
+`/computeStats`, the same with and without the consumables warm-up:
+
+| Request | Melee hit rating | Melee hit % (Precision included) | Active sets |
+| --- | --- | --- | --- |
+| Base gear | 52 | 6.2976 | none |
+| Package, set-less copies (pair low side) | 54 | 6.4244 | none |
+| Package, set-kept copies (pair high side) | 74 | 7.6927 | Burning Rage (2pc) |
+
+- **The cap.** Against the level-73 target, miss = 8% − (melee hit % + 3%
+  Improved Faerie Fire − 1% hit suppression), floored at 0 (fork
+  `sim/core/target.go:394,401`, `debuffs.go:44,365`,
+  `spell_result.go:179-187`, `spell_outcome.go:570-577`). The request
+  sends `faerieFire: TristateEffectImproved`. So misses reach 0 at 6.0%
+  melee hit, which is 47.31 rating at 15.77 rating per 1%. The base gear is
+  4.69 rating over the cap. The package gear is **6.69 rating over** before
+  the bonus.
+- **The gems.** The package puts two Rigid Dawnstone (24051, +8 hit each)
+  in the Ragesteel Shoulders' two yellow sockets. The Ragesteel Breastplate
+  has no sockets. The gems that leave with the Crystalforge Breastplate
+  (24027, 30584, 28363) and the Shoulderpads of the Stranger (24027) have
+  no hit. No other slot changes. Item hit (`data/items/index.json`
+  `stats[20]`): 30129 = 23, 30055 = 0, 23522 = 0, 33173 = 9. So
+  52 − 23 + 9 + 16 = 54, which matches `/computeStats`. The SME's "about 9.3
+  below the cap" assumed no hit gems in the package. Why the engine picked
+  Rigid Dawnstone for these sockets was not checked.
+- **The profession check.** Burning Rage needs Blacksmithing (fork
+  `sim/common/tbc/items_sets.go`, `ItemSetBurningRage`). Both pair requests
+  send `profession2: Blacksmithing`, and `/computeStats` lists "Burning Rage
+  (2pc)" as active on the set-kept side. So the bonus is on and simply
+  does nothing at the cap. The bonus adds melee hit only: spell hit reads
+  3% on all three requests.
+- **The pair reproduces.** Simming the two captured requests at the
+  screen's options (seed 11, 300 iterations) gives 2024.1456 on both sides,
+  a pair of exactly 0, as in the fixture's `setScreen.sets` entry for 566.
+  The fixture was recorded at fork `04de6a46`. The 04de6a46..f09d218e diff
+  does not touch `packageAt` or `candidateSwapWithRepairs` in `rank.ts`.
+
+Commands. Tools are in `S/f1/` (gitignored), run from that folder under
+node v22.17.1, with the launch.json `wowsims-backend` (:3333) and
+`wowsims-fork` (:5173) entries running:
+
+- `node capture566.mjs ret-p3-p2.json cap-run.json requests/base.json`
+  (dry run, 0 sims; it writes the base request and
+  `requests/base.json.566-0.json` / `566-1.json`).
+- `tsx stats.mts` and `tsx stats.mts --warm`, which write
+  `stats-cold.json` and `stats-warm.json`.
+- `tsx pairsim.mts`, which runs two 300-iteration sims and writes
+  `pairsim.json`.
