@@ -154,6 +154,9 @@ def main() -> int:
             f"{len(paths)} fixture(s) cannot be checked against the fork."
         )
         return 0
+    if not paths:
+        print("tab-fixtures: FAILED -- no fixtures found in data/tab-fixtures.")
+        return 1
     rc = 0
     for path in paths:
         ok, line = check_fixture(path)

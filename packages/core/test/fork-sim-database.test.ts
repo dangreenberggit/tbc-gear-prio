@@ -1,5 +1,5 @@
 /**
- * The tab's per-request database carries the page's consumable rows
+ * The tab's per-request database includes the page's consumable rows
  * (ticket 522), on the fork's real resolver.
  *
  * The page's own sim request names the player's consumables and sends their
@@ -91,7 +91,7 @@ function playerOf(request: Json | RaidSimRequest): Json {
 }
 
 /**
- * A committed skeleton as the page's own request would carry it: the player's
+ * A committed skeleton as the page's own request would send it: the player's
  * database holds the rows for its named consumables. This is the step
  * `ui/core/sim.ts:290` runs on the page's request.
  */
@@ -197,13 +197,16 @@ describe.skipIf(!forkPresent)(
       ({ simDatabaseResolverFor } = await importForkUpgrades<{
         simDatabaseResolverFor: ResolverFactory;
       }>("adapters/sim_database.ts"));
-    });
+      // 30s, matching `testTimeout`, not the 10s default hookTimeout: parsing
+      // the 3.1 MB db.json plus the proto transforms takes about 3.3s idle and
+      // can pass 10s under CPU contention.
+    }, 30_000);
 
     it("522-A: an agility melee mix (feral P2 consumables on ret P2 gear) is sent with its rows", () => {
       // Scenario kind: battle and guardian elixirs, agility food, an imbue,
       // drums, and potion and conjured lists with multi-effect rows. Stands
       // for feral, rogue, enhancement and hunter. The feral skeleton has no
-      // gear, so the ret gear carries the item rows.
+      // gear, so the ret gear supplies the item rows.
       const feralConsumes = playerOf(readJson(FERAL)).consumables as Json;
       const skeleton = pageSkeleton(RET, feralConsumes);
       const db = simDatabaseResolverFor(

@@ -87,7 +87,8 @@ Exit codes: 0 = ok (ran green, or skipped for any reason above); 1 = the gate
 ran and MEASURED a failure -- a broken layout OR an unbaselined critical/serious
 accessibility violation (the fork's test-layout.mjs exits 1 for either, and this
 script blocks on any measured nonzero exit, so the a11y ratchet needs no branch
-here); 2 = a real error (could not read a tracked source file that the record
+here), or the gate would run but its tab fixture is missing or unreadable; 2 = a
+real error (could not read a tracked source file that the record
 expects).
 
 Accessibility: the gate passes TBC_A11Y_BASELINE (data/wowsims-fork-a11y-baseline.json)
@@ -153,13 +154,26 @@ ENGINE_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades/engine"
 #     accessibility change the gate must re-run to see. Adding it re-arms the
 #     gate on a copy change at the cost of one gate run per re-pin, which the
 #     re-pin cycle already pays.
+#   - vite.config.mts -- it defines `__TBC_TAB_FIXTURES__`, which decides
+#     whether the fixture pass's code is in the bundle at all (review round 10,
+#     finding A8).
 SHELL_FILES = (
     "ui/core/components/individual_sim_ui/upgrades_tab.tsx",
     "ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss",
     "ui/scss/core/components/_sim_tab.scss",
     "ui/core/components/sim_tab.ts",
     "assets/locales/en/translation.json",
+    "vite.config.mts",
 )
+
+# The tab's adapters (the fixture loader `adapters/fixture.ts` and the check
+# hooks among them) and its pool data feed the rows the fixture pass renders,
+# so they are hashed too (finding A8). They are globbed like the engine.
+UPGRADES_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades"
+# Gitignored in the fork (its .gitignore names it): the owner's own WCL
+# credentials. Hashing it would tie the committed digest to one machine's
+# secrets file.
+LOCAL_ONLY_FILES = frozenset({"local.wcl-credentials.ts"})
 
 # The shared SCSS the tab's asserted geometry resolves THROUGH. The two tab SCSS
 # files above declare no `@use`/`@import`; they consume globally-injected Sass
@@ -232,6 +246,16 @@ def _iter_layout_files() -> list[Path]:
     files = [FORK_ROOT / rel for rel in SHELL_FILES + SHARED_LAYOUT_FILES]
     if ENGINE_DIR.is_dir():
         files.extend(sorted(ENGINE_DIR.rglob("*.ts")))
+    for sub in ("adapters", "data"):
+        d = UPGRADES_DIR / sub
+        if d.is_dir():
+            files.extend(
+                sorted(
+                    p
+                    for p in d.rglob("*")
+                    if p.is_file() and p.name not in LOCAL_ONLY_FILES
+                )
+            )
     return files
 
 
@@ -305,9 +329,12 @@ def write_baseline(digest: str) -> None:
         "testedTabHash is the sha256 (over fork-relative path + bytes) of the "
         "Upgrades-tab layout source at the last green run of the layout gate: the "
         "shell files (upgrades_tab.tsx, _upgrades_tab.scss, _sim_tab.scss, "
-        "sim_tab.ts, and assets/locales/en/translation.json -- the a11y probe's "
-        "accessible names are locale strings), the ranking engine "
-        "(upgrades/engine/**/*.ts), AND the shared "
+        "sim_tab.ts, assets/locales/en/translation.json -- the a11y probe's "
+        "accessible names are locale strings -- and vite.config.mts, which "
+        "defines __TBC_TAB_FIXTURES__), the ranking engine "
+        "(upgrades/engine/**/*.ts), the tab's adapters and pool data "
+        "(upgrades/adapters/** and upgrades/data/**, except the gitignored "
+        "local.wcl-credentials.ts), AND the shared "
         "SCSS the tab's asserted geometry resolves through -- shared/_variables.scss "
         "($grid-breakpoints + the layout tokens the asserted rules read), "
         "shared/_global.scss (root font-size + lg/xxl spacer overrides), "
@@ -713,10 +740,23 @@ def run(
     # fixture pass too.
     if fixture is None and DEFAULT_FIXTURE.is_file():
         fixture = DEFAULT_FIXTURE
+    # A missing or unreadable fixture fails rather than skips: the fixture pass
+    # is what measures the result rows, so a green run without it would record
+    # an untested digest as tested (review round 10, finding A1).
     if fixture is None:
-        print("layout gate: no tab fixture on disk -- the post-run checks are skipped.")
-    else:
-        print(f"layout gate: {check_fixture(fixture)[1]}")
+        print(
+            "layout gate: FAILED -- no tab fixture on disk, so the post-run "
+            "checks cannot run; the baseline is not advanced."
+        )
+        return 1
+    fixture_readable, fixture_line = check_fixture(fixture)
+    print(f"layout gate: {fixture_line}")
+    if not fixture_readable:
+        print(
+            "layout gate: FAILED -- the tab fixture is unreadable; the baseline "
+            "is not advanced."
+        )
+        return 1
 
     result = run_gate(fixture)
     if result.rc == GATE_UNMEASURED:
