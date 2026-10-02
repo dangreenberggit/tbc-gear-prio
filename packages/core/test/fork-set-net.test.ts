@@ -2665,6 +2665,17 @@ type StopTerm = {
   isStop: boolean;
 };
 
+/** One step of the "steps that add up" popover (K6). */
+type StepTerm = {
+  kind: "step";
+  threshold: number;
+  setName: string;
+  pieces: Array<{ itemId: number; name: string }>;
+  broken: Array<{ setId: number; threshold: number; dps?: number }>;
+  dps: number;
+  isStop: boolean;
+};
+
 type StepViewMod = ViewMod & {
   setPotentialTerms: (
     ctx: unknown,
@@ -2674,6 +2685,7 @@ type StepViewMod = ViewMod & {
     stopThreshold: number;
     terms: Array<StopTerm | { kind: "bonus" | "piece" | "break" }>;
   };
+  setPotentialSteps: (ctx: unknown, noiseFloorDps: number) => StepTerm[] | null;
   setCreditUnmeasured: (ctx: unknown) => boolean;
   setBonusSubLine: (
     ctx: unknown,
@@ -2692,6 +2704,19 @@ function stopTerms(view: StepViewMod, row: { setContext?: unknown }) {
   return view
     .setPotentialTerms(row.setContext, FLOOR)
     .terms.filter((t): t is StopTerm => t.kind === "stop");
+}
+
+/** A row's steps as [count, added piece ids, dps, isStop, newly broken]. */
+function stepsOf(view: StepViewMod, row: { setContext?: unknown }) {
+  return view
+    .setPotentialSteps(row.setContext, FLOOR)
+    ?.map((s) => [
+      s.threshold,
+      s.pieces.map((p) => p.itemId),
+      Number(s.dps.toFixed(9)),
+      s.isStop,
+      s.broken.map((b) => [b.setId, b.threshold]),
+    ]);
 }
 
 /** Item values with the listed overrides. */
@@ -2844,6 +2869,14 @@ describe.skipIf(!forkPresent)(
         [2, false],
         [4, true],
       ]);
+      // K6 "steps that add up": the 2pc partner (Chestguard) is inside the
+      // 4pc partner set, so the row's steps are differences of its totals:
+      // 250 − 100 = 150 for the Chestguard, then 490 − 250 = 240 for the
+      // Pauldrons and Leggings. They add up to the credit, 390.
+      expect(stepsOf(view, hands)).toEqual([
+        [2, [THUNDERHEART.chest], 150, false, []],
+        [4, [THUNDERHEART.shoulder, THUNDERHEART.legs], 240, true, []],
+      ]);
       // Every row's three 2pc partner sets tie on estimate, so all are close
       // calls: the choices sim the six pairs (12 calls; the 2pc package,
       // hands + chest, from the store), then the four distinct step gears
@@ -2888,6 +2921,10 @@ describe.skipIf(!forkPresent)(
       expect(hands.deltaDps + credit).toBeCloseTo(250, 9);
       expect(futureOf(hands, 2)?.pieces?.map((p) => p.itemId)).toEqual([
         THUNDERHEART.chest,
+      ]);
+      // K6: only the steps up to the stop: 250 − 100 = 150.
+      expect(stepsOf(view, hands)).toEqual([
+        [2, [THUNDERHEART.chest], 150, true, []],
       ]);
     });
 
@@ -3180,6 +3217,15 @@ describe.skipIf(!forkPresent)(
       ]);
       // Pauldrons + Gauntlets keep the Malorne chest: 3064 − 3090.
       expect(futureOf(todays, 2)?.stepGearDps).toBeCloseTo(-26, 9);
+      // K6: the Gauntlets row, as on the owner's demo. 2pc with the
+      // Leggings: 6 − 12 + 50 = 44, a step of 38. 4pc with the Pauldrons and
+      // Chestguard: 6 + 8 + 12 − 12 + 50 + 80 − 90 = 54, a step of 10 that
+      // breaks Malorne 2pc. The Gauntlets alone break nothing.
+      const view = await stepView();
+      expect(stepsOf(view, thRow(z, THUNDERHEART.hands))).toEqual([
+        [2, [THUNDERHEART.legs], 38, false, []],
+        [4, [THUNDERHEART.shoulder, THUNDERHEART.chest], 10, true, [[640, 2]]],
+      ]);
     });
 
     it("511-PB: a partner set that loses a worn bonus no single swap loses is charged for it", async () => {
@@ -3352,6 +3398,9 @@ describe.skipIf(!forkPresent)(
       expect(stops.map((t) => t.totalDps)).toEqual([260, 510]);
       expect(stops.map((t) => t.isStop)).toEqual([false, true]);
       expect(view.rankableSetPotential(legs, FLOOR)).toBeCloseTo(510 - 100, 9);
+      // K6: the 2pc partner (Gauntlets) is not in the 4pc partner set, so
+      // there are no steps; the tab shows the totals as separate outcomes.
+      expect(view.setPotentialSteps(legs.setContext, FLOOR)).toBeNull();
     });
 
     it("511-CB: a step ranking's credit and disclosure do not read the top package's breaks", async () => {

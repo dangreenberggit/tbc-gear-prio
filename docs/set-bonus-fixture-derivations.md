@@ -1140,3 +1140,40 @@ before K5R. "on" adds `"setScreen":"on"`; on the store of an unset run it
 is not served the cached ranking, and it sends exactly its 2 screen sims
 (new `:all` keys at N = 300); every other sim comes from the store.
 Unset, "off", "record" and "on" give four different hashes.
+
+## The popover's steps (K6)
+
+The owner chose "steps that add up" for the set popover (2026-10-01).
+`setPotentialSteps` turns a step ranking row's `"stop"` totals, up to the
+stop, into steps. Step k adds the partner pieces that step k − 1 did not
+have, names the worn bonuses its gear loses that step k − 1 (or, for the
+first step, the row's own swap) did not, and is worth its total minus the
+total before it. The first step's "total before" is the row's single
+swap. So the steps add up to the stop's total minus the single swap,
+which is the credit (C86). When a step's partner pieces do not include the
+previous step's, the sets do not nest and the function returns null; the
+tab then shows the totals as separate outcomes.
+
+**511-R.** The Gauntlets row's single swap is 100. Its 2pc partner is the
+Chestguard (the three pairs tie; the engine keeps the Chestguard, the
+piece of the 2pc package hands + chest): 100 + 100 + 50 = 250. Its 4pc partners are the Pauldrons, Chestguard and Leggings:
+490 (511-R above). Steps: the Chestguard, 250 − 100 = 150; then the
+Pauldrons and Leggings, the pieces the 4pc adds, 490 − 250 = 240. 150 +
+240 = 390, the credit. Nothing is worn, so nothing breaks.
+
+**511-S2.** As 511-R with the 4pc at 10, so the stop is the 2pc. One
+step: the Chestguard, 250 − 100 = 150 = the credit. The 4pc total is not
+a step, because it comes after the stop.
+
+**511-PS.** The Gauntlets row (own value 6, replaces nothing). 2pc with
+the Leggings: 6 − 12 + 50 = 44, against −26 with the Pauldrons and −22 with the Chestguard (each
+breaks Malorne), so the first step is 44 − 6 = 38. 4pc with
+the Pauldrons, Chestguard and Leggings: 6 + 8 + 12 − 12 + 50 + 80 − 90 =
+54, so the second step is 54 − 44 = 10, adds the Pauldrons and
+Chestguard, and breaks Malorne 2pc (both Malorne pieces are replaced).
+Credit 48 > 38, so the stop is the 4pc. This is the owner's demo row
+(Leggings, then Pauldrons and Chestguard breaking Malorne Harness 2pc).
+
+**511-PN.** The Leggings row's 2pc partner is the Gauntlets; its 4pc
+partners are the Chestguard, Wristguards and Waistguard, which do not
+include the Gauntlets. `setPotentialSteps` returns null.
