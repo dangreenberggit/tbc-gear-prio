@@ -23,7 +23,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { forkPresent, importForkUpgrades } from "./fork-engine-harness.js";
 
@@ -271,13 +271,19 @@ type Scenario = {
   setScreen?: string;
   /** A store shared between runs, to see what the ranking cache serves. */
   store?: Record<string, unknown>;
+  /** The 0-based fake sim call during which the run's Stop fires (ticket 533). */
+  stopDuringCall?: number;
+  /** `RankInput.seeds`; absent means one seed, 11 (ticket 533). */
+  seeds?: number[];
 };
 
 type ForkRanking = {
   contentHash: string;
+  complete?: boolean;
   items: Array<{
     itemId: number;
     deltaDps: number;
+    seMethod?: string;
     owned?: boolean;
     setContext?: {
       setId: number;
@@ -462,6 +468,8 @@ async function runScenario(scenario: Scenario): Promise<{
   const callOpts: SimRunOpts[] = [];
   const requests: RaidSimRequest[] = [];
   const { simCacheKey } = seamMod;
+  const controller =
+    scenario.stopDuringCall === undefined ? undefined : new AbortController();
   const sim = {
     version: () => Promise.resolve(SIM_VERSION),
     run: (req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation> => {
@@ -470,6 +478,7 @@ async function runScenario(scenario: Scenario): Promise<{
       calls.push(ids);
       callOpts.push({ ...opts });
       requests.push(structuredClone(req));
+      if (runCount - 1 === scenario.stopDuringCall) controller?.abort();
       if (scenario.failWhen?.(ids, opts)) {
         return Promise.reject(new Error("the model sim failed on purpose"));
       }
@@ -502,7 +511,7 @@ async function runScenario(scenario: Scenario): Promise<{
     maxPhase: 5,
     fight: fightRef,
     iterations: ITERATIONS,
-    seeds: [11],
+    seeds: scenario.seeds ?? [11],
     candidateCap: 100,
   };
 
@@ -517,6 +526,7 @@ async function runScenario(scenario: Scenario): Promise<{
     ...(scenario.measureBrokenSetValue ? { measureBrokenSetValue: true } : {}),
     ...(scenario.partnerRule ? { partnerRule: scenario.partnerRule } : {}),
     ...(scenario.setScreen ? { setScreen: scenario.setScreen } : {}),
+    ...(controller ? { signal: controller.signal } : {}),
   });
 
   return { ranking, runCount, calls, callOpts, requests };
@@ -4888,3 +4898,156 @@ describe.skipIf(!forkPresent)(
     });
   }
 );
+
+/* ------------------------------------------------------------------ *
+ * Stop after the candidate loop (ticket 533). A Stop during any later
+ * sim sends no further sim and gives the result of a Stop during the
+ * last candidate sim. No hand-derived literals.
+ * ------------------------------------------------------------------ */
+
+const STOP_SCENARIOS: ReadonlyArray<readonly [string, Scenario]> = [
+  ["511-SR gear, screen on", { ...SR_SCENARIO, setScreen: "on" }],
+  [
+    "492-F gear, flag and screen on",
+    {
+      worn: wornGear({ hands: THUNDERHEART.hands }),
+      pool: TH_POOL.filter((p) => p.slot !== "hands"),
+      measureBrokenSetValue: true,
+      setScreen: "on",
+    },
+  ],
+  [
+    "case 8 gear, flag on",
+    {
+      worn: wornGear({ hands: MALORNE.hands, legs: MALORNE.legs }),
+      pool: [
+        ...TH_POOL,
+        { itemId: NEUTRAL.hands[0], slot: "hands" },
+        { itemId: NEUTRAL.legs[0], slot: "legs" },
+      ],
+      measureBrokenSetValue: true,
+    },
+  ],
+];
+
+/**
+ * The first set-phase sim's call index: candidate requests carry no copy
+ * id, and the set phase's first sim always does.
+ */
+const firstSetPhaseCall = (calls: readonly number[][]) =>
+  calls.findIndex((ids) => ids.some((id) => id >= COPY_OFFSET));
+
+describe.skipIf(!forkPresent)("Stop after the candidate loop (533)", () => {
+  for (const [name, scenario] of STOP_SCENARIOS) {
+    it(`533-S/W (${name}): a Stop during any set-phase sim sends no further sim, writes no sim-failure warning, and returns the last-candidate Stop result`, async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      try {
+        const full = await runScenario(scenario);
+        expect(full.ranking.complete).toBe(true);
+        // The model sim never fails, so a full run writes no warning.
+        expect(warn).not.toHaveBeenCalled();
+        const first = firstSetPhaseCall(full.calls);
+        expect(first).toBeGreaterThan(0);
+        const before = await runScenario({
+          ...scenario,
+          stopDuringCall: first - 1,
+        });
+        // No set-phase sim ran, so `first` is the set phase's first sim.
+        expect(before.runCount).toBe(first);
+        expect(before.ranking.complete).toBe(false);
+        for (let i = first; i < full.runCount; i++) {
+          warn.mockClear();
+          const stopped = await runScenario({ ...scenario, stopDuringCall: i });
+          expect(stopped.runCount, `Stop during call ${i}`).toBe(i + 1);
+          expect(stopped.ranking, `Stop during call ${i}`).toEqual(
+            before.ranking
+          );
+          expect(warn, `Stop during call ${i}`).not.toHaveBeenCalled();
+        }
+      } finally {
+        warn.mockRestore();
+      }
+    }, 120_000);
+  }
+
+  it("533-R: a Stop during any replication sim sends no further sim and returns the last-candidate Stop result", async () => {
+    const scenario: Scenario = {
+      ...SR_SCENARIO,
+      setScreen: "on",
+      seeds: [11, 22, 33],
+    };
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const full = await runScenario(scenario);
+      expect(full.ranking.complete).toBe(true);
+      expect(warn).not.toHaveBeenCalled();
+      expect(
+        full.ranking.items.some((r) => r.seMethod === "paired-replicate")
+      ).toBe(true);
+      const firstSet = firstSetPhaseCall(full.calls);
+      const firstReplica = full.callOpts.findIndex((o) => o.seed !== 11);
+      expect(firstReplica).toBeGreaterThan(firstSet);
+      // Replication is the run's tail: every later sim is at another seed.
+      expect(
+        full.callOpts.slice(firstReplica).every((o) => o.seed !== 11)
+      ).toBe(true);
+      const before = await runScenario({
+        ...scenario,
+        stopDuringCall: firstSet - 1,
+      });
+      expect(before.runCount).toBe(firstSet);
+      for (let i = firstReplica; i < full.runCount; i++) {
+        warn.mockClear();
+        const stopped = await runScenario({ ...scenario, stopDuringCall: i });
+        expect(stopped.runCount, `Stop during call ${i}`).toBe(i + 1);
+        expect(stopped.ranking, `Stop during call ${i}`).toEqual(
+          before.ranking
+        );
+        expect(warn, `Stop during call ${i}`).not.toHaveBeenCalled();
+      }
+    } finally {
+      warn.mockRestore();
+    }
+  }, 120_000);
+
+  it("533-K: the full runs send every kind of set-phase sim, so 533-S stops inside each", async () => {
+    const fulls = await Promise.all(
+      STOP_SCENARIOS.map(([, scenario]) => runScenario(scenario))
+    );
+    const rankings = fulls.map((f) => f.ranking);
+    const kinds = {
+      "worn-set ladder": rankings.some((r) =>
+        (r.wornSetLadder ?? []).some((e) => e.dps !== undefined)
+      ),
+      "set screen": fulls.some((f) =>
+        f.callOpts.some((o) => o.saveAllValues === true)
+      ),
+      "same-gear gate": rankings.some((r) =>
+        (r.setBonuses ?? []).some((e) => e.sameGearDps !== undefined)
+      ),
+      "package sim": rankings.some((r) =>
+        (r.setBonuses ?? []).some((e) => e.bonusDps !== undefined)
+      ),
+      "worn-1 pair sim": rankings.some((r) =>
+        (r.setBonuses ?? []).some((e) => e.selfConfound?.dps !== undefined)
+      ),
+      "crossing gate": rankings.some((r) =>
+        (r.crossingGates ?? []).some((e) => e.dps !== undefined)
+      ),
+      "step-gear sim": rankings.some((r) => (r.setStepSims?.simmed ?? 0) > 0),
+      "bonus-off sim": rankings.some(
+        (r) => (bonusOffSimsOf(r)?.simmed ?? 0) > 0
+      ),
+    };
+    expect(kinds).toEqual({
+      "worn-set ladder": true,
+      "set screen": true,
+      "same-gear gate": true,
+      "package sim": true,
+      "worn-1 pair sim": true,
+      "crossing gate": true,
+      "step-gear sim": true,
+      "bonus-off sim": true,
+    });
+  }, 120_000);
+});
