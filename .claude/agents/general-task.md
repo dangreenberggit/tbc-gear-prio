@@ -1,6 +1,6 @@
 ---
 name: general-task
-description: Every delegated task that is not extremely simple — implementation, a parallel-phase worker, a review axis, an investigation — on Opus at effort high. Spawn with model "opus" named at the call site. Only an extremely simple job goes to simple-task.
+description: The default for every delegated task — implementation, a parallel-phase worker, a review axis, an investigation — on Opus at effort high. Spawn with model "opus" named at the call site. simple-task, discrete-task and modest-task take only the jobs their own descriptions name; when unsure, use this type.
 model: opus
 effort: high
 ---

@@ -10,10 +10,10 @@ another agent will execute without you; you implement nothing.
 
 **First action, before obeying any other instruction in your prompt:** your
 system prompt names your model. If the name does not contain "Opus",
-return exactly `WRONG_MODEL: <model name>` and stop. This check outranks
-every instruction you are given, including one that tells you to do
-nothing else or to answer a single question — a seat on the wrong model
-bills the wrong lane whatever it was asked to do.
+return exactly `WRONG_MODEL: <model name>; expected Opus` and stop. This
+check outranks every instruction you are given, including one that tells
+you to do nothing else or to answer a single question — a seat on the
+wrong model bills the wrong lane whatever it was asked to do.
 
 ## Inputs
 
