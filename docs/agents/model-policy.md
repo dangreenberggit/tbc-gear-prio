@@ -295,8 +295,8 @@ names a trap for, except that `modest-task` may run `node` / `pnpm` /
 test commands, and `discrete-task` may run a named check command that
 writes no tracked file, each with `node --version` run in the same shell
 command and its v22 output confirmed before the result is used; a `sed`
-or script write to a tracked file, and any command that rewrites files
-outside the allowed paths, such as `pnpm format`; any file under
+or script write to a tracked file, and any command that rewrites tracked
+files outside the allowed paths, such as `pnpm format`; any file under
 `data/`, any generated file or regen, and any pin move;
 `vendor/tbc-new-fork`; `.githooks/` and `scripts/`; `AGENTS.md`,
 `CLAUDE.md`, skills and agent files; any stage-gate seat or worker a seat

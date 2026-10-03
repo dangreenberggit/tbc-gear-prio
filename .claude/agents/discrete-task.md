@@ -24,7 +24,7 @@ the command you report, an edit against the result the prompt states.
   it writes no tracked file, such as `pnpm verify` or a named test. Run
   `node --version` in the same shell command, for example
   `node --version; pnpm verify`, and report what it prints. If it does
-  not print v22, discard that result and return
+  not print v22, discard the command's result and return
   `NEEDS_JUDGMENT: node --version printed <output>`
   (`docs/agents/known-traps.md`, "Before running node / pnpm / test
   commands").

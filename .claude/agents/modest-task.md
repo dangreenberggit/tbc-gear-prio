@@ -18,16 +18,16 @@ before it is accepted. Do the job the prompt names and nothing next to it.
 - Do the job with your own tool calls; spawn no subagents.
 - Run `node --version` in the same shell command as each `node`, `pnpm`
   or test command, for example `node --version; pnpm verify`. If it does
-  not print v22, discard that result and return
+  not print v22, discard the command's result and return
   `NEEDS_JUDGMENT: node --version printed <output>`
   (`docs/agents/known-traps.md`, "Before running node / pnpm / test
-  commands"). Such a check may write untracked cache and build files.
+  commands"). These commands may write untracked cache and build files.
 - Stop and return `NEEDS_JUDGMENT: <one line saying why>` when the job
   needs a choice the prompt did not make (between approaches, about
   whether something is correct, or about a cause not yet known), needs
   more than the size above, or needs any of: a file under `data/`; a
   generated file; a generator re-run, `pnpm format`, or any other command
-  that rewrites files outside the allowed paths; a `sed` or script write
+  that rewrites tracked files outside the allowed paths; a `sed` or script write
   to a tracked file; `vendor/tbc-new-fork`; `.githooks/`; `scripts/`;
   `AGENTS.md`, `CLAUDE.md`, a skill or an agent file. The caller respawns
   it on `general-task`.
