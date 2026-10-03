@@ -101,7 +101,8 @@ with a silent deviation is the failure.
 ## Report
 
 Final message in the shape of
-`.claude/skills/parallel-phase/handoff-template.md`, plus one section:
+`.claude/skills/parallel-phase/handoff-template.md`, plus two sections,
+the Deviation ledger and then `## Decisions`:
 
     ## Deviation ledger
     | Step | Plan said | Found | Action | Why |
@@ -110,3 +111,13 @@ An empty ledger is a claim — it asserts the diff matches the plan
 step-for-step, and the orchestrator checks it against `git diff --stat`.
 Do not merge into `dev` or `main`, and do not run `pre-merge-review` — the
 orchestrator owns the next gate.
+
+End your final message with a `## Decisions` section of at most 10
+lines, placed after everything else except a "Summary for the user":
+one line per decision a reader could not see from the rest of your
+message — an option chosen or dropped, a finding accepted or rejected, a
+deviation — written as `- <decision> — <reason, one line> — evidence:
+<file:line, command, or none>`, or the single line `- none`. A hook
+copies this section into the run log by its exact heading. It does not
+count toward any line limit on your final message, wherever that limit
+is set.
