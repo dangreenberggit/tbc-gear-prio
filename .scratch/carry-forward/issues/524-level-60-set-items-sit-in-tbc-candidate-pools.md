@@ -157,3 +157,26 @@ re-runnable command for each figure, and either a follow-up ticket for a
 fix or a recorded decision to keep the pools as they are.
 
 ## Comments
+
+**2026-10-02, ticket 532 (orchestrator ruling: note here, no new ticket).**
+The K5E C5 run (elemental shaman, phase 3) has 7 `setBonuses` entries
+with `unmeasured: "repair-failed"`. All 7 are at threshold 7, for sets
+521, 524, 525, 526, 527, 529 and 530. Each one's detail says "no legal
+recolour activates meta 34220 (Requires at least 2 Blue Gems.)". Read
+them in `.scratch/stage-gate/532-cryptstalker-crash/C5-after.json`
+(`ranking.ranking.setBonuses`, filtered to `unmeasured ==
+"repair-failed"`).
+
+- The engine writes these entries in the fork's `rank.ts:2283-2318`
+  (engine folder `ui/core/components/individual_sim_ui/upgrades/engine/`):
+  when gem repair for a set package throws, it records the skip and
+  moves on, so no sim is sent for that package. The message comes from
+  `meta-repair.ts:95`.
+- They are older than ticket 532. The same 7 entries are in the
+  pre-fix run, `.scratch/stage-gate/511-512-set-credit/k5e/results/C5.json`.
+  Both folders are gitignored.
+- Cause (hypothesis, untested): the level-60 pieces have no sockets, so
+  the gear left after a 7-piece package cannot hold the 2 blue gems the
+  meta needs.
+- If this ticket removes level-60 sets from the pools, these entries go
+  away.
