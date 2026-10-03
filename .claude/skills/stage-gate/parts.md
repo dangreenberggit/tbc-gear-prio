@@ -48,7 +48,10 @@ findings as in a revision round. Rewrite `plan.md` unless you keep it
 as it is. When you defer or bring back a chunk or part, also write
 `decomposition.md` (with `DECISION: partial` when none exists) and the
 ticket drafts. A part you bring back moves from the Deferred table to
-the Parts table, and its `ticket.md` is deleted.
+the Parts table, and its `ticket.md` is deleted. When a part you bring
+back leaves two or more planned parts, also write each planned part's
+`parts/<id>/plan.md` and give `plan.md` a `## Seams` section, as
+§ Part mode and § Reconcile mode describe.
 
 ## decomposition.md
 

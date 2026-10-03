@@ -4,12 +4,13 @@ Hook mode (no arguments). Registered twice in .claude/settings.json, both async:
 - PostToolUse on SubagentHandback: the delivered report is tool_input.message.
 - SubagentStop: last_assistant_message, for subagents that return plain text.
   For a subagent that used SubagentHandback, this is only its closing text.
-Each line also carries the agent's context-window load and a list-price cost
+Each line also has the agent's context-window load and a list-price cost
 estimate, read from its transcript.
 
 The run log is .scratch/agent-runs/<session_id>.jsonl in the checkout where
 the session started. The Decisions section and the context numbers are copied
-because Claude Code deletes transcripts after cleanupPeriodDays (default 30).
+because Claude Code deletes transcripts after cleanupPeriodDays (default 30,
+https://code.claude.com/docs/en/settings-reference.md, read 2026-10-01).
 
 Hook mode must never affect a run, so it swallows every error and exits 0.
 

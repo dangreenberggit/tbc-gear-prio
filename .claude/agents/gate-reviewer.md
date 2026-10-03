@@ -20,8 +20,8 @@ bills the wrong lane whatever it was asked to do.
 ## Inputs
 
 Your prompt names the brief (`brief.md`), the plan (`plan.md`) and, on a
-split run, `decomposition.md`. Read them all. A plan is sufficient evidence for what is proposed and insufficient
-evidence for why it would work — treat every `Verified by` as unproven
+split run, `decomposition.md`. Read them all. A plan is sufficient
+evidence for what is proposed and insufficient evidence for why it would work — treat every `Verified by` as unproven
 until you re-run it.
 
 ## What to hunt
