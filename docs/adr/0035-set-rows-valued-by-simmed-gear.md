@@ -558,7 +558,8 @@ patch, "Changes to other plan sections" item 2; C224–C229).
 - The Go sim seeds iteration i with RandomSeed + i. Two runs are independent only
   when their seeds differ by at least the iteration count (C77).
 - The tab's `DEFAULT_SEEDS` [11, 22, 33, 44, 55] overlap, so its replicates are
-  not independent (ticket 530, record only).
+  not independent (ticket 530, record only). Fixed by ticket 530, fork
+  `b1eb1de85`: the default seeds are now 11 + k × iterations.
 - Nothing in this ADR relies on a tab replicate. Every pair, gate and rung shares
   one seed on one path. The one replicate measurement, Q3-W, spaced its seeds
   1,000,000 apart.
@@ -618,7 +619,8 @@ Added since:
 - Item swap was tested with non-set items only (limit (l)).
 - Off-class Cryptstalker Armor sims fail, so those sets read "couldn't measure"
   (ticket 532). Fixed by ticket 532 at fork `55c705173`.
-- The tab's replicate seeds overlap (ticket 530).
+- The tab's replicate seeds overlap (ticket 530). Fixed by ticket 530, fork
+  `b1eb1de85`.
 - A step no longer lumps a set's gain with a broken set's loss. The owner asked
   for the design ("Yes pls.", decision-log line 214) and then decided to build it
   ("yes", decision-log line 227). Chunk K6B built it (fork `f09d218e`, main

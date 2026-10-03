@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: defect
 Origin: stage-gate 511-512-set-credit, 2026-09-28 (`.scratch/stage-gate/511-512-set-credit/decision-log.md` lines 20, 46 and 69; gitignored)
 Blocks: none
@@ -125,3 +125,168 @@ fix.
   updated for the changed files.
 - The paired se on one tab ranking is compared before and after, with a
   command a reader can re-run.
+
+## Closed 2026-10-02
+
+Plan: `.scratch/stage-gate/530-replicate-seed-overlap/plan.md` (gitignored).
+An independent reviewer passed it with inline fixes, made in this close.
+
+**The owner's go.** This ticket said "Do not start a fix from it". The
+owner's go, verbatim, on 2026-10-02: "id rather wait and handle the issues
+generated in the handoff", and then "Otherwise tickets now. Use our
+orchestration system". The handoff they answered,
+`.scratch/handoffs/511-512-merge-ask-HANDOFF.md` (untracked), lists 530.
+
+Fork commit (`dangreenberggit/tbc-new`, branch `feat/upgrades-tab`):
+
+- `b1eb1de85` Space the tab's replicate seeds (530). `engine/se.ts` is
+  now a byte copy of core `packages/core/src/se.ts`, which adds
+  `replicateSeeds` and the two-argument `assertUsableSeeds(seeds,
+  iterations)`. `engine/rank.ts` replaces `DEFAULT_SEEDS` with core's
+  `defaultSeedsFor(iterations)` = `replicateSeeds(11, 5, iterations)` and
+  passes `iterations` to the guard. The PROVENANCE rows move for both
+  files.
+
+Main re-pin: `00119171` Re-pin fork to b1eb1de85 for ticket 530. It moves
+the lock, regenerates `data/sim-implemented-effects.json` (`forkCommit`
+only), and changes the tests.
+
+Tests, in `packages/core/test/fork-set-net.test.ts`:
+
+- **530-D:** with no seeds, the five replicates run at
+  11 + k × iterations. At 3000 iterations the sims use exactly the seeds
+  11, 3011, 6011, 9011 and 12011, and `assumptions.seeds` says the same.
+- **530-G:** seeds closer than the iteration count are refused. `[11, 22]`
+  at 3000 rejects with a `RankError` of kind `internal` whose message
+  says "at least 3000 apart". `[11, 3011]`, the spacing E-W3 uses,
+  completes.
+- **533-R** moves from seeds `[11, 22, 33]` to `[11, 5011, 10011]`,
+  because the guard refuses the old seeds at the suite's 5000 iterations.
+
+Red outputs, before each fix
+(`npx vitest run packages/core/test/fork-set-net.test.ts -t "530"`, rc=1
+each time):
+
+- 530-D: "expected [ 11, 22, 33, 44, 55 ] to deeply equal [ 11, 3011,
+  6011, 9011, 12011 ]".
+- 530-G: "expected undefined to match object { name: 'RankError', kind:
+  'internal' }". `[11, 22]` resolved.
+
+Checks, Node v22.17.1:
+
+- `npx vitest run packages/core/test/wowsims-fork-parity.test.ts`: rc=0
+  (E-W3) before the hashes moved.
+- The fork-gated suites (the ten files
+  `grep -l forkPresent packages/core/test/*.test.ts` lists): rc=0, 135
+  passed, 1 skipped, both before the fork commit and at the re-pin.
+- `cmp packages/core/src/se.ts vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/se.ts`:
+  rc=0.
+- `python scripts/check_engine_port_drift.py`: rc=0.
+- `python scripts/check_fork_lint.py`: rc=0 at the re-pin.
+- `pnpm verify`: rc=0.
+
+**Before and after, live.** Both recordings ran on one backend binary,
+built at fork `55c705173` and left running between them, since this
+ticket changes no Go code. "Before" was at fork `55c705173`, "after" at
+`b1eb1de85`:
+
+```
+corepack pnpm tab-fixtures:record --spec feral --phase 3 --name p2bis --preset-tab "Phase 2" --preset "BiS 6%" --expect-gear-file ui/druid/feralcat/gear_sets/p2_6p.gear.json --out .scratch/stage-gate/530-replicate-seed-overlap/before
+corepack pnpm tab-fixtures:record --spec feral --phase 3 --name p2bis --preset-tab "Phase 2" --preset "BiS 6%" --expect-gear-file ui/druid/feralcat/gear_sets/p2_6p.gear.json --out .scratch/stage-gate/530-replicate-seed-overlap/after
+python .scratch/stage-gate/530-replicate-seed-overlap/compare.py .scratch/stage-gate/530-replicate-seed-overlap/before/feral-p3-p2bis.json .scratch/stage-gate/530-replicate-seed-overlap/after/feral-p3-p2bis.json
+```
+
+Its output, verbatim:
+
+```
+seeds [11, 22, 33, 44, 55] -> [11, 3011, 6011, 9011, 12011]
+replicated rows 8 same in both: True
+Band of the Eternal Champion       delta     4.75 ->     6.09   se 0.044 -> 0.636
+Everbloom Idol                     delta    43.33 ->    43.44   se 0.036 -> 0.382
+Shady Dealer's Pantaloons          delta     8.72 ->     7.70   se 0.028 -> 0.575
+Idol of the White Stag             delta    16.73 ->    16.84   se 0.036 -> 0.369
+Insidious Bands                    delta     6.82 ->     7.29   se 0.036 -> 0.220
+Shadowmaster's Boots               delta    10.83 ->    12.93   se 0.051 -> 0.925
+Vengeful Gladiator's Staff         delta    47.74 ->    48.20   se 0.039 -> 0.186
+Vindicator's Dragonhide Bracers    delta    14.72 ->    14.84   se 0.038 -> 0.402
+geomean se ratio 10.73
+other rows differing on ('deltaDps', 'se', 'seMethod', 'belowCutoff') : 0 []
+rest of ranking equal: True
+```
+
+`compare.py`, because `.scratch/stage-gate/` is gitignored:
+
+```python
+import json, math, sys
+b, a = (json.load(open(p, encoding="utf-8"))["ranking"] for p in sys.argv[1:3])
+print("seeds", b["assumptions"]["seeds"], "->", a["assumptions"]["seeds"])
+bi = {i["itemId"]: i for i in b["items"]}; ai = {i["itemId"]: i for i in a["items"]}
+assert bi.keys() == ai.keys(), "row sets differ"
+rep = sorted(k for k in bi if "paired-replicate" in (bi[k].get("seMethod"), ai[k].get("seMethod")))
+same8 = all(bi[k].get("seMethod") == ai[k].get("seMethod") == "paired-replicate" for k in rep)
+print("replicated rows", len(rep), "same in both:", same8)
+logs = []
+for k in rep:
+    x, y = bi[k], ai[k]
+    if x["se"] > 0: logs.append(math.log(y["se"] / x["se"]))
+    print(f'{x["name"][:34]:34} delta {x["deltaDps"]:8.2f} -> {y["deltaDps"]:8.2f}   se {x["se"]:.3f} -> {y["se"]:.3f}')
+print("geomean se ratio", round(math.exp(sum(logs) / len(logs)), 2))
+F = ("deltaDps", "se", "seMethod", "belowCutoff")
+other = [k for k in bi if k not in rep and any(bi[k].get(f) != ai[k].get(f) for f in F)]
+print("other rows differing on", F, ":", len(other), other[:10])
+skip = {"items", "contentHash", "assumptions", "plausibilityWarnings"}
+rest = all(b.get(key) == a.get(key) for key in set(b) | set(a) if key not in skip)
+ab = {k: v for k, v in b["assumptions"].items() if k != "seeds"}
+aa = {k: v for k, v in a["assumptions"].items() if k != "seeds"}
+print("rest of ranking equal:", rest and ab == aa)
+```
+
+What the comparison shows:
+
+- The paired `se` of the top 8 rows grew by a geometric mean of 10.73×.
+  A model predicted √(3000/22) ≈ 11.7× (plan claim C4; it assumes
+  per-iteration values are independent given the seed). Each row's `se`
+  comes from only five deltas, so the per-row ratios scatter, from 4.8
+  (Vengeful Gladiator's Staff) to 20.7 (Shady Dealer's Pantaloons).
+- **Correction to this ticket's premise: `deltaDps` also changes on those
+  8 rows,** not only `se`. Replication overwrites each row's `deltaDps`
+  with the mean of its five deltas. Taken from the unrounded values, the
+  deltas moved by −1.02 to +2.09 DPS (the largest: Shadowmaster's Boots,
+  10.834 → 12.926). No row changed position, `rank` or `belowCutoff` in
+  this ranking.
+- Every row outside the top 8 is identical before and after, and so is
+  the rest of the ranking. So on this run the tab was deterministic at a
+  fixed seed.
+
+**Deviation: the visual check.** The plan asked for the assumptions
+drawer to list the new seeds. Fork `141786023` ("Demote the assumptions
+block to a console log", ticket 318) removed that drawer. Its seed list
+now goes to `console.info` through `logAssumptions`
+(`upgrades_tab.tsx:3566`, seeds line `:3577`), and only a real run calls
+it, not a fixture load. So the seeds were checked from the "after"
+recording's `ranking.assumptions.seeds`. That is the same object, because
+`scripts/tab-fixtures/record.mjs:305-318` reads it from
+`window.__upgradesRanking()` on the page after the run. On :5173 with
+`?upgrades-dev`, the "after" recording loaded through **Load fixture**,
+and its rows drew with the "after" deltas and no error text.
+
+**A note on the plan's reviewer check R3.3.** Restoring the one-argument
+`assertUsableSeeds(seeds)` call against the copied `se.ts` makes
+`iterations` undefined, so the guard refuses every multi-seed list. 530-G
+then fails on its `[11, 3011]` boundary half, which is not the defect it
+pins. A mutation that disables only the spacing check is the real test of
+530-G.
+
+**Not done here:**
+
+- The five committed fixtures under `data/tab-fixtures/` were not
+  re-recorded. `pnpm tab-fixtures:check` only warns, and now lists
+  `engine/se.ts` among each fixture's changed inputs. The layout gate
+  draws a recorded fixture and runs no sim (plan claim C13).
+- Two fork tool files still name `DEFAULT_SEEDS` in comments. They are
+  recorded as an item on ticket 513.
+- Ticket 236 stays open for its own two partial boxes. This close does
+  not touch it.
+
+**Review rows.** `grep -rn "530-tab-replicate" docs/reviews/` prints
+nothing, so no Disposition row defers to this ticket.

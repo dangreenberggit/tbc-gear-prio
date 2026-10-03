@@ -5082,7 +5082,7 @@ describe.skipIf(!forkPresent)("Replicate seeds (530)", () => {
     ]);
   }, 120_000);
 
-  it("530-G: seeds closer than the iteration count are refused before any sim", async () => {
+  it("530-G: seeds closer than the iteration count are refused", async () => {
     const err: unknown = await runScenario({
       ...SR_SCENARIO,
       seeds: [11, 22],

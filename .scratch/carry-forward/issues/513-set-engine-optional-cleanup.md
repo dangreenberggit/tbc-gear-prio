@@ -70,3 +70,16 @@ it stays. An engine change needs the PROVENANCE cycle in
   - **ST11.** `PartnerRule` keeps "sum-of-singles-plain" and "single-swap"
     for scoring only, and `setScreen` "off"/"record" are reachable only
     through the dev check hooks.
+- 2026-10-02, independent review of ticket 530 (fork `b1eb1de85`), finding
+  F1. Ticket 530 removed `DEFAULT_SEEDS` from fork `engine/rank.ts`, but
+  two fork tool comments still name it:
+  - `upgrades/tools/equiv-campaign.mts`, in the comment above the
+    `rankUpgrades` call that says the engine reads
+    `input.seeds ?? DEFAULT_SEEDS`;
+  - `upgrades/tools/run-tab-cdp.mjs`, in the comment that calls 11 the
+    tab's baseline seed (`DEFAULT_SEEDS[0]`).
+
+  Fix: reword the first to `input.seeds ?? defaultSeedsFor(iterations)`
+  and the second to `DEFAULT_SEED_BASE`, and drop the `rank.ts` line
+  numbers both comments cite. Comment-only, in files outside `engine/`,
+  so no PROVENANCE row moves; it still needs a fork commit and a re-pin.
