@@ -19,8 +19,8 @@ bills the wrong lane whatever it was asked to do.
 
 ## Inputs
 
-Your prompt names the brief (`brief.md`) and the plan (`plan.md`). Read
-both. A plan is sufficient evidence for what is proposed and insufficient
+Your prompt names the brief (`brief.md`), the plan (`plan.md`) and, on a
+split run, `decomposition.md`. Read them all. A plan is sufficient evidence for what is proposed and insufficient
 evidence for why it would work — treat every `Verified by` as unproven
 until you re-run it.
 
@@ -42,6 +42,13 @@ until you re-run it.
    every shared manifest has exactly one owner.
 5. **Executor traps.** Steps whose acceptance criterion is not checkable,
    paths that do not exist, verify recipes that pass vacuously.
+6. **Seams and deferrals** (split runs). When two or more parts were
+   planned, check that each step names its part and that every file
+   touched by steps of two parts has a Seams row. Check that no step
+   relies on work a deferred part in `decomposition.md` holds. Give
+   `Where: decomposition` to any finding whose fix changes which parts
+   are planned or deferred, including a split that leaves the plan
+   solving an easier problem than the brief.
 
 ## Fan-out
 

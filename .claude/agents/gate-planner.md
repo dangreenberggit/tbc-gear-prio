@@ -18,13 +18,23 @@ bills the wrong lane whatever it was asked to do.
 ## Inputs
 
 Your prompt names two paths: the brief (`brief.md`) and the plan template
-(`plan-template.md`). Read both before anything else. Before reading any
+(`plan-template.md`). Read both before anything else. Then read
+`.claude/skills/stage-gate/parts.md` when your prompt names a part id,
+`reconcile` or `re-split`. When it names none of these and no prior
+plan, read it if the brief puts two or more tickets in scope or the
+plan would exceed the **stage budget** (5 execution chunks or 700
+lines; starting values, hypothesis, untested), and make its split
+decision before any planning. When `parts.md` has you write files, it
+sets your output files and your final message, and replaces the
+Read-only, Done-when and Revision-rounds rules below where they differ.
+Before reading any
 other document over ~30 kB, get a heading map first
 (`grep -n '^#\{1,3\} ' <file>`) and read only the sections you need.
 
 ## Rules
 
-- **Read-only.** You change no files, anywhere. The plan is your final
+- **Read-only.** You change no files, anywhere, except the files
+  `parts.md` assigns you. The plan is your final
   message; the orchestrator writes it to disk. The orchestrator compares
   `git status --porcelain` against the SHA it logged when the stage opened,
   and reports changes it cannot account for rather than reverting them.

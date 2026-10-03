@@ -97,8 +97,8 @@ not` list below.
 ## Steps
 
 1. **Open the stage.** Pick `<slug>`; create `.scratch/stage-gate/<slug>/`;
-   write `brief.md` — goal, constraints, and what done means, in terms the
-   planner can plan against. Start `decision-log.md` (one dated line per
+   write `brief.md` — goal, the tickets in scope, constraints, and what
+   done means, in terms the planner can plan against. Start `decision-log.md` (one dated line per
    gate: gate, outcome, reason, round count; step 5 adds lines per chunk
    and per question). Confirm
    `git status --porcelain` is empty and record `git rev-parse HEAD` in
@@ -117,23 +117,53 @@ not` list below.
    open question carries those three items, the tree is clean, and the SHA
    is logged.
 
-2. **Plan.** Spawn `gate-planner` (`model: "opus"`) with the absolute
-   paths of `brief.md` and
-   `.claude/skills/stage-gate/plan-template.md`. Write its final message
-   to `plan.md` verbatim.
+2. **Plan.** Every `gate-planner` spawn (`model: "opus"`) names the
+   absolute paths of `brief.md`,
+   `.claude/skills/stage-gate/plan-template.md` and the stage folder.
+   Spawn one. When it returns a plan, write it to `plan.md` verbatim.
+   When its final message starts with `DECISION:`, it has split the
+   brief and written its files itself: this is a **split run**, marked
+   by a `decomposition.md` in the stage folder. When the Parts table
+   there has more than one part, spawn one `gate-planner` with
+   `part: <id>` for each part after `P1`, in order and one at a time;
+   then one with `reconcile`, which writes `plan.md`. Write a `started`
+   line before every `gate-planner` spawn.
+   When a planner's final message lists "Open questions", put them to
+   the user before the next spawn and send the answers back to that
+   planner (`SendMessage` it, or respawn it in the same mode with the
+   answers). There is one round of answers.
 
    **Gate A (mechanical):** every template section present; Claims
    register nonempty; Paths manifest present; every open question in the
-   brief answered with its three items; `git status --porcelain`
-   still empty. Compare against the SHA logged in step 1.
+   brief answered with its three items, or assigned to a deferred part;
+   `git status --porcelain` still empty. Compare against the SHA logged in step 1.
    New changes mean the seat edited files: **stop and report them to the
    user** — never revert, because another agent's live work looks identical
-   from here (ticket 261). Respawn once with the violation named. One respawn per gap; a second failure goes to the
-   user. Log the outcome.
+   from here (ticket 261). Respawn once with the violation named (on a
+   split run, `gate-planner` with `re-split: gate A`). One respawn per
+   gap; a second failure goes to the user. Log the outcome.
+
+   On a split run, Gate A also checks: `decomposition.md` has a
+   `DECISION:` line and a Why; when two or more parts were planned,
+   every planned part has its `parts/<id>/plan.md` and `plan.md` has a
+   Seams section; every deferred part has its `parts/<id>/ticket.md`.
+
+   When `plan.md` is over the stage budget (more than 5 execution chunks
+   or 700 lines; starting values, hypothesis, untested), spawn
+   `gate-planner` once per stage, before the review, with
+   `re-split: over budget`; it rewrites `plan.md` itself. Then run Gate
+   A on the result.
+
+   Deferrals made at the first split stand, and the reviewer checks
+   them. A deferral made by a re-split, and any open question of the
+   brief assigned to a deferred part, goes to the user before Gate B
+   passes. If the user rejects one, spawn `gate-planner` with
+   `re-split: ruling` and the ruling; it rewrites `plan.md` itself, and
+   that is one revision round.
 
 3. **Review.** Spawn `gate-reviewer` (`model: "opus"`) with the paths of
-   `brief.md` and `plan.md`. Write its final message to `plan-review.md`.
-   Same clean-tree check.
+   `brief.md`, `plan.md` and, on a split run, `decomposition.md`. Write
+   its final message to `plan-review.md`. Same clean-tree check.
 
 4. **Gate B (judgment — yours).** Reconcile each finding against the
    brief's intent — a finding can be correct about the plan and wrong
@@ -145,11 +175,22 @@ not` list below.
      round is the norm.** Loop back again only while a `blocking` finding
      still stands after the revision; a third disagreement goes to the
      user with the contradiction stated, not resolved.
+   - On a split run, when a `blocking` or `material` finding has
+     `Where: decomposition`, the round's revision is one `gate-planner`
+     (`model: "opus"`) with `plan-review.md` and `re-split: review`. It
+     handles every finding and rewrites `plan.md` itself. Every other
+     revision prompt on a split run says: keep each step's part id and
+     the `## Seams` section.
    - Proceed when: no blocking finding stands; every `material` finding is
      fixed in the plan or accepted in `decision-log.md` with a reason;
      `minor` findings ride along to the executor as advisories.
    - A seat contradiction you cannot settle by having a subagent re-run a
      command is the user's call. Log every gate outcome.
+   - When `decomposition.md` lists deferred parts, after Gate B passes
+     spawn one `general-task` (`model: "opus"`) to file the
+     `parts/<id>/ticket.md` of each part in the Deferred table as a
+     ticket per `docs/agents/issue-tracker.md` and commit them. Log
+     their ids and the new `git rev-parse HEAD`.
 
 5. **Execute.** Run one `gate-executor` (`model: "opus"`) per execution
    chunk, in order. A plan whose `Execution chunks` section is missing or
@@ -209,7 +250,9 @@ not` list below.
 
 7. **Hand off.** The normal loop resumes: `pre-merge-review`, then **ask**
    before `pnpm merge-to-dev`. Stage artifacts stay in
-   `.scratch/stage-gate/<slug>/`.
+   `.scratch/stage-gate/<slug>/`. Name any deferred-part tickets in the
+   reply, and say they are visible from `dev` only after this branch
+   merges.
 
 ## Recovery
 
@@ -220,7 +263,9 @@ respawn, run `git status --porcelain` and `git rev-parse HEAD`: pass the
 fresh SHA, and name any dirty paths in the prompt as probably the
 earlier executor's unfinished work. Every stage artifact is on disk the
 moment its stage ends, so a fresh session resumes from
-`decision-log.md`: the last logged gate is where you are.
+`decision-log.md`: the last logged gate is where you are. In a fresh
+session, a planner spawn with a `started` line and no `returned` line
+after it was cut off: respawn it in the same mode.
 
 ## Do not
 
