@@ -206,9 +206,12 @@ takes a small job"). If you are unsure, spawn `general-task`. A
 `NEEDS_JUDGMENT`, or a `discrete-task` that returns `WRONG_MODEL`, is
 respawned on `general-task` with the same prompt. A `design-task` that
 returns `WRONG_MODEL` is respawned on `design-task` with the model the
-return says it expected. Spawn these types in place of the built-in
-`Explore`, `general-purpose` and `Plan` types. You cannot set the built-ins' effort at the call site, and
-whether they pin an effort of their own is unverified. If the harness does
+return says it expected. A second `WRONG_MODEL` from the same job goes to
+the owner, not to another respawn: the check has rejected a correct Opus
+spawn before (ticket 252). Spawn these types in place of the built-in
+`Explore`, `general-purpose` and `Plan` types. You cannot set the
+built-ins' effort at the call site, and whether they pin an effort of
+their own is unverified. If the harness does
 not recognize one of these types, restart the session rather than falling
 back to a built-in.
 
@@ -255,14 +258,17 @@ where the worker decides what the code does is `modest-task` work at
 least. For commands: a named check that writes no tracked file
 (`pnpm verify`, a named test), run and reported with its exit code, is
 `discrete-task` work. A generator re-run, or any command that rewrites a
-committed file, is `general-task` work.
+committed file, is `general-task` work. That `pnpm verify` writes no
+tracked file was checked on 2026-10-03: `git status --porcelain
+--untracked-files=no` printed nothing after a run. Check again when
+verify gains a step.
 
 **Modest.** A job is modest only when all four hold:
 
 1. The prompt names the files to change and what the result must do. It
    leaves no choice between approaches open.
-2. The change is small: at most 3 files and 150 changed lines in
-   `git diff --stat`.
+2. The change is small: at most 3 files and 150 changed lines, new
+   files included.
 3. The result is checked before it is accepted. The caller reads the diff
    and runs a check the prompt names (`pnpm verify`, a named test). When
    the caller is the interactive session, a `general-task` verifier does
@@ -287,13 +293,15 @@ visual judgment); planning or architecture; debugging; a question whether
 something exists or is absent; any action `docs/agents/known-traps.md`
 names a trap for, except that `modest-task` may run `node` / `pnpm` /
 test commands, and `discrete-task` may run a named check command that
-writes no tracked file, each after `node --version` prints v22; any file
+writes no tracked file, each after `node --version` prints v22 in the
+same shell command; any file
 under `data/`, any generated file or regen, and any pin move;
 `vendor/tbc-new-fork`; `.githooks/` and `scripts/`; `AGENTS.md`,
 `CLAUDE.md`, skills and agent files; any stage-gate seat or worker a seat
 spawns; any `parallel-phase` worker; and any job moved off `general-task`
 because of a wall (§ Three lanes). The two trial agent files repeat a
-short form of this list; change all three together.
+short form of this list, because a worker reads only its own agent file;
+change all three together.
 
 **Measuring.** A spawn's `agentType` is in
 `~/.claude/projects/<project-dir>/<session>/subagents/*.meta.json`; the
