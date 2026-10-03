@@ -1,12 +1,11 @@
 /**
  * A brute-force check of the fork's exact meta repair (ticket 535).
  *
- * Test support, not a test file. It writes the repair's value V and its six
- * conditions again from their definitions in
- * `.scratch/stage-gate/535-meta-repair-hit/plan.md`, Appendices A and C
- * (gitignored; ticket 535's comment holds the measurements), and finds the
- * best layout by trying every one. It calls only the fork's lookups and
- * colour rules (`getItem`, `getGem`, `socketBonusActive`, `gemColorCounts`,
+ * Test support, not a test file. It writes again, apart from the fork, the
+ * repair's value V (`repairValue`) and the six conditions a repair must meet
+ * (each stated where `bruteForceBestValue` checks it), and finds the best
+ * layout by trying every one. Ticket 535's comment holds the measurements. It
+ * calls only the fork's lookups and colour rules (`getItem`, `getGem`, `socketBonusActive`, `gemColorCounts`,
  * `isMetaConditionMet`), never the repair code it checks.
  */
 

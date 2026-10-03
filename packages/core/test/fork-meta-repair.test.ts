@@ -2,7 +2,7 @@
  * Meta repair with a hit budget and an exact search (ticket 535), on the
  * fork's ported engine.
  *
- * The fork's repair now picks, by exact search, the best set of recolours that
+ * The fork's repair picks, by exact search, the best set of recolours that
  * switches the meta back on, counting every socket bonus the recolours switch
  * on or off. On ret and feral, when the runner can read character stats, hit
  * counts only up to the character's remaining hit cap. These cases check that
@@ -11,8 +11,7 @@
  * (`.scratch/carry-forward/issues/535-meta-repair-may-add-dead-hit-gems-to-set-gear.md`),
  * and against a brute force written in test code (`meta-repair-oracle.ts`).
  *
- * The plan is `.scratch/stage-gate/535-meta-repair-hit/plan.md` (gitignored);
- * each case names its test id from it. Skips when the fork clone is absent
+ * Each case names its ticket 535 test id. Skips when the fork clone is absent
  * (`vendor/` is gitignored), like the other fork-gated suites.
  */
 
@@ -556,7 +555,8 @@ describe.skipIf(!forkPresent)("exact repair (535)", () => {
 
   it("535-R4: the budget caps the layout's total hit: Burning Rage's package gets one Rigid and one Inscribed", async () => {
     // remaining = −4.69 − (38 − 52) = 9.31: two Rigid score 4.02, one of each
-    // 8.28, two Inscribed −1.84 (plan Appendix A). One of each was also the
+    // 8.28, two Inscribed −1.84 (V, as `meta-repair-oracle.ts` defines it).
+    // One of each was also the
     // best measured set-less layout.
     const { e, equipment, capped } = await retCapped();
     const shoulders = e.rank.candidateSwapWithRepairs(
@@ -671,7 +671,7 @@ function indicesForItemType(itemType: number): number[] {
   return [];
 }
 
-/** The fixtures in the order the plan's tables list them. */
+/** The fixtures in the order ticket 535's probe table lists them. */
 const O1_FIXTURES = [
   "ret-p3-p2",
   "feral-p2-malorne4",
@@ -680,7 +680,10 @@ const O1_FIXTURES = [
   "feral-p3-th-hands-legs",
 ] as const;
 
-/** Each fixture's baseline gear hit (plan Appendix B). */
+/**
+ * Each fixture's baseline gear hit (ticket 535, § Baseline and swapped-gear
+ * hit).
+ */
 const O1_BASE_HIT: Record<(typeof O1_FIXTURES)[number], number> = {
   "ret-p3-p2": 52,
   "feral-p2-malorne4": 96,
@@ -689,7 +692,10 @@ const O1_BASE_HIT: Record<(typeof O1_FIXTURES)[number], number> = {
   "feral-p3-th-hands-legs": 148,
 };
 
-/** Row repairs per fixture, as the probes counted them (plan Appendix D). */
+/**
+ * Row repairs per fixture, as the probes counted them (ticket 535, § The
+ * probes).
+ */
 const O1_ROW_REPAIRS: Record<(typeof O1_FIXTURES)[number], number> = {
   "ret-p3-p2": 54,
   "feral-p2-malorne4": 2,
@@ -713,7 +719,7 @@ const O1_PACKAGE_REPAIRS: Record<(typeof O1_FIXTURES)[number], string[]> = {
 
 /**
  * Deficit counts over each fixture's row repairs plus its named package
- * repairs (plan Appendix D's table; rev 6.1, F4).
+ * repairs (ticket 535, § The probes).
  */
 const O1_DEFICITS: Record<
   (typeof O1_FIXTURES)[number],
@@ -785,8 +791,8 @@ const isLayout = (
 describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
   it("535-O1: every measured repair, through the tab's own swap path, is the best minimal set", async () => {
     // Oracle: the brute force for the search; the probes for the counts
-    // (plan Appendix D); probe 222 for the work (at most 1,343,593, under
-    // the limit of 5,000,000).
+    // (ticket 535, § The probes); probe 222 for the work (at most
+    // 1,343,593, under the limit of 5,000,000).
     const e = await engine();
     const fork = oracleFork(e);
     const t0 = performance.now();
@@ -1478,7 +1484,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
   it("535-V1: the set-kept version drops the dead Rigid; the set-less version keeps one", async () => {
     // Oracle: the kept budget is 9.31 − 20 = −10.69, where two Inscribed win;
     // the set-less budget is 9.31, where one Rigid and one Inscribed win
-    // (plan Appendix A); both were the best measured layouts.
+    // (535-R4's scores); both were the best measured layouts.
     const run = await brRun(20);
     expectOwnLayouts(run.requests);
   });
@@ -1498,7 +1504,8 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
   });
 
   it("535-V3: one stats read per distinct request", async () => {
-    // Oracle: the per-request cache (plan § Approach, Part 3, rule 2). V6's
+    // Oracle: the set phase reads each distinct request's stats once and
+    // reuses the read for a repeat of the same request. V6's
     // run is checked in 535-V6, which builds a step's version twice.
     const run = await brRun(20);
     const keys = run.statsRequests.map(gearKey);
@@ -1506,7 +1513,9 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
   });
 
   it("535-V4: the first failed version read ends version budgets and caches no ranking", async () => {
-    // Oracle: rule 6.
+    // Oracle: the first failed version read turns version budgets off for
+    // the rest of the run, so every later version uses the shared layout,
+    // and the ranking is not cached.
     const store = await newStore();
     const stats = await scriptedStats({
       baselineGearHit: 52,
@@ -1554,7 +1563,8 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
   });
 
   it("535-V5: a Stop during a set-phase sim stops the version reads, with no warning", async () => {
-    // Oracle: rule 7.
+    // Oracle: after Stop the guard refuses each version read, and a refused
+    // read is no failure to warn about.
     const controller = new AbortController();
     let readsAfterAbort = 0;
     const stats = await scriptedStats({
@@ -1594,9 +1604,8 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
   });
 
   it("535-V6: the step after a rebuilt step keeps its break split", async () => {
-    // Oracle: plan § Approach, Part 3, "The step break split keeps its
-    // pairing": `plain` is the request the first step simmed, so the store
-    // holds it.
+    // Oracle: the step break split keeps its pairing: `plain` is the
+    // request the first step simmed, so the store holds it.
     const s = await stepScenario("V6");
     const e = s.e;
     const hands = SIM_ORDER.indexOf("hands");
@@ -1651,11 +1660,11 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     expect(new Set(keys).size).toBe(keys.length);
   });
 
-  it("535-V7: a first step whose gear before carries set hit the candidate loop missed is skipped, not mismeasured", async () => {
-    // Oracle: plan § Approach, Part 3, first step (rev 6.1, F1): the row's
-    // single swap completes Justicar 2pc, whose hit the candidate loop's
-    // budget missed, so `versionGears`' entry 0 is a rebuild the candidate
-    // loop never simmed, and the split is skipped.
+  it("535-V7: a first step whose gear before has set hit the candidate loop missed is skipped, not mismeasured", async () => {
+    // Oracle: a first step's split pairs with the candidate loop's sim.
+    // Here the row's single swap completes Justicar 2pc, whose hit the
+    // candidate loop's budget missed, so `versionGears`' entry 0 is a
+    // rebuild the candidate loop never simmed, and the split is skipped.
     const s = await stepScenario("V7");
     const e = s.e;
     const legs = SIM_ORDER.indexOf("legs");
@@ -1732,8 +1741,8 @@ const V_BONUS_HIT = 40;
 /**
  * The set phase's DPS: 2000, each piece's own value (a copy counts as its
  * item), and each set's bonus by counted pieces (a real piece or a set-kept
- * copy): Justicar 2pc 50 and 4pc 80, Burning Rage 2pc 90. Values follow
- * 511-PS's shape (Pauldrons 8, Chestguard 12, Gauntlets 6, Leggings −12).
+ * copy): Justicar 2pc 50 and 4pc 80, Burning Rage 2pc 90. The pieces' own
+ * values are 511-PS's (Pauldrons 8, Chestguard 12, Gauntlets 6, Leggings −12).
  */
 async function stepDps() {
   const e = await engine();
