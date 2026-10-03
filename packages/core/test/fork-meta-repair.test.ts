@@ -992,6 +992,7 @@ type RunRanking = {
   items: RankedRow[];
   setBonusOffSims?: { skippedSteps: number; gears: number };
   setScreen?: { sets: Array<{ setId: number; pair: { dps?: number } }> };
+  substitutions: Array<{ field: string; detail: string }>;
 };
 
 const retSkeleton = JSON.parse(
@@ -1036,6 +1037,8 @@ type RetRun = {
   measureBrokenSetValue?: boolean;
   setScreen?: string;
   controller?: AbortController;
+  /** The raid sim skeleton; defaults to the ret P2 preset's. */
+  skeleton?: RaidSimRequest;
   /** Called with each request `run` receives, before it answers. */
   onRun?: (req: RaidSimRequest) => void;
 };
@@ -1130,7 +1133,7 @@ async function runRet(o: RetRun) {
       sim,
       store: o.store ?? new storeMod.MemoryStore(),
       clock: () => new Date("2026-10-03T12:00:00.000Z"),
-      raidSimSkeleton: retSkeleton,
+      raidSimSkeleton: o.skeleton ?? retSkeleton,
       epWeights: retWeights,
       pool,
       ...(o.measureBrokenSetValue ? { measureBrokenSetValue: true } : {}),
@@ -1181,6 +1184,10 @@ const S_POOL = [
   { itemId: 32365, slot: "chest" }, // Heartshatter Breastplate, over the cap
   { itemId: 30907, slot: "chest" }, // Mail of Fevered Pursuit, under it
 ];
+
+/** The `substitutions` fields that say repair could not use the hit cap. */
+const HIT_CAP_NOTE = "gems.meta-repair-hit-cap";
+const SET_VERSION_NOTE = "gems.meta-repair-set-versions";
 
 describe.skipIf(!forkPresent)(
   "rankUpgrades reads the baseline hit (535)",
@@ -1255,6 +1262,58 @@ describe.skipIf(!forkPresent)(
       for (const c of capped) {
         expect(c).toEqual([`${BOLD}->${INSCRIBED}`, `${BOLD}->${INSCRIBED}`]);
       }
+    });
+
+    it("535-S4: a failed read tells the ranking that repair used full weight; a good read does not", async () => {
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      let failed;
+      try {
+        failed = await runRet({
+          pool: S_POOL,
+          computeStats: () => Promise.reject(new Error("worker died")),
+        });
+      } finally {
+        warn.mockRestore();
+      }
+      const notes = failed.ranking.substitutions.filter(
+        (s) => s.field === HIT_CAP_NOTE
+      );
+      expect(notes).toHaveLength(1);
+      expect(notes[0]!.detail).toMatch(/full weight/);
+      expect(notes[0]!.detail).toMatch(/worker died/);
+
+      const good = await runRet({
+        pool: S_POOL,
+        computeStats: baselineReadOnce(),
+      });
+      expect(
+        good.ranking.substitutions.filter((s) => s.field === HIT_CAP_NOTE)
+      ).toEqual([]);
+    });
+
+    it("535-S5: a target that is not level 73 gives no budget, and the ranking says repair used full weight", async () => {
+      const skeleton = structuredClone(retSkeleton) as {
+        encounter: { targets: Array<{ level: number }> };
+      };
+      for (const t of skeleton.encounter.targets) t.level = 72;
+      const run = await runRet({
+        pool: S_POOL,
+        skeleton,
+        computeStats: baselineReadOnce(),
+      });
+      for (const chestId of [32365, 30907]) {
+        const changes = chestRequestChanges(run.requests, run.worn, chestId);
+        expect(changes.length).toBeGreaterThan(0);
+        for (const c of changes) {
+          expect(c).toEqual([`${BOLD}->${RIGID}`, `${BOLD}->${RIGID}`]);
+        }
+      }
+      const notes = run.ranking.substitutions.filter(
+        (s) => s.field === HIT_CAP_NOTE
+      );
+      expect(notes).toHaveLength(1);
+      expect(notes[0]!.detail).toMatch(/full weight/);
+      expect(notes[0]!.detail).toMatch(/level 73/);
     });
   }
 );
@@ -1471,6 +1530,14 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     }
     expect(failed.ranking.complete).toBe(true);
     expect(failed.statsRequests).toHaveLength(2);
+    const notes = failed.ranking.substitutions.filter(
+      (s) => s.field === SET_VERSION_NOTE
+    );
+    expect(notes).toHaveLength(1);
+    expect(notes[0]!.detail).toMatch(/worker died/);
+    expect(
+      failed.ranking.substitutions.filter((s) => s.field === HIT_CAP_NOTE)
+    ).toEqual([]);
     const { kept, setLess } = brVersions(failed.requests);
     expect(kept.length).toBeGreaterThan(0);
     for (const k of kept) {
