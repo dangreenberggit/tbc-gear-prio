@@ -205,3 +205,19 @@ run `pnpm tab-fixtures:smoke`, which starts `:5173` when the port is free and
 stops only a server it started. Recording one needs both ports, because it is
 a real run. A fixture load never shows "Took": no run happened, so wait for
 result rows and no stale banner instead. See `data/tab-fixtures/README.md`.
+
+## Before writing a `pnpm tab-review` manifest
+
+**Symptom when armed:** in a `pane: false` entry with a hover, every clip
+after `capture[0]` shows the tab's nav bar instead of its target, and
+`index.json` reports no error (ticket 536's row clips, `*-1.png`).
+
+`capture[0]` is clipped where it stands, so a hovered tooltip stays open
+for it. Each later capture goes through the scroll branch of `captureClip`
+in the fork's `test-review.mjs`, which offsets the clip by `window.scrollY`.
+Hypothesis, untested: the page scrolls an inner container, so
+`window.scrollY` stays 0 and the clip lands at the top of the page. Make
+each element `capture[0]` of its own entry: one entry for the popover, one
+for the row. The row entry in
+`.scratch/stage-gate/494-set-hover-redo/out/current-popover/manifest-rows.json`
+(gitignored) hovers the row's first cell and captures only the row.
