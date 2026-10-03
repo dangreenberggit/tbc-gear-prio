@@ -91,7 +91,8 @@ went from 971 to 989 of 994. The settled table then held 942 rows.
   A failed sim skips the candidate (`rank.ts:1216-1225`, then
   `if (!best) return` at `rank.ts:1266`). The skip is by design. The
   panic itself is a possible sim defect: split it out as its own ticket
-  (see "What would close this").
+  (see "What would close this"). Split out as ticket 531, fixed at fork
+  2b0fece2f.
 - **956 landed, 942 settled.** The settled table drops worn items from the
   below-the-cutoff group (`upgrades_tab.tsx:2864`, reasons in the comment
   above it). Read on 2026-09-30: 14 of Cherryboom's 17 worn item ids are
@@ -132,5 +133,4 @@ run.
 
 Each of items 1 to 5 is marked "explained / not an issue" in this file,
 or split out as its own ticket with a link here. Items 2, 4 and 5 are
-marked already. The World Breaker sim panic in item 2 is not yet split
-out: file it as its own ticket, or record here why it needs none.
+marked already. The World Breaker sim panic in item 2 is ticket 531.

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner's Cherryboom test runs, 2026-09-29 and 2026-09-30 (three Enhancement Shaman rankings in the Upgrades (New) tab); split out of ticket 529, item 2
 Blocks: none
@@ -206,3 +206,162 @@ not list item 30090. A test, or the gate-visual seat reading a capture of
 the settled tab, can judge both. If option C alone is chosen, the
 acceptance is different: the dropped item and its count show without
 scrolling past the results table.
+
+## Closed 2026-10-02: fixed at fork 2b0fece2f
+
+Fixed by fork commit `2b0fece2ff98cc5ce972ace1f64c9cc9fc0d0d12`
+("Stop weapon procs panicking on item swap (531)",
+`dangreenberggit/tbc-new`, branch `feat/upgrades-tab`, not pushed) and
+the main-repo re-pin `f7cd7051` ("Re-pin fork to 2b0fece2f for ticket
+531"). Plan, logs and results are in
+`.scratch/stage-gate/531-world-breaker-swap/` (gitignored, so a fresh
+checkout does not have them). An independent reviewer passed the work
+before this close.
+
+### Orchestrator rulings
+
+As recorded in the plan's Rulings section:
+
+1. **R1, test seam.** A fork Go test calling `core.RunRaidSim` is
+   approved, as for ticket 532. AGENTS.md's three seams are about
+   adapters, not where a test goes, and no TS seam can see a fork-only Go
+   change.
+2. **R2, the CLI acceptance sentence.** The "Acceptance" section asks
+   that `30090-swap.json` return DPS through the repro's CLI. That CLI is
+   the engine-pin CLI, built from upstream `17a8fb2`, and no fork commit
+   can change it. The sentence is met by a CLI built from the fork
+   instead (table below). The pinned upstream CLI still panics on the
+   request; that is expected.
+
+### The option chosen
+
+Option A. The eight weapon effects in `sim/common/tbc/items_weapons.go`
+now build their proc manager with core's
+`NewDynamicLegacyProcForWeapon(<item id>, <same ppm>, 0)`, as Syphon of
+the Nathrezim already did, and their item-swap callbacks are deleted.
+That helper registers one swap callback at setup and rebuilds the proc
+manager in place, so the proc trigger sees each rebuild. Nothing under
+`sim/core/` changed. This is an upstream file, so the change is a new
+fork divergence. No ported engine file changed, so no PROVENANCE row
+moved.
+
+Option B was not chosen: ticket 362's resolution rejected stripping the
+swap, because the candidate's number stops being comparable to the
+baseline's, and it would leave the baseline panicking when the swap set
+holds one of these weapons. Option C was not chosen: World Breaker would
+still get no number.
+
+### Red and green
+
+Tests in the new fork file `sim/item_swap_weapon_proc_test.go`, through
+`core.RunRaidSim` with `IsTest: false`, a 180 s fight, 10 iterations and
+seed 531. `TestWeaponProcsWithItemSwap` checks, per weapon, the swap-off
+DPS against a literal recorded before the fix, and that with item swap on
+the sim has no error and the effect fires. `TestWeaponProcSwappedIn` puts
+World Breaker in the swap set, swaps it in at the start, and checks that
+it procs.
+
+Command:
+`go -C vendor/tbc-new-fork test -tags=with_db ./sim/ -run TestWeaponProc -count=1 -v`.
+
+- Slice 1, only the World Breaker row: rc=1 before the fix. The
+  World Breaker row and `TestWeaponProcSwappedIn` both failed with
+  "Tried to add a new item swap callback for slots in a finalized
+  environment!". The World Breaker trace, innermost first:
+  `item_swaps.go:136` (`RegisterItemSwapCallback`), `character.go:604`
+  (`getDynamicProcMaskPointer`), `character.go:624`
+  (`GetDynamicProcMaskForWeaponEffect`), `items_weapons.go:190` (the
+  closure), `items_weapons.go:210` (the swap callback),
+  `item_swaps.go:376` (`SwapItems`), `item_swaps.go:458`
+  (`ItemSwap.reset`), `character.go:517` (`Character.reset`). rc=0 after
+  the World Breaker fix.
+- Slice 2, the other seven rows added: rc=1, each of the seven failed
+  with the same error, through its own block. rc=0 after the full fix.
+  No swap-off check failed in either red run.
+
+| Weapon (spec) | Swap off, before and after | Swap on, red | Swap on, green |
+| --- | --- | --- | --- |
+| World Breaker 30090 (enh) | 694.888225 | panic | PASS |
+| Despair 28573 (enh) | 700.757428 | panic | PASS |
+| Bonereaver's Edge 17076 (enh) | 600.407765 | panic | PASS |
+| Devastation 30316 (enh) | 852.737327 | panic | PASS |
+| Warp Slicer 30311 (enh) | 974.986922 | panic | PASS |
+| Infinity Blade 30312 (enh) | 886.523976 | panic | PASS |
+| Blinkstrike 31332 (enh) | 809.797248 | panic | PASS |
+| Rod of the Sun King 29996 (fury warrior) | 633.261564 | panic | PASS |
+
+Also at the fork commit:
+`go -C vendor/tbc-new-fork test -tags=with_db ./sim/ ./sim/shaman/... ./sim/warrior/... ./sim/rogue/... ./sim/hunter/... ./sim/paladin/... ./sim/druid/... ./sim/mage/... ./sim/priest/... ./sim/warlock/... -count=1`
+rc=0; `go vet ./sim/ ./sim/common/tbc/` rc=0; `gofmt -l` clean; the
+ten fork-gated vitest suites rc=0 (135 passed, 1 skipped); `pnpm verify`
+rc=0.
+
+From the independent review: the swap-off results are byte-identical
+before and after the fix. With alternative 1 (delete only the callbacks
+and keep the static proc managers), `TestWeaponProcSwappedIn` fails:
+World Breaker averaged 3.7 procs with the fix and 0 under alternative 1.
+
+### The repro, through two CLIs (ruling R2)
+
+The fork CLI was built with
+`go -C vendor/tbc-new-fork/cmd/wowsimcli build -tags=with_db -o <out>.exe .`
+at `2b0fece2f`; the requests come from the "Repro" script with arguments
+`30090 1`.
+
+| CLI | `30090-swap.json` | `30090-noswap.json` |
+| --- | --- | --- |
+| Engine pin, `vendor/wowsimcli-17a8fb28...-win32-x64/wowsimcli-windows.exe` | error: "Tried to add a new item swap callback for slots in a finalized environment!" | 1379.384247 DPS |
+| Built from fork `2b0fece2f` | 1361.982023 DPS, no error | 1379.384247 DPS |
+
+### Live tab check
+
+Enhancement Shaman, page defaults with the Truncheon swap, phase-2 preset
+gear on the phase-3 page, 1000 iterations, the tab's own 957-entry pool,
+on the `:5173` tab against a backend rebuilt from fork `2b0fece2f`:
+`node .scratch/stage-gate/511-512-set-credit/k5p/run-check.mjs .scratch/stage-gate/531-world-breaker-swap/ENH-531.json .scratch/stage-gate/531-world-breaker-swap/ENH-531-after.json`
+rc=0. The first request had `enableItemSwap` true; 1230 sims started,
+1230 completed, 0 failed; no dropped candidates; 957 rows, one of them
+World Breaker at −552.84 DPS. From the independent review: that is in
+line with the other two-handers in the same run (−500 to −800).
+
+### Upstream status
+
+Upstream master is `d80ed2f132574c43b750a3c11f25d69dabb56f64` (checked
+with `git ls-remote https://github.com/wowsims/tbc-new refs/heads/master`
+on 2026-10-02). PR #520 (`fd8149869`, `ccf7eb19a`, merged 2026-09-15)
+moved seven of the eight weapons onto helpers that use
+`NewDynamicLegacyProcForWeapon`. Blinkstrike still has the old closure
+and callback on master, so the Blinkstrike change is an upstream
+candidate. Opening an upstream PR is the owner's call. When the fork next
+merges upstream master, `items_weapons.go` is likely to conflict in the
+six blocks PR #520 rewrote (hypothesis, untested); take upstream's
+version of those and keep the Blinkstrike change unless upstream has
+fixed it.
+
+### The open questions above, answered
+
+- **Side observation.** Confirmed: the old callbacks rebound a local
+  pointer that the proc trigger never read, so they had no effect. The
+  new proc manager follows a swap; `TestWeaponProcSwappedIn` shows it.
+- **Which items.** Rod of the Sun King panics for a fury warrior (the
+  test's Rod row). Blinkstrike, Warp Slicer and Bonereaver's Edge also
+  panicked for a fury warrior in the planner's scratch run of 2026-10-02;
+  that run was not kept. All eight are fixed.
+
+### Same pattern, no panic (no ticket)
+
+These swap callbacks also assign a new proc manager to a local variable
+(`dpm = ...`), so they have no effect. They do not panic, because they
+build the mask with `GetProcMaskForTypes`, which registers nothing:
+
+- Twin Blades of Azzinoth 2-piece (`sim/common/tbc/items_weapons.go`,
+  grep `hasteDPM`), `NewStaticLegacyPPMManager` + `GetProcMaskForTypes`.
+- Warrior Mace Specialization (`sim/warrior/talents_arms.go`, grep
+  `newMaceSpecializationDPM`), the same.
+- Hand of Justice (`sim/common/classic/items_trinkets.go:45-47`),
+  `NewFixedProcChanceManager` + `GetProcMaskForTypes` (reviewer F1).
+- Warrior Sword Specialization (`sim/warrior/talents_arms.go:441-443`),
+  the same (reviewer F1).
+
+Whether their proc masks go stale after a swap is a hypothesis,
+untested.
