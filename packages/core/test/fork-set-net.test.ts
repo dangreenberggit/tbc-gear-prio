@@ -273,13 +273,20 @@ type Scenario = {
   store?: Record<string, unknown>;
   /** The 0-based fake sim call during which the run's Stop fires (ticket 533). */
   stopDuringCall?: number;
-  /** `RankInput.seeds`; absent means one seed, 11 (ticket 533). */
-  seeds?: number[];
+  /**
+   * `RankInput.seeds`; absent means one seed, 11 (ticket 533).
+   * `"engine-default"` sends no `seeds`, so the engine picks its default
+   * (ticket 530).
+   */
+  seeds?: number[] | "engine-default";
+  /** `RankInput.iterations`; absent means `ITERATIONS` (ticket 530). */
+  iterations?: number;
 };
 
 type ForkRanking = {
   contentHash: string;
   complete?: boolean;
+  assumptions: { seeds: number[]; iterations: number };
   items: Array<{
     itemId: number;
     deltaDps: number;
@@ -510,8 +517,10 @@ async function runScenario(scenario: Scenario): Promise<{
     spec: "feral",
     maxPhase: 5,
     fight: fightRef,
-    iterations: ITERATIONS,
-    seeds: scenario.seeds ?? [11],
+    iterations: scenario.iterations ?? ITERATIONS,
+    ...(scenario.seeds === "engine-default"
+      ? {}
+      : { seeds: scenario.seeds ?? [11] }),
     candidateCap: 100,
   };
 
@@ -4974,7 +4983,8 @@ describe.skipIf(!forkPresent)("Stop after the candidate loop (533)", () => {
     const scenario: Scenario = {
       ...SR_SCENARIO,
       setScreen: "on",
-      seeds: [11, 22, 33],
+      // At least ITERATIONS apart, or the seed guard refuses them (ticket 530).
+      seeds: [11, 5011, 10011],
     };
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
@@ -5049,5 +5059,45 @@ describe.skipIf(!forkPresent)("Stop after the candidate loop (533)", () => {
       "step-gear sim": true,
       "bonus-off sim": true,
     });
+  }, 120_000);
+});
+
+describe.skipIf(!forkPresent)("Replicate seeds (530)", () => {
+  it("530-D: with no seeds, the five replicates run at 11 + k × iterations", async () => {
+    const run = await runScenario({
+      ...SR_SCENARIO,
+      setScreen: "on",
+      seeds: "engine-default",
+      iterations: 3000,
+    });
+    expect(
+      run.ranking.items.some((r) => r.seMethod === "paired-replicate")
+    ).toBe(true);
+    const seeds = [...new Set(run.callOpts.map((o) => o.seed))].sort(
+      (a, b) => a - b
+    );
+    expect(seeds).toEqual([11, 3011, 6011, 9011, 12011]);
+    expect(run.ranking.assumptions.seeds).toEqual([
+      11, 3011, 6011, 9011, 12011,
+    ]);
+  }, 120_000);
+
+  it("530-G: seeds closer than the iteration count are refused before any sim", async () => {
+    const err: unknown = await runScenario({
+      ...SR_SCENARIO,
+      seeds: [11, 22],
+      iterations: 3000,
+    }).then(
+      () => undefined,
+      (e: unknown) => e
+    );
+    expect(err).toMatchObject({ name: "RankError", kind: "internal" });
+    expect((err as Error).message).toMatch(/at least 3000 apart/);
+    const boundary = await runScenario({
+      ...SR_SCENARIO,
+      seeds: [11, 3011],
+      iterations: 3000,
+    });
+    expect(boundary.ranking.complete).toBe(true);
   }, 120_000);
 });
