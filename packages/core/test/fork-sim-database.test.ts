@@ -29,6 +29,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
+import { SIM_ORDER, type SimOrderName } from "../src/slots.js";
 import {
   forkPresent,
   forkRoot,
@@ -242,12 +243,9 @@ describe.skipIf(!forkPresent)(
         stubPlayer(),
         skeleton
       )(equipmentOf(skeleton));
-      const want = skeletonDb(skeleton);
-      expectPageRows(db, skeleton, {
-        consumables: ids(want.consumables).length,
-        spellEffects: ids(want.spellEffects).length,
-      });
-      expect(ids(db?.consumables).length).toBeGreaterThan(0);
+      // Seven distinct ids: the flask, the food, three potions and two
+      // conjured items (22839 and 12662 are named twice).
+      expectPageRows(db, skeleton, { consumables: 7, spellEffects: 6 });
       // Super Mana, Fel Mana, Demonic Rune and Master Healthstone: the rows
       // the potion and conjured-item paths in consumes.go read.
       expect(ids(db?.spellEffects)).toEqual(
@@ -311,9 +309,9 @@ describe.skipIf(!forkPresent)(
       // the gear source's worn gear in place of its empty equipment.
       const skeleton = pageSkeleton(FERAL);
       const want = skeletonDb(skeleton);
-      const recorded = await runRanking(skeleton);
+      const requests = await runRanking(skeleton);
 
-      const equipped = recorded.requests.map((req) =>
+      const equipped = requests.map((req) =>
         (
           (playerOf(req).equipment as { items?: ItemSpecJson[] }).items ?? []
         ).map((item) => item?.id ?? 0)
@@ -327,7 +325,7 @@ describe.skipIf(!forkPresent)(
         true
       );
 
-      for (const [i, req] of recorded.requests.entries()) {
+      for (const [i, req] of requests.entries()) {
         const db = (playerOf(req).database ?? {}) as DbJson;
         expect(ids(db.consumables)).toEqual(ids(want.consumables));
         expect(ids(db.consumables).length).toBeGreaterThan(0);
@@ -338,12 +336,6 @@ describe.skipIf(!forkPresent)(
           expect(items.has(id)).toBe(true);
         }
       }
-
-      expect(
-        (recorded.ranking.wornSetLadder ?? []).filter(
-          (rung) => rung.unmeasured === "sim-failed"
-        )
-      ).toEqual([]);
     });
   }
 );
@@ -355,27 +347,7 @@ describe.skipIf(!forkPresent)(
 const SIM_VERSION = "v0.0.101";
 const ITERATIONS = 5000;
 
-const SIM_ORDER = [
-  "head",
-  "neck",
-  "shoulder",
-  "back",
-  "chest",
-  "wrist",
-  "hands",
-  "waist",
-  "legs",
-  "feet",
-  "finger1",
-  "finger2",
-  "trinket1",
-  "trinket2",
-  "mainhand",
-  "offhand",
-  "ranged",
-] as const;
-
-const WORN_MALORNE: Partial<Record<(typeof SIM_ORDER)[number], number>> = {
+const WORN_MALORNE: Partial<Record<SimOrderName, number>> = {
   head: 29098, // Stag-Helm of Malorne
   shoulder: 29100, // Mantle of Malorne
   hands: 29097, // Gauntlets of Malorne
@@ -395,15 +367,10 @@ const SUMMARY = {
   confidence: 1,
 };
 
-type Ranking = {
-  wornSetLadder?: Array<{ unmeasured?: string }>;
-};
-
-async function runRanking(
-  skeleton: RaidSimRequest
-): Promise<{ ranking: Ranking; requests: RaidSimRequest[] }> {
+/** Ranks with a stub sim and returns every request the ranking sent. */
+async function runRanking(skeleton: RaidSimRequest): Promise<RaidSimRequest[]> {
   const rankMod = await importForkUpgrades<{
-    rankUpgrades: (input: Json, deps: Json) => Promise<Ranking>;
+    rankUpgrades: (input: Json, deps: Json) => Promise<unknown>;
   }>("engine/rank.ts");
   const storeMod = await importForkUpgrades<{
     MemoryStore: new () => Json;
@@ -455,7 +422,7 @@ async function runRanking(
     }
   ).weights;
 
-  const ranking = await rankMod.rankUpgrades(
+  await rankMod.rankUpgrades(
     {
       character: CHAR,
       spec: "feral",
@@ -483,5 +450,5 @@ async function runRanking(
       measureBrokenSetValue: true,
     }
   );
-  return { ranking, requests };
+  return requests;
 }

@@ -109,7 +109,7 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import NamedTuple
 
-from check_tab_fixtures import check_fixture
+from check_tab_fixtures import FIXTURE_DIR, check_fixture
 
 ROOT = Path(__file__).resolve().parents[1]
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
@@ -222,7 +222,6 @@ ROOT_GATE_FILES = (
     "vendor/tbc-new-fork/test-layout.mjs",
     "vendor/tbc-new-fork/test-tab-harness.mjs",
 )
-FIXTURE_DIR = ROOT / "data/tab-fixtures"
 # The fixture the fixture pass renders unless `--fixture` names another: feral
 # on the Phase 2 BiS preset at page phase 3, which has set rows.
 DEFAULT_FIXTURE = FIXTURE_DIR / "feral-p3-p2bis.json"

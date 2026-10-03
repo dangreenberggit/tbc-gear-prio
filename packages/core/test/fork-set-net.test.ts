@@ -25,6 +25,7 @@ import { fileURLToPath } from "node:url";
 
 import { describe, expect, it, vi } from "vitest";
 
+import { SIM_ORDER, type SimOrderName } from "../src/slots.js";
 import { forkPresent, importForkUpgrades } from "./fork-engine-harness.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -103,27 +104,6 @@ const ITEM_VALUE = new Map<number, number>([
     .map((id) => [id, V_NEUTRAL] as const),
 ]);
 
-const SIM_ORDER = [
-  "head",
-  "neck",
-  "shoulder",
-  "back",
-  "chest",
-  "wrist",
-  "hands",
-  "waist",
-  "legs",
-  "feet",
-  "finger1",
-  "finger2",
-  "trinket1",
-  "trinket2",
-  "mainhand",
-  "offhand",
-  "ranged",
-] as const;
-
-type SimOrderName = (typeof SIM_ORDER)[number];
 type RaidSimRequest = Readonly<Record<string, unknown>>;
 type SimObservation = {
   dps: number;
@@ -1151,8 +1131,6 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     const setValue = await importForkUpgrades<{
       netInflation: (
         keys: ReadonlyArray<{
-          setId: number;
-          threshold: number;
           membersPkg: number;
           members2pc: number;
           pkgEnd: number;
@@ -1161,20 +1139,25 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
         }>
       ) => number;
     }>("engine/set-value.ts");
-    // I = (membersPkg − members2pc − pkgEnd + twoPcEnd)·B = (0 − 0 − 0 + 1)·40.
-    const raw = 100;
+    // A model, not the formula: a 4pc package worth 60, whose 2pc package's
+    // end state breaks a worn bonus worth 40 that the 4pc package's end state
+    // keeps, and no member single breaks it. The pieces' own stats are 500
+    // and the 2pc bonus is 30. `computeSynergy` gives pkgΔ − Σsingles − raw2pc.
+    // The 2pc package's Δ is its pieces' stats plus 30 minus the 40 its end
+    // state breaks, so its raw synergy over its singles is 30 − 40.
+    const pieces = 500;
+    const bonus2 = 30;
+    const bonus4 = 60;
+    const broken = 40;
+    const pkgDelta = pieces + bonus2 + bonus4;
+    const singles = pieces;
+    const raw2pc = bonus2 - broken;
+    const raw = pkgDelta - singles - raw2pc;
     const inflation = setValue.netInflation([
-      {
-        setId: 999,
-        threshold: 2,
-        membersPkg: 0,
-        members2pc: 0,
-        pkgEnd: 0,
-        twoPcEnd: 1,
-        B: 40,
-      },
+      { membersPkg: 0, members2pc: 0, pkgEnd: 0, twoPcEnd: 1, B: broken },
     ]);
-    expect(raw - inflation).toBe(60);
+    expect(raw).toBe(100);
+    expect(raw - inflation).toBe(bonus4);
   });
 
   it("A3-R: no implemented-set member is a ring or trinket (478 wontfix pin)", async () => {
@@ -1248,9 +1231,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
 
 /** Item values with the given set pieces at the Thunderheart value (100). */
 function withSetValues(ids: readonly number[]): Map<number, number> {
-  const values = new Map(ITEM_VALUE);
-  for (const id of ids) values.set(id, V_TH);
-  return values;
+  return withValues(ids.map((id) => [id, V_TH] as const));
 }
 
 const futB = (f: {
@@ -3716,6 +3697,30 @@ describe.skipIf(!forkPresent)(
       // The failed sim was sent, so it counts as simmed.
       expect(on.ranking.setScreen!.simmed).toBe(14);
       expect(on.ranking.setScreen!.fromStore).toBe(6);
+    });
+
+    it("513-A6: pairedSe is sd(a_i − b_i)/√N on values that spread", async () => {
+      // The fake sim gives every iteration one value, so 511-SR only ever
+      // reads a paired error of 0. These values spread.
+      const { pairedSe } = await importForkUpgrades<{
+        pairedSe: (
+          a: readonly number[] | undefined,
+          b: readonly number[] | undefined,
+          iterations: number
+        ) => number | undefined;
+      }>("engine/set-screen.ts");
+      // Differences 1, 2, 1, 4: mean 2, squared deviations 1 + 0 + 1 + 4 = 6,
+      // sample variance 6/3 = 2, so sd = √2 and sd/√4 = √2/2.
+      expect(pairedSe([10, 12, 14, 20], [9, 10, 13, 16], 4)).toBeCloseTo(
+        Math.SQRT2 / 2,
+        12
+      );
+      // Each side spreads by 100 but the difference is constant: a paired
+      // error is 0 where an unpaired one would not be.
+      expect(pairedSe([100, 200, 300], [90, 190, 290], 3)).toBe(0);
+      expect(pairedSe([1, 2, 3], [1, 2], 3)).toBeUndefined();
+      expect(pairedSe([1], [2], 1)).toBeUndefined();
+      expect(pairedSe(undefined, [1, 2], 2)).toBeUndefined();
     });
   }
 );
