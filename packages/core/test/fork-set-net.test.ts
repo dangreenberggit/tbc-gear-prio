@@ -1259,7 +1259,7 @@ type SubLineMod = ViewMod & {
    * "full-path": charge every break on the path to every credited future.
    * An owner preference, not a game fact; only 490-B separates them.
    */
-  RULE_490: SetCreditRule;
+  DEFAULT_SET_CREDIT_RULE: SetCreditRule;
   setPotentialCredit: (
     ctx: unknown,
     noiseFloorDps: number,

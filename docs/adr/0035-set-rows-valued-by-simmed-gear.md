@@ -92,7 +92,7 @@ For a row r of set S that the player does not wear (plan, "The rule for one row"
   other spec (C22).
 - For each eligible future, g(r, t) = sim(G + r + P(r, t)) − sim(G), where P is
   the chosen partner set and G is the current gear.
-- **Best total (`RULE_490` = "best-stop").** Walk the eligible futures in count
+- **Best total (`DEFAULT_SET_CREDIT_RULE` = "best-stop").** Walk the eligible futures in count
   order with a running value c = g − d_r. The credit is the largest c above 0,
   or 0.
 - The row's figure is deltaDps + credit. For a row that paired replication did
@@ -655,7 +655,7 @@ For a **step ranking** (the tab, with `measureBrokenSetValue` on):
   takes a worn set below, with no list.
 
 Still in force from ADR-0034: row figures are not additive; best-stop
-(`RULE_490`) over full-path; and every rule on the flag-off path.
+(`DEFAULT_SET_CREDIT_RULE`) over full-path; and every rule on the flag-off path.
 
 ## Consequences
 
