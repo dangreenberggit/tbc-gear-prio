@@ -413,3 +413,113 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
     });
   }
 });
+
+type FixtureFile = {
+  spec: string;
+  gear: { items: Array<{ id?: number }> };
+  ranking: {
+    brokenSetValues?: Break[];
+    items: Array<
+      Row & {
+        slot: string;
+        slotChoice?: string;
+        removedItems?: Array<{ itemId: number; slot: string }>;
+        setBonusNote?: string;
+        simmed?: false;
+      }
+    >;
+  };
+};
+type SwapBreaksMod = {
+  singleSwapBreaks: (
+    row: Record<string, unknown>,
+    brokenSetValues: Break[] | undefined,
+    wornItemIds: readonly number[] | undefined,
+    spec: string
+  ) => Break[];
+};
+type SlotsMod = { SIM_ORDER: readonly string[] };
+
+/** (set name, count) for each "breaks N-piece {set} (below M)" in a note. */
+function noteBreaks(note: string | undefined): Array<[string, number]> {
+  if (note === undefined) return [];
+  return note.split("; ").map((part) => {
+    const m = /^breaks \d+-piece (.+) \(below (\d+)\)$/.exec(part);
+    expect(m, `note part "${part}"`).not.toBeNull();
+    return [m![1]!, Number(m![2])];
+  });
+}
+
+const byNameThenCount = (a: [string, number], b: [string, number]) =>
+  a[0].localeCompare(b[0]) || a[1] - b[1];
+
+describe.skipIf(!forkPresent)("own-swap breaks on tab fixtures (536)", () => {
+  it("536-X: the render-time rule reproduces the engine's breaks on every fixture row", async () => {
+    const { singleSwapBreaks } =
+      await importForkUpgrades<SwapBreaksMod>("engine/view.ts");
+    const { SIM_ORDER } = await importForkUpgrades<SlotsMod>("engine/slots.ts");
+
+    for (const { name } of FIXTURES) {
+      const file = JSON.parse(
+        readFileSync(join(fixtureDir, `${name}.json`), "utf8")
+      ) as FixtureFile;
+      const { ranking, spec } = file;
+      const wornItemIds = SIM_ORDER.map((_, i) => file.gear.items[i]?.id ?? 0);
+      let setRows = 0;
+      let nonSetBreakRows = 0;
+
+      for (const row of ranking.items) {
+        const where = `${name} row ${row.itemId} ${row.name}`;
+        if (row.setContext) {
+          const got = singleSwapBreaks(
+            { ...row, setContext: undefined },
+            ranking.brokenSetValues,
+            wornItemIds,
+            spec
+          );
+          const want = row.setContext.singleBreaks ?? [];
+          expect(got, `${where} singleBreaks`).toEqual(want);
+          if (want.length > 0) setRows += 1;
+          continue;
+        }
+        const got = singleSwapBreaks(
+          row,
+          ranking.brokenSetValues,
+          wornItemIds,
+          spec
+        );
+        if (row.owned) {
+          expect(got, `${where} owned`).toEqual([]);
+          continue;
+        }
+        const gotPairs = got
+          .map((b): [string, number] => [b.setName, b.threshold])
+          .sort(byNameThenCount);
+        const notePairs = noteBreaks(row.setBonusNote).sort(byNameThenCount);
+        expect(gotPairs, `${where} setBonusNote`).toEqual(notePairs);
+        if (got.length > 0) nonSetBreakRows += 1;
+      }
+
+      if (spec === "feral") {
+        expect(setRows, `${name} set rows compared`).toBeGreaterThan(0);
+        expect(nonSetBreakRows, `${name} non-set break rows`).toBeGreaterThan(
+          0
+        );
+      }
+
+      if (name === "feral-p2-malorne4") {
+        const row = ranking.items.find((r) => r.itemId === 29995)!;
+        expect(
+          singleSwapBreaks(row, ranking.brokenSetValues, wornItemIds, spec)
+        ).toEqual([
+          {
+            setId: 640,
+            setName: "Malorne Harness",
+            threshold: 4,
+            dps: 22.857401253672833,
+          },
+        ]);
+      }
+    }
+  });
+});

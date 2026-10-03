@@ -1282,3 +1282,95 @@ more sim per distinct bonus-off request; no other literal moves.
   the 4pc, which newly loses Malorne 2pc; its gear before is the row's own
   single swap, so the four requests differ. Each reads Y = 40, X = 280,
   step 240.
+
+## Ticket 536: own-swap breaks on rows with no setContext
+
+`singleSwapBreaks` (fork `engine/view.ts`) lists the worn bonuses one row's
+own swap breaks, for a row with no `setContext`. Its counts come from
+`brokenSetBonuses`: the item in the swapped slot, and each `removedItems`
+slot, is displaced; the row's own item adds a piece of its set. A lost
+count is a break only when `brokenSetValues` has an entry for it, and the
+entry's `dps` is the value. The swapped slot is `slotChoice`, else the
+first of `simSlotsForPoolSlot(slot, spec, itemId)`. Set ids and slots are
+from `vendor/tbc-new-fork/assets/database/db.json`: Malorne Harness 640,
+Nordrassil Harness 641, Spirit of Eskhandar 261 (18202 is an off-hand-only
+claw, 18203 a main-hand-only claw), Battlegear of Unyielding Strength 495.
+The `brokenSetValues` figures are the test's own inputs.
+
+**536-A.** Worn Malorne shoulder, chest, hands and legs: Malorne 4. The
+Leggings of Murderous Intent (29995, no set) go in the legs and displace
+the Greaves of Malorne: Malorne 4 → 3. Lost count 4, which has an entry
+(23). Result: Malorne Harness 4, dps 23.
+
+**536-B.** 536-A's inputs on a row that has a `setContext`: the engine's
+`singleBreaks` are that row's source, so the result is empty.
+
+**536-C.** Worn 18203 main hand, 18202 off hand, 18204 back: Eskhandar 3.
+Brain Hacker (1263, a two-hander, feral) goes in the main hand and clears
+the off hand (`removedItems`). Both claws are displaced: Eskhandar 3 → 1.
+Lost counts 3 and 2; only 2 has an entry (50). Result: Spirit of
+Eskhandar 2, dps 50. If the cleared off hand were not counted, the swap
+would be 3 → 2, losing only count 3, which has no entry: an empty result.
+
+**536-D.** Worn 11979 (no set) in finger1, 21393 in finger2, 21394 back:
+Unyielding 2. The Opal Ring (11980) goes in finger2 (`slotChoice`) and
+displaces the Signet: Unyielding 2 → 1. Lost count 2, entry 40. Result:
+Battlegear of Unyielding Strength 2, dps 40. Placed in finger1, it would
+displace the non-set ring and break nothing.
+
+**536-E.** Worn off hand 18202, back 18204, neck 18205, main hand empty:
+Eskhandar 3. Rogue is a dual-wield spec, and the Distracting Dagger
+(18392) is off-hand only, so with no `slotChoice` its only placement is
+the off hand. It displaces the Left Claw: Eskhandar 3 → 2. Lost count 3,
+entry 30. Result: Spirit of Eskhandar 3, dps 30. Placed in the empty main
+hand, it would break nothing.
+
+**536-F.** Worn Malorne shoulder, chest and hands: Malorne 3. The
+Shoulderpads of the Stranger (30055, no set) displace the Mantle: 3 → 2.
+Lost count 3, which has no entry (only 2 does), so no break: Malorne has
+no 3pc bonus that was active. Result empty.
+
+**536-G.** Worn Malorne shoulder only: Malorne 1. 30055 makes it 1 → 0.
+No count of 2 or more is lost, and the one entry is for set 676 anyway.
+Result empty.
+
+**536-H.** Worn Malorne shoulder and chest: Malorne 2. 30055 makes it
+2 → 1. Lost count 2; its entry has no `dps` (`unmeasured: "sim-failed"`).
+Result: Malorne Harness 2 with no `dps` key.
+
+**536-I.** Worn Malorne shoulder and chest: Malorne 2. The Nordrassil
+Feral-Mantle (30230, set 641) displaces the Mantle: Malorne 2 → 1, and
+Nordrassil 0 → 1, which is no loss (and 641 is the completing set, which
+`brokenSetBonuses` skips). Lost Malorne count 2, entry 84. Result:
+Malorne Harness 2, dps 84, nothing for 641.
+
+**536-J.** 536-A's inputs, changed one at a time. An owned row, a row Stop
+left unsimmed (`simmed: false`), no `brokenSetValues`, no worn ids, and
+16 worn ids (not the 17 of `SIM_ORDER`) each give an empty result.
+
+**536-K.** Worn 21392 main hand, 21393 finger1, 18202 off hand, 18204
+back: Unyielding 2, Eskhandar 2. Brain Hacker goes in the main hand and
+clears the off hand: Unyielding 2 → 1 (the Sickle) and Eskhandar 2 → 1
+(the Left Claw). Lost: Eskhandar 2 (entry 50) and Unyielding 2 (entry 40).
+Sorted by set id: Spirit of Eskhandar 2, dps 50; then Battlegear of
+Unyielding Strength 2, dps 40.
+
+**536-X.** Every row of the five committed fixtures, with worn ids from
+each fixture's `gear.items` (0 for an empty slot) and its `spec`. A set row
+with its `setContext` taken away must give its own `singleBreaks`; a
+non-set row that is not owned must give the (set name, count) pairs of its
+`setBonusNote`, where "breaks N-piece {set} (below M)" gives ({set}, M);
+an owned row must give nothing. In feral-p2-malorne4, `brokenSetValues`
+has (640, 4) at 22.857401253672833 and (640, 2) at 84.2835690558677, and
+row 29995 replaces worn 29099 (Malorne 4 → 3), so it gives exactly
+Malorne Harness 4 at 22.857401253672833.
+
+The receipt for that row, with `tenths(v) = round(v.toFixed(1) × 10)` and
+`tipDelta` printing "+" before a positive value and one decimal:
+`deltaDps` 14.975688940414784 gives 150 tenths; the break −22.857… gives
+−229; the first line is 150 − (−229) = 379. So "Item stats +37.9",
+"Breaks Malorne Harness 4pc -22.9", "Total +15.0". The row has no
+`setContext`, so its Set potential credit is 0 and the ON receipt is the
+same. Row 30055 (`deltaDps` −10.014…, the same note): −100 − (−229) =
+129, so "Item stats +12.9", "Breaks Malorne Harness 4pc -22.9", "Total
+-10.0".

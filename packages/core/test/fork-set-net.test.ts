@@ -5101,3 +5101,280 @@ describe.skipIf(!forkPresent)("Replicate seeds (530)", () => {
     expect(boundary.ranking.complete).toBe(true);
   }, 120_000);
 });
+
+type SwapBreak = {
+  setId: number;
+  setName: string;
+  threshold: number;
+  dps?: number;
+};
+type SwapBreaksMod = {
+  singleSwapBreaks: (
+    row: Record<string, unknown>,
+    brokenSetValues: readonly Record<string, unknown>[] | undefined,
+    wornItemIds: readonly number[] | undefined,
+    spec: string
+  ) => SwapBreak[];
+};
+
+describe.skipIf(!forkPresent)(
+  "own-swap breaks on rows without a setContext (536)",
+  () => {
+    const view = () => importForkUpgrades<SwapBreaksMod>("engine/view.ts");
+    // Derivations: docs/set-bonus-fixture-derivations.md § Ticket 536.
+    const MALORNE_4 = idsOf({
+      shoulder: MALORNE.shoulder,
+      chest: MALORNE.chest,
+      hands: MALORNE.hands,
+      legs: MALORNE.legs,
+    });
+    const MALORNE_4_VALUES = [
+      { setId: 640, setName: "Malorne Harness", threshold: 4, dps: 23 },
+      { setId: 640, setName: "Malorne Harness", threshold: 2, dps: 84 },
+    ];
+    const LEGGINGS_29995 = { itemId: 29995, slot: "legs" };
+
+    it("536-A: a non-set legs swap over four Malorne pieces breaks the 4pc", async () => {
+      const { singleSwapBreaks } = await view();
+      expect(
+        singleSwapBreaks(LEGGINGS_29995, MALORNE_4_VALUES, MALORNE_4, "feral")
+      ).toEqual([
+        { setId: 640, setName: "Malorne Harness", threshold: 4, dps: 23 },
+      ]);
+    });
+
+    it("536-B: a row with a setContext keeps the engine's own singleBreaks", async () => {
+      const { singleSwapBreaks } = await view();
+      expect(
+        singleSwapBreaks(
+          { ...LEGGINGS_29995, setContext: {} },
+          MALORNE_4_VALUES,
+          MALORNE_4,
+          "feral"
+        )
+      ).toEqual([]);
+    });
+
+    it("536-C: a two-hander that clears the off hand counts the removed piece", async () => {
+      const { singleSwapBreaks } = await view();
+      expect(
+        singleSwapBreaks(
+          {
+            itemId: 1263,
+            slot: "weapon",
+            removedItems: [{ itemId: 18202, slot: "offhand" }],
+          },
+          [
+            {
+              setId: 261,
+              setName: "Spirit of Eskhandar",
+              threshold: 2,
+              dps: 50,
+            },
+          ],
+          idsOf({ mainhand: 18203, offhand: 18202, back: 18204 }),
+          "feral"
+        )
+      ).toEqual([
+        { setId: 261, setName: "Spirit of Eskhandar", threshold: 2, dps: 50 },
+      ]);
+    });
+
+    it("536-D: a ring goes where the engine put it (slotChoice)", async () => {
+      const { singleSwapBreaks } = await view();
+      expect(
+        singleSwapBreaks(
+          { itemId: 11980, slot: "finger", slotChoice: "finger2" },
+          [
+            {
+              setId: 495,
+              setName: "Battlegear of Unyielding Strength",
+              threshold: 2,
+              dps: 40,
+            },
+          ],
+          idsOf({ finger1: 11979, finger2: 21393, back: 21394 }),
+          "feral"
+        )
+      ).toEqual([
+        {
+          setId: 495,
+          setName: "Battlegear of Unyielding Strength",
+          threshold: 2,
+          dps: 40,
+        },
+      ]);
+    });
+
+    it("536-E: with no slotChoice, the slot follows the spec and the item's hand", async () => {
+      const { singleSwapBreaks } = await view();
+      expect(
+        singleSwapBreaks(
+          { itemId: 18392, slot: "weapon" },
+          [
+            {
+              setId: 261,
+              setName: "Spirit of Eskhandar",
+              threshold: 3,
+              dps: 30,
+            },
+          ],
+          idsOf({ offhand: 18202, back: 18204, neck: 18205 }),
+          "rogue"
+        )
+      ).toEqual([
+        { setId: 261, setName: "Spirit of Eskhandar", threshold: 3, dps: 30 },
+      ]);
+    });
+
+    const SHOULDERPADS_30055 = { itemId: 30055, slot: "shoulder" };
+
+    it("536-F: a lost count with no brokenSetValues entry was never active, so it is no break", async () => {
+      const { singleSwapBreaks } = await view();
+      expect(
+        singleSwapBreaks(
+          SHOULDERPADS_30055,
+          [{ setId: 640, setName: "Malorne Harness", threshold: 2, dps: 84 }],
+          idsOf({
+            shoulder: MALORNE.shoulder,
+            chest: MALORNE.chest,
+            hands: MALORNE.hands,
+          }),
+          "feral"
+        )
+      ).toEqual([]);
+    });
+
+    it("536-G: one worn piece going to none breaks nothing", async () => {
+      const { singleSwapBreaks } = await view();
+      expect(
+        singleSwapBreaks(
+          SHOULDERPADS_30055,
+          [
+            {
+              setId: 676,
+              setName: "Thunderheart Harness",
+              threshold: 2,
+              dps: 100,
+            },
+          ],
+          idsOf({ shoulder: MALORNE.shoulder }),
+          "feral"
+        )
+      ).toEqual([]);
+    });
+
+    it("536-H: an unmeasured break is listed with no dps", async () => {
+      const { singleSwapBreaks } = await view();
+      const breaks = singleSwapBreaks(
+        SHOULDERPADS_30055,
+        [
+          {
+            setId: 640,
+            setName: "Malorne Harness",
+            threshold: 2,
+            unmeasured: "sim-failed",
+          },
+        ],
+        idsOf({ shoulder: MALORNE.shoulder, chest: MALORNE.chest }),
+        "feral"
+      );
+      expect(breaks).toEqual([
+        { setId: 640, setName: "Malorne Harness", threshold: 2 },
+      ]);
+      expect(breaks[0]).not.toHaveProperty("dps");
+    });
+
+    it("536-I: a piece of another set breaks the worn set and not its own", async () => {
+      const { singleSwapBreaks } = await view();
+      expect(
+        singleSwapBreaks(
+          { itemId: NORDRASSIL.shoulder, slot: "shoulder" },
+          [{ setId: 640, setName: "Malorne Harness", threshold: 2, dps: 84 }],
+          idsOf({ shoulder: MALORNE.shoulder, chest: MALORNE.chest }),
+          "feral"
+        )
+      ).toEqual([
+        { setId: 640, setName: "Malorne Harness", threshold: 2, dps: 84 },
+      ]);
+    });
+
+    it("536-J: an owned row, an unsimmed row, or missing inputs give no breaks", async () => {
+      const { singleSwapBreaks } = await view();
+      const cases: Record<string, Parameters<typeof singleSwapBreaks>> = {
+        owned: [
+          { ...LEGGINGS_29995, owned: true },
+          MALORNE_4_VALUES,
+          MALORNE_4,
+          "feral",
+        ],
+        unsimmed: [
+          { ...LEGGINGS_29995, simmed: false },
+          MALORNE_4_VALUES,
+          MALORNE_4,
+          "feral",
+        ],
+        "no brokenSetValues": [LEGGINGS_29995, undefined, MALORNE_4, "feral"],
+        "no worn ids": [LEGGINGS_29995, MALORNE_4_VALUES, undefined, "feral"],
+        "16 worn ids": [
+          LEGGINGS_29995,
+          MALORNE_4_VALUES,
+          MALORNE_4.slice(0, 16),
+          "feral",
+        ],
+      };
+      const got = Object.fromEntries(
+        Object.entries(cases).map(([k, args]) => [k, singleSwapBreaks(...args)])
+      );
+      expect(got).toEqual({
+        owned: [],
+        unsimmed: [],
+        "no brokenSetValues": [],
+        "no worn ids": [],
+        "16 worn ids": [],
+      });
+    });
+
+    it("536-K: a two-hander that breaks two sets lists both, by set id", async () => {
+      const { singleSwapBreaks } = await view();
+      expect(
+        singleSwapBreaks(
+          {
+            itemId: 1263,
+            slot: "weapon",
+            removedItems: [{ itemId: 18202, slot: "offhand" }],
+          },
+          [
+            {
+              setId: 261,
+              setName: "Spirit of Eskhandar",
+              threshold: 2,
+              dps: 50,
+            },
+            {
+              setId: 495,
+              setName: "Battlegear of Unyielding Strength",
+              threshold: 2,
+              dps: 40,
+            },
+          ],
+          idsOf({
+            mainhand: 21392,
+            finger1: 21393,
+            offhand: 18202,
+            back: 18204,
+          }),
+          "feral"
+        )
+      ).toEqual([
+        { setId: 261, setName: "Spirit of Eskhandar", threshold: 2, dps: 50 },
+        {
+          setId: 495,
+          setName: "Battlegear of Unyielding Strength",
+          threshold: 2,
+          dps: 40,
+        },
+      ]);
+    });
+  }
+);
