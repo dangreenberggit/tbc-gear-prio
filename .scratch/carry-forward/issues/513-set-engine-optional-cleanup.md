@@ -83,3 +83,51 @@ it stays. An engine change needs the PROVENANCE cycle in
   and the second to `DEFAULT_SEED_BASE`, and drop the `rank.ts` line
   numbers both comments cite. Comment-only, in files outside `engine/`,
   so no PROVENANCE row moves; it still needs a fork commit and a re-pin.
+- 2026-10-03, worked (main `6e2a8f8b` and `a96fc82d`; fork `4e807e900`
+  and `d92c05941`). Not closed: an independent review comes first.
+  Dispositions:
+  - **Duplicated derivation:** fixed. `rank.ts` points at `netInflation`'s
+    doc comment instead of repeating it.
+  - **Duplicated comparator:** dropped. The two sorts use different fields
+    (`threshold` in `brokenSetBonuses`, `count` in the `rank.ts` target
+    ordering), so a shared comparator needs an adapter longer than the
+    one-line sort.
+  - **Inline keys:** fixed. `set-value.ts` exports `bonusKey`, used in
+    `rank.ts`, `view.ts`, `partner-choice.ts` and `upgrades_tab.tsx`. The
+    `rank.ts` ladder predicate keys by `count` inside one function and is
+    left as it is.
+  - **Unused fields:** fixed. `InflationKey` drops `setId` and `threshold`.
+  - **Ticket-named constant:** fixed. `RULE_490` is now
+    `DEFAULT_SET_CREDIT_RULE`; ADR-0034 and ADR-0035 follow.
+  - **Dangling line:** fixed (`view.ts` header rewrapped).
+  - **A4:** fixed. A3-U works out the raw figure from a modelled package,
+    not from `netInflation`'s formula.
+  - **A6:** fixed. Test 513-A6 checks `pairedSe` on values that spread; a
+    mutation to `/ iterations` fails it and still passes 511-SR.
+  - **A7:** fixed. 522-G's sim-failed check is gone; 522-C pins 7
+    consumable rows and 6 spell-effect rows.
+  - **ST8:** partly fixed. `withSetValues` reuses `withValues`; both
+    fork-gated suites import `SIM_ORDER` from `packages/core/src/slots.ts`;
+    `check_layout_gate.py` imports `FIXTURE_DIR` from
+    `check_tab_fixtures.py`. Dropped: `SIM_VERSION`, `ITERATIONS` and the
+    one-line `RaidSimRequest` type in `fork-sim-database.test.ts` are
+    scenario values, and sharing them would tie the suite to another
+    suite's fixture module. Dropped: schema version `1` is written in
+    TypeScript, Python and `.mjs` across two repos, and one source needs
+    codegen. A different value in `record.mjs` fails
+    `check_tab_fixtures.py`; a change to `fixture.ts` alone would make the
+    tab refuse the committed fixtures that the layout gate renders
+    (hypothesis, untested).
+  - **ST10:** partly fixed. The one repeated predicate (the step branch of
+    `setCreditUnmeasured` and the tab's unmeasured popover filter) is now
+    `view.ts`'s `stepFutureUnmeasured`. Dropped: the other sites choose
+    different behaviour per ranking kind, and merging them means splitting
+    `view.ts` and the tab by ranking kind, a larger refactor than this
+    ticket's tidy.
+  - **ST11:** dropped. The extra `PartnerRule` values and the screen's
+    "off" and "record" modes are what the K5P and K5E checks use to score
+    the shipped rule (`partner-choice.ts` doc comment, `check_hooks.ts`),
+    and `fork-set-net.test.ts` covers them. Removing them removes the
+    means to re-run those checks.
+  - **F1:** fixed. Both tool comments name `defaultSeedsFor` and
+    `DEFAULT_SEED_BASE`, with no `rank.ts` line numbers.
