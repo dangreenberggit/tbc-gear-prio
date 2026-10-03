@@ -70,12 +70,15 @@ gave the pre-502 figure of 90 above. The figures in this paragraph are from
 before ticket 502; the ticket 502 paragraph below changes what each step adds.
 Fixtures 490-A and 490-B pin the rule (`view.ts` `setPotentialCredit`). The
 owner confirmed this "best-stop" rule on 2026-09-24 over "full-path" (charge
-every break on the path to every credited future). `setPotentialCredit` implements
-both rules; the exported `DEFAULT_SET_CREDIT_RULE` (named `RULE_490` until
-ticket 513) in `view.ts` selects the one `rankableSetPotential` uses. Fixture 490-B reads that constant from the
-engine and also asserts each rule's figures by calling `setPotentialCredit`
-directly. Since ticket 502 both rules stop at the 4pc in 490-B, so that
-fixture no longer tells them apart; test 502-B does.
+every break on the path to every credited future). `setPotentialCredit`
+implements both rules; the exported `DEFAULT_SET_CREDIT_RULE` (named
+`RULE_490` until ticket 513) in `view.ts` selects the one
+`rankableSetPotential` uses. No test reads that constant. Fixture 490-B
+asserts each rule's figures by calling `setPotentialCredit` with the rule
+named. Since ticket 502 both rules stop at the 4pc in 490-B, so that fixture
+no longer tells them apart; test 502-B does. Tests 502-D and 511-S2 and the
+tab-fixture checks in `fork-set-fixtures.test.ts` fail when the constant is
+"full-path".
 
 **The other set pieces' own stats count (ticket 502, 2026-09-27).** With Set
 potential on, a set-piece row the player does not wear now shows

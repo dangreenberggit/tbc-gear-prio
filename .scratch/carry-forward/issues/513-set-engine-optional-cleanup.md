@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-tab-signoff-followups.md (targeted engine review 2026-09-25, finding S6)
 Blocks: none
@@ -104,8 +104,10 @@ it stays. An engine change needs the PROVENANCE cycle in
     not from `netInflation`'s formula.
   - **A6:** fixed. Test 513-A6 checks `pairedSe` on values that spread; a
     mutation to `/ iterations` fails it and still passes 511-SR.
-  - **A7:** fixed. 522-G's sim-failed check is gone; 522-C pins 7
-    consumable rows and 6 spell-effect rows.
+  - **A7:** fixed. 522-G's sim-failed check is gone: it cannot fail
+    except by `applyCopies` finding no item row, which 522-G's per-request
+    item check already catches on the baseline request, which uses the
+    same composition. 522-C pins 7 consumable rows and 6 spell-effect rows.
   - **ST8:** partly fixed. `withSetValues` reuses `withValues`; both
     fork-gated suites import `SIM_ORDER` from `packages/core/src/slots.ts`;
     `check_layout_gate.py` imports `FIXTURE_DIR` from
@@ -131,3 +133,34 @@ it stays. An engine change needs the PROVENANCE cycle in
     means to re-run those checks.
   - **F1:** fixed. Both tool comments name `defaultSeedsFor` and
     `DEFAULT_SEED_BASE`, with no `rank.ts` line numbers.
+
+## Closed 2026-10-03
+
+Every item has a disposition in the 2026-10-03 comment above. An
+independent reviewer passed the work with inline fixes, made in this close:
+ADR-0034's paragraph on the default credit rule, the unused
+`DEFAULT_SET_CREDIT_RULE` member of the `SubLineMod` test type, and the A7
+reason above.
+
+Fork commits (`dangreenberggit/tbc-new`, branch `feat/upgrades-tab`, not
+pushed): `4e807e900` (engine and tab tidy, four PROVENANCE rows) and
+`d92c05941` (F1 tool comments). Main commits: `6e2a8f8b` (tests),
+`a96fc82d` (re-pin to `d92c05941`) and `2a47f885` (dispositions).
+
+Evidence:
+
+- The fork-gated suites (`npx vitest run` over the ten files
+  `grep -l forkPresent packages/core/test/*.test.ts` lists): 148 passed,
+  1 skipped, rc=0. E-W3
+  (`npx vitest run packages/core/test/wowsims-fork-parity.test.ts`) rc=0
+  before the hashes moved.
+- Mutation checks. With `pairedSe` dividing by `iterations` instead of
+  `iterations - 1`, test 513-A6 fails and 511-SR still passes. With
+  `netInflation` subtracting `twoPcEnd`, A3-U fails. The reviewer's run with
+  `DEFAULT_SET_CREDIT_RULE` set to "full-path" fails tests 502-D and 511-S2
+  and the tab-fixture checks in `fork-set-fixtures.test.ts`.
+- The reviewer's `pnpm tab-review` renders before and after the fork
+  commits were byte-identical (reported by the reviewer; the renders are
+  not committed). Their limit: no committed fixture reaches the changed
+  step-unmeasured lines (the tab's unmeasured popover on a step ranking), so
+  the renders do not test that change.

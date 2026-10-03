@@ -1253,13 +1253,6 @@ function bonusOf(ranking: ForkRanking, setId: number, threshold: number) {
 type SetCreditRule = "best-stop" | "full-path";
 
 type SubLineMod = ViewMod & {
-  /**
-   * The 490 stopping rule the engine applies. "best-stop": stop at the
-   * threshold where committing pays best on full values, or not at all.
-   * "full-path": charge every break on the path to every credited future.
-   * An owner preference, not a game fact; only 490-B separates them.
-   */
-  DEFAULT_SET_CREDIT_RULE: SetCreditRule;
   setPotentialCredit: (
     ctx: unknown,
     noiseFloorDps: number,
