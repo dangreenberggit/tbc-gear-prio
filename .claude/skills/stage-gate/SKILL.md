@@ -303,8 +303,9 @@ the report's `## Decisions` section. To trace a decision: find its line
 in `decision-log.md`, grep `.scratch/agent-runs/*.jsonl` for the agent
 id or agent type, read `decisions`, then open `agent_transcript_path`
 if it still exists (transcripts are deleted after `cleanupPeriodDays`,
-default 30: https://code.claude.com/docs/en/settings-reference.md). The run log is gitignored and per-checkout. A missing or
-empty run log never stops a run; say so in the hand-off reply.
+default 30: https://code.claude.com/docs/en/settings-reference.md).
+The run log is gitignored and per-checkout. A missing or empty run log
+never stops a run; say so in the hand-off reply.
 
 ## Do not
 
