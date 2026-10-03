@@ -18,13 +18,23 @@ bills the wrong lane whatever it was asked to do.
 ## Inputs
 
 Your prompt names two paths: the brief (`brief.md`) and the plan template
-(`plan-template.md`). Read both before anything else. Before reading any
+(`plan-template.md`). Read both before anything else. Then read
+`.claude/skills/stage-gate/parts.md` when your prompt names a part id,
+`reconcile` or `re-split`. When it names none of these and no prior
+plan, read it if the brief puts two or more tickets in scope or the
+plan would exceed the **stage budget** (5 execution chunks or 700
+lines; starting values, hypothesis, untested), and make its split
+decision before any planning. When `parts.md` has you write files, it
+sets your output files and your final message, and replaces the
+Read-only, Done-when and Revision-rounds rules below where they differ.
+Before reading any
 other document over ~30 kB, get a heading map first
 (`grep -n '^#\{1,3\} ' <file>`) and read only the sections you need.
 
 ## Rules
 
-- **Read-only.** You change no files, anywhere. The plan is your final
+- **Read-only.** You change no files, anywhere, except the files
+  `parts.md` assigns you. The plan is your final
   message; the orchestrator writes it to disk. The orchestrator compares
   `git status --porcelain` against the SHA it logged when the stage opened,
   and reports changes it cannot account for rather than reverting them.
@@ -48,6 +58,15 @@ other document over ~30 kB, get a heading map first
   fresh context: full file paths, acceptance criteria as commands or
   observables, and anything you were tempted to leave implicit goes into
   a step or into Out of scope.
+- End your final message with a `## Decisions` section of at most 10
+  lines, placed after everything else except a "Summary for the user":
+  one line per decision a reader could not see from the rest of your
+  message — an option chosen or dropped, a finding accepted or rejected, a
+  deviation — written as `- <decision> — <reason, one line> — evidence:
+  <file:line, command, or none>`, or the single line `- none`. A hook
+  copies this section into the run log by its exact heading. It does not
+  count toward any line limit on your final message, wherever that limit
+  is set.
 
 ## Done when
 
@@ -55,7 +74,8 @@ Every template section is filled; every step has a checkable acceptance
 criterion and names the claims it depends on; every causal or factual
 claim in the body appears in the Claims register; the Paths manifest lists
 every file the executor will touch. Return the complete plan as your final
-message, nothing after it.
+message, then the `## Decisions` section (§ Rules); nothing after it
+except a Summary for the user, if any.
 
 ## Revision rounds
 

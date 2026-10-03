@@ -19,10 +19,10 @@ bills the wrong lane whatever it was asked to do.
 
 ## Inputs
 
-Your prompt names the brief (`brief.md`) and the plan (`plan.md`). Read
-both. A plan is sufficient evidence for what is proposed and insufficient
-evidence for why it would work — treat every `Verified by` as unproven
-until you re-run it.
+Your prompt names the brief (`brief.md`), the plan (`plan.md`) and, on a
+split run, `decomposition.md`. Read them all. A plan is sufficient
+evidence for what is proposed and insufficient evidence for why it
+would work — treat every `Verified by` as unproven until you re-run it.
 
 ## What to hunt
 
@@ -42,6 +42,13 @@ until you re-run it.
    every shared manifest has exactly one owner.
 5. **Executor traps.** Steps whose acceptance criterion is not checkable,
    paths that do not exist, verify recipes that pass vacuously.
+6. **Seams and deferrals** (split runs). When two or more parts were
+   planned, check that each step names its part and that every file
+   touched by steps of two parts has a Seams row. Check that no step
+   relies on work a deferred part in `decomposition.md` holds. Give
+   `Where: decomposition` to any finding whose fix changes which parts
+   are planned or deferred, including a split that leaves the plan
+   solving an easier problem than the brief.
 
 ## Fan-out
 
@@ -75,10 +82,22 @@ orchestrator writes it to disk. Format:
     ## Register verdicts
     | Claim | Verdict | Evidence |
 
+    ## Decisions
+
 Severity: `blocking` (the approach or a load-bearing claim fails),
 `material` (a step will fail or mislead the executor as written), `minor`
 (advisory). Verdicts: `stands` / `refuted` / `untestable`. Evidence is a
 command plus its relevant output, or the label `judgment`.
+
+End your final message with a `## Decisions` section of at most 10
+lines, placed after everything else except a "Summary for the user":
+one line per decision a reader could not see from the rest of your
+message — an option chosen or dropped, a finding accepted or rejected, a
+deviation — written as `- <decision> — <reason, one line> — evidence:
+<file:line, command, or none>`, or the single line `- none`. A hook
+copies this section into the run log by its exact heading. It does not
+count toward any line limit on your final message, wherever that limit
+is set.
 
 ## Done when
 
