@@ -2,7 +2,7 @@ Status: open
 Type: investigation
 Origin: owner, 2026-09-28, during stage-gate 511-512-set-credit (`.scratch/stage-gate/511-512-set-credit/decision-log.md`, 2026-09-28 entries, and `other-pieces-decisions.md` in the same folder; both gitignored)
 Blocks: none
-Blocked by: none
+Blocked by: 500, 505
 Related: 511, 512, 298, 500, 505, 519
 
 # The tab cannot show the value of moving a worn set bonus to other slots
@@ -271,3 +271,57 @@ the owner's example with 4 tier pieces worn; ADR-0035's K5P table) is an
 example of this ticket's case. The partner-rule check did not score that
 move. ADR-0035, "Relation to ticket 523", keeps the verifier's reasoning
 that the gap can leave rows too low, never too high.
+
+### 2026-10-02 — orchestrator ruling: blocked on the phase-5 item gap
+
+The ticket stays open, now `Blocked by: 500, 505`. A scan that runs no
+sim finds that in the five committed tab fixtures, a player who follows
+the tab one swap at a time already reaches the best move. The case that
+could need a fix is feral at phase 5, and it cannot be checked until
+tickets 500 and 505 add 34444, 34556 and 34573 to the candidate pool.
+
+**Finding** (`data/tab-fixtures/`, cutoffs as each fixture records them):
+
+- `feral-p2-malorne4`, `feral-p3-nordrassil4` and `feral-p3-p2bis`: 0
+  qualifying moves.
+- `ret-p3-p2`: does not apply. It wears one Crystalforge piece and records
+  no break value.
+- `feral-p3-th-hands-legs`: 7 qualifying moves. The best is Shady
+  Dealer's Pantaloons (legs, −81.8) with the Thunderheart Chestguard
+  (chest, +28.7) and the Thunderheart 2-piece break (106.2): about +53.1
+  DPS. This is an additive estimate from recorded figures, not a sim
+  (untested). The Chestguard's own row, +28.7, is above the fixture's
+  3.6 DPS cutoff, so the tab already shows the first swap. Once the
+  player wears it, they hold 3 Thunderheart pieces and the Pantaloons
+  row no longer breaks the 2-piece bonus. The 3 moves whose set piece is
+  below the cutoff all pair with the Thunderheart Pauldrons (+1.6), and
+  the best of them, +26.0, is below the +53.1 move.
+
+**Method.** For each worn set at exactly a bonus count with a recorded
+break value (`ranking.brokenSetValues`): take each non-set row in a slot
+that holds the set, and each unworn piece of the same set for a slot that
+does not hold the set. The estimate is the non-set row's `deltaDps`, plus
+the break value, plus the set piece's `deltaDps`. Keep the pairs whose
+estimate is over 5 DPS and also beats the set piece alone. A pair is
+"hidden" when its set piece's own row is at or below the fixture's
+cutoff (`ranking.cutoff.absDps`).
+
+Re-run from the repo root (Git Bash):
+
+```
+python .scratch/stage-gate/523-move-scan/move_scan.py
+```
+
+The script is gitignored, so a fresh checkout does not have it. Its only
+change from the scratch copy that produced these figures is
+`r.get('brokenSetValues', [])`, because `ret-p3-p2` has no such key and
+the original stopped with a `KeyError` there.
+
+**Fix sketch (medium size, not started).** Show a paired-move figure on
+the non-set row's popover: the row plus the best set piece for another
+slot, with the break it avoids. Keep ranking rows by the solo figure, so
+the pair explains the row and does not move it.
+
+**When to revisit.** Once tickets 500 and 505 land, re-run this scan on a
+feral phase-5 run (the owner's P4-to-P5 example in the body) and decide
+from that result whether the fix sketch is needed.
