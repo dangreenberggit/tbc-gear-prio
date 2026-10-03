@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: defect
 Origin: independent review of ticket 536 on feat/tab-signoff-followups, finding F4 (relayed by the orchestrator), 2026-10-03
 Blocks: none
@@ -36,3 +36,57 @@ Found by reading the code. Nobody ran the tab to file this.
 2. If it reproduces: a change to gear, talents or run settings during a
    run makes the finished result show as stale, and the test or repro
    from item 1 now passes.
+
+## Closed 2026-10-03
+
+Reproduced live before the fix
+(`.scratch/stage-gate/537-stale-mid-run/notes.md`, gitignored) and fixed.
+An independent reviewer passed the work with no fixes (reported by the
+reviewer, relayed by the orchestrator; the review is not committed).
+
+Fork commit (`dangreenberggit/tbc-new`, branch `feat/upgrades-tab`, not
+pushed): `72bc102f2`. The new `upgrades/run_staleness.ts` holds
+`RunStaleness`. The tab's four stale setters now all call one helper,
+`markInputsChanged`. A change while the state is `running` sets a flag
+that `run()` clears at start and writes as the finished state's `stale`.
+Main commit: `3c7c700d` (re-pin to `72bc102f2`, and the test
+`packages/core/test/fork-run-staleness.test.ts`).
+
+Evidence:
+
+- Red/green: `npx vitest run packages/core/test/fork-run-staleness.test.ts`
+  failed 2 of 6 against an unchanged extraction of the old logic (the
+  mid-run change and the stopped result) and passed 6 of 6 after the fix.
+  The four tests that pass on both were shown to fail under two deliberate
+  breaks: no reset in `runStarted`, and `staleAtFinish` always `true`.
+- The reviewer killed 7 mutants (reported by the reviewer; the mutant list
+  is not committed).
+- Fork-gated suites (`npx vitest run` over the eleven files
+  `grep -l forkPresent packages/core/test/*.test.ts` lists): 154 passed,
+  1 skipped, rc=0. `pnpm verify` rc=0.
+- Live, 4 cases on `:5173` (feral, Upgrades phase 2, "Sim only selected set
+  items", 20000 iterations): a waist change mid-run leaves the stale line
+  shown and Simulate enabled after the run; no change shows no stale line
+  and leaves Simulate disabled; the same pair with Stop shows the stale line
+  on the stopped result only after the mid-run change.
+- The reviewer's 6 live cases also passed, including the cached replay and
+  the Stop cases (reported by the reviewer; the case details are not
+  committed).
+
+Scope extension: a stopped result now also goes stale after a later
+change, the same as `done`. Before this, a stopped result never showed the
+stale line.
+
+Known limits:
+
+- The tests cover only the `RunStaleness` tracker, not the tab's wiring.
+  The live checks cover the wiring.
+- The Sources picker and the set chips call `markInputsChanged` twice, once
+  through `settingsChangedEmitter` and once directly. The second call costs
+  one extra render. It is harmless and not a regression: the old code made
+  the same two calls.
+
+Open question: the first live attempt was lost when the page navigated to
+`http://localhost:5173/tbc/` mid-run, after an Escape key press closed the
+item picker. The reviewer found no Escape path that navigates, and its live
+test did not reproduce the jump. The cause is unknown.
