@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/handoffs/511-512-set-credit-redesign/d1-measurements.md (round 2e-1 measurements, 2026-09-25)
 Blocks: none
@@ -109,3 +109,63 @@ reading that item 2 asks for is missing.
     ticket's missing reading. "No new sims for it" is the orchestrator's
     ruling (`.scratch/stage-gate/511-512-set-credit/decision-log.md` line
     246, gitignored); no owner agreement is recorded.
+
+## Closed 2026-10-02: the pre-raid reading
+
+The missing reading is taken. Full record:
+`.scratch/stage-gate/514-reading/reading.md` (gitignored). It ran at main
+`50960b92` and fork `587fe9f24`, on
+`vendor/tbc-new-fork/ui/paladin/retribution/gear_sets/preraid.gear.json`
+at page phase 2. That is the same gear as the old dump
+`ret-p2-preraid-10000.json`: the baseline 1840.24571596816 matches to every
+digit. No Justicar or Crystalforge piece is worn.
+
+| Run | Justicar 4pc (626:4) | Crystalforge 4pc (629:4) |
+| --- | --- | --- |
+| Same-gear, 10,000 iterations, seed 11, set pieces only, screen "record" | +0.0000, se 1.6213 | −0.9518, se 1.6533 |
+| Same-gear, the tab's player defaults (3000 iterations, whole pool, screen on) | 0.0000, se 3.0306 | +1.1518, se 3.0631 |
+| Old method, "package minus singles", 10,000 iterations | −5.2516, se 4.1466 | +2.3314, se 3.1677 |
+
+Both bonuses read within 1 se of 0 in both runs. Every Justicar and
+Crystalforge entry has `belowGate: true`, so no row of either set gets Set
+potential credit. With the P2 gear reading from K1 (Justicar +0.0000,
+Crystalforge +1.5851, se 1.725), item 2 now holds on both gear sets, and
+item 1 was already agreed by the owner.
+
+**How to re-run** (from `reading.md`, "How to re-run"):
+
+1. With ports 3333 and 5173 free, start the `.claude/launch.json` entries
+   `wowsims-backend` and `wowsims-fork`, and wait until
+   `curl -s -o /dev/null http://localhost:3333/` succeeds.
+2. In Git Bash with Node 22, with
+   `N=/c/Users/dgree/AppData/Roaming/fnm/node-versions/v22.17.1/installation/node.exe`
+   and `R=C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate`:
+   `$N $R/511-512-set-credit/k5p/run-check.mjs $R/514-reading/RET-P2-PRERAID.json $R/514-reading/result-10000.json > $R/514-reading/run-10000.log 2>&1; echo rc=$?`,
+   and the same with `RET-P2-PRERAID-PLAYER.json` and
+   `result-player-3000.json`. Both printed rc=0.
+3. `python .scratch/stage-gate/514-reading/ana.py .scratch/stage-gate/514-reading/result-10000.json`
+   (and the same for `result-player-3000.json`).
+4. Stop both servers.
+
+Both runs use seed 11, so a re-run on the same commits should give the
+same figures (hypothesis, untested: not re-run).
+
+**Answer to review finding D1: the core/CLI path is out of scope.** The
+same-gear method is the tab's path. ADR-0035 lines 520-525
+(`docs/adr/0035-set-rows-valued-by-simmed-gear.md`, "The flag boundary")
+say "the core engine, the CLI report and the flag-off path keep ADR-0034's
+rules in full". ADR-0027 lines 35-39
+(`docs/adr/0027-the-wowsims-upgrades-tab-is-the-primary-product.md`) make
+the tab the primary product and the standalone shell secondary.
+`docs/plans/wowsims-tab/plan.md` lines 180-182 and 196-199 accept the two
+copies drifting apart and name the end state: this repo consumes the
+fork's engine, and its duplicated modules become candidates for
+retirement. Core is already behind the tab on every set-credit change
+since ticket 467: the fork's `upgrades/engine/PROVENANCE.md` `rank.ts` row
+marks the changes for tickets 467, 476-478, 490, 492, 502, 511 and 512
+as fork-only. So the core path's "package minus singles" credit gets no
+ticket of its own here.
+
+**Answer to review finding P2:** the reading has now been taken, under
+the owner's standing go for live sims (as relayed by the orchestrator,
+2026-10-02).
