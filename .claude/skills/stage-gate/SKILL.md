@@ -293,6 +293,19 @@ moment its stage ends, so a fresh session resumes from
 session, a planner spawn with a `started` line and no `returned` line
 after it was cut off: respawn it in the same mode.
 
+## Run log (Claude Code)
+
+Two async hooks (`.claude/hooks/log-agent-run.py`, registered in
+`.claude/settings.json`) append one JSON line per subagent report, at
+any depth, to `.scratch/agent-runs/<session>.jsonl`, where `<session>`
+is a session ID as in `decision-log.md`. The `decisions` field holds
+the report's `## Decisions` section. To trace a decision: find its line
+in `decision-log.md`, grep `.scratch/agent-runs/*.jsonl` for the agent
+id or agent type, read `decisions`, then open `agent_transcript_path`
+if it still exists (transcripts are deleted after `cleanupPeriodDays`,
+default 30). The run log is gitignored and per-checkout. A missing or
+empty run log never stops a run; say so in the hand-off reply.
+
 ## Do not
 
 - Implement plan steps yourself between gates — this seat writes only the
