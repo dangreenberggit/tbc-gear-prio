@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: defect
 Origin: pre-merge review round 10 of feat/tab-signoff-followups, findings D2 and P4 (`docs/reviews/feat-tab-signoff-followups.md`), 2026-10-02; first recorded as an SME caveat in ticket 511
 Blocks: none
@@ -28,3 +28,14 @@ reason for the difference.
 2. The chosen text renders on a recorded fixture that has two rows
    breaking the same bonus at different values, and a gate-visual pass
    judges it.
+
+## Closed 2026-10-02: no change
+
+The owner's ruling, verbatim (as relayed by the orchestrator, 2026-10-02):
+"534: no change". That settles item 1, so item 2 does not apply. No code
+changes.
+
+Why no change is needed: each "Breaks <set> <n>pc" line shows what the
+bonus is worth when it is lost, on the gear worn at that point. Two rows
+can price the same bonus differently because the rest of their gear
+differs, and that is expected.
