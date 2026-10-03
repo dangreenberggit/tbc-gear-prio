@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: defect
 Origin: stage-gate 511-512-set-credit, chunk K5E, 2026-10-01 (`.scratch/stage-gate/511-512-set-credit/execution-report.md`, section "Sim failures (finding, not a plan stop)"; gitignored)
 Blocks: none
@@ -171,3 +171,113 @@ That gives a wrong number, not a failure.
 - A Go change in `sim/` is a new fork divergence from upstream, like
   ticket 311's guard (fork commit `c4d1cb661`). It lands as a fork
   commit plus a re-pin (`AGENTS.md`, "The forked tab repo").
+
+## Closed 2026-10-02: fixed at fork 55c705173
+
+Fixed by fork commit `55c705173117f1b2a681571d5933b93f0da36d6c`
+("Guard off-class set bonuses (532)", `dangreenberggit/tbc-new`,
+branch `feat/upgrades-tab`, not pushed) and the main-repo re-pin
+`54a65b6f` ("Re-pin fork to 55c705173 for ticket 532"). Plan, logs and
+results are in `.scratch/stage-gate/532-cryptstalker-crash/`
+(gitignored, so a fresh checkout does not have them).
+
+### Orchestrator rulings
+
+As recorded in the plan's Rulings section:
+
+1. **Test seam.** A fork Go test calling `core.RunRaidSim` is approved.
+   AGENTS.md's three seams are about adapters, not where a test goes,
+   and no TS seam can see a fork-only Go change.
+2. **Scope widened.** 532 also covers the three other sets an off-class
+   wearer can reach: Bold Armor (653), Moonglade Raiment (637) and
+   Assassination Armor (620). Each gets a red test case and the same
+   comma-ok class guard. No follow-up ticket for other unguarded sets is
+   filed. The scan scripts that found these sets (`scan.py`, `masks.py`
+   and their `.out` files) are kept in the stage folder's `scan/`.
+3. **Fork commit subject:** "Guard off-class set bonuses (532)".
+
+### The cause, confirmed
+
+The hypothesis above was right. Class-mask bits are per class, so a set
+bonus written for one class names unrelated spells on another class.
+The Cryptstalker 2pc's Rapid Fire bit names warrior Charge and shaman
+Lightning Shield, which have no `RelatedSelfBuff`, and
+`applyBuffDurationFlat` (`sim/core/spell_mod.go:790`) dereferences nil.
+
+### The fix
+
+The comma-ok class guard from `c4d1cb661` (ticket 311) on:
+
+- Cryptstalker Armor 2pc and 8pc (`sim/hunter/item_sets.go`)
+- Bold Armor 2pc and 4pc (`sim/warrior/items.go`)
+- Moonglade Raiment 4pc (`sim/druid/item_sets.go`)
+- Assassination Armor 4pc (`sim/rogue/items.go`)
+
+The Moonglade and Assassination 2pc bonuses are empty functions, so
+they need no guard. These are upstream files, so each guard is an
+upstream candidate. No ported engine file changed, so no PROVENANCE row
+moved.
+
+### Red and green
+
+Test `TestOffClassSetBonuses` in the new fork file
+`sim/off_class_set_bonus_test.go`, through `core.RunRaidSim` with
+`IsTest: false`, a 180 s fight, 10 iterations and seed 532. An
+off-class case passes when the sim has no error and its DPS equals the
+same sim with the set's bonuses replaced by no-ops. An own-class case
+passes when its DPS equals the literal recorded in the red run.
+
+Command:
+`go -C vendor/tbc-new-fork test -tags=with_db ./sim/ -run TestOffClassSetBonuses -count=1 -v`.
+Before the guards: rc=1, 7 off-class cases fail and 5 own-class cases
+pass (run twice, identical output). After: rc=0.
+
+| Case | Red | Green |
+| --- | --- | --- |
+| Cryptstalker 2pc, fury warrior | FAIL: nil pointer dereference, `spell_mod.go:790` | PASS, 601.675320 DPS |
+| Cryptstalker 8pc, fury warrior | FAIL: same | PASS, 456.220487 |
+| Cryptstalker 2pc, elemental shaman | FAIL: same | PASS, 666.331665 |
+| Cryptstalker 8pc, elemental shaman | FAIL: same | PASS, 403.287909 |
+| Cryptstalker 2pc, BM hunter | PASS, 789.706224 | PASS, 789.706224 |
+| Cryptstalker 8pc, BM hunter | PASS, 774.907778 | PASS, 774.907778 |
+| Bold Armor 5pc, ret paladin | FAIL: `*retribution.RetributionPaladin is not warrior.WarriorAgent`, `sim/warrior/items.go:24` | PASS, 371.769934 |
+| Bold Armor 5pc, fury warrior | PASS, 450.971957 | PASS, 450.971957 |
+| Moonglade 5pc, arms warrior | FAIL: DPS 455.795292, want 421.011089 | PASS, 421.011089 |
+| Moonglade 5pc, feral cat | PASS, 685.414701 | PASS, 685.414701 |
+| Assassination 5pc, BM hunter | FAIL: DPS 687.343316, want 690.836376 | PASS, 690.836376 |
+| Assassination 5pc, swords rogue | PASS, 553.359163 | PASS, 553.359163 |
+
+Also at the fork commit:
+`go -C vendor/tbc-new-fork test -tags=with_db ./sim/ ./sim/hunter/... ./sim/warrior/... ./sim/druid/... ./sim/rogue/... ./sim/paladin/... ./sim/shaman/... -count=1`
+rc=0; `go vet` rc=0 on the five changed packages; the four fork-gated
+vitest suites rc=0 (94 passed, 1 skipped); `pnpm verify` rc=0.
+
+Two guards, from the independent review:
+
+- **The Cryptstalker 8pc guard is defensive (reviewer F2).** Removing it
+  fails no test, because its cost mod hits spells that do not move DPS
+  for these presets.
+- **The Bold Armor 2pc guard has a measured red (reviewer F3).** With
+  only it removed, the paladin's DPS is 372.951623 against the
+  no-bonus reference 371.769934.
+
+### Live tab check
+
+K5E character C5 (elemental shaman, phase 3, 3000 iterations) on the
+`:5173` tab against a backend rebuilt from fork `55c705173`:
+`node .scratch/stage-gate/511-512-set-credit/k5p/run-check.mjs .scratch/stage-gate/511-512-set-credit/k5e/characters/C5.json .scratch/stage-gate/532-cryptstalker-crash/C5-after.json`
+rc=0. 0 of 969 sims failed; before the fix, 31 of 956 failed
+(`k5e/results/C5.json`). No set 530 `setBonuses` entry is
+`sim-failed`. Each measured threshold reads `sameGearDps: 0`, because
+the bonuses do nothing for a shaman. The set 530 screen has no missing
+pair or rung. The threshold-7 entry is still `repair-failed`, as it was
+before the fix; ticket 524 records that.
+
+### The close conditions
+
+- Cause confirmed, with the re-runnable test above and its stack trace.
+- A warrior and an elemental shaman with 2 or 8 Cryptstalker pieces sim
+  without error.
+- The fix covers set 530 and the three other sets an off-class wearer
+  can reach (rulings above). No follow-up ticket.
+- The Go change is a fork commit plus a re-pin.

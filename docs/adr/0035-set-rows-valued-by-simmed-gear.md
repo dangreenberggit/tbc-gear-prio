@@ -375,7 +375,7 @@ scoring of the check characters.
   "readings-absent" and goes through the gain side as with the screen off
   (C231). The known case is Cryptstalker Armor 530 on a non-hunter: every sim
   with 2 or more of its set-tagged pieces fails (ticket 532; cause a hypothesis,
-  untested).
+  untested). Fixed by ticket 532 at fork `55c705173`.
 
 ### Checks on the shipped rule
 
@@ -617,7 +617,7 @@ Added since:
   K7, decision-log line 224). No saved ranking has a row that shows it.
 - Item swap was tested with non-set items only (limit (l)).
 - Off-class Cryptstalker Armor sims fail, so those sets read "couldn't measure"
-  (ticket 532).
+  (ticket 532). Fixed by ticket 532 at fork `55c705173`.
 - The tab's replicate seeds overlap (ticket 530).
 - A step no longer lumps a set's gain with a broken set's loss. The owner asked
   for the design ("Yes pls.", decision-log line 214) and then decided to build it
