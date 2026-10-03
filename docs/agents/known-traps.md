@@ -30,16 +30,18 @@ the PATH pin works in either shell.
 
 - In the Bash tool, `cd` returns exit code 1 even when it changes directory: ~/.bashrc runs `fnm env --use-on-cd`, which replaces `cd` with fnm's `__fnmcd`, and fnm cannot find its settings in the agent shell. So `cd X && cmd` never runs `cmd`. Use the command's own directory flag (`git -C`, `pnpm -C`, `npm --prefix`), or separate commands with `;`.
 
-**Fork-gated suites never run in CI.** `fork-set-net.test.ts`,
-`fork-set-fixtures.test.ts`, `fork-sim-database.test.ts` and
-`wowsims-fork-parity.test.ts` are wrapped in `describe.skipIf(!forkPresent)`
-(the parity suite in `describe.runIf(canRunForkSide)`), and `vendor/` is
-gitignored, so CI collects them and skips them. A green CI run is no
-evidence for them. Run them locally with the fork present —
-`npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/fork-sim-database.test.ts packages/core/test/wowsims-fork-parity.test.ts; echo rc=$?`
+**Fork-gated suites never run in CI.** Every suite that imports
+`forkPresent` — among them `fork-set-net.test.ts`,
+`fork-meta-repair.test.ts`, `fork-run-staleness.test.ts`, the `bulk-*`
+suites and `wowsims-fork-parity.test.ts` — is wrapped in
+`describe.skipIf(!forkPresent)` (the parity suite in
+`describe.runIf(canRunForkSide)`), and `vendor/` is gitignored, so CI
+collects them and skips them. A green CI run is no evidence for them. Run
+every one locally with the fork present, in Bash —
+`npx vitest run $(grep -l forkPresent packages/core/test/*.test.ts); echo rc=$?`
 — and record the command and its rc in the commit or ticket (ticket 478,
-item A5). The `bulk-*` suites are fork-gated too;
-`grep -l forkPresent packages/core/test/*.test.ts` lists every fork-gated suite.
+item A5). The `grep` lists the suites at run time, so a new fork-gated
+suite joins the command without an edit here.
 
 ## Before any scripted or generated file edit
 
@@ -216,7 +218,7 @@ after `capture[0]` shows the tab's nav bar instead of its target, and
 for it. Each later capture goes through the scroll branch of `captureClip`
 in the fork's `test-review.mjs`, which offsets the clip by `window.scrollY`.
 Hypothesis, untested: the page scrolls an inner container, so
-`window.scrollY` stays 0 and the clip lands at the top of the page. Make
+`window.scrollY` stays 0 and the clip is taken at the top of the page. Make
 each element `capture[0]` of its own entry: one entry for the popover, one
 for the row. The row entry in
 `.scratch/stage-gate/494-set-hover-redo/out/current-popover/manifest-rows.json`

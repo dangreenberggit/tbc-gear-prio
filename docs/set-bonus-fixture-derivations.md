@@ -1297,6 +1297,11 @@ Nordrassil Harness 641, Spirit of Eskhandar 261 (18202 is an off-hand-only
 claw, 18203 a main-hand-only claw), Battlegear of Unyielding Strength 495.
 The `brokenSetValues` figures are the test's own inputs.
 
+536-C, D and K pass spec `feral` but use gear a feral druid cannot wear:
+the warrior-only Unyielding Strength set, two claws, and the two-handed
+axe Brain Hacker (pre-merge review round 11, D4). The gear is chosen for
+its set ids. The logic under test does not read the class.
+
 **536-A.** Worn Malorne shoulder, chest, hands and legs: Malorne 4. The
 Leggings of Murderous Intent (29995, no set) go in the legs and displace
 the Greaves of Malorne: Malorne 4 → 3. Lost count 4, which has an entry
