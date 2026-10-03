@@ -200,8 +200,9 @@ through an agent type that pins both:
 
 The spawning agent decides which type to use. If you are unsure whether a
 job is extremely simple, spawn `general-task`. A `simple-task` that returns
-`NEEDS_JUDGMENT` is respawned on `general-task` with the same prompt. Spawn
-these types in place of the built-in `Explore`, `general-purpose` and
+`NEEDS_JUDGMENT` is respawned on `general-task` with the same prompt. A
+`design-task` that returns `WRONG_MODEL` is respawned on `design-task` with
+the model the return says it expected. Spawn these types in place of the built-in `Explore`, `general-purpose` and
 `Plan` types. You cannot set the built-ins' effort at the call site, and
 whether they pin an effort of their own is unverified. If the harness does
 not recognize one of these types, restart the session rather than falling
