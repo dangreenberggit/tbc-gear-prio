@@ -625,6 +625,9 @@ Added since:
   for the design ("Yes pls.", decision-log line 214) and then decided to build it
   ("yes", decision-log line 227). Chunk K6B built it (fork `f09d218e`, main
   `7921a69a`); see "The popover: steps that add up".
+- Rows with no `setContext` show their own Breaks lines, from `singleSwapBreaks`
+  in `view.ts` at render time (ticket 536, fork `cdb423505`). Test:
+  `npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts -t "536"`.
 
 ## Relation to ticket 523
 
