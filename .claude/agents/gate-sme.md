@@ -41,4 +41,15 @@ the engineering team.
 ## Done when
 
 The handoff file exists with a verdict and every finding's evidence, and
-your final message is the verdict plus the handoff path.
+your final message is the verdict, the handoff path, and the
+`## Decisions` section.
+
+End your final message with a `## Decisions` section of at most 10
+lines, placed after everything else except a "Summary for the user":
+one line per decision a reader could not see from the rest of your
+message — an option chosen or dropped, a finding accepted or rejected, a
+deviation — written as `- <decision> — <reason, one line> — evidence:
+<file:line, command, or none>`, or the single line `- none`. A hook
+copies this section into the run log by its exact heading. It does not
+count toward any line limit on your final message, wherever that limit
+is set.

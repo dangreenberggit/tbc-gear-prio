@@ -191,21 +191,28 @@ the session when the definition sets none
 ([sub-agents](https://code.claude.com/docs/en/sub-agents)). So spawn
 through an agent type that pins both:
 
-| Agent type     | Model    | Effort                                                                                                  | Use for                                                                                                                |
-| -------------- | -------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `simple-task`  | `sonnet` | `high`                                                                                                  | An **extremely simple** job: one lookup, one search with a known target, or one edit whose exact text the prompt gives |
-| `general-task` | `opus`   | `high`                                                                                                  | Every other delegated job: implementation, `parallel-phase` workers, review axes, investigation                        |
-| `design-task`  | `opus`   | `xhigh` (`claude --help` lists it on 2.1.267; model-side behavior untested on this install, ticket 518) | Planning and architecture outside stage-gate                                                                           |
-| `gate-*` seats | `opus`   | `high`; `gate-planner` `xhigh`                                                                          | Stage-gate only — see § Stage-gate seats                                                                               |
+| Agent type      | Model    | Effort                                                                                                  | Use for                                                                                                                |
+| --------------- | -------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `simple-task`   | `sonnet` | `high`                                                                                                  | An **extremely simple** job: one lookup, one search with a known target, or one edit whose exact text the prompt gives |
+| `general-task`  | `opus`   | `high`                                                                                                  | Every other delegated job: implementation, `parallel-phase` workers, review axes, investigation                        |
+| `modest-task`   | `opus`   | `medium`                                                                                                | Trial: a modest job where the worker writes the code or text, as § Trial types defines it                              |
+| `discrete-task` | `sonnet` | `high`                                                                                                  | Trial: one job whose result the prompt fixes, as § Trial types defines it                                              |
+| `design-task`   | `opus`   | `xhigh` (`claude --help` lists it on 2.1.267; model-side behavior untested on this install, ticket 518) | Planning and architecture outside stage-gate                                                                           |
+| `gate-*` seats  | `opus`   | `high`; `gate-planner` `xhigh`                                                                          | Stage-gate only — see § Stage-gate seats                                                                               |
 
-The spawning agent decides which type to use. If you are unsure whether a
-job is extremely simple, spawn `general-task`. A `simple-task` that returns
-`NEEDS_JUDGMENT` is respawned on `general-task` with the same prompt. Spawn
-these types in place of the built-in `Explore`, `general-purpose` and
-`Plan` types. You cannot set the built-ins' effort at the call site, and
-whether they pin an effort of their own is unverified. If the harness does
-not recognize one of these types, restart the session rather than falling
-back to a built-in.
+The spawning agent decides which type to use (§ Trial types, "Which type
+takes a small job"). If you are unsure, spawn `general-task`. A
+`simple-task`, `discrete-task` or `modest-task` that returns
+`NEEDS_JUDGMENT`, or a `discrete-task` that returns `WRONG_MODEL`, is
+respawned on `general-task` with the same prompt. A `design-task` that
+returns `WRONG_MODEL` is respawned on `design-task` with the model the
+return says it expected. A second `WRONG_MODEL` from the same job goes to
+the owner, not to another respawn: the check has rejected a correct Opus
+spawn before (ticket 252). Spawn these types in place of the built-in
+`Explore`, `general-purpose` and `Plan` types. You cannot set the
+built-ins' effort at the call site, and whether they pin an effort of
+their own is unverified. If the harness does not recognize one of these
+types, restart the session rather than falling back to a built-in.
 
 > **Changed 2026-09-25.** Before this date the repo preferred Opus at effort
 > `medium`, reserved `high` and above for a single narrow adversarial review
@@ -224,6 +231,105 @@ frontmatter already names one.
 Prefer this harness when a review-lane reviewer from a different vendor than the
 authoring session is wanted, and sequential axes on a rate limit.
 
+#### Trial types
+
+`modest-task` (Opus at effort `medium`) and `discrete-task` (Sonnet 5.5
+at effort `high`) are options the owner asked for on 2026-09-29, run as a
+trial. `general-task` stays the default.
+
+**Which type takes a small job.** A job on the list below ("Always
+`general-task`") goes to `general-task` whatever its size. For any other
+job, ask whether the prompt fixes the whole result, so that checking it
+needs no judgment: the answer is checked against the sources given, the
+command output against the command as reported, the edit against the
+result the prompt states.
+
+- Fixed, and one action → `simple-task`.
+- Fixed, and more than one action → `discrete-task`.
+- The worker chooses any line of code or text, and the job is modest →
+  `modest-task`.
+- Anything else, or unsure → `general-task`.
+
+For code this means: a rename whose old and new names the prompt gives, a
+block moved without change, or text the prompt gives word for word is
+`discrete-task` work. A fix, a new test, a new function, or any edit
+where the worker decides what the code does is `modest-task` work at
+least. For commands: a named check that writes no tracked file
+(`pnpm verify`, a named test), run and reported with its exit code, is
+`discrete-task` work. A generator re-run, or any command that rewrites a
+committed file, is `general-task` work. That `pnpm verify` writes no
+tracked file was checked on 2026-10-03: every step in `package.json`'s
+`verify:steps` is a check or a test run, and `git status --porcelain
+--untracked-files=no` printed nothing after a run. Check again when
+verify gains a step.
+
+**Modest.** A job is modest only when all four hold:
+
+1. The prompt names the files to change and what the result must do. It
+   leaves no choice between approaches open.
+2. The change is small: at most 3 files and 150 changed lines, new
+   files included.
+3. The result is checked before it is accepted. The caller reads the diff
+   and runs a check the prompt names (`pnpm verify`, a named test). When
+   the caller is the interactive session, a `general-task` verifier does
+   this. The worker's own report of a pass does not count.
+4. It is one job: the worker spawns no subagents, fans nothing out, and
+   merges nothing.
+
+**Discrete.** A `discrete-task` job is one of: a question with one named
+target ("which commit added X", "where is Y defined"); commands the
+prompt names that write no tracked file (`git log`, `pnpm verify`, a
+named test), run and reported without diagnosis; or an edit whose exact
+text the prompt states. The caller checks it before accepting it: the
+answer against its sources, the diff against the stated result, plus a
+check the prompt names when code changed. When the caller is the
+interactive session, a `general-task` verifier does this. A list of
+matches means "at least these", and `not found` means unanswered;
+neither is evidence that something is absent.
+
+**Always `general-task` (or its own seat), never `simple-task` or a trial
+type:** any review (a pre-merge axis, a plan review, a claim check, SME or
+visual judgment); planning or architecture; debugging; a question whether
+something exists or is absent; any action `docs/agents/known-traps.md`
+names a trap for, except that `modest-task` may run `node` / `pnpm` /
+test commands, and `discrete-task` may run a named check command that
+writes no tracked file, each with `node --version` run in the same shell
+command and its v22 output confirmed before the result is used; a `sed`
+or script write to a tracked file, and any command that rewrites tracked
+files outside the allowed paths, such as `pnpm format`; any file under
+`data/`, any generated file or regen, and any pin move;
+`vendor/tbc-new-fork`; `.githooks/` and `scripts/`; `AGENTS.md`,
+`CLAUDE.md`, skills and agent files; any stage-gate seat or worker a seat
+spawns; any `parallel-phase` worker; and any job moved off `general-task`
+because of a wall (§ Three lanes). The two trial agent files repeat a
+short form of this list, because a worker reads only its own agent file;
+change all three together.
+
+**Measuring.** A spawn's `agentType` is in
+`~/.claude/projects/<project-dir>/<session>/subagents/*.meta.json`; the
+matching `.jsonl` records the model ID and `effort` that ran. When a check
+rejects or corrects a trial type's result, or someone later finds a wrong
+claim in one, the agent that finds it writes
+`TRIAL-REJECT <type>: <one line saying why>` in its own text, so the
+transcript records it.
+
+**Stopping and review.** On 2026-10-31 a `general-task` counts each
+type's runs, `NEEDS_JUDGMENT` and `WRONG_MODEL` returns, and
+`TRIAL-REJECT` lines, and the owner decides whether each type stays.
+Before that date, every caller stops spawning a type, and the finder
+tells the owner, when either holds:
+
+- a result that passed its check is later found wrong (for
+  `discrete-task`: a wrong or unsourced claim, or an edit that differs
+  from the stated result; for `modest-task`: a change that needs a fix);
+- more than 1 in 10 of its runs so far were rejected, corrected, or
+  returned `NEEDS_JUDGMENT`.
+
+A `discrete-task` run that records any model other than
+`claude-sonnet-5-5` also stops that type until the harness is fixed.
+`sonnet` resolves to Sonnet 5.5 only on Claude Code v2.1.284 or later
+(https://code.claude.com/docs/en/model-config).
+
 #### Stage-gate seats
 
 The `stage-gate` skill fills its seats from these lanes: Planner = design
@@ -237,7 +343,7 @@ and reality disagree, and a plan is underspecified by construction. The
 failure mode there is a silent paper-over, which is a judgment failure and
 not a throughput one. The Executor's `parallel-phase` workers run
 `simple-task` for an extremely simple slice and `general-task` for every
-other slice.
+other slice. Stage-gate uses no trial type from § Trial types.
 
 The orchestrator is the interactive session. The owner picks its model and
 effort per session. Whatever it runs on, it delegates every task

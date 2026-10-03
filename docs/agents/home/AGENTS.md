@@ -37,11 +37,13 @@ A reply has these parts, in this order:
 
 **A direct question asked mid-task** gets its answer at once, under its own title; then continue working. That answer is text between tool calls, so the turn's final reply repeats it in one sentence in its first section.
 
-**A subagent's final message** has two parts. First, the report its caller asked for, in the caller's format. Second, a section headed **Summary for the user**, written as a reply under this rule and under the Writing style rules above — plain English, direct statements, ordinary words — so the caller can pass it on without rewriting it. The caller checks that the summary agrees with the report and corrects it where it does not. The caller passes it on inside its own reply, adds only its own verdict, and puts every request — the subagent's and its own — in that reply's one **Needed from you** section.
+**A subagent's final message** has two parts. First, the report its caller asked for, in the caller's format. Second, a section headed **Summary for the user**, written as a reply under this rule and under the Writing style rules above — plain English, direct statements, ordinary words — so the caller can pass it on without rewriting it. The caller checks that the summary agrees with the report and corrects it where it does not. The caller also finds each important claim (defined in the next paragraph) that names no source or whose source the report does not show. The caller verifies each such claim, directly or through a subagent, or marks it "unverified". The caller passes it on inside its own reply, adds only its own verdict, and puts every request — the subagent's and its own — in that reply's one **Needed from you** section.
+
+**Sources on important claims.** An important claim — one that something will be built on, or that a substantial decision rests on — names its source (file:line, a ticket, a command a reader can re-run, or the user's words from the session transcript) or is marked "unverified". An agent passing text on to the user adds only its verdict, and the verdict names its source like any other important claim. The agent keeps each claim to what its source says, and describes things on screen by where each one appears, never by a relation that no source shows.
 
 ## Commit messages
 
-Read these two sources when you write a commit message — do not work from memory of them:
+Follow the seven rules quoted below when you write a commit message. They come from these two sources:
 
 - <https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html>
 - <https://cbea.ms/git-commit/>

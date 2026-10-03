@@ -34,6 +34,8 @@ Review means a second pass over your finished draft, revising it against the ski
 
 Propose changes to `AGENTS.md`, `CLAUDE.md`, and skill files in chat and wait for approval before editing them. These files steer every future session, so a bad line costs more than a bad commit and nothing catches it.
 
+Subagents receive the root `CLAUDE.md` / `AGENTS.md` text from when the parent session started, so an edit to those files reaches subagents only in a new session. An uncommitted token audit reported this, and on 2026-09-26 a review subagent received an `AGENTS.md` older than the file on disk. A `CLAUDE.md` in another directory, such as a worktree, was loaded from disk when a subagent read a file there; this was seen once.
+
 ## Interacting with the user
 
 How to hand work back — applies to every session, not only orchestration. Message format: global "Chat responses" (staged in `docs/agents/home/AGENTS.md`). When overseeing the plan-review-execute pipeline, the `stage-gate` skill's `## Orchestrator conduct` adds pipeline-specific rules (standing instructions, scoped stops, routing detail outward, gating on open tickets).
@@ -68,7 +70,7 @@ Prefer absolute paths or tool `working_directory` over `cd` in shells whose cwd 
 
 Do not run interactive `pnpm approve-builds` — declare builds via `pnpm.onlyBuiltDependencies`. A permission denial is evidence about that call, not a capability model — if a fan-out or merge precondition cannot be established, stop and report the exact blocked command rather than silently dropping or rewriting the plan.
 
-**A bounded question is a subagent, not a detour.** When answering something takes many reads whose _content_ you will not reuse — measuring a filter, probing what upstream actually does, confirming a spec claim — send it out and keep the paragraph, not the thirty tool calls. This is not the `parallel-phase` fan-out: no worktree, no merge, nothing to sequence, so its disjointness rule does not apply. Match the agent type to the judgment, not the token count: only an extremely simple job goes to `simple-task`, and a question that needs judgment (does this measurement support this conclusion?) goes to `general-task`. The tell that you got this wrong is retrospective — you are deep in a file you only opened to answer one question.
+**A bounded question is a subagent, not a detour.** When answering something takes many reads whose _content_ you will not reuse — measuring a filter, probing what upstream actually does, confirming a spec claim — send it out and keep the paragraph, not the thirty tool calls. This is not the `parallel-phase` fan-out: no worktree, no merge, nothing to sequence, so its disjointness rule does not apply. Match the agent type to the judgment, not the token count: only an extremely simple job goes to `simple-task`, a question with one named target that takes more than one lookup may go to the trial type `discrete-task` (model-policy § Trial types), and a question that needs judgment (does this measurement support this conclusion?) goes to `general-task`. The tell that you got this wrong is retrospective — you are deep in a file you only opened to answer one question.
 
 ### CLI environment
 
@@ -125,9 +127,11 @@ effort high — it holds the adapt-vs-flag-vs-stop call on every
 underspecified step), with judged gates between stages and a bounded
 loop-back.
 The plan is reviewed before any code exists; `pre-merge-review` still runs
-after, unchanged. Seats are agent definitions under `.claude/agents/` —
-files added there register at session start only, so a new or edited seat
-needs a fresh session.
+after, unchanged. Seats are agent definitions under `.claude/agents/`.
+New agent files can register mid-session: `simple-task`, `general-task` and
+`design-task` (added in 1d86fd48 on 2026-09-25) appeared in the coordinator
+session's harness notices without a restart. Whether an edit to an existing
+seat is picked up the same way is untested.
 
 ### Parking WIP
 
@@ -142,22 +146,24 @@ The session makes only these tool calls itself:
 - spawning and messaging agents
 - loading a skill
 - writing `brief.md`, `decision-log.md`, and any stage artifact copied verbatim from a seat's final message
-- the short gate checks: `git status --porcelain`, `git rev-parse HEAD`, `git diff --stat`
+- the short gate checks: `git status --porcelain`, `git rev-parse HEAD`, `git diff --stat`, and `date -u +%Y-%m-%dT%H:%MZ` for `decision-log.md` times
 - reading the stage-gate artifacts under `.scratch/stage-gate/<slug>/` and `.claude/skills/stage-gate/plan-template.md`
 
 Everything else goes to a subagent: reading code or docs, running `pnpm` or any other `git` command, editing files, and committing. To run `pre-merge-review`, spawn one subagent to run the whole skill. Allow it to write `docs/reviews/` and `.scratch/carry-forward/` and to commit them, and have it return the review file's path and its summary.
 
 Pick each subagent's model from your harness section of [`docs/agents/model-policy.md`](docs/agents/model-policy.md), and name the model on every spawn:
 
-- **Claude Code:** pick `simple-task`, `general-task` or `design-task` from the agent-type table in model-policy § Claude Code, and run `pre-merge-review` on a `general-task`. If the harness does not recognize one of these types, restart the session rather than falling back to a built-in type.
+- **Claude Code:** pick `simple-task`, `general-task`, `design-task` or a trial type (`modest-task`, `discrete-task`) from the agent-type table in model-policy § Claude Code, and run `pre-merge-review` on a `general-task`. When unsure, pick `general-task`. If the harness does not recognize one of these types, restart the session rather than falling back to a built-in type.
 - **Codex:** everything that is not review or design goes to subagents at the workhorse fill, mid tier at a lower reasoning effort. The owner wants these used freely. Review and design jobs go to subagents at the review and design fills.
 - **Cursor:** everything that is not review or design goes to subagents on the workhorse pin, Composer. Review and design jobs go to subagents at the review and design fills.
 
 This rule binds the interactive session only. A subagent that orchestrates — the stage-gate Executor, or a subagent spawned to run `parallel-phase` as Delegator — does its own work, merge and fan-in.
 
+Any agent that splits a research question across subagents, whether the session or a subagent, splits it until each piece is narrow enough for one agent to answer with its own reads, and puts this sentence in every subagent's prompt: "Your job is one narrow investigation: do it yourself and spawn no subagents."
+
 ### Models and walls
 
-Three lanes, every harness, sorted by **kind of work, not model height**: **workhorse** for implementation / parallel workers, **review** for pre-merge review axes and adversarial judgment, **design** for planning and architecture. Go slower or serial on walls; never invent a weaker substitute for a _review_ job — if waiting and serialising both fail, stop and say so rather than downgrading; and never promote a job to a taller lane it does not belong in. Managers must not background workers and end the turn without a disk handoff for fan-in (see model-policy § Manager / multi-step fan-out). Filling the lanes: on **Claude Code**, **Opus at effort `high`** for workhorse and review, **Opus at effort `xhigh`** for design, and **Sonnet at effort `high`** only for an extremely simple job. The spawn cannot set effort, so spawn the agent type whose frontmatter sets it (model-policy § Claude Code). Name the model on every spawn: a session on Fable makes an unnamed built-in subagent inherit Fable, the top price tier; on **Codex**, mid tier for workers and `codex exec` / top tier for review; on **Cursor**, workhorse = **Composer** (pinned, not merely preferred, because on Pro the Other-pool Terra/Sol models often die at spawn) and review = **Grok high** (prefer non-fast; high-fast if that’s the only high slug) — do **not** probe Sol/Opus first, and do not burn Grok on every trivial worker. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).
+Three lanes, every harness, sorted by **kind of work, not model height**: **workhorse** for implementation / parallel workers, **review** for pre-merge review axes and adversarial judgment, **design** for planning and architecture. Go slower or serial on walls; never invent a weaker substitute for a _review_ job — if waiting and serialising both fail, stop and say so rather than downgrading; and never promote a job to a taller lane it does not belong in. Managers must not background workers and end the turn without a disk handoff for fan-in (see model-policy § Manager / multi-step fan-out). Filling the lanes: on **Claude Code**, **Opus at effort `high`** for workhorse and review, **Opus at effort `xhigh`** for design, and **Sonnet at effort `high`** for an extremely simple job; two trial types, `discrete-task` on Sonnet and `modest-task` on Opus at effort `medium`, take the small jobs model-policy § Trial types names. The spawn cannot set effort, so spawn the agent type whose frontmatter sets it (model-policy § Claude Code). Name the model on every spawn: a session on Fable makes an unnamed built-in subagent inherit Fable, the top price tier; on **Codex**, mid tier for workers and `codex exec` / top tier for review; on **Cursor**, workhorse = **Composer** (pinned, not merely preferred, because on Pro the Other-pool Terra/Sol models often die at spawn) and review = **Grok high** (prefer non-fast; high-fast if that’s the only high slug) — do **not** probe Sol/Opus first, and do not burn Grok on every trivial worker. See [`docs/agents/model-policy.md`](docs/agents/model-policy.md).
 
 ### The loop
 
