@@ -281,7 +281,11 @@ above ("wowsims' optimizer on the same repairs"). Ticket 343 records it.
 - **The hit budget: ret and feral only.** Dual-wield white swings miss 27%
   at zero hit, so hit past 9% still helps them; casters keep school hit in
   per-school pseudo-stats and Balance of Power is a per-spell mod; hunters'
-  ranged hit is unexamined.
+  ranged hit is unexamined. The budget is set per spec, not per build: the
+  sim adds the dual-wield miss penalty only when the off hand has a swing
+  speed (`sim/core/attack.go:441`), so a two-handed warrior or enhancement
+  shaman has ret's 9% cap and still gets full-weight repair (pre-merge
+  review round 11, D1).
 - **The exact search with credit: every spec the fork tab ranks.** Measured
   with sims on ret and feral; on rogue P2 and enhancement P3 gear only timed
   and scored with V, not simmed. Step 4 Part C ran the shipped search on the
@@ -302,7 +306,12 @@ above ("wowsims' optimizer on the same repairs"). Ticket 343 records it.
 ### Limits
 
 - An item row whose single swap changes a set's count keeps the local
-  budget, which misses that set's hit.
+  budget, which misses that set's hit. The sets that give melee hit rating
+  are in the fork's `sim/common/tbc/items_sets.go`: Doomplate 2pc +35
+  (line 21), Wastewalker 2pc +35 (line 54), Burning Rage 2pc +20 (line
+  121), Netherscale 3pc +20 (line 164) and Thick Draenic 2pc +15 (line
+  219). Wastewalker is leather, so this limit applies to feral as well as
+  ret (pre-merge review round 11, D2).
 - The worn-set ladder keeps one shared layout, chosen without a budget when
   the baseline needs a repair.
 - A feral druid's own Improved Faerie Fire is applied through Faerie Fire
@@ -401,3 +410,15 @@ set-kept version wore two Inscribed Noble Topaz and no Rigid Dawnstone
 The tab loaded the "after" ret recording and drew its table with no error
 banner. No part of the tab shows a row's gem changes, so that half of the
 visual check could not be judged.
+
+## Comment 2026-10-03: closing item 1 (pre-merge review round 11, P1)
+
+Item 1 asked which path chose the Rigid Dawnstone in the F1 gear. Meta
+repair did. In the table "Baseline and swapped-gear hit" above, each chest
+row's gear hit as built (with greedy repair) is 16 more than the same gear
+without the repair's hit gems (for example 75 against 59), which is two
+Rigid Dawnstones at +8 hit each. Tests 535-R1 to R4 pin the result after
+the fix: the over-cap chest rows get Inscribed Noble Topaz and the others
+keep two Rigid Dawnstones. Re-run:
+`npx vitest run packages/core/test/fork-meta-repair.test.ts` (fork-gated,
+Node 22).

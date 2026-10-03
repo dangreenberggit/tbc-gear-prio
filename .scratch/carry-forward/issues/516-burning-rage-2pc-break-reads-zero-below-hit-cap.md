@@ -95,7 +95,7 @@ Wrap socket bonus are counted, only about 4.3 of the 20 rating is below
 the cap (measured below). The "tens of DPS" premise came from the tab
 readout, which omits debuff and enchant hit (ticket 521). P2 package
 gear: the exact 0 comes from meta repair's dead Rigid Dawnstones. Ticket
-535 owns it, and its fix carries the test
+535 owns it, and its fix includes the test
 (`.scratch/stage-gate/535-meta-repair-hit/measurement.md`). The title's
 "below the hit cap" is true of neither gear.
 

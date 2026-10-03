@@ -322,6 +322,6 @@ the non-set row's popover: the row plus the best set piece for another
 slot, with the break it avoids. Keep ranking rows by the solo figure, so
 the pair explains the row and does not move it.
 
-**When to revisit.** Once tickets 500 and 505 land, re-run this scan on a
+**When to revisit.** Once tickets 500 and 505 are closed, re-run this scan on a
 feral phase-5 run (the owner's P4-to-P5 example in the body) and decide
 from that result whether the fix sketch is needed.

@@ -900,3 +900,157 @@ ticket.
 | P3 / K-c            | Spec, Standards, Adversarial | wontfix     | No spec, owner decision or visual acceptance asks for a marker colour, and the marker is text, so its meaning does not depend on colour. ADR-0035 lines 615-617 record why it has none (the stylesheet was outside K6's paths) and that no saved ranking has a row that shows it, so a colour could not be checked on a real render now.                                                                                                                          |
 | P6                  | Spec                         | wontfix     | Intended by the 494 redo: its plan review made `not_counted` an internal kind name with no "not counted" label (`.scratch/stage-gate/494-set-hover-redo/gate-b-amendments.md` N4), and ticket 494's closing comment records that the owner confirmed the copy and that `not_counted` now reads "set detail".                                                                                                                                                      |
 | P7                  | Spec                         | fixed       | Old literals in dated comments on closed tickets stay as records. Main `8a3ecc12` (PF6): ticket 520's body line "Open until the owner rules" is removed.                                                                                                                                                                                                                                                                                                          |
+
+# Round 11 — round 10 fixes, tickets 513, 514, 516, 530–537 and 343
+
+Reviewed range: `fbd2e3dfb5d74a0d6ef535b1730ceedd35abafa2..d9a1b25f38d968cf0eac08b0f17f885f4136b719` (main); fork `f09d218ed4e9afc2d1a1350f3b67572c33b5cd0b..3613d654fa56439f84c35d8e0ad1f4cdd61953b8`
+
+The range starts at round 10's recorded through-sha, so it includes round
+10's own fix commits (main `927a1b64`, `8a3ecc12`, `8dfffad6`; fork
+`587fe9f24`) as well as the work on tickets 533, 532, 530, 514, 534, 516,
+531, 536, 513, 537, 535 and 343. Main holds 35 commits, none of them
+merges (`git log --oneline fbd2e3df..d9a1b25f`): 36 files, +4929/−176,
+most of it ticket markdown and the new `fork-meta-repair.test.ts`. The
+fork window is 14 commits, 30 files, +2220/−446, every one re-pinned in
+main.
+
+Dispatch: fresh `general-task` agents on Opus (effort high) — adversarial
+and domain on the `.agents/reviews/` briefs, and the `code-review` skill's
+Standards and Spec halves as two agents. No `codex` binary on PATH. The
+first agent sent to run `code-review` handed back before its own two
+sub-agents reported; its test run is kept below, and the two halves were
+dispatched again directly. Every axis was told it writes nothing; each
+reported the same dirty state (six untracked owner handoffs and this
+file's round header) and a clean fork at `3613d654f`.
+
+Tests run by the axes, under Node 22.17.1:
+`npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/fork-sim-database.test.ts packages/core/test/wowsims-fork-parity.test.ts packages/core/test/fork-meta-repair.test.ts packages/core/test/fork-run-staleness.test.ts`
+rc=0, 141 passed, 1 skipped (the parity suite's placeholder,
+`describe.skipIf(canRunForkSide)` at line 998). In the fork,
+`go -C vendor/tbc-new-fork test -tags=with_db ./sim/ -run 'ItemSwap|OffClass|WeaponProc' -count=1 -v`
+rc=0, 23 passed. `python scripts/check_engine_port_drift.py` rc=0.
+
+## Adversarial
+
+Nothing blocking: no path found that shows a wrong number with no warning.
+Material: **A1** a `computeStats` read (new with 535) has no timeout and
+Stop cannot end one in flight (fork `ui/core/worker_pool.ts:114-117`,
+`rank.ts` about 1108-1135 and 3989-3995); ticket 535 records one feral
+recording that stalled for 25 minutes before its first sim, cause unknown
+(hypothesis, untested, that this is the cause). Minor: **A2** a change to
+race, rotation, spec options or bonus stats does not mark a shown result
+stale; `upgrades_tab.tsx:1579-1596` wires the gear, talents, sim, raid and
+encounter emitters only, and `raid.changeEmitter` does not include the
+player's (pre-existing; hypothesis, untested in a live tab). **A3** a
+failed hit read falls back to full-weight repair with only a console
+warning and no on-screen notice (`rank.ts:1128-1134`, `1225-1232`). **A4**
+the 531 stale-pointer pattern remains at Twin Blades of Azzinoth, Hand of
+Justice and two arms-warrior talent sites; they do not panic, but the proc
+chance does not follow a swap. **A5** the two new Go test files fail
+without `-tags=with_db`. **A6** the 535 work limit counts merges, not the
+enumeration of each item's options (hypothesis, untested). Checked clean:
+the exact search's state merge, minimality test, hit term and two-way
+socket-bonus credit; the oracle recomputes value from definitions, not
+production code; 530's seeds; 533's Stop path through `setContext` and the
+skipped warnings; 536's predicates; 513's removed assertion was vacuous;
+`NewDynamicLegacyProcForWeapon` rebuilds in place; the lock names fork
+HEAD; fork `se.ts` equals core's.
+
+## Domain
+
+No blocking or material findings. The 535 hit budget, the 532 off-class
+guards, the 531 weapon-proc fix and ticket 514's pre-raid reading agree
+with the Go sim at `3613d654f`: 9% physical cap against a level-73 target
+(`sim/core/target.go:393-399`), Improved Faerie Fire 3%
+(`debuffs.go:43-44,360-370`), `PseudoStatMeleeHitPercent = 12`, the
+ret-p3-p2 baseline 52 hit giving 6.2976%, meta conditions read from
+upstream's `gems.ts`, Rigid Dawnstone +8 hit and rare, the Cryptstalker
+class-mask collision, Justicar 4pc a flat Judgement of Command mod that
+the default ret rotation never uses. Minor: **D1** the hit budget is per
+spec, but a two-handed warrior or enhancement shaman has ret's 9% cap
+(`sim/core/attack.go:441`), and neither the `repairCap` doc nor ticket 535
+said so. **D2** the single-swap limit (set-bonus hit missed) also applies
+to feral, through Wastewalker 2pc. **D3** `socketBonusActive` (core and the
+fork port) gives the socket bonus when the meta socket is empty; the sim
+does not (`sim/core/database.go:633-641`), and the new hit sums read the
+rule. **D4** tests 536-C, D and K pass spec `feral` while wearing the
+warrior-only Unyielding Strength set, two claws, or a two-handed axe; the
+logic under test does not depend on class. **D5** = A4.
+
+## Standards + Spec
+
+**Standards.** Every hashed PROVENANCE row matches its file at
+`3613d654f`; the ten re-pin commits cover all 14 fork commits, and the lock
+and `data/sim-implemented-effects.json` both name `3613d654f`. Hard,
+wording only: **ST1** "carries" in fork `engine/candidate-gems.ts:76` and
+`engine/caps.ts:54,58`; **ST2** "carries" in a test name,
+`fork-meta-repair.test.ts:1587`; **ST4** "lands" in
+`docs/agents/known-traps.md:219`; **ST5** "landed" in
+`docs/upgrades-tab-scope.md:136`; **ST6** "carries" and "land" in tickets
+516 and 523. Judgement: **ST3** "shape" for a set of hit values,
+`fork-meta-repair.test.ts:1669`; **ST7** `fork-meta-repair.test.ts:5,14`
+and `meta-repair-oracle.ts:6` cite the gitignored 535 plan (fork
+`3613d654f` removed the same kind of citation from `rank.ts`); **ST8**
+`view.ts:322,325` comments tell the change's history; **ST9**
+`view.ts:329` `singleSwapBreaks` repeats `rank.ts:3698-3712`'s break list
+with different inputs; **ST10** one Stop-check warning guard five times in
+`rank.ts`; **ST11** `candidateSwapPreRepair` exported only for tests. Three
+new commit-message style breaks in pushed history (**CM**).
+
+**Spec.** Every round 10 Disposition row checked holds in the code, and
+all 12 tickets closed in the window meet their closing items; every test
+id named as evidence is in a test title. Findings, all judgement: **P1**
+ticket 535 item 1 ("Find which path chose the Rigid Dawnstone … record the
+command") was answered only by implication. **P2** ticket 535 went beyond
+its item 2: each version of the set gear now gets its own repair, a change
+to the same-gear method the owner approved ("sims the same gear twice …
+thats fine", ticket 514), and ADR-0035 line 700 says the decision is the
+orchestrator's (Q-535-same-gear-amendment), not the owner's. **P3**
+known-traps' list of fork-gated suites misses `fork-meta-repair.test.ts`
+and `fork-run-staleness.test.ts`. **P4** tickets 533, 532 and 537 each grew
+by an orchestrator ruling recorded in the ticket. **P5** the map has no
+line for ticket 536.
+
+## Summary
+
+Nothing blocks a merge on correctness, domain facts or spec. Round 10's
+fixes hold, the 12 tickets closed in the window meet their closing items,
+the fork-gated suites pass (141 passed, 1 skipped) and the Go tests pass
+with the `with_db` tag. One decision belongs to the owner (P2: keep the
+per-version repair that ticket 535 added to the set measurement, or not).
+Four real follow-ups are new tickets: the stats read's missing timeout
+(538), player-setting changes not marking a result stale (539), the
+remaining stale proc pointers (540) and the empty-meta socket-bonus rule
+(541). Ticket and map wording (ST6, P1, D2, P5, and the ticket half of D1)
+is fixed in this commit. The rest are small inline fixes for the
+orchestrator to dispatch, grouped as R11-PF1 to R11-PF4 in the `pending`
+rows below; until each row becomes `fixed` or `wontfix`,
+`pnpm merge-to-dev --check-only` refuses this file.
+
+## Disposition
+
+| ID            | Axis                | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                   |
+| ------------- | ------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1            | Adversarial         | defer       | `.scratch/carry-forward/issues/538-stats-read-has-no-timeout-and-ignores-stop.md` — reproduce the stall or rule it out, then race each read against Stop and a timeout.                                                                                                                                         |
+| A2            | Adversarial         | defer       | `.scratch/carry-forward/issues/539-player-setting-changes-do-not-mark-result-stale.md` — pre-existing listener gap; confirm in a live tab first.                                                                                                                                                                |
+| A3            | Adversarial         | pending     | R11-PF4 (fork code): when the hit read fails, or `hitCapBudgetFrom` returns undefined, add a `substitutions` entry so the ranking says repair used full weight (`rank.ts:1128-1134`, `1225-1232`); test beside 535-S3; PROVENANCE cycle and re-pin.                                                             |
+| A4 / D5       | Adversarial, Domain | defer       | `.scratch/carry-forward/issues/540-procs-keep-old-proc-chance-after-item-swap.md` — outside this range's changes; needs a Go test per site.                                                                                                                                                                     |
+| A5            | Adversarial         | wontfix     | The commands recorded in tickets 531 (line 265) and 532 (line 231) pass `-tags=with_db`, as the fork's `makefile:279` does for `./sim/...`; the reviewer's brief omitted the tag. The tagged run passes (23).                                                                                                   |
+| A6            | Adversarial         | wontfix     | Ticket 535's Scope records the shipped search timed on rogue P2 (at most 22.7 ms per repair) and enhancement P3 (at most 9.3 ms), none past the limit; an unbounded enumeration is unobserved.                                                                                                                  |
+| D1            | Domain              | pending     | Ticket half fixed in this commit (535 Scope names the two-handed case). R11-PF1 (fork): add the same sentence to the `repairCap` doc in `engine/cap-profile.ts` (about line 74).                                                                                                                                |
+| D2            | Domain              | fixed       | This commit: ticket 535 Limits names the five sets with melee hit (`sim/common/tbc/items_sets.go` lines 21, 54, 121, 164, 219) and says the limit applies to feral.                                                                                                                                             |
+| D3            | Domain              | defer       | `.scratch/carry-forward/issues/541-socket-bonus-counted-with-empty-meta-socket.md` — rule predates this range; confirm with a sim reading, then fix core and the fork port.                                                                                                                                     |
+| D4            | Domain              | pending     | R11-PF3 (main doc): in `docs/set-bonus-fixture-derivations.md`, say 536-C, D and K use gear chosen for its set ids that a feral druid cannot wear, and that the logic under test does not read the class.                                                                                                       |
+| ST1, ST8      | Standards           | pending     | R11-PF1 (fork, with D1; PROVENANCE cycle and re-pin): "carries" to "has" or "holds" at `candidate-gems.ts:76` and `caps.ts:54,58`; `view.ts:322,325` keeps only "Runs at render time, so a recorded ranking shows the breaks too."                                                                              |
+| ST2, ST3, ST7 | Standards           | pending     | R11-PF2 (main tests, comments and one test name): `fork-meta-repair.test.ts:1587` "carries set hit" to "has set hit"; `:1669` "shape" to "hit values"; `:5,14` and `meta-repair-oracle.ts:6` cite ticket 535's file, not the gitignored plan, and drop "now".                                                   |
+| ST4, P3       | Standards, Spec     | pending     | R11-PF3 (main doc): `docs/agents/known-traps.md:219` "the clip lands at the top" to "the clip is taken at the top"; add `fork-meta-repair.test.ts` and `fork-run-staleness.test.ts` to the fork-gated list and command (lines 33-39).                                                                           |
+| ST5           | Standards           | pending     | R11-PF3 (main doc): `docs/upgrades-tab-scope.md:136` "landed in core" to "was merged in core".                                                                                                                                                                                                                  |
+| ST6           | Standards           | fixed       | This commit: ticket 516 "carries" to "includes"; ticket 523 "land" to "are closed".                                                                                                                                                                                                                             |
+| ST9           | Standards           | wontfix     | The view copy runs at render time on a recorded ranking and the engine's at rank time, with different inputs; merging them is a refactor with no spec need now (as round 10's ST9). The adversarial and spec axes found 536's behaviour correct; whether the `removedItems` difference matters was not checked. |
+| ST10          | Standards           | wontfix     | Five one-line guards; a helper would save little, and tests 533-S/W, R and K cover the Stop path.                                                                                                                                                                                                               |
+| ST11          | Standards           | wontfix     | `AGENTS.md` § Testing allows direct tests of pure functions such as the gem solver; splitting `rank.ts` stays out of scope (round 10, ST9).                                                                                                                                                                     |
+| CM            | Standards           | wontfix     | Pushed history; commits are not amended (round 10, ST1/ST2).                                                                                                                                                                                                                                                    |
+| P1            | Spec                | fixed       | This commit: a ticket 535 comment names meta repair as the path (16 more gear hit as built than without the repair's gems, two +8 Rigid Dawnstones) and gives the test command.                                                                                                                                 |
+| P2            | Spec                | pending     | Owner ruling Q-535-same-gear-amendment: keep per-version repair in the set measurement (then `wontfix`, owner accepted) or not (then a ticket to restore one shared layout).                                                                                                                                    |
+| P4            | Spec                | wontfix     | Each widening is an orchestrator ruling recorded in its ticket (533, 532, 537:76); listed for the owner in the report, no code change.                                                                                                                                                                          |
+| P5            | Spec                | fixed       | This commit: `.scratch/carry-forward/map.md` has a line for 536.                                                                                                                                                                                                                                                |

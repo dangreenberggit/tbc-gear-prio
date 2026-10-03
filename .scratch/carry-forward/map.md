@@ -283,3 +283,8 @@ file contention, worker prompt. This file stays the chronological log.
 - 534 Set popover shows one lost bonus at two values without naming the gear (pre-merge review round 10, D2/P4) 2026-10-02
 - 535 Meta-gem repair may put hit gems on hit-capped set gear, hypothesis (pre-merge review round 10, D3) 2026-10-02
 - 537 A gear change during a run may leave the result marked fresh, hypothesis (independent review of 536, F4) 2026-10-03
+- 536 The tab hides a lost set bonus on non-set rows (investigation, first noticed as plan-review finding F6; filed at main `a6b26cc6`, closed at `37b33008`) 2026-10-02
+- 538 A stats read has no timeout and Stop cannot end it, hypothesis (pre-merge review round 11, A1) 2026-10-03
+- 539 Changing race, rotation, spec options or bonus stats does not mark the result stale, hypothesis (pre-merge review round 11, A2) 2026-10-03
+- 540 Some weapon and talent procs keep the old proc chance after an item swap (pre-merge review round 11, A4/D5) 2026-10-03
+- 541 The socket bonus counts as active when the meta socket is empty (pre-merge review round 11, D3) 2026-10-03
