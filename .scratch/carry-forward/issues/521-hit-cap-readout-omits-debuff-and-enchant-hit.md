@@ -64,3 +64,14 @@ page.
 
 Other caps in `caps.ts`, such as expertise, may have the same omission.
 This is a **hypothesis, untested**.
+
+## Comment 2026-10-03: reusable hit helpers from ticket 535
+
+At fork `890e8e643`, `gearHitRating`
+(`vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/caps.ts`)
+counts item, enchant, gem and active socket-bonus hit, and
+`hitCapBudgetFrom` (`engine/cap-profile.ts`) applies Improved Faerie Fire
+from the request's `raid.debuffs` and withholds the budget unless every
+target is level 73. The readout (`capStateFrom`) can reuse them. Ticket
+535's test 535-L0 checks `gearHitRating` against the sim's gear hit (52 on
+ret-p3-p2). This ticket stays open.

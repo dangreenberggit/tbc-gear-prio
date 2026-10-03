@@ -1,6 +1,6 @@
 # ADR-0035 — Set rows are valued by a sim of gear the player could wear
 
-**Status:** accepted
+**Status:** accepted; amended 2026-10-03 by ticket 535
 **Date:** 2026-10-02
 **Related:** [`ADR-0034`](0034-set-bonus-row-values-are-not-additive.md) (superseded in part here: the walk (R1) and the rule for when a row equals the measured swap, for a step ranking); tickets `.scratch/carry-forward/issues/511-ret-set-credit-counts-bonuses-with-no-ret-dps.md`, `512-set-breaks-model-only-six-tier-sets.md`, `514-set-bonus-value-carries-gear-dependent-residue.md`, `490-commit-break-assumes-top-package-over-charges-other-sets.md` (owner-quote correction), `523-moving-a-worn-set-to-other-slots-cannot-be-shown.md`, `530-tab-replicate-seeds-overlap.md`, `532-off-class-cryptstalker-sims-fail.md`; fork engine files `partner-choice.ts`, `set-screen.ts`, `set-less-copies.ts`, `rank.ts`, `view.ts` under `vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/`; fixtures in `packages/core/test/fork-set-net.test.ts`, derived in `docs/set-bonus-fixture-derivations.md`; stage-gate `511-512-set-credit`
 
@@ -449,7 +449,9 @@ mods only for listed hands ids (`RegisterPvPGloveMod`, C112), and equipped-id
 reads in trinket, ring, weapon, item-swap and class code (C10). A copy lacks
 every such effect. The pieces whose set membership changes are copies in both
 requests of a gate or rung, so the effect is missing from both sides. Values
-are therefore measured without those effects (limit (c)).
+are therefore measured without those effects (limit (c)). Since ticket 535,
+the two requests can differ in the gems a meta repair chose, each for its own
+hit ("Amendment, ticket 535" below).
 
 **G1, rejected.** Extending the Go-source generator to list id-keyed effects
 would be a generated list. Its correctness depends on the parser finding every
@@ -674,3 +676,45 @@ Still in force from ADR-0034: row figures are not additive; best-stop
    back; close-calls adds up to about 4%.
 5. A change to the partner rule or the screen rule needs a new check like K5P or
    K5E, because each constant comes from that scoring.
+
+## Amendment, ticket 535: repair sees each version's own hit
+
+Plan: `.scratch/stage-gate/535-meta-repair-hit/plan.md` (gitignored). Fork
+`890e8e643`; the record is
+`.scratch/carry-forward/issues/535-meta-repair-may-add-dead-hit-gems-to-set-gear.md`.
+
+This ADR measures a bonus by simming "the same gear twice", and
+`set-less-copies.ts` says the copies keep every stat. Before ticket 535, a
+meta repair in the set phase was chosen once, with a hit budget that cannot
+see set-bonus hit, so on the set-kept side it could place hit the bonus had
+already supplied. That is a hit-cap error, the one 535 fixes, not a
+different way of measuring. Since 535, repair sees each version's own hit:
+each version of a set gear (the screen's rungs, a gate's "on" and "off",
+a step and its bonus-off split) reads its own hit from the sim and gets the
+repair chosen for it. The two versions share items, enchants and every gem
+outside the sockets a meta repair changed. Inside those sockets each version
+wears the repair chosen for its own hit. Where no repair happened, or the
+bonus gives no hit, the two versions' gems are identical and the
+measurement is exactly as before.
+
+**The decision is the orchestrator's (Q-535-same-gear-amendment,
+2026-10-03), not the owner's.** Its three reasons:
+
+1. The shared layout is chosen with a hit budget that cannot see set-bonus
+   hit, so on the set-kept side it is a hit-cap bug, the bug 535 fixes, not a
+   change of measurement method.
+2. The owner's stated view of this angle favours sensible gems on each side.
+   The owner's words, a perspective on one angle and not a ruling: "It seems
+   obvious, not considering other downside, but just this one angle of
+   comparison and gemming, that the set bonus set should have gems a player
+   would use that make sense and are better and not purposely bad, rather
+   than just the same gems blindly. That's all I'm saying."
+3. The plan reviewer's fixes R-1 to R-4 address the risk: the reads go
+   through the Stop guard, a pair's versions come from one call, a package's
+   gem changes name the build that was simmed, and the search has a work
+   limit.
+
+On ret-p3-p2 the change moves one screen reading: Burning Rage 2pc's pair
+goes from exactly 0 to +7.36, and the screen still drops the set, now as
+"below-zero". On feral-p3-p2bis, screen pairs 640, 641 and 676 move by up to
+1.32 DPS with the same verdicts. The worn-set ladder keeps one shared layout.

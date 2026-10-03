@@ -131,3 +131,13 @@ Both requests report `sets: ["Burning Rage (2pc)"]`, including noBS.
 by piece count only. The profession check skips the bonus's effect
 (`item_sets.go:210-213`) and does not remove its name. The 20-rating gap
 between the two requests shows the check works.
+
+## Comment 2026-10-03: the set 566 reading after ticket 535
+
+Ticket 535 closed on 2026-10-03 (fork `890e8e643` and `3613d654f`, main
+`c8e5a8be` and `6535ad92`). Each version of a set gear now gets the repair
+chosen for its own hit. On the ret-p3-p2 recording
+(`corepack pnpm tab-fixtures:record --spec ret --phase 3 --name p2 ...`,
+before at fork `72bc102f2`, after at `890e8e643`), set 566's screen pair
+went from 0 (reason `exact-zero`) to +7.36 (reason `below-zero`). The set is
+still not kept. Ticket 535's close has the full comparison.
