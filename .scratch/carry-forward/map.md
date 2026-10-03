@@ -282,3 +282,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 533 Stop does nothing while the set phase runs (pre-merge review round 10, A4) 2026-10-02
 - 534 Set popover shows one lost bonus at two values without naming the gear (pre-merge review round 10, D2/P4) 2026-10-02
 - 535 Meta-gem repair may put hit gems on hit-capped set gear, hypothesis (pre-merge review round 10, D3) 2026-10-02
+- 537 A gear change during a run may leave the result marked fresh, hypothesis (independent review of 536, F4) 2026-10-03
