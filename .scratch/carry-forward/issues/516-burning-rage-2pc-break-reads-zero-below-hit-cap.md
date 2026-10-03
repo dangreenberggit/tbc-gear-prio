@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/handoffs/511-512-set-credit-redesign/d1-measurements.md (round 2e-1 measurements, 2026-09-25)
 Blocks: none
@@ -85,3 +85,49 @@ and commands are in ticket 511's comment of the same date.
   pre-raid gear. There, K1's +6.5966 (above) shows the bonus is worth DPS
   below the cap. The ticket's title, "below the hit cap", fits that gear
   and not the P2 gear.
+
+## Closed 2026-10-02: explained, no defect
+
+Pre-raid: +6.60 ± 1.56 (K1 M7,
+`.scratch/stage-gate/511-512-set-credit/k1-measurements.md:108-109`) is
+expected. Once Improved Faerie Fire, Glyph of Ferocity and the Vengeance
+Wrap socket bonus are counted, only about 4.3 of the 20 rating is below
+the cap (measured below). The "tens of DPS" premise came from the tab
+readout, which omits debuff and enchant hit (ticket 521). P2 package
+gear: the exact 0 comes from meta repair's dead Rigid Dawnstones. Ticket
+535 owns it, and its fix carries the test
+(`.scratch/stage-gate/535-meta-repair-hit/measurement.md`). The title's
+"below the hit cap" is true of neither gear.
+
+### The measurement
+
+`/computeStats` on the managed `wowsims-backend` (:3333, fork
+`b1eb1de85`), for the two K1 requests
+`.scratch/stage-gate/511-512-set-credit/probe/requests/ret-p2-preraid/sent/base.json`
+and `noBS.json`. The two differ only in `profession2: Blacksmithing`.
+
+| Request | Melee hit rating (final) | Melee hit % (final) |
+| --- | --- | --- |
+| base (Blacksmithing) | 63 | 6.9951 |
+| noBS (no profession2) | 43 | 5.7268 |
+
+The sim's cap is 6.0% with Improved Faerie Fire counted. 20 rating is
+1.2683%, so 15.77 rating per 1%. Without the bonus the gear is 0.2732%
+below the cap, which is 4.31 rating. The other 15.69 rating of the bonus
+is over the cap.
+
+Command, from the repo root with Node 22 on PATH:
+
+```
+node_modules/.bin/tsx .scratch/stage-gate/511-512-set-credit/f1/stats516.mts --warm
+```
+
+`stats516.mts` is a copy of `f1/stats.mts` with `REQS` pointed at the two
+files above. Output: `f1/stats516-warm.log` and `f1/stats516-warm.json`
+(all under `.scratch/stage-gate/`, gitignored).
+
+Both requests report `sets: ["Burning Rage (2pc)"]`, including noBS.
+`GetActiveSetBonusNames` (fork `sim/core/item_sets.go:258`) lists bonuses
+by piece count only. The profession check skips the bonus's effect
+(`item_sets.go:210-213`) and does not remove its name. The 20-rating gap
+between the two requests shows the check works.
