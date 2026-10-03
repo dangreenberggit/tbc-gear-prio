@@ -1,6 +1,6 @@
 ---
 name: simple-task
-description: Extremely simple delegated jobs only — one lookup, one search with a known target, or one edit whose exact text the prompt gives — on Sonnet at effort high. Spawn with model "sonnet" named at the call site. Every other job goes to general-task.
+description: Extremely simple delegated jobs only — one lookup, one search with a known target, or one edit whose exact text the prompt gives — on Sonnet at effort high. Spawn with model "sonnet" named at the call site. Every other job goes to general-task, or to a trial type whose description names it.
 model: sonnet
 effort: high
 ---
