@@ -29,6 +29,18 @@ Numbered. Each step: action, files touched, a checkable acceptance
 criterion (a command or an observable), and the claims it depends on
 (C-ids).
 
+A step that changes what the Upgrades tab renders says how it is looked
+at. The default is a `Visual check:` line: the fixture names to look at
+(from `data/tab-fixtures/`) and the one sentence to judge against. The
+executor looks with `pnpm tab-fixtures:smoke` or the fixture's link in the
+Browser pane, which also covers hover and widths other than 1280; no live
+sim runs. Use a `Visual acceptance:` block instead only when the ticket
+must close on recorded evidence: captures at fixed widths, axe results,
+measured facts, a pre-run state, or an independent `gate-visual` verdict.
+The block names the state (`pre-run` / `post-run`), widths, selectors to
+capture, interactions, facts to record, and the sentence; the manifest
+schema is in the header comment of `vendor/tbc-new-fork/test-review.mjs`.
+
 ## Paths manifest
 
 Every file this plan creates or modifies. If the executor should fan out,

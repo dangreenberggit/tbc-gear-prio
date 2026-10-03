@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: bug
 Origin: owner report, 2026-08-28 (relates to tickets 313, 315)
 Blocks: none
@@ -91,3 +91,27 @@ string. Rendered live at both widths (feral: "toward Malorne Harness 4pc
 harness layout shots in `.../d-evidence/disclosure-harness/`).
 
 NOT closed here — closes on owner sign-off of the rendered line.
+
+## 2026-09-18 — owner sign-off (resolved: current wording approved)
+
+Owner viewed the set-bonus line on the live tab and approved the current wording.
+The line renders as `{{threshold}}pc bonus ({{worn}}/{{threshold}}) (+{{dps}})`
+(`translation.json:893` key `upgrades_tab.set_bonus.prospective`; e.g. "2pc bonus
+(0/2) (+35.1)"), with the 4pc `package_disclosure` line beneath it. The earlier
+"0/2 → 1/2 arrow" overreach that opened this ticket is gone — the current form
+shows the worn/threshold fraction without the misleading arrival arrow. Owner:
+"it looks fine."
+
+Note the 2026-08-29 update above is **stale**: it recorded the string as
+`"toward {{set}} {{threshold}}pc (+{{dps}})"`, but the shipped
+`translation.json:893` today reads `"{{threshold}}pc bonus ({{worn}}/{{threshold}})
+(+{{dps}})"` — a later fork change moved it back to the worn/threshold form. The
+owner approved the string that actually ships (verified in the file and on
+screen), not the 2026-08-29 candidate. Trust the shipped string, not that note.
+
+This closes 330's **wording** scope only. The bigger "the whole system is failing
+to account for a 4pc bonus" concern the owner raised was split to ticket 331 when
+this ticket was filed; 331 owns that and is unaffected by this sign-off.
+
+Verified by: owner observation on the live tab, 2026-09-18; shipped string read
+at `vendor/tbc-new-fork/assets/locales/en/translation.json:893`.

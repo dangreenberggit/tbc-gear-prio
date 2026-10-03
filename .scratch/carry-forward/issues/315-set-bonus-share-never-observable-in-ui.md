@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: bug
 Origin: stage-gate `upgrades-ui-rebuild`, slice 4 execution, 2026-08-27
 Blocks: none
@@ -222,3 +222,16 @@ Plus 336's new **package-disclosure** state rendered live on ret
 row's number"`) and in the layout harness (`.../d-evidence/disclosure-harness/`).
 Row-credit invariance held byte-for-byte before/after the disclosure (see
 the execution report). Still closes with 313 on owner sign-off.
+
+## 2026-09-18 — owner sign-off (resolved): the share is observable
+
+The open question this ticket owned — is 313's set-bonus share ever visible in
+practice — is now answered YES by direct owner observation. On a live ret run
+(`http://localhost:5173/tbc/paladin/retribution/`, 2026-09-18) the Thunderheart
+Leggings row carried a visible set-context disclosure: `2pc bonus (0/2) (+35.1)`
+and `4pc bonus (0/4) (+75.9)`. The five-failed-sweeps state that opened this
+ticket no longer holds; the feature renders in normal use. Owner approved.
+Closed with 313.
+
+Verified by: owner observation on the live tab, 2026-09-18 (Thunderheart
+Leggings, ret, real run).

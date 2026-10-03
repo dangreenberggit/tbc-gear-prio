@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: bug
 Origin: owner report, 2026-08-28
 Blocks: none
@@ -86,3 +86,37 @@ on native BooleanPicker"):**
   landed. Any further wording change belongs to the held 330 review, not here.
 
 State: **styling landed, owner-checklist-pending.** Closes on owner sign-off.
+
+## 2026-09-18 — re-verified on the post-Chunk-1 fork tip (Chunk 3, styling half only)
+
+Re-proven on fork tip `d754ac1b`. The styling half is confirmed from source on
+the current tip (copy is untouched — that stays with the 330 pass):
+
+- **Copy button** is the native filled `CopyButton` with the `fa-copy` icon and
+  `btn-secondary` weighting, not the hand-rolled transparent control
+  (`upgrades_tab.tsx:833-837`).
+- **View toggles** (set-potential, BiS-only) are native `ViewToggle`/
+  `BooleanPicker` instances (`upgrades_tab.tsx:793-799`). The one raw
+  `<input type="checkbox">` still in the file is the export flavour toggle
+  (`upgrades_tab.tsx:754`), a deliberate plain checkbox for the export format,
+  not a styled-control regression — see the 312 note for why the
+  `<input type="checkbox"` grep reads 0.
+- The redesigned control layout renders correctly at all four widths — 37/37
+  layout-gate assertions green against a real WASM run.
+
+Verified by: `sed -n '793,837p' vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`
+and `cd vendor/tbc-new-fork && node test-layout.mjs` (log at
+`.scratch/stage-gate/chunk3-tab-layout-verify/evidence/test-layout-run.log`).
+Status unchanged — closes on owner sign-off; copy half remains with 330.
+
+## 2026-09-18 — owner sign-off (resolved, styling half)
+
+Owner viewed the controls and the Copy JSON button on the live tab and approved:
+the checkboxes/dropdown are native-sized, the copy button reads as a real filled
+button. The styling half is resolved. Follow-ups the owner raised — the export
+tooltip should trigger on hover over the checkbox itself (not only the label),
+"use raid-drop ids" → "use tier token ids" with more space from the checkbox,
+and the "JSON export" header/parenthetical rewording — are filed as a separate
+export/controls-polish ticket. The copy-wording half remains with the 330 family.
+
+Verified by: owner observation on the live tab, 2026-09-18.

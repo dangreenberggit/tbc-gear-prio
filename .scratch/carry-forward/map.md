@@ -220,3 +220,71 @@ file contention, worker prompt. This file stays the chronological log.
 - 407 `--full --update-golden` writes a cap-0 golden that check (h) never reads, plus three minor cleanups in the same file (adversarial+standards axes, pre-merge review round 3, feat/desktop-transport-gate)
 - 408 the verify gate counter miscounts in both directions — sharp against ticket 400's own purpose of making the ran/skipped count trustworthy (adversarial axis, round 3)
 - 409 `bulk-screen-http-fixture.test.ts` version guard is tautological; a regression introduced by ticket 390's own fix, so do not revert it wholesale (adversarial axis, round 3)
+- 415 empty Filter-results/Shopping-List headings pre-run (owner report 2026-09-18, tab surface, related 312)
+- 416 'Your current gear' summary sits above the upgrades ranking, should be below (owner report 2026-09-18, tab surface, related 312/415)
+- 417 Content source filter should be multi-select checkboxes not a dropdown (owner request 2026-09-18, BLOCKING, tab surface)
+- 418 Per-profession gate for BoP crafted upgrades (owner request 2026-09-18, post-finish nice-to-have, depends on 417)
+- 419 Set-potential total DPS not shown when checked (owner 2026-09-18, blocking-polish)
+- 420 Tooltip should trigger on checkbox hover not just label (owner 2026-09-18)
+- 421 Remove 'X above the cutoff' text (owner 2026-09-18)
+- 422 Export box polish: JSON export header, width, 'use tier token ids' label+spacing, blurb into checkbox parenthetical (owner 2026-09-18)
+- 423 Mobile table alignment + BiS-tag crowding (owner 2026-09-18, spinoff of resolved 327)
+- 424 Set selection in sim settings with result tags (owner 2026-09-18, BLOCKING, heavy — likely own stage-gate)
+- 425 BiS-tag gap layout assertion may pass vacuously (premerge adversarial A1, minor, deferred)
+- 426 Content filter: multi-source item survives if any source ticked (premerge adversarial A2, minor, deferred — behaviour choice)
+- 427 Pre-run explanation text repeats empty-state text + placement unclear (owner screenshot 2026-09-18)
+- 428 Content checkboxes not a contained/organized element (owner screenshot 2026-09-18, refines 417)
+- 429 Sim-sets group: relabel to 'Sim sets', quieter explainer, chip styling vs gear tab (owner screenshot 2026-09-18, refines 424)
+- 430 Result-row tag redundant (BiS + grey) and mislabeled; unify to one correct short tag — BiS IS set membership (owner screenshot 2026-09-18, refines 424; domain call)
+- 431 Set-bonus 'incl.' line confusing/verbose; keep the total, move detail to tooltip (owner screenshot 2026-09-18, refines 419)
+- 432 Fork locale gate red on tip (419 added set_bonus.total sans schema) + not in pnpm verify (found in tab-ui-refinements review)
+- 433 Sim-sets starts empty; default-select the old 'BiS' set per phase (owner review 2026-09-18; folded into tab-ui-refinements; may move desktop golden)
+- 434 Desktop gate leaves stray wowsimtbc.exe on :3333 blocking next run; executor perm-denied to kill it (recurring 3x); fix gate teardown + document trap
+- 435 Upgrades tab tippy instances not destroyed on re-render (premerge R2 adversarial, minor, deferred)
+- 436 ContentBlock scaffold hand-written 3x in the tab (premerge R2 standards, minor, deferred)
+- 437 'Ranking failed: Failed to fetch' junky UI error; catch worker/transport failure, show plain msg (owner viewing 2026-09-19)
+- 438 Sources filter + Sim-sets organization need a real design exploration (design-an-interface); 428 was too shallow (owner viewing 2026-09-19)
+- 439 After a run, scrolling over sim settings scrolls the item list instead of the settings panel (owner viewing 2026-09-19)
+- 440 Source column text styling inconsistent, looks bad (owner viewing 2026-09-19)
+- 441 Set-potential toggle hidden when no rankable set bonus in results; pre-existing gating, UX decision (owner viewing 2026-09-19)
+- 444 Result-row item icons have no alt text (image-alt, critical) (a11y seed 2026-09-19)
+- 445 Phase selector <select> has no accessible name (select-name, critical; upstream widget) (a11y seed 2026-09-19)
+- 446 Run progress bar has no accessible name (aria-progressbar-name, serious) (a11y seed 2026-09-19)
+- 447 Sources filter → native "Sources…" popup (BaseModal) — 438 Part A impl, owner pick 2026-09-19
+- 448 Sim-sets → "Other phases (n)" disclosure — 438 Part B impl, owner pick 2026-09-19
+- 449 Sources modal has no accessible name (aria-dialog-name); a11y ratchet open-modal blind spot — from 447, 2026-09-19
+- 450 a11y focus-walk passes green when it measures nothing (round 4 adversarial) 2026-09-19
+- 451 test-review.mjs green on entry with empty widths (round 4 adversarial) 2026-09-19
+- 452 EPIC: end ret/feralcat tunnel vision, support all DPS specs (owner directive) 2026-09-19
+- 476 Net set-bonus misses lower threshold on a tier-set swap (round 6 A2/D1, material) 2026-09-22
+- 477 Commit-time break with no measured B credits gain, drops loss (round 6 A1, material) 2026-09-22
+- 478 Net set-bonus minor follow-ups bundle (round 6 A3/A4/D3/A5/D2, minor) 2026-09-22
+- 479 Set-bonus tooltip piece count excludes hovered piece (round 6 D4/D5, minor/copy) 2026-09-22
+- 480 a11y baseline covers only epic-quality names, hypothesis (round 6 S6, minor) 2026-09-22
+- 481 Results table overflows its container at 1280px, wide Source column (owner review of 472 render) 2026-09-22
+- 482 Favorite click wrongly marks the ranking stale via sim.changeEmitter (owner review of 472 render) 2026-09-22
+- 483 Per-table scroll host + shared column widths, supersedes 481 (owner review of 472 render) 2026-09-22
+- 484 Item name to tag spacing too tight (owner review of 472 render) 2026-09-22
+- 485 Drop "Upgrades" heading, rename "Shopping List" tab to "Upgrades" (owner review of 472 render) 2026-09-22
+- 486 Results area typography inconsistent, sloppy (owner review of 472 render) 2026-09-22
+- 487 View options heading clipped at ~1070px (owner review of 472 render) 2026-09-22
+- 488 EPIC: upgrades tab polish arc, umbrella for 483-487 (owner review of 472 render) 2026-09-22
+- 489 Widen Source column cap so rows are not four lines tall (owner live look) 2026-09-22
+- 511 Ret set credit counts bonuses that cannot add ret DPS (targeted engine review D1) 2026-09-25
+- 512 Set breaks model only six tier sets, only at 2pc and 4pc (targeted engine review D3) 2026-09-25
+- 513 Optional cleanup in the set-bonus engine and its tests (targeted engine review S6) 2026-09-25
+- 514 Set bonus value carries a gear-dependent residue (round 2e-1 measurements, systematic verdict) 2026-09-25
+- 515 No phase-1 universe; a phase-1 ret run ranks no candidates (round 2e-1 measurements) 2026-09-25
+- 516 Burning Rage 2pc break reads about 0 below the hit cap, hypothesis (round 2e-1 measurements) 2026-09-25
+- 517 Hide the popover "Item stats" line when it equals the DPS figure, after 494 (owner feedback on 494 proposal) 2026-09-25
+- 518 Delete the dead bulk-screening code, blocked until feat/tab-signoff-followups merges to dev (owner decision, follow-up to 406/411) 2026-09-25
+- 268 CLOSED 2026-09-25, feat/tab-signoff-followups — `fix/node-22-engines-floor` is in dev via merge `dc83b554` (`git merge-base --is-ancestor fix/node-22-engines-floor dev` exits 0), which is the close condition the ticket named
+- 533 Stop does nothing while the set phase runs (pre-merge review round 10, A4) 2026-10-02
+- 534 Set popover shows one lost bonus at two values without naming the gear (pre-merge review round 10, D2/P4) 2026-10-02
+- 535 Meta-gem repair may put hit gems on hit-capped set gear, hypothesis (pre-merge review round 10, D3) 2026-10-02
+- 537 A gear change during a run may leave the result marked fresh, hypothesis (independent review of 536, F4) 2026-10-03
+- 536 The tab hides a lost set bonus on non-set rows (investigation, first noticed as plan-review finding F6; filed at main `a6b26cc6`, closed at `37b33008`) 2026-10-02
+- 538 A stats read has no timeout and Stop cannot end it, hypothesis (pre-merge review round 11, A1) 2026-10-03
+- 539 Changing race, rotation, spec options or bonus stats does not mark the result stale, hypothesis (pre-merge review round 11, A2) 2026-10-03
+- 540 Some weapon and talent procs keep the old proc chance after an item swap (pre-merge review round 11, A4/D5) 2026-10-03
+- 541 The socket bonus counts as active when the meta socket is empty (pre-merge review round 11, D3) 2026-10-03

@@ -1,0 +1,45 @@
+Status: closed
+Type: task
+Origin: owner walkthrough of the 472 render, 2026-09-22
+Blocks: none
+Blocked by: none
+Related: 472
+
+# Epic-name contrast fails on the new zebra row backgrounds
+
+After 472 gave Upgrades rows a zebra background, axe reports 24 serious
+`color-contrast` failures: `.upgrades-item-name.text-epic` (`#a335ee`) on row
+backgrounds `#222328` / `#18191e` / hover `#343a40`, ratios 2.35-3.59, need
+4.5 (captures:
+`.scratch/stage-gate/upgrades-rowstyle/captures/after-upgrades/a11y.json`).
+
+The Gear tab's item list has the identical colour pair, but the layout gate
+only scans `#upgrades-tab`, so the failure was never visible there. This
+blocks `python scripts/check_layout_gate.py` (`a11yFailed=24`) and therefore
+`pnpm merge-to-dev`.
+
+Owner decision 2026-09-22: baseline as inherited debt.
+
+The baseline matcher is exact string equality on the axe target selector
+(`vendor/tbc-new-fork/test-tab-harness.mjs:507-524`, key
+`${ruleId}\u0000${selector}`, selector = `target.join(' ')`), and axe emits
+per-item selectors like `span[title="Choker of Endless Nightmares"]`, so a
+class-level entry cannot match today.
+
+## What would close this
+
+1. Extend the harness matcher so a baseline entry may carry a class-based
+   selector matched with `element.matches()` (or a `selectorMatch: "matches"`
+   field), keeping exact match as the default.
+2. Add an entry `{ruleId: color-contrast, selector: .text-epic (or
+   .upgrades-item-name), ticket: 473, reason: inherited item-quality colour,
+   same pair on the Gear tab}` to `data/wowsims-fork-a11y-baseline.json`.
+3. Layout gate green, `pnpm verify` green, re-pin.
+
+Also note for later (owner's alternative, not chosen now): a thin text
+outline / text-shadow on quality-coloured names on the Upgrades table only
+would lift the measured contrast; the Gear tab's table is never touched.
+
+## Comments
+
+2026-09-22: closed. Fork 72eebdee (harness: baseline entries may carry `match: css`, matched by class tokens against the axe node html since classification runs in Node); baseline entry added; main re-pin 79599670; `pnpm verify` rc=0; layout gate `passed:53 failed:0 a11yFailed:0`. Owner's alternative (text outline on Upgrades-only names) noted above, not taken.

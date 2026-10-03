@@ -1,0 +1,148 @@
+// Excerpt of vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx lines 3164-3310 at fork bcbb5e741 (the hover as shipped).
+				))}
+			</>
+		);
+	}
+
+	/**
+	 * The DPS cell's set-bonus presentation (tickets 431, 467): at most one short
+	 * `<small>` hover-hint line for the cell, and a tippy tooltip that itemises
+	 * every gain and every loss with a DPS figure — the NET model the owner asked
+	 * for. The inline cell figure is the row's signed total (`deltaLabel`, built
+	 * by the caller from `deltaDps + credit`); this sub-line only tells the reader
+	 * a breakdown is available.
+	 *
+	 * OFF: shows only what this one piece changes now — its own delta and any set
+	 * bonus it activates or breaks by itself (`singleBreaks`, inside `deltaDps`).
+	 * ON: adds the future bonuses committing to the set would gain
+	 * (`futureBonuses`, credited full or split) minus the breaks each future's own
+	 * path needs, printed under that future as "to reach Npc: breaks ..." (ticket
+	 * 490). Each figure is floored at the ranking's own per-spec noise floor
+	 * (tickets 331/332); an absent floor is the mid-run skeleton and suppresses
+	 * every figure. A break whose value could not be measured is named without a
+	 * number (`tip_unmeasured`). Whether the sub-line says `not_counted` comes
+	 * from `view.ts`'s `setBonusSubLine`, the same rule that zeroes the credit
+	 * (ticket 491).
+	 */
+	private setBonusPresentation(
+		row: RankedItem,
+		noiseFloorDps: number | undefined,
+		on: boolean,
+		_setCredit: SetCreditView,
+		deltaLabel: string,
+	): { line: Node | null; tip: HTMLElement | null } {
+		const ctx = row.setContext;
+		if (!ctx) return { line: null, tip: null };
+
+		const floorOk = (v: number | undefined): boolean =>
+			noiseFloorDps !== undefined && v !== undefined && v > noiseFloorDps;
+
+		const singleBreaks = ctx.singleBreaks ?? [];
+		// Prospective disclosure (future bonuses / commit breaks) is shown on ANY
+		// set item that has it, regardless of the Set-potential toggle (ticket
+		// 471/#4): a row whose only disclosure is prospective must still get a
+		// hover. The toggle keeps affecting ranking/sort only (`view.ts`'s
+		// `ViewOptions.withSetPotential`), not what this tooltip discloses.
+		const futureBonuses = ctx.futureBonuses ?? [];
+		const commitBreaks = ctx.commitBreaks ?? [];
+
+		const subLine = setBonusSubLine(ctx, on);
+		if (subLine === null) return { line: null, tip: null };
+
+		const line = <small className="upgrades-set-bonus">{i18n.t(`upgrades_tab.set_bonus.${subLine}`)}</small>;
+
+		const rows: Node[] = [];
+		// Set credit mode label ("Set credit: full set/split share") intentionally
+		// not shown (ticket 471/#5): it named a ranking-internal mode the tooltip
+		// doesn't need to explain. The "This piece alone" line is also gone
+		// (ticket 475): it repeated the DPS column, so the tooltip now opens with
+		// the set-context line below.
+		if (ctx.crossesThreshold) {
+			// The threshold this piece crosses, the same expression rank.ts uses for
+			// `crossesThreshold` (ticket 479). `piecesAfterSwap` only equalled it for
+			// the usual one-piece step. The `??` cannot fire while crossesThreshold
+			// is true; it keeps the value a number.
+			const crossed = nextMeasurableThreshold(ctx.setId, ctx.piecesWornBefore) ?? ctx.piecesAfterSwap;
+			rows.push(<div>{i18n.t('upgrades_tab.set_bonus.tip_activates_included', { threshold: crossed })}</div>);
+		}
+		for (const b of singleBreaks) {
+			rows.push(
+				<div>
+					{b.dps !== undefined
+						? i18n.t('upgrades_tab.set_bonus.tip_breaks', {
+								set: b.setName,
+								threshold: b.threshold,
+								dps: b.dps.toFixed(1),
+							})
+						: i18n.t('upgrades_tab.set_bonus.tip_unmeasured', {
+								set: b.setName,
+								threshold: b.threshold,
+							})}
+				</div>,
+			);
+		}
+		// A break shared by two futures' paths is charged once (view.ts), so it is
+		// printed once, under the lowest future that needs it (ticket 490).
+		const renderedBreaks = new Set<string>();
+		for (const f of futureBonuses) {
+			// `have` is the pieces worn now, before this swap: the owner wants the
+			// count to show "how much progress a player has with their current
+			// gear" (ticket 479, 2026-09-24), so a player wearing one piece reads
+			// "1/4" whichever piece they hover.
+			if (f.dps !== undefined && floorOk(f.dps)) {
+				rows.push(
+					<div>
+						{i18n.t('upgrades_tab.set_bonus.tip_future', {
+							threshold: f.threshold,
+							have: ctx.piecesWornBefore,
+							dps: f.dps.toFixed(1),
+						})}
+					</div>,
+				);
+			}
+			// A future at or below the floor has no value line, but its path's
+			// breaks still print: a higher future's path goes through them.
+			for (const b of f.breaks ?? []) {
+				const key = `${b.setId}:${b.threshold}`;
+				if (renderedBreaks.has(key)) continue;
+				if (b.dps === undefined) {
+					renderedBreaks.add(key);
+					rows.push(<div>{i18n.t('upgrades_tab.set_bonus.tip_unmeasured', { set: b.setName, threshold: b.threshold })}</div>);
+				} else if (floorOk(b.dps)) {
+					renderedBreaks.add(key);
+					rows.push(
+						<div>
+							{i18n.t('upgrades_tab.set_bonus.tip_future_break', {
+								threshold: f.threshold,
+								set: b.setName,
+								broken: b.threshold,
+								dps: b.dps.toFixed(1),
+							})}
+						</div>,
+					);
+				}
+			}
+		}
+		// Measured top-package breaks are no longer printed: the credit does not
+		// charge them (ticket 490). An unmeasured one still zeroes the credit
+		// (ticket 477), so it is named.
+		for (const b of commitBreaks) {
+			const key = `${b.setId}:${b.threshold}`;
+			if (b.dps !== undefined || renderedBreaks.has(key)) continue;
+			renderedBreaks.add(key);
+			rows.push(<div>{i18n.t('upgrades_tab.set_bonus.tip_unmeasured', { set: b.setName, threshold: b.threshold })}</div>);
+		}
+		// "Full set end state" is informative regardless of the toggle (ticket
+		// 471/#4), so its gate is dropped along with the others above.
+		if (ctx.commitPackageDeltaDps !== undefined) {
+			rows.push(<div>{i18n.t('upgrades_tab.set_bonus.tip_package_total', { dps: tipDelta(ctx.commitPackageDeltaDps) })}</div>);
+		}
+		// Full/split credit TOTALS and the "(ranked)" marker intentionally not
+		// shown (ticket 471/#5): `setCredit` and `rankableSetPotential` (see
+		// `resultRow`) still compute them for ranking; this tooltip just no
+		// longer renders them.
+		void deltaLabel;
+
+		const tip = (<div className="upgrades-set-bonus-tip">{rows}</div>) as HTMLElement;
+		return { line, tip };
+	}

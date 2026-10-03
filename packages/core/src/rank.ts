@@ -1353,7 +1353,7 @@ export async function rankUpgrades(
           field: `${s.setName} ${s.threshold}pc completion package`,
           detail:
             `the ${s.setName} ${s.threshold}pc completion package could not ` +
-            `be measured: the sim failed — ${s.reason}`,
+            `be measured: ${s.reason}`,
         })),
       ],
       items: ranked,
@@ -1685,7 +1685,9 @@ async function buildSetBonuses(
             setId,
             setName: label,
             threshold,
-            reason: err instanceof Error ? err.message : String(err),
+            reason: `the sim failed — ${
+              err instanceof Error ? err.message : String(err)
+            }`,
           });
           results.push({
             setId,

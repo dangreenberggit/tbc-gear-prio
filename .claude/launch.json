@@ -17,12 +17,17 @@
     },
     {
       "name": "wowsims-fork",
-      "runtimeExecutable": "npx",
+      "runtimeExecutable": "fnm",
       "runtimeArgs": [
-        "vite",
+        "exec",
+        "--using=22",
+        "--",
+        "node",
+        "node_modules/vite/bin/vite.js",
         "serve",
         "--port",
-        "5173"
+        "5173",
+        "--strictPort"
       ],
       "cwd": "vendor/tbc-new-fork",
       "port": 5173

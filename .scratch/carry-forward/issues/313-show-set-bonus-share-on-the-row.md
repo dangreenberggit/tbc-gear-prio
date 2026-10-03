@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: task
 Origin: Owner review of the running tab, 2026-08-27
 Blocks: none
@@ -123,5 +123,18 @@ DOM readback in `.../d-evidence/after/readback.json`:
 - **no-context / empty**: rows without a set context show no line (unchanged).
 
 Still closes with 315 on owner sign-off, not by the executor.
+
+## 2026-09-18 — owner sign-off (resolved)
+
+Owner viewed the running tab (`http://localhost:5173/tbc/paladin/retribution/`,
+ret, real run) and saw the set-bonus share rendered on a row — Thunderheart
+Leggings showed `2pc bonus (0/2) (+35.1)` and `4pc bonus (0/4) (+75.9)` beneath
+the item. The display is correct and legible; owner approved. Closed together
+with 315 (observability). Set-potential-total display and the number-includes-
+bonus concern are a separate new ticket, not a defect in 313's display.
+
+Verified by: owner observation on the live tab, 2026-09-18; the rendered lines
+match the `upgrades_tab.set_bonus.prospective` / `package_disclosure` templates
+(`vendor/tbc-new-fork/assets/locales/en/translation.json:893,896`).
 
 ## Comments

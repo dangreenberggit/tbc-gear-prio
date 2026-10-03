@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: feature
 Origin: Owner request, 2026-08-27, during the toolbar redesign review
 Blocks: none
@@ -146,3 +146,65 @@ artifact rather than re-captured. The 126 token/pattern-id sub-concern remains f
 Execution C. State: **styled, owner-checklist-pending.**
 
 ## Comments
+
+## 2026-09-18 — re-verified on the post-Chunk-1 fork tip (Chunk 3); [~] box sound by construction, live readback still owed at sign-off
+
+Re-proven on fork tip `d754ac1b`. The functional-export behaviour and the
+styling half are confirmed from source on the current tip, and the one box
+Execution B left as `[~]` (the live before/after payload change on a BiS-only
+toggle) is settled by construction rather than a flaky live capture:
+
+- **Payload shape** `{"items":[{"id":N}]}`, two-space indented:
+  `JSON.stringify({ items }, null, 2)` (`upgrades_tab.tsx:2115`).
+- **Deduped**: a `Set<number> seen` skips repeats — `if (seen.has(id)) continue`
+  (`upgrades_tab.tsx:2104,2111`).
+- **Displayed order, cross-slot (not slot-grouped)**: `updateExport` iterates
+  the rendered `rows` in display order and pushes one item per unique id, with
+  no slot bucketing (`upgrades_tab.tsx:2103-2114`).
+- **[~] filter-reactivity — sound by construction; live readback still owed**:
+  the export is built from the displayed rows, and the BiS-only toggle's
+  `onChange: () => this.render()` (`upgrades_tab.tsx:798`) re-runs render, which
+  calls `updateExport(exported)` on the freshly filtered rows
+  (`upgrades_tab.tsx:1738`). Toggling BiS-only therefore recomputes the payload
+  from whatever rows are then displayed — the same render-on-change wiring the
+  flavour toggle uses (`upgrades_tab.tsx:817-824`). This is the by-construction
+  argument the 2026-08-29 note anticipated, now pinned to the current line
+  numbers. It proves the wiring, not the observed behaviour: the explicit
+  toggle-and-diff readback the box asked for is not re-exercised here and remains
+  the owner's to confirm at sign-off.
+- **Export box styling** uses the site block idiom (`.upgrades-export.content-block`,
+  native `CopyButton`) — see 328.
+
+**Correction to the "Note on ticket 126" above:** that note (and the older
+Execution-C framing) treat token-id emission as not-yet-built. The current tip
+contradicts them — 126 **shipped and is on by default**. `exportTokenFlavour`
+defaults to `true` (`upgrades_tab.tsx:432`), so `updateExport` takes the
+`exportIdForRow` branch (`upgrades_tab.tsx:2110`) and the export emits tier
+**token** ids, not gear ids, unless the user unticks the flavour toggle
+(landed by fork commit `ed31676a` "Add a token/gear-id flavour to the tab
+export (126)"). The `exportIdForRow` logic is domain-correct: T4/T5/T6 tokens
+drop in raid and trade for the tier piece, so a loot-priority export should
+carry the token id, and a Sunmote token with no single tradeable id falls
+through to the gear id (`upgrades_tab.tsx:2137-2149`). Ticket 126 is itself
+`Status: resolved`, so there is no deferred 126 work behind 314 — the "deferred"
+wording above is stale and this export already does what 126 asked.
+
+Verified by: `sed -n '2103,2123p' vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`,
+`sed -n '793,799p;1738p' .../upgrades_tab.tsx`,
+`grep -n 'exportTokenFlavour' .../upgrades_tab.tsx` (line 432 → `= true`),
+`git -C vendor/tbc-new-fork log --oneline -S exportTokenFlavour -- ui/core/components/individual_sim_ui/upgrades_tab.tsx`.
+Status unchanged — closes on owner sign-off (its 328 copy sub-concern remains
+tracked with the 330 pass).
+
+## 2026-09-18 — owner sign-off (resolved)
+
+Owner viewed the export box on the live tab and approved: the box exists, the
+JSON lists the displayed items in order, dedupes, and the export works. Cosmetic
+follow-ups the owner raised (text box too wide; "ThatsMyBis export" subheader →
+"JSON export"; move "to import into a loot-priority tool, e.g. ThatsMyBis" into
+the checkbox-label parenthetical; "use raid-drop ids" → "use tier token ids" and
+the label sits too close to the checkbox) are filed as a separate export-polish
+ticket, not defects in 314's core deliverable.
+
+Verified by: owner observation on the live tab, 2026-09-18; payload shape/dedupe/
+order proven from source in the 2026-09-18 re-verification note above.

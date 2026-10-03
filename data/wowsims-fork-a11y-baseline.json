@@ -1,0 +1,20 @@
+{
+  "_comment": "Accepted/known accessibility debt for the Upgrades tab, seeded from a real layout-gate run at fork 9b407a5f3 on 2026-09-19 (stage visual-a11y-reviewer), and re-seeded at fork baf02292d on 2026-09-19 after tickets 444/445/446 were fixed (their entries removed; they no longer fire). Each entry is a (ruleId, selector) axe reports; scripts/check_layout_gate.py passes this file to the fork test-layout.mjs via TBC_A11Y_BASELINE, so these are tracked debt and only NEW critical/serious WCAG violations block pnpm merge-to-dev. Every entry carries EITHER a ticket (a fix is owed) OR a wontfix reason. An entry that no longer fires prints a stale-baseline WARN and should be removed, unless it carries \"mayNotFire\": true: that marks debt the gate's capture may not show, prints no stale-baseline WARN, and its reason must say why. Re-seed after a fix or a tab change with TBC_A11Y_DUMP=<path> pnpm layout-gate:check, then rebuild this file from the dump (dedupe on ruleId+selector, sort, assign ticket/reason).",
+  "entries": [
+    {
+      "ruleId": "color-contrast",
+      "selector": ".upgrades-item-name.text-epic",
+      "match": "css",
+      "ticket": "473",
+      "reason": "inherited item-quality colour (#a335ee epic) on the 472 zebra rows; identical pair on the Gear-tab item list; owner-accepted debt 2026-09-22"
+    },
+    {
+      "ruleId": "color-contrast",
+      "selector": ".upgrades-item-name.text-rare",
+      "match": "css",
+      "ticket": "480",
+      "mayNotFire": true,
+      "reason": "inherited item-quality colour (#0070dd rare: 3.26:1 on #222328, 3.65:1 on #18191e) on the 472 zebra rows; same pair as the Gear-tab item list; measured under ticket 480, sibling of the 473 epic entry. The gate's mid-run ret capture may hold no rare-quality name, so this entry often matches nothing; mayNotFire stops the fork's test-layout.mjs printing a 'stale-baseline ... never fired -- remove it' warning for it (owner, 2026-09-27: 'Flag is fine for this'). Do not remove it because it did not fire"
+    }
+  ]
+}

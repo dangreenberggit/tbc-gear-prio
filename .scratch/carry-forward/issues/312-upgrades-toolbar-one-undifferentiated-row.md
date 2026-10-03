@@ -1,4 +1,4 @@
-Status: open
+Status: resolved
 Type: design
 Origin: Owner review of the running tab, 2026-08-27 (branch `feat/upgrades-dedup-wowsims`, fork `342f6a74`)
 Blocks: none
@@ -319,3 +319,42 @@ captured in Execution A's `.scratch/.../cdp-reverify.json` (done:true). Closes o
 owner sign-off.
 
 ## Comments
+
+## 2026-09-18 — re-verified on the post-Chunk-1 fork tip (Chunk 3)
+
+Re-proven on fork tip `d754ac1b`. The redesigned toolbar structure survives the
+Chunk-1 merge and the runner rename:
+
+- The run/view controls are native picker components, not the raw-checkbox
+  toolbar the ticket complained about. The one raw `<input type="checkbox">` that
+  remains is the export flavour toggle (`upgrades_tab.tsx:754`), a deliberate
+  plain checkbox that switches the export FORMAT rather than a run/view control —
+  so it is out of this ticket's scope. `grep -c 'type="checkbox"'
+  vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx` → 1
+  (that toggle); `grep -c '<input type="checkbox"' …` → 0 misses it only because
+  `ref=…` sits between `<input` and `type=`, so do not read the 0 as "no raw
+  checkboxes anywhere".
+- The post-run view controls sit above the results and the run settings sit
+  above them, proven by the layout gate on a real WASM run:
+  `[375] view-controls-host top 1216.5 <= tabs top 1276.0`,
+  `[375] settings panel top 975.3 <= results panel top 1216.5`,
+  with `settings-outer-container position: sticky` keeping Run reachable — all
+  four widths. At 1280 the filter row spans full width
+  (`grid-column 1/-1, width 664.3 == tabs 664.3`). 37/37 assertions green.
+
+Verified by: `grep -c '<input type="checkbox"' vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`
+and `cd vendor/tbc-new-fork && node test-layout.mjs` (log at
+`.scratch/stage-gate/chunk3-tab-layout-verify/evidence/test-layout-run.log`).
+Status unchanged — closes on owner sign-off.
+
+## 2026-09-18 — owner sign-off (resolved)
+
+Owner viewed the redesigned run settings + view controls on the live tab and
+approved: Run reads as the primary action, the run knobs are grouped, and the
+filter controls sit above the results. The "one undifferentiated row" complaint
+is resolved. Separate new items the owner raised on the same surface — remove the
+"X above the cutoff" text, and the content filter should become checkboxes
+(ticket 417) — are tracked as their own tickets, not defects in 312.
+
+Verified by: owner observation on the live tab, 2026-09-18; structure proven in
+the 2026-09-18 re-verification note above.

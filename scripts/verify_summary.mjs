@@ -83,3 +83,51 @@ export function formatSummary({ pythonSkips, vitest, layout }) {
   }
   return lines.join("\n");
 }
+
+const FAILURE_MESSAGE_LINES = 4;
+
+/**
+ * @param {{testResults?: Array<{name: string, status?: string, message?: string, assertionResults?: Array<{status: string, fullName: string, failureMessages?: string[]}>}>}} report
+ *   vitest's `--reporter=json` output
+ * @param {string} root prefix stripped from each test file path
+ * @returns {string} one entry per failed test, or per failed file with no
+ *   failed test (an import error), each with the start of its message; ""
+ *   when nothing failed
+ *
+ * `pnpm verify` runs vitest with only the JSON reporter, so without this a
+ * red test step printed no test name at all.
+ */
+export function formatVitestFailures(report, root) {
+  const rel = (file) => {
+    const f = file.replaceAll("\\", "/");
+    const r = root.replaceAll("\\", "/").replace(/\/?$/, "/");
+    return f.toLowerCase().startsWith(r.toLowerCase()) ? f.slice(r.length) : f;
+  };
+  const excerpt = (message) => {
+    const lines = message.trimEnd().split("\n");
+    const kept = lines.slice(0, FAILURE_MESSAGE_LINES).map((l) => `    ${l}`);
+    if (lines.length > FAILURE_MESSAGE_LINES)
+      kept.push(
+        `    ... (${lines.length - FAILURE_MESSAGE_LINES} more lines in the JSON report)`
+      );
+    return kept;
+  };
+  const entries = [];
+  for (const file of report.testResults ?? []) {
+    const failed = (file.assertionResults ?? []).filter(
+      (a) => a.status === "failed"
+    );
+    for (const a of failed)
+      entries.push([
+        `  FAIL ${rel(file.name)} > ${a.fullName}`,
+        ...excerpt((a.failureMessages ?? []).join("\n")),
+      ]);
+    if (failed.length === 0 && file.status === "failed")
+      entries.push([
+        `  FAIL ${rel(file.name)}`,
+        ...excerpt(file.message ?? ""),
+      ]);
+  }
+  if (entries.length === 0) return "";
+  return [`vitest failures (${entries.length}):`, ...entries.flat()].join("\n");
+}

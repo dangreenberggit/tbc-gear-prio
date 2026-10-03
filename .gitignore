@@ -77,6 +77,11 @@ vendor/
 !.scratch/stage-gate/bulk-finalist-cost/
 !.scratch/stage-gate/411-desktop-bulk-wallclock/
 !.scratch/stage-gate/rename-misleading-sim-runner/
+# Visual-review PNG clips: regenerable from the recorded fork sha (index.json)
+# and present only where the fork clone is, so they are never committed even
+# when a stage directory above is allowlisted -- the handoff's evidence keys and
+# the facts/a11y JSON carry the verdict. This overrides the un-ignore for images.
+.scratch/stage-gate/*/visual/**/*.png
 !.scratch/rank-reports/
 .scratch/rank-reports/*
 !.scratch/rank-reports/stage2-close-*.json

@@ -1,0 +1,136 @@
+{
+  "hovers": [
+    {
+      "label": "F",
+      "fixture": "feral-p3-th-hands-legs",
+      "row": "Breastplate of Malorne",
+      "off": 9.453784648271721,
+      "on": 65.22323301610686,
+      "credit": 55.76944836783514,
+      "textA": "Swap: +9.5\n  Item stats: +9.5\nSet potential: +55.8\n  Malorne Harness 2pc: +55.8\nNot counted\n  Malorne Harness 4pc: no gain",
+      "textB": "Item stats                            +9.5\nSet potential off                     +9.5   (bold, rule above)\nMalorne Harness 2pc                  +55.8\nSet potential on                     +65.2   (bold, rule above)\nNot counted\nMalorne Harness 4pc: no gain",
+      "files": [
+        "494v2-F-A-1280.png",
+        "494v2-F-B-1280.png"
+      ],
+      "tips": {
+        "A": {
+          "left": 613,
+          "right": 836.515625,
+          "top": 330.59375,
+          "bottom": 462,
+          "width": 223.515625,
+          "height": 131.40625
+        },
+        "B": {
+          "left": 618,
+          "right": 831.265625,
+          "top": 334.96875,
+          "bottom": 462,
+          "width": 213.265625,
+          "height": 127.03125
+        }
+      },
+      "dpsCell": "+65.2 DPS\nset detail"
+    },
+    {
+      "label": "D",
+      "fixture": "feral-p3-nordrassil4",
+      "row": "Thunderheart Chestguard",
+      "off": -34.45656585230381,
+      "on": 148.0996800320454,
+      "credit": 182.5562458843492,
+      "textA": "Swap: −34.5\n  Item stats: +12.7\n  Loses Nordrassil Harness 4pc: −47.2\nSet potential: +182.6\n  Thunderheart Harness 2pc: +103.1\n  Thunderheart Harness 4pc: +79.4",
+      "textB": "Item stats                           +12.7\nLoses Nordrassil Harness 4pc         −47.2\nSet potential off                    −34.5   (bold, rule above)\nThunderheart Harness 2pc            +103.1\nThunderheart Harness 4pc             +79.4\nSet potential on                    +148.1   (bold, rule above)",
+      "files": [
+        "494v2-D-A-1280.png",
+        "494v2-D-B-1280.png"
+      ],
+      "tips": {
+        "A": {
+          "left": 590,
+          "right": 859.03125,
+          "top": 299.78125,
+          "bottom": 427,
+          "width": 269.03125,
+          "height": 127.21875
+        },
+        "B": {
+          "left": 585,
+          "right": 864.421875,
+          "top": 304.15625,
+          "bottom": 427,
+          "width": 279.421875,
+          "height": 122.84375
+        }
+      },
+      "dpsCell": "+148.1 DPS\nset detail"
+    },
+    {
+      "label": "E",
+      "fixture": "feral-p3-th-hands-legs",
+      "row": "Nordrassil Chestplate",
+      "off": 16.776270683614985,
+      "on": 16.776270683614985,
+      "credit": 0,
+      "textA": "Swap: +16.8\n  Item stats: +16.8\nNot counted\n  Nordrassil Harness 4pc: no gain",
+      "textB": "Item stats                           +16.8\nSet potential off                    +16.8   (bold, rule above)\nNot counted\nNordrassil Harness 4pc: no gain",
+      "files": [
+        "494v2-E-A-1280.png",
+        "494v2-E-B-1280.png"
+      ],
+      "tips": {
+        "A": {
+          "left": 606,
+          "right": 844.328125,
+          "top": 369.0625,
+          "bottom": 462,
+          "width": 238.328125,
+          "height": 92.9375
+        },
+        "B": {
+          "left": 611,
+          "right": 838.828125,
+          "top": 371.25,
+          "bottom": 462,
+          "width": 227.828125,
+          "height": 90.75
+        }
+      },
+      "dpsCell": "+16.8 DPS\nset detail"
+    },
+    {
+      "label": "C",
+      "fixture": "feral-p2-malorne4",
+      "row": "Nordrassil Chestplate",
+      "off": -17.421577489680658,
+      "on": -17.421577489680658,
+      "credit": 0,
+      "textA": "Swap: −17.4\n  Item stats: +5.4\n  Loses Malorne Harness 4pc: −22.9\nNot counted\n  Nordrassil Harness 4pc: +50.9, but loses Malorne Harness 2pc −84.3",
+      "textB": "Item stats                            +5.4\nLoses Malorne Harness 4pc            −22.9\nSet potential off                    −17.4   (bold, rule above)\nNot counted\nNordrassil Harness 4pc: +50.9, but loses Malorne Harness 2pc −84.3",
+      "files": [
+        "494v2-C-A-1280.png",
+        "494v2-C-B-1280.png"
+      ],
+      "tips": {
+        "A": {
+          "left": 515,
+          "right": 935,
+          "top": 334.78125,
+          "bottom": 462,
+          "width": 420,
+          "height": 127.21875
+        },
+        "B": {
+          "left": 515,
+          "right": 935,
+          "top": 336.96875,
+          "bottom": 462,
+          "width": 420,
+          "height": 125.03125
+        }
+      },
+      "dpsCell": "-17.4 DPS\nset detail"
+    }
+  ]
+}

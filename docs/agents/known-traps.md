@@ -28,6 +28,21 @@ $env:PATH = "C:\Users\dgree\AppData\Roaming\fnm\node-versions\v22.17.1\installat
 Bash's `eval "$(fnm env)"` can fail with the same error the commands do;
 the PATH pin works in either shell.
 
+- In the Bash tool, `cd` returns exit code 1 even when it changes directory: ~/.bashrc runs `fnm env --use-on-cd`, which replaces `cd` with fnm's `__fnmcd`, and fnm cannot find its settings in the agent shell. So `cd X && cmd` never runs `cmd`. Use the command's own directory flag (`git -C`, `pnpm -C`, `npm --prefix`), or separate commands with `;`.
+
+**Fork-gated suites never run in CI.** Every suite that imports
+`forkPresent` — among them `fork-set-net.test.ts`,
+`fork-meta-repair.test.ts`, `fork-run-staleness.test.ts`, the `bulk-*`
+suites and `wowsims-fork-parity.test.ts` — is wrapped in
+`describe.skipIf(!forkPresent)` (the parity suite in
+`describe.runIf(canRunForkSide)`), and `vendor/` is gitignored, so CI
+collects them and skips them. A green CI run is no evidence for them. Run
+every one locally with the fork present, in Bash —
+`npx vitest run $(grep -l forkPresent packages/core/test/*.test.ts); echo rc=$?`
+— and record the command and its rc in the commit or ticket (ticket 478,
+item A5). The `grep` lists the suites at run time, so a new fork-gated
+suite joins the command without an edit here.
+
 ## Before any scripted or generated file edit
 
 **Symptom when armed:** `git diff --stat` shows hundreds of changed lines
@@ -179,3 +194,32 @@ another session's vite is serving this same checkout with HMR — use it;
 starting a second copy buys nothing. One HMR side-effect: an engine-file
 edit reloads the page, dropping in-page run state and sometimes the
 browser tab id — re-drive the page rather than debugging the "lost" run.
+
+The layout gate (`pnpm layout-gate:check`) and `pnpm tab-review` need
+neither port: the harness serves its own built `dist/`. The layout gate runs
+no sim since ticket 520 — its post-run checks render a recorded fixture.
+`pnpm tab-review` runs the WASM in the browser only for a `post-run` entry
+that names no fixture.
+
+Looking at a recorded tab fixture (`data/tab-fixtures/`, ticket 504) needs
+only `:5173`: open a link from `http://localhost:5173/tbc/tab-fixtures/`, or
+run `pnpm tab-fixtures:smoke`, which starts `:5173` when the port is free and
+stops only a server it started. Recording one needs both ports, because it is
+a real run. A fixture load never shows "Took": no run happened, so wait for
+result rows and no stale banner instead. See `data/tab-fixtures/README.md`.
+
+## Before writing a `pnpm tab-review` manifest
+
+**Symptom when armed:** in a `pane: false` entry with a hover, every clip
+after `capture[0]` shows the tab's nav bar instead of its target, and
+`index.json` reports no error (ticket 536's row clips, `*-1.png`).
+
+`capture[0]` is clipped where it stands, so a hovered tooltip stays open
+for it. Each later capture goes through the scroll branch of `captureClip`
+in the fork's `test-review.mjs`, which offsets the clip by `window.scrollY`.
+Hypothesis, untested: the page scrolls an inner container, so
+`window.scrollY` stays 0 and the clip is taken at the top of the page. Make
+each element `capture[0]` of its own entry: one entry for the popover, one
+for the row. The row entry in
+`.scratch/stage-gate/494-set-hover-redo/out/current-popover/manifest-rows.json`
+(gitignored) hovers the row's first cell and captures only the row.
