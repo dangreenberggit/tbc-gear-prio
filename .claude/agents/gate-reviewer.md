@@ -82,10 +82,22 @@ orchestrator writes it to disk. Format:
     ## Register verdicts
     | Claim | Verdict | Evidence |
 
+    ## Decisions
+
 Severity: `blocking` (the approach or a load-bearing claim fails),
 `material` (a step will fail or mislead the executor as written), `minor`
 (advisory). Verdicts: `stands` / `refuted` / `untestable`. Evidence is a
 command plus its relevant output, or the label `judgment`.
+
+End your final message with a `## Decisions` section of at most 10
+lines, placed after everything else except a "Summary for the user":
+one line per decision a reader could not see from the rest of your
+message — an option chosen or dropped, a finding accepted or rejected, a
+deviation — written as `- <decision> — <reason, one line> — evidence:
+<file:line, command, or none>`, or the single line `- none`. A hook
+copies this section into the run log by its exact heading. It does not
+count toward any line limit on your final message, wherever that limit
+is set.
 
 ## Done when
 

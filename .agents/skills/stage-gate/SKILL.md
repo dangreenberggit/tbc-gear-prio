@@ -98,9 +98,8 @@ not` list below.
 
 1. **Open the stage.** Pick `<slug>`; create `.scratch/stage-gate/<slug>/`;
    write `brief.md` — goal, the tickets in scope, constraints, and what
-   done means, in terms the planner can plan against. Start `decision-log.md` (one dated line per
-   gate: gate, outcome, reason, round count; step 5 adds lines per chunk
-   and per question). Confirm
+   done means, in terms the planner can plan against. Start
+   `decision-log.md` in the format below. Confirm
    `git status --porcelain` is empty and record `git rev-parse HEAD` in
    the log.
 
@@ -116,6 +115,33 @@ not` list below.
    Done when: `brief.md` answers "what exists when this is done", every
    open question carries those three items, the tree is clean, and the SHA
    is logged.
+
+   `decision-log.md` is an index for a later investigator: each line
+   says what was decided, why in one line, and where to look. Append
+   one line per event, in the order the events happen. `<time>` is the
+   output of `date -u +%Y-%m-%dT%H:%MZ` (Bash); one call may stamp all
+   the lines you append together. `<session>` is the session ID: the
+   folder name just above `scratchpad` in the scratchpad path your
+   system prompt gives, or `unknown`.
+
+       <time> | <session> | gate <A, B, C, or chunk id> | <outcome> | round <n> | <reason, one line>
+       <time> | <session> | row <finding or ledger id> | <fixed, accepted, rejected, advisory, rework, or escalate> | <reason, one line> | evidence: <file:line, command, or none>
+       <time> | <session> | spawn <subagent_type> (<model>) | <started or returned> | agent <agent id or n/a> | subagent_tokens <n or n/a> | <mode, part id or chunk id>
+       <time> | <session> | note <sha, question, or tickets> | <the SHA, the question and its answer, or the ticket ids> | <reason, one line>
+
+   - `gate`: each gate outcome.
+   - `row`: each Gate B finding (`advisory` for a `minor` finding that
+     rides along) and each Gate C ledger row, non-`success` status and
+     out-of-manifest path.
+   - `spawn`: a `returned` line for every spawn you make, with the
+     `subagent_tokens` figure its result reports, or `n/a` if it shows
+     none. A `started` line goes before a spawn only where a step asks
+     for one; it has `agent n/a` and `subagent_tokens n/a`.
+   - `note`: the SHAs that steps 1 and 5 record, each question and
+     answer of step 5, and filed ticket ids with the new HEAD.
+
+   Write the reason on every line. Write `evidence: none` when you
+   checked nothing.
 
 2. **Plan.** Every `gate-planner` spawn (`model: "opus"`) names the
    absolute paths of `brief.md`,

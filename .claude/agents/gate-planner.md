@@ -58,6 +58,15 @@ other document over ~30 kB, get a heading map first
   fresh context: full file paths, acceptance criteria as commands or
   observables, and anything you were tempted to leave implicit goes into
   a step or into Out of scope.
+- End your final message with a `## Decisions` section of at most 10
+  lines, placed after everything else except a "Summary for the user":
+  one line per decision a reader could not see from the rest of your
+  message — an option chosen or dropped, a finding accepted or rejected, a
+  deviation — written as `- <decision> — <reason, one line> — evidence:
+  <file:line, command, or none>`, or the single line `- none`. A hook
+  copies this section into the run log by its exact heading. It does not
+  count toward any line limit on your final message, wherever that limit
+  is set.
 
 ## Done when
 
@@ -65,7 +74,8 @@ Every template section is filled; every step has a checkable acceptance
 criterion and names the claims it depends on; every causal or factual
 claim in the body appears in the Claims register; the Paths manifest lists
 every file the executor will touch. Return the complete plan as your final
-message, nothing after it.
+message, then the `## Decisions` section (§ Rules); nothing after it
+except a Summary for the user, if any.
 
 ## Revision rounds
 

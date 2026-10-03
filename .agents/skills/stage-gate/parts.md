@@ -87,7 +87,8 @@ whole, and return a new digest with no Open questions. Your final
 message is a digest of at most 40 lines. As the first planner of a
 split, its first line is the `DECISION:` line; in every other case it
 starts with the plan file's line count and its number of execution
-chunks.
+chunks. It ends with the `## Decisions` section (`gate-planner.md`
+§ Rules).
 
 ## Part mode
 
