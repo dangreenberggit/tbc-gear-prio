@@ -17,9 +17,11 @@ before it is accepted. Do the job the prompt names and nothing next to it.
   included.
 - Do the job with your own tool calls; spawn no subagents.
 - Run `node --version` in the same shell command as each `node`, `pnpm`
-  or test command, for example `node --version; pnpm verify`, and check
-  that it prints v22 (`docs/agents/known-traps.md`, "Before running node /
-  pnpm / test commands").
+  or test command, for example `node --version; pnpm verify`. If it does
+  not print v22, discard that result and return
+  `NEEDS_JUDGMENT: node --version printed <output>`
+  (`docs/agents/known-traps.md`, "Before running node / pnpm / test
+  commands"). Such a check may write untracked cache and build files.
 - Stop and return `NEEDS_JUDGMENT: <one line saying why>` when the job
   needs a choice the prompt did not make (between approaches, about
   whether something is correct, or about a cause not yet known), needs
@@ -31,7 +33,8 @@ before it is accepted. Do the job the prompt names and nothing next to it.
   it on `general-task`.
 
 This list is a short form of model-policy § Trial types, "Always
-`general-task`"; change both together.
+`general-task`"; change it, that list and the one in `discrete-task.md`
+together.
 
 Open your final message with the result in plain English. Name every file
 you changed and every check you ran, with its result. Give each fact with

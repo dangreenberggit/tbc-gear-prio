@@ -211,9 +211,8 @@ the owner, not to another respawn: the check has rejected a correct Opus
 spawn before (ticket 252). Spawn these types in place of the built-in
 `Explore`, `general-purpose` and `Plan` types. You cannot set the
 built-ins' effort at the call site, and whether they pin an effort of
-their own is unverified. If the harness does
-not recognize one of these types, restart the session rather than falling
-back to a built-in.
+their own is unverified. If the harness does not recognize one of these
+types, restart the session rather than falling back to a built-in.
 
 > **Changed 2026-09-25.** Before this date the repo preferred Opus at effort
 > `medium`, reserved `high` and above for a single narrow adversarial review
@@ -259,7 +258,8 @@ least. For commands: a named check that writes no tracked file
 (`pnpm verify`, a named test), run and reported with its exit code, is
 `discrete-task` work. A generator re-run, or any command that rewrites a
 committed file, is `general-task` work. That `pnpm verify` writes no
-tracked file was checked on 2026-10-03: `git status --porcelain
+tracked file was checked on 2026-10-03: every step in `package.json`'s
+`verify:steps` is a check or a test run, and `git status --porcelain
 --untracked-files=no` printed nothing after a run. Check again when
 verify gains a step.
 
@@ -293,9 +293,11 @@ visual judgment); planning or architecture; debugging; a question whether
 something exists or is absent; any action `docs/agents/known-traps.md`
 names a trap for, except that `modest-task` may run `node` / `pnpm` /
 test commands, and `discrete-task` may run a named check command that
-writes no tracked file, each after `node --version` prints v22 in the
-same shell command; any file
-under `data/`, any generated file or regen, and any pin move;
+writes no tracked file, each with `node --version` run in the same shell
+command and its v22 output confirmed before the result is used; a `sed`
+or script write to a tracked file, and any command that rewrites files
+outside the allowed paths, such as `pnpm format`; any file under
+`data/`, any generated file or regen, and any pin move;
 `vendor/tbc-new-fork`; `.githooks/` and `scripts/`; `AGENTS.md`,
 `CLAUDE.md`, skills and agent files; any stage-gate seat or worker a seat
 spawns; any `parallel-phase` worker; and any job moved off `general-task`

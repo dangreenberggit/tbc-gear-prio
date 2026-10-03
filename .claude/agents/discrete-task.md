@@ -23,7 +23,8 @@ the command you report, an edit against the result the prompt states.
 - Run a `node`, `pnpm` or test command only when the prompt names it and
   it writes no tracked file, such as `pnpm verify` or a named test. Run
   `node --version` in the same shell command, for example
-  `node --version; pnpm verify`; if it does not print v22, return
+  `node --version; pnpm verify`, and report what it prints. If it does
+  not print v22, discard that result and return
   `NEEDS_JUDGMENT: node --version printed <output>`
   (`docs/agents/known-traps.md`, "Before running node / pnpm / test
   commands").
@@ -42,7 +43,8 @@ the command you report, an edit against the result the prompt states.
   on `general-task`.
 
 This list is a short form of model-policy § Trial types, "Always
-`general-task`"; change both together.
+`general-task`"; change it, that list and the one in `modest-task.md`
+together.
 
 Open your final message with the result. Name every file you changed. Give
 each fact with its absolute file path and line, or the exact command that
