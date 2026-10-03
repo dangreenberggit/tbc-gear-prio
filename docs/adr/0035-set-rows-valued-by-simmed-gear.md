@@ -714,6 +714,15 @@ measurement is exactly as before.
    gem changes name the build that was simmed, and the search has a work
    limit.
 
+**2026-10-03, owner ruling: keep it if it works.** The owner's words: "535
+same gear: if it works, keep it. My reasoning from before for a benefit
+seems to stand, but I have seen no other benefits or costs with which to
+make any decision (whether or not they exist, you did not effectively
+communicate them if they did) other than a de minimis simming time
+increase". It works by ticket 535's record: the live check (§ Live check
+(step 7.6)) passed all 8 cases, and the tests and code mutations are in the
+ticket's close.
+
 On ret-p3-p2 the change moves one screen reading: Burning Rage 2pc's pair
 goes from exactly 0 to +7.36, and the screen still drops the set, now as
 "below-zero". On feral-p3-p2bis, screen pairs 640, 641 and 676 move by up to
