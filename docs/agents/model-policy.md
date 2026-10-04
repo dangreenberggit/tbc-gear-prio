@@ -208,8 +208,9 @@ respawned on `general-task` with the same prompt. A `design-task` that
 returns `WRONG_MODEL` is respawned on `design-task` with the model the
 agent-type table above names, not the model the return says it
 expected: a session started before an agent file changed may hold the
-old check. A second `WRONG_MODEL` from the same job goes to the owner, not to another respawn: the check has rejected a correct Opus
-spawn before (ticket 252). Spawn these types in place of the built-in
+old check. A second `WRONG_MODEL` from the same job goes to the owner,
+not to another respawn: the check has rejected a correct Opus spawn
+before (ticket 252). Spawn these types in place of the built-in
 `Explore`, `general-purpose` and `Plan` types. You cannot set the
 built-ins' effort at the call site, and whether they pin an effort of
 their own is unverified. If the harness does not recognize one of these

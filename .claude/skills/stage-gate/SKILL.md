@@ -54,9 +54,9 @@ Name the model on every spawn, even though each seat's frontmatter sets
 its model. A call-site name outranks frontmatter, so a wrong name
 there is the one way a seat runs on the wrong model. Every
 seat self-checks and returns `WRONG_MODEL: <name>` on a mismatch: respawn
-with the model the seat table names, not the one the return expected (a
-session started before a seat file changed may hold the old check). A `subagent_type` the harness does not recognize
-has no registered agent definition. First check that a file under
+with the model the seat table names, not the model the return says it
+expected (a session started before a seat file changed may hold the old
+check). A `subagent_type` the harness does not recognize has no registered agent definition. First check that a file under
 `.claude/agents/` sets that exact value as its `name:`. If it does and the
 type is still unknown, restart the session. New agent files have
 registered without a restart (seen in harness notices on 2026-09-25), so
