@@ -96,15 +96,19 @@ alternative recent window: e25 -0.3505  e50 -0.1816  e75 -0.0083  d* 231  raw 0.
 alternative online slowdown: e25 -0.3867  e50 0.0963  e75 0.0240  d* 260  raw 0.6484
 ```
 
-Time per candidate rises through run 1's candidate phase for two reasons.
-Up to about the 218th candidate, the cost of a 30-candidate window depends
-on how many sims its candidates need: rings and trinkets sim two slots, and
-candidates are dispatched by EP gain, so some windows hold far more sims
-than others. The sim server stays saturated there (14.2-15.3 cores busy,
-the `--windows` lines). From about the 219th candidate, busy cores fall to
-9.5 and machine load to 69-81% while the sim server's CPU per sim stays
-flat, so the server waits for work. That the cause is the tab rebuilding
-the whole running table twice per finished candidate is a hypothesis: no
+Time per candidate rises through run 1's candidate phase in two stretches.
+Up to about the 218th candidate, the sim server stays saturated (14.2-15.3
+cores busy, the `--windows` lines) while wall time per 30-candidate window
+varies. Hypothesis, untested: the windows differ in how many sims their
+candidates need, since rings and trinkets sim two slots and candidates are
+dispatched by EP gain; no per-window sim count was taken, and the `window`
+lines report sim-server CPU-s per candidate, not sims. From about the
+219th candidate, busy cores fall to 9.5 and machine load to 69-81% while
+the sim server's CPU per candidate does not rise with them (5.13-5.83 from
+d 249 on, inside the 2.85-7.80 of the windows before d 219; the d 219-248
+window reads 10.12), so the server waits for work. That the cause is the
+tab rebuilding the whole running table twice per finished candidate is a
+hypothesis: no
 render time was measured, and this trace has no long-task data. The
 shipped estimator is therefore the phased estimator with a per-candidate
 slowdown term, with kappa 0.3221, psi 50.993, slowdown 0.003064 (halves
@@ -114,6 +118,6 @@ test, with the unchanged bound |e50| <= 0.25. Known limits: one run on one
 setup (feral, 364 candidates, one machine, fresh profile); the slowdown
 measures the tab's table-rebuild cost relative to sim speed, so if that
 rebuild changes the estimate reads high until slowdown, kappa and psi are
-refitted; many saved gear sets slow the rebuild, so the estimate reads low
-there; the WASM-worker path is unmeasured; and on pools much longer than
-364 candidates the estimate will read low late (hypothesis).
+refitted; many saved gear sets may slow the rebuild, so the estimate may
+read low there (hypothesis, untested); the WASM-worker path is
+unmeasured; and on pools much longer than 364 candidates the estimate will read low late (hypothesis).
