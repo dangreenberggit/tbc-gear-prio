@@ -206,7 +206,8 @@ takes a small job"). If you are unsure, spawn `general-task`. A
 `NEEDS_JUDGMENT`, or a `discrete-task` that returns `WRONG_MODEL`, is
 respawned on `general-task` with the same prompt. A `design-task` that
 returns `WRONG_MODEL` is respawned on `design-task` with the model the
-return says it expected. A second `WRONG_MODEL` from the same job goes to
+agent-type table above names, not the model the return says it expected: a session
+started before an agent file changed may hold the old check. A second `WRONG_MODEL` from the same job goes to
 the owner, not to another respawn: the check has rejected a correct Opus
 spawn before (ticket 252). Spawn these types in place of the built-in
 `Explore`, `general-purpose` and `Plan` types. You cannot set the
@@ -220,7 +221,8 @@ types, restart the session rather than falling back to a built-in.
 > and recommended Opus at `medium` for the orchestrator. The owner replaced
 > all of that with the tables above. Plans and review notes written before
 > this date that say "Opus at effort `medium`" or "Fable (design lane)"
-> record what ran then and are left as written.
+> record what ran then and are left as written. The design lane went back
+> to Fable on 2026-10-04 (next note).
 >
 > **Changed 2026-10-04.** The owner moved the design lane from Opus at
 > effort `xhigh` to Fable at effort `low`. This is the current choice, and

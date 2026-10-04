@@ -45,8 +45,8 @@ other document over ~30 kB, get a heading map first
   researchers, each with a bounded question, the instruction to change no
   files, and the instruction to return at most 40 lines. You hold the
   judgment; they fetch the facts. Name the model on every spawn: you run
-  on Fable, the top price tier, and a subagent with no model named
-  inherits it.
+  on Fable, the top price tier, and an unnamed subagent can inherit it
+  (`docs/agents/model-policy.md` § Lane is per job, not per parent).
 - **Claims are the product.** A plan is a bundle of causal claims with
   steps attached. Every claim goes in the Claims register with a
   re-runnable `Verified by` command or the label `hypothesis, untested`.
