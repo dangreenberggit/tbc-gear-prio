@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: feature
 Origin: owner request in chat, 2026-10-02 ("we should have this", with a screenshot of the Bulk tab's progress dialog); no review round
 Blocks: none
@@ -87,3 +87,113 @@ component that fits the area we have to work with (probably more a thing for
 desktop)". So the target is a Bulk-dialog-inspired progress component that
 fits the tab's own area, designed for desktop first; it need not float or
 block.
+
+**2026-10-03, closed** (stage-gate `run-progress-popover`, chunk K3b).
+H below means `.scratch/handoffs/542-run-progress/`.
+
+What shipped:
+
+- While a run is going, the tab shows a progress component at the top of
+  the results area, styled after the Bulk Sim dialog: a "Ranking upgrades"
+  title over a divider; on the left the phase name, a bar and the
+  done/total count; on the right Elapsed Time (ticking every 100 ms from
+  the Run click, in the Bulk dialog's format), rows landed, time remaining
+  and a Stop button with the Bulk dialog's cancel styling.
+- Phase names follow the engine's event order with no engine edit:
+  preparing (the existing stage labels), "Simming candidates", "Measuring
+  set bonuses", "Re-simming the top rows", "Ranking results…". On run 2
+  the phase sequence was preparing, candidates, set-bonuses, replication,
+  ranking, and "Measuring set bonuses" started at done = boundary = 365
+  (`H/facts-run2.json` `phaseSequence`, `setBonusesAtDone`).
+- Status line: while running, the one-line status and thin bar are
+  replaced by the component (the status row is hidden, so no empty row
+  sits above it). The live-region announcement at Run is unchanged,
+  "Starting… (0 rows landed)", with 2 announcement changes per run;
+  nothing ticks into it (`announceFirstText`, `announceChanges`,
+  `panelAriaLive` 0). The done, stopped, error and stale states render as
+  before; the stale warning still shows after a run where an input
+  changed (K3a check (c)). "Took" and the stopped state are unchanged;
+  ticket 460 is already closed on this branch and this work does not
+  touch it.
+- Deliberate deviations from the Bulk look: the done/total count is
+  gray-500 instead of gray-600, for contrast (gray-600 measures 3.82:1 and
+  fails AA); the title is left-aligned for the wide layout.
+- Mount: owner ruling of 2026-10-03 (above), an in-tab component, not a
+  popover or modal.
+
+Estimator:
+
+- Shipped: the phased estimator with a per-candidate slowdown term and an
+  exact re-sim count. Constants, all fitted on run 1 (in sample): kappa
+  0.3221, psi 50.993, slowdown 0.003064, `showFromFraction` 0.35,
+  `minCandidatesDone` 10. The re-sim count comes from rows that clear the
+  cutoff as they land (exact once the last candidate finishes, projected
+  before). Why: linear read -0.4504 at 50% on run 1 (out of sample), and
+  the round-3 phased estimator read -0.2817 even in sample; the slowdown
+  version reads -0.0382 in sample (`H/decision.md`).
+- Run 1 (2026-10-03, fork 9b11bf214, feral `/tbc/druid/feralcat/`, phase
+  3, preset "Phase 2 / BiS 6%", 3000 iterations, cold headless profile,
+  concurrency 4, T 401): G (set phase) 23.19 s, r_rep/r_c = 585.8/454.7 =
+  1.29. Linear e50 -0.4504 (out of sample).
+- **Run 2 (the gate): e50_shown -0.0662**, inside the bound |e50| <= 0.25
+  written before the run. Shown 127.68 s at 50% done against 136.73 s
+  actual. 2026-10-03, fork 4d447adcd, the same setup as run 1, T 401, Took
+  210 s. Re-run: `node .scratch/handoffs/542-run-progress/replay.mjs
+  .scratch/handoffs/542-run-progress/trace-run2.json --shown`. Information
+  only: e75_shown +0.0021; replication count matched (9 qualifying rows,
+  36 re-sims predicted and seen).
+- Run-2 information checks: (i) slowdown refitted on run 2 is 0.00318473,
+  inside [0.0015, 0.0046]; (ii) the raw stability fraction of the shown
+  values is 0.3516 (<= 0.45); (iii) main-thread long tasks fill 0.9897 of
+  wall time in the last 30-candidate window against 0.1440 in the first.
+  All ok.
+- Why later candidates cost more (round-4 finding): from about the 219th
+  candidate the sim server's CPU per sim stays flat while busy cores fall
+  (15 to 9.4 on run 2) and wall time per candidate rises. Check (iii)
+  supports a client-side cause; that the long tasks are the running-table
+  rebuilds is a hypothesis (render time per function not measured). The
+  running table is rebuilt in full twice per finished candidate. Ticket
+  543 tracks the fix; any such change requires refitting slowdown, kappa
+  and psi.
+
+Known limits:
+
+- One setup, one machine (feral, 364 candidates, fresh profile), measured
+  on the dev path: vite on :5174 plus the Go sim server on :3333. The
+  players' WASM-worker path is not measured; an old WASM-path run spent
+  most of its time in re-sims, so accuracy there is untested.
+- Many saved gear sets slow the table rebuild, so the estimate likely reads
+  low there (hypothesis). Pools much longer than 364 candidates likely read
+  low late (hypothesis).
+- Small pools read high: psi was fitted on a 364-candidate run, and the set
+  phase does not shrink with candidate count. On the 40-candidate dry run
+  the 50% estimate read +0.66.
+
+Load control: run 1 and run 2 each passed the 60 s quiet gate on the first
+attempt and replayed `load: clean`; no discards. Run 2: 46 monitor samples,
+own sockets seen (max 4), no foreign socket, Claude app probe sockets max 0.
+Residual risk: load that does not go through :3333 and slows the whole run
+evenly is not detected; it scales candidate and re-sim times together.
+
+Checks and records:
+
+- Captures (40-candidate dry run): `H/542-*-1280-*.png`, `H/facts.json`,
+  `H/a11y.json` (no axe violations); run 2: `H/trace-run2.json`,
+  `H/trace-run2.load.jsonl`, `H/facts-run2.json`.
+- Visual verdict: pass, `.scratch/handoffs/visual-review-542-run-progress-K3.md`
+  (two advisory notes: one clip caught the bar mid-transition; axe ran on
+  one phase only).
+- Fork branch `feat/run-progress-542` (worktree `vendor/tbc-new-fork`),
+  based on 9b11bf214: 88ff18586, 8fcdc6fb9, 5420f9cd3, 4d447adcd. No
+  ported-engine file changed. Pin: `data/wowsims-fork.lock.json` at
+  4d447adcd (repo commit f46e1a19); `pnpm verify` rc=0; fork-gated suites
+  rc=0 (229 passed, 1 skipped). The fork branch is not merged into
+  `feat/upgrades-tab` or pushed.
+- `tab-fixtures:check` warns that all five fixtures are stale, as it did
+  before the re-pin; this change does not alter the ranking inputs.
+- Flags: the `layout` verify gate skipped because the fork worktree has no
+  built `dist/` (`make host` not run), so the layout gate did not run on
+  this change. At 375 px the running results table overflows the viewport
+  (layout width 503 px) while the progress component fits (7 to 368 px);
+  the table is outside this ticket and likely older (hypothesis, not
+  measured at 9b11bf214).
