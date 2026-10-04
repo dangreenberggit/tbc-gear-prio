@@ -1,12 +1,15 @@
 # Load monitor for the ticket 542 timing runs (plan "Load control for timing
 # runs"). Each sample appends one JSON line to -Out:
-#   {t, backendPid, backendCpuS, machineLoadPct, own, foreign: [{pid, name, localPort}]}
+#   {t, backendPid, backendCpuS, machineLoadPct, own, appProbe, foreign: [{pid, name, localPort}]}
 # t is Unix epoch ms, so replay.mjs can line samples up with the page's
 # Date.now() at the Run click.
 #
 # A client socket to :3333 is "own" when its process is -ChromePid or a
 # descendant of it (Chrome's network service is a child of the browser
-# process), and "foreign" otherwise.
+# process), "appProbe" when its process is named `claude`, and "foreign"
+# otherwise. The Claude desktop app opens idle connections to any new local
+# listener (plan "Gate C K2 rulings"), so those are counted, not judged; real
+# load from any source still shows in the backend-CPU gate and in D2/D3.
 #
 # -GateSeconds G > 0: sample for G seconds, then exit 0 only if the backend's
 # CPU time rose by less than 1.0 s and no sample saw a foreign socket; exit 1
@@ -54,11 +57,13 @@ function Get-Sample {
   $load = (Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average
   $ownSet = Get-OwnSet $ChromePid
   $own = 0
+  $appProbe = 0
   $foreign = @()
   foreach ($c in @(Get-NetTCPConnection -State Established -RemotePort 3333 -ErrorAction SilentlyContinue)) {
     $procId = [int]$c.OwningProcess
     if ($ownSet.Contains($procId)) { $own++; continue }
     $name = (Get-Process -Id $procId -ErrorAction SilentlyContinue).ProcessName
+    if ($name -eq 'claude') { $appProbe++; continue }
     $foreign += [pscustomobject]@{ pid = $procId; name = $name; localPort = [int]$c.LocalPort }
   }
   return [pscustomobject]@{
@@ -67,6 +72,7 @@ function Get-Sample {
     backendCpuS    = $cpu
     machineLoadPct = $load
     own            = $own
+    appProbe       = $appProbe
     foreign        = $foreign
   }
 }
