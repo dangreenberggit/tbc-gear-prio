@@ -297,6 +297,9 @@ describe("preferred metas", () => {
     expect(missingMetaPreferenceNote(unlistedSpec)).toContain(
       "no meta preference recorded"
     );
+    expect(missingMetaPreferenceNote(unlistedSpec)).toContain(
+      "without their socket bonus"
+    );
     expect(missingMetaPreferenceNote("ret")).toBeUndefined();
     expect(missingMetaPreferenceNote("feral")).toBeUndefined();
     expect(missingMetaPreferenceNote("feral-tank")).toBeUndefined();
