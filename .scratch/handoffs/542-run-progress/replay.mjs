@@ -3,7 +3,11 @@
 // applies the load-control discard rules D0-D3 first, and prints the
 // estimator decision for H/decision.md.
 //
-// usage: node replay.mjs <trace.json>
+// usage: node replay.mjs <trace.json> [--windows] [--alternatives]
+//
+// Round 4 (plan "Amendments (round 4): estimator") adds the slowdown
+// estimator after the original output; --windows prints per-D3-window load
+// figures and --alternatives the rejected round-4 estimators.
 //
 // Exit codes: 0 decision printed; 4 load discard (no decision values printed);
 // 6 a plan stop rule fired (boundary mismatch, or no replication); 2 bad input.
@@ -123,6 +127,158 @@ function phased(p, T, B, N, kappa, psi) {
   });
 }
 
+const S = (x) => (x * (x + 1)) / 2;
+
+/**
+ * Cumulative candidate time for n candidates done: t(first event with
+ * done >= n + 1) - t1, over the events before `ranking`.
+ */
+function candidateClock(p) {
+  const t1 = p.sims[0].t;
+  const before = p.sims.filter((s) => !s.afterRank);
+  return (n) => before.find((s) => s.d >= n + 1).t - t1;
+}
+
+/**
+ * Halves rule (plan R4-2): with the i-th candidate costing a(1 + beta i), fit
+ * beta so the two halves of the first n candidates take the times observed.
+ */
+function betaHalves(n, tau) {
+  const h = Math.floor(n / 2);
+  if (h < 1) return 0;
+  const tauH = tau(h);
+  const rho = (tau(n) - tauH) / tauH;
+  const beta = (rho * h - (n - h)) / (S(n) - S(h) - rho * S(h));
+  return beta > 0 ? beta : 0;
+}
+
+/**
+ * The round-3 phased estimator with the candidate-event rule replaced:
+ * `remaining({n, tau, c})` gives the remaining candidate time C, and the
+ * estimate is C + rbar (psi + k R) with rbar = (tau + C) / c (plan R4-2).
+ * Boundary, ranking and replication rules are phased's.
+ */
+function phasedWith(p, T, B, N, kappa, psi, remaining) {
+  const t1 = p.sims[0].t;
+  const k = kappa * N;
+  const R = T - B;
+  const c = B - 1;
+  let rB = null;
+  let b = null;
+  let tRank = null;
+  let lastD = null;
+  let lastT = null;
+  return events(p).map((e) => {
+    let est = null;
+    if (e.kind === "ranking") {
+      b = lastD;
+      tRank = e.t;
+      if (rB === null && b > 1) rB = (lastT - t1) / (b - 1);
+      if (rB !== null) est = rB * k * (T - b);
+    } else if (tRank === null) {
+      lastD = e.d;
+      lastT = e.t;
+      if (e.d >= 2 && e.d < B) {
+        const tau = e.t - t1;
+        const C = remaining({ n: e.d - 1, tau, c });
+        est = C + ((tau + C) / c) * (psi + k * R);
+      } else if (e.d === B) {
+        rB = (e.t - t1) / (B - 1);
+        est = rB * (psi + k * R);
+      }
+    } else {
+      const m = e.d - b;
+      est =
+        m === 1 ? rB * k * (T - e.d) : ((e.t - tRank) / m) * (T - e.d);
+    }
+    return { ...e, est: est === null ? null : Math.max(0, est) };
+  });
+}
+
+/** Remaining candidate time when the i-th candidate costs a(1 + beta i). */
+const slowdownRemaining =
+  (beta) =>
+  ({ n, tau, c }) => {
+    const a = tau / (n + beta * S(n));
+    return a * (c - n + beta * (S(c) - S(n)));
+  };
+
+/** Remaining candidate time when the i-th candidate costs max(a, m i). */
+const clientFloorRemaining =
+  (m) =>
+  ({ n, tau, c }) => {
+    const a = tau / n;
+    let C = 0;
+    for (let i = n + 1; i <= c; i++) C += Math.max(a, m * i);
+    return C;
+  };
+
+/** Remaining candidate time at the rate of the last w candidates. */
+const recentWindowRemaining =
+  (clock) =>
+  ({ n, tau, c }) => {
+    const w = Math.max(30, Math.floor(n / 3));
+    if (n <= w) return (tau / n) * (c - n);
+    return ((clock(n) - clock(n - w)) / w) * (c - n);
+  };
+
+/** Slowdown with beta refitted by the halves rule over the n done so far. */
+const onlineSlowdownRemaining =
+  (clock) =>
+  ({ n, tau, c }) =>
+    slowdownRemaining(n >= 20 ? betaHalves(n, clock) : 0)({ n, tau, c });
+
+/** Client-floor m by bisection: the second half's time with a_h = tau_h / h. */
+function clientFloorM(c, tau) {
+  const h = Math.floor(c / 2);
+  const aH = tau(h) / h;
+  const target = tau(c) - tau(h);
+  let lo = 0;
+  let hi = 10;
+  for (let i = 0; i < 60; i++) {
+    const mid = (lo + hi) / 2;
+    let s = 0;
+    for (let j = h + 1; j <= c; j++) s += Math.max(aH, mid * j);
+    if (s < target) lo = mid;
+    else hi = mid;
+  }
+  return lo;
+}
+
+/**
+ * Show-threshold rule (plan Approach item 3): d* is the smallest candidate
+ * event with d - 1 >= 10 after which every F = t + est stays within 10% of
+ * the run's wall time.
+ */
+function stability(series, B, T, endT) {
+  const cand = series.filter(
+    (e) =>
+      e.kind === "simming" &&
+      !e.afterRank &&
+      e.d < B &&
+      e.d - 1 >= MIN_CANDIDATES_DONE &&
+      e.est != null
+  );
+  const limit = STABILITY_SHARE * endT;
+  let dStar = null;
+  for (let i = 0; i < cand.length; i++) {
+    const F = cand.slice(i).map((e) => e.t + e.est);
+    if (Math.max(...F) - Math.min(...F) <= limit) {
+      dStar = cand[i].d;
+      break;
+    }
+  }
+  const raw = dStar === null ? null : dStar / T;
+  const showFrom =
+    raw === null
+      ? null
+      : Math.min(
+          MAX_SHOW_FRACTION,
+          Math.max(0.05, Math.ceil(20 * raw - 1e-9) / 20)
+        );
+  return { limit, dStar, raw, showFrom };
+}
+
 /** Relative error of the estimate in effect after the first event with d/T >= frac. */
 function errorAt(series, T, endT, frac) {
   const e = series.find((x) => x.kind === "simming" && x.d / T >= frac);
@@ -190,12 +346,79 @@ function loadRules(trace, tracePath, p, B, N) {
   };
 }
 
+/**
+ * Per D3 window (the same windows as loadRules): wall ms per candidate,
+ * sim-server CPU-s per candidate (backendCpuS interpolated linearly between
+ * the load samples around the window's first and last event), cores busy,
+ * the machine-load samples inside the window, and long-task time when the
+ * trace has it.
+ */
+function windowLines(trace, tracePath, p, B, N) {
+  const lf = path.join(
+    path.dirname(tracePath),
+    trace.meta?.loadFile ?? path.basename(tracePath, ".json") + ".load.jsonl"
+  );
+  const load = fs.existsSync(lf)
+    ? fs
+        .readFileSync(lf, "utf8")
+        .split("\n")
+        .filter(Boolean)
+        .map((l) => JSON.parse(l))
+        .map((s) => ({ ...s, rel: s.t - trace.t0Epoch }))
+    : [];
+  const cpuAt = (t) => {
+    for (let i = 1; i < load.length; i++)
+      if (load[i].rel >= t) {
+        const a = load[i - 1];
+        const b = load[i];
+        return (
+          a.backendCpuS +
+          ((b.backendCpuS - a.backendCpuS) * (t - a.rel)) / (b.rel - a.rel)
+        );
+      }
+    return null;
+  };
+  const longTasks = Array.isArray(trace.longTasks) ? trace.longTasks : null;
+  const cand = p.sims.filter((s) => !s.afterRank && s.d < B).slice(2 * N);
+  const lines = [];
+  for (let i = 0; i + 30 <= cand.length; i += 30) {
+    const a = cand[i];
+    const b = cand[i + 29];
+    const wall = b.t - a.t;
+    const ca = cpuAt(a.t);
+    const cb = cpuAt(b.t);
+    const cpu = ca === null || cb === null ? null : cb - ca;
+    const mach = load
+      .filter((s) => s.rel >= a.t && s.rel <= b.t)
+      .map((s) => s.machineLoadPct);
+    let line =
+      `window d ${a.d}-${b.d}: ${Math.round(wall / 29)} ms/candidate` +
+      `  sim-server ${cpu === null ? "n/a" : fmt(cpu / 29, 2)} CPU-s/candidate` +
+      `  cores busy ${cpu === null ? "n/a" : fmt(cpu / (wall / 1000), 1)}` +
+      `  machine load ${mach.length ? mach.join(",") : "none"}`;
+    if (longTasks) {
+      const lt = longTasks
+        .filter((x) => x.start >= a.t && x.start <= b.t)
+        .reduce((sum, x) => sum + x.dur, 0);
+      line += `  long tasks ${fmt(lt / 29, 1)} ms/candidate, ${fmt(lt / wall, 4)} of wall`;
+    }
+    lines.push(line);
+  }
+  if (!longTasks) lines.push("long tasks: none in this trace");
+  return lines;
+}
+
 function main(argv) {
-  if (argv.length !== 1) {
-    console.error("usage: node replay.mjs <trace.json>");
+  const flags = new Set(argv.filter((a) => a.startsWith("--")));
+  const positional = argv.filter((a) => !a.startsWith("--"));
+  const known = new Set(["--windows", "--alternatives"]);
+  if (positional.length !== 1 || [...flags].some((f) => !known.has(f))) {
+    console.error(
+      "usage: node replay.mjs <trace.json> [--windows] [--alternatives]"
+    );
     return 2;
   }
-  const tracePath = path.resolve(argv[0]);
+  const tracePath = path.resolve(positional[0]);
   const trace = JSON.parse(fs.readFileSync(tracePath, "utf8"));
   const p = parseTrace(trace);
   if (!p.sims.length || p.endT == null) {
@@ -279,35 +502,75 @@ function main(argv) {
     console.log(`constants: kappa ${fmt(kappa)}  psi ${fmt(psi)}  (fitted on this run; in-sample)`);
 
   const shipped = estimator === "linear" ? lin : ph;
-  const cand = shipped.filter(
-    (e) =>
-      e.kind === "simming" &&
-      !e.afterRank &&
-      e.d < Bobs &&
-      e.d - 1 >= MIN_CANDIDATES_DONE &&
-      e.est != null
-  );
-  const limit = STABILITY_SHARE * p.endT;
-  let dStar = null;
-  for (let i = 0; i < cand.length; i++) {
-    const F = cand.slice(i).map((e) => e.t + e.est);
-    if (Math.max(...F) - Math.min(...F) <= limit) {
-      dStar = cand[i].d;
-      break;
-    }
-  }
-  const raw = dStar === null ? null : dStar / T;
-  const showFrom =
-    raw === null
-      ? null
-      : Math.min(MAX_SHOW_FRACTION, Math.max(0.05, Math.ceil(20 * raw - 1e-9) / 20));
+  const stab = stability(shipped, Bobs, T, p.endT);
+  const stabilityLine = (s, tag) =>
+    `stability: limit ${sec(s.limit)} (10% of wall time)  d* ${s.dStar}  raw ${fmt(s.raw)}  showFromFraction ${fmt(s.showFrom, 2)}  (${tag})`;
+  const capFlag = (s) =>
+    s.raw !== null && s.raw > MAX_SHOW_FRACTION
+      ? [`FLAG: raw show fraction ${fmt(s.raw)} > ${MAX_SHOW_FRACTION}; capped`]
+      : [];
   console.log(
-    `stability: limit ${sec(limit)} (10% of wall time)  d* ${dStar}  raw ${fmt(raw)}  showFromFraction ${fmt(showFrom, 2)}  (${estimator === "phased" ? "in-sample" : "out-of-sample"})`
+    stabilityLine(stab, estimator === "phased" ? "in-sample" : "out-of-sample")
   );
   console.log(`minCandidatesDone ${MIN_CANDIDATES_DONE}`);
-  if (raw !== null && raw > MAX_SHOW_FRACTION)
-    console.log(`FLAG: raw show fraction ${fmt(raw)} > ${MAX_SHOW_FRACTION}; capped`);
+  for (const l of capFlag(stab)) console.log(l);
   if (dLast < T) console.log(`FLAG: d_last ${dLast} < T ${T}`);
+
+  // Round 4 (plan R4-2): phased with a per-candidate slowdown term.
+  const clock = candidateClock(p);
+  const c = Bobs - 1;
+  const beta = betaHalves(c, clock);
+  const errorLines = (name, s, e50Tag) =>
+    [0.25, 0.5, 0.75].map((f) => {
+      const r = errorAt(s, T, p.endT, f);
+      const tag = f === 0.5 ? ` (${e50Tag})` : " (information)";
+      return (
+        `${name} e${Math.round(f * 100)} ${r ? fmt(r.e) : "n/a"}${tag}` +
+        (r ? `  at d ${r.d}, est ${sec(r.est)}, actual ${sec(r.actual)}` : "")
+      );
+    });
+  // Base-mode traces carry no row flags, so the replication count stays T - B
+  // here (plan R4-d-3); the tab counts qualifying rows instead.
+  console.log("replication count: T - B (base-mode trace has no row flags)");
+  console.log(
+    `slowdown beta ${beta.toPrecision(6)} (halves rule; fitted on this run; in-sample)`
+  );
+  const slow = phasedWith(p, T, Bobs, N, kappa, psi, slowdownRemaining(beta));
+  for (const l of errorLines("slowdown", slow, "in-sample")) console.log(l);
+  console.log("round 4: shipped estimator slowdown");
+  const slowStab = stability(slow, Bobs, T, p.endT);
+  console.log(stabilityLine(slowStab, "in-sample"));
+  for (const l of capFlag(slowStab)) console.log(l);
+
+  if (flags.has("--windows"))
+    for (const l of windowLines(trace, tracePath, p, Bobs, N)) console.log(l);
+
+  if (flags.has("--alternatives")) {
+    const m = clientFloorM(c, clock);
+    console.log(
+      `client floor m ${m.toPrecision(6)} ms (bisection on [0, 10] ms, 60 steps; fitted on this run; in-sample)`
+    );
+    const alternatives = [
+      ["slowdown beta x0.5", slowdownRemaining(beta * 0.5)],
+      ["slowdown beta x1.5", slowdownRemaining(beta * 1.5)],
+      ["client floor m x0.75", clientFloorRemaining(m * 0.75)],
+      ["client floor m x1", clientFloorRemaining(m)],
+      ["client floor m x1.25", clientFloorRemaining(m * 1.25)],
+      ["recent window", recentWindowRemaining(clock)],
+      ["online slowdown", onlineSlowdownRemaining(clock)],
+    ];
+    for (const [name, rule] of alternatives) {
+      const s = phasedWith(p, T, Bobs, N, kappa, psi, rule);
+      const st = stability(s, Bobs, T, p.endT);
+      const e = (f) => {
+        const r = errorAt(s, T, p.endT, f);
+        return r ? fmt(r.e) : "n/a";
+      };
+      console.log(
+        `alternative ${name}: e25 ${e(0.25)}  e50 ${e(0.5)}  e75 ${e(0.75)}  d* ${st.dStar}  raw ${fmt(st.raw)}`
+      );
+    }
+  }
   return 0;
 }
 
