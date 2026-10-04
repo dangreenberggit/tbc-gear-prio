@@ -206,9 +206,9 @@ takes a small job"). If you are unsure, spawn `general-task`. A
 `NEEDS_JUDGMENT`, or a `discrete-task` that returns `WRONG_MODEL`, is
 respawned on `general-task` with the same prompt. A `design-task` that
 returns `WRONG_MODEL` is respawned on `design-task` with the model the
-agent-type table above names, not the model the return says it expected: a session
-started before an agent file changed may hold the old check. A second `WRONG_MODEL` from the same job goes to
-the owner, not to another respawn: the check has rejected a correct Opus
+agent-type table above names, not the model the return says it
+expected: a session started before an agent file changed may hold the
+old check. A second `WRONG_MODEL` from the same job goes to the owner, not to another respawn: the check has rejected a correct Opus
 spawn before (ticket 252). Spawn these types in place of the built-in
 `Explore`, `general-purpose` and `Plan` types. You cannot set the
 built-ins' effort at the call site, and whether they pin an effort of
@@ -357,7 +357,8 @@ The orchestrator is the interactive session. The owner picks its model and
 effort per session. Whatever it runs on, it delegates every task
 (AGENTS.md § The session delegates). The skill names every seat's model at
 the call site, and each seat self-checks
-(`WRONG_MODEL: <name>` → respawn with the model named, never continue).
+(`WRONG_MODEL: <name>` → respawn with the model the skill's seat table
+names, never continue).
 
 ### Codex
 
