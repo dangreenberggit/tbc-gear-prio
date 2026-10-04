@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
   gemContext,
+  gemFillWeights,
   metaSocketUnpriced,
   missingMetaPreferenceNote,
 } from "../src/candidate-gems.js";
@@ -14,7 +15,7 @@ import { getItem } from "../src/items.js";
 import { gemColorMatchesSocket, metaStatus } from "../src/meta.js";
 import { socketsMatch } from "../src/meta-repair.js";
 import { GemColor } from "../src/proto/common_pb.js";
-import { Stat } from "../src/stats.js";
+import { Stat, epScore } from "../src/stats.js";
 import { equipmentFromLoggedGear } from "../src/logged-gear.js";
 import {
   equipmentForCandidateSwap,
@@ -2138,20 +2139,23 @@ describe("equipmentForCandidateSwap socket-bonus branches (ticket 136 item 5)", 
   });
 
   /**
-   * Branch 2: on a mixed meta+coloured item, an unfilled meta socket does
-   * *not* forfeit the socket bonus — only the coloured sockets gate it. Same
-   * item and palette shape as the `socketsMatch` unit test, but reached
-   * through the swap path so the wiring is covered too.
+   * Branch 2: on a mixed meta+coloured item, an unfilled meta socket forfeits
+   * the socket bonus. The sim pays it only when every socket holds an
+   * intersecting gem, and an empty socket intersects nothing (fork
+   * sim/core/database.go:632-644; ticket 541). So with no meta gem to seat,
+   * the yellow socket is filled by raw EP alone. Scores are compared rather
+   * than ids so that two gems of equal EP cannot fail the test.
    */
-  it("still fills the coloured socket for the bonus on a mixed item with no meta gem available", () => {
+  it("leaves the socket bonus off on a mixed item when no meta gem is available, and fills the yellow socket by raw EP", () => {
     const noMetas = gemsForPhase(3).filter(
       (g) => g.colour !== GemColor.GemColorMeta
     );
+    const ctx = gemContext(noMetas, strWeights);
     const swapped = equipmentForCandidateSwap(
       bareEquipment(),
       SIM_ORDER.indexOf("head"),
       24545, // Gladiator's Plate Helm: [meta, yellow], +4 str bonus
-      gemContext(noMetas, strWeights)
+      ctx
     );
 
     const head = swapped[SIM_ORDER.indexOf("head")]!;
@@ -2160,12 +2164,59 @@ describe("equipmentForCandidateSwap socket-bonus branches (ticket 136 item 5)", 
     const yellowIdx = sockets.indexOf(GemColor.GemColorYellow);
 
     expect(head.gems[metaIdx] ?? 0).toBe(0);
+    expect(socketsMatch(24545, head.gems)).toBe(false);
+
+    const fillWeights = gemFillWeights(strWeights, undefined);
+    const filled = head.gems[yellowIdx] ?? 0;
+    expect(filled).toBeGreaterThan(0);
+    const best = Math.max(
+      ...ctx.fillPalette
+        .filter((g) => g.colour !== GemColor.GemColorMeta)
+        .map((g) => epScore(g.stats, fillWeights))
+    );
+    expect(epScore(getGem(filled)!.stats, fillWeights)).toBe(best);
+  });
+
+  /**
+   * The live-bonus case on the same swap path: with meta gems in the palette
+   * the fill seats one, so the bonus can be live. The worn chest, waist and
+   * hands already give Relentless Earthstorm Diamond (32409) its 2 red,
+   * 2 yellow and 2 blue gems, as in the feral test above; on bare gear the
+   * repair step cannot activate it and throws.
+   */
+  it("seats a meta gem and keeps the socket bonus live on a mixed item when metas are available", () => {
+    const equipment = bareEquipment();
+    equipment[SIM_ORDER.indexOf("chest")] = {
+      id: 21865, // Soulcloth Vest: yellow, red, blue
+      gems: [23113, 24027, 23118],
+    };
+    equipment[SIM_ORDER.indexOf("waist")] = {
+      id: 23510, // Enchanted Adamantite Belt: blue, yellow
+      gems: [23118, 23113],
+    };
+    equipment[SIM_ORDER.indexOf("hands")] = {
+      id: 21863, // Soulcloth Gloves: yellow, red
+      gems: [23113, 24027],
+    };
+
+    const swapped = equipmentForCandidateSwap(
+      equipment,
+      SIM_ORDER.indexOf("head"),
+      24545,
+      gemContext(gemsForPhase(3), strWeights)
+    );
+
+    const head = swapped[SIM_ORDER.indexOf("head")]!;
+    const sockets = getItem(24545)!.sockets;
+    const metaIdx = sockets.indexOf(GemColor.GemColorMeta);
+    const yellowIdx = sockets.indexOf(GemColor.GemColorYellow);
+
+    expect(head.gems[metaIdx] ?? 0).toBeGreaterThan(0);
     const filled = head.gems[yellowIdx] ?? 0;
     expect(filled).toBeGreaterThan(0);
     expect(
       gemColorMatchesSocket(getGem(filled)!.colour, GemColor.GemColorYellow)
     ).toBe(true);
-    // Bonus is live despite the bare meta socket — the branch under test.
     expect(socketsMatch(24545, head.gems)).toBe(true);
   });
 });

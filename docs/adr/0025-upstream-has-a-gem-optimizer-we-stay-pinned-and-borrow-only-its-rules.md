@@ -1,6 +1,6 @@
 # ADR-0025 — Upstream has a gem optimizer; we stay pinned and borrow only its rules
 
-**Status:** accepted — Decision 1 superseded by [`ADR-0030`](0030-build-from-feature-backend-reforge-on-both-pins.md) (2026-09-10)
+**Status:** accepted — Decision 1 superseded by [`ADR-0030`](0030-build-from-feature-backend-reforge-on-both-pins.md) (2026-09-10); Decision 3 superseded by ticket 541 (2026-10-04)
 **Date:** 2026-08-12
 **Relates to:** PLAN.md §9 (gem and enchant policy), §8 (upstream pin)
 **Tickets:** [issue #1](https://github.com/dangreenberggit/tbc-gear-prio/issues/1) (canonical record);
@@ -55,6 +55,14 @@ one in theirs, and a trap for the next re-pin. All facts below are as of
    all three committed fixtures — a **null result**: every worn meta there was
    already active and none of the three wears a meta-only-socket item, so this
    exercises neither changed branch. No committed fixture currently does.
+
+   > **Superseded 2026-10-04 by ticket 541:** the sim's stat code
+   > (`sim/core/database.go:632-644`) withholds the bonus for any empty socket,
+   > meta included; the rule above came from the reforge optimizer's own
+   > predicate, not the sim. Recorded by
+   > `TestEmptyMetaSocketWithMatchedColouredSocketEarnsNoBonus` (fork
+   > `sim/core/gem_test.go`).
+
 4. **Keep our prismatic rule where upstream is wrong:** prismatic gems count
    toward all three meta colours (game rule); upstream counts them as nothing.
    Pinned by comment and tests at the prismatic mapping in `meta.ts`. Low

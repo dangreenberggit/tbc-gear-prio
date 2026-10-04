@@ -399,6 +399,17 @@ async function retInputs() {
   return { e, fx, equipment, gems };
 }
 
+describe.skipIf(!forkPresent)("socket bonus follows the sim (541)", () => {
+  // Gladiator's Plate Helm's sockets: [Meta, Yellow] (GemColor 1 and 4).
+  const META_YELLOW = [1, 4];
+
+  it("541-F: the fork's socketBonusActive withholds the bonus for an empty meta socket beside a matched yellow socket", async () => {
+    const { meta } = await engine();
+    expect(meta.socketBonusActive(META_YELLOW, [0, 23113])).toBe(false);
+    expect(meta.socketBonusActive(META_YELLOW, [32409, 23113])).toBe(true);
+  });
+});
+
 describe.skipIf(!forkPresent)("gear hit matches the sim (535)", () => {
   it("535-L0: the ret-p3-p2 baseline sums to the sim's 52 gear hit rating, head enchant included", async () => {
     const { e, equipment } = await retInputs();
