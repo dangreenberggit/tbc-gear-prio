@@ -1,0 +1,18 @@
+{
+  "note": "Plan Step 6: mid-run captures from capture.mjs --captures on the Step 5a dry run. tab-review has no running state (plan C26), so state \"mid-run\" is a stated deviation from the test-review.mjs schema. 375 px is the noHScroll375 fact only (Gate B round-3 ruling F1).",
+  "entries": [
+    {
+      "ticket": "542",
+      "state": "mid-run",
+      "widths": [
+        1280
+      ],
+      "capture": [
+        ".upgrades-run-progress",
+        "#upgrades-tab"
+      ],
+      "facts": {},
+      "acceptance": "At 1280 px, mid-run, the progress component sits at the top of the results area and spans its width. It reads as the Bulk Sim dialog laid out for the tab: a title over a divider; on the left, the phase name over a bar that spans the column, with the done/total count under it; on the right, Elapsed Time, rows landed and time remaining, and a Stop button with the Bulk dialog's cancel styling. Before the first sim count the bar shows moving stripes, not a filled bar. From the first count it is the Bulk dialog's green bar at the done/total width. Two differences from the Bulk dialog are deliberate: the count under the bar is a lighter grey, for contrast, and the title is left-aligned, for the wide layout. The phase names follow the run (preparing, Simming candidates, Measuring set bonuses, Re-simming the top rows). Rows appear in the table under the component as they finish, with no empty status row above the component. The component covers and dims nothing. Fact `noHScroll375` is true."
+    }
+  ]
+}
