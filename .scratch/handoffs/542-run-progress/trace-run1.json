@@ -1,0 +1,1670 @@
+{
+ "meta": {
+  "date": "2026-10-03T23:42:46.700Z",
+  "base": "http://localhost:5174",
+  "mode": "base",
+  "timing": true,
+  "candidates": null,
+  "forkHead": "9b11bf2143aaeb563c1a49fe90bef999e247f88e",
+  "forkDirty": false,
+  "page": "/tbc/druid/feralcat/",
+  "phase": 3,
+  "preset": "Phase 2 / BiS 6%",
+  "iterations": 3000,
+  "chromePid": 35472,
+  "hardwareConcurrency": 20,
+  "deviceMemory": 8,
+  "wasmConcurrencySetting": "4",
+  "runnerKey": null,
+  "N": 4,
+  "loadFile": "trace-run1.load.jsonl"
+ },
+ "t0Epoch": 1791070755269,
+ "endT": 210698.59999999404,
+ "endText": "Your current gear: 2451.1 DPS. Took 210s.",
+ "records": [
+  {
+   "t": 2,
+   "text": ""
+  },
+  {
+   "t": 68.40000000596046,
+   "text": "Starting… (0 rows landed)"
+  },
+  {
+   "t": 72.2000000178814,
+   "text": "Reading your gear… (0 rows landed)"
+  },
+  {
+   "t": 90.7000000178814,
+   "text": "Building the candidate pool… (0 rows landed)"
+  },
+  {
+   "t": 581.8000000119209,
+   "text": "Simming 1/401… (0 rows landed)"
+  },
+  {
+   "t": 2221.7000000178814,
+   "text": "Simming 2/401… (1 rows landed)"
+  },
+  {
+   "t": 2360.4000000059605,
+   "text": "Simming 3/401… (2 rows landed)"
+  },
+  {
+   "t": 2522,
+   "text": "Simming 4/401… (3 rows landed)"
+  },
+  {
+   "t": 2614.800000011921,
+   "text": "Simming 5/401… (4 rows landed)"
+  },
+  {
+   "t": 3382.2000000178814,
+   "text": "Simming 6/401… (5 rows landed)"
+  },
+  {
+   "t": 3941.5999999940395,
+   "text": "Simming 7/401… (6 rows landed)"
+  },
+  {
+   "t": 4013.4000000059605,
+   "text": "Simming 8/401… (7 rows landed)"
+  },
+  {
+   "t": 4047.4000000059605,
+   "text": "Simming 9/401… (8 rows landed)"
+  },
+  {
+   "t": 4431.300000011921,
+   "text": "Simming 10/401… (9 rows landed)"
+  },
+  {
+   "t": 5255.700000017881,
+   "text": "Simming 11/401… (10 rows landed)"
+  },
+  {
+   "t": 5326.0999999940395,
+   "text": "Simming 12/401… (11 rows landed)"
+  },
+  {
+   "t": 5551.200000017881,
+   "text": "Simming 13/401… (12 rows landed)"
+  },
+  {
+   "t": 5666.4000000059605,
+   "text": "Simming 14/401… (13 rows landed)"
+  },
+  {
+   "t": 6473.5999999940395,
+   "text": "Simming 15/401… (14 rows landed)"
+  },
+  {
+   "t": 6831.4000000059605,
+   "text": "Simming 16/401… (15 rows landed)"
+  },
+  {
+   "t": 6973.5999999940395,
+   "text": "Simming 17/401… (16 rows landed)"
+  },
+  {
+   "t": 7836.700000017881,
+   "text": "Simming 18/401… (17 rows landed)"
+  },
+  {
+   "t": 8145.4000000059605,
+   "text": "Simming 19/401… (18 rows landed)"
+  },
+  {
+   "t": 8217.59999999404,
+   "text": "Simming 20/401… (19 rows landed)"
+  },
+  {
+   "t": 8255.09999999404,
+   "text": "Simming 21/401… (20 rows landed)"
+  },
+  {
+   "t": 8323.800000011921,
+   "text": "Simming 22/401… (21 rows landed)"
+  },
+  {
+   "t": 9351.09999999404,
+   "text": "Simming 23/401… (22 rows landed)"
+  },
+  {
+   "t": 9476.700000017881,
+   "text": "Simming 24/401… (23 rows landed)"
+  },
+  {
+   "t": 9607,
+   "text": "Simming 25/401… (24 rows landed)"
+  },
+  {
+   "t": 10813.5,
+   "text": "Simming 26/401… (25 rows landed)"
+  },
+  {
+   "t": 10877.59999999404,
+   "text": "Simming 27/401… (26 rows landed)"
+  },
+  {
+   "t": 10937.09999999404,
+   "text": "Simming 28/401… (27 rows landed)"
+  },
+  {
+   "t": 11029.700000017881,
+   "text": "Simming 29/401… (28 rows landed)"
+  },
+  {
+   "t": 12333.59999999404,
+   "text": "Simming 30/401… (29 rows landed)"
+  },
+  {
+   "t": 12456.59999999404,
+   "text": "Simming 31/401… (30 rows landed)"
+  },
+  {
+   "t": 12540.59999999404,
+   "text": "Simming 32/401… (31 rows landed)"
+  },
+  {
+   "t": 13312.90000000596,
+   "text": "Simming 33/401… (32 rows landed)"
+  },
+  {
+   "t": 13667.200000017881,
+   "text": "Simming 34/401… (33 rows landed)"
+  },
+  {
+   "t": 13820.800000011921,
+   "text": "Simming 35/401… (34 rows landed)"
+  },
+  {
+   "t": 13902.40000000596,
+   "text": "Simming 36/401… (35 rows landed)"
+  },
+  {
+   "t": 14605.40000000596,
+   "text": "Simming 37/401… (36 rows landed)"
+  },
+  {
+   "t": 14675.09999999404,
+   "text": "Simming 38/401… (37 rows landed)"
+  },
+  {
+   "t": 14964.200000017881,
+   "text": "Simming 39/401… (38 rows landed)"
+  },
+  {
+   "t": 15137.59999999404,
+   "text": "Simming 40/401… (39 rows landed)"
+  },
+  {
+   "t": 15669,
+   "text": "Simming 41/401… (40 rows landed)"
+  },
+  {
+   "t": 16083.800000011921,
+   "text": "Simming 42/401… (41 rows landed)"
+  },
+  {
+   "t": 16437,
+   "text": "Simming 43/401… (42 rows landed)"
+  },
+  {
+   "t": 16890.80000001192,
+   "text": "Simming 44/401… (43 rows landed)"
+  },
+  {
+   "t": 17652.09999999404,
+   "text": "Simming 45/401… (44 rows landed)"
+  },
+  {
+   "t": 17716,
+   "text": "Simming 46/401… (45 rows landed)"
+  },
+  {
+   "t": 17740.90000000596,
+   "text": "Simming 47/401… (45 rows landed)"
+  },
+  {
+   "t": 17794.5,
+   "text": "Simming 48/401… (46 rows landed)"
+  },
+  {
+   "t": 17894.40000000596,
+   "text": "Simming 49/401… (47 rows landed)"
+  },
+  {
+   "t": 17925.90000000596,
+   "text": "Simming 50/401… (47 rows landed)"
+  },
+  {
+   "t": 17954.90000000596,
+   "text": "Simming 51/401… (47 rows landed)"
+  },
+  {
+   "t": 17987.59999999404,
+   "text": "Simming 52/401… (47 rows landed)"
+  },
+  {
+   "t": 18115.30000001192,
+   "text": "Simming 53/401… (48 rows landed)"
+  },
+  {
+   "t": 18202,
+   "text": "Simming 54/401… (49 rows landed)"
+  },
+  {
+   "t": 18232.20000001788,
+   "text": "Simming 55/401… (49 rows landed)"
+  },
+  {
+   "t": 18486.90000000596,
+   "text": "Simming 56/401… (50 rows landed)"
+  },
+  {
+   "t": 19323.59999999404,
+   "text": "Simming 57/401… (51 rows landed)"
+  },
+  {
+   "t": 19414.09999999404,
+   "text": "Simming 58/401… (52 rows landed)"
+  },
+  {
+   "t": 19492.90000000596,
+   "text": "Simming 59/401… (53 rows landed)"
+  },
+  {
+   "t": 19554.09999999404,
+   "text": "Simming 60/401… (54 rows landed)"
+  },
+  {
+   "t": 19683.20000001788,
+   "text": "Simming 61/401… (55 rows landed)"
+  },
+  {
+   "t": 19717.5,
+   "text": "Simming 62/401… (55 rows landed)"
+  },
+  {
+   "t": 19801.59999999404,
+   "text": "Simming 63/401… (56 rows landed)"
+  },
+  {
+   "t": 19900.40000000596,
+   "text": "Simming 64/401… (57 rows landed)"
+  },
+  {
+   "t": 20035.09999999404,
+   "text": "Simming 65/401… (58 rows landed)"
+  },
+  {
+   "t": 20183.59999999404,
+   "text": "Simming 66/401… (59 rows landed)"
+  },
+  {
+   "t": 20270.40000000596,
+   "text": "Simming 67/401… (60 rows landed)"
+  },
+  {
+   "t": 20367.59999999404,
+   "text": "Simming 68/401… (61 rows landed)"
+  },
+  {
+   "t": 20461.70000001788,
+   "text": "Simming 69/401… (62 rows landed)"
+  },
+  {
+   "t": 20551.80000001192,
+   "text": "Simming 70/401… (63 rows landed)"
+  },
+  {
+   "t": 20599.90000000596,
+   "text": "Simming 71/401… (63 rows landed)"
+  },
+  {
+   "t": 20687.70000001788,
+   "text": "Simming 72/401… (64 rows landed)"
+  },
+  {
+   "t": 20723.80000001192,
+   "text": "Simming 73/401… (64 rows landed)"
+  },
+  {
+   "t": 20762.59999999404,
+   "text": "Simming 74/401… (64 rows landed)"
+  },
+  {
+   "t": 20833.30000001192,
+   "text": "Simming 75/401… (65 rows landed)"
+  },
+  {
+   "t": 21050.20000001788,
+   "text": "Simming 76/401… (66 rows landed)"
+  },
+  {
+   "t": 21220.59999999404,
+   "text": "Simming 77/401… (67 rows landed)"
+  },
+  {
+   "t": 21493.80000001192,
+   "text": "Simming 78/401… (68 rows landed)"
+  },
+  {
+   "t": 21535.09999999404,
+   "text": "Simming 79/401… (68 rows landed)"
+  },
+  {
+   "t": 21578.90000000596,
+   "text": "Simming 80/401… (68 rows landed)"
+  },
+  {
+   "t": 21858.90000000596,
+   "text": "Simming 81/401… (69 rows landed)"
+  },
+  {
+   "t": 22262.90000000596,
+   "text": "Simming 82/401… (70 rows landed)"
+  },
+  {
+   "t": 23003.40000000596,
+   "text": "Simming 83/401… (71 rows landed)"
+  },
+  {
+   "t": 23299.90000000596,
+   "text": "Simming 84/401… (72 rows landed)"
+  },
+  {
+   "t": 23489.90000000596,
+   "text": "Simming 85/401… (73 rows landed)"
+  },
+  {
+   "t": 24727,
+   "text": "Simming 86/401… (74 rows landed)"
+  },
+  {
+   "t": 24896.80000001192,
+   "text": "Simming 87/401… (75 rows landed)"
+  },
+  {
+   "t": 25064.90000000596,
+   "text": "Simming 88/401… (76 rows landed)"
+  },
+  {
+   "t": 25232,
+   "text": "Simming 89/401… (77 rows landed)"
+  },
+  {
+   "t": 25762.40000000596,
+   "text": "Simming 90/401… (78 rows landed)"
+  },
+  {
+   "t": 27135.09999999404,
+   "text": "Simming 91/401… (79 rows landed)"
+  },
+  {
+   "t": 27427.40000000596,
+   "text": "Simming 92/401… (80 rows landed)"
+  },
+  {
+   "t": 27935.40000000596,
+   "text": "Simming 93/401… (81 rows landed)"
+  },
+  {
+   "t": 28115.70000001788,
+   "text": "Simming 94/401… (82 rows landed)"
+  },
+  {
+   "t": 28459.30000001192,
+   "text": "Simming 95/401… (83 rows landed)"
+  },
+  {
+   "t": 28655.40000000596,
+   "text": "Simming 96/401… (84 rows landed)"
+  },
+  {
+   "t": 29368.80000001192,
+   "text": "Simming 97/401… (85 rows landed)"
+  },
+  {
+   "t": 29552.20000001788,
+   "text": "Simming 98/401… (86 rows landed)"
+  },
+  {
+   "t": 29761.80000001192,
+   "text": "Simming 99/401… (87 rows landed)"
+  },
+  {
+   "t": 30435.09999999404,
+   "text": "Simming 100/401… (88 rows landed)"
+  },
+  {
+   "t": 31069.59999999404,
+   "text": "Simming 101/401… (89 rows landed)"
+  },
+  {
+   "t": 31273,
+   "text": "Simming 102/401… (90 rows landed)"
+  },
+  {
+   "t": 31697.59999999404,
+   "text": "Simming 103/401… (91 rows landed)"
+  },
+  {
+   "t": 32496.5,
+   "text": "Simming 104/401… (92 rows landed)"
+  },
+  {
+   "t": 32701.80000001192,
+   "text": "Simming 105/401… (93 rows landed)"
+  },
+  {
+   "t": 33289.09999999404,
+   "text": "Simming 106/401… (94 rows landed)"
+  },
+  {
+   "t": 34129.09999999404,
+   "text": "Simming 107/401… (95 rows landed)"
+  },
+  {
+   "t": 34358,
+   "text": "Simming 108/401… (96 rows landed)"
+  },
+  {
+   "t": 34576.5,
+   "text": "Simming 109/401… (97 rows landed)"
+  },
+  {
+   "t": 35814.20000001788,
+   "text": "Simming 110/401… (98 rows landed)"
+  },
+  {
+   "t": 36032.59999999404,
+   "text": "Simming 111/401… (99 rows landed)"
+  },
+  {
+   "t": 36256,
+   "text": "Simming 112/401… (100 rows landed)"
+  },
+  {
+   "t": 36586.20000001788,
+   "text": "Simming 113/401… (101 rows landed)"
+  },
+  {
+   "t": 37649,
+   "text": "Simming 114/401… (102 rows landed)"
+  },
+  {
+   "t": 37856.90000000596,
+   "text": "Simming 115/401… (103 rows landed)"
+  },
+  {
+   "t": 38092.20000001788,
+   "text": "Simming 116/401… (104 rows landed)"
+  },
+  {
+   "t": 38318.09999999404,
+   "text": "Simming 117/401… (105 rows landed)"
+  },
+  {
+   "t": 38549.40000000596,
+   "text": "Simming 118/401… (106 rows landed)"
+  },
+  {
+   "t": 39380.59999999404,
+   "text": "Simming 119/401… (107 rows landed)"
+  },
+  {
+   "t": 39796.20000001788,
+   "text": "Simming 120/401… (108 rows landed)"
+  },
+  {
+   "t": 40429.30000001192,
+   "text": "Simming 121/401… (109 rows landed)"
+  },
+  {
+   "t": 41094.30000001192,
+   "text": "Simming 122/401… (110 rows landed)"
+  },
+  {
+   "t": 41320.09999999404,
+   "text": "Simming 123/401… (111 rows landed)"
+  },
+  {
+   "t": 41553.40000000596,
+   "text": "Simming 124/401… (112 rows landed)"
+  },
+  {
+   "t": 41790.80000001192,
+   "text": "Simming 125/401… (113 rows landed)"
+  },
+  {
+   "t": 42015.40000000596,
+   "text": "Simming 126/401… (114 rows landed)"
+  },
+  {
+   "t": 42579.40000000596,
+   "text": "Simming 127/401… (115 rows landed)"
+  },
+  {
+   "t": 42916.90000000596,
+   "text": "Simming 128/401… (116 rows landed)"
+  },
+  {
+   "t": 43169.80000001192,
+   "text": "Simming 129/401… (117 rows landed)"
+  },
+  {
+   "t": 43411.80000001192,
+   "text": "Simming 130/401… (118 rows landed)"
+  },
+  {
+   "t": 44165.90000000596,
+   "text": "Simming 131/401… (119 rows landed)"
+  },
+  {
+   "t": 44419.70000001788,
+   "text": "Simming 132/401… (120 rows landed)"
+  },
+  {
+   "t": 44655,
+   "text": "Simming 133/401… (121 rows landed)"
+  },
+  {
+   "t": 45662.59999999404,
+   "text": "Simming 134/401… (122 rows landed)"
+  },
+  {
+   "t": 46199.70000001788,
+   "text": "Simming 135/401… (123 rows landed)"
+  },
+  {
+   "t": 46425.70000001788,
+   "text": "Simming 136/401… (124 rows landed)"
+  },
+  {
+   "t": 46702.20000001788,
+   "text": "Simming 137/401… (125 rows landed)"
+  },
+  {
+   "t": 48430.20000001788,
+   "text": "Simming 138/401… (126 rows landed)"
+  },
+  {
+   "t": 48806.80000001192,
+   "text": "Simming 139/401… (127 rows landed)"
+  },
+  {
+   "t": 49694.90000000596,
+   "text": "Simming 140/401… (128 rows landed)"
+  },
+  {
+   "t": 49938.30000001192,
+   "text": "Simming 141/401… (129 rows landed)"
+  },
+  {
+   "t": 51538.80000001192,
+   "text": "Simming 142/401… (130 rows landed)"
+  },
+  {
+   "t": 51776.90000000596,
+   "text": "Simming 143/401… (131 rows landed)"
+  },
+  {
+   "t": 52029.40000000596,
+   "text": "Simming 144/401… (132 rows landed)"
+  },
+  {
+   "t": 52396.70000001788,
+   "text": "Simming 145/401… (133 rows landed)"
+  },
+  {
+   "t": 54375.59999999404,
+   "text": "Simming 146/401… (134 rows landed)"
+  },
+  {
+   "t": 54646.70000001788,
+   "text": "Simming 147/401… (135 rows landed)"
+  },
+  {
+   "t": 54926.90000000596,
+   "text": "Simming 148/401… (136 rows landed)"
+  },
+  {
+   "t": 55210.70000001788,
+   "text": "Simming 149/401… (137 rows landed)"
+  },
+  {
+   "t": 55521,
+   "text": "Simming 150/401… (138 rows landed)"
+  },
+  {
+   "t": 56087.90000000596,
+   "text": "Simming 151/401… (139 rows landed)"
+  },
+  {
+   "t": 56870.30000001192,
+   "text": "Simming 152/401… (140 rows landed)"
+  },
+  {
+   "t": 57144.30000001192,
+   "text": "Simming 153/401… (141 rows landed)"
+  },
+  {
+   "t": 57430.90000000596,
+   "text": "Simming 154/401… (142 rows landed)"
+  },
+  {
+   "t": 57718.30000001192,
+   "text": "Simming 155/401… (143 rows landed)"
+  },
+  {
+   "t": 58008.70000001788,
+   "text": "Simming 156/401… (144 rows landed)"
+  },
+  {
+   "t": 58303.90000000596,
+   "text": "Simming 157/401… (145 rows landed)"
+  },
+  {
+   "t": 58732.90000000596,
+   "text": "Simming 158/401… (146 rows landed)"
+  },
+  {
+   "t": 59351.09999999404,
+   "text": "Simming 159/401… (147 rows landed)"
+  },
+  {
+   "t": 60073.70000001788,
+   "text": "Simming 160/401… (148 rows landed)"
+  },
+  {
+   "t": 60381.80000001192,
+   "text": "Simming 161/401… (149 rows landed)"
+  },
+  {
+   "t": 60690.59999999404,
+   "text": "Simming 162/401… (150 rows landed)"
+  },
+  {
+   "t": 61417.30000001192,
+   "text": "Simming 163/401… (151 rows landed)"
+  },
+  {
+   "t": 61751.30000001192,
+   "text": "Simming 164/401… (152 rows landed)"
+  },
+  {
+   "t": 62058.80000001192,
+   "text": "Simming 165/401… (153 rows landed)"
+  },
+  {
+   "t": 62375.80000001192,
+   "text": "Simming 166/401… (154 rows landed)"
+  },
+  {
+   "t": 62687.90000000596,
+   "text": "Simming 167/401… (155 rows landed)"
+  },
+  {
+   "t": 63002.70000001788,
+   "text": "Simming 168/401… (156 rows landed)"
+  },
+  {
+   "t": 63504.09999999404,
+   "text": "Simming 169/401… (157 rows landed)"
+  },
+  {
+   "t": 63822.20000001788,
+   "text": "Simming 170/401… (158 rows landed)"
+  },
+  {
+   "t": 64168.59999999404,
+   "text": "Simming 171/401… (159 rows landed)"
+  },
+  {
+   "t": 64486.5,
+   "text": "Simming 172/401… (160 rows landed)"
+  },
+  {
+   "t": 64813.30000001192,
+   "text": "Simming 173/401… (161 rows landed)"
+  },
+  {
+   "t": 65128.09999999404,
+   "text": "Simming 174/401… (162 rows landed)"
+  },
+  {
+   "t": 65439.59999999404,
+   "text": "Simming 175/401… (163 rows landed)"
+  },
+  {
+   "t": 65755.09999999404,
+   "text": "Simming 176/401… (164 rows landed)"
+  },
+  {
+   "t": 66080.5,
+   "text": "Simming 177/401… (165 rows landed)"
+  },
+  {
+   "t": 66426,
+   "text": "Simming 178/401… (166 rows landed)"
+  },
+  {
+   "t": 66825.40000000596,
+   "text": "Simming 179/401… (167 rows landed)"
+  },
+  {
+   "t": 67497.5,
+   "text": "Simming 180/401… (168 rows landed)"
+  },
+  {
+   "t": 67840.09999999404,
+   "text": "Simming 181/401… (169 rows landed)"
+  },
+  {
+   "t": 68198.09999999404,
+   "text": "Simming 182/401… (170 rows landed)"
+  },
+  {
+   "t": 68540.59999999404,
+   "text": "Simming 183/401… (171 rows landed)"
+  },
+  {
+   "t": 68880.59999999404,
+   "text": "Simming 184/401… (172 rows landed)"
+  },
+  {
+   "t": 69221.80000001192,
+   "text": "Simming 185/401… (173 rows landed)"
+  },
+  {
+   "t": 69568.20000001788,
+   "text": "Simming 186/401… (174 rows landed)"
+  },
+  {
+   "t": 69936.20000001788,
+   "text": "Simming 187/401… (175 rows landed)"
+  },
+  {
+   "t": 70294.90000000596,
+   "text": "Simming 188/401… (176 rows landed)"
+  },
+  {
+   "t": 70639.40000000596,
+   "text": "Simming 189/401… (177 rows landed)"
+  },
+  {
+   "t": 70989.40000000596,
+   "text": "Simming 190/401… (178 rows landed)"
+  },
+  {
+   "t": 71343.09999999404,
+   "text": "Simming 191/401… (179 rows landed)"
+  },
+  {
+   "t": 71695.30000001192,
+   "text": "Simming 192/401… (180 rows landed)"
+  },
+  {
+   "t": 72059.30000001192,
+   "text": "Simming 193/401… (181 rows landed)"
+  },
+  {
+   "t": 72429.09999999404,
+   "text": "Simming 194/401… (182 rows landed)"
+  },
+  {
+   "t": 72787,
+   "text": "Simming 195/401… (183 rows landed)"
+  },
+  {
+   "t": 73140.80000001192,
+   "text": "Simming 196/401… (184 rows landed)"
+  },
+  {
+   "t": 73507.80000001192,
+   "text": "Simming 197/401… (185 rows landed)"
+  },
+  {
+   "t": 73880.80000001192,
+   "text": "Simming 198/401… (186 rows landed)"
+  },
+  {
+   "t": 74349.30000001192,
+   "text": "Simming 199/401… (187 rows landed)"
+  },
+  {
+   "t": 74740.70000001788,
+   "text": "Simming 200/401… (188 rows landed)"
+  },
+  {
+   "t": 75105.20000001788,
+   "text": "Simming 201/401… (189 rows landed)"
+  },
+  {
+   "t": 75487.30000001192,
+   "text": "Simming 202/401… (190 rows landed)"
+  },
+  {
+   "t": 75855.09999999404,
+   "text": "Simming 203/401… (191 rows landed)"
+  },
+  {
+   "t": 76238.20000001788,
+   "text": "Simming 204/401… (192 rows landed)"
+  },
+  {
+   "t": 76622,
+   "text": "Simming 205/401… (193 rows landed)"
+  },
+  {
+   "t": 76997.30000001192,
+   "text": "Simming 206/401… (194 rows landed)"
+  },
+  {
+   "t": 77370.20000001788,
+   "text": "Simming 207/401… (195 rows landed)"
+  },
+  {
+   "t": 77750.59999999404,
+   "text": "Simming 208/401… (196 rows landed)"
+  },
+  {
+   "t": 78135.20000001788,
+   "text": "Simming 209/401… (197 rows landed)"
+  },
+  {
+   "t": 78530.09999999404,
+   "text": "Simming 210/401… (198 rows landed)"
+  },
+  {
+   "t": 78930,
+   "text": "Simming 211/401… (199 rows landed)"
+  },
+  {
+   "t": 79309.80000001192,
+   "text": "Simming 212/401… (200 rows landed)"
+  },
+  {
+   "t": 79703.90000000596,
+   "text": "Simming 213/401… (201 rows landed)"
+  },
+  {
+   "t": 80086.70000001788,
+   "text": "Simming 214/401… (202 rows landed)"
+  },
+  {
+   "t": 80483.80000001192,
+   "text": "Simming 215/401… (203 rows landed)"
+  },
+  {
+   "t": 80900.30000001192,
+   "text": "Simming 216/401… (204 rows landed)"
+  },
+  {
+   "t": 81305.5,
+   "text": "Simming 217/401… (205 rows landed)"
+  },
+  {
+   "t": 81717.5,
+   "text": "Simming 218/401… (206 rows landed)"
+  },
+  {
+   "t": 82192.59999999404,
+   "text": "Simming 219/401… (207 rows landed)"
+  },
+  {
+   "t": 82589.30000001192,
+   "text": "Simming 220/401… (208 rows landed)"
+  },
+  {
+   "t": 82993.20000001788,
+   "text": "Simming 221/401… (209 rows landed)"
+  },
+  {
+   "t": 83390.59999999404,
+   "text": "Simming 222/401… (210 rows landed)"
+  },
+  {
+   "t": 85295.30000001192,
+   "text": "Simming 223/401… (211 rows landed)"
+  },
+  {
+   "t": 85691.40000000596,
+   "text": "Simming 224/401… (212 rows landed)"
+  },
+  {
+   "t": 86111.80000001192,
+   "text": "Simming 225/401… (213 rows landed)"
+  },
+  {
+   "t": 86514.80000001192,
+   "text": "Simming 226/401… (214 rows landed)"
+  },
+  {
+   "t": 88125.90000000596,
+   "text": "Simming 227/401… (215 rows landed)"
+  },
+  {
+   "t": 88563.59999999404,
+   "text": "Simming 228/401… (216 rows landed)"
+  },
+  {
+   "t": 89000.40000000596,
+   "text": "Simming 229/401… (217 rows landed)"
+  },
+  {
+   "t": 89405.40000000596,
+   "text": "Simming 230/401… (218 rows landed)"
+  },
+  {
+   "t": 91166.70000001788,
+   "text": "Simming 231/401… (219 rows landed)"
+  },
+  {
+   "t": 91562.90000000596,
+   "text": "Simming 232/401… (220 rows landed)"
+  },
+  {
+   "t": 91982.30000001192,
+   "text": "Simming 233/401… (221 rows landed)"
+  },
+  {
+   "t": 92393.90000000596,
+   "text": "Simming 234/401… (222 rows landed)"
+  },
+  {
+   "t": 94166.40000000596,
+   "text": "Simming 235/401… (223 rows landed)"
+  },
+  {
+   "t": 94602.5,
+   "text": "Simming 236/401… (224 rows landed)"
+  },
+  {
+   "t": 95005.20000001788,
+   "text": "Simming 237/401… (225 rows landed)"
+  },
+  {
+   "t": 95428.90000000596,
+   "text": "Simming 238/401… (226 rows landed)"
+  },
+  {
+   "t": 97375.5,
+   "text": "Simming 239/401… (227 rows landed)"
+  },
+  {
+   "t": 97796.80000001192,
+   "text": "Simming 240/401… (228 rows landed)"
+  },
+  {
+   "t": 98217.59999999404,
+   "text": "Simming 241/401… (229 rows landed)"
+  },
+  {
+   "t": 98651.59999999404,
+   "text": "Simming 242/401… (230 rows landed)"
+  },
+  {
+   "t": 100511.59999999404,
+   "text": "Simming 243/401… (231 rows landed)"
+  },
+  {
+   "t": 100936.70000001788,
+   "text": "Simming 244/401… (232 rows landed)"
+  },
+  {
+   "t": 101389.09999999404,
+   "text": "Simming 245/401… (233 rows landed)"
+  },
+  {
+   "t": 101844.20000001788,
+   "text": "Simming 246/401… (234 rows landed)"
+  },
+  {
+   "t": 103724.30000001192,
+   "text": "Simming 247/401… (235 rows landed)"
+  },
+  {
+   "t": 104171.5,
+   "text": "Simming 248/401… (236 rows landed)"
+  },
+  {
+   "t": 104593.90000000596,
+   "text": "Simming 249/401… (237 rows landed)"
+  },
+  {
+   "t": 105036.30000001192,
+   "text": "Simming 250/401… (238 rows landed)"
+  },
+  {
+   "t": 106642.09999999404,
+   "text": "Simming 251/401… (239 rows landed)"
+  },
+  {
+   "t": 107056.20000001788,
+   "text": "Simming 252/401… (240 rows landed)"
+  },
+  {
+   "t": 107491.30000001192,
+   "text": "Simming 253/401… (241 rows landed)"
+  },
+  {
+   "t": 107947.09999999404,
+   "text": "Simming 254/401… (242 rows landed)"
+  },
+  {
+   "t": 108407.20000001788,
+   "text": "Simming 255/401… (243 rows landed)"
+  },
+  {
+   "t": 108854.90000000596,
+   "text": "Simming 256/401… (244 rows landed)"
+  },
+  {
+   "t": 109282.70000001788,
+   "text": "Simming 257/401… (245 rows landed)"
+  },
+  {
+   "t": 109802.5,
+   "text": "Simming 258/401… (246 rows landed)"
+  },
+  {
+   "t": 110262,
+   "text": "Simming 259/401… (247 rows landed)"
+  },
+  {
+   "t": 110715.90000000596,
+   "text": "Simming 260/401… (248 rows landed)"
+  },
+  {
+   "t": 111150.20000001788,
+   "text": "Simming 261/401… (249 rows landed)"
+  },
+  {
+   "t": 111593.09999999404,
+   "text": "Simming 262/401… (250 rows landed)"
+  },
+  {
+   "t": 112040,
+   "text": "Simming 263/401… (251 rows landed)"
+  },
+  {
+   "t": 112495,
+   "text": "Simming 264/401… (252 rows landed)"
+  },
+  {
+   "t": 112958,
+   "text": "Simming 265/401… (253 rows landed)"
+  },
+  {
+   "t": 113417.90000000596,
+   "text": "Simming 266/401… (254 rows landed)"
+  },
+  {
+   "t": 113871.90000000596,
+   "text": "Simming 267/401… (255 rows landed)"
+  },
+  {
+   "t": 114340.70000001788,
+   "text": "Simming 268/401… (256 rows landed)"
+  },
+  {
+   "t": 114798.5,
+   "text": "Simming 269/401… (257 rows landed)"
+  },
+  {
+   "t": 115246.80000001192,
+   "text": "Simming 270/401… (258 rows landed)"
+  },
+  {
+   "t": 115724,
+   "text": "Simming 271/401… (259 rows landed)"
+  },
+  {
+   "t": 116207.70000001788,
+   "text": "Simming 272/401… (260 rows landed)"
+  },
+  {
+   "t": 116658.90000000596,
+   "text": "Simming 273/401… (261 rows landed)"
+  },
+  {
+   "t": 117109.5,
+   "text": "Simming 274/401… (262 rows landed)"
+  },
+  {
+   "t": 117567,
+   "text": "Simming 275/401… (263 rows landed)"
+  },
+  {
+   "t": 118131,
+   "text": "Simming 276/401… (264 rows landed)"
+  },
+  {
+   "t": 118629.40000000596,
+   "text": "Simming 277/401… (265 rows landed)"
+  },
+  {
+   "t": 119105.09999999404,
+   "text": "Simming 278/401… (266 rows landed)"
+  },
+  {
+   "t": 119568.80000001192,
+   "text": "Simming 279/401… (267 rows landed)"
+  },
+  {
+   "t": 120083.59999999404,
+   "text": "Simming 280/401… (268 rows landed)"
+  },
+  {
+   "t": 120569.40000000596,
+   "text": "Simming 281/401… (269 rows landed)"
+  },
+  {
+   "t": 121043.59999999404,
+   "text": "Simming 282/401… (270 rows landed)"
+  },
+  {
+   "t": 121543.20000001788,
+   "text": "Simming 283/401… (271 rows landed)"
+  },
+  {
+   "t": 122034.80000001192,
+   "text": "Simming 284/401… (272 rows landed)"
+  },
+  {
+   "t": 122477,
+   "text": "Simming 285/401… (273 rows landed)"
+  },
+  {
+   "t": 122926,
+   "text": "Simming 286/401… (274 rows landed)"
+  },
+  {
+   "t": 123401.20000001788,
+   "text": "Simming 287/401… (275 rows landed)"
+  },
+  {
+   "t": 123883.59999999404,
+   "text": "Simming 288/401… (276 rows landed)"
+  },
+  {
+   "t": 124343.80000001192,
+   "text": "Simming 289/401… (277 rows landed)"
+  },
+  {
+   "t": 124850.5,
+   "text": "Simming 290/401… (278 rows landed)"
+  },
+  {
+   "t": 125363.30000001192,
+   "text": "Simming 291/401… (279 rows landed)"
+  },
+  {
+   "t": 125841.80000001192,
+   "text": "Simming 292/401… (280 rows landed)"
+  },
+  {
+   "t": 126358.59999999404,
+   "text": "Simming 293/401… (281 rows landed)"
+  },
+  {
+   "t": 126967.40000000596,
+   "text": "Simming 294/401… (282 rows landed)"
+  },
+  {
+   "t": 127489,
+   "text": "Simming 295/401… (283 rows landed)"
+  },
+  {
+   "t": 127998,
+   "text": "Simming 296/401… (284 rows landed)"
+  },
+  {
+   "t": 128492.5,
+   "text": "Simming 297/401… (285 rows landed)"
+  },
+  {
+   "t": 129002.80000001192,
+   "text": "Simming 298/401… (286 rows landed)"
+  },
+  {
+   "t": 129495.90000000596,
+   "text": "Simming 299/401… (287 rows landed)"
+  },
+  {
+   "t": 129953.90000000596,
+   "text": "Simming 300/401… (288 rows landed)"
+  },
+  {
+   "t": 130423.5,
+   "text": "Simming 301/401… (289 rows landed)"
+  },
+  {
+   "t": 130924,
+   "text": "Simming 302/401… (290 rows landed)"
+  },
+  {
+   "t": 131411.59999999404,
+   "text": "Simming 303/401… (291 rows landed)"
+  },
+  {
+   "t": 131922.30000001192,
+   "text": "Simming 304/401… (292 rows landed)"
+  },
+  {
+   "t": 132424.90000000596,
+   "text": "Simming 305/401… (293 rows landed)"
+  },
+  {
+   "t": 132913.09999999404,
+   "text": "Simming 306/401… (294 rows landed)"
+  },
+  {
+   "t": 133389,
+   "text": "Simming 307/401… (295 rows landed)"
+  },
+  {
+   "t": 133882.5,
+   "text": "Simming 308/401… (296 rows landed)"
+  },
+  {
+   "t": 134435.90000000596,
+   "text": "Simming 309/401… (297 rows landed)"
+  },
+  {
+   "t": 134968.40000000596,
+   "text": "Simming 310/401… (298 rows landed)"
+  },
+  {
+   "t": 135578.09999999404,
+   "text": "Simming 311/401… (299 rows landed)"
+  },
+  {
+   "t": 136113.30000001192,
+   "text": "Simming 312/401… (300 rows landed)"
+  },
+  {
+   "t": 136686.90000000596,
+   "text": "Simming 313/401… (301 rows landed)"
+  },
+  {
+   "t": 137191.70000001788,
+   "text": "Simming 314/401… (302 rows landed)"
+  },
+  {
+   "t": 137715.20000001788,
+   "text": "Simming 315/401… (303 rows landed)"
+  },
+  {
+   "t": 138280.40000000596,
+   "text": "Simming 316/401… (304 rows landed)"
+  },
+  {
+   "t": 138799,
+   "text": "Simming 317/401… (305 rows landed)"
+  },
+  {
+   "t": 139290.5,
+   "text": "Simming 318/401… (306 rows landed)"
+  },
+  {
+   "t": 139840.40000000596,
+   "text": "Simming 319/401… (307 rows landed)"
+  },
+  {
+   "t": 140355.09999999404,
+   "text": "Simming 320/401… (308 rows landed)"
+  },
+  {
+   "t": 140901.30000001192,
+   "text": "Simming 321/401… (309 rows landed)"
+  },
+  {
+   "t": 141456,
+   "text": "Simming 322/401… (310 rows landed)"
+  },
+  {
+   "t": 142008.59999999404,
+   "text": "Simming 323/401… (311 rows landed)"
+  },
+  {
+   "t": 142602.5,
+   "text": "Simming 324/401… (312 rows landed)"
+  },
+  {
+   "t": 143167.09999999404,
+   "text": "Simming 325/401… (313 rows landed)"
+  },
+  {
+   "t": 143702.30000001192,
+   "text": "Simming 326/401… (314 rows landed)"
+  },
+  {
+   "t": 144270.40000000596,
+   "text": "Simming 327/401… (315 rows landed)"
+  },
+  {
+   "t": 144927.20000001788,
+   "text": "Simming 328/401… (316 rows landed)"
+  },
+  {
+   "t": 145490.70000001788,
+   "text": "Simming 329/401… (317 rows landed)"
+  },
+  {
+   "t": 146054.20000001788,
+   "text": "Simming 330/401… (318 rows landed)"
+  },
+  {
+   "t": 146588.70000001788,
+   "text": "Simming 331/401… (319 rows landed)"
+  },
+  {
+   "t": 147168.70000001788,
+   "text": "Simming 332/401… (320 rows landed)"
+  },
+  {
+   "t": 147727.09999999404,
+   "text": "Simming 333/401… (321 rows landed)"
+  },
+  {
+   "t": 148342.30000001192,
+   "text": "Simming 334/401… (322 rows landed)"
+  },
+  {
+   "t": 148941.5,
+   "text": "Simming 335/401… (323 rows landed)"
+  },
+  {
+   "t": 149515.90000000596,
+   "text": "Simming 336/401… (324 rows landed)"
+  },
+  {
+   "t": 150062.70000001788,
+   "text": "Simming 337/401… (325 rows landed)"
+  },
+  {
+   "t": 150617.80000001192,
+   "text": "Simming 338/401… (326 rows landed)"
+  },
+  {
+   "t": 151179.20000001788,
+   "text": "Simming 339/401… (327 rows landed)"
+  },
+  {
+   "t": 151725,
+   "text": "Simming 340/401… (328 rows landed)"
+  },
+  {
+   "t": 152275,
+   "text": "Simming 341/401… (329 rows landed)"
+  },
+  {
+   "t": 152809.70000001788,
+   "text": "Simming 342/401… (330 rows landed)"
+  },
+  {
+   "t": 153370.80000001192,
+   "text": "Simming 343/401… (331 rows landed)"
+  },
+  {
+   "t": 153981.90000000596,
+   "text": "Simming 344/401… (332 rows landed)"
+  },
+  {
+   "t": 154626.09999999404,
+   "text": "Simming 345/401… (333 rows landed)"
+  },
+  {
+   "t": 155170.70000001788,
+   "text": "Simming 346/401… (334 rows landed)"
+  },
+  {
+   "t": 155732,
+   "text": "Simming 347/401… (335 rows landed)"
+  },
+  {
+   "t": 156296.90000000596,
+   "text": "Simming 348/401… (336 rows landed)"
+  },
+  {
+   "t": 156840,
+   "text": "Simming 349/401… (337 rows landed)"
+  },
+  {
+   "t": 157405.90000000596,
+   "text": "Simming 350/401… (338 rows landed)"
+  },
+  {
+   "t": 157943.59999999404,
+   "text": "Simming 351/401… (339 rows landed)"
+  },
+  {
+   "t": 158510.40000000596,
+   "text": "Simming 352/401… (340 rows landed)"
+  },
+  {
+   "t": 159115.70000001788,
+   "text": "Simming 353/401… (341 rows landed)"
+  },
+  {
+   "t": 159661.20000001788,
+   "text": "Simming 354/401… (342 rows landed)"
+  },
+  {
+   "t": 160288.70000001788,
+   "text": "Simming 355/401… (343 rows landed)"
+  },
+  {
+   "t": 160833.30000001192,
+   "text": "Simming 356/401… (344 rows landed)"
+  },
+  {
+   "t": 161424.70000001788,
+   "text": "Simming 357/401… (345 rows landed)"
+  },
+  {
+   "t": 161986.30000001192,
+   "text": "Simming 358/401… (346 rows landed)"
+  },
+  {
+   "t": 162574.70000001788,
+   "text": "Simming 359/401… (347 rows landed)"
+  },
+  {
+   "t": 163191.70000001788,
+   "text": "Simming 360/401… (348 rows landed)"
+  },
+  {
+   "t": 163840.90000000596,
+   "text": "Simming 361/401… (349 rows landed)"
+  },
+  {
+   "t": 164569,
+   "text": "Simming 362/401… (350 rows landed)"
+  },
+  {
+   "t": 165062,
+   "text": "Simming 363/401… (351 rows landed)"
+  },
+  {
+   "t": 165590.30000001192,
+   "text": "Simming 364/401… (352 rows landed)"
+  },
+  {
+   "t": 166100.40000000596,
+   "text": "Simming 365/401… (353 rows landed)"
+  },
+  {
+   "t": 189288,
+   "text": "Ranking results… (353 rows landed)"
+  },
+  {
+   "t": 189825.30000001192,
+   "text": "Simming 366/401… (353 rows landed)"
+  },
+  {
+   "t": 190402.40000000596,
+   "text": "Simming 367/401… (353 rows landed)"
+  },
+  {
+   "t": 191001.09999999404,
+   "text": "Simming 368/401… (353 rows landed)"
+  },
+  {
+   "t": 191582.20000001788,
+   "text": "Simming 369/401… (353 rows landed)"
+  },
+  {
+   "t": 192204.5,
+   "text": "Simming 370/401… (353 rows landed)"
+  },
+  {
+   "t": 192761.80000001192,
+   "text": "Simming 371/401… (353 rows landed)"
+  },
+  {
+   "t": 193417.5,
+   "text": "Simming 372/401… (353 rows landed)"
+  },
+  {
+   "t": 193979.80000001192,
+   "text": "Simming 373/401… (353 rows landed)"
+  },
+  {
+   "t": 194577.59999999404,
+   "text": "Simming 374/401… (353 rows landed)"
+  },
+  {
+   "t": 195171.59999999404,
+   "text": "Simming 375/401… (353 rows landed)"
+  },
+  {
+   "t": 195793.30000001192,
+   "text": "Simming 376/401… (353 rows landed)"
+  },
+  {
+   "t": 196393.40000000596,
+   "text": "Simming 377/401… (353 rows landed)"
+  },
+  {
+   "t": 196991.40000000596,
+   "text": "Simming 378/401… (353 rows landed)"
+  },
+  {
+   "t": 197717.30000001192,
+   "text": "Simming 379/401… (353 rows landed)"
+  },
+  {
+   "t": 198359.09999999404,
+   "text": "Simming 380/401… (353 rows landed)"
+  },
+  {
+   "t": 198992.5,
+   "text": "Simming 381/401… (353 rows landed)"
+  },
+  {
+   "t": 199595.5,
+   "text": "Simming 382/401… (353 rows landed)"
+  },
+  {
+   "t": 200167.70000001788,
+   "text": "Simming 383/401… (353 rows landed)"
+  },
+  {
+   "t": 200711.20000001788,
+   "text": "Simming 384/401… (353 rows landed)"
+  },
+  {
+   "t": 201228.5,
+   "text": "Simming 385/401… (353 rows landed)"
+  },
+  {
+   "t": 201768.20000001788,
+   "text": "Simming 386/401… (353 rows landed)"
+  },
+  {
+   "t": 202352.59999999404,
+   "text": "Simming 387/401… (353 rows landed)"
+  },
+  {
+   "t": 202932.40000000596,
+   "text": "Simming 388/401… (353 rows landed)"
+  },
+  {
+   "t": 203477.40000000596,
+   "text": "Simming 389/401… (353 rows landed)"
+  },
+  {
+   "t": 204049.80000001192,
+   "text": "Simming 390/401… (353 rows landed)"
+  },
+  {
+   "t": 204652,
+   "text": "Simming 391/401… (353 rows landed)"
+  },
+  {
+   "t": 205180.5,
+   "text": "Simming 392/401… (353 rows landed)"
+  },
+  {
+   "t": 205778.59999999404,
+   "text": "Simming 393/401… (353 rows landed)"
+  },
+  {
+   "t": 206310.59999999404,
+   "text": "Simming 394/401… (353 rows landed)"
+  },
+  {
+   "t": 206891.80000001192,
+   "text": "Simming 395/401… (353 rows landed)"
+  },
+  {
+   "t": 207523.30000001192,
+   "text": "Simming 396/401… (353 rows landed)"
+  },
+  {
+   "t": 208105.40000000596,
+   "text": "Simming 397/401… (353 rows landed)"
+  },
+  {
+   "t": 208723.80000001192,
+   "text": "Simming 398/401… (353 rows landed)"
+  },
+  {
+   "t": 209267.20000001788,
+   "text": "Simming 399/401… (353 rows landed)"
+  },
+  {
+   "t": 209850,
+   "text": "Simming 400/401… (353 rows landed)"
+  },
+  {
+   "t": 210377.90000000596,
+   "text": "Simming 401/401… (353 rows landed)"
+  },
+  {
+   "t": 210698.59999999404,
+   "text": ""
+  }
+ ],
+ "panel": [],
+ "announces": [
+  {
+   "t": 2,
+   "text": "No ranking yetThis tab ranks gear upgrades against the character and settings on this page. Press Run to start.Simulate"
+  },
+  {
+   "t": 68.40000000596046,
+   "text": "Starting… (0 rows landed)"
+  },
+  {
+   "t": 210698.59999999404,
+   "text": "Your current gear: 2451.1 DPS. Took 210s."
+  }
+ ]
+}

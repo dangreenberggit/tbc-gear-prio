@@ -1,0 +1,248 @@
+{
+  "source": "capture.mjs --mode panel --captures (trace-dry.json); replay.mjs --shown adds the trace-derived facts",
+  "panelAriaLive": 0,
+  "panelRoleTimer": 0,
+  "panelInLiveRegion": false,
+  "countColor": "rgb(173, 181, 189)",
+  "gray500": "rgb(173, 181, 189)",
+  "reducedMotion": false,
+  "progressbarAriaLabel": "Ranking progress",
+  "panelHidden": false,
+  "phase": "set-bonuses",
+  "progressbarName": "Ranking progress",
+  "progressbarRole": "progressbar",
+  "styleProbe": {
+    "pairs": {
+      "box background-color": {
+        "bulk": "rgb(21, 23, 30)",
+        "panel": "rgb(21, 23, 30)",
+        "equal": true
+      },
+      "box border-top-color": {
+        "bulk": "rgb(55, 61, 87)",
+        "panel": "rgb(55, 61, 87)",
+        "equal": true
+      },
+      "box border-top-width": {
+        "bulk": "1px",
+        "panel": "1px",
+        "equal": true
+      },
+      "box border-top-left-radius": {
+        "bulk": "0px",
+        "panel": "0px",
+        "equal": true
+      },
+      "header border-bottom-color": {
+        "bulk": "rgb(108, 117, 125)",
+        "panel": "rgb(108, 117, 125)",
+        "equal": true
+      },
+      "header border-bottom-width": {
+        "bulk": "1px",
+        "panel": "1px",
+        "equal": true
+      },
+      "title font-size": {
+        "bulk": "17.5px",
+        "panel": "17.5px",
+        "equal": true
+      },
+      "title font-weight": {
+        "bulk": "700",
+        "panel": "700",
+        "equal": true
+      }
+    },
+    "allEqual": true,
+    "panelHidden": false,
+    "phase": "set-bonuses"
+  },
+  "at375": {
+    "mobile": {
+      "innerWidth": 503,
+      "scrollWidth": 503,
+      "panelLeft": 7,
+      "panelRight": 368,
+      "panelWidth": 361,
+      "panelHidden": false,
+      "phase": "set-bonuses",
+      "outermostPast375": [
+        {
+          "tag": "ul",
+          "cls": "sim-tabs nav nav-tabs",
+          "left": 7,
+          "right": 649
+        },
+        {
+          "tag": "div",
+          "cls": "import-export nav",
+          "left": 649,
+          "right": 831
+        },
+        {
+          "tag": "div",
+          "cls": "sim-toolbar nav",
+          "left": 831,
+          "right": 1135
+        },
+        {
+          "tag": "table",
+          "cls": "upgrades-results-table upgrades-results-table-provisional table table-sm",
+          "left": 7,
+          "right": 546
+        },
+        {
+          "tag": "div",
+          "cls": "sim-toast-container p-3 bottom-0 right-0",
+          "left": 475,
+          "right": 503
+        }
+      ]
+    },
+    "desktopEmulation": {
+      "innerWidth": 375,
+      "scrollWidth": 503,
+      "panelLeft": 7,
+      "panelRight": 368,
+      "panelWidth": 361,
+      "panelHidden": false,
+      "phase": "set-bonuses",
+      "outermostPast375": [
+        {
+          "tag": "ul",
+          "cls": "sim-tabs nav nav-tabs",
+          "left": 7,
+          "right": 649
+        },
+        {
+          "tag": "div",
+          "cls": "import-export nav",
+          "left": 649,
+          "right": 831
+        },
+        {
+          "tag": "div",
+          "cls": "sim-toolbar nav",
+          "left": 831,
+          "right": 1135
+        },
+        {
+          "tag": "table",
+          "cls": "upgrades-results-table upgrades-results-table-provisional table table-sm",
+          "left": 7,
+          "right": 546
+        }
+      ]
+    }
+  },
+  "noHScroll375": true,
+  "layoutWidth375": 503,
+  "panelFits375": true,
+  "countColorIsGray500": true,
+  "styleProbeAllEqual": true,
+  "captures": {
+    "preparing": {
+      "sampleIndex": 0,
+      "sampleT": 59.90000003576279,
+      "file": "542-preparing-1280-panel.png",
+      "phaseBefore": "preparing",
+      "doneBefore": null,
+      "phaseAfter": "preparing",
+      "doneAfter": null,
+      "hiddenAfter": false
+    },
+    "candidates": {
+      "sampleIndex": 33,
+      "sampleT": 12333.200000047684,
+      "file": "542-candidates-1280-panel.png",
+      "phaseBefore": "candidates",
+      "doneBefore": "33",
+      "phaseAfter": "candidates",
+      "doneAfter": "34",
+      "hiddenAfter": false
+    },
+    "half": {
+      "sampleIndex": 46,
+      "sampleT": 14496.300000011921,
+      "panel": {
+        "file": "542-half-1280-panel.png",
+        "phaseBefore": "set-bonuses",
+        "doneBefore": "54",
+        "phaseAfter": "set-bonuses",
+        "doneAfter": "54",
+        "hiddenAfter": false
+      },
+      "tab": {
+        "file": "542-half-1280-tab.png",
+        "phaseBefore": "set-bonuses",
+        "doneBefore": "54",
+        "phaseAfter": "set-bonuses",
+        "doneAfter": "54",
+        "hiddenAfter": false
+      }
+    },
+    "set-bonuses": {
+      "sampleIndex": 55,
+      "sampleT": 14999.200000047684,
+      "file": "542-set-bonuses-1280-panel.png",
+      "phaseBefore": "set-bonuses",
+      "doneBefore": "54",
+      "phaseAfter": "set-bonuses",
+      "doneAfter": "54",
+      "hiddenAfter": false
+    },
+    "replication": {
+      "sampleIndex": 56,
+      "sampleT": 22100.5,
+      "file": "542-replication-1280-panel.png",
+      "phaseBefore": "replication",
+      "doneBefore": "54",
+      "phaseAfter": "replication",
+      "doneAfter": "54",
+      "hiddenAfter": false
+    }
+  },
+  "replayedBy": "replay.mjs trace-dry.json --shown",
+  "e50Shown": 0.6605069343798529,
+  "phaseSequence": [
+    "preparing",
+    "candidates",
+    "set-bonuses",
+    "replication",
+    "ranking"
+  ],
+  "phaseSequenceStartsPreparingCandidates": true,
+  "phaseSequenceHasReplication": true,
+  "phaseSequenceIsFull": true,
+  "announceFirstText": "Starting… (0 rows landed)",
+  "announceChanges": 2,
+  "barDeterminateFromFirstSim": true,
+  "preparingBarAnim": "progress-bar-stripes",
+  "preparingBarImg": "linear-gradient(45deg,",
+  "determinateBarAnim": "loading-shimmer",
+  "statusRowHiddenWhileRunning": true,
+  "zeroRemainingEarly": 0,
+  "lastElapsedText": "33.0s",
+  "tookS": 33,
+  "elapsedMinusTookS": 0,
+  "boundary": 54,
+  "setBonusesAtDone": 54,
+  "setBonusesAtBoundary": true,
+  "rowsChangedAfterCandidates": false,
+  "concurrency": 4,
+  "run1N": 4,
+  "concurrencyMatchesRun1": true,
+  "qualifyingRowsAtRanking": 5,
+  "replicationCountHat": 24,
+  "replicationSims": 24,
+  "replicationCountMatches": true,
+  "loadmonOwnSeen": true,
+  "appProbeMax": 0,
+  "longTaskCount": 57,
+  "checks": [
+    "FLAG: check (i): beta refit 0.00000 outside [0.0015, 0.0046]",
+    "FLAG: check (ii): raw stability fraction of shown values 0.5556 > 0.45",
+    "FLAG: check (iii): 1 full D3 window(s), two needed (cause not confirmed)"
+  ]
+}

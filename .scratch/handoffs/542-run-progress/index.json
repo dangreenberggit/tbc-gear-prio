@@ -1,0 +1,23 @@
+{
+  "forkHead": "4d447adcd2940437a0541be38345cf8e4ad8f60a",
+  "forkDirty": false,
+  "generatedAt": "2026-10-04T01:05:03.835Z",
+  "manifest": "manifest.json",
+  "trace": "trace-dry.json",
+  "entries": [
+    {
+      "ticket": "542",
+      "state": "mid-run",
+      "width": 1280,
+      "files": [
+        "542-preparing-1280-panel.png",
+        "542-candidates-1280-panel.png",
+        "542-half-1280-panel.png",
+        "542-half-1280-tab.png",
+        "542-set-bonuses-1280-panel.png",
+        "542-replication-1280-panel.png"
+      ],
+      "errors": []
+    }
+  ]
+}
