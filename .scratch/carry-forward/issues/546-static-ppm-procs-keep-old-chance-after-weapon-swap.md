@@ -36,7 +36,7 @@ player's item swap is on.
    Assert on the chance or on a proc rate, not only on a proc count above
    0, so the test pins the speed (round 12, A2).
 2. Fix each site that does not, by rebuilding in place as
-   `NewLegacyPPMManager` does (`sim/core/procs.go:47-54`), or record why it
+   `NewLegacyPPMManager` does (`sim/core/procs.go:46-54`), or record why it
    stays.
 3. Re-pin the fork in the main repo (AGENTS.md "The forked tab repo").
 
@@ -75,7 +75,7 @@ compared with the chance per hit of the swapped-in weapons, speed × PPM /
 | Test | Weapons (start → swap) | Start chance | Swapped-in chance | Rate at `d14f459d0` | Rate at `536645d01` |
 | --- | --- | --- | --- | --- | --- |
 | `TestItemSwapRateUnbridledWrath` | 2.6 MH → 1.5 MH | 0.6500 | 0.3750 | 0.6326 (823 / 1301) | 0.3689 (480 / 1301) |
-| `TestItemSwapRateUnbridledWrathOffHand` | 3.6 2H → 2.6 MH + 1.5 OH | 0.3246 | 0.4742 | 0.3206 (544 / 1697) | 0.4737 (794 / 1676) |
+| `TestItemSwapRateUnbridledWrathOffHand` | 3.6 2H → 2.6 MH + 1.5 OH | 0.3246 red, 0.3286 green | 0.4742 red, 0.4754 green | 0.3206 (544 / 1697) | 0.4737 (794 / 1676) |
 | `TestItemSwapRateSealOfVengeance` | 2.6 MH → 1.5 MH | 0.8667 | 0.5000 | 0.8525 (988 / 1159) | 0.4802 (559 / 1164) |
 
 At `d14f459d0` each rate is within 3% of the start chance, so all three
@@ -84,7 +84,8 @@ within 4% of the swapped-in chance.
 
 For the off-hand test, both chances are blends weighted by the measured
 hits of each hand (612 main hand and 1085 off hand red, 612 and 1064
-green). The start chance there is the main-hand-only rate: the
+green), so each run has its own pair (`546-red.txt:37`,
+`546-green.txt:36`). The start chance there is the main-hand-only rate: the
 two-hander's 0.9 on main-hand hits and nothing on off-hand hits, because
 the off hand had speed 0 when the manager was built and got no proc mask
 (`mergeOrAppend`, `procs.go:134-137`). The red rate matches it, which

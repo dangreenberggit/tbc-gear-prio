@@ -199,6 +199,8 @@ which this review may not edit; they are grouped as R12-PF1 to R12-PF3 in
 the `pending` rows below for the orchestrator to dispatch, as Round 11 did
 with its R11-PF rows. Until each `pending` row becomes `fixed` or
 `wontfix`, `pnpm merge-to-dev --check-only` refuses this file.
+(Since done: all three were fixed at fork `d14f459d0` and main
+`be705bdf`, and Round 13 reviewed them.)
 
 - **R12-PF1** (fork `engine/rank.ts`, one fork commit and re-pin): "surface"
   to plain wording in the `readStats` comment (ST3); split its 70-word
@@ -230,3 +232,187 @@ with its R11-PF rows. Until each `pending` row becomes `fixed` or
 | P3       | Spec                   | wontfix     | Each widening is recorded in the stage-gate decision log and in its ticket; listed for the owner in the report, no code change.                                                                                                                 |
 | P4       | Spec                   | wontfix     | Ticket 540 recorded the decision not to ticket it; it is the same mechanism as 540 in slots that a weapon-swap set does not reach. Listed for the owner in the report.                                                                          |
 | P5       | Spec                   | fixed       | R12-PF2, fork `d14f459d0`: the `singleSwapBreaks` comment says why the function exists, without the history, and every line is wrapped.                                                                                                         |
+
+# Round 13 — Round 12's fixes and ticket 546
+
+Reviewed range: `fceb4842a5adf429279a941ac8c913c6288a93b1..3c0dd2880e41522bea847ba14173711bd09e4716`
+
+Fork `vendor/tbc-new-fork` (`feat/upgrades-tab`): `1f102770e97cf68b12a09baf410ac931da84eba2..536645d011160b9760f78012700a9d404d4fcafb`.
+
+The main range has four commits (`git log --oneline fceb4842..3c0dd288`):
+`5f7c57dc` is Round 12's own review text and its ticket filing; `be705bdf`
+applies R12-PF3 in core and re-pins the fork to `d14f459d0`; `888c7d30` is
+the layout-gate record that `merge-to-dev --check-only` wrote; `3c0dd288`
+re-pins the fork to `536645d01` and closes ticket 546. The fork range has
+two commits: `d14f459d0` (R12-PF1 to R12-PF3 in `engine/rank.ts`,
+`view.ts`, `candidate-gems.ts` and PROVENANCE) and `536645d01` (ticket 546:
+`talents_fury.go`, `seals.go`, and three tests in
+`sim/item_swap_weapon_proc_test.go`). Spec sources: Round 12's rows above,
+ticket 546, and `.scratch/stage-gate/round-11-followups/546-plan.md` with
+its `546-*.txt` logs (gitignored).
+
+Dispatch: four fresh `general-task` agents on Opus (effort high). The Spec
+and domain axes ran first, in an earlier dispatch of this round; their
+reports were reused unchanged (run log
+`.scratch/agent-runs/5cef0953-10d5-4668-b1e6-2fbbf6778cb6.jsonl`, agents
+`ac1ae002323fa2df7` and `a60431927e43dc35a`). The adversarial axis and the
+Standards half of `code-review` ran later, in one parallel batch, with the
+same briefs. No `codex` binary on PATH. Every axis was told it writes
+nothing; each reported the main tree with only the seven untracked owner
+handoffs and the fork clean at `536645d01`.
+
+Tests run by the axes:
+
+- `go -C vendor/tbc-new-fork test -tags=with_db ./sim/ -run 'TestItemSwapRate' -count=1 -v`:
+  rc=0, 3 passed, rates 0.3689, 0.4737 and 0.4802 (adversarial and domain).
+- `python scripts/check_engine_port_drift.py`: rc=0, "36 ported files match
+  PROVENANCE.md" (standards).
+
+## Adversarial
+
+No blocking defect. The three 546 tests fail on the old code
+(`546-red.txt`: 0.6326, 0.3206 and 0.8525 against wanted 0.375, 0.4742 and
+0.5) and pass on the new. The expected value is weapon speed × PPM / 60
+from constants; the measured hits only weight the off-hand blend, so the
+tests are not true by construction. With item swap off,
+`RegisterItemSwapCallback` registers nothing (`item_swaps.go:131-133`), so
+`NewLegacyPPMManager` equals the static manager; with it on, the callbacks
+run after the auto attacks are updated (`item_swaps.go:373`, `:376`), and
+the end-of-iteration reset rebuilds from the original gear.
+
+- **R13-A1 (low).** The `gems.meta-repair-set-versions` note is kept on a
+  stopped run. Fork `rank.ts:1955-1967` (ticket 533) clears every
+  set-phase output on Stop but not `hitCapNotes`; the note goes into
+  `substitutions` (`rank.ts:2031`), then the `PartialRanking`
+  (`rank.ts:2075`), and the tab shows substitutions on a stopped run
+  (`upgrades_tab.tsx:2863`). Trigger: a non-Stop error in a set-phase
+  `versionGears` call. A read that Stop cuts short is a `StopRefusedSim`
+  (`rank.ts:4015`, `:4024`), and the catch at `rank.ts:1248` stays silent
+  for it.
+
+The two questions this round had to settle:
+
+- **Does a stopped run drop set-phase notes (ticket 533)?** No. The abort
+  block at fork `rank.ts:1955-1967` resets the set result, `steps`,
+  `packageSimSkips` and each row's `setContext`; it does not touch
+  `hitCapNotes`. Since `d14f459d0`, the set-version catch at `rank.ts:1248`
+  skips the warning and the note only for `StopRefusedSim`, so a non-Stop
+  error that happens after Stop now adds the note. Before `d14f459d0` the
+  same note was already kept on a stopped run when the error came before
+  Stop; the change widens that case to errors after Stop. This is R13-A1.
+- **Does a rejected read cached in `versionReads` (`rank.ts:1212`)
+  matter?** No. The map is created inside `rankAfterJobCreated` on every
+  run (`rank.ts:1091`, `:1171`), so a later run never sees it. In the same
+  run, the catch that leaves the rejected promise in the map also sets
+  `versionBudgetsOff = true` (`rank.ts:1245`), and the guard at
+  `rank.ts:1197` then returns the shared layout before the map lookup.
+  `hitCapFailed` (`rank.ts:1246`) stops the ranking from being cached
+  (`rank.ts:2086`). Whether two `versionGears` calls can be in flight on
+  one key at once was traced for two call sites only (`rank.ts:3025`,
+  `:3252`); the worst case would be a repeated warning and note, not a
+  wrong number (hypothesis, untested).
+
+Unexamined: core `candidate-gems.ts` and its test (covered by Spec); the
+`view.ts` change (comment only); the six other `versionGears` call sites;
+a weapon swap before the pull (`item_swaps.go:417` returns before the auto
+attacks are updated; same as the static manager, so not a regression).
+
+## Domain
+
+No game-rule error. A PPM proc's chance per hit is the hitting weapon's
+speed × PPM / 60; after `536645d01`, Unbridled Wrath and Seal of Vengeance
+follow it after a swap, through the rebuild-in-place manager that upstream
+already uses for Seal of Command (`upstream/master:sim/paladin/seals.go:915`).
+Item speeds from `assets/database/db.json` (28295 = 2.6, 25952 = 1.5,
+28307 = 1.5, 24550 = 3.6) give the tests' expected chances. The new note
+text is true under the sim's socket-bonus rule (fork `database.go:633-644`).
+
+- **R13-D1 (informational).** The PPM values (15 for 5/5 Unbridled Wrath,
+  20 for Seal of Vengeance) are upstream's and general game knowledge;
+  neither `docs/stage0-findings.md` nor `docs/verification-log.md` covers
+  them (`grep -niE "unbridled|vengeance|ppm"`). Upstream still uses
+  `NewStaticLegacyPPMManager` at both sites (`talents_fury.go:69`,
+  `seals.go:815` on `upstream/master` `17a8fb28c`), so the fork now
+  differs from upstream at two lines. PPM, proc mask and outcome are
+  unchanged, so this stays inside "combat modelling is upstream's"
+  (ticket 258).
+- **R13-D2 (informational).** One static manager remains: Elune's Touch,
+  `sim/druid/forms.go:362`. It is outside ticket 546.
+- **R13-D3 (minor).** Ticket 546's off-hand table row gave the start and
+  swapped-in chances from the red run's hit split (0.3246, 0.4742); the
+  green run gives 0.3286 and 0.4754 (`546-green.txt:36`). The verdict does
+  not change. Same finding as R13-P1.
+
+## Standards + Spec
+
+**Standards.** No documented standard is broken. The lock `commit`,
+`data/sim-implemented-effects.json` `forkCommit` and the fork HEAD all
+name `536645d01`; the PROVENANCE sha256 rows for `rank.ts`, `view.ts` and
+`candidate-gems.ts` match the files at `536645d01`; all six commit subjects
+follow the seven rules and have no body; no banned word in the added
+lines.
+
+- **R13-ST1 (judgement).** Fork `engine/rank.ts:1247`: "A read Stop ended
+  is no failure to report (ticket 538)." The missing "that" makes it hard
+  to parse; "A read that Stop ended is not a failure to report" is plainer.
+- **R13-ST2 (judgement).** This file's Round 12 Summary still said three
+  code fixes remain and that check-only refuses the file.
+- **R13-ST3 (judgement, Duplicated Code).** In fork
+  `sim/item_swap_weapon_proc_test.go`, the new `runSim` repeats the
+  `core.RunRaidSim` and error block of the two older tests, which were left
+  as they were, and `playerActionTargets` repeats the walk in `procCount`.
+- **R13-ST4 (judgement).** The axis reported ticket 546's `procs.go`
+  citations as off by one or two. Checked against `git -C
+vendor/tbc-new-fork show 536645d01:sim/core/procs.go`:
+  `NewLegacyPPMManager` is lines 46-54 and `NewStaticLegacyPPMManager`
+  57-61 (the file did not change in this range), so only one citation,
+  `:47-54` in "What would close this", was wrong.
+
+**Spec.** Everything asked for is done. R12-PF1 to R12-PF3 hold at fork
+`d14f459d0`: "surface" is "become", the 70-word sentence is four, the
+`computeStats` wrapper is gone and both catches test `StopRefusedSim`
+(`rank.ts:1143`, `:1248`), the `view.ts` comment is rewrapped without
+history, and core and fork notes say "without their socket bonus", which
+`candidate-gems.test.ts` asserts. Ticket 546's three closing items are
+done at fork `536645d01` and main `3c0dd288`. `546-sim-all.txt` fails only
+`TestProtoVersioning`, on proto deletions; `546-verify.txt` and
+`546-check-only.txt` end rc=0. The lock says `pushed: false`, and
+`ls-remote` gives `7d4d69d6a` for the fork origin.
+
+- **R13-P1 (minor).** `546-plan.md:33` asks for "the measured rates
+  before/after for each test"; the off-hand row used the red run's
+  chances. Same as R13-D3.
+- **R13-P2 (not scope creep).** R12-PF1 asked for one Stop test in both
+  catches without naming which; `instanceof StopRefusedSim` matches the
+  hit-read catch. Its side effect is R13-A1.
+- **R13-P3 (informational).** `888c7d30` records a new layout-lock
+  `testedTabHash`; check-only wrote it, and `decision-log.md:141` logs it.
+
+Not checked by any axis: the claim in the lock `_comment` that the parity
+test gave rc=0 at `d14f459d0` (no log saved; unverified); `pnpm verify` at
+`be705bdf`.
+
+## Summary
+
+Nothing blocks a merge. Round 12's three fixes are in the code, ticket 546
+is fixed and its tests fail red and pass green, and no game rule is wrong.
+The one code-level finding, R13-A1, is a note about a real set-phase
+failure that is kept on a stopped run; it changes no figure and is
+disposed `wontfix` below. Ticket 546's off-hand table row and one line
+citation are fixed in this commit, and the Round 12 Summary now says its
+pending fixes are done. No ticket filed, no `pending` row.
+
+## Disposition (round 13)
+
+| ID             | Axis         | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                          |
+| -------------- | ------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R13-A1         | Adversarial  | wontfix     | The note reports a real set-phase read failure, which the user may want whether or not they pressed Stop; it was already kept on a stopped run for errors before Stop, it changes no figure, and a Stop refusal stays silent (`rank.ts:1248`). A fix would be a fork commit, re-pin and PROVENANCE cycle for a rare error path; dropped under the small-findings rule. |
+| R13-D1         | Domain       | wontfix     | Informational. The PPM values are upstream's; only the rebuild after a swap changed, which is upstream's own pattern for Seal of Command, so the ticket 258 line is not crossed.                                                                                                                                                                                       |
+| R13-D2         | Domain       | wontfix     | Informational and outside ticket 546; no ranked case swaps weapons on a druid that uses Elune's Touch (hypothesis, untested).                                                                                                                                                                                                                                          |
+| R13-D3, R13-P1 | Domain, Spec | fixed       | This commit: ticket 546's off-hand row gives both pairs (0.3246 red, 0.3286 green; 0.4742 red, 0.4754 green), and the prose cites `546-red.txt:37` and `546-green.txt:36`.                                                                                                                                                                                             |
+| R13-ST1        | Standards    | wontfix     | The comment is grammatical, and the next line's `StopRefusedSim` test makes its meaning clear; a fork commit, re-pin and PROVENANCE cycle for one word is not worth it. Dropped under the small-findings rule.                                                                                                                                                         |
+| R13-ST2        | Standards    | fixed       | This commit: the Round 12 Summary says the three fixes are done, at fork `d14f459d0` and main `be705bdf`.                                                                                                                                                                                                                                                              |
+| R13-ST3        | Standards    | wontfix     | Test-only repetition in a fork Go test file; routing the two older tests through `runSim` changes no behaviour and would need its own fork commit and re-pin.                                                                                                                                                                                                          |
+| R13-ST4        | Standards    | fixed       | This commit: ticket 546's "What would close this" cites `procs.go:46-54`. The other citations were correct at `536645d01` (checked with `git show`).                                                                                                                                                                                                                   |
+| R13-P2         | Spec         | wontfix     | Not a defect: the choice is inside R12-PF1's ask; its side effect is R13-A1.                                                                                                                                                                                                                                                                                           |
+| R13-P3         | Spec         | wontfix     | Informational: `merge-to-dev --check-only` writes the layout-gate record by design.                                                                                                                                                                                                                                                                                    |
