@@ -9,11 +9,12 @@
  *   and every expected value is worked out by hand in the comment beside it;
  * - the engine-order block drives the real fork `rankUpgrades` with a
  *   controlled sim and the engine's default seeds, the way the tab calls it
- *   (no `seeds`), and checks the tracker's set-phase boundary against the
+ *   (no `seeds`), on a seven- and a twelve-candidate pool, and checks the
+ *   tracker's set-phase boundary, phases and replication count against the
  *   events the engine really sends.
  *
  * The fork is gitignored (`vendor/`), so both blocks skip when the module is
- * absent.
+ * absent, which includes every CI run.
  */
 
 import { existsSync, readFileSync } from "node:fs";
@@ -171,10 +172,6 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     it.each([7, 38])("returns null for total %i, which no c gives", (total) => {
       expect(mod.replicationBoundary(total, 5, 8)).toBeNull();
     });
-
-    it("mirrors the engine's private seed count of 5", () => {
-      expect(mod.TAB_REPLICATE_SEED_COUNT).toBe(5);
-    });
   });
 
   describe("phases follow the engine's event order", () => {
@@ -296,8 +293,10 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       // r_B = (3000 - 1000) / 20 = 100; 100 * (20 + 2 * 36)
       t.observe(sim(21, 57), 3_000);
       expect(t.view().remainingMs).toBe(9_200);
-      // A row in the silent set phase changes nothing: the value is held.
-      t.observe({ kind: "row", row: {} }, 4_000);
+      // A ninth qualifying row in the silent set phase is counted, but the
+      // count is already at top-N 8, so R and the estimate stay the same.
+      t.observe(row(false), 4_000);
+      expect(t.view().qualifyingRows).toBe(9);
       expect(t.view().remainingMs).toBe(9_200);
       // b = 21; r_B * k * (T - b) = 100 * 2 * 36
       t.observe(RANKING, 5_000);
@@ -570,12 +569,35 @@ const THUNDERHEART = {
 const MALORNE = { hands: 29097, legs: 29099 } as const;
 // Non-set items, so a candidate can replace a Malorne piece.
 const NEUTRAL = { hands: 10140, legs: 8289 } as const;
+// Five more pieces for slots nothing is worn in, so a pool can hold more
+// candidates than PAIRED_REPLICATE_TOP_N (Thunderheart Wristguards,
+// Waistguard and Treads; Primal Intent wrist and waist).
+const EXTRA = [
+  { itemId: 34444, slot: "wrist" },
+  { itemId: 34556, slot: "waist" },
+  { itemId: 34573, slot: "feet" },
+  { itemId: 29527, slot: "wrist" },
+  { itemId: 29526, slot: "waist" },
+] as const;
 
 const ITEM_VALUE = new Map<number, number>([
   ...Object.values(THUNDERHEART).map((id) => [id, 100] as const),
   [NEUTRAL.hands, 120],
   [NEUTRAL.legs, 120],
+  ...EXTRA.map((p) => [p.itemId, 100] as const),
 ]);
+
+type PoolSlot = { itemId: number; slot: SimOrderName };
+
+const SMALL_POOL: readonly PoolSlot[] = [
+  ...(["head", "shoulder", "chest", "hands", "legs"] as const).map((slot) => ({
+    itemId: THUNDERHEART[slot],
+    slot,
+  })),
+  { itemId: NEUTRAL.hands, slot: "hands" },
+  { itemId: NEUTRAL.legs, slot: "legs" },
+];
+const LARGE_POOL: readonly PoolSlot[] = [...SMALL_POOL, ...EXTRA];
 const SET_BONUSES: Record<number, { b2: number; b4: number }> = {
   676: { b2: 50, b4: 80 },
   640: { b2: 40, b4: 70 },
@@ -623,7 +645,8 @@ type RecordedEvent = { progress: Progress; simCallsSoFar: number };
  * reads (rank.ts `hitCapReadable`).
  */
 async function recordRun(
-  candidateValue: ReadonlyMap<number, number> = ITEM_VALUE
+  candidateValue: ReadonlyMap<number, number> = ITEM_VALUE,
+  poolSlots: readonly PoolSlot[] = SMALL_POOL
 ): Promise<RecordedEvent[]> {
   const rankMod = await importForkUpgrades<{
     rankUpgrades: (
@@ -675,13 +698,7 @@ async function recordRun(
     ]),
   });
 
-  const pool = [
-    ...(["head", "shoulder", "chest", "hands", "legs"] as const).map(
-      (slot) => ({ itemId: THUNDERHEART[slot], slot })
-    ),
-    { itemId: NEUTRAL.hands, slot: "hands" },
-    { itemId: NEUTRAL.legs, slot: "legs" },
-  ].map((p) => ({
+  const pool = poolSlots.map((p) => ({
     ...p,
     name: `item ${p.itemId}`,
     phase: 1,
@@ -747,7 +764,14 @@ describe.skipIf(!forkPresent || !moduleExists())(
   () => {
     let mod: RunProgressModule;
     let topN: number;
-    let events: RecordedEvent[];
+    // Seven candidates take the small-pool branch of `replicationBoundary`.
+    // Twelve, all above the cutoff, take the large-pool branch and pass the
+    // top-N cap on re-simmed rows.
+    const recordings: Record<"seven" | "twelve", RecordedEvent[]> = {
+      seven: [],
+      twelve: [],
+    };
+    const pools = ["seven", "twelve"] as const;
     let zeroQualifyEvents: RecordedEvent[];
 
     beforeAll(async () => {
@@ -757,14 +781,15 @@ describe.skipIf(!forkPresent || !moduleExists())(
           "engine/se.ts"
         )
       ).PAIRED_REPLICATE_TOP_N;
-      events = await recordRun();
+      recordings.seven = await recordRun();
+      recordings.twelve = await recordRun(ITEM_VALUE, LARGE_POOL);
       // Every candidate loses 50 DPS, so no row clears the cutoff.
       zeroQualifyEvents = await recordRun(
         new Map([...ITEM_VALUE.keys()].map((id) => [id, -50] as const))
       );
     }, 240_000);
 
-    const stageEvents = (from: RecordedEvent[] = events) =>
+    const stageEvents = (from: RecordedEvent[]) =>
       from.filter(
         (
           e
@@ -772,11 +797,15 @@ describe.skipIf(!forkPresent || !moduleExists())(
           progress: Exclude<Progress, { kind: "row" }>;
         } => !("kind" in e.progress)
       );
-    const rankingIndex = (from: RecordedEvent[] = events) =>
+    const rankingIndex = (from: RecordedEvent[]) =>
       stageEvents(from).findIndex((e) => e.progress.stage === "ranking");
     const simmingAfterRanking = (from: RecordedEvent[]) =>
       stageEvents(from)
         .slice(rankingIndex(from) + 1)
+        .filter((e) => e.progress.stage === "simming");
+    const simmingBeforeRanking = (from: RecordedEvent[]) =>
+      stageEvents(from)
+        .slice(0, rankingIndex(from))
         .filter((e) => e.progress.stage === "simming");
     const landedRows = (from: RecordedEvent[]) =>
       from
@@ -786,81 +815,118 @@ describe.skipIf(!forkPresent || !moduleExists())(
             "kind" in p && p.kind === "row"
         )
         .map((p) => p.row as { belowCutoff?: boolean; simmed?: boolean });
-    const simmingBeforeRanking = () =>
-      stageEvents()
-        .slice(0, rankingIndex())
-        .filter((e) => e.progress.stage === "simming");
 
-    it("solves the set-phase boundary from the first total with the tab's seed count", () => {
-      expect(rankingIndex()).toBeGreaterThan(0);
-      const sims = simmingBeforeRanking();
-      const first = sims[0]!.progress as { done: number; total: number };
-      const last = sims[sims.length - 1]!.progress as { done: number };
-      // The first event is the baseline sim (done 1); each later one before
-      // `ranking` is one candidate.
-      const candidates = sims.length - 1;
-      expect(candidates).toBeGreaterThan(0);
+    /** Feeds a recording to a tracker; returns it and the phases it named. */
+    const replay = (
+      from: RecordedEvent[],
+      estimator: EstimatorConfig = { kind: "linear" }
+    ) => {
+      const tracker = new mod.RunProgressTracker({
+        estimator,
+        showFromFraction: 0.05,
+        minCandidatesDone: 1,
+      });
+      tracker.setConcurrency(1);
+      const phases: RunPhase[] = [tracker.view().phase];
+      from.forEach((e, i) => {
+        tracker.observe(e.progress, (i + 1) * 100);
+        const phase = tracker.view().phase;
+        if (phases[phases.length - 1] !== phase) phases.push(phase);
+      });
+      return { tracker, phases };
+    };
+
+    it("records one pool within top-N and one past it, with more rows above the cutoff than top-N", () => {
+      // The first event before `ranking` is the baseline; each later one is
+      // one candidate.
       expect(
-        mod.replicationBoundary(first.total, mod.TAB_REPLICATE_SEED_COUNT, topN)
-      ).toBe(last.done);
-      expect(last.done).toBe(1 + candidates);
+        simmingBeforeRanking(recordings.seven).length - 1
+      ).toBeLessThanOrEqual(topN);
+      expect(
+        simmingBeforeRanking(recordings.twelve).length - 1
+      ).toBeGreaterThan(topN);
+      const aboveCutoff = landedRows(recordings.twelve).filter(
+        (r) => r.belowCutoff === false && r.simmed !== false
+      );
+      expect(aboveCutoff.length).toBeGreaterThan(topN);
     });
 
+    it.each(pools)(
+      "solves the set-phase boundary from the engine's first total with the tab's seed count (%s candidates)",
+      (name) => {
+        const from = recordings[name];
+        expect(rankingIndex(from)).toBeGreaterThan(0);
+        const sims = simmingBeforeRanking(from);
+        const first = sims[0]!.progress as { done: number; total: number };
+        const last = sims[sims.length - 1]!.progress as { done: number };
+        const candidates = sims.length - 1;
+        expect(candidates).toBeGreaterThan(0);
+        expect(
+          mod.replicationBoundary(
+            first.total,
+            mod.TAB_REPLICATE_SEED_COUNT,
+            topN
+          )
+        ).toBe(last.done);
+        expect(last.done).toBe(1 + candidates);
+      }
+    );
+
     it("runs set-phase sims between the last candidate event and ranking", () => {
-      const sims = simmingBeforeRanking();
+      const from = recordings.seven;
+      const sims = simmingBeforeRanking(from);
       const lastCandidate = sims[sims.length - 1]!;
-      const ranking = stageEvents()[rankingIndex()]!;
+      const ranking = stageEvents(from)[rankingIndex(from)]!;
       expect(ranking.simCallsSoFar).toBeGreaterThan(
         lastCandidate.simCallsSoFar
       );
     });
 
-    it("counts replication sims after ranking, above the boundary", () => {
-      const sims = simmingBeforeRanking();
-      const first = sims[0]!.progress as { total: number };
-      const boundary = (sims[sims.length - 1]!.progress as { done: number })
-        .done;
-      const after = stageEvents()
-        .slice(rankingIndex() + 1)
-        .filter((e) => e.progress.stage === "simming")
-        .map((e) => e.progress as { done: number; total: number });
-      expect(after.length).toBeGreaterThan(0);
-      for (const p of after) {
-        expect(p.done).toBeGreaterThan(boundary);
-        expect(p.done).toBeLessThanOrEqual(first.total);
+    it.each(pools)(
+      "counts replication sims after ranking, above the boundary (%s candidates)",
+      (name) => {
+        const from = recordings[name];
+        const sims = simmingBeforeRanking(from);
+        const first = sims[0]!.progress as { total: number };
+        const boundary = (sims[sims.length - 1]!.progress as { done: number })
+          .done;
+        const after = simmingAfterRanking(from).map(
+          (e) => e.progress as { done: number; total: number }
+        );
+        expect(after.length).toBeGreaterThan(0);
+        for (const p of after) {
+          expect(p.done).toBeGreaterThan(boundary);
+          expect(p.done).toBeLessThanOrEqual(first.total);
+        }
       }
-    });
+    );
 
-    it("gives the tracker the phases preparing, candidates, set bonuses, replication", () => {
-      const tracker = new mod.RunProgressTracker({
-        estimator: { kind: "linear" },
-        showFromFraction: 0.45,
-        minCandidatesDone: 10,
-      });
-      tracker.setConcurrency(1);
-      const phases: RunPhase[] = [tracker.view().phase];
-      events.forEach((e, i) => {
-        tracker.observe(e.progress, (i + 1) * 100);
-        const phase = tracker.view().phase;
-        if (phases[phases.length - 1] !== phase) phases.push(phase);
-      });
-      const expected: RunPhase[] = [
-        "preparing",
-        "candidates",
-        "set-bonuses",
-        "replication",
-      ];
-      expect([expected, [...expected, "ranking"]]).toContainEqual(phases);
-    });
+    it.each(pools)(
+      "gives the tracker the phases preparing, candidates, set bonuses, replication, ranking (%s candidates)",
+      (name) => {
+        // The run ends on the done the tracker expects, so the last
+        // replication sim names the final ranking.
+        expect(replay(recordings[name]).phases).toEqual([
+          "preparing",
+          "candidates",
+          "set-bonuses",
+          "replication",
+          "ranking",
+        ]);
+      }
+    );
 
-    it("re-sims the baseline and each qualifying row, at most top-N", () => {
-      const q = landedRows(events).filter(
-        (r) => r.belowCutoff === false && r.simmed !== false
-      ).length;
-      expect(simmingAfterRanking(events)).toHaveLength(
-        q > 0 ? (mod.TAB_REPLICATE_SEED_COUNT - 1) * (1 + Math.min(topN, q)) : 0
-      );
-    });
+    it.each(pools)(
+      "re-sims the baseline and each row the tracker counts, at most top-N (%s candidates)",
+      (name) => {
+        const from = recordings[name];
+        const q = replay(from).tracker.view().qualifyingRows;
+        expect(q).toBeGreaterThan(0);
+        expect(simmingAfterRanking(from)).toHaveLength(
+          (mod.TAB_REPLICATE_SEED_COUNT - 1) * (1 + Math.min(topN, q))
+        );
+      }
+    );
 
     it("runs no replication when no row qualifies, and the tracker expects none", () => {
       const landed = landedRows(zeroQualifyEvents);
@@ -869,18 +935,10 @@ describe.skipIf(!forkPresent || !moduleExists())(
       expect(rankingIndex(zeroQualifyEvents)).toBeGreaterThan(0);
       expect(simmingAfterRanking(zeroQualifyEvents)).toHaveLength(0);
 
-      const tracker = new mod.RunProgressTracker({
-        estimator: mod.RUN_PROGRESS_ESTIMATOR,
-        showFromFraction: 0.05,
-        minCandidatesDone: 1,
-      });
-      tracker.setConcurrency(1);
-      const phases: RunPhase[] = [tracker.view().phase];
-      zeroQualifyEvents.forEach((e, i) => {
-        tracker.observe(e.progress, (i + 1) * 100);
-        const phase = tracker.view().phase;
-        if (phases[phases.length - 1] !== phase) phases.push(phase);
-      });
+      const { tracker, phases } = replay(
+        zeroQualifyEvents,
+        mod.RUN_PROGRESS_ESTIMATOR
+      );
       expect(phases).toEqual([
         "preparing",
         "candidates",
