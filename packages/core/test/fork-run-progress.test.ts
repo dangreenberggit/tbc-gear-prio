@@ -46,7 +46,17 @@ type RunPhase =
   "preparing" | "candidates" | "set-bonuses" | "replication" | "ranking";
 
 type EstimatorConfig =
-  { kind: "linear" } | { kind: "phased"; kappa: number; psi: number };
+  | { kind: "linear" }
+  | { kind: "phased"; kappa: number; psi: number; slowdown: number };
+
+type RunTimeline = {
+  sims: ReadonlyArray<{ t: number; done: number; afterRanking: boolean }>;
+  rankingAt: number | undefined;
+  total: number;
+  boundary: number | null;
+  concurrency: number;
+  now: number;
+};
 
 type RunProgressView = {
   phase: RunPhase;
@@ -72,6 +82,13 @@ type RunProgressModule = {
     topN: number
   ): number | null;
   formatElapsed(ms: number): string;
+  estimateRemainingMs(
+    config: EstimatorConfig,
+    run: RunTimeline
+  ): number | undefined;
+  RUN_PROGRESS_ESTIMATOR: EstimatorConfig;
+  RUN_PROGRESS_SHOW_FROM_FRACTION: number;
+  RUN_PROGRESS_MIN_CANDIDATES_DONE: number;
   RunProgressTracker: new (opts: {
     estimator: EstimatorConfig;
     showFromFraction: number;
@@ -250,7 +267,12 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
   describe("phased estimate", () => {
     // kappa 0.5 at concurrency 4 gives k = 2 candidate-times per replication
     // sim. T = 57 is c = 20, so B = 21 and R = T - B = 36. psi = 20.
-    const phased: EstimatorConfig = { kind: "phased", kappa: 0.5, psi: 20 };
+    const phased: EstimatorConfig = {
+      kind: "phased",
+      kappa: 0.5,
+      psi: 20,
+      slowdown: 0,
+    };
 
     it("applies the candidate, boundary, ranking and replication rules", () => {
       const t = tracker(phased, 4);
@@ -289,6 +311,88 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       // b = 22: 100 * 2 * (57 - 22)
       t.observe(RANKING, 4_000);
       expect(t.view().remainingMs).toBe(7_000);
+    });
+  });
+
+  describe("slowdown term in the candidate estimate", () => {
+    // Five events, four candidates done (n = 4) at 250 ms each. T = 47 is
+    // c = 10, so B = 11 and R = 36. kappa 0.25 at concurrency 4 gives k = 1;
+    // psi = 2. With S(x) = x(x + 1)/2: a = tau / (n + s S(n)),
+    // C = a ((c - n) + s (S(c) - S(n))), rbar = (tau + C) / c and the
+    // estimate is C + rbar (psi + k R).
+    const sims = [0, 250, 500, 750, 1_000].map((t, i) => ({
+      t,
+      done: i + 1,
+      afterRanking: false,
+    }));
+    const run = (over: Partial<RunTimeline> = {}): RunTimeline => ({
+      sims,
+      rankingAt: undefined,
+      total: 47,
+      boundary: 11,
+      concurrency: 4,
+      now: 1_000,
+      ...over,
+    });
+    const config = (slowdown: number): EstimatorConfig => ({
+      kind: "phased",
+      kappa: 0.25,
+      psi: 2,
+      slowdown,
+    });
+
+    it("uses the boundary the tab solves for total 47", () => {
+      expect(mod.replicationBoundary(47, 5, 8)).toBe(11);
+    });
+
+    it.each([
+      // Round 3's rule: 250 * (11 - 5 + 2 + 36)
+      [0, 11_000],
+      // a = 1000 / (4 + 0.1 * 10) = 200; C = 200 * (6 + 0.1 * 45) = 2100;
+      // rbar = 3100 / 10 = 310; 2100 + 310 * 38
+      [0.1, 13_880],
+      // a = 1000 / 6; C = a * (6 + 0.2 * 45) = 2500; rbar = 350; 2500 + 350 * 38
+      [0.2, 15_800],
+    ])("with slowdown %f reads %i", (slowdown, expected) => {
+      expect(mod.estimateRemainingMs(config(slowdown), run())).toBeCloseTo(
+        expected,
+        6
+      );
+    });
+
+    it.each([0, 0.1])(
+      "leaves the boundary rule unchanged (slowdown %f)",
+      (slowdown) => {
+        // r_B = 3000 / 10 = 300; 300 * (2 + 36)
+        const atBoundary = run({
+          sims: [...sims, { t: 3_000, done: 11, afterRanking: false }],
+          now: 3_000,
+        });
+        expect(
+          mod.estimateRemainingMs(config(slowdown), atBoundary)
+        ).toBeCloseTo(11_400, 6);
+      }
+    );
+
+    it.each([0, 0.1])(
+      "stays linear without a boundary (slowdown %f)",
+      (slowdown) => {
+        // 1000 / 4 * (47 - 5)
+        expect(
+          mod.estimateRemainingMs(config(slowdown), run({ boundary: null }))
+        ).toBeCloseTo(10_500, 6);
+      }
+    );
+
+    it("ships the round-4 constants fitted on run 1", () => {
+      expect(mod.RUN_PROGRESS_ESTIMATOR).toEqual({
+        kind: "phased",
+        kappa: 0.3221,
+        psi: 50.993,
+        slowdown: 0.003064,
+      });
+      expect(mod.RUN_PROGRESS_SHOW_FROM_FRACTION).toBe(0.35);
+      expect(mod.RUN_PROGRESS_MIN_CANDIDATES_DONE).toBe(10);
     });
   });
 
