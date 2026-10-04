@@ -171,11 +171,11 @@ Three peers. Read only the one you are running on.
 
 ### Claude Code
 
-| Lane          | Fill it with                                                                                                                                                                  |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Workhorse** | **Opus at effort `high`**; an extremely simple job runs **Sonnet at effort `high`** (see the agent-type table)                                                                |
-| **Review**    | **Opus at effort `high`**                                                                                                                                                     |
-| **Design**    | **Opus at effort `xhigh`** (`xhigh`: `claude --help` lists it on 2.1.267; model-side behavior untested on this install, ticket 518) — used only for planning and architecture |
+| Lane          | Fill it with                                                                                                   |
+| ------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Workhorse** | **Opus at effort `high`**; an extremely simple job runs **Sonnet at effort `high`** (see the agent-type table) |
+| **Review**    | **Opus at effort `high`**                                                                                      |
+| **Design**    | **Fable at effort `low`** — used only for planning and architecture (`gate-planner`, `design-task`)            |
 
 The **model** and the **effort level** are separate controls
 ([model config](https://code.claude.com/docs/en/model-config#adjust-effort-level),
@@ -191,14 +191,14 @@ the session when the definition sets none
 ([sub-agents](https://code.claude.com/docs/en/sub-agents)). So spawn
 through an agent type that pins both:
 
-| Agent type      | Model    | Effort                                                                                                  | Use for                                                                                                                |
-| --------------- | -------- | ------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `simple-task`   | `sonnet` | `high`                                                                                                  | An **extremely simple** job: one lookup, one search with a known target, or one edit whose exact text the prompt gives |
-| `general-task`  | `opus`   | `high`                                                                                                  | Every other delegated job: implementation, `parallel-phase` workers, review axes, investigation                        |
-| `modest-task`   | `opus`   | `medium`                                                                                                | Trial: a modest job where the worker writes the code or text, as § Trial types defines it                              |
-| `discrete-task` | `sonnet` | `high`                                                                                                  | Trial: one job whose result the prompt fixes, as § Trial types defines it                                              |
-| `design-task`   | `opus`   | `xhigh` (`claude --help` lists it on 2.1.267; model-side behavior untested on this install, ticket 518) | Planning and architecture outside stage-gate                                                                           |
-| `gate-*` seats  | `opus`   | `high`; `gate-planner` `xhigh`                                                                          | Stage-gate only — see § Stage-gate seats                                                                               |
+| Agent type      | Model                          | Effort                       | Use for                                                                                                                |
+| --------------- | ------------------------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `simple-task`   | `sonnet`                       | `high`                       | An **extremely simple** job: one lookup, one search with a known target, or one edit whose exact text the prompt gives |
+| `general-task`  | `opus`                         | `high`                       | Every other delegated job: implementation, `parallel-phase` workers, review axes, investigation                        |
+| `modest-task`   | `opus`                         | `medium`                     | Trial: a modest job where the worker writes the code or text, as § Trial types defines it                              |
+| `discrete-task` | `sonnet`                       | `high`                       | Trial: one job whose result the prompt fixes, as § Trial types defines it                                              |
+| `design-task`   | `fable`                        | `low`                        | Planning and architecture outside stage-gate                                                                           |
+| `gate-*` seats  | `opus`; `gate-planner` `fable` | `high`; `gate-planner` `low` | Stage-gate only — see § Stage-gate seats                                                                               |
 
 The spawning agent decides which type to use (§ Trial types, "Which type
 takes a small job"). If you are unsure, spawn `general-task`. A
@@ -206,9 +206,11 @@ takes a small job"). If you are unsure, spawn `general-task`. A
 `NEEDS_JUDGMENT`, or a `discrete-task` that returns `WRONG_MODEL`, is
 respawned on `general-task` with the same prompt. A `design-task` that
 returns `WRONG_MODEL` is respawned on `design-task` with the model the
-return says it expected. A second `WRONG_MODEL` from the same job goes to
-the owner, not to another respawn: the check has rejected a correct Opus
-spawn before (ticket 252). Spawn these types in place of the built-in
+agent-type table above names, not the model the return says it
+expected: a session started before an agent file changed may hold the
+old check. A second `WRONG_MODEL` from the same job goes to the owner,
+not to another respawn: the check has rejected a correct Opus spawn
+before (ticket 252). Spawn these types in place of the built-in
 `Explore`, `general-purpose` and `Plan` types. You cannot set the
 built-ins' effort at the call site, and whether they pin an effort of
 their own is unverified. If the harness does not recognize one of these
@@ -220,13 +222,20 @@ types, restart the session rather than falling back to a built-in.
 > and recommended Opus at `medium` for the orchestrator. The owner replaced
 > all of that with the tables above. Plans and review notes written before
 > this date that say "Opus at effort `medium`" or "Fable (design lane)"
-> record what ran then and are left as written.
+> record what ran then and are left as written. The design lane went back
+> to Fable on 2026-10-04 (next note).
+>
+> **Changed 2026-10-04.** The owner moved the design lane from Opus at
+> effort `xhigh` to Fable at effort `low`. This is the current choice, and
+> the owner may change it. Text written between 2026-09-25 and this date
+> that names Opus at effort `xhigh` for planning records what ran then.
 
-**Fable fills no lane.** It is the top price tier on this harness, above
-Opus. The owner may run the interactive session on Fable, and a subagent
-whose agent type names no model inherits the session's model and bills at
-that tier. Name the model on every spawn, including for agent types whose
-frontmatter already names one.
+**Fable fills only the design lane.** It is the top price tier on this
+harness, above Opus. The owner may run the interactive session on Fable,
+and a subagent whose agent type names no model inherits the session's
+model and bills at that tier. Name the model on every spawn, including
+for agent types whose frontmatter already names one. A Fable planner
+names `opus` on every `general-task` it spawns for research.
 
 Prefer this harness when a review-lane reviewer from a different vendor than the
 authoring session is wanted, and sequential axes on a rate limit.
@@ -333,9 +342,9 @@ A `discrete-task` run that records any model other than
 #### Stage-gate seats
 
 The `stage-gate` skill fills its seats from these lanes: Planner = design
-(Opus at effort `xhigh`), Reviewer, Executor and SME = review
-(Opus at effort `high`). Each seat's agent definition sets `model: opus`
-and its effort in frontmatter.
+(Fable at effort `low`), Reviewer, Executor and SME = review
+(Opus at effort `high`). Each seat's agent definition sets its model and
+its effort in frontmatter.
 
 The Executor is on the review lane, not the workhorse lane, because of the
 kind of work it does. It decides adapt-vs-flag-vs-stop wherever the plan
@@ -349,7 +358,8 @@ The orchestrator is the interactive session. The owner picks its model and
 effort per session. Whatever it runs on, it delegates every task
 (AGENTS.md § The session delegates). The skill names every seat's model at
 the call site, and each seat self-checks
-(`WRONG_MODEL: <name>` → respawn with the model named, never continue).
+(`WRONG_MODEL: <name>` → respawn with the model the skill's seat table
+names, never continue).
 
 ### Codex
 

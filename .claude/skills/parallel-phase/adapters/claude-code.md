@@ -8,7 +8,7 @@ Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents
 
 - **Workhorse:** Opus at effort `high` — parallel implement workers. Spawn each as `general-task` with `model: "opus"`. An extremely simple slice (see `simple-task`) may go to `simple-task` with `model: "sonnet"`.
 - **Review:** Opus at effort `high` — pre-merge axes, adversarial and domain judgment. One spawn per review axis; never split one axis across N workers.
-- **Design:** Opus at effort `xhigh` — planning and architecture. Never a worker.
+- **Design:** Fable at effort `low` — planning and architecture (`gate-planner`, `design-task`). Never a worker.
 
 The agent type's frontmatter sets effort. The spawn and the prompt cannot. Workers are Opus, so size the round with model-policy § Budget the round before spawning. Name the model on every spawn: a session on Fable, the top price tier, makes an unnamed built-in subagent inherit Fable.
 
