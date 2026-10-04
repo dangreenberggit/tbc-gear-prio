@@ -24,7 +24,8 @@ registers no callback (`sim/core/procs.go:57-61`).
 - Arms warrior talents, `sim/warrior/talents_arms.go:374-395` and `:442`
 
 The effect on DPS is not measured (hypothesis, untested). It matters only
-when item swap is on and the swapped weapon has a different speed.
+when item swap is on and the swapped weapon has a different speed (the
+PPM procs only) or a different weapon type (pre-merge review round 12, D2).
 
 ## What would close this
 

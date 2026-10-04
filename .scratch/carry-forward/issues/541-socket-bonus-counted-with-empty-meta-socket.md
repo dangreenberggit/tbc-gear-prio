@@ -93,7 +93,7 @@ preference gets no meta (`:367`). It does this before the layout is scored. Repa
 that is still empty when a layout is scored reaches the sim empty, and the
 sim pays no bonus for it; the old rule's credit had no source.
 
-**ADR.** ADR-0025 Decision 3 carries a "Superseded 2026-10-04 by ticket
+**ADR.** ADR-0025 Decision 3 has a "Superseded 2026-10-04 by ticket
 541" note, and the ADR status line names it. Decisions 2, 4 and 5 are
 unchanged.
 

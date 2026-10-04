@@ -288,3 +288,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 539 Changing race, rotation, spec options or bonus stats does not mark the result stale, hypothesis (pre-merge review round 11, A2) 2026-10-03
 - 540 Some weapon and talent procs keep the old proc chance after an item swap (pre-merge review round 11, A4/D5) 2026-10-03
 - 541 The socket bonus counts as active when the meta socket is empty (pre-merge review round 11, D3) 2026-10-03
+- 545 The Upgrades tab cannot recover from a sim worker that never answers (owner ruling on Q-538-timeout) 2026-10-04
+- 546 Unbridled Wrath and Seal of Vengeance keep the old proc chance after a weapon swap (pre-merge review round 12, A1) 2026-10-04

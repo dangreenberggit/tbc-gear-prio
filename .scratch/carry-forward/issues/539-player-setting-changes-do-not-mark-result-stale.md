@@ -98,7 +98,7 @@ Full log: `.scratch/stage-gate/round-11-followups/539-live-check.txt`
 Pre-registered Candidate A wins. Every checked input marks a finished
 result stale and re-enables Simulate: race, a rotation option, bonus
 stats, talents and gear. The finding's premise was wrong:
-`raid.changeEmitter` does carry the player's changes, through
+`raid.changeEmitter` does pass on the player's changes, through
 `Player.changeEmitter` (`onAny` of all 17 player emitters,
 `ui/core/player.tsx:338-358`) → `party.ts:90` → `raid.ts:51`. No
 listener added, no fork commit, no re-pin. The `run_staleness.ts:2-3`
