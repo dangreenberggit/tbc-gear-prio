@@ -39,3 +39,22 @@ during a run count, using the same listeners.
 2. If it does not: subscribe `player.changeEmitter` (or the specific player
    emitters the sim request reads) to `markStale`, with a test, and make
    `run_staleness.ts`'s comment name what is wired.
+
+## Pre-registered outcome (written 2026-10-04, before the live check)
+
+Code trace at fork `e413972db`: `Player.changeEmitter` is `onAny` of all
+17 player emitters, race, rotation, spec options, consumes and bonus stats
+among them (`ui/core/player.tsx:338-358`). `party.ts:90` forwards it to the
+party's `changeEmitter`, and `raid.ts:51` forwards that to
+`raid.changeEmitter`, which `wireStalenessListeners` subscribes
+(`upgrades_tab.tsx:1579-1617`). The finding's premise, that
+`raid.changeEmitter` leaves out the player's emitters, reads only the
+`onAny` list at `raid.ts:58-64` and misses the forward at `:51`.
+
+- **Candidate A (no change)** wins if, after a finished run, each of race,
+  one rotation option and one bonus-stat edit shows the stale notice and
+  re-enables Simulate.
+- **Candidate B** (subscribe the failing input's own player emitter in
+  `wireStalenessListeners`, not `player.changeEmitter`, which would double
+  every notification that already arrives through the raid path) wins for
+  exactly the inputs that fail.
