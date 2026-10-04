@@ -1500,6 +1500,44 @@ function expectOwnLayouts(requests: readonly RaidSimRequest[]) {
   ).toEqual([INSCRIBED]);
 }
 
+describe.skipIf(!forkPresent)("Stop ends a stats read (538)", () => {
+  it("538-H: a Stop during a never-answering stats read returns a PartialRanking", async () => {
+    // The abort fires inside the read, before it returns its promise, so a
+    // race that attached its listener after calling the read would miss it.
+    const store = await newStore();
+    const controller = new AbortController();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    let stopped;
+    try {
+      stopped = await runRet({
+        pool: S_POOL,
+        store,
+        controller,
+        computeStats: () => {
+          controller.abort();
+          return new Promise<StatsObservation>(() => {});
+        },
+      });
+      const upgradesWarnings = warn.mock.calls.filter((args) =>
+        String(args[0]).startsWith("[upgrades]")
+      );
+      expect(upgradesWarnings).toHaveLength(0);
+    } finally {
+      warn.mockRestore();
+    }
+    expect(stopped.ranking.complete).toBe(false);
+    // No ranking was cached: a second run on the same store reads the hit
+    // again instead of returning a stored ranking.
+    const again = await runRet({
+      pool: S_POOL,
+      store,
+      computeStats: baselineReadOnce(),
+    });
+    expect(again.statsRequests).toHaveLength(1);
+    expect(again.ranking.complete).toBe(true);
+  });
+});
+
 describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
   it("535-V1: the set-kept version drops the dead Rigid; the set-less version keeps one", async () => {
     // Oracle: the kept budget is 9.31 − 20 = −10.69, where two Inscribed win;
