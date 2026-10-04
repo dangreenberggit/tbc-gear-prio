@@ -150,9 +150,10 @@ Estimator:
   values is 0.3516 (<= 0.45); (iii) main-thread long tasks fill 0.9897 of
   wall time in the last 30-candidate window against 0.1440 in the first.
   All ok.
-- Why later candidates cost more (round-4 finding): from about the 219th
-  candidate busy cores fall (14.7-15.8 in the windows before d 189, 9.4 in
-  the last window, d 309-338, on run 2) and wall time per candidate rises,
+- Why later candidates cost more (round-4 finding): late in the candidate
+  phase busy cores fall (run 1 from about the 219th candidate; run 2 one
+  window earlier: 14.7-15.8 in the windows before d 189, 13.7 in d 189-218,
+  9.4 in the last window, d 309-338) and wall time per candidate rises,
   while the sim server's CPU per candidate does not rise with it
   (5.15-5.84 CPU-s per candidate from d 249 on, inside the 2.78-7.94 of
   the windows before d 219; the d 219-248 window reads 9.94). Re-run: `node

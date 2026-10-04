@@ -571,7 +571,7 @@ const MALORNE = { hands: 29097, legs: 29099 } as const;
 const NEUTRAL = { hands: 10140, legs: 8289 } as const;
 // Five more pieces for slots nothing is worn in, so a pool can hold more
 // candidates than PAIRED_REPLICATE_TOP_N (Thunderheart Wristguards,
-// Waistguard and Treads; Primal Intent wrist and waist).
+// Waistguard and Treads; Primalstrike Bracers and Belt).
 const EXTRA = [
   { itemId: 34444, slot: "wrist" },
   { itemId: 34556, slot: "waist" },
