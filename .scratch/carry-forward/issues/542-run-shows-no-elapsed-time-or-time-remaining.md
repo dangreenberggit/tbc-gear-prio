@@ -159,7 +159,9 @@ Estimator:
   the windows before d 219; the d 219-248 window reads 9.94). Re-run: `node
   .scratch/handoffs/542-run-progress/replay.mjs
   .scratch/handoffs/542-run-progress/trace-run2.json --shown` prints these
-  as its `window` lines. Check (iii)
+  as its `window` lines; run 1: `node
+  .scratch/handoffs/542-run-progress/replay.mjs
+  .scratch/handoffs/542-run-progress/trace-run1.json --windows`. Check (iii)
   supports a client-side cause; that the long tasks are the running-table
   rebuilds is a hypothesis (render time per function not measured). The
   running table is rebuilt in full twice per finished candidate. Ticket
