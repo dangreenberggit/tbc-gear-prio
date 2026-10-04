@@ -37,7 +37,7 @@ that one reviews the diff after.
 
 | Seat | subagent_type | Call-site model | Frontmatter effort | Lane |
 | --- | --- | --- | --- | --- |
-| Planner | `gate-planner` | `opus` | `xhigh` | design |
+| Planner | `gate-planner` | `fable` | `low` | design |
 | Reviewer | `gate-reviewer` | `opus` | `high` | review |
 | Executor | `gate-executor` | `opus` | `high` | review |
 | SME | `gate-sme` | `opus` | `high` | review |
@@ -51,7 +51,7 @@ paper-over, which is a judgment failure, not a throughput one. Its
 extremely simple slice, `general-task` for every other slice.
 
 Name the model on every spawn, even though each seat's frontmatter sets
-`model: opus`. A call-site name outranks frontmatter, so a wrong name
+its model. A call-site name outranks frontmatter, so a wrong name
 there is the one way a seat runs on the wrong model. Every
 seat self-checks and returns `WRONG_MODEL: <name>` on a mismatch: respawn
 with the model named. A `subagent_type` the harness does not recognize
@@ -144,7 +144,7 @@ not` list below.
    Write the reason on every line. Write `evidence: none` when you
    checked nothing.
 
-2. **Plan.** Every `gate-planner` spawn (`model: "opus"`) names the
+2. **Plan.** Every `gate-planner` spawn (`model: "fable"`) names the
    absolute paths of `brief.md`,
    `.claude/skills/stage-gate/plan-template.md` and the stage folder.
    Spawn one. When it returns a plan, write it to `plan.md` verbatim.
@@ -204,7 +204,7 @@ not` list below.
      user with the contradiction stated, not resolved.
    - On a split run, when a `blocking` or `material` finding has
      `Where: decomposition`, the round's revision is one `gate-planner`
-     (`model: "opus"`) with `plan-review.md` and `re-split: review`. It
+     (`model: "fable"`) with `plan-review.md` and `re-split: review`. It
      handles every finding and rewrites `plan.md` itself. Every other
      revision prompt on a split run says: keep each step's part id and
      the `## Seams` section.
