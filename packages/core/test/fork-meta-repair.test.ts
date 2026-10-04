@@ -355,12 +355,21 @@ function equipmentOf(fx: Fixture): SimItemSpec[] {
   }));
 }
 
-/** The fork's ret P2 weights, read from the file the tab ships. */
-const retWeights = (
-  JSON.parse(
-    readFileSync(join(forkUpgradesDir, "data/ret-p2.ep-weights.json"), "utf8")
-  ) as { weights: Record<string, number> }
-).weights;
+/**
+ * The fork's ret P2 weights, read from the file the tab ships. Empty without
+ * the fork: this runs at import, so reading it then would fail the whole file
+ * instead of letting the `forkPresent` suites skip.
+ */
+const retWeights: Record<string, number> = forkPresent
+  ? (
+      JSON.parse(
+        readFileSync(
+          join(forkUpgradesDir, "data/ret-p2.ep-weights.json"),
+          "utf8"
+        )
+      ) as { weights: Record<string, number> }
+    ).weights
+  : {};
 
 const CHEST = SIM_ORDER.indexOf("chest");
 const SHOULDER = SIM_ORDER.indexOf("shoulder");
