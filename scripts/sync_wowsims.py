@@ -318,14 +318,15 @@ def parse_current_phase(ts_source):
     """CURRENT_PHASE is written as `Phase.PhaseN`, not as a bare number, so resolve
     through the enum. Fail loudly rather than guessing -- a wrong default here
     silently changes every ranking's candidate pool and gem palette."""
-    m = re.search(r"CURRENT_PHASE\s*:\s*Phase\s*=\s*Phase\.Phase(\d)", ts_source)
+    # The `: Phase` annotation is optional: ui/sim/constants/other.ts dropped it.
+    m = re.search(r"CURRENT_PHASE\s*(?::\s*Phase\s*)?=\s*Phase\.Phase(\d)", ts_source)
     if m:
         return int(m.group(1))
-    m = re.search(r"CURRENT_PHASE\s*:\s*Phase\s*=\s*(\d)", ts_source)
+    m = re.search(r"CURRENT_PHASE\s*(?::\s*Phase\s*)?=\s*(\d)", ts_source)
     if m:
         return int(m.group(1))
     raise SystemExit(
-        "could not parse CURRENT_PHASE out of ui/core/constants/other.ts.\n"
+        "could not parse CURRENT_PHASE out of the upstream constants/other.ts.\n"
         "Upstream changed the declaration. Do NOT fall back to a hardcoded default; "
         "read the file and fix the parser."
     )

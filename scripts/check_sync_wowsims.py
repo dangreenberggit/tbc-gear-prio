@@ -826,6 +826,28 @@ def check_phase_is_read_from_the_new_path_when_the_old_one_404s() -> list[str]:
     return problems
 
 
+def check_parse_current_phase_accepts_the_unannotated_form() -> list[str]:
+    """ui/sim/constants/other.ts at upstream 42c75dc9 declares
+    `export const CURRENT_PHASE = Phase.Phase3;` with no `: Phase` annotation,
+    unlike the old ui/core file the parser was written against (ticket 551).
+    """
+    problems = []
+    cases = {
+        "export const CURRENT_PHASE = Phase.Phase3;": 3,
+        "export const CURRENT_PHASE = 4;": 4,
+        "export const CURRENT_PHASE: Phase = Phase.Phase2;": 2,
+    }
+    for src, want in cases.items():
+        try:
+            got = sync_wowsims.parse_current_phase(src)
+        except SystemExit as e:
+            problems.append(f"parse_current_phase({src!r}) raised SystemExit({e})")
+            continue
+        if got != want:
+            problems.append(f"parse_current_phase({src!r}) = {got}, want {want}")
+    return problems
+
+
 def check_unwatch_ref_removes_the_key_and_refuses_an_absent_one() -> list[str]:
     """--watch-ref is a keyed upsert and nothing removed a key, so a deleted
     upstream branch stayed in the lock failing every --check forever. A hand
@@ -961,6 +983,7 @@ CHECKS = (
     # The phase file moved upstream and its old path 404s (ticket 551).
     check_phase_file_404_is_drift_not_a_crash,
     check_phase_is_read_from_the_new_path_when_the_old_one_404s,
+    check_parse_current_phase_accepts_the_unannotated_form,
     check_unwatch_ref_removes_the_key_and_refuses_an_absent_one,
     # The single-watched-ref invariant, enforced at both ends (ticket 392).
     check_sha_pin_refuses_to_guess_between_two_watched_refs,
