@@ -38,8 +38,8 @@ warm-up (`.scratch/stage-gate/545-worker-silence-check/measurement.md:84`).
 
 Page sims on 2026-10-05, on the dev machine with four page workers at
 once, at fork `4cdc02b8a`
-(`.scratch/stage-gate/555-557-silence-followups/557-page-sims.md`,
-gitignored), measured the three specs this ticket asked for:
+(`.scratch/stage-gate/555-557-silence-followups/557-page-sims.md`),
+measured the three specs this ticket asked for:
 
 - hunter (beast mastery, pet): warm-up 15.08 s, 147-151 ms per
   warm-up iteration, longest main-loop silence 1.16 s
@@ -75,8 +75,8 @@ run raised it to 44.83 s (see "Closed" below).
 - **Desktop build (part 2).** One Upgrades-tab run on feral cat,
   desktop build (HTTP worker, backend on `:3333`), fork `3b75509aa`
   with temporary probe lines (reverted), 2026-10-05
-  (`.scratch/stage-gate/555-557-silence-followups/557-desktop.md`,
-  gitignored). The run took 368 s and restarted no worker. Longest
+  (`.scratch/stage-gate/555-557-silence-followups/557-desktop.md`).
+  The run took 368 s and restarted no worker. Longest
   silence per regime: start-up 0.654 s, warm-up regime 4.275 s, run
   regime 4.483 s. The 4.483 s run silence was 6.7 times under the 30 s
   run limit, not ten times. In that window no worker of either pool
