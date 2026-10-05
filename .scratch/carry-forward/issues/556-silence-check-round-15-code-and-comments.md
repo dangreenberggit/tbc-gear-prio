@@ -107,15 +107,20 @@ deadline (556)" moves `data/wowsims-fork.lock.json` to it, with
   waits keeps the time the timer was armed" and "a second sim posted to
   a hung worker that answers nothing is judged from the worker's last
   message" (red run in `execution-report.md`, K1).
-- **Items 2 to 8: fixed** in the same fork commit. The freeze band in
-  the `worker_silence.ts` header now includes a freeze that ends before
-  the due time, and the tab's bands moved beside
-  `WORKER_SILENCE_LIMITS` (items 2 and 7); the start-up arithmetic
-  rounds 137.8 s up to 140 s (item 3); feral's main loop reads 1.0 s
-  (item 4); the Chromium, vitest and fake-timers claims cite their
-  sources (item 5); the limits test is "pins the tab's limits: 140 s
-  start-up, the 30 s run floor, 220 s presim" (item 6); the limits
-  comment says what sets the warm-up time (item 8).
+- **Items 2 to 8: fixed.** The fork comments are fixed in the same
+  fork commit. The freeze band in the `worker_silence.ts` header now
+  includes a freeze that ends before the due time, and the tab's bands
+  moved beside `WORKER_SILENCE_LIMITS` (items 2 and 7); the start-up
+  arithmetic rounds 137.8 s up to 140 s (item 3); feral's main loop
+  reads 1.0 s (item 4); the Chromium and vitest claims in
+  `worker_silence.ts` cite their sources (item 5); the limits comment
+  says what sets the warm-up time (item 8). The test file is in the
+  main repo, so its two parts are in main `95be23a9`, not the fork
+  commit (`git -C vendor/tbc-new-fork show --stat 3b75509aa` lists
+  only `worker_pool_sim_runner.ts` and `worker_silence.ts`): the
+  fake-timers claim cites its source (item 5), and the limits test is
+  "pins the tab's limits: 140 s start-up, the 30 s run floor, 220 s
+  presim" (item 6).
 - **`presimMs` is 220 s**, from ticket 557's page sims under the ticket
   545 rule: ten times enhancement shaman's 21.43 s warm-up, rounded up
   to the next 10 s.
