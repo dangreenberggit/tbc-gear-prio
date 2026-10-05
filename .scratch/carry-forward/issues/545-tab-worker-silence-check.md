@@ -160,11 +160,18 @@ The 10× margin is 2.5× for a spec at 1,000 DPS, whose warm-up pass is
 longer, and 4× for a slower machine (hypothesis, untested). The 120 s
 download allowance is about 32 kB/s for the 3.8 MB module (hypothesis).
 
+Not measured: the `[upgrades] stats read` lines of the time-based run
+(they left the console buffer; the recorder's lookup times, 7-25 ms,
+stand in, `execution-report.md:63`), and the desktop build, where the
+check is also on (`plan.md:152` put it out of scope). Ticket 553 records
+the risks.
+
 ### Item 2: the check
 
 The option is set only at `worker_pool_sim_runner.ts:117`
 (`WORKER_SILENCE_LIMITS`, `:63`); every other `new WorkerPool` site gets
-none, so other sim pages behave as before. A per-worker timer is re-armed
+none, so other sim pages get no silence check. The one change they share
+is the `finally` delete of the progress entry (D-N3, below). A per-worker timer is re-armed
 by every message the worker sends. When it fires and a request is
 waiting, every waiting request fails with "Sim worker <id> sent nothing
 for <N> s; it was restarted", callers waiting for `ready` fail too, and
@@ -175,14 +182,19 @@ the worker is terminated and set up again with the check still on
   request id with an empty payload, and the result then arrives only on
   the progress channel. The id answer is posted after the sim
   goroutine's first yield, not at once: after sim setup, the whole
-  warm-up pass and the first main-loop sleep (plan review N5a). The
-  progress entry's reject was a no-op; it is now real
+  warm-up pass and the first main-loop sleep (plan review N5a, code
+  reading; the measurement saw the id answer arrive anywhere in the
+  progress stream, `measurement.md`, "Observations the table does not
+  show"). The progress entry's reject was a no-op; it is now real
   (`worker_pool.ts:274-284`), and only the silence check calls it,
-  since a worker never posts an error under a progress id. So a sim
-  that goes quiet after its id was answered now fails.
+  since a worker never posts an error under a progress id (code
+  reading; hypothesis, untested). So a sim that goes quiet after its id
+  was answered now fails.
 - **Regime per worker.** The regime is tracked per worker and set by the
   latest progress message on that worker. A warm-up pass blocks the Go
-  thread, so no other sim on that worker can send during it.
+  thread, so no other sim on that worker can send during it (code
+  reading of `sim/core/presim.go`; hypothesis, untested). The `true`
+  message can arrive late; ticket 553 records what that costs.
 - **Idle workers.** A request on a worker that was idle gets a full
   limit from when it was posted (D-N1). When nothing waits, the timer
   goes idle.
@@ -198,7 +210,7 @@ The existing handling stands; no new loop code. At fork `b8ba9b800`:
 - A candidate sim that fails is dropped with the worker text in the
   "dropped from the ranking" note (`upgrades/engine/rank.ts:1602-1613`).
 - A ring, trinket or one-hand that fails on one slot only is still
-  ranked from the other slot and also carries that note.
+  ranked from the other slot and also shows that note.
 - A baseline or replication sim failure ends the run with "Ranking
   failed: Sim worker <id> sent nothing for N s; it was restarted"
   (`rank.ts:1101`, `:2161`).

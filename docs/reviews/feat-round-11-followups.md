@@ -416,3 +416,199 @@ pending fixes are done. No ticket filed, no `pending` row.
 | R13-ST4        | Standards    | fixed       | This commit: ticket 546's "What would close this" cites `procs.go:46-54`. The other citations were correct at `536645d01` (checked with `git show`).                                                                                                                                                                                                                   |
 | R13-P2         | Spec         | wontfix     | Not a defect: the choice is inside R12-PF1's ask; its side effect is R13-A1.                                                                                                                                                                                                                                                                                           |
 | R13-P3         | Spec         | wontfix     | Informational: `merge-to-dev --check-only` writes the layout-gate record by design.                                                                                                                                                                                                                                                                                    |
+
+# Round 14 — ticket 545 and tickets 547-552
+
+Reviewed range: `2d281ee7a2d470fb76b7955c6c67167b364ef247..63c55c03b01472b4e19343bd7d675d42665873b9`
+
+Fork `vendor/tbc-new-fork` (`feat/upgrades-tab`): `536645d011160b9760f78012700a9d404d4fcafb..b8ba9b800f274791c7a70b4d5484bb45dd91c281`.
+
+The main range has three commits (`git log --oneline 2d281ee7..63c55c03`):
+`555cdb34` files tickets 547 to 552; `28840c0a` re-pins the fork to
+`b8ba9b800` and adds `packages/core/test/fork-worker-silence.test.ts` and a
+`rank.test.ts` case; `63c55c03` closes ticket 545. The fork range has one
+commit, `b8ba9b800` (new `ui/core/worker_silence.ts`; `ui/core/worker_pool.ts`;
+the tab's `worker_pool_sim_runner.ts`). Spec sources: ticket 545, and
+`.scratch/stage-gate/545-worker-silence-check/` (gitignored): `plan.md`,
+`plan-review.md`, `gate-b-directives.md`, `measurement.md`,
+`live-check.md`, `execution-report.md`, `decision-log.md`.
+
+Dispatch: four fresh `general-task` agents on Opus (effort high), run in
+the foreground in one parallel batch — adversarial and domain on the
+`.agents/reviews/` briefs, and the `code-review` skill's Standards and
+Spec halves as two agents with that skill's prompts and smell baseline. No
+`codex` binary on PATH. Every axis was told it writes nothing; each
+reported the main tree with only the eight untracked owner handoffs and
+the fork clean at `b8ba9b800`.
+
+Tests run by the axes:
+
+- `npx vitest run packages/core/test/fork-worker-silence.test.ts packages/core/test/rank.test.ts`,
+  Node 22.17.1: rc=0, 97 passed (14 silence, 83 rank) (adversarial).
+- `python scripts/check_engine_port_drift.py`: rc=0, "36 ported files match
+  PROVENANCE.md"; no changed fork file is under `upgrades/engine/`
+  (standards).
+
+## Adversarial
+
+No high-severity defect. Each request is failed once, timers are cleared
+when a worker is disabled, and a silence failure becomes an error or a
+disclosed dropped row, never a number. The monitor and pool tests import
+the real fork files (`fork-worker-silence.test.ts:48-54`) and would fail
+at `536645d01` (by reading: `worker_silence.ts` does not exist there, and
+the old `WorkerPool` ignores `options`).
+
+- **R14-A1 (medium).** The 120 s warm-up limit applies only once a
+  `PresimRunning: true` message reaches the main thread
+  (`worker_pool.ts:325`). In 14 of 495 measured requests it arrived in the
+  same turn as the `false` one (`measurement.md`, "Observations the table
+  does not show"), so the warm-up ran under the 30 s run limit. The
+  measured warm-up at default boss health is 11.7 s, a 2.6× margin. A
+  slower spec or machine could fail a healthy sim (hypothesis, untested).
+- **R14-A2 (low).** A frozen hidden tab or a sleeping machine can let the
+  overdue timer (`worker_silence.ts:89-97`) run before the worker's next
+  message on resume, failing every running sim (hypothesis, untested).
+- **R14-A3 (low, test theatre).** The new `rank.test.ts` case and
+  `fork-worker-silence.test.ts:466-494` use a stub sim that throws the
+  silence text, so they check only the existing thrown-error-to-`sim-failed`
+  rule and pass without this change. The tab's `WORKER_SILENCE_LIMITS`
+  wiring is not tested.
+- **R14-A4 (informational).** Untested paths: a retiring worker
+  (`shouldDestroy`, `worker_pool.ts:515`), two sims on one worker, abort
+  during a silence.
+- **R14-A5 (informational).** A silent worker that is being retired is
+  never failed: `onSilence` returns early on `shouldDestroy`
+  (`worker_pool.ts:515`) and does not re-arm. The tab's pool is never
+  resized (`git grep setNumWorkers` finds only `ui/core/sim.ts:177`, the
+  page's own pool).
+- **R14-A6 (informational).** A late `ready` from a terminated worker could
+  resolve the replacement's `onReady` early (`worker_pool.ts:390-398`);
+  hypothesis, untested, and likely unreachable if the browser drops
+  messages after `terminate()`.
+- **R14-A7 (informational).** Nothing in the change can reload the page:
+  `git grep` for `location.reload` and `location` assignments in fork
+  `ui/core` finds only the language picker (`settings_menu.tsx:139`).
+
+## Domain
+
+No game-rule or sim-engine error. Every code claim checked in ticket 545
+and tickets 547 to 552 matches the fork at `536645d01` (`git show` and
+`git grep`: 547 `item_sets.go:30-38`, `:244-252`; 548 `forms.go:362`,
+`procs.go:56-61`; 549 `proto_test.go:37`; 550 `_heals.go:259`; 551
+`sync_wowsims.py:618-628`; 552 `player.tsx:338-358`). The fork diff
+touches three TypeScript transport files and no Go, so a healthy run's
+numbers cannot change; the live run gave 2451.1 DPS with and without the
+check (`live-check.md`, "Result").
+
+- **R14-D1 (medium).** Same as R14-A1, reached from the Go side: progress
+  goes out through a separate goroutine over a buffered channel
+  (`sim/wasm/main.go:200`, `:227`), and `runtime.Gosched` after the send
+  does not guarantee it runs first, so the worker itself may post the
+  `true` message late (hypothesis, untested).
+- **R14-D2 (low).** All limits rest on feral cat. The 2.5× factor covers
+  fight length only; cost per simulated second differs by spec (pets,
+  totems, DoTs), and that is unmeasured (hypothesis, untested).
+  Multi-player requests were not measured.
+
+## Standards + Spec
+
+**Standards.** The lock `commit`, `data/sim-implemented-effects.json`
+`forkCommit` and the fork HEAD all name `b8ba9b800`; the lock `_comment`
+entry matches the fork diff; the four commit messages follow the seven
+rules; tickets 547 to 552 are numbered uniquely with `map.md` lines and
+`NEXT` at 553.
+
+- **R14-ST1 (hard, small).** Ticket 545's close used "carries", a banned
+  word (`~/.claude/AGENTS.md`, Plain English).
+- **R14-ST2 (judgement, AGENTS.md "Durable claims").** Three causal claims
+  had no command and no "hypothesis" label: in the 545 close, "A warm-up
+  pass blocks the Go thread" and "The id answer is posted after the sim
+  goroutine's first yield"; in the 545 close, the fork commit body and
+  `worker_pool.ts:274-276`, "a worker never posts an error under a
+  progress id".
+- **R14-ST3 (judgement).** `worker_pool_sim_runner.ts` says "Each limit is
+  ten times the longest silence measured"; the run limit is the 30 s
+  floor.
+- **R14-ST4 (judgement, Duplicated Code).** `hasWaitersOtherThan` rebuilds
+  the progress id (`worker_pool.ts:509`); `getProgressName` (`:141`)
+  owns the format.
+- **R14-ST5 (judgement, Speculative Generality).** In `worker_silence.ts`,
+  the `timers` constructor parameter has no caller that passes it, the
+  `regime` argument of `onExpire` is ignored by the only production
+  caller, and `presimMs` is optional although always set.
+- **R14-ST6 (judgement, Mysterious Name).** Test names and comments use
+  plan labels, "(D-N1)" and "(D-N2)" (`fork-worker-silence.test.ts:122`,
+  `:356`), which resolve only in the gitignored plan.
+- **R14-ST7 (judgement, Duplicated Code).** `LIMITS` (`:64`) and
+  `POOL_LIMITS` (`:247`) in the test hold the same values.
+
+**Spec.** Ticket 545's four closing items, plan steps 1 to 6 and
+directives D-N1 to D-N5 all have code or log evidence. The limits follow
+candidate C (`plan.md:41`): 10 × 1.777 s + 120 s gives 140 s; 10 × 1.144 s
+is raised to the 30 s floor; 10 × 11.704 s gives 120 s. `vitest` 97 passed
+and `pnpm verify` rc=0 are logged (`execution-report.md:259-261`, `:288`).
+Tickets 547 to 552 state their sources' findings faithfully.
+
+- **R14-P1 (minor, partial).** Ticket item 4 asks for a test that a
+  never-answering worker fails "after N seconds"; the tests use test
+  limits, and none covers the shipped limits or the tab's opt-in at
+  `worker_pool_sim_runner.ts:117`. Same gap as R14-A3.
+- **R14-P2 (minor).** The ticket says "every other sim page keeps today's
+  behaviour", but the new `finally` (`worker_pool.ts:303-306`) removes the
+  progress entry on every page. Gate C accepted it (`decision-log.md:48`);
+  the `WorkerPoolOptions` comment (`:88`) and the 545 close overstate it.
+- **R14-P3 (minor, partial).** Item 1's `[upgrades] stats read` times for
+  the time-based run were lost (recorder times stand in,
+  `execution-report.md:63`), and the desktop build, where the check is
+  also on, was not measured (`plan.md:152`); the close did not say so.
+- **R14-P4 (not a defect).** The Spec axis reported the tab's status
+  region reading "Starting… (0 rows landed)" while progress read 230/401.
+  Checked against the K3 executor transcript (agent
+  `a02188a9072251b39`, line 168, 03:36:32Z): that read was at 63 s
+  elapsed, before any row landed, not at 230/401.
+
+**K3 reload.** The first live run (03:35:29Z, Phase 3, 401 candidates)
+reloaded at 21:08:53 local (04:08:53Z), at 230/401 with 218 rows. At that
+time no fork file had changed (`find -newermt`, no output), the vite log
+shows no HMR or page-reload line and one `ready` line (no server restart;
+K1's log shows that vite does log a file-triggered reload), there was no
+commit in either repo (reflogs), and the silence-error count was 0 a
+minute before (`beacon.log`). The Browser pane was hidden and held a
+second `:5173` tab (`live-check.md:22`). Nothing in the change can reload
+a page (R14-A7). The repeat run in a fresh tab passed: 2451.1 DPS, "Took
+2062s.", no captured line. Judged in the Disposition (row K3).
+
+## Summary
+
+Nothing blocks a merge. Ticket 545 is done as asked, its tests pass, and
+no game rule is wrong; tickets 547 to 552 match their sources. Two real
+follow-ups are filed: the silence check can fail a healthy sim when the
+warm-up message arrives late, on a frozen page, or on specs and the
+desktop build that were not measured (553); and the tests miss the tab's
+own wiring while three fork comments say more than the code does (554).
+Ticket 545's close is corrected in this commit (R14-ST1, R14-ST2,
+R14-P2, R14-P3). The lost K3 run is not a finding about this change. No
+`pending` row.
+
+## Disposition (round 14)
+
+| ID               | Axis                | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ---------------- | ------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R14-A1, R14-D1   | Adversarial, Domain | defer       | `.scratch/carry-forward/issues/553-silence-check-can-fail-a-healthy-sim.md`, item 1.                                                                                                                                                                                                                                                                                                                                                         |
+| R14-A2           | Adversarial         | defer       | `.scratch/carry-forward/issues/553-silence-check-can-fail-a-healthy-sim.md`, item 2.                                                                                                                                                                                                                                                                                                                                                         |
+| R14-D2           | Domain              | defer       | `.scratch/carry-forward/issues/553-silence-check-can-fail-a-healthy-sim.md`, item 3.                                                                                                                                                                                                                                                                                                                                                         |
+| R14-A3, R14-P1   | Adversarial, Spec   | defer       | `.scratch/carry-forward/issues/554-silence-check-tests-and-comments.md`, items 1 and 2.                                                                                                                                                                                                                                                                                                                                                      |
+| R14-A4           | Adversarial         | defer       | `.scratch/carry-forward/issues/554-silence-check-tests-and-comments.md`, item 3.                                                                                                                                                                                                                                                                                                                                                             |
+| R14-A5           | Adversarial         | wontfix     | Not reachable today: the tab's pool is never resized, so no tab worker is retired (`git grep setNumWorkers` finds only `ui/core/sim.ts:177`, the page pool).                                                                                                                                                                                                                                                                                 |
+| R14-A6           | Adversarial         | wontfix     | Hypothesis only; the browser is expected to drop messages from a terminated worker, and no run showed it. Dropped under the small-findings rule.                                                                                                                                                                                                                                                                                             |
+| R14-A7           | Adversarial         | wontfix     | Not a defect: the change has no reload code. Evidence for row K3.                                                                                                                                                                                                                                                                                                                                                                            |
+| R14-ST1          | Standards           | fixed       | This commit: ticket 545 "also carries that note" is now "also shows that note".                                                                                                                                                                                                                                                                                                                                                              |
+| R14-ST2          | Standards           | fixed       | This commit: the three claims in ticket 545's close now say "code reading; hypothesis, untested" or cite `measurement.md`. The same claim in the fork comment is ticket 554 item 4; the fork commit body cannot change.                                                                                                                                                                                                                      |
+| R14-ST3          | Standards           | defer       | `.scratch/carry-forward/issues/554-silence-check-tests-and-comments.md`, item 4.                                                                                                                                                                                                                                                                                                                                                             |
+| R14-ST4, R14-ST6 | Standards           | defer       | `.scratch/carry-forward/issues/554-silence-check-tests-and-comments.md`, item 5.                                                                                                                                                                                                                                                                                                                                                             |
+| R14-ST5          | Standards           | wontfix     | The timer wrappers come from directive D-N4 (`gate-b-directives.md`), and the optional `presimMs` and the unused `regime` change no behaviour. Dropped under the small-findings rule.                                                                                                                                                                                                                                                        |
+| R14-ST7          | Standards           | wontfix     | Two test constants, one per suite (monitor and pool), that may diverge; merging them changes no behaviour.                                                                                                                                                                                                                                                                                                                                   |
+| R14-P2           | Spec                | fixed       | This commit: ticket 545's close says other pages get no silence check and share only the `finally` delete. The fork comment at `worker_pool.ts:88` is ticket 554 item 4.                                                                                                                                                                                                                                                                     |
+| R14-P3           | Spec                | fixed       | This commit: ticket 545's close says the time-based stats-read lines and the desktop build were not measured. The desktop-build risk is ticket 553 item 3.                                                                                                                                                                                                                                                                                   |
+| R14-P4           | Spec                | wontfix     | Not a defect: the "Starting… (0 rows landed)" read was at 63 s elapsed (transcript line 168), before any row landed.                                                                                                                                                                                                                                                                                                                         |
+| K3               | Spec                | wontfix     | Not a finding about this change. Nothing in the change can reload a page (R14-A7); at the reload no file changed, vite neither reloaded nor restarted, and the check had reported no silence; the repeat run in a fresh tab passed with the same DPS. The likely cause is the hidden Browser pane reloading or discarding its tab (hypothesis, untested), which is the test harness, not the product. A ticket would have nothing to act on. |

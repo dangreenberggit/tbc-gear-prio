@@ -296,3 +296,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 550 gofmt over the fork's sim/ is never clean: _heals.go does not parse (ticket 546 gofmt check) 2026-10-04
 - 551 The upstream drift check stops on an HTTP 404 and never reports drift (feat/round-11-followups verify logs) 2026-10-04
 - 552 Spec options and consumables are not checked for the stale notice (ticket 539 close) 2026-10-04
+- 553 The tab's worker silence check can fail a healthy sim (pre-merge review round 14, R14-A1, R14-D1, R14-A2, R14-D2, R14-P3) 2026-10-05
+- 554 Ticket 545's silence check: tests miss the tab's wiring, and three comments are wrong (pre-merge review round 14, R14-A3, R14-P1 and others) 2026-10-05
