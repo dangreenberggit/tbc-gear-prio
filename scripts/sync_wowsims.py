@@ -289,6 +289,13 @@ def fetch(sha, path):
     return pinned_fetch(REPO, sha, path)
 
 
+# Upstream ported the UI to ui/sim/ in c86fd86f5 and deleted ui/core/ in
+# 7b539641 (both 2026-09-16), so the phase file's path depends on the commit.
+# TRACKED keeps the old path because --restore and --update read the pin, which
+# predates the move; --check reads newer tips and needs both (ticket 551).
+PHASE_FILE_AFTER_UI_PORT = "ui/sim/constants/other.ts"
+
+
 def read_phase_at(sha):
     """CURRENT_PHASE at an upstream commit, for --check.
 
@@ -297,7 +304,7 @@ def read_phase_at(sha):
     (ticket 551). Convert it here, naming every path tried.
     """
     tried = []
-    for path in (TRACKED["constants_other.ts"],):
+    for path in (PHASE_FILE_AFTER_UI_PORT, TRACKED["constants_other.ts"]):
         try:
             blob = fetch(sha, path)
         except urllib.error.HTTPError as e:
