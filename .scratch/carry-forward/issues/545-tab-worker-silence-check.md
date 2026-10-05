@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner ruling on Q-538-timeout, 2026-10-04 ("3 sound ok"), stage-gate run round-11-followups (`.scratch/stage-gate/round-11-followups/q-538-timeout.md`)
 Blocks: none
@@ -118,3 +118,126 @@ unchanged from `7d4d69d6a` to fork `1f102770e`.
    something else).
 4. A test that a never-answering worker fails its waiting lookup and sim
    after N seconds.
+
+## Closed 2026-10-05: fixed at fork b8ba9b800
+
+Fixed by one fork commit on `feat/upgrades-tab` in
+`dangreenberggit/tbc-new`, not pushed (the remote still names
+`7d4d69d6a`, `git -C vendor/tbc-new-fork ls-remote origin
+refs/heads/feat/upgrades-tab`):
+
+- `b8ba9b800f274791c7a70b4d5484bb45dd91c281` "Fail requests on silent
+  tab workers (545)": `ui/core/worker_silence.ts` (new),
+  `ui/core/worker_pool.ts`,
+  `upgrades/adapters/worker_pool_sim_runner.ts`.
+
+The main-repo commit "Re-pin fork to b8ba9b800 for ticket 545" moves
+`data/wowsims-fork.lock.json` to `b8ba9b800` with `pushed: false` and
+adds the tests. Plan, measurement and evidence are in
+`.scratch/stage-gate/545-worker-silence-check/` (gitignored, so a fresh
+checkout does not have them): `plan.md`, `gate-b-directives.md`,
+`measurement.md` with three JSON files, `live-check.md`,
+`execution-report.md`.
+
+### Item 1: the measurement and the limits
+
+`measurement.md` records one browser-build (wasm) session of the tab on
+feral cat, on the time-based fight, on a fight that ends at zero boss
+health (health 441,198, about a 180 s fight), and one page sim at the
+default boss health 6,070,400 with 100 iterations. Longest silences
+while a request waited: start-up 1.777 s, sims and lookups 1.144 s, the
+warm-up pass (presim) 11.704 s at the default health (measured, not
+extrapolated). The plan's decision table picks candidate C: three
+regimes, chosen from the `PresimRunning` flag in the progress messages.
+
+| Regime | Limit | Rule |
+| --- | --- | --- |
+| start-up (created to `ready`) | 140 s | 10 × 1.777 s + 120 s for the wasm download, rounded up to 10 s |
+| run (after `ready`) | 30 s | 10 × 1.144 s, raised to the 30 s floor |
+| warm-up pass | 120 s | 10 × 11.704 s, rounded up to 10 s |
+
+The 10× margin is 2.5× for a spec at 1,000 DPS, whose warm-up pass is
+longer, and 4× for a slower machine (hypothesis, untested). The 120 s
+download allowance is about 32 kB/s for the 3.8 MB module (hypothesis).
+
+### Item 2: the check
+
+The option is set only at `worker_pool_sim_runner.ts:117`
+(`WORKER_SILENCE_LIMITS`, `:63`); every other `new WorkerPool` site gets
+none, so other sim pages behave as before. A per-worker timer is re-armed
+by every message the worker sends. When it fires and a request is
+waiting, every waiting request fails with "Sim worker <id> sent nothing
+for <N> s; it was restarted", callers waiting for `ready` fail too, and
+the worker is terminated and set up again with the check still on
+(`worker_pool.ts:513-525`).
+
+- **The wasm sim path.** On the browser build the worker answers a sim's
+  request id with an empty payload, and the result then arrives only on
+  the progress channel. The id answer is posted after the sim
+  goroutine's first yield, not at once: after sim setup, the whole
+  warm-up pass and the first main-loop sleep (plan review N5a). The
+  progress entry's reject was a no-op; it is now real
+  (`worker_pool.ts:274-284`), and only the silence check calls it,
+  since a worker never posts an error under a progress id. So a sim
+  that goes quiet after its id was answered now fails.
+- **Regime per worker.** The regime is tracked per worker and set by the
+  latest progress message on that worker. A warm-up pass blocks the Go
+  thread, so no other sim on that worker can send during it.
+- **Idle workers.** A request on a worker that was idle gets a full
+  limit from when it was posted (D-N1). When nothing waits, the timer
+  goes idle.
+- **Stale progress entry (D-N3).** `doAsyncRequest`'s `finally`
+  (`worker_pool.ts:300`) always deletes the `${id}progress` entry, so a
+  rejected call leaves nothing waiting and an idle worker is never
+  restarted. On success the delete does nothing.
+
+### Item 3: what the run shows when a sim fails this way
+
+The existing handling stands; no new loop code. At fork `b8ba9b800`:
+
+- A candidate sim that fails is dropped with the worker text in the
+  "dropped from the ranking" note (`upgrades/engine/rank.ts:1602-1613`).
+- A ring, trinket or one-hand that fails on one slot only is still
+  ranked from the other slot and also carries that note.
+- A baseline or replication sim failure ends the run with "Ranking
+  failed: Sim worker <id> sent nothing for N s; it was restarted"
+  (`rank.ts:1101`, `:2161`).
+- Set-phase package sims show `unmeasured: "sim-failed"` rows
+  (`rank.ts:2580`, `:2648`).
+- The same-gear gate (`set-less-copies.ts:159`), the worn-set ladder
+  (`:200`, `:215`), the set screen (`set-screen.ts:282`), step sims and
+  pair 2pc sims log the text to the console only.
+
+### Known limits (not fixed)
+
+- **Routing after a persistent failure.** A restarted worker holds the
+  least work, so least-busy routing sends it the next request. If the
+  cause persists, about one candidate in four (with 4 workers) is
+  dropped, each after 30 s (hypothesis, untested; plan C19).
+- **Laptop sleep.** A laptop that sleeps during a run may lose one row
+  on resume: the main-thread timer can fire before the worker's queued
+  progress arrives (hypothesis, untested; plan C17).
+- **Not proven to fix 535.** The cause of ticket 535's stall is unknown.
+
+### Item 4: tests
+
+`npx vitest run packages/core/test/fork-worker-silence.test.ts
+packages/core/test/rank.test.ts` gives rc=0, 97 passed, with fake
+timers. Cases: a never-ready worker fails a lookup and a sim at the
+start-up limit and not before, and its restarted worker fails again; the
+wasm pattern (id answered with an empty payload, two progress messages,
+then silence) fails at the run limit after the last message, and the
+restarted worker fails a second silence; a worker that sends progress
+every 100 ms never fails; a warm-up pass under and over its limit; no
+restart of an idle worker; a pool without the option still waits; a
+baseline sim rejected with the worker text gives `RankError` kind
+`sim-failed` (on both the fork engine and `packages/core/src/rank.ts`).
+`corepack pnpm fork-lint:check` and `corepack pnpm verify` rc=0.
+
+### Live check
+
+One feral run of the tab on the browser build with the check on
+completed with no silence error: 2451.1 DPS, "Took 2062s.", the same as
+the run without the check (2063 s). No live run provoked a dead worker:
+no devtools path mutes one worker of the tab's pool; the wasm-pattern
+test stands in for it.
