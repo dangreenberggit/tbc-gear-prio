@@ -26,7 +26,8 @@ Where the 97 missing paths are at the tip, matched by file path below
 | --- | --- |
 | `ui/specs/<class>/<spec>/...`, same path below the spec directory | 94 |
 | `ui/core/constants/other.ts` is now `ui/sim/constants/other.ts` (ticket 551) | 1 |
-| no file of the same name: `ui/druid/feralcat/sim.ts`, `ui/core/proto_utils/utils.ts` | 2 |
+| `ui/core/proto_utils/utils.ts`: the two helpers we read are in `ui/sim/proto/utils.ts` | 1 |
+| no file of the same name: `ui/druid/feralcat/sim.ts` | 1 |
 
 Re-run: fetch both trees with
 `gh api "repos/wowsims/tbc-new/git/trees/<sha>?recursive=1"` for
@@ -54,17 +55,28 @@ engine every ranking is computed with, and it needs the fork re-pin and
 re-baselining that come with any engine move (`docs/agents/known-traps.md`,
 "Before moving the wowsims engine pin").
 
-The two files with no same-name successor need more than a path change.
-`scripts/extract_sim_defaults.mjs` parses `feral_sim.ts` for buff and
-debuff defaults and reads two helpers from `proto_utils.ts`. Where those
-now live is unknown; `ui/specs/druid/feralcat/` at the tip has `inputs.ts`,
-`presets.ts` and `spec.ts` (hypothesis, untested: one of these holds the
-defaults).
+Two tracked files feed `scripts/extract_sim_defaults.mjs`, which parses
+`feral_sim.ts` for buff and debuff defaults and reads two helpers from
+`proto_utils.ts`.
+
+- Both helpers exist at the tip: `defaultRaidBuffMajorDamageCooldowns`
+  at `42c75dc9:ui/sim/proto/utils.ts:133` and
+  `defaultExposeWeaknessSettings` at `:169` (re-run: `git -C
+  vendor/tbc-new-fork grep -n
+  "defaultRaidBuffMajorDamageCooldowns\s*=\|defaultExposeWeaknessSettings\s*="
+  42c75dc9 -- ui`). So `proto_utils.ts` needs a path change to
+  `ui/sim/proto/utils.ts`. Whether the extractor's parse still matches
+  the helpers' bodies there is untested.
+- `feral_sim.ts` has no same-name successor. Where its defaults now live
+  is unknown; `ui/specs/druid/feralcat/` at the tip has `inputs.ts`,
+  `presets.ts` and `spec.ts` (hypothesis, untested: one of these holds
+  the defaults).
 
 ## What would close this
 
 The owner decides to move the engine pin past `7b539641`. Then: `TRACKED`
-is remapped, including new sources for the two files above;
+is remapped, including a new source for `feral_sim.ts` and the new path
+for `proto_utils.ts`;
 `--update --ref <chosen sha>` writes a lockfile with all tracked files;
 and `corepack pnpm sim-defaults:check` passes against the new vendored
 sources. Or the owner decides not to follow upstream past `7b539641`, and
