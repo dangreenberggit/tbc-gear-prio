@@ -774,7 +774,7 @@ describe.skipIf(!forkPresent)("WorkerPoolSimRunner silence opt-in", () => {
     expect(FakeWorker.instances).toHaveLength(2);
   });
 
-  it("pins the tab's limits: 140 s start-up, 44.83 s run, 220 s presim", () => {
+  it("pins the tab's start-up, run and presim limits", () => {
     expect(runnerModule.WORKER_SILENCE_LIMITS).toEqual({
       startMs: 140_000,
       runMs: 44_830,
