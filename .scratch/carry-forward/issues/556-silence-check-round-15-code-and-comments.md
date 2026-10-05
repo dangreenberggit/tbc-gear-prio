@@ -128,3 +128,17 @@ deadline (556)" moves `data/wowsims-fork.lock.json` to it, with
   run packages/core/test/fork-worker-silence.test.ts
   packages/core/test/rank.test.ts` rc=0 (109 passed); `python
   scripts/check_engine_port_drift.py` rc=0.
+
+## Addendum 2026-10-05: figures since fork `cb561067`
+
+Fork `cb561067719abb9cd1f267ccb99425fc2a7fc007` (ticket 557) raised
+`runMs` from 30 s to 44.83 s (`WORKER_SILENCE_LIMITS` in
+`upgrades/adapters/worker_pool_sim_runner.ts:108` at that commit). So
+from that pin on, the accepted extension is up to `presimMs - runMs` =
+220 s − 44.83 s = 175.17 s after the earlier request's run deadline. In
+this ticket's example the run deadline is t0+44.83 s, and the hung
+worker still fails at t0+220 s. The 190 s, "t0+30 s" and "the 30 s run
+floor" in the close above describe fork `3b75509aa`; the dated history
+that records them (decision-log row F1, the lock `_comment` entry for
+`3b75509aa`) stays as written. The decision itself is unchanged. Source:
+pre-merge review rows A2 and P1 in `docs/reviews/feat-silence-followups.md`.
