@@ -319,10 +319,11 @@ def parse_current_phase(ts_source):
     through the enum. Fail loudly rather than guessing -- a wrong default here
     silently changes every ranking's candidate pool and gem palette."""
     # The `: Phase` annotation is optional: ui/sim/constants/other.ts dropped it.
-    m = re.search(r"CURRENT_PHASE\s*(?::\s*Phase\s*)?=\s*Phase\.Phase(\d)", ts_source)
+    prefix = r"CURRENT_PHASE\s*(?::\s*Phase\s*)?=\s*"
+    m = re.search(prefix + r"Phase\.Phase(\d)", ts_source)
     if m:
         return int(m.group(1))
-    m = re.search(r"CURRENT_PHASE\s*(?::\s*Phase\s*)?=\s*(\d)", ts_source)
+    m = re.search(prefix + r"(\d)", ts_source)
     if m:
         return int(m.group(1))
     raise SystemExit(
