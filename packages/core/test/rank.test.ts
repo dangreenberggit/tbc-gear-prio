@@ -3522,13 +3522,13 @@ describe("rankUpgrades — candidate whose meta repair is infeasible", () => {
   });
 });
 
-describe("rankUpgrades — baseline sim rejected by the worker silence check (ticket 545)", () => {
+describe("rankUpgrades — a baseline sim rejection becomes RankError sim-failed with the sim's message", () => {
   // The fork's WorkerPool rejects with this text when a tab worker goes quiet.
   // A candidate sim failing so is dropped with a note; the baseline has no
   // fallback, so the run must fail with the worker's text, not hang or vanish.
   const SILENCE = "Sim worker 2 sent nothing for 30 s; it was restarted";
 
-  it("fails the ranking as sim-failed carrying the worker's text", async () => {
+  it("maps the thrown error to sim-failed and keeps its text", async () => {
     const silentSim: SimRunner = {
       version: async () => "v0.0.101",
       run: async () => {

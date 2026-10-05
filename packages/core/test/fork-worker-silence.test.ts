@@ -25,6 +25,7 @@ import {
 import {
   forkPresent,
   forkRoot,
+  importForkUpgrades,
   loadForkEngineEnvironment,
 } from "./fork-engine-harness.js";
 
@@ -36,6 +37,10 @@ type SilenceMonitorModule = {
     hooks: {
       hasWaiters: () => boolean;
       onExpire: (regime: Regime, limitMs: number) => void;
+    },
+    timers?: {
+      set: (callback: () => void, ms: number) => unknown;
+      clear: (handle: unknown) => void;
     }
   ) => {
     requestWaiting(): void;
@@ -119,7 +124,7 @@ describe.skipIf(!forkPresent)("SilenceMonitor", () => {
     expect(expiries).toEqual([["presim", 5000]]);
   });
 
-  it("gives a request on an idle worker a full limit (D-N1)", async () => {
+  it("gives a request on an idle worker a full limit", async () => {
     // The worker's last message re-armed the timer; nothing waits. A request
     // posted 1 ms before that deadline must still get a whole limit.
     const waiting = { value: false };
@@ -143,6 +148,79 @@ describe.skipIf(!forkPresent)("SilenceMonitor", () => {
     monitor.dispose();
     await vi.advanceTimersByTimeAsync(10_000);
     expect(expiries).toEqual([]);
+  });
+
+  /**
+   * Timers the test fires by hand. Fake timers cannot show a late timer:
+   * `vi.setSystemTime` moves every pending timer's due time along with the
+   * clock, so a frozen page is modelled as a clock jump and then a fire.
+   */
+  function manualTimers() {
+    let current: { token: object; cb: () => void; ms: number } | undefined;
+    return {
+      timers: {
+        set: (cb: () => void, ms: number) => {
+          const token = {};
+          current = { token, cb, ms };
+          return token;
+        },
+        clear: (handle: unknown) => {
+          if (current?.token === handle) current = undefined;
+        },
+      },
+      pendingMs: () => current?.ms,
+      fire: () => {
+        const timer = current;
+        current = undefined;
+        timer?.cb();
+      },
+    };
+  }
+
+  async function lateTimerMonitor() {
+    const { SilenceMonitor } = await loadMonitor();
+    const expiries: Array<[Regime, number]> = [];
+    const manual = manualTimers();
+    const monitor = new SilenceMonitor(
+      LIMITS,
+      {
+        hasWaiters: () => true,
+        onExpire: (regime, limitMs) => expiries.push([regime, limitMs]),
+      },
+      manual.timers
+    );
+    monitor.setRegime("run");
+    monitor.requestWaiting();
+    return { monitor, expiries, manual };
+  }
+
+  it("re-arms a full limit instead of failing when its timer fires more than 5 s late", async () => {
+    const { expiries, manual } = await lateTimerMonitor();
+    expect(manual.pendingMs()).toBe(1000);
+    vi.setSystemTime(Date.now() + 1000 + 5001);
+    manual.fire();
+    expect(expiries).toEqual([]);
+    expect(manual.pendingMs()).toBe(1000);
+    vi.setSystemTime(Date.now() + 1000);
+    manual.fire();
+    expect(expiries).toEqual([["run", 1000]]);
+  });
+
+  it("fails when its timer fires at most 5 s late", async () => {
+    const { expiries, manual } = await lateTimerMonitor();
+    vi.setSystemTime(Date.now() + 1000 + 5000);
+    manual.fire();
+    expect(expiries).toEqual([["run", 1000]]);
+  });
+
+  it("a late fire re-arms with the limit of the regime the monitor is in", async () => {
+    const { monitor, expiries, manual } = await lateTimerMonitor();
+    monitor.setRegime("presim");
+    expect(manual.pendingMs()).toBe(5000);
+    vi.setSystemTime(Date.now() + 5000 + 5001);
+    manual.fire();
+    expect(expiries).toEqual([]);
+    expect(manual.pendingMs()).toBe(5000);
   });
 });
 
@@ -353,7 +431,7 @@ describe.skipIf(!forkPresent)("WorkerPool silence option", () => {
     expect(FakeWorker.instances).toHaveLength(2);
     expect(FakeWorker.instances[0]!.terminated).toBe(true);
 
-    // The restarted worker never becomes ready either (D-N2): no hang.
+    // The restarted worker that never readies fails a second lookup.
     const second = track(pool.computeStats(api.ComputeStatsRequest.create()));
     await vi.advanceTimersByTimeAsync(POOL_LIMITS.startMs - 1);
     expect(second.state).toBe("pending");
@@ -438,6 +516,142 @@ describe.skipIf(!forkPresent)("WorkerPool silence option", () => {
     expect(String(sim.error)).toMatch(/sent nothing for 5 s/);
   });
 
+  /** `wasmScript` with its own steps for each request, in the order they arrive. */
+  const wasmScriptByRequest = (
+    perRequest: Array<Array<[number, ProgressInit]>>
+  ): Script => {
+    let count = 0;
+    return {
+      ready: true,
+      onRequest: (worker, message) => {
+        if (message.msg !== "raidSimAsync") return;
+        wasmScript(perRequest[count++] ?? []).onRequest?.(worker, message);
+      },
+    };
+  };
+
+  // Ticket 553: the engine can post `PresimRunning: true` only after the
+  // warm-up has run, together with its `false`, so the whole warm-up reaches
+  // the page as silence before any start message.
+  const LATE_START_STEPS: Array<[number, ProgressInit]> = [
+    [3000, { presimRunning: true }],
+    [3000, { presimRunning: false }],
+    [3100, { completedIterations: 100 }],
+    [3200, { completedIterations: 3000, final: true }],
+  ];
+
+  it("judges a warm-up whose start message arrives late against the presim limit", async () => {
+    FakeWorker.script = wasmScript(LATE_START_STEPS);
+    const pool = new WorkerPool(1, { silence: POOL_LIMITS });
+    await vi.advanceTimersByTimeAsync(0);
+
+    const sim = track(pool.raidSimAsync(raidRequest(), () => {}, SIGNALS));
+    await vi.advanceTimersByTimeAsync(2999);
+    expect(sim.state).toBe("pending");
+    await vi.advanceTimersByTimeAsync(201);
+    expect(sim.state).toBe("resolved");
+    expect(FakeWorker.instances).toHaveLength(1);
+  });
+
+  it("keeps the presim limit for a sim posted before the worker is ready", async () => {
+    FakeWorker.script = { ready: false };
+    const pool = new WorkerPool(1, { silence: POOL_LIMITS });
+    // Read at post time, so the worker answers the sim once it is ready.
+    FakeWorker.script = wasmScript(LATE_START_STEPS);
+
+    const sim = track(pool.raidSimAsync(raidRequest(), () => {}, SIGNALS));
+    await vi.advanceTimersByTimeAsync(500);
+    FakeWorker.instances[0]!.send({
+      msg: "ready",
+      outputData: new Uint8Array([1]),
+    });
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(2999);
+    expect(sim.state).toBe("pending");
+    await vi.advanceTimersByTimeAsync(301);
+    expect(sim.state).toBe("resolved");
+    expect(FakeWorker.instances).toHaveLength(1);
+  });
+
+  it("fails a warm-up with no start message at the presim limit", async () => {
+    FakeWorker.script = wasmScript([
+      [5500, { presimRunning: true }],
+      [5500, { presimRunning: false }],
+    ]);
+    const pool = new WorkerPool(1, { silence: POOL_LIMITS });
+    await vi.advanceTimersByTimeAsync(0);
+
+    const sim = track(pool.raidSimAsync(raidRequest(), () => {}, SIGNALS));
+    await vi.advanceTimersByTimeAsync(POOL_LIMITS.presimMs - 1);
+    expect(sim.state).toBe("pending");
+    await vi.advanceTimersByTimeAsync(1);
+    expect(sim.state).toBe("rejected");
+    expect(String(sim.error)).toMatch(/sent nothing for 5 s/);
+  });
+
+  it("keeps the presim limit while any sim on the worker is before its main loop", async () => {
+    FakeWorker.script = wasmScriptByRequest([
+      [
+        [100, { presimRunning: true }],
+        [200, { presimRunning: false }],
+        [300, { completedIterations: 10 }],
+      ],
+      [
+        [3000, { presimRunning: true }],
+        [3000, { presimRunning: false }],
+        [3100, { completedIterations: 10 }],
+      ],
+    ]);
+    const pool = new WorkerPool(1, { silence: POOL_LIMITS });
+    await vi.advanceTimersByTimeAsync(0);
+
+    const a = track(pool.raidSimAsync(raidRequest(), () => {}, SIGNALS));
+    const b = track(pool.raidSimAsync(raidRequest(), () => {}, SIGNALS));
+    await vi.advanceTimersByTimeAsync(3100 + POOL_LIMITS.runMs - 1);
+    expect(a.state).toBe("pending");
+    expect(b.state).toBe("pending");
+    await vi.advanceTimersByTimeAsync(1);
+    expect(a.state).toBe("rejected");
+    expect(b.state).toBe("rejected");
+    expect(String(a.error)).toMatch(/sent nothing for 1 s/);
+    expect(String(b.error)).toMatch(/sent nothing for 1 s/);
+    expect(FakeWorker.instances).toHaveLength(2);
+  });
+
+  it("an abort during a silence neither stops the check nor hangs", async () => {
+    FakeWorker.script = wasmScript([[100, { completedIterations: 10 }]]);
+    const pool = new WorkerPool(1, { silence: POOL_LIMITS });
+    await vi.advanceTimersByTimeAsync(0);
+
+    let triggerAbort: (() => Promise<void>) | undefined;
+    const signals = {
+      abort: {
+        onTrigger: (callback: () => Promise<void>) => {
+          triggerAbort = callback;
+          return () => {};
+        },
+      },
+    };
+    const sim = track(pool.raidSimAsync(raidRequest(), () => {}, signals));
+    await vi.advanceTimersByTimeAsync(100 + POOL_LIMITS.runMs - 1);
+
+    // The abort waits on the same worker under an id of its own, so the
+    // silence that fails the sim must fail the abort too.
+    const abort = track(triggerAbort!());
+    // The abort is posted after an await on the worker's ready promise.
+    await vi.advanceTimersByTimeAsync(0);
+    expect(FakeWorker.instances[0]!.posted).toContainEqual(
+      expect.objectContaining({ msg: "abortById" })
+    );
+    expect(sim.state).toBe("pending");
+
+    await vi.advanceTimersByTimeAsync(1);
+    expect(sim.state).toBe("rejected");
+    expect(String(sim.error)).toMatch(/sent nothing for 1 s/);
+    expect(abort.state).toBe("rejected");
+    expect(String(abort.error)).toMatch(/sent nothing for 1 s/);
+  });
+
   it("does not restart an idle worker after a finished sim", async () => {
     FakeWorker.script = wasmScript([
       [100, { completedIterations: 3000, final: true }],
@@ -461,12 +675,69 @@ describe.skipIf(!forkPresent)("WorkerPool silence option", () => {
   });
 });
 
+type SimRunnerModule = {
+  WorkerPoolSimRunner: new (numWorkers?: number) => {
+    computeStats(request: {
+      raid: object;
+      encounter: object;
+    }): Promise<unknown>;
+  };
+  WORKER_SILENCE_LIMITS: { startMs: number; runMs: number; presimMs: number };
+};
+
+// The pool tests above pass their own limits; these build the tab's sim runner,
+// so they fail if the runner stops passing the silence option or its limits.
+describe.skipIf(!forkPresent)("WorkerPoolSimRunner silence opt-in", () => {
+  let runnerModule: SimRunnerModule;
+
+  beforeEach(async () => {
+    runnerModule = await importForkUpgrades<SimRunnerModule>(
+      "adapters/worker_pool_sim_runner.ts"
+    );
+    vi.useFakeTimers();
+    Object.assign((globalThis as unknown as { window: object }).window, {
+      Worker: FakeWorker,
+      setTimeout: globalThis.setTimeout,
+      clearTimeout: globalThis.clearTimeout,
+    });
+    FakeWorker.instances = [];
+    FakeWorker.script = { ready: false };
+    vi.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it("fails a lookup on a worker that never becomes ready at the start limit, and restarts it", async () => {
+    const { WorkerPoolSimRunner, WORKER_SILENCE_LIMITS } = runnerModule;
+    const runner = new WorkerPoolSimRunner(1);
+    const lookup = track(runner.computeStats({ raid: {}, encounter: {} }));
+
+    await vi.advanceTimersByTimeAsync(WORKER_SILENCE_LIMITS.startMs - 1);
+    expect(lookup.state).toBe("pending");
+    await vi.advanceTimersByTimeAsync(1);
+    expect(lookup.state).toBe("rejected");
+    expect(String(lookup.error)).toMatch(/sent nothing for 140 s/);
+    expect(FakeWorker.instances).toHaveLength(2);
+  });
+
+  it("uses the limits the tab was measured for", () => {
+    expect(runnerModule.WORKER_SILENCE_LIMITS).toEqual({
+      startMs: 140_000,
+      runMs: 30_000,
+      presimMs: 120_000,
+    });
+  });
+});
+
 // rank.test.ts pins the same path on packages/core's engine; this one runs the
 // fork's copy, which is the engine the tab actually calls.
 describe.skipIf(!forkPresent)(
-  "fork rankUpgrades — silent worker on the baseline sim",
+  "fork rankUpgrades — a baseline sim rejection becomes RankError sim-failed with the sim's message",
   () => {
-    it("fails the ranking as sim-failed carrying the worker's text", async () => {
+    it("maps the thrown error to sim-failed and keeps its text", async () => {
       const SILENCE = "Sim worker 2 sent nothing for 30 s; it was restarted";
       const { rankUpgrades } = await loadRank();
       const { input, makeGearSource, pool } = await buildRankFixture();
