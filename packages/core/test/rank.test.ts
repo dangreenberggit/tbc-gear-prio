@@ -3522,6 +3522,51 @@ describe("rankUpgrades — candidate whose meta repair is infeasible", () => {
   });
 });
 
+describe("rankUpgrades — baseline sim rejected by the worker silence check (ticket 545)", () => {
+  // The fork's WorkerPool rejects with this text when a tab worker goes quiet.
+  // A candidate sim failing so is dropped with a note; the baseline has no
+  // fallback, so the run must fail with the worker's text, not hang or vanish.
+  const SILENCE = "Sim worker 2 sent nothing for 30 s; it was restarted";
+
+  it("fails the ranking as sim-failed carrying the worker's text", async () => {
+    const silentSim: SimRunner = {
+      version: async () => "v0.0.101",
+      run: async () => {
+        throw new Error(SILENCE);
+      },
+    };
+
+    const ranking = rankUpgrades(
+      {
+        character: CHAR,
+        spec: "ret",
+        maxPhase: 3,
+        iterations: 3000,
+        seeds: [42],
+        race: "RaceHuman",
+      },
+      {
+        gear: new RecordedGearSource({
+          fights: new Map([["US|dreamscythe|slamaltman|ret", [SUMMARY]]]),
+          gear: new Map([["abc123|7", slamaltmanLoggedGear()]]),
+        }),
+        sim: silentSim,
+        store: new MemoryStore(),
+        clock: () => new Date("2026-07-26T12:00:00.000Z"),
+        raidSimSkeleton: skeleton,
+        epWeights,
+        pool: [realPoolEntry(29381)],
+      }
+    );
+
+    await expect(ranking).rejects.toMatchObject({
+      name: "RankError",
+      kind: "sim-failed",
+      message: SILENCE,
+    } satisfies Partial<RankError>);
+  });
+});
+
 /**
  * Ticket 107 / PLAN.md §9 policy item 5: when a candidate helm brings a meta
  * socket, `repairMeta` satisfies the new meta's colour condition by recolouring
