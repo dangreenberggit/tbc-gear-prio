@@ -290,3 +290,9 @@ file contention, worker prompt. This file stays the chronological log.
 - 541 The socket bonus counts as active when the meta socket is empty (pre-merge review round 11, D3) 2026-10-03
 - 545 The Upgrades tab cannot recover from a sim worker that never answers (owner ruling on Q-538-timeout) 2026-10-04
 - 546 Unbridled Wrath and Seal of Vengeance keep the old proc chance after a weapon swap (pre-merge review round 12, A1) 2026-10-04
+- 547 Set bonuses with pieces in feet, waist, wrist or finger are not re-checked when only those slots are swapped (ticket 540 close; pre-merge review round 12, P4) 2026-10-04
+- 548 Elune's Touch keeps the old proc chance after a weapon swap (pre-merge review round 13, R13-D2) 2026-10-04
+- 549 The fork's full Go suite always fails on TestProtoVersioning (tickets 540 and 546 full-suite runs) 2026-10-04
+- 550 gofmt over the fork's sim/ is never clean: _heals.go does not parse (ticket 546 gofmt check) 2026-10-04
+- 551 The upstream drift check stops on an HTTP 404 and never reports drift (feat/round-11-followups verify logs) 2026-10-04
+- 552 Spec options and consumables are not checked for the stale notice (ticket 539 close) 2026-10-04
