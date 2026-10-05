@@ -612,3 +612,207 @@ R14-P2, R14-P3). The lost K3 run is not a finding about this change. No
 | R14-P3           | Spec                | fixed       | This commit: ticket 545's close says the time-based stats-read lines and the desktop build were not measured. The desktop-build risk is ticket 553 item 3.                                                                                                                                                                                                                                                                                   |
 | R14-P4           | Spec                | wontfix     | Not a defect: the "Starting… (0 rows landed)" read was at 63 s elapsed (transcript line 168), before any row landed.                                                                                                                                                                                                                                                                                                                         |
 | K3               | Spec                | wontfix     | Not a finding about this change. Nothing in the change can reload a page (R14-A7); at the reload no file changed, vite neither reloaded nor restarted, and the check had reported no silence; the repeat run in a fresh tab passed with the same DPS. The likely cause is the hidden Browser pane reloading or discarding its tab (hypothesis, untested), which is the test harness, not the product. A ticket would have nothing to act on. |
+
+# Round 15 — tickets 553 and 554 (Round 14's follow-ups)
+
+Reviewed range: `9f9768ac7579b2c1d3a92ad919e6eff617c762c4..b40b944941a7b98696638ce1821bfdd06e75fd9b`
+
+Fork `vendor/tbc-new-fork` (`feat/upgrades-tab`): `b8ba9b800f274791c7a70b4d5484bb45dd91c281..4cdc02b8a231e5376f2798be06348e00167868cc`.
+
+The main range has three commits (`git log --oneline 9f9768ac..b40b9449`):
+`f7dea375` is the layout-gate record that `merge-to-dev --check-only`
+wrote at fork `b8ba9b800`; `82ded354` re-pins the fork to `4cdc02b8a` and
+changes `packages/core/test/fork-worker-silence.test.ts` and
+`rank.test.ts`; `b40b9449` closes tickets 553 and 554 and files 555.
+`9f9768ac` itself is Round 14's review commit (review text, tickets 553
+and 554 filed, ticket 545's close corrected), so this round starts after
+it, as Round 14 started after Round 13's. The fork range has one commit,
+`4cdc02b8a` (`ui/core/worker_pool.ts`, `ui/core/worker_silence.ts`, the
+tab's `worker_pool_sim_runner.ts`): the silence check now takes its
+regime (start-up, warm-up, run) from the worker's state, and a timer
+that fires more than 5 s late re-arms instead of failing. Spec sources:
+tickets 553, 554 and 555, and `.scratch/stage-gate/553-554-silence-followups/`
+(gitignored): `brief.md`, `plan.md`, `plan-review-r1.md`,
+`plan-review.md`, `gate-b-directives.md`, `probe.md`,
+`execution-report.md`, `decision-log.md`.
+
+Dispatch: four fresh `general-task` agents on Opus (effort high), run in
+the foreground in one parallel batch — adversarial and domain on the
+`.agents/reviews/` briefs, and the `code-review` skill's Standards and
+Spec halves as two agents with that skill's prompts and smell baseline.
+No `codex` binary on PATH. Every axis was told it writes nothing; each
+reported the main tree with only the eight untracked owner handoffs and
+the fork clean at `4cdc02b8a`.
+
+Tests run by the axes:
+
+- `npx vitest run packages/core/test/fork-worker-silence.test.ts packages/core/test/rank.test.ts`,
+  Node 22.17.1: rc=0, 107 passed (24 silence, 83 rank) (adversarial,
+  domain, spec).
+- `python scripts/check_engine_port_drift.py`: rc=0; no changed fork
+  file is a ported engine file (standards).
+- `git -C vendor/tbc-new-fork diff b8ba9b800 4cdc02b8a -- '*.go' | wc -l`:
+  0 (domain).
+- `python scripts/check_layout_gate.py --print-hash`: `01f2524f…`,
+  against the recorded `50c6fbbd…` (standards; the adversarial axis got
+  the same value from `compute_tab_hash()`).
+
+## Adversarial
+
+No blocking defect. The new rule is correct for the tab's two calls
+(`raidSimAsync`, `computeStats`): a healthy sim is judged against the
+warm-up limit from the moment it is posted, so the late `PresimRunning:
+true` message of R14-A1 no longer matters. A restarted worker keeps the
+start-up limit (`setupWorker` sets `ready=false`, `worker_pool.ts:385`;
+`regime()` returns `start` until `ready`, `:538`). Timers do not leak:
+`arm()` calls `stop()` first, `onSilence` clears `preLoopIds` (`:564`),
+and `doAsyncRequest`'s `finally` calls `noteAsyncEnd` (`:310`). The four
+new pool tests would fail at `b8ba9b800` by code reading (the old code
+switched to the run limit at `ready`); they were not run there.
+
+- **R15-A1 (low).** `noteAsyncStart` (`worker_pool.ts:518`) calls
+  `setRegime`, which re-arms on any change (`worker_silence.ts:88-92`),
+  bypassing `requestWaiting(othersWaiting = true)`. A worker hung in its
+  main loop that receives a second sim 29 s later gets a fresh 120 s
+  warm-up limit, so it fails at about 149 s, not 30 s. Code reading;
+  that the tab rarely puts two sims on one worker is a hypothesis,
+  untested.
+- **R15-A2 (low, wrong comment).** `worker_silence.ts:16-21` and ticket
+  553's close say a freeze fails a healthy worker when it "ends 0-5 s
+  after the due time". A freeze that ends before the due time with too
+  little of the limit left also fails it, every time (a 110 s freeze in
+  a warm-up leaves 10 s; feral's warm-up needs 11.7 s). The bands
+  given, 29-35 s and 108-125 s, already include that case.
+- **R15-A3 (informational).** The layout-gate record from `f7dea375` no
+  longer matches: its hash covers `upgrades/adapters/**`, and
+  `4cdc02b8a` edits `worker_pool_sim_runner.ts`. `merge-to-dev` re-runs
+  the gate instead of skipping it.
+- **R15-A4 (informational).** The freeze re-arm is tested only on
+  `SilenceMonitor` with hand-fired timers, because vitest's fake timers
+  move `Date` with every timer; ticket 553's close says so. The runner
+  test that builds `WorkerPoolSimRunner` through `importForkUpgrades`
+  and fails at the 140 s start-up limit is the real wiring check.
+
+## Domain
+
+No game-rule or sim-engine error, and no ranking number can change: the
+fork range touches no Go file, and the main repo changes only pin and
+hash fields. The fix matches the engine: `sim/core/sim.go:149-154` sends
+`PresimRunning: true` and then only calls `Gosched`; the warm-up
+(`presim.go:103`) sends no message; a warm-up error ends with a final
+result whose `presimRunning` is false. Code citations in tickets 553 to
+555 hold at `4cdc02b8a`. Ticket 555's Energy Saver claims match the
+cited Chrome blog; the worker-freeze claim rests on Chromium source the
+axis did not read (hypothesis, untested).
+
+- **R15-D1 (low).** The limits comment and ticket 553 item 3 leave out
+  what sets warm-up time: a fixed 100-iteration run
+  (`sim/core/presim.go:35`), only on a health-based fight
+  (`presim.go:66`), one round for DPS specs (the only `Presimmer` is the
+  tank healing model, `sim/core/health.go:272`). So the 120 s limit fails
+  a spec whose single iteration takes more than 1.2 s, which an ordinary
+  sim's speed shows without a probe.
+- **R15-D2 (low).** The two new probes, warlock and shadow priest, are
+  casters. Hunter pets, shaman totems and dual-wield melee are still
+  unmeasured; the comment labels this a hypothesis.
+- **R15-D3 (informational).** On the desktop build the first
+  `/asyncProgress` poll returns an empty `ProgressMetrics`
+  (`sim/web/async_progress.go:32`), which ends the warm-up regime before
+  the warm-up starts. Polls arrive about every 50 ms
+  (`ui/core/worker_http.ts:52-70`), so it should be harmless
+  (hypothesis, untested).
+- **R15-D4 (low).** Ticket 553's "What G gives" gave timer-chain
+  thresholds ("deeper than level 6", "60 s or 5 min") that differ from
+  the cited Chrome blog (chain count 5 or more, hidden more than 5 min);
+  the extra figures come from Chromium `main` source.
+
+## Standards + Spec
+
+**Standards.** No hard violation. The lock `commit`,
+`data/sim-implemented-effects.json` `forkCommit` and the fork HEAD all
+name `4cdc02b8a`; the lock `_comment` entry matches the fork diff; the
+commit messages follow the seven rules; no banned word in added lines;
+`NEXT` was 556 with 555 filed. Round 14's R14-ST3, R14-ST4 (now
+`progressIdOf`, `worker_pool.ts:77`), R14-ST6 and ticket 554 item 4 are
+fixed.
+
+- **R15-ST1 (judgement, AGENTS.md "Durable claims").** Three causal
+  claims have no source and no "hypothesis" label: in
+  `worker_silence.ts`, "Chrome freezes a page's dedicated workers with
+  the page" and "vitest's fake performance.now() ignores setSystemTime";
+  in `fork-worker-silence.test.ts:155`, "`vi.setSystemTime` moves every
+  pending timer's due time".
+- **R15-ST2 (judgement).** The limits comment lists "feral cat: … main
+  loop 1.1 s" (`worker_pool_sim_runner.ts:71`). That is the old 1,144 ms
+  figure, which `measurement.md:53` and `:71` show is a warm-up silence
+  under the new rule; ticket 553 uses 1.020 s.
+- **R15-ST3 (judgement, Mysterious Name).** The test "uses the limits the
+  tab was measured for" (`fork-worker-silence.test.ts:726`) names a
+  floor as measured.
+- **R15-ST4 (judgement).** Tickets 553 and 555 use plan labels (C1, C8,
+  C16-C20, Y′, G, U) that resolve only in the gitignored `plan.md`.
+- **R15-ST5 (soft).** `map.md` had no line for 555.
+- **R15-ST6 (judgement, Middle Man).** `getProgressName(id)` only
+  returns `progressIdOf(id)`.
+- **R15-ST7 (judgement, Duplicated Code).** The `FREEZE_MS` comment
+  repeats the header's hidden-tab claim, and the generic monitor header
+  hard-codes the tab's bands.
+
+**Spec.** Every item of tickets 553 and 554, plan steps 1 to 10 and
+directives D-N1 to D-N5 have code or log evidence. The plan's C1 command
+over the 545 data gives `495 495 14 1385 866` and `280 280 0 200 590`;
+the red-run lines in the 553 close match `execution-report.md:49-54`;
+the D-N2 band appears in all three required places. No unrequested
+behaviour in the fork diff.
+
+- **R15-P1 (minor, partial).** Ticket 553's close condition 1 asked for
+  one desktop-build session; the close substituted code reading and said
+  so, but no open ticket held the missing measurement.
+- **R15-P2 (minor).** Same as R15-ST5: no `map.md` line for 555
+  (`decision-log.md`, row K4, hands it to this review).
+- **R15-P3 (informational).** Candidate U, a short engine sleep after
+  sending `PresimRunning: true`, is recorded only in closed ticket 553
+  as an option for the owner.
+- **R15-P4 (informational).** Same as R15-A3: `f7dea375` is a gate
+  record, outside 553 and 554, and is already stale.
+- **R15-P5 (minor).** The start-up comment says "ten times … (1.8 s),
+  plus 120 s", which is 138 s; the constant is 140 s. The round-up to
+  the next 10 s (`545-worker-silence-check/measurement.md:13`) is
+  missing.
+
+## Summary
+
+Nothing blocks a merge. Tickets 553 and 554 are done as planned, 107
+tests pass, and no ranking number can change. Two follow-ups are filed:
+ticket 556 holds one low-severity code path (a second sim on a hung
+worker extends its limit from 30 s to about 150 s) and seven comment or
+name fixes in the fork and one test; ticket 557 holds the measurements
+not yet made (pet, totem and melee specs, and the desktop build). Ticket
+553's close is corrected in this commit (R15-A2, R15-D4), ticket 555's
+reference to it is updated, and `map.md` now has lines for 555 to 557.
+For the owner: ticket 553 records an optional engine change (a short
+sleep after the warm-up message, R15-P3). `merge-to-dev` will re-run the
+layout gate, because the fork change edits a file the gate hashes. No
+`pending` row.
+
+## Disposition (round 15)
+
+| ID              | Axis              | Disposition | Ticket / note                                                                                                                                                            |
+| --------------- | ----------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R15-A1          | Adversarial       | defer       | `.scratch/carry-forward/issues/556-silence-check-round-15-code-and-comments.md`, item 1.                                                                                 |
+| R15-A2          | Adversarial       | defer       | Ticket 553's close and ticket 555 corrected in this commit; the fork comment is `.scratch/carry-forward/issues/556-silence-check-round-15-code-and-comments.md`, item 2. |
+| R15-A3, R15-P4  | Adversarial, Spec | wontfix     | Not a defect: `merge-to-dev` re-runs the layout gate when the hash differs, which is its design (same as R13-P3).                                                        |
+| R15-A4          | Adversarial       | wontfix     | Informational: the limit is stated in ticket 553's close, and the runner test checks the tab's wiring.                                                                   |
+| R15-D1          | Domain            | defer       | `.scratch/carry-forward/issues/556-silence-check-round-15-code-and-comments.md`, item 8; the check method is in ticket 557.                                              |
+| R15-D2          | Domain            | defer       | `.scratch/carry-forward/issues/557-silence-limits-unmeasured-specs-and-desktop.md`.                                                                                      |
+| R15-D3, R15-P1  | Domain, Spec      | defer       | `.scratch/carry-forward/issues/557-silence-limits-unmeasured-specs-and-desktop.md`.                                                                                      |
+| R15-D4          | Domain            | fixed       | This commit: ticket 553's "What G gives" gives the blog's figures and labels the Chromium `main` figures as unverified against the stable release.                       |
+| R15-ST1         | Standards         | defer       | `.scratch/carry-forward/issues/556-silence-check-round-15-code-and-comments.md`, item 5.                                                                                 |
+| R15-ST2         | Standards         | defer       | `.scratch/carry-forward/issues/556-silence-check-round-15-code-and-comments.md`, item 4.                                                                                 |
+| R15-ST3         | Standards         | defer       | `.scratch/carry-forward/issues/556-silence-check-round-15-code-and-comments.md`, item 6.                                                                                 |
+| R15-ST4         | Standards         | wontfix     | Each label in tickets 553 and 555 sits next to a plain description of what it names and the plan's path; rewriting a closed ticket's record changes no decision.         |
+| R15-ST5, R15-P2 | Standards, Spec   | fixed       | This commit: `map.md` lines for 555, 556 and 557. The 553 and 554 lines are not marked closed, matching the line for 545, closed in Round 14.                            |
+| R15-ST6         | Standards         | wontfix     | `getProgressName` is upstream's method (`git log -S"private getProgressName"` finds `d7d5425df` "Convert to jsx"); keeping it keeps the fork diff small.                 |
+| R15-ST7         | Standards         | defer       | `.scratch/carry-forward/issues/556-silence-check-round-15-code-and-comments.md`, item 7.                                                                                 |
+| R15-P3          | Spec              | wontfix     | An option, not a defect; it is recorded in ticket 553 and named in this round's Summary for the owner.                                                                   |
+| R15-P5          | Spec              | defer       | `.scratch/carry-forward/issues/556-silence-check-round-15-code-and-comments.md`, item 3.                                                                                 |

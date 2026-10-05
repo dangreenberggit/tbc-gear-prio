@@ -161,13 +161,15 @@ What G gives:
 
 - A dead worker in a hidden tab is still failed at about its limit plus
   1 s. Chrome aligns a single timer set from a message handler to 1 s
-  wake-ups. Its once-a-minute throttling applies only to timer chains
-  nested deeper than level 6, after the tab has been hidden 60 s or
-  5 min (plan C17:
-  https://developer.chrome.com/blog/timer-throttling-in-chrome-88;
-  Chromium `main` `dom_timer.cc:327-364`,
-  `frame_scheduler_impl.cc:494-504`. That Chromium `main` matches the
-  stable release is an inference).
+  wake-ups. Its once-a-minute throttling applies only to timer chains.
+  The blog gives a chain count of 5 or more, after the page has been
+  hidden for more than 5 min
+  (https://developer.chrome.com/blog/timer-throttling-in-chrome-88).
+  The plan's other figures, chains nested deeper than level 6 and a
+  60 s hidden time, come from Chromium `main` `dom_timer.cc:327-364`
+  and `frame_scheduler_impl.cc:494-504` (plan C17). That Chromium `main`
+  matches the stable release is an inference, unverified (corrected in
+  pre-merge review round 15, R15-D4).
 - A frozen page also freezes its dedicated workers, so a worker's
   silence during a freeze says nothing about it (plan C16: Chromium
   `core/workers/dedicated_worker.cc:662-674`). For system sleep this is
@@ -179,12 +181,16 @@ What G costs:
   (30 s, or 120 s in a warm-up) after the freeze or sleep ends, not at
   once.
 - A frozen page or a sleeping machine can still fail a healthy worker
-  when the freeze or sleep ends 0-5 s after the timer's due time: the
-  timer is then not late enough to re-arm. At the tab's limits that is
-  a freeze of about 29-35 s in the main loop, or about 108-125 s in a
-  warm-up. In that band the outcome depends on whether the worker's
-  queued message runs before the overdue timer on resume, which Chrome
-  does not document (plan C18, hypothesis, untested;
+  when the freeze or sleep ends less than 5 s after the timer's due
+  time, or before it with less of the limit left than the worker needs
+  to send its next message: in both cases the timer is not late enough
+  to re-arm. At the tab's limits that is a freeze of about 29-35 s in
+  the main loop, or about 108-125 s in a warm-up (corrected in
+  pre-merge review round 15, R15-A2). When the freeze ends before the
+  due time, the healthy worker always fails. When it ends 0-5 s after,
+  the outcome depends on whether the worker's queued message runs
+  before the overdue timer on resume, which Chrome does not document
+  (plan C18, hypothesis, untested;
   https://developer.chrome.com/blog/page-lifecycle-api). `FREEZE_MS`
   stays at 5,000 ms: a lower value is untested against Chrome's 1 s
   hidden-tab alignment.

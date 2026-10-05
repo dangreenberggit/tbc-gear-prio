@@ -298,3 +298,6 @@ file contention, worker prompt. This file stays the chronological log.
 - 552 Spec options and consumables are not checked for the stale notice (ticket 539 close) 2026-10-04
 - 553 The tab's worker silence check can fail a healthy sim (pre-merge review round 14, R14-A1, R14-D1, R14-A2, R14-D2, R14-P3) 2026-10-05
 - 554 Ticket 545's silence check: tests miss the tab's wiring, and three comments are wrong (pre-merge review round 14, R14-A3, R14-P1 and others) 2026-10-05
+- 555 Chrome Energy Saver may freeze a hidden tab run after 5 min (Chrome 133+) (stage-gate 553-554 plan C19) 2026-10-05
+- 556 Silence check: a new request can extend a hung worker's limit, and five comments are wrong or unsourced (pre-merge review round 15, R15-A1, R15-A2, R15-D1 and others) 2026-10-05
+- 557 Silence-check limits are unmeasured for pet, totem and melee specs and on the desktop build (pre-merge review round 15, R15-D2, R15-D3, R15-P1) 2026-10-05

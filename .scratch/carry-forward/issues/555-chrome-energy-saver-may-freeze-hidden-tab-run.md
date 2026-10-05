@@ -30,9 +30,9 @@ freezing it (plan C19 marks the Memory Saver claim unverified).
 
 A run left in a hidden tab may take much longer than its sims need, and
 nothing tells the user why. Ticket 553's silence check re-arms after a
-freeze instead of failing the run, except in a narrow band (ticket 553,
-"Item 2", the 0-5 s band), so the check does not report a freeze
-either.
+freeze instead of failing the run, except in a narrow band of freeze
+lengths near the limit (ticket 553, "Item 2", "What G costs"), so the
+check does not report a freeze either.
 
 ## What would close this
 
