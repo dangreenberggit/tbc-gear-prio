@@ -417,6 +417,18 @@ class _DoCheckHarness:
         with open(sync_wowsims.LOCKFILE, "w", encoding="utf-8", newline="") as fh:
             json.dump(lock, fh, indent=2)
 
+    def write_sha_pin(self, pin, watched):
+        """Make the lock a sha pin at `pin` (lock["tag"] is the sha itself),
+        watching each ref in `watched`, a dict of ref name -> recorded commit."""
+        lock = sync_wowsims.load_lock()
+        lock["tag"] = pin
+        lock["commit"] = pin
+        lock["watchedRefs"] = {
+            name: {"commit": commit, "fetchedAt": "2026-01-01"}
+            for name, commit in watched.items()
+        }
+        self.write_lock(lock)
+
     def add_watched_ref(self, name="some/watched-ref", commit="c" * 40):
         lock = sync_wowsims.load_lock()
         lock["watchedRefs"] = {name: {"commit": commit, "fetchedAt": "2026-01-01"}}
@@ -607,12 +619,8 @@ def check_sha_pin_compares_against_its_watched_ref() -> list[str]:
     """
     problems = []
     with _DoCheckHarness() as h:
-        lock = sync_wowsims.load_lock()
         # A sha pin whose watched ref has moved past it.
-        lock["tag"] = h.PIN_SHA
-        lock["commit"] = h.PIN_SHA
-        lock["watchedRefs"] = {"master": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
-        h.write_lock(lock)
+        h.write_sha_pin(h.PIN_SHA, {"master": h.PIN_SHA})
         # ref_sha returns UPSTREAM_SHA, so the watched ref reads as moved.
         rc, body = h.run()
 
@@ -655,13 +663,9 @@ def check_sha_pin_in_sync_with_watched_ref_is_clean() -> list[str]:
     """
     problems = []
     with _DoCheckHarness() as h:
-        lock = sync_wowsims.load_lock()
         # Pin and watched ref agree on UPSTREAM_SHA; latest_tag() reports a
         # different commit, which must not matter.
-        lock["tag"] = h.UPSTREAM_SHA
-        lock["commit"] = h.UPSTREAM_SHA
-        lock["watchedRefs"] = {"master": {"commit": h.UPSTREAM_SHA, "fetchedAt": "2026-01-01"}}
-        h.write_lock(lock)
+        h.write_sha_pin(h.UPSTREAM_SHA, {"master": h.UPSTREAM_SHA})
         rc, body = h.run()
 
     if rc != 0:
@@ -693,11 +697,7 @@ def check_sha_pin_tier_change_is_read_from_the_watched_ref() -> list[str]:
     with _DoCheckHarness() as h:
         h.phase_by_sha[h.UPSTREAM_SHA] = 3
         h.phase_by_sha[h.TAG_SHA] = 2
-        lock = sync_wowsims.load_lock()
-        lock["tag"] = h.PIN_SHA
-        lock["commit"] = h.PIN_SHA
-        lock["watchedRefs"] = {"master": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
-        h.write_lock(lock)
+        h.write_sha_pin(h.PIN_SHA, {"master": h.PIN_SHA})
         rc, body = h.run()
 
     if rc != 1:
@@ -726,11 +726,7 @@ def check_sha_pin_survives_an_unresolvable_watched_ref() -> list[str]:
         raise SystemExit("HTTP 422")
 
     with _DoCheckHarness() as h:
-        lock = sync_wowsims.load_lock()
-        lock["tag"] = h.PIN_SHA
-        lock["commit"] = h.PIN_SHA
-        lock["watchedRefs"] = {"dead/ref": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
-        h.write_lock(lock)
+        h.write_sha_pin(h.PIN_SHA, {"dead/ref": h.PIN_SHA})
         orig = sync_wowsims.ref_sha
         sync_wowsims.ref_sha = boom
         try:
@@ -771,13 +767,8 @@ def check_phase_file_404_is_drift_not_a_crash() -> list[str]:
     problems = []
     for label, sha_pin in (("sha pin", True), ("tag pin", False)):
         with _DoCheckHarness() as h:
-            lock = sync_wowsims.load_lock()
             if sha_pin:
-                lock["tag"] = h.PIN_SHA
-                lock["commit"] = h.PIN_SHA
-                lock["watchedRefs"] = {
-                    "master": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
-            h.write_lock(lock)
+                h.write_sha_pin(h.PIN_SHA, {"master": h.PIN_SHA})
             sync_wowsims.fetch = _not_found
             try:
                 rc, body = h.run()
@@ -828,11 +819,7 @@ def check_phase_is_read_from_the_new_path_past_the_ui_move() -> list[str]:
         return _not_found(sha, path)
 
     with _DoCheckHarness() as h:
-        lock = sync_wowsims.load_lock()
-        lock["tag"] = h.PIN_SHA
-        lock["commit"] = h.PIN_SHA
-        lock["watchedRefs"] = {"master": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
-        h.write_lock(lock)
+        h.write_sha_pin(h.PIN_SHA, {"master": h.PIN_SHA})
         sync_wowsims.fetch = moved
         try:
             rc, body = h.run()
@@ -858,11 +845,7 @@ def check_phase_falls_back_to_the_old_path_before_the_ui_move() -> list[str]:
         return _not_found(sha, path)
 
     with _DoCheckHarness() as h:
-        lock = sync_wowsims.load_lock()
-        lock["tag"] = h.PIN_SHA
-        lock["commit"] = h.PIN_SHA
-        lock["watchedRefs"] = {"master": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
-        h.write_lock(lock)
+        h.write_sha_pin(h.PIN_SHA, {"master": h.PIN_SHA})
         sync_wowsims.fetch = not_moved_yet
         try:
             rc, body = h.run()
@@ -935,14 +918,7 @@ def check_sha_pin_refuses_to_guess_between_two_watched_refs() -> list[str]:
     """
     problems = []
     with _DoCheckHarness() as h:
-        lock = sync_wowsims.load_lock()
-        lock["commit"] = h.PIN_SHA
-        lock["tag"] = h.PIN_SHA
-        lock["watchedRefs"] = {
-            "master": {"commit": h.UPSTREAM_SHA, "fetchedAt": "2026-01-01"},
-            "other/ref": {"commit": h.UPSTREAM_SHA, "fetchedAt": "2026-01-01"},
-        }
-        h.write_lock(lock)
+        h.write_sha_pin(h.PIN_SHA, {"master": h.UPSTREAM_SHA, "other/ref": h.UPSTREAM_SHA})
         rc, body = h.run()
 
     if rc == 0:
