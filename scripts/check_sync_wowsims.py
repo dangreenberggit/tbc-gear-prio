@@ -809,17 +809,22 @@ def check_phase_file_404_is_drift_not_a_crash() -> list[str]:
     return problems
 
 
-def check_phase_is_read_from_the_new_path_when_the_old_one_404s() -> list[str]:
+def check_phase_is_read_from_the_new_path_past_the_ui_move() -> list[str]:
     """Since upstream c86fd86f5 / 7b539641 (2026-09-16) the phase file lives at
     ui/sim/constants/other.ts, and ui/core/constants/other.ts is gone. A tip
     past that point must still yield its tier, or --check can never report the
     tier change it exists for.
+
+    The fixture is the real declaration at upstream 42c75dc9
+    (ui/sim/constants/other.ts:12), which has no `: Phase` annotation.
+    read_phase_at tries the new path first, so the old path is never fetched
+    here; check_phase_falls_back_to_the_old_path_before_the_ui_move covers it.
     """
     problems = []
 
     def moved(sha, path):
         if path == "ui/sim/constants/other.ts":
-            return b"export const CURRENT_PHASE: Phase = Phase.Phase3;"
+            return b"export const CURRENT_PHASE = Phase.Phase3;"
         return _not_found(sha, path)
 
     with _DoCheckHarness() as h:
@@ -837,6 +842,36 @@ def check_phase_is_read_from_the_new_path_when_the_old_one_404s() -> list[str]:
     if "master CURRENT_PHASE = 3" not in body or "CONTENT TIER CHANGED 2 -> 3" not in body:
         problems.append(
             "the tier must be read from ui/sim/constants/other.ts when the old path "
+            f"404s (ticket 551): rc {rc}, {body.strip()!r}")
+    return problems
+
+
+def check_phase_falls_back_to_the_old_path_before_the_ui_move() -> list[str]:
+    """A tip from before c86fd86f5 has no ui/sim/constants/other.ts, so the new
+    path 404s and read_phase_at must fall back to ui/core/constants/other.ts.
+    """
+    problems = []
+
+    def not_moved_yet(sha, path):
+        if path == "ui/core/constants/other.ts":
+            return b"export const CURRENT_PHASE: Phase = Phase.Phase3;"
+        return _not_found(sha, path)
+
+    with _DoCheckHarness() as h:
+        lock = sync_wowsims.load_lock()
+        lock["tag"] = h.PIN_SHA
+        lock["commit"] = h.PIN_SHA
+        lock["watchedRefs"] = {"master": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
+        h.write_lock(lock)
+        sync_wowsims.fetch = not_moved_yet
+        try:
+            rc, body = h.run()
+        except (Exception, SystemExit) as e:
+            return [f"do_check raised {type(e).__name__}({e})"]
+
+    if "master CURRENT_PHASE = 3" not in body or "CONTENT TIER CHANGED 2 -> 3" not in body:
+        problems.append(
+            "the tier must be read from ui/core/constants/other.ts when the new path "
             f"404s (ticket 551): rc {rc}, {body.strip()!r}")
     return problems
 
@@ -997,7 +1032,8 @@ CHECKS = (
     check_sha_pin_survives_an_unresolvable_watched_ref,
     # The phase file moved upstream and its old path 404s (ticket 551).
     check_phase_file_404_is_drift_not_a_crash,
-    check_phase_is_read_from_the_new_path_when_the_old_one_404s,
+    check_phase_is_read_from_the_new_path_past_the_ui_move,
+    check_phase_falls_back_to_the_old_path_before_the_ui_move,
     check_parse_current_phase_accepts_the_unannotated_form,
     check_unwatch_ref_removes_the_key_and_refuses_an_absent_one,
     # The single-watched-ref invariant, enforced at both ends (ticket 392).
