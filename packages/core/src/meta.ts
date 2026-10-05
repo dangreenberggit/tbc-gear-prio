@@ -128,13 +128,14 @@ export function gemColorMatchesSocket(
  * Whether an item's socket bonus is active, given its socket colours and the
  * gems sitting in them.
  *
- * The bonus is gated on the *coloured* sockets — an unfilled meta socket does
- * not forfeit it (issue #1 step 2; upstream
- * `sim/core/reforge_optimizer/gear.go:socketBonusActive` skips non-coloured
- * sockets, as of `wowsims/tbc-new` @ v0.0.101 `8aa378b3`). Exception: an item
- * whose sockets are meta-only (11 exist in db.json, e.g. 28559) has nothing
- * else to gate on, and an empty socket grants no bonus in-game — skipping it
- * unconditionally would credit the bonus vacuously (round-4 review, D1).
+ * The rule is the sim's (`sim/core/database.go:632-644`
+ * `ItemEquipmentGemAndEnchantStats`, as of fork `7d4d69d6a`): every socket,
+ * meta included, must hold a gem whose colour matches it. An empty socket has
+ * colour `Unknown`, which matches nothing, so an empty meta socket withholds
+ * the bonus. A meta gem in a meta socket matches by colour equality, so the
+ * meta socket needs no special case. ADR-0025 Decision 3 had skipped meta
+ * sockets, following upstream's reforge-optimizer predicate rather than the
+ * sim's stat code; ticket 541 supersedes it.
  *
  * One definition because there were two: `socketsMatch` (meta-repair.ts) and
  * `allSocketsMatched` (candidate-gems.ts) implemented this rule separately,
@@ -152,20 +153,13 @@ export function socketBonusActive(
   if (sockets.length === 0) return true;
   if (gemIds.length < sockets.length) return false;
 
-  let sawColoured = false;
-  let metaEmpty = false;
   for (let i = 0; i < sockets.length; i++) {
-    if (sockets[i] === GemColor.GemColorMeta) {
-      if (!gemIds[i]) metaEmpty = true;
-      continue;
-    }
-    sawColoured = true;
     const gem = getGem(gemIds[i] ?? 0);
     if (!gem) return false;
     if (!gemColorMatchesSocket(gem.colour, sockets[i]!)) return false;
   }
 
-  return sawColoured || !metaEmpty;
+  return true;
 }
 
 export function gemColorCounts(gemIds: readonly number[]): GemColorCounts {

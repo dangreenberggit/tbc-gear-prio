@@ -288,3 +288,16 @@ file contention, worker prompt. This file stays the chronological log.
 - 539 Changing race, rotation, spec options or bonus stats does not mark the result stale, hypothesis (pre-merge review round 11, A2) 2026-10-03
 - 540 Some weapon and talent procs keep the old proc chance after an item swap (pre-merge review round 11, A4/D5) 2026-10-03
 - 541 The socket bonus counts as active when the meta socket is empty (pre-merge review round 11, D3) 2026-10-03
+- 545 The Upgrades tab cannot recover from a sim worker that never answers (owner ruling on Q-538-timeout) 2026-10-04
+- 546 Unbridled Wrath and Seal of Vengeance keep the old proc chance after a weapon swap (pre-merge review round 12, A1) 2026-10-04
+- 547 Set bonuses with pieces in feet, waist, wrist or finger are not re-checked when only those slots are swapped (ticket 540 close; pre-merge review round 12, P4) 2026-10-04
+- 548 Elune's Touch keeps the old proc chance after a weapon swap (pre-merge review round 13, R13-D2) 2026-10-04
+- 549 The fork's full Go suite always fails on TestProtoVersioning (tickets 540 and 546 full-suite runs) 2026-10-04
+- 550 gofmt over the fork's sim/ is never clean: _heals.go does not parse (ticket 546 gofmt check) 2026-10-04
+- 551 The upstream drift check stops on an HTTP 404 and never reports drift (feat/round-11-followups verify logs) 2026-10-04
+- 552 Spec options and consumables are not checked for the stale notice (ticket 539 close) 2026-10-04
+- 553 The tab's worker silence check can fail a healthy sim (pre-merge review round 14, R14-A1, R14-D1, R14-A2, R14-D2, R14-P3) 2026-10-05
+- 554 Ticket 545's silence check: tests miss the tab's wiring, and three comments are wrong (pre-merge review round 14, R14-A3, R14-P1 and others) 2026-10-05
+- 555 Chrome Energy Saver may freeze a hidden tab run after 5 min (Chrome 133+) (stage-gate 553-554 plan C19) 2026-10-05
+- 556 Silence check: a new request can extend a hung worker's limit, and five comments are wrong or unsourced (pre-merge review round 15, R15-A1, R15-A2, R15-D1 and others) 2026-10-05
+- 557 Silence-check limits are unmeasured for pet, totem and melee specs and on the desktop build (pre-merge review round 15, R15-D2, R15-D3, R15-P1) 2026-10-05

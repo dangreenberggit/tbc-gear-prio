@@ -399,6 +399,17 @@ async function retInputs() {
   return { e, fx, equipment, gems };
 }
 
+describe.skipIf(!forkPresent)("socket bonus follows the sim (541)", () => {
+  // Gladiator's Plate Helm's sockets: [Meta, Yellow] (GemColor 1 and 4).
+  const META_YELLOW = [1, 4];
+
+  it("541-F: the fork's socketBonusActive withholds the bonus for an empty meta socket beside a matched yellow socket", async () => {
+    const { meta } = await engine();
+    expect(meta.socketBonusActive(META_YELLOW, [0, 23113])).toBe(false);
+    expect(meta.socketBonusActive(META_YELLOW, [32409, 23113])).toBe(true);
+  });
+});
+
 describe.skipIf(!forkPresent)("gear hit matches the sim (535)", () => {
   it("535-L0: the ret-p3-p2 baseline sums to the sim's 52 gear hit rating, head enchant included", async () => {
     const { e, equipment } = await retInputs();
@@ -1488,6 +1499,44 @@ function expectOwnLayouts(requests: readonly RaidSimRequest[]) {
     multisetMinus(gemMultiset(kept[0]!), gemMultiset(setLess[0]!))
   ).toEqual([INSCRIBED]);
 }
+
+describe.skipIf(!forkPresent)("Stop ends a stats read (538)", () => {
+  it("538-H: a Stop during a never-answering stats read returns a PartialRanking", async () => {
+    // The abort fires inside the read, before it returns its promise, so a
+    // race that attached its listener after calling the read would miss it.
+    const store = await newStore();
+    const controller = new AbortController();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    let stopped;
+    try {
+      stopped = await runRet({
+        pool: S_POOL,
+        store,
+        controller,
+        computeStats: () => {
+          controller.abort();
+          return new Promise<StatsObservation>(() => {});
+        },
+      });
+      const upgradesWarnings = warn.mock.calls.filter((args) =>
+        String(args[0]).startsWith("[upgrades]")
+      );
+      expect(upgradesWarnings).toHaveLength(0);
+    } finally {
+      warn.mockRestore();
+    }
+    expect(stopped.ranking.complete).toBe(false);
+    // No ranking was cached: a second run on the same store reads the hit
+    // again instead of returning a stored ranking.
+    const again = await runRet({
+      pool: S_POOL,
+      store,
+      computeStats: baselineReadOnce(),
+    });
+    expect(again.statsRequests).toHaveLength(1);
+    expect(again.ranking.complete).toBe(true);
+  });
+});
 
 describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
   it("535-V1: the set-kept version drops the dead Rigid; the set-less version keeps one", async () => {

@@ -64,17 +64,21 @@ describe("epScore", () => {
 });
 
 describe("socketsMatch", () => {
-  // Gladiator's Plate Helm (24545): sockets [meta, yellow]. The game only
-  // requires the coloured sockets to match for the socket bonus — an
-  // unfilled meta socket does not forfeit it (upstream gear.go
-  // socketBonusActive skips non-coloured sockets the same way).
-  it("is satisfied by a matching yellow socket even with the meta socket empty", () => {
-    expect(socketsMatch(24545, [0, 23113])).toBe(true);
+  // Gladiator's Plate Helm (24545): sockets [meta, yellow]. The sim pays the
+  // bonus only when every socket holds an intersecting gem, and an empty
+  // socket intersects nothing, meta included (fork
+  // sim/core/database.go:632-644; ticket 541).
+  it("is not satisfied by a matching yellow socket while the meta socket is empty", () => {
+    expect(socketsMatch(24545, [0, 23113])).toBe(false);
+  });
+
+  it("is satisfied once a meta gem sits beside the matching yellow socket", () => {
+    expect(socketsMatch(24545, [32409, 23113])).toBe(true);
   });
 
   it("still fails when the coloured socket itself does not match", () => {
     const red = 24027; // Bold Living Ruby, red
-    expect(socketsMatch(24545, [0, red])).toBe(false);
+    expect(socketsMatch(24545, [32409, red])).toBe(false);
   });
 
   // Exorcist's Plate Helm (28559): sockets [meta] only. With no coloured
