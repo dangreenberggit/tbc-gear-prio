@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import tempfile
 import types
@@ -787,10 +788,24 @@ def check_phase_file_404_is_drift_not_a_crash() -> list[str]:
                 continue
         if rc != 1:
             problems.append(f"{label}: a 404 on the phase file is drift (rc 1), got {rc}")
-        if warn_upstream_drift.DRIFT_TOKEN not in body or "CURRENT_PHASE" not in body:
+        # rc 1 and a DRIFT token alone prove nothing: the stale pin already
+        # prints "pin is behind" / "new release available" as DRIFT, and the
+        # success line "<ref> CURRENT_PHASE = N" also names CURRENT_PHASE. A
+        # read_phase_at that swallowed the 404 and returned a default passed
+        # both (pre-merge review A1).
+        unread = [
+            ln for ln in body.splitlines()
+            if warn_upstream_drift.DRIFT_TOKEN in ln
+            and "could not read" in ln and "CURRENT_PHASE" in ln
+        ]
+        if not unread:
             problems.append(
                 f"{label}: --check must print a DRIFT line saying CURRENT_PHASE could "
                 f"not be read: {body.strip()!r}")
+        if re.search(r"CURRENT_PHASE = \d", body):
+            problems.append(
+                f"{label}: a phase file that 404s has no tier to print, but --check "
+                f"printed one: {body.strip()!r}")
     return problems
 
 
