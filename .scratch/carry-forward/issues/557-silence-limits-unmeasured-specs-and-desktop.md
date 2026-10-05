@@ -81,16 +81,19 @@ run raised it to 44.83 s (see "Closed" below).
   regime 4.483 s. The 4.483 s run silence was 6.7 times under the 30 s
   run limit, not ten times. In that window no worker of either pool
   sent anything; the cause is unknown (557-desktop.md).
-- **`runMs` 30 s → 44.83 s.** The session applied the ticket 545 run
-  rule to the desktop number, as gate B applied the presim rule
-  (`.scratch/stage-gate/555-557-silence-followups/decision-log.md`,
-  row Q-557-desktop-run-limit). The rule is `10 × M_run`, floor 30 s,
-  cap 90 s, with no rounding step
-  (`.scratch/stage-gate/545-worker-silence-check/measurement.md:14`):
-  10 × 4.483 s = 44.83 s. The measurement agent's 50 s rounded up to
-  10 s, a step that only the start-up and presim rules have. The
-  main-loop freeze band moves from about 29-35 s to about 40-50 s
-  (44.83 − 4.483 to 44.83 + 5).
+- **`runMs` 30 s → 44.83 s.** Two rows of
+  `.scratch/stage-gate/555-557-silence-followups/decision-log.md` set
+  this value. Row `Q-557-desktop-run-limit` is the decision: the session
+  applies the ticket 545 run rule to the desktop number, as gate B
+  applied the presim rule. That row computed 10 × 4.483 → 50 s, and the
+  measurement agent's Verdict in `557-desktop.md` also said 50 s; both
+  rounded up to 10 s. Row `runMs-rounding` sets the value: the rule text
+  governs. The rule is `10 × M_run`, floor 30 s, cap 90 s, with no
+  rounding step
+  (`.scratch/stage-gate/545-worker-silence-check/measurement.md:14`),
+  so 10 × 4.483 s = 44.83 s. Only the start-up and presim rules round
+  up to 10 s. The main-loop freeze band moves from about 29-35 s to
+  about 40-50 s (44.83 − 4.483 to 44.83 + 5).
 - **Commits.** Fork `cb561067719abb9cd1f267ccb99425fc2a7fc007` on
   `feat/upgrades-tab` (not pushed; the remote names `4cdc02b8a`):
   `runMs: 44_830`, the run rule and arithmetic, the desktop spec line
