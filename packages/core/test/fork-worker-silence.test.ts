@@ -142,6 +142,18 @@ describe.skipIf(!forkPresent)("SilenceMonitor", () => {
     expect(expiries).toEqual([["run", 1000]]);
   });
 
+  it("a regime change while a request waits keeps the time the timer was armed", async () => {
+    const { monitor, expiries } = await monitorWith({ value: true });
+    monitor.setRegime("run");
+    monitor.requestWaiting();
+    await vi.advanceTimersByTimeAsync(999);
+    monitor.setRegime("presim");
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(expiries).toEqual([]);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(expiries).toEqual([["presim", 5000]]);
+  });
+
   it("stays silent after dispose", async () => {
     const { monitor, expiries } = await monitorWith({ value: true });
     monitor.requestWaiting();
@@ -153,7 +165,9 @@ describe.skipIf(!forkPresent)("SilenceMonitor", () => {
   /**
    * Timers the test fires by hand. Fake timers cannot show a late timer:
    * `vi.setSystemTime` moves every pending timer's due time along with the
-   * clock, so a frozen page is modelled as a clock jump and then a fire.
+   * clock (fake-timers 14.0.0 bundled in vitest 3.2.7: `setSystemTime` adds
+   * the difference to each timer's `callAt`), so a frozen page is modelled as
+   * a clock jump and then a fire.
    */
   function manualTimers() {
     let current: { token: object; cb: () => void; ms: number } | undefined;
@@ -618,6 +632,43 @@ describe.skipIf(!forkPresent)("WorkerPool silence option", () => {
     expect(FakeWorker.instances).toHaveLength(2);
   });
 
+  // Ticket 556. The fake answers nothing to the second sim, as a worker whose
+  // event loop is blocked would. A worker whose loop still runs answers the
+  // second sim's id, and that message re-arms a full limit by design (ticket
+  // 545). Sim A enters its main loop and hangs; B is posted 1 ms before A's
+  // run deadline.
+  it("a second sim posted to a hung worker that answers nothing is judged from the worker's last message", async () => {
+    const answerFirst = wasmScript([
+      [100, { presimRunning: true }],
+      [200, { presimRunning: false }],
+      [300, { completedIterations: 10 }],
+    ]);
+    let requests = 0;
+    FakeWorker.script = {
+      ready: true,
+      onRequest: (worker, message) => {
+        if (message.msg !== "raidSimAsync") return;
+        if (requests++ === 0) answerFirst.onRequest?.(worker, message);
+      },
+    };
+    const pool = new WorkerPool(1, { silence: POOL_LIMITS });
+    await vi.advanceTimersByTimeAsync(0);
+
+    const a = track(pool.raidSimAsync(raidRequest(), () => {}, SIGNALS));
+    await vi.advanceTimersByTimeAsync(1299);
+    const b = track(pool.raidSimAsync(raidRequest(), () => {}, SIGNALS));
+    await vi.advanceTimersByTimeAsync(0);
+    await vi.advanceTimersByTimeAsync(4000);
+    expect(a.state).toBe("pending");
+    expect(b.state).toBe("pending");
+    await vi.advanceTimersByTimeAsync(1);
+    expect(a.state).toBe("rejected");
+    expect(b.state).toBe("rejected");
+    expect(String(a.error)).toMatch(/sent nothing for 5 s/);
+    expect(String(b.error)).toMatch(/sent nothing for 5 s/);
+    expect(FakeWorker.instances).toHaveLength(2);
+  });
+
   it("an abort during a silence neither stops the check nor hangs", async () => {
     FakeWorker.script = wasmScript([[100, { completedIterations: 10 }]]);
     const pool = new WorkerPool(1, { silence: POOL_LIMITS });
@@ -723,11 +774,11 @@ describe.skipIf(!forkPresent)("WorkerPoolSimRunner silence opt-in", () => {
     expect(FakeWorker.instances).toHaveLength(2);
   });
 
-  it("uses the limits the tab was measured for", () => {
+  it("pins the tab's start-up, run and presim limits", () => {
     expect(runnerModule.WORKER_SILENCE_LIMITS).toEqual({
       startMs: 140_000,
-      runMs: 30_000,
-      presimMs: 120_000,
+      runMs: 44_830,
+      presimMs: 220_000,
     });
   });
 });

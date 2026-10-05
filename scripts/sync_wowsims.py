@@ -52,6 +52,7 @@ import os
 import re
 import subprocess
 import sys
+import urllib.error
 
 from pinned_fetch import digest as sha256_of
 from pinned_fetch import fetch as pinned_fetch
@@ -288,18 +289,45 @@ def fetch(sha, path):
     return pinned_fetch(REPO, sha, path)
 
 
+# Upstream ported the UI to ui/sim/ in c86fd86f5 and deleted ui/core/ in
+# 7b539641 (both 2026-09-16), so the phase file's path depends on the commit.
+# TRACKED keeps the old path because --restore and --update read the pin, which
+# predates the move; --check reads newer tips and needs both (ticket 551).
+PHASE_FILE_AFTER_UI_PORT = "ui/sim/constants/other.ts"
+
+
+def read_phase_at(sha):
+    """CURRENT_PHASE at an upstream commit, for --check.
+
+    pinned_fetch raises HTTPError, not SystemExit, and do_check reports only
+    SystemExit as drift -- so a missing file ended --check with a traceback
+    (ticket 551). Convert it here, naming every path tried.
+    """
+    tried = []
+    for path in (PHASE_FILE_AFTER_UI_PORT, TRACKED["constants_other.ts"]):
+        try:
+            blob = fetch(sha, path)
+        except urllib.error.HTTPError as e:
+            tried.append(f"{path} (HTTP {e.code})")
+            continue
+        return parse_current_phase(blob.decode("utf-8"))
+    raise SystemExit(f"no phase file at {sha[:12]}; tried {', '.join(tried)}")
+
+
 def parse_current_phase(ts_source):
     """CURRENT_PHASE is written as `Phase.PhaseN`, not as a bare number, so resolve
     through the enum. Fail loudly rather than guessing -- a wrong default here
     silently changes every ranking's candidate pool and gem palette."""
-    m = re.search(r"CURRENT_PHASE\s*:\s*Phase\s*=\s*Phase\.Phase(\d)", ts_source)
+    # The `: Phase` annotation is optional: ui/sim/constants/other.ts dropped it.
+    prefix = r"CURRENT_PHASE\s*(?::\s*Phase\s*)?=\s*"
+    m = re.search(prefix + r"Phase\.Phase(\d)", ts_source)
     if m:
         return int(m.group(1))
-    m = re.search(r"CURRENT_PHASE\s*:\s*Phase\s*=\s*(\d)", ts_source)
+    m = re.search(prefix + r"(\d)", ts_source)
     if m:
         return int(m.group(1))
     raise SystemExit(
-        "could not parse CURRENT_PHASE out of ui/core/constants/other.ts.\n"
+        "could not parse CURRENT_PHASE out of the upstream constants/other.ts.\n"
         "Upstream changed the declaration. Do NOT fall back to a hardcoded default; "
         "read the file and fix the parser."
     )
@@ -620,8 +648,7 @@ def do_check():
                     drift.append(
                         f"pin is behind {ref}: {lock['commit'][:12]} -> {tip[:12]}")
                     try:
-                        upstream_phase = parse_current_phase(
-                            fetch(tip, TRACKED["constants_other.ts"]).decode("utf-8"))
+                        upstream_phase = read_phase_at(tip)
                         print(f"  {ref} CURRENT_PHASE = {upstream_phase}")
                         if upstream_phase != lock["currentPhase"]:
                             drift.append(
@@ -633,8 +660,7 @@ def do_check():
     elif lock["commit"] != sha:
         drift.append(f"new release available: {lock['tag']} -> {tag}")
         try:
-            upstream_phase = parse_current_phase(
-                fetch(sha, TRACKED["constants_other.ts"]).decode("utf-8"))
+            upstream_phase = read_phase_at(sha)
             print(f"  upstream CURRENT_PHASE = {upstream_phase}")
             if upstream_phase != lock["currentPhase"]:
                 drift.append(

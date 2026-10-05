@@ -77,6 +77,19 @@ vendor/
 !.scratch/stage-gate/bulk-finalist-cost/
 !.scratch/stage-gate/411-desktop-bulk-wallclock/
 !.scratch/stage-gate/rename-misleading-sim-runner/
+# Single measurement files that the fork's WORKER_SILENCE_LIMITS comment, the
+# tickets 545-557 closes and the fork lock `_comment` cite. The rest of each
+# directory stays ignored.
+!.scratch/stage-gate/545-worker-silence-check/
+.scratch/stage-gate/545-worker-silence-check/*
+!.scratch/stage-gate/545-worker-silence-check/measurement.md
+!.scratch/stage-gate/553-554-silence-followups/
+.scratch/stage-gate/553-554-silence-followups/*
+!.scratch/stage-gate/553-554-silence-followups/probe.md
+!.scratch/stage-gate/555-557-silence-followups/
+.scratch/stage-gate/555-557-silence-followups/*
+!.scratch/stage-gate/555-557-silence-followups/557-page-sims.md
+!.scratch/stage-gate/555-557-silence-followups/557-desktop.md
 # Visual-review PNG clips: regenerable from the recorded fork sha (index.json)
 # and present only where the fork clone is, so they are never committed even
 # when a stage directory above is allowlisted -- the handoff's evidence keys and

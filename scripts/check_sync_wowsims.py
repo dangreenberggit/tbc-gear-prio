@@ -16,9 +16,11 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import sys
 import tempfile
 import types
+import urllib.error
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -415,6 +417,18 @@ class _DoCheckHarness:
         with open(sync_wowsims.LOCKFILE, "w", encoding="utf-8", newline="") as fh:
             json.dump(lock, fh, indent=2)
 
+    def write_sha_pin(self, pin, watched):
+        """Make the lock a sha pin at `pin` (lock["tag"] is the sha itself),
+        watching each ref in `watched`, a dict of ref name -> recorded commit."""
+        lock = sync_wowsims.load_lock()
+        lock["tag"] = pin
+        lock["commit"] = pin
+        lock["watchedRefs"] = {
+            name: {"commit": commit, "fetchedAt": "2026-01-01"}
+            for name, commit in watched.items()
+        }
+        self.write_lock(lock)
+
     def add_watched_ref(self, name="some/watched-ref", commit="c" * 40):
         lock = sync_wowsims.load_lock()
         lock["watchedRefs"] = {name: {"commit": commit, "fetchedAt": "2026-01-01"}}
@@ -605,12 +619,8 @@ def check_sha_pin_compares_against_its_watched_ref() -> list[str]:
     """
     problems = []
     with _DoCheckHarness() as h:
-        lock = sync_wowsims.load_lock()
         # A sha pin whose watched ref has moved past it.
-        lock["tag"] = h.PIN_SHA
-        lock["commit"] = h.PIN_SHA
-        lock["watchedRefs"] = {"master": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
-        h.write_lock(lock)
+        h.write_sha_pin(h.PIN_SHA, {"master": h.PIN_SHA})
         # ref_sha returns UPSTREAM_SHA, so the watched ref reads as moved.
         rc, body = h.run()
 
@@ -653,13 +663,9 @@ def check_sha_pin_in_sync_with_watched_ref_is_clean() -> list[str]:
     """
     problems = []
     with _DoCheckHarness() as h:
-        lock = sync_wowsims.load_lock()
         # Pin and watched ref agree on UPSTREAM_SHA; latest_tag() reports a
         # different commit, which must not matter.
-        lock["tag"] = h.UPSTREAM_SHA
-        lock["commit"] = h.UPSTREAM_SHA
-        lock["watchedRefs"] = {"master": {"commit": h.UPSTREAM_SHA, "fetchedAt": "2026-01-01"}}
-        h.write_lock(lock)
+        h.write_sha_pin(h.UPSTREAM_SHA, {"master": h.UPSTREAM_SHA})
         rc, body = h.run()
 
     if rc != 0:
@@ -691,11 +697,7 @@ def check_sha_pin_tier_change_is_read_from_the_watched_ref() -> list[str]:
     with _DoCheckHarness() as h:
         h.phase_by_sha[h.UPSTREAM_SHA] = 3
         h.phase_by_sha[h.TAG_SHA] = 2
-        lock = sync_wowsims.load_lock()
-        lock["tag"] = h.PIN_SHA
-        lock["commit"] = h.PIN_SHA
-        lock["watchedRefs"] = {"master": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
-        h.write_lock(lock)
+        h.write_sha_pin(h.PIN_SHA, {"master": h.PIN_SHA})
         rc, body = h.run()
 
     if rc != 1:
@@ -724,11 +726,7 @@ def check_sha_pin_survives_an_unresolvable_watched_ref() -> list[str]:
         raise SystemExit("HTTP 422")
 
     with _DoCheckHarness() as h:
-        lock = sync_wowsims.load_lock()
-        lock["tag"] = h.PIN_SHA
-        lock["commit"] = h.PIN_SHA
-        lock["watchedRefs"] = {"dead/ref": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
-        h.write_lock(lock)
+        h.write_sha_pin(h.PIN_SHA, {"dead/ref": h.PIN_SHA})
         orig = sync_wowsims.ref_sha
         sync_wowsims.ref_sha = boom
         try:
@@ -750,6 +748,136 @@ def check_sha_pin_survives_an_unresolvable_watched_ref() -> list[str]:
         problems.append(
             f"--check must say the ref could not be resolved: {body.strip()!r}"
         )
+    return problems
+
+
+def _not_found(sha, path):
+    raise urllib.error.HTTPError(
+        f"https://raw.githubusercontent.com/x/y/{sha}/{path}", 404, "Not Found", None, None
+    )
+
+
+def check_phase_file_404_is_drift_not_a_crash() -> list[str]:
+    """Upstream deleted ui/core/ in 7b539641 (2026-09-16), so fetching the phase
+    file at a newer tip returns HTTP 404. pinned_fetch raises HTTPError, which is
+    not SystemExit, and --check died with a traceback instead of reporting
+    (ticket 551). Both call sites -- the sha-pin branch and the release-tag
+    branch -- must turn it into a DRIFT line and exit 1.
+    """
+    problems = []
+    for label, sha_pin in (("sha pin", True), ("tag pin", False)):
+        with _DoCheckHarness() as h:
+            if sha_pin:
+                h.write_sha_pin(h.PIN_SHA, {"master": h.PIN_SHA})
+            sync_wowsims.fetch = _not_found
+            try:
+                rc, body = h.run()
+            except (Exception, SystemExit) as e:
+                problems.append(
+                    f"{label}: a 404 on the phase file must not escape do_check; "
+                    f"it raised {type(e).__name__}({e})")
+                continue
+        if rc != 1:
+            problems.append(f"{label}: a 404 on the phase file is drift (rc 1), got {rc}")
+        # rc 1 and a DRIFT token alone prove nothing: the stale pin already
+        # prints "pin is behind" / "new release available" as DRIFT, and the
+        # success line "<ref> CURRENT_PHASE = N" also names CURRENT_PHASE. A
+        # read_phase_at that swallowed the 404 and returned a default passed
+        # both (pre-merge review A1).
+        unread = [
+            ln for ln in body.splitlines()
+            if warn_upstream_drift.DRIFT_TOKEN in ln
+            and "could not read" in ln and "CURRENT_PHASE" in ln
+        ]
+        if not unread:
+            problems.append(
+                f"{label}: --check must print a DRIFT line saying CURRENT_PHASE could "
+                f"not be read: {body.strip()!r}")
+        if re.search(r"CURRENT_PHASE = \d", body):
+            problems.append(
+                f"{label}: a phase file that 404s has no tier to print, but --check "
+                f"printed one: {body.strip()!r}")
+    return problems
+
+
+def check_phase_is_read_from_the_new_path_past_the_ui_move() -> list[str]:
+    """Since upstream c86fd86f5 / 7b539641 (2026-09-16) the phase file lives at
+    ui/sim/constants/other.ts, and ui/core/constants/other.ts is gone. A tip
+    past that point must still yield its tier, or --check can never report the
+    tier change it exists for.
+
+    The fixture is the real declaration at upstream 42c75dc9
+    (ui/sim/constants/other.ts:12), which has no `: Phase` annotation.
+    read_phase_at tries the new path first, so the old path is never fetched
+    here; check_phase_falls_back_to_the_old_path_before_the_ui_move covers it.
+    """
+    problems = []
+
+    def moved(sha, path):
+        if path == "ui/sim/constants/other.ts":
+            return b"export const CURRENT_PHASE = Phase.Phase3;"
+        return _not_found(sha, path)
+
+    with _DoCheckHarness() as h:
+        h.write_sha_pin(h.PIN_SHA, {"master": h.PIN_SHA})
+        sync_wowsims.fetch = moved
+        try:
+            rc, body = h.run()
+        except (Exception, SystemExit) as e:
+            return [f"do_check raised {type(e).__name__}({e})"]
+
+    if "master CURRENT_PHASE = 3" not in body or "CONTENT TIER CHANGED 2 -> 3" not in body:
+        problems.append(
+            "the tier must be read from ui/sim/constants/other.ts when the old path "
+            f"404s (ticket 551): rc {rc}, {body.strip()!r}")
+    return problems
+
+
+def check_phase_falls_back_to_the_old_path_before_the_ui_move() -> list[str]:
+    """A tip from before c86fd86f5 has no ui/sim/constants/other.ts, so the new
+    path 404s and read_phase_at must fall back to ui/core/constants/other.ts.
+    """
+    problems = []
+
+    def not_moved_yet(sha, path):
+        if path == "ui/core/constants/other.ts":
+            return b"export const CURRENT_PHASE: Phase = Phase.Phase3;"
+        return _not_found(sha, path)
+
+    with _DoCheckHarness() as h:
+        h.write_sha_pin(h.PIN_SHA, {"master": h.PIN_SHA})
+        sync_wowsims.fetch = not_moved_yet
+        try:
+            rc, body = h.run()
+        except (Exception, SystemExit) as e:
+            return [f"do_check raised {type(e).__name__}({e})"]
+
+    if "master CURRENT_PHASE = 3" not in body or "CONTENT TIER CHANGED 2 -> 3" not in body:
+        problems.append(
+            "the tier must be read from ui/core/constants/other.ts when the new path "
+            f"404s (ticket 551): rc {rc}, {body.strip()!r}")
+    return problems
+
+
+def check_parse_current_phase_accepts_the_unannotated_form() -> list[str]:
+    """ui/sim/constants/other.ts at upstream 42c75dc9 declares
+    `export const CURRENT_PHASE = Phase.Phase3;` with no `: Phase` annotation,
+    unlike the old ui/core file the parser was written against (ticket 551).
+    """
+    problems = []
+    cases = {
+        "export const CURRENT_PHASE = Phase.Phase3;": 3,
+        "export const CURRENT_PHASE = 4;": 4,
+        "export const CURRENT_PHASE: Phase = Phase.Phase2;": 2,
+    }
+    for src, want in cases.items():
+        try:
+            got = sync_wowsims.parse_current_phase(src)
+        except SystemExit as e:
+            problems.append(f"parse_current_phase({src!r}) raised SystemExit({e})")
+            continue
+        if got != want:
+            problems.append(f"parse_current_phase({src!r}) = {got}, want {want}")
     return problems
 
 
@@ -790,14 +918,7 @@ def check_sha_pin_refuses_to_guess_between_two_watched_refs() -> list[str]:
     """
     problems = []
     with _DoCheckHarness() as h:
-        lock = sync_wowsims.load_lock()
-        lock["commit"] = h.PIN_SHA
-        lock["tag"] = h.PIN_SHA
-        lock["watchedRefs"] = {
-            "master": {"commit": h.UPSTREAM_SHA, "fetchedAt": "2026-01-01"},
-            "other/ref": {"commit": h.UPSTREAM_SHA, "fetchedAt": "2026-01-01"},
-        }
-        h.write_lock(lock)
+        h.write_sha_pin(h.PIN_SHA, {"master": h.UPSTREAM_SHA, "other/ref": h.UPSTREAM_SHA})
         rc, body = h.run()
 
     if rc == 0:
@@ -885,6 +1006,11 @@ CHECKS = (
     check_sha_pin_in_sync_with_watched_ref_is_clean,
     check_sha_pin_tier_change_is_read_from_the_watched_ref,
     check_sha_pin_survives_an_unresolvable_watched_ref,
+    # The phase file moved upstream and its old path 404s (ticket 551).
+    check_phase_file_404_is_drift_not_a_crash,
+    check_phase_is_read_from_the_new_path_past_the_ui_move,
+    check_phase_falls_back_to_the_old_path_before_the_ui_move,
+    check_parse_current_phase_accepts_the_unannotated_form,
     check_unwatch_ref_removes_the_key_and_refuses_an_absent_one,
     # The single-watched-ref invariant, enforced at both ends (ticket 392).
     check_sha_pin_refuses_to_guess_between_two_watched_refs,

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: pre-merge review round 15 on feat/round-11-followups, findings R15-A1, R15-A2, R15-P5, R15-ST1, R15-ST2, R15-ST3, R15-ST7 and R15-D1, 2026-10-05
 Blocks: none
@@ -78,3 +78,67 @@ main repo at `b40b9449`.
   "hypothesis, untested".
 - Fork commit, lock bump, `pnpm sim-implemented-effects:generate`,
   `pnpm verify` (AGENTS.md "The forked tab repo").
+
+## Closed 2026-10-05: reset removed, residual extension accepted by decision, items 2-8 fixed
+
+Fork `3b75509aaf45ff0ca58c7fed649efcd54ab4794e` on `feat/upgrades-tab`
+(parent `4cdc02b8a`), not pushed: "Re-base silence deadline; presim
+limit 220 s". Main commit `95be23a9` "Pin fork with re-based silence
+deadline (556)" moves `data/wowsims-fork.lock.json` to it, with
+`pushed: false`. Plan and reports are in
+`.scratch/stage-gate/555-557-silence-followups/` (gitignored).
+
+- **Item 1: closed by removing the reset and by a recorded decision,
+  not fixed.** The reset at a second post is removed: on a regime
+  change, `SilenceMonitor.setRegime` keeps the time the timer was armed
+  and applies the new limit from there (re-base). The presim-length
+  extension that remains, up to `presimMs - runMs` = 190 s after the
+  earlier request's run deadline, is accepted by session decision
+  (`decision-log.md` in the folder above, gate B row F1). In this
+  ticket's example the hung worker now fails at t0+220 s, not t0+30 s.
+  Any rule that is safe for a second sim's warm-up must allow `presimMs`
+  of silence after the first sim's last message, because that warm-up
+  posts nothing until it ends (C3 in `plan.md`, by reading; hypothesis,
+  untested). The change applies only when the second request gets no
+  reply: a worker that answers the request's id arms a full limit on
+  that message, as on every message (ticket 545 design). Two new tests
+  in `packages/core/test/fork-worker-silence.test.ts` failed at
+  `4cdc02b8a` and pass at `3b75509aa`: "a regime change while a request
+  waits keeps the time the timer was armed" and "a second sim posted to
+  a hung worker that answers nothing is judged from the worker's last
+  message" (red run in `execution-report.md`, K1).
+- **Items 2 to 8: fixed.** The fork comments are fixed in the same
+  fork commit. The freeze band in the `worker_silence.ts` header now
+  includes a freeze that ends before the due time, and the tab's bands
+  moved beside `WORKER_SILENCE_LIMITS` (items 2 and 7); the start-up
+  arithmetic rounds 137.8 s up to 140 s (item 3); feral's main loop
+  reads 1.0 s (item 4); the Chromium and vitest claims in
+  `worker_silence.ts` cite their sources (item 5); the limits comment
+  says what sets the warm-up time (item 8). The test file is in the
+  main repo, so its two parts are in main `95be23a9`, not the fork
+  commit (`git -C vendor/tbc-new-fork show --stat 3b75509aa` lists
+  only `worker_pool_sim_runner.ts` and `worker_silence.ts`): the
+  fake-timers claim cites its source (item 5), and the limits test is
+  "pins the tab's limits: 140 s start-up, the 30 s run floor, 220 s
+  presim" (item 6).
+- **`presimMs` is 220 s**, from ticket 557's page sims under the ticket
+  545 rule: ten times enhancement shaman's 21.43 s warm-up, rounded up
+  to the next 10 s.
+- Checks on main `95be23a9`: `corepack pnpm verify` rc=0; `npx vitest
+  run packages/core/test/fork-worker-silence.test.ts
+  packages/core/test/rank.test.ts` rc=0 (109 passed); `python
+  scripts/check_engine_port_drift.py` rc=0.
+
+## Addendum 2026-10-05: figures since fork `cb561067`
+
+Fork `cb561067719abb9cd1f267ccb99425fc2a7fc007` (ticket 557) raised
+`runMs` from 30 s to 44.83 s (`WORKER_SILENCE_LIMITS` in
+`upgrades/adapters/worker_pool_sim_runner.ts:108` at that commit). So
+from that pin on, the accepted extension is up to `presimMs - runMs` =
+220 s − 44.83 s = 175.17 s after the earlier request's run deadline. In
+this ticket's example the run deadline is t0+44.83 s, and the hung
+worker still fails at t0+220 s. The 190 s, "t0+30 s" and "the 30 s run
+floor" in the close above describe fork `3b75509aa`; the dated history
+that records them (decision-log row F1, the lock `_comment` entry for
+`3b75509aa`) stays as written. The decision itself is unchanged. Source:
+pre-merge review rows A2 and P1 in `docs/reviews/feat-silence-followups.md`.
