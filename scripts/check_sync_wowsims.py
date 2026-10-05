@@ -19,6 +19,7 @@ import os
 import sys
 import tempfile
 import types
+import urllib.error
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -753,6 +754,46 @@ def check_sha_pin_survives_an_unresolvable_watched_ref() -> list[str]:
     return problems
 
 
+def _not_found(sha, path):
+    raise urllib.error.HTTPError(
+        f"https://raw.githubusercontent.com/x/y/{sha}/{path}", 404, "Not Found", None, None
+    )
+
+
+def check_phase_file_404_is_drift_not_a_crash() -> list[str]:
+    """Upstream deleted ui/core/ in 7b539641 (2026-09-16), so fetching the phase
+    file at a newer tip returns HTTP 404. pinned_fetch raises HTTPError, which is
+    not SystemExit, and --check died with a traceback instead of reporting
+    (ticket 551). Both call sites -- the sha-pin branch and the release-tag
+    branch -- must turn it into a DRIFT line and exit 1.
+    """
+    problems = []
+    for label, sha_pin in (("sha pin", True), ("tag pin", False)):
+        with _DoCheckHarness() as h:
+            lock = sync_wowsims.load_lock()
+            if sha_pin:
+                lock["tag"] = h.PIN_SHA
+                lock["commit"] = h.PIN_SHA
+                lock["watchedRefs"] = {
+                    "master": {"commit": h.PIN_SHA, "fetchedAt": "2026-01-01"}}
+            h.write_lock(lock)
+            sync_wowsims.fetch = _not_found
+            try:
+                rc, body = h.run()
+            except (Exception, SystemExit) as e:
+                problems.append(
+                    f"{label}: a 404 on the phase file must not escape do_check; "
+                    f"it raised {type(e).__name__}({e})")
+                continue
+        if rc != 1:
+            problems.append(f"{label}: a 404 on the phase file is drift (rc 1), got {rc}")
+        if warn_upstream_drift.DRIFT_TOKEN not in body or "CURRENT_PHASE" not in body:
+            problems.append(
+                f"{label}: --check must print a DRIFT line saying CURRENT_PHASE could "
+                f"not be read: {body.strip()!r}")
+    return problems
+
+
 def check_unwatch_ref_removes_the_key_and_refuses_an_absent_one() -> list[str]:
     """--watch-ref is a keyed upsert and nothing removed a key, so a deleted
     upstream branch stayed in the lock failing every --check forever. A hand
@@ -885,6 +926,8 @@ CHECKS = (
     check_sha_pin_in_sync_with_watched_ref_is_clean,
     check_sha_pin_tier_change_is_read_from_the_watched_ref,
     check_sha_pin_survives_an_unresolvable_watched_ref,
+    # The phase file moved upstream and its old path 404s (ticket 551).
+    check_phase_file_404_is_drift_not_a_crash,
     check_unwatch_ref_removes_the_key_and_refuses_an_absent_one,
     # The single-watched-ref invariant, enforced at both ends (ticket 392).
     check_sha_pin_refuses_to_guess_between_two_watched_refs,

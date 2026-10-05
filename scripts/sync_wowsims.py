@@ -52,6 +52,7 @@ import os
 import re
 import subprocess
 import sys
+import urllib.error
 
 from pinned_fetch import digest as sha256_of
 from pinned_fetch import fetch as pinned_fetch
@@ -286,6 +287,24 @@ def ref_sha(ref):
 
 def fetch(sha, path):
     return pinned_fetch(REPO, sha, path)
+
+
+def read_phase_at(sha):
+    """CURRENT_PHASE at an upstream commit, for --check.
+
+    pinned_fetch raises HTTPError, not SystemExit, and do_check reports only
+    SystemExit as drift -- so a missing file ended --check with a traceback
+    (ticket 551). Convert it here, naming every path tried.
+    """
+    tried = []
+    for path in (TRACKED["constants_other.ts"],):
+        try:
+            blob = fetch(sha, path)
+        except urllib.error.HTTPError as e:
+            tried.append(f"{path} (HTTP {e.code})")
+            continue
+        return parse_current_phase(blob.decode("utf-8"))
+    raise SystemExit(f"no phase file at {sha[:12]}; tried {', '.join(tried)}")
 
 
 def parse_current_phase(ts_source):
@@ -620,8 +639,7 @@ def do_check():
                     drift.append(
                         f"pin is behind {ref}: {lock['commit'][:12]} -> {tip[:12]}")
                     try:
-                        upstream_phase = parse_current_phase(
-                            fetch(tip, TRACKED["constants_other.ts"]).decode("utf-8"))
+                        upstream_phase = read_phase_at(tip)
                         print(f"  {ref} CURRENT_PHASE = {upstream_phase}")
                         if upstream_phase != lock["currentPhase"]:
                             drift.append(
@@ -633,8 +651,7 @@ def do_check():
     elif lock["commit"] != sha:
         drift.append(f"new release available: {lock['tag']} -> {tag}")
         try:
-            upstream_phase = parse_current_phase(
-                fetch(sha, TRACKED["constants_other.ts"]).decode("utf-8"))
+            upstream_phase = read_phase_at(sha)
             print(f"  upstream CURRENT_PHASE = {upstream_phase}")
             if upstream_phase != lock["currentPhase"]:
                 drift.append(
