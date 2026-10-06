@@ -133,8 +133,8 @@ const META_NEAR_EP = 1.0;
  * **`feral-tank` is read from upstream, like ret's**, and is the one value
  * here that is not a registry entry: it is identifiable but not rankable, so it
  * has no entry to carry. It is sourced from wowsims' bear presets, a separate
- * spec upstream (`SpecFeralBearDruid`, `ui/druid/feralbear/gear_sets/` in the
- * fork clone). Seven of the eleven bear sets socket 32409 (`p1`, `p2_balanced`,
+ * spec upstream (`SpecFeralBearDruid`, `ui/specs/druid/feralbear/gear_sets/` in
+ * the fork clone). Seven of the eleven bear sets socket 32409 (`p1`, `p2_balanced`,
  * `p2_offensive`, `p2_survival`, `p3`, `p4`, `preraid`); of the rest, three
  * wear socketless Wolfshead and `p5` uses Powerful Earthstorm Diamond 25896.
  * That last one is a genuine disagreement, not a scoping artefact: 25896 is
@@ -143,7 +143,7 @@ const META_NEAR_EP = 1.0;
  * meta at all, and this is the judgment call — 7 of 11 — that a derived table
  * would have to make explicit (ticket 263). Re-check with:
  *
- *     node -e "for (const f of require('fs').readdirSync('vendor/tbc-new-fork/ui/druid/feralbear/gear_sets')) { const g = require('./vendor/tbc-new-fork/ui/druid/feralbear/gear_sets/' + f); console.log(f, (g.items || []).flatMap(i => i.gems || []).filter(x => x === 32409).length); }"
+ *     node -e "for (const f of require('fs').readdirSync('vendor/tbc-new-fork/ui/specs/druid/feralbear/gear_sets')) { const g = require('./vendor/tbc-new-fork/ui/specs/druid/feralbear/gear_sets/' + f); console.log(f, (g.items || []).flatMap(i => i.gems || []).filter(x => x === 32409).length); }"
  *
  * `feral-tank` is read but never ranked — it is not a member of `SpecId`, so no
  * candidate is ever gemmed from it. It is recorded because the evidence exists,
