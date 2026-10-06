@@ -15,6 +15,12 @@ Related: 558, 559, 560
 
 Source: `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate/558-p3-settings-gates/decision-log.md`, last line, logged 2026-10-06T23:45Z. The owner wrote this after reading `reducer-dispatch-explainer.html` in the same folder (the orchestrating session's account; the log line does not say it). "The next part" is chunk K4 of stage 558-p3-settings-gates (ticket 560). K4 waits until this ticket is closed.
 
+> And basically, if wowsims is using zustand, it would be silly for us not to use it
+
+> We just don't want to run roughshod over existing code, but if we can nestle in a little stuff that very much fits, that's a possibile exception as long as it's thoughtful and I really ok it
+
+Source: the owner in chat, 2026-10-06, logged in `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate/558-p3-settings-gates/decision-log.md` (gitignored, owner's checkout).
+
 ## Goal
 
 Today the Upgrades tab keeps its run state and its settings in two `useReducer` hooks. Only the tab can read them. Move that state into a zustand store that is organised separately from upstream's sim store. Two results follow:
@@ -64,7 +70,7 @@ This ticket reverses those decisions on the owner's request.
 
 The planner answers these. They are not answered here.
 
-1. **Where the store lives.** A separate zustand store that the tab owns, or a slice of upstream's sim store. The owner said "organize our store separately". Bulk is a slice inside the sim store behind a `ui/sim` facade.
+1. **Where the store lives.** A separate zustand store that the tab owns, or a slice of upstream's sim store. The owner said "organize our store separately". Bulk is a slice inside the sim store behind a `ui/sim` facade. Any edit to upstream files, such as adding a slice to `ui/sim/state/sim_store.ts`, is an exception the owner must approve explicitly before it is made (owner quote above); the plan names each such edit and asks.
 2. **Which state moves.** Run state, settings, or both. Run state gains one row per `landed` action during a run, so the cost of one store write per row may matter (hypothesis, untested).
 3. **What the tab reads and shares.** Which other tabs or site data the tab should read, and which of its state other parts of the site should read. The owner's example is "the gear tab sim using settings elsewhere".
 4. **Persistence.** Whether any of the tab's state survives a page reload, as Bulk's settings do through `player.sim.env.storage`.
