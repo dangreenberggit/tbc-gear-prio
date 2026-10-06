@@ -80,3 +80,17 @@ L0-L2 per feature (settings reducer, staleness with `mockSubscriptions`, phase s
 
 - **Source labels are English.** P1 renders the engine's `SOURCE_LABELS` text, not `upgrades_tab.*` i18n keys, because the desktop golden compares that text. When this part re-derives the golden, move the labels to `upgrades_tab.*` keys (rule I1). Source: `.scratch/stage-gate/558-upstream-react-port/execution-report.md` K4 ledger ("engine English `SOURCE_LABELS` kept (golden compares text)"); `decision-log.md` row K4-source-labels-not-i18n (2026-10-06T04:31Z).
 - **Capped run's 48 s tail.** P1's capped live run (ret, `?upgrades-dev&cap=10&iterations=500`) landed its last row at 16.3 s and finished at 64.3 s, with no new row in the 48 s between. Which `rankUpgrades` stage runs in that gap was not recorded (hypothesis: the post-sim stages; untested). When this part re-records the fixtures, measure the stage times; fix the gap or explain it. Source: `.scratch/stage-gate/558-upstream-react-port/live-check.md` (capped-run row and "Capped run tail"); `decision-log.md` row K5-18-capped-tail (2026-10-06T14:11Z).
+
+## Carried from P4 (stage 558-p4-engine-move)
+
+- **Tab fixtures name the old Mug id.** The four feral tab fixtures
+  (`data/tab-fixtures/feral-p2-malorne4.json`, `feral-p3-nordrassil4.json`,
+  `feral-p3-p2bis.json`, `feral-p3-th-hands-legs.json`) embed a rotation
+  that casts the Mug of Direbrew as item 38287. Upstream `42c75dc9` replaced
+  that id with 281739, and the new engine silently drops a cast on an id it
+  does not know: a worn 281739 Mug is never pressed (808.70 DPS against
+  826.65 with the cast on 281739; measurement C27). When this part
+  re-records the fixtures, record them with the engine's id 281739. Re-run:
+  `grep -c 38287 data/tab-fixtures/*.json` (4 feral files today). Source:
+  `.scratch/stage-gate/558-p4-engine-move/engine-delta.md`, section "C27"
+  (gitignored, owner's checkout).

@@ -76,6 +76,8 @@ Every command below was run on 2026-09-14 moving both pins from `ec5c5f2` to
 `master` tip `17a8fb28c5ad14b649acecdaacd488594048f467`; the outputs are in
 `.scratch/stage-gate/upstream-catchup-chunk1/execution-report.md`.
 
+2026-10-06 (ticket 558 P4): the engine pin moved from `17a8fb28` to `42c75dc9`. `TRACKED` was remapped to upstream's `ui/specs/` and `ui/sim/` layout, and the three CLI rankings were compared old engine against new engine on the same code; outputs in `.scratch/stage-gate/558-p4-engine-move/`.
+
 ### 0. Preconditions
 
 Both trees clean, the fork lock naming the clone's actual HEAD, the expected

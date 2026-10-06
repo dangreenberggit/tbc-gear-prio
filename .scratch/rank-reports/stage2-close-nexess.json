@@ -5,11 +5,11 @@
     "region": "US",
     "spec": "feral",
     "maxPhase": 2,
-    "poolSize": 228,
-    "generatedAt": "2026-08-22T06:16:02.399Z"
+    "poolSize": 227,
+    "generatedAt": "2026-10-06T15:57:31.644Z"
   },
   "ranking": {
-    "contentHash": "2ac5a64bfc5f020d156a1078dbb47562f4ac475e56c609a724890b8aa7175fc9",
+    "contentHash": "20c62b802188a5580e22f44a734b33a8a4802319b00db5a93880eab1af52db36",
     "cutoff": {
       "absDps": 3.6,
       "pct": 0.15
@@ -23,8 +23,8 @@
       "salvationUptime": 1
     },
     "baseline": {
-      "dps": 2302.50371298918,
-      "stdev": 77.46094853297826,
+      "dps": 2310.3595052481087,
+      "stdev": 77.73407806045041,
       "metaAdjusted": false
     },
     "assumptions": {
@@ -54,7 +54,7 @@
         },
         {
           "id": "weapon-imbue-omitted",
-          "detail": "WCL temporaryEnchant (effect id) is omitted: no effectId→itemId imbue table in db.json. Constant across baseline and candidates, so deltas survive."
+          "detail": "WCL temporaryEnchant (effect id) is omitted: no effectId→itemId imbue table in db.json. Any mhImbueId pinned by the skeleton is carried unchanged into every candidate — including weapon candidates of the other stone family and off-hand items — so a weapon-slot delta is measured under the baseline's imbue rather than the candidate's (ticket 351)."
         }
       ]
     },
@@ -72,12 +72,7 @@
         "gap": null
       }
     },
-    "substitutions": [
-      {
-        "field": "gems.meta-preference",
-        "detail": "no meta preference recorded for feral — meta sockets on candidate items were left empty, so those items are priced without any meta gem's stats or effect"
-      }
-    ],
+    "substitutions": [],
     "items": [
       {
         "rank": 1,
@@ -89,9 +84,9 @@
           "via": "arena",
           "origin": "wowhead"
         },
-        "deltaDps": 59.83255246993267,
-        "deltaPct": 2.5985865791398113,
-        "se": 0.4109901806088269,
+        "deltaDps": 59.801366445708574,
+        "deltaPct": 2.588400909463072,
+        "se": 0.4126007174237443,
         "seMethod": "paired-replicate",
         "bisTags": [
           "BiS"
@@ -128,9 +123,9 @@
           "boss": "Lady Vashj",
           "origin": "db"
         },
-        "deltaDps": 38.020604834513776,
-        "deltaPct": 1.6512722485539133,
-        "se": 1.023780485284027,
+        "deltaDps": 38.1089538818007,
+        "deltaPct": 1.6494815545041417,
+        "se": 1.0224485631531126,
         "seMethod": "paired-replicate",
         "bisTags": [
           "BiS"
@@ -166,9 +161,9 @@
           "boss": "High Astromancer Solarian",
           "origin": "db"
         },
-        "deltaDps": 17.67690846185633,
-        "deltaPct": 0.7677255138454319,
-        "se": 0.5423004267353814,
+        "deltaDps": 17.706633961430907,
+        "deltaPct": 0.7664016756357317,
+        "se": 0.5445474214376983,
         "seMethod": "paired-replicate",
         "bisTags": [
           "BiS"
@@ -203,9 +198,9 @@
           "recipeBoss": "Trash",
           "origin": "db"
         },
-        "deltaDps": 15.290478384966354,
-        "deltaPct": 0.6640805093476176,
-        "se": 0.48805708577525464,
+        "deltaDps": 15.317943157676746,
+        "deltaPct": 0.6630112379861747,
+        "se": 0.48936303470336107,
         "seMethod": "paired-replicate",
         "bisTags": [],
         "belowCutoff": false,
@@ -229,9 +224,9 @@
           "zone": "Tempest Keep",
           "origin": "wowhead"
         },
-        "deltaDps": 15.240937411389586,
-        "deltaPct": 0.6619288961581452,
-        "se": 0.7340799008530373,
+        "deltaDps": 15.257503493765217,
+        "deltaPct": 0.660395209451471,
+        "se": 0.7345585375817794,
         "seMethod": "paired-replicate",
         "bisTags": [
           "BiS"
@@ -268,9 +263,9 @@
           "boss": "The Lurker Below",
           "origin": "db"
         },
-        "deltaDps": 12.230362154151134,
-        "deltaPct": 0.5311766528390658,
-        "se": 0.18765561836879183,
+        "deltaDps": 12.246179144237157,
+        "deltaPct": 0.5300551328232376,
+        "se": 0.18817888086218665,
         "seMethod": "paired-replicate",
         "bisTags": [],
         "belowCutoff": false,
@@ -298,9 +293,9 @@
           "via": "honor",
           "origin": "wowhead"
         },
-        "deltaDps": 10.786071488182461,
-        "deltaPct": 0.4684496892376194,
-        "se": 0.7053436013093617,
+        "deltaDps": 10.832698904295375,
+        "deltaPct": 0.4688750335040198,
+        "se": 0.7074403138950709,
         "seMethod": "paired-replicate",
         "bisTags": [],
         "belowCutoff": false,
@@ -324,9 +319,9 @@
           "standing": "Exalted",
           "origin": "atlasloot"
         },
-        "deltaDps": 10.40402285932987,
-        "deltaPct": 0.4518569416690779,
-        "se": 1.3893171610065365,
+        "deltaDps": 10.476235142986752,
+        "deltaPct": 0.4534461030497378,
+        "se": 1.3939018025173586,
         "seMethod": "independent",
         "bisTags": [],
         "curatedSets": [
@@ -360,9 +355,9 @@
           "factionId": 1038,
           "origin": "db"
         },
-        "deltaDps": 10.270820452720363,
-        "deltaPct": 0.4460718301898621,
-        "se": 0.35856458947318787,
+        "deltaDps": 10.293622887837136,
+        "deltaPct": 0.4455420407280601,
+        "se": 0.36062927755608126,
         "seMethod": "paired-replicate",
         "bisTags": [],
         "belowCutoff": false,
@@ -388,9 +383,9 @@
           "factionId": 933,
           "origin": "db"
         },
-        "deltaDps": 9.776315771478039,
-        "deltaPct": 0.4245950057029932,
-        "se": 1.416680338569338,
+        "deltaDps": 9.78738730752093,
+        "deltaPct": 0.42363049063526015,
+        "se": 1.421463790528458,
         "seMethod": "independent",
         "bisTags": [],
         "curatedSets": [
@@ -421,9 +416,9 @@
           "zone": "Karazhan",
           "origin": "db"
         },
-        "deltaDps": 7.512763848586474,
-        "deltaPct": 0.3262867202430339,
-        "se": 1.4163954730567652,
+        "deltaDps": 7.514144289400974,
+        "deltaPct": 0.32523701494646967,
+        "se": 1.421245845790983,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false,
@@ -456,9 +451,9 @@
           "boss": "Kael'thas Sunstrider",
           "origin": "db"
         },
-        "deltaDps": 4.8062330937291335,
-        "deltaPct": 0.2087394285887833,
-        "se": 1.432345187508214,
+        "deltaDps": 4.84421711389723,
+        "deltaPct": 0.20967373704799291,
+        "se": 1.437276396363896,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -492,9 +487,9 @@
           "zone": "Serpentshrine Cavern",
           "origin": "db"
         },
-        "deltaDps": 3.381772248634661,
-        "deltaPct": 0.14687369360392225,
-        "se": 1.4183771400338057,
+        "deltaDps": 3.384471600044435,
+        "deltaPct": 0.14649112366955974,
+        "se": 1.4232391591690086,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -527,9 +522,9 @@
           "boss": "Al'ar",
           "origin": "db"
         },
-        "deltaDps": 2.5911415196733287,
-        "deltaPct": 0.1125358237233603,
-        "se": 1.360376021571171,
+        "deltaDps": 2.579300713399789,
+        "deltaPct": 0.11164066490694481,
+        "se": 1.365075929362269,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -562,9 +557,9 @@
           "via": "arena",
           "origin": "wowhead"
         },
-        "deltaDps": 2.255258395884539,
-        "deltaPct": 0.09794808942812494,
-        "se": 1.4168130004987045,
+        "deltaDps": 2.213317585085406,
+        "deltaPct": 0.09579970476706041,
+        "se": 1.4217147250667799,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -592,9 +587,9 @@
           "recipeBoss": "Trash",
           "origin": "db"
         },
-        "deltaDps": 1.550923453053656,
-        "deltaPct": 0.06735813038234802,
-        "se": 1.4208000801392646,
+        "deltaDps": 1.5429556939889153,
+        "deltaPct": 0.06678422515993751,
+        "se": 1.4259775054150712,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -619,9 +614,9 @@
           "boss": "The Curator",
           "origin": "db"
         },
-        "deltaDps": 1.0702745303578922,
-        "deltaPct": 0.04648307511167613,
-        "se": 1.4111087064797099,
+        "deltaDps": 1.087547527120023,
+        "deltaPct": 0.047072653612980964,
+        "se": 1.4159340099044602,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -646,9 +641,9 @@
           "boss": "Netherspite",
           "origin": "db"
         },
-        "deltaDps": 0.8191321303052064,
-        "deltaPct": 0.035575713762553904,
-        "se": 1.4179396451938615,
+        "deltaDps": 0.8428514257666393,
+        "deltaPct": 0.03648139710949988,
+        "se": 1.4228045926158885,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -677,9 +672,9 @@
           "boss": "Gruul the Dragonkiller",
           "origin": "db"
         },
-        "deltaDps": 0.7619782064061837,
-        "deltaPct": 0.03309346265578702,
-        "se": 1.415655572246773,
+        "deltaDps": 0.77629887394869,
+        "deltaPct": 0.03360078257021405,
+        "se": 1.420509283887386,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -703,9 +698,9 @@
           "boss": "The Lurker Below",
           "origin": "db"
         },
-        "deltaDps": 0.567653142042218,
-        "deltaPct": 0.02465373405653594,
-        "se": 1.41601520147964,
+        "deltaDps": 0.5537076799869283,
+        "deltaPct": 0.023966299562001102,
+        "se": 1.4210030151171797,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -733,9 +728,9 @@
           "boss": "Shade of Aran",
           "origin": "db"
         },
-        "deltaDps": 0.5281148276462773,
-        "deltaPct": 0.02293654618956782,
-        "se": 1.4106828847357413,
+        "deltaDps": 0.5281972302936992,
+        "deltaPct": 0.022862122933416645,
+        "se": 1.4155446544220138,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -762,9 +757,9 @@
           "profession": "Jewelcrafting",
           "origin": "db"
         },
-        "deltaDps": 0.45268078783692545,
-        "deltaPct": 0.01966037167641487,
-        "se": 1.4136464535452489,
+        "deltaDps": 0.48114942583333686,
+        "deltaPct": 0.020825738364110842,
+        "se": 1.418549854386515,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -787,9 +782,9 @@
           "boss": "The Lurker Below",
           "origin": "db"
         },
-        "deltaDps": 0.08828152407795642,
-        "deltaPct": 0.0038341533861566144,
-        "se": 1.4165025080018987,
+        "deltaDps": 0.0911895261187965,
+        "deltaPct": 0.003946984264208859,
+        "se": 1.421365627876237,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -819,7 +814,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -857,7 +852,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -896,7 +891,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -920,7 +915,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -959,7 +954,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -986,7 +981,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1013,7 +1008,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -1050,7 +1045,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1076,7 +1071,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1105,11 +1100,12 @@
           "zone": "Magtheridon's Lair",
           "token": "Chestguard of the Fallen Defender",
           "boss": "Magtheridon",
+          "tokenId": 29753,
           "origin": "two-hop"
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -1129,6 +1125,7 @@
             "zone": "Magtheridon's Lair",
             "token": "Chestguard of the Fallen Defender",
             "boss": "Magtheridon",
+            "tokenId": 29753,
             "origin": "two-hop"
           }
         ],
@@ -1152,11 +1149,12 @@
           "zone": "Gruul's Lair",
           "token": "Pauldrons of the Fallen Defender",
           "boss": "High King Maulgar",
+          "tokenId": 29764,
           "origin": "two-hop"
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -1176,6 +1174,7 @@
             "zone": "Gruul's Lair",
             "token": "Pauldrons of the Fallen Defender",
             "boss": "High King Maulgar",
+            "tokenId": 29764,
             "origin": "two-hop"
           }
         ],
@@ -1201,7 +1200,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -1240,7 +1239,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [],
         "curatedSets": [
@@ -1269,7 +1268,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -1305,7 +1304,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -1338,7 +1337,7 @@
         },
         "deltaDps": 0,
         "deltaPct": 0,
-        "se": 1.4142369612419632,
+        "se": 1.4192236013525374,
         "seMethod": "independent",
         "bisTags": [],
         "curatedSets": [
@@ -1365,9 +1364,9 @@
           "zone": "World Bosses",
           "origin": "atlasloot"
         },
-        "deltaDps": -0.1544924507302312,
-        "deltaPct": -0.006709759027040371,
-        "se": 1.4177820450980694,
+        "deltaDps": -0.14296554020347685,
+        "deltaPct": -0.0061880213827641434,
+        "se": 1.4227280902079391,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1392,9 +1391,9 @@
           "boss": "Maiden of Virtue",
           "origin": "db"
         },
-        "deltaDps": -2.1040917338091276,
-        "deltaPct": -0.0913827726721679,
-        "se": 1.419147601278698,
+        "deltaDps": -2.100226700321855,
+        "deltaPct": -0.09090475727050594,
+        "se": 1.4241007606762566,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1416,9 +1415,9 @@
           "kind": "world",
           "origin": "wowhead"
         },
-        "deltaDps": -3.022193134504505,
-        "deltaPct": -0.13125681915105372,
-        "se": 1.4187475267545304,
+        "deltaDps": -3.0406783748558155,
+        "deltaPct": -0.13161061592140735,
+        "se": 1.4237118822372257,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1440,9 +1439,9 @@
           "boss": "Morogrim Tidewalker",
           "origin": "db"
         },
-        "deltaDps": -3.023556748635656,
-        "deltaPct": -0.13131604225342955,
-        "se": 1.418743653442853,
+        "deltaDps": -3.0421274954624096,
+        "deltaPct": -0.1316733386536619,
+        "se": 1.4237074763997886,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1466,9 +1465,9 @@
           "boss": "Prince Malchezaar",
           "origin": "db"
         },
-        "deltaDps": -3.1478943496790635,
-        "deltaPct": -0.1367161465113284,
-        "se": 1.4094750406672423,
+        "deltaDps": -3.1194701949139017,
+        "deltaPct": -0.13502098646673183,
+        "se": 1.4143988250237824,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1493,9 +1492,9 @@
           "boss": "Gruul the Dragonkiller",
           "origin": "db"
         },
-        "deltaDps": -4.7467059777586655,
-        "deltaPct": -0.20615410741711024,
-        "se": 1.422329701602918,
+        "deltaDps": -4.6616235394003525,
+        "deltaPct": -0.20177048328674468,
+        "se": 1.427757167528883,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1518,9 +1517,9 @@
           "kind": "unknown",
           "origin": "curated"
         },
-        "deltaDps": -5.238283319852144,
-        "deltaPct": -0.22750379468668247,
-        "se": 1.3846641092105154,
+        "deltaDps": -5.184299116138391,
+        "deltaPct": -0.22439361079355705,
+        "se": 1.389576191201674,
         "seMethod": "independent",
         "bisTags": [],
         "curatedSets": [
@@ -1545,9 +1544,9 @@
           "zone": "Karazhan",
           "origin": "db"
         },
-        "deltaDps": -5.715401133741125,
-        "deltaPct": -0.2482254904302073,
-        "se": 1.3856557792115236,
+        "deltaDps": -5.754300910532493,
+        "deltaPct": -0.24906517351352817,
+        "se": 1.3906477212154722,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1575,9 +1574,9 @@
           "zone": "Karazhan",
           "origin": "db"
         },
-        "deltaDps": -7.5515127136668525,
-        "deltaPct": -0.3279696215500669,
-        "se": 1.4106546384903316,
+        "deltaDps": -7.60568784372299,
+        "deltaPct": -0.32919932272212404,
+        "se": 1.4154556413782908,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1606,9 +1605,9 @@
           "boss": "Magtheridon",
           "origin": "db"
         },
-        "deltaDps": -9.766575912297412,
-        "deltaPct": -0.4241719940428738,
-        "se": 1.4170777703651931,
+        "deltaDps": -9.798500797684483,
+        "deltaPct": -0.42411151924307233,
+        "se": 1.4220314068135835,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1633,9 +1632,9 @@
           "recipeBoss": "Trash",
           "origin": "db"
         },
-        "deltaDps": -9.835144101651167,
-        "deltaPct": -0.42714997792046494,
-        "se": 1.4238365787336682,
+        "deltaDps": -9.894507685322424,
+        "deltaPct": -0.4282670148453739,
+        "se": 1.4287155924014174,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1659,9 +1658,9 @@
           "profession": "Tailoring",
           "origin": "db"
         },
-        "deltaDps": -9.964352362770114,
-        "deltaPct": -0.4327616197341151,
-        "se": 1.4136194518202145,
+        "deltaDps": -9.955005271600385,
+        "deltaPct": -0.43088555045165233,
+        "se": 1.4185385617804713,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1684,9 +1683,9 @@
           "zone": "World Bosses",
           "origin": "atlasloot"
         },
-        "deltaDps": -11.038346557172645,
-        "deltaPct": -0.4794062435122995,
-        "se": 1.4130832173865684,
+        "deltaDps": -11.033554223056399,
+        "deltaPct": -0.47756871595061606,
+        "se": 1.4180258892457174,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1711,9 +1710,9 @@
           "factionId": 1038,
           "origin": "db"
         },
-        "deltaDps": -11.394876452376593,
-        "deltaPct": -0.4948906873893124,
-        "se": 1.4082603079086604,
+        "deltaDps": -11.401460024966127,
+        "deltaPct": -0.4934928957621999,
+        "se": 1.413156976917736,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1737,9 +1736,9 @@
           "kind": "unknown",
           "origin": "curated"
         },
-        "deltaDps": -12.236861659588158,
-        "deltaPct": -0.5314589327502928,
-        "se": 1.4134949902560148,
+        "deltaDps": -12.255366632203277,
+        "deltaPct": -0.5304527976864439,
+        "se": 1.4184610185595579,
         "seMethod": "independent",
         "bisTags": [],
         "curatedSets": [
@@ -1763,11 +1762,12 @@
           "zone": "Serpentshrine Cavern",
           "token": "Gloves of the Vanquished Defender",
           "boss": "Leotheras the Blind",
+          "tokenId": 30240,
           "origin": "two-hop"
         },
-        "deltaDps": -12.884924971908731,
-        "deltaPct": -0.559604959558616,
-        "se": 1.4113996268501512,
+        "deltaDps": -12.95364245774681,
+        "deltaPct": -0.5606764846908846,
+        "se": 1.4161696832724375,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1777,6 +1777,7 @@
             "zone": "Serpentshrine Cavern",
             "token": "Gloves of the Vanquished Defender",
             "boss": "Leotheras the Blind",
+            "tokenId": 30240,
             "origin": "two-hop"
           }
         ],
@@ -1787,7 +1788,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "prospectiveBonusDps": 114.36522009413147,
+          "prospectiveBonusDps": 114.57123727356156,
           "prospectiveBonusBreaks": [
             {
               "setId": 640,
@@ -1800,7 +1801,7 @@
           "packages": [
             {
               "threshold": 4,
-              "deltaDps": -41.36685786404223,
+              "deltaDps": -41.729949596478036,
               "itemIds": [
                 30230,
                 30222,
@@ -1822,9 +1823,9 @@
           "zone": "Serpentshrine Cavern",
           "origin": "db"
         },
-        "deltaDps": -14.57891490933389,
-        "deltaPct": -0.6331766080154155,
-        "se": 1.4267078461141975,
+        "deltaDps": -14.715289948130248,
+        "deltaPct": -0.6369264140365886,
+        "se": 1.431725773588665,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1853,9 +1854,9 @@
           "boss": "Shade of Aran",
           "origin": "db"
         },
-        "deltaDps": -15.717088715314276,
-        "deltaPct": -0.6826086154236806,
-        "se": 1.4044615287616955,
+        "deltaDps": -15.731542596890904,
+        "deltaPct": -0.6809131895341759,
+        "se": 1.4094209940825844,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -1887,9 +1888,9 @@
           "boss": "Magtheridon",
           "origin": "db"
         },
-        "deltaDps": -17.354713173884647,
-        "deltaPct": -0.7537322557171574,
-        "se": 1.4029835259003323,
+        "deltaDps": -17.368951264707448,
+        "deltaPct": -0.7517856517677408,
+        "se": 1.4079437866968316,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1913,9 +1914,9 @@
           "boss": "Hydross the Unstable",
           "origin": "db"
         },
-        "deltaDps": -17.63454233987659,
-        "deltaPct": -0.7658855115148933,
-        "se": 1.4560599230904137,
+        "deltaDps": -17.64584158976413,
+        "deltaPct": -0.7637703807429377,
+        "se": 1.461037642678662,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1939,11 +1940,12 @@
           "zone": "Karazhan",
           "token": "Gloves of the Fallen Defender",
           "boss": "The Curator",
+          "tokenId": 29758,
           "origin": "two-hop"
         },
-        "deltaDps": -18.7974299691964,
-        "deltaPct": -0.8163908645685966,
-        "se": 1.4070894799191571,
+        "deltaDps": -18.882462608019523,
+        "deltaPct": -0.8172954280546803,
+        "se": 1.4118945646522814,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -1953,6 +1955,7 @@
             "zone": "Karazhan",
             "token": "Gloves of the Fallen Defender",
             "boss": "The Curator",
+            "tokenId": 29758,
             "origin": "two-hop"
           }
         ],
@@ -1963,11 +1966,11 @@
           "piecesAfterSwap": 3,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "prospectiveBonusDps": 17.13998100655772,
+          "prospectiveBonusDps": 17.139520877141422,
           "packages": [
             {
               "threshold": 4,
-              "deltaDps": -41.08771081458053,
+              "deltaDps": -41.311881303050086,
               "itemIds": [
                 29097,
                 29099
@@ -1988,9 +1991,9 @@
           "boss": "Hydross the Unstable",
           "origin": "db"
         },
-        "deltaDps": -18.90136668865125,
-        "deltaPct": -0.8209049384816378,
-        "se": 1.40178195478409,
+        "deltaDps": -18.954528611396654,
+        "deltaPct": -0.8204146830110379,
+        "se": 1.4066298115133542,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2015,9 +2018,9 @@
           "boss": "Shade of Aran",
           "origin": "db"
         },
-        "deltaDps": -18.90445812562666,
-        "deltaPct": -0.8210392026288775,
-        "se": 1.3939531067555957,
+        "deltaDps": -18.96824554573095,
+        "deltaPct": -0.8210083972924361,
+        "se": 1.3986825141888473,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2027,6 +2030,28 @@
             "zone": "Karazhan",
             "boss": "Shade of Aran",
             "origin": "db"
+          }
+        ]
+      },
+      {
+        "rank": null,
+        "itemId": 31255,
+        "name": "Cloak of the Craft",
+        "slot": "back",
+        "source": {
+          "kind": "world",
+          "origin": "wowhead"
+        },
+        "deltaDps": -19.865815985954214,
+        "deltaPct": -0.8598582143094147,
+        "se": 1.4093930650139297,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true,
+        "sources": [
+          {
+            "kind": "world",
+            "origin": "wowhead"
           }
         ]
       },
@@ -2042,9 +2067,9 @@
           "recipeBoss": "Trash",
           "origin": "db"
         },
-        "deltaDps": -19.843806961378505,
-        "deltaPct": -0.8618360461020355,
-        "se": 1.4148797082704583,
+        "deltaDps": -19.89325543067389,
+        "deltaPct": -0.8610458842221422,
+        "se": 1.4198094627876847,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2055,28 +2080,6 @@
             "recipeZone": "Serpentshrine Cavern",
             "recipeBoss": "Trash",
             "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 31255,
-        "name": "Cloak of the Craft",
-        "slot": "back",
-        "source": {
-          "kind": "world",
-          "origin": "wowhead"
-        },
-        "deltaDps": -19.851462621372775,
-        "deltaPct": -0.8621685389423763,
-        "se": 1.4044038213599381,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "world",
-            "origin": "wowhead"
           }
         ]
       },
@@ -2093,9 +2096,9 @@
           "recipeFactionId": 933,
           "origin": "db"
         },
-        "deltaDps": -22.317128157548268,
-        "deltaPct": -0.9692548173386223,
-        "se": 1.4128956246386453,
+        "deltaDps": -22.361083876326575,
+        "deltaPct": -0.9678616607299487,
+        "se": 1.4178873985409997,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2128,11 +2131,12 @@
           "zone": "Serpentshrine Cavern",
           "token": "Leggings of the Vanquished Defender",
           "boss": "Fathom-Lord Karathress",
+          "tokenId": 30246,
           "origin": "two-hop"
         },
-        "deltaDps": -22.765226345575684,
-        "deltaPct": -0.9887161621998507,
-        "se": 1.4051511841038915,
+        "deltaDps": -22.85808541659935,
+        "deltaPct": -0.9893735310316837,
+        "se": 1.4097887913191405,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2142,6 +2146,7 @@
             "zone": "Serpentshrine Cavern",
             "token": "Leggings of the Vanquished Defender",
             "boss": "Fathom-Lord Karathress",
+            "tokenId": 30246,
             "origin": "two-hop"
           }
         ],
@@ -2152,7 +2157,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "prospectiveBonusDps": 114.36522009413147,
+          "prospectiveBonusDps": 114.57123727356156,
           "prospectiveBonusBreaks": [
             {
               "setId": 640,
@@ -2165,7 +2170,7 @@
           "packages": [
             {
               "threshold": 4,
-              "deltaDps": -41.36685786404223,
+              "deltaDps": -41.729949596478036,
               "itemIds": [
                 30230,
                 30222,
@@ -2188,9 +2193,9 @@
           "boss": "Netherspite",
           "origin": "db"
         },
-        "deltaDps": -23.0254767305928,
-        "deltaPct": -1.0000190922906453,
-        "se": 1.3946883852937206,
+        "deltaDps": -23.10302937216329,
+        "deltaPct": -0.9999755154850788,
+        "se": 1.3993783574317733,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -2221,9 +2226,9 @@
           "profession": "Leatherworking",
           "origin": "db"
         },
-        "deltaDps": -23.133300335144668,
-        "deltaPct": -1.0047019774449057,
-        "se": 1.3908234890362843,
+        "deltaDps": -23.223858233133342,
+        "deltaPct": -1.0052053881821887,
+        "se": 1.3954699098974739,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2248,9 +2253,9 @@
           "recipeFactionId": 933,
           "origin": "db"
         },
-        "deltaDps": -23.440232484213084,
-        "deltaPct": -1.0180323424444022,
-        "se": 1.4128781029514632,
+        "deltaDps": -23.47992873407884,
+        "deltaPct": -1.016288966316406,
+        "se": 1.4178292784733257,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2284,9 +2289,9 @@
           "boss": "Prince Malchezaar",
           "origin": "db"
         },
-        "deltaDps": -29.793813184583087,
-        "deltaPct": -1.2939745988901734,
-        "se": 1.3884022585219316,
+        "deltaDps": -29.877276766781506,
+        "deltaPct": -1.2931873459049827,
+        "se": 1.3930819032013009,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2310,9 +2315,9 @@
           "boss": "Moroes",
           "origin": "db"
         },
-        "deltaDps": -33.06477791312591,
-        "deltaPct": -1.4360358129542479,
-        "se": 1.3865600610031725,
+        "deltaDps": -33.14849114360186,
+        "deltaPct": -1.4347763223993166,
+        "se": 1.3912400247818304,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2336,9 +2341,9 @@
           "boss": "Maiden of Virtue",
           "origin": "db"
         },
-        "deltaDps": -34.096651914676386,
-        "deltaPct": -1.4808511153456982,
-        "se": 1.413990039557702,
+        "deltaDps": -34.15848839002774,
+        "deltaPct": -1.4784923433965518,
+        "se": 1.4189978630883924,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2362,9 +2367,9 @@
           "boss": "Al'ar",
           "origin": "db"
         },
-        "deltaDps": -34.271366945612044,
-        "deltaPct": -1.4884391609132268,
-        "se": 1.4074850366146536,
+        "deltaDps": -34.33812024607687,
+        "deltaPct": -1.4862674041886528,
+        "se": 1.4124300206595808,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2373,32 +2378,6 @@
             "kind": "raid",
             "zone": "Tempest Keep",
             "boss": "Al'ar",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 30684,
-        "name": "Ravager's Cuffs",
-        "slot": "wrist",
-        "source": {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Rokad the Ravager",
-          "origin": "db"
-        },
-        "deltaDps": -34.30142602774913,
-        "deltaPct": -1.489744656403528,
-        "se": 1.392439734552815,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Karazhan",
-            "boss": "Rokad the Ravager",
             "origin": "db"
           }
         ]
@@ -2414,9 +2393,35 @@
           "boss": "Rokad the Ravager",
           "origin": "db"
         },
-        "deltaDps": -34.30142602774913,
-        "deltaPct": -1.489744656403528,
-        "se": 1.392439734552815,
+        "deltaDps": -34.36557857475509,
+        "deltaPct": -1.4874558914615577,
+        "se": 1.3972408912821275,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true,
+        "sources": [
+          {
+            "kind": "raid",
+            "zone": "Karazhan",
+            "boss": "Rokad the Ravager",
+            "origin": "db"
+          }
+        ]
+      },
+      {
+        "rank": null,
+        "itemId": 30684,
+        "name": "Ravager's Cuffs",
+        "slot": "wrist",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Rokad the Ravager",
+          "origin": "db"
+        },
+        "deltaDps": -34.36557857475509,
+        "deltaPct": -1.4874558914615577,
+        "se": 1.3972408912821275,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2440,9 +2445,9 @@
           "boss": "Al'ar",
           "origin": "db"
         },
-        "deltaDps": -34.3176444050664,
-        "deltaPct": -1.490449036475785,
-        "se": 1.4164764003576038,
+        "deltaDps": -34.368926789896705,
+        "deltaPct": -1.4876008132858023,
+        "se": 1.4215758815590085,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2467,9 +2472,9 @@
           "boss": "Attumen the Huntsman",
           "origin": "db"
         },
-        "deltaDps": -34.389796214229136,
-        "deltaPct": -1.4935826604849756,
-        "se": 1.4169241320207522,
+        "deltaDps": -34.45710722249851,
+        "deltaPct": -1.4914175540311927,
+        "se": 1.4219768643118824,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2493,9 +2498,9 @@
           "boss": "Attumen the Huntsman",
           "origin": "db"
         },
-        "deltaDps": -34.42274775745818,
-        "deltaPct": -1.4950137784042716,
-        "se": 1.4182047971704774,
+        "deltaDps": -34.4743849130291,
+        "deltaPct": -1.4921653896165785,
+        "se": 1.423285232524977,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2520,9 +2525,9 @@
           "boss": "Attumen the Huntsman",
           "origin": "db"
         },
-        "deltaDps": -34.510267255657254,
-        "deltaPct": -1.4988148362573097,
-        "se": 1.430048476604174,
+        "deltaDps": -34.57717159611593,
+        "deltaPct": -1.4966143371874372,
+        "se": 1.4351050936931489,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2546,9 +2551,9 @@
           "boss": "The Lurker Below",
           "origin": "db"
         },
-        "deltaDps": -34.573377921130486,
-        "deltaPct": -1.5015557945071143,
-        "se": 1.4329811457230566,
+        "deltaDps": -34.63822963095163,
+        "deltaPct": -1.4992571308607592,
+        "se": 1.4380660420083813,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2572,9 +2577,9 @@
           "boss": "Maiden of Virtue",
           "origin": "db"
         },
-        "deltaDps": -34.60649275436754,
-        "deltaPct": -1.5029940042719994,
-        "se": 1.4206918360589662,
+        "deltaDps": -34.673509445783566,
+        "deltaPct": -1.5007841579209116,
+        "se": 1.425752550301243,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2598,9 +2603,9 @@
           "boss": "Fathom-Lord Karathress",
           "origin": "db"
         },
-        "deltaDps": -34.95684447210124,
-        "deltaPct": -1.5182101238273014,
-        "se": 1.3920684174619593,
+        "deltaDps": -35.021009681516716,
+        "deltaPct": -1.5158251173449226,
+        "se": 1.3968696773580858,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2623,9 +2628,9 @@
           "zone": "Karazhan",
           "origin": "db"
         },
-        "deltaDps": -34.97693052813338,
-        "deltaPct": -1.5190824809887178,
-        "se": 1.4158116137934007,
+        "deltaDps": -35.032232248731816,
+        "deltaPct": -1.5163108671682557,
+        "se": 1.4209089000150663,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2654,9 +2659,9 @@
           "zone": "Karazhan",
           "origin": "db"
         },
-        "deltaDps": -34.97693052813338,
-        "deltaPct": -1.5190824809887178,
-        "se": 1.4158116137934007,
+        "deltaDps": -35.032232248731816,
+        "deltaPct": -1.5163108671682557,
+        "se": 1.4209089000150663,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2686,9 +2691,9 @@
           "boss": "Terestian Illhoof",
           "origin": "db"
         },
-        "deltaDps": -35.041788360492774,
-        "deltaPct": -1.5218993204141444,
-        "se": 1.4126629540445654,
+        "deltaDps": -35.1016007958483,
+        "deltaPct": -1.519313367296868,
+        "se": 1.4177761344748916,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2713,9 +2718,9 @@
           "boss": "Hydross the Unstable",
           "origin": "db"
         },
-        "deltaDps": -35.06962130514012,
-        "deltaPct": -1.5231081325646019,
-        "se": 1.4148497431974765,
+        "deltaDps": -35.13982055718225,
+        "deltaPct": -1.5209676449643534,
+        "se": 1.4199096995068468,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2739,9 +2744,9 @@
           "boss": "Lady Vashj",
           "origin": "db"
         },
-        "deltaDps": -35.3045749252683,
-        "deltaPct": -1.5333123992853341,
-        "se": 1.392436688485094,
+        "deltaDps": -35.359145146868286,
+        "deltaPct": -1.5304607385364937,
+        "se": 1.397318132618971,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2766,9 +2771,9 @@
           "zone": "World Bosses",
           "origin": "atlasloot"
         },
-        "deltaDps": -35.3045749252683,
-        "deltaPct": -1.5333123992853341,
-        "se": 1.392436688485094,
+        "deltaDps": -35.359145146868286,
+        "deltaPct": -1.5304607385364937,
+        "se": 1.397318132618971,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2793,9 +2798,9 @@
           "boss": "Morogrim Tidewalker",
           "origin": "db"
         },
-        "deltaDps": -35.3045749252683,
-        "deltaPct": -1.5333123992853341,
-        "se": 1.392436688485094,
+        "deltaDps": -35.359145146868286,
+        "deltaPct": -1.5304607385364937,
+        "se": 1.397318132618971,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2820,9 +2825,9 @@
           "boss": "Shade of Aran",
           "origin": "db"
         },
-        "deltaDps": -35.30675117252213,
-        "deltaPct": -1.5334069158431818,
-        "se": 1.3925001041941139,
+        "deltaDps": -35.36023327049497,
+        "deltaPct": -1.530507836125601,
+        "se": 1.3973498376264766,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2846,9 +2851,9 @@
           "zone": "Tempest Keep",
           "origin": "db"
         },
-        "deltaDps": -35.30675117252213,
-        "deltaPct": -1.5334069158431818,
-        "se": 1.3925001041941139,
+        "deltaDps": -35.36023327049497,
+        "deltaPct": -1.530507836125601,
+        "se": 1.3973498376264766,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2878,9 +2883,9 @@
           "boss": "Morogrim Tidewalker",
           "origin": "db"
         },
-        "deltaDps": -35.30675117252213,
-        "deltaPct": -1.5334069158431818,
-        "se": 1.3925001041941139,
+        "deltaDps": -35.36023327049497,
+        "deltaPct": -1.530507836125601,
+        "se": 1.3973498376264766,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2905,9 +2910,9 @@
           "boss": "The Lurker Below",
           "origin": "db"
         },
-        "deltaDps": -35.30675117252213,
-        "deltaPct": -1.5334069158431818,
-        "se": 1.3925001041941139,
+        "deltaDps": -35.36023327049497,
+        "deltaPct": -1.530507836125601,
+        "se": 1.3973498376264766,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2932,9 +2937,9 @@
           "boss": "Lady Vashj",
           "origin": "db"
         },
-        "deltaDps": -35.764225095679194,
-        "deltaPct": -1.5532754580990011,
-        "se": 1.415567695486089,
+        "deltaDps": -35.8254535705496,
+        "deltaPct": -1.5506441092466394,
+        "se": 1.4207147747828124,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -2943,33 +2948,6 @@
             "kind": "raid",
             "zone": "Serpentshrine Cavern",
             "boss": "Lady Vashj",
-            "origin": "db"
-          }
-        ],
-        "slotChoice": "finger1"
-      },
-      {
-        "rank": null,
-        "itemId": 29920,
-        "name": "Phoenix-Ring of Rebirth",
-        "slot": "finger",
-        "source": {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Al'ar",
-          "origin": "db"
-        },
-        "deltaDps": -35.796851046027314,
-        "deltaPct": -1.5546924351993665,
-        "se": 1.3956644350929348,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Tempest Keep",
-            "boss": "Al'ar",
             "origin": "db"
           }
         ],
@@ -2986,9 +2964,9 @@
           "boss": "Romulo and Julianne",
           "origin": "db"
         },
-        "deltaDps": -35.801555047296915,
-        "deltaPct": -1.5548967345993225,
-        "se": 1.4350837759354855,
+        "deltaDps": -35.8275256760985,
+        "deltaPct": -1.5507337968274768,
+        "se": 1.4403999362029345,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3004,6 +2982,33 @@
       },
       {
         "rank": null,
+        "itemId": 29920,
+        "name": "Phoenix-Ring of Rebirth",
+        "slot": "finger",
+        "source": {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Al'ar",
+          "origin": "db"
+        },
+        "deltaDps": -35.85306272709431,
+        "deltaPct": -1.5518391248484102,
+        "se": 1.4008626344743405,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true,
+        "sources": [
+          {
+            "kind": "raid",
+            "zone": "Tempest Keep",
+            "boss": "Al'ar",
+            "origin": "db"
+          }
+        ],
+        "slotChoice": "finger1"
+      },
+      {
+        "rank": null,
         "itemId": 28763,
         "name": "Jade Ring of the Everliving",
         "slot": "finger",
@@ -3013,9 +3018,9 @@
           "boss": "Prince Malchezaar",
           "origin": "db"
         },
-        "deltaDps": -36.04213012679702,
-        "deltaPct": -1.5653451468274089,
-        "se": 1.4160211944302836,
+        "deltaDps": -36.102216456028145,
+        "deltaPct": -1.5626233222154378,
+        "se": 1.4211672377299038,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3040,9 +3045,9 @@
           "boss": "Gruul the Dragonkiller",
           "origin": "db"
         },
-        "deltaDps": -36.050929361678755,
-        "deltaPct": -1.565727306249437,
-        "se": 1.404214404925234,
+        "deltaDps": -36.11732082596518,
+        "deltaPct": -1.5632770892981245,
+        "se": 1.4091535038055376,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3066,9 +3071,9 @@
           "boss": "Prince Malchezaar",
           "origin": "db"
         },
-        "deltaDps": -36.28919617646534,
-        "deltaPct": -1.5760754682716063,
-        "se": 1.407724141121964,
+        "deltaDps": -36.364633178459826,
+        "deltaPct": -1.5739815858032296,
+        "se": 1.41254350972957,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3092,9 +3097,9 @@
           "boss": "Moroes",
           "origin": "db"
         },
-        "deltaDps": -36.4469714788529,
-        "deltaPct": -1.582927804773715,
-        "se": 1.4050574342924538,
+        "deltaDps": -36.51857752840215,
+        "deltaPct": -1.5806448063796215,
+        "se": 1.4098098514964994,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3118,9 +3123,9 @@
           "boss": "Nightbane",
           "origin": "db"
         },
-        "deltaDps": -36.519367606029846,
-        "deltaPct": -1.5860720397544679,
-        "se": 1.4164516526857083,
+        "deltaDps": -36.59050541538136,
+        "deltaPct": -1.583758083201511,
+        "se": 1.4214585875456864,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3144,9 +3149,9 @@
           "zone": "World Bosses",
           "origin": "atlasloot"
         },
-        "deltaDps": -36.57250752963,
-        "deltaPct": -1.5883799588818237,
-        "se": 1.4072461186775709,
+        "deltaDps": -36.64437667974789,
+        "deltaPct": -1.5860898096814882,
+        "se": 1.4120224816239961,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3170,9 +3175,9 @@
           "boss": "Netherspite",
           "origin": "db"
         },
-        "deltaDps": -36.649129690093105,
-        "deltaPct": -1.59170773464309,
-        "se": 1.4075916050404438,
+        "deltaDps": -36.72441782076794,
+        "deltaPct": -1.5895542549696877,
+        "se": 1.4125401040733854,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3196,9 +3201,9 @@
           "boss": "Maiden of Virtue",
           "origin": "db"
         },
-        "deltaDps": -37.125008212585726,
-        "deltaPct": -1.612375606742841,
-        "se": 1.3841555573192637,
+        "deltaDps": -37.19556679701827,
+        "deltaPct": -1.6099471408032602,
+        "se": 1.388702548834532,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3221,9 +3226,9 @@
           "zone": "Karazhan",
           "origin": "db"
         },
-        "deltaDps": -37.125008212585726,
-        "deltaPct": -1.612375606742841,
-        "se": 1.3841555573192637,
+        "deltaDps": -37.19556679701827,
+        "deltaPct": -1.6099471408032602,
+        "se": 1.388702548834532,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3251,11 +3256,12 @@
           "zone": "Gruul's Lair",
           "token": "Leggings of the Fallen Defender",
           "boss": "Gruul the Dragonkiller",
+          "tokenId": 29767,
           "origin": "two-hop"
         },
-        "deltaDps": -39.43026185194185,
-        "deltaPct": -1.7124950387485933,
-        "se": 1.4085005877005736,
+        "deltaDps": -39.568939572171985,
+        "deltaPct": -1.7126745635165852,
+        "se": 1.4132048452503994,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3265,6 +3271,7 @@
             "zone": "Gruul's Lair",
             "token": "Leggings of the Fallen Defender",
             "boss": "Gruul the Dragonkiller",
+            "tokenId": 29767,
             "origin": "two-hop"
           }
         ],
@@ -3275,11 +3282,11 @@
           "piecesAfterSwap": 3,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "prospectiveBonusDps": 17.13998100655772,
+          "prospectiveBonusDps": 17.139520877141422,
           "packages": [
             {
               "threshold": 4,
-              "deltaDps": -41.08771081458053,
+              "deltaDps": -41.311881303050086,
               "itemIds": [
                 29097,
                 29099
@@ -3300,9 +3307,9 @@
           "boss": "High King Maulgar",
           "origin": "db"
         },
-        "deltaDps": -40.58276548230788,
-        "deltaPct": -1.762549404518532,
-        "se": 1.4107734981639066,
+        "deltaDps": -40.64674696586053,
+        "deltaPct": -1.75932563194296,
+        "se": 1.4157028149653803,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3326,9 +3333,9 @@
           "boss": "The Lurker Below",
           "origin": "db"
         },
-        "deltaDps": -40.833326320262586,
-        "deltaPct": -1.7734315080539667,
-        "se": 1.4055697580661235,
+        "deltaDps": -40.897550872176,
+        "deltaPct": -1.7701812544443825,
+        "se": 1.4104743922924858,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3352,9 +3359,9 @@
           "boss": "Void Reaver",
           "origin": "db"
         },
-        "deltaDps": -41.26771567270953,
-        "deltaPct": -1.7922974647078653,
-        "se": 1.4136210624069554,
+        "deltaDps": -41.33711470379467,
+        "deltaPct": -1.789207030762751,
+        "se": 1.418731885332935,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3378,9 +3385,9 @@
           "boss": "Shade of Aran",
           "origin": "db"
         },
-        "deltaDps": -42.80964739612,
-        "deltaPct": -1.8592650754314408,
-        "se": 1.4003265618181513,
+        "deltaDps": -42.81694998349667,
+        "deltaPct": -1.853259195646202,
+        "se": 1.4055721308321432,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3405,9 +3412,9 @@
           "boss": "Lady Vashj",
           "origin": "db"
         },
-        "deltaDps": -43.03168843860885,
-        "deltaPct": -1.8689085362100812,
-        "se": 1.38914984510089,
+        "deltaDps": -43.03209620368625,
+        "deltaPct": -1.8625714355682081,
+        "se": 1.3941548920282658,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3432,9 +3439,9 @@
           "boss": "Fathom-Lord Karathress",
           "origin": "db"
         },
-        "deltaDps": -43.065988966822715,
-        "deltaPct": -1.870398241873545,
-        "se": 1.3894052254876985,
+        "deltaDps": -43.070687152664505,
+        "deltaPct": -1.8642417794644977,
+        "se": 1.3944050915477344,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3459,9 +3466,9 @@
           "boss": "Moroes",
           "origin": "db"
         },
-        "deltaDps": -43.07425171886325,
-        "deltaPct": -1.870757101318328,
-        "se": 1.3894067721127266,
+        "deltaDps": -43.07481852868477,
+        "deltaPct": -1.8644205990815694,
+        "se": 1.3944069043210798,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3486,9 +3493,9 @@
           "boss": "Terestian Illhoof",
           "origin": "db"
         },
-        "deltaDps": -43.07425171886325,
-        "deltaPct": -1.870757101318328,
-        "se": 1.3894067721127266,
+        "deltaDps": -43.07481852868477,
+        "deltaPct": -1.8644205990815694,
+        "se": 1.3944069043210798,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3513,9 +3520,9 @@
           "boss": "Magtheridon",
           "origin": "db"
         },
-        "deltaDps": -43.07425171886325,
-        "deltaPct": -1.870757101318328,
-        "se": 1.3894067721127266,
+        "deltaDps": -43.07481852868477,
+        "deltaPct": -1.8644205990815694,
+        "se": 1.3944069043210798,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3539,9 +3546,9 @@
           "zone": "Serpentshrine Cavern",
           "origin": "db"
         },
-        "deltaDps": -43.07425171886325,
-        "deltaPct": -1.870757101318328,
-        "se": 1.3894067721127266,
+        "deltaDps": -43.07481852868477,
+        "deltaPct": -1.8644205990815694,
+        "se": 1.3944069043210798,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3571,9 +3578,9 @@
           "boss": "Hydross the Unstable",
           "origin": "db"
         },
-        "deltaDps": -43.07425171886325,
-        "deltaPct": -1.870757101318328,
-        "se": 1.3894067721127266,
+        "deltaDps": -43.07481852868477,
+        "deltaPct": -1.8644205990815694,
+        "se": 1.3944069043210798,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3598,9 +3605,9 @@
           "boss": "Maiden of Virtue",
           "origin": "db"
         },
-        "deltaDps": -45.41661764159926,
-        "deltaPct": -1.972488356278828,
-        "se": 1.3927906634011697,
+        "deltaDps": -45.50282423112367,
+        "deltaPct": -1.9695127155648937,
+        "se": 1.3976564996210536,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3623,9 +3630,9 @@
           "zone": "Karazhan",
           "origin": "db"
         },
-        "deltaDps": -45.564338534603394,
-        "deltaPct": -1.9789040198962544,
-        "se": 1.410995417284112,
+        "deltaDps": -45.655982968195076,
+        "deltaPct": -1.9761419322181246,
+        "se": 1.4159351367012902,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3654,9 +3661,9 @@
           "zone": "World Bosses",
           "origin": "atlasloot"
         },
-        "deltaDps": -45.575435543731146,
-        "deltaPct": -1.979385973912882,
-        "se": 1.4217797638342407,
+        "deltaDps": -45.66477033993806,
+        "deltaPct": -1.976522278727965,
+        "se": 1.426730694412466,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3680,9 +3687,9 @@
           "boss": "Fathom-Lord Karathress",
           "origin": "db"
         },
-        "deltaDps": -46.22416876527268,
-        "deltaPct": -2.0075610955373038,
-        "se": 1.3980101491206784,
+        "deltaDps": -46.315226835317844,
+        "deltaPct": -2.004676186979137,
+        "se": 1.4029020634465927,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3706,9 +3713,9 @@
           "boss": "Leotheras the Blind",
           "origin": "db"
         },
-        "deltaDps": -46.35880048164381,
-        "deltaPct": -2.013408283344717,
-        "se": 1.412405258976772,
+        "deltaDps": -46.453522849745696,
+        "deltaPct": -2.010662095843697,
+        "se": 1.4173630043282175,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3732,9 +3739,9 @@
           "boss": "Attumen the Huntsman",
           "origin": "db"
         },
-        "deltaDps": -51.61841321753127,
-        "deltaPct": -2.2418384355401835,
-        "se": 1.3874230523545414,
+        "deltaDps": -51.71107267831485,
+        "deltaPct": -2.238226239719416,
+        "se": 1.3921684626797952,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3758,9 +3765,9 @@
           "boss": "Magtheridon",
           "origin": "db"
         },
-        "deltaDps": -51.68139782443177,
-        "deltaPct": -2.244573918942238,
-        "se": 1.3916561244722985,
+        "deltaDps": -51.78011395430076,
+        "deltaPct": -2.2412145744711753,
+        "se": 1.3964574094071762,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3784,9 +3791,9 @@
           "boss": "Hydross the Unstable",
           "origin": "db"
         },
-        "deltaDps": -51.891499878618106,
-        "deltaPct": -2.253698857720885,
-        "se": 1.3483012867577324,
+        "deltaDps": -52.03060569191257,
+        "deltaPct": -2.2520566852787276,
+        "se": 1.3529888272680959,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3811,9 +3818,9 @@
           "boss": "Maiden of Virtue",
           "origin": "db"
         },
-        "deltaDps": -51.974381999503294,
-        "deltaPct": -2.2572985097178666,
-        "se": 1.4145662478107381,
+        "deltaDps": -52.080349709513484,
+        "deltaPct": -2.25420977086943,
+        "se": 1.419424594315772,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3837,9 +3844,9 @@
           "boss": "Terestian Illhoof",
           "origin": "db"
         },
-        "deltaDps": -52.266831595061376,
-        "deltaPct": -2.2699998831796453,
-        "se": 1.3881753079958405,
+        "deltaDps": -52.35814425189619,
+        "deltaPct": -2.266233637360843,
+        "se": 1.3932141018374253,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3863,9 +3870,9 @@
           "boss": "High King Maulgar",
           "origin": "db"
         },
-        "deltaDps": -52.30637991924232,
-        "deltaPct": -2.2717175057814174,
-        "se": 1.3911377589387648,
+        "deltaDps": -52.39258356672235,
+        "deltaPct": -2.2677242848011194,
+        "se": 1.396021740449533,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3889,9 +3896,9 @@
           "zone": "World Bosses",
           "origin": "atlasloot"
         },
-        "deltaDps": -52.31554822838143,
-        "deltaPct": -2.272115694461305,
-        "se": 1.3769376860819458,
+        "deltaDps": -52.41503994248251,
+        "deltaPct": -2.268696271009722,
+        "se": 1.3816257243352355,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3915,9 +3922,9 @@
           "boss": "Prince Malchezaar",
           "origin": "db"
         },
-        "deltaDps": -52.33270189756922,
-        "deltaPct": -2.272860695179046,
-        "se": 1.3885131632489436,
+        "deltaDps": -52.415171986112455,
+        "deltaPct": -2.268701986294709,
+        "se": 1.3933788847404047,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3941,9 +3948,9 @@
           "boss": "Moroes",
           "origin": "db"
         },
-        "deltaDps": -52.33806853415763,
-        "deltaPct": -2.273093773482379,
-        "se": 1.3888610714124978,
+        "deltaDps": -52.41879215124209,
+        "deltaPct": -2.2688586790138037,
+        "se": 1.3936662693409194,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3967,9 +3974,9 @@
           "boss": "Kael'thas Sunstrider",
           "origin": "db"
         },
-        "deltaDps": -52.34055224513486,
-        "deltaPct": -2.2732016434920217,
-        "se": 1.389754350539774,
+        "deltaDps": -52.42297765053809,
+        "deltaPct": -2.2690398412652404,
+        "se": 1.3946119199850315,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -3993,9 +4000,9 @@
           "boss": "Terestian Illhoof",
           "origin": "db"
         },
-        "deltaDps": -52.669090621482155,
-        "deltaPct": -2.2874703881847624,
-        "se": 1.3755059929804139,
+        "deltaDps": -52.752991088165345,
+        "deltaPct": -2.283323914236465,
+        "se": 1.3801893615800171,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4019,9 +4026,9 @@
           "boss": "Al'ar",
           "origin": "db"
         },
-        "deltaDps": -52.669090621482155,
-        "deltaPct": -2.2874703881847624,
-        "se": 1.3755059929804139,
+        "deltaDps": -52.752991088165345,
+        "deltaPct": -2.283323914236465,
+        "se": 1.3801893615800171,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4045,9 +4052,9 @@
           "zone": "World Bosses",
           "origin": "atlasloot"
         },
-        "deltaDps": -52.71279455850072,
-        "deltaPct": -2.289368493137732,
-        "se": 1.387938397638014,
+        "deltaDps": -52.799164457392635,
+        "deltaPct": -2.28532245035703,
+        "se": 1.3928246093071652,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4071,9 +4078,9 @@
           "boss": "Attumen the Huntsman",
           "origin": "db"
         },
-        "deltaDps": -53.00554395524614,
-        "deltaPct": -2.302082887259832,
-        "se": 1.4044346373010608,
+        "deltaDps": -53.114858689257744,
+        "deltaPct": -2.298986740747681,
+        "se": 1.409371459091319,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4096,9 +4103,9 @@
           "zone": "Karazhan",
           "origin": "db"
         },
-        "deltaDps": -53.0443760327189,
-        "deltaPct": -2.303769402562877,
-        "se": 1.4055877270224801,
+        "deltaDps": -53.13685189566104,
+        "deltaPct": -2.299938679454767,
+        "se": 1.4105462040292593,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4127,9 +4134,9 @@
           "boss": "Kael'thas Sunstrider",
           "origin": "db"
         },
-        "deltaDps": -53.14190554242441,
-        "deltaPct": -2.30800520505715,
-        "se": 1.4026283100358794,
+        "deltaDps": -53.23744106344566,
+        "deltaPct": -2.304292511295921,
+        "se": 1.4076392664580881,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4153,9 +4160,9 @@
           "boss": "The Big Bad Wolf",
           "origin": "db"
         },
-        "deltaDps": -53.814404626397845,
-        "deltaPct": -2.3372125014527927,
-        "se": 1.4073030911562379,
+        "deltaDps": -53.914033668721004,
+        "deltaPct": -2.3335776768183614,
+        "se": 1.412303457749996,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4179,9 +4186,9 @@
           "boss": "Prince Malchezaar",
           "origin": "db"
         },
-        "deltaDps": -54.08511099135876,
-        "deltaPct": -2.3489695450325176,
-        "se": 1.4075991822305451,
+        "deltaDps": -54.18452601247054,
+        "deltaPct": -2.3452854800037573,
+        "se": 1.4126003853244882,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4204,11 +4211,12 @@
           "zone": "Tempest Keep",
           "token": "Pauldrons of the Vanquished Defender",
           "boss": "Void Reaver",
+          "tokenId": 30249,
           "origin": "two-hop"
         },
-        "deltaDps": -57.386266903896285,
-        "deltaPct": -2.4923419919004477,
-        "se": 1.332988626468255,
+        "deltaDps": -57.577326787677066,
+        "deltaPct": -2.4921371179198304,
+        "se": 1.3377878534672563,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4218,6 +4226,7 @@
             "zone": "Tempest Keep",
             "token": "Pauldrons of the Vanquished Defender",
             "boss": "Void Reaver",
+            "tokenId": 30249,
             "origin": "two-hop"
           }
         ],
@@ -4229,7 +4238,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "prospectiveBonusDps": 114.36522009413147,
+          "prospectiveBonusDps": 114.57123727356156,
           "prospectiveBonusBreaks": [
             {
               "setId": 640,
@@ -4242,7 +4251,7 @@
           "packages": [
             {
               "threshold": 4,
-              "deltaDps": -41.36685786404223,
+              "deltaDps": -41.729949596478036,
               "itemIds": [
                 30230,
                 30222,
@@ -4265,9 +4274,9 @@
           "boss": "Terestian Illhoof",
           "origin": "db"
         },
-        "deltaDps": -58.22311612084877,
-        "deltaPct": -2.5286871761549414,
-        "se": 1.3795962646822848,
+        "deltaDps": -58.33186948750654,
+        "deltaPct": -2.524796221324105,
+        "se": 1.3846379208740907,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4290,9 +4299,9 @@
           "zone": "Karazhan",
           "origin": "db"
         },
-        "deltaDps": -58.60137007675485,
-        "deltaPct": -2.54511511734662,
-        "se": 1.3798447042792796,
+        "deltaDps": -58.70397742181558,
+        "deltaPct": -2.540902283322845,
+        "se": 1.3845697267448778,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4321,9 +4330,9 @@
           "boss": "Terestian Illhoof",
           "origin": "db"
         },
-        "deltaDps": -58.699669572799394,
-        "deltaPct": -2.5493843611046216,
-        "se": 1.3840497953580329,
+        "deltaDps": -58.80246996380674,
+        "deltaPct": -2.5451653662658864,
+        "se": 1.3888269565398976,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4346,9 +4355,9 @@
           "zone": "Tempest Keep",
           "origin": "db"
         },
-        "deltaDps": -58.715586613099276,
-        "deltaPct": -2.550075653813949,
-        "se": 1.3800842183259132,
+        "deltaDps": -58.82069222958444,
+        "deltaPct": -2.545954086191781,
+        "se": 1.3848534819362275,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4377,9 +4386,9 @@
           "boss": "Hyakiss the Lurker",
           "origin": "db"
         },
-        "deltaDps": -59.08798406131109,
-        "deltaPct": -2.5662492411185425,
-        "se": 1.3701882770493483,
+        "deltaDps": -59.185831070366476,
+        "deltaPct": -2.5617585027751137,
+        "se": 1.3747911382062055,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4403,9 +4412,9 @@
           "boss": "Hyakiss the Lurker",
           "origin": "db"
         },
-        "deltaDps": -59.08798406131109,
-        "deltaPct": -2.5662492411185425,
-        "se": 1.3701882770493483,
+        "deltaDps": -59.185831070366476,
+        "deltaPct": -2.5617585027751137,
+        "se": 1.3747911382062055,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4429,9 +4438,9 @@
           "boss": "Moroes",
           "origin": "db"
         },
-        "deltaDps": -59.579528298856985,
-        "deltaPct": -2.5875974906250656,
-        "se": 1.3990390400603643,
+        "deltaDps": -59.69128997477628,
+        "deltaPct": -2.5836364357661323,
+        "se": 1.4039312092764225,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4455,9 +4464,9 @@
           "boss": "Terestian Illhoof",
           "origin": "db"
         },
-        "deltaDps": -59.69112534615988,
-        "deltaPct": -2.5924442601079267,
-        "se": 1.3873637733012685,
+        "deltaDps": -59.8066505660222,
+        "deltaPct": -2.5886296236654123,
+        "se": 1.3922352145091361,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4480,11 +4489,12 @@
           "zone": "Tempest Keep",
           "token": "Chestguard of the Vanquished Defender",
           "boss": "Kael'thas Sunstrider",
+          "tokenId": 30237,
           "origin": "two-hop"
         },
-        "deltaDps": -62.695659736793004,
-        "deltaPct": -2.722934142651158,
-        "se": 1.3424588885612048,
+        "deltaDps": -62.912132208016374,
+        "deltaPct": -2.7230451393000963,
+        "se": 1.3472383627675277,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4494,6 +4504,7 @@
             "zone": "Tempest Keep",
             "token": "Chestguard of the Vanquished Defender",
             "boss": "Kael'thas Sunstrider",
+            "tokenId": 30237,
             "origin": "two-hop"
           }
         ],
@@ -4505,7 +4516,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "prospectiveBonusDps": 114.36522009413147,
+          "prospectiveBonusDps": 114.57123727356156,
           "prospectiveBonusBreaks": [
             {
               "setId": 640,
@@ -4518,7 +4529,7 @@
           "packages": [
             {
               "threshold": 4,
-              "deltaDps": -41.36685786404223,
+              "deltaDps": -41.729949596478036,
               "itemIds": [
                 30230,
                 30222,
@@ -4541,9 +4552,9 @@
           "boss": "Hydross the Unstable",
           "origin": "db"
         },
-        "deltaDps": -63.72663882087545,
-        "deltaPct": -2.767710577897119,
-        "se": 1.3896643068853294,
+        "deltaDps": -63.857319233610724,
+        "deltaPct": -2.7639559596052177,
+        "se": 1.3942947876332015,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4567,9 +4578,9 @@
           "boss": "Shade of Aran",
           "origin": "db"
         },
-        "deltaDps": -63.923033328462225,
-        "deltaPct": -2.7762401844501445,
-        "se": 1.3830650968783003,
+        "deltaDps": -64.06889295015708,
+        "deltaPct": -2.7731135697548828,
+        "se": 1.3878977674666537,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4593,9 +4604,9 @@
           "boss": "The Wizard of Oz",
           "origin": "db"
         },
-        "deltaDps": -64.27688676655725,
-        "deltaPct": -2.7916083871635133,
-        "se": 1.3956269214927584,
+        "deltaDps": -64.40680187373118,
+        "deltaPct": -2.787739385469127,
+        "se": 1.4002748755978922,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4619,9 +4630,9 @@
           "boss": "Shade of Aran",
           "origin": "db"
         },
-        "deltaDps": -64.31392628564709,
-        "deltaPct": -2.7932170498936046,
-        "se": 1.413341874679903,
+        "deltaDps": -64.45754226120425,
+        "deltaPct": -2.7899355972430007,
+        "se": 1.4180834517980234,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4645,9 +4656,9 @@
           "boss": "The Lurker Below",
           "origin": "db"
         },
-        "deltaDps": -64.58535761403618,
-        "deltaPct": -2.8050055793477755,
-        "se": 1.4187051272003708,
+        "deltaDps": -64.7341339994905,
+        "deltaPct": -2.8019074023953134,
+        "se": 1.4234548633023416,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4671,9 +4682,9 @@
           "boss": "Shadikith the Glider",
           "origin": "db"
         },
-        "deltaDps": -64.78597639499503,
-        "deltaPct": -2.8137186502465146,
-        "se": 1.370198340329142,
+        "deltaDps": -64.91904976704245,
+        "deltaPct": -2.809911168351733,
+        "se": 1.374696336934484,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4697,9 +4708,9 @@
           "boss": "Shadikith the Glider",
           "origin": "db"
         },
-        "deltaDps": -64.78597639499503,
-        "deltaPct": -2.8137186502465146,
-        "se": 1.370198340329142,
+        "deltaDps": -64.91904976704245,
+        "deltaPct": -2.809911168351733,
+        "se": 1.374696336934484,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4722,9 +4733,9 @@
           "zone": "Tempest Keep",
           "origin": "db"
         },
-        "deltaDps": -69.4122113792314,
-        "deltaPct": -3.0146405839718873,
-        "se": 1.3925673963320508,
+        "deltaDps": -69.56420560501829,
+        "deltaPct": -3.010968875060326,
+        "se": 1.3974156826780286,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4753,9 +4764,9 @@
           "boss": "Kael'thas Sunstrider",
           "origin": "db"
         },
-        "deltaDps": -69.50790497321304,
-        "deltaPct": -3.018796650841261,
-        "se": 1.4036422096609222,
+        "deltaDps": -69.66600279522527,
+        "deltaPct": -3.0153749941069825,
+        "se": 1.408400598594635,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4778,9 +4789,9 @@
           "zone": "Karazhan",
           "origin": "db"
         },
-        "deltaDps": -69.59414924011116,
-        "deltaPct": -3.0225423241451344,
-        "se": 1.3954625307280755,
+        "deltaDps": -69.74707949787626,
+        "deltaPct": -3.018884261927286,
+        "se": 1.4002010143195374,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4809,9 +4820,9 @@
           "boss": "Fathom-Lord Karathress",
           "origin": "db"
         },
-        "deltaDps": -72.76504764716037,
-        "deltaPct": -3.16025755948487,
-        "se": 1.3448794043123768,
+        "deltaDps": -72.97051336038476,
+        "deltaPct": -3.1584051397467894,
+        "se": 1.349712164321693,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4835,9 +4846,9 @@
           "profession": "Leatherworking",
           "origin": "db"
         },
-        "deltaDps": -78.33950054240495,
-        "deltaPct": -3.402361529341564,
-        "se": 1.3248215730779447,
+        "deltaDps": -78.60128847578244,
+        "deltaPct": -3.4021237083334994,
+        "se": 1.3296872807241127,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4869,9 +4880,9 @@
           "zone": "World Bosses",
           "origin": "atlasloot"
         },
-        "deltaDps": -79.53807032372288,
-        "deltaPct": -3.4544165933380473,
-        "se": 1.3347898937194773,
+        "deltaDps": -79.78251050761855,
+        "deltaPct": -3.4532509043024775,
+        "se": 1.3395479885302426,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4896,9 +4907,9 @@
           "zone": "World Bosses",
           "origin": "atlasloot"
         },
-        "deltaDps": -80.31469330673917,
-        "deltaPct": -3.4881460930402675,
-        "se": 1.392588190590643,
+        "deltaDps": -80.4853611098847,
+        "deltaPct": -3.4836726027727623,
+        "se": 1.3972256842653903,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4922,9 +4933,9 @@
           "boss": "The Wizard of Oz",
           "origin": "db"
         },
-        "deltaDps": -81.2533772531965,
-        "deltaPct": -3.528914059717668,
-        "se": 1.4083165153898773,
+        "deltaDps": -81.43383814143999,
+        "deltaPct": -3.5247258254162848,
+        "se": 1.4129727895916646,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4960,9 +4971,9 @@
           "zone": "World Bosses",
           "origin": "atlasloot"
         },
-        "deltaDps": -81.44650790667129,
-        "deltaPct": -3.537301913877697,
-        "se": 1.4059076989829602,
+        "deltaDps": -81.6243527645156,
+        "deltaPct": -3.532971928355799,
+        "se": 1.410746894868556,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -4986,9 +4997,9 @@
           "boss": "Netherspite",
           "origin": "db"
         },
-        "deltaDps": -81.46873779921498,
-        "deltaPct": -3.538267379966559,
-        "se": 1.41448170740811,
+        "deltaDps": -81.64842621559274,
+        "deltaPct": -3.5340139069319663,
+        "se": 1.4192273487574782,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5012,9 +5023,9 @@
           "boss": "High Astromancer Solarian",
           "origin": "db"
         },
-        "deltaDps": -81.90568119222507,
-        "deltaPct": -3.557244261113162,
-        "se": 1.4156435348154233,
+        "deltaDps": -82.0905433924986,
+        "deltaPct": -3.5531502004785582,
+        "se": 1.420415195791196,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5038,9 +5049,9 @@
           "boss": "The Wizard of Oz",
           "origin": "db"
         },
-        "deltaDps": -82.06306626514015,
-        "deltaPct": -3.56407964956562,
-        "se": 1.414128613956818,
+        "deltaDps": -82.24475147938165,
+        "deltaPct": -3.559824836461952,
+        "se": 1.4188501017510233,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5076,9 +5087,9 @@
           "boss": "Nightbane",
           "origin": "db"
         },
-        "deltaDps": -84.98548570409457,
-        "deltaPct": -3.691003199024763,
-        "se": 1.325934046919276,
+        "deltaDps": -85.24998721159227,
+        "deltaPct": -3.6899013775969602,
+        "se": 1.3307417939595414,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5102,9 +5113,9 @@
           "zone": "Karazhan",
           "origin": "db"
         },
-        "deltaDps": -87.44681616443631,
-        "deltaPct": -3.797901200815447,
-        "se": 1.3263357536881761,
+        "deltaDps": -87.67672488949756,
+        "deltaPct": -3.794938609784973,
+        "se": 1.3310153610721087,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5132,9 +5143,9 @@
           "kind": "world",
           "origin": "wowhead"
         },
-        "deltaDps": -95.54616725930919,
-        "deltaPct": -4.149663981877722,
-        "se": 1.4177155317710368,
+        "deltaDps": -95.68043086922671,
+        "deltaPct": -4.141365473723173,
+        "se": 1.4230338054257599,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5157,9 +5168,9 @@
           "factionId": 942,
           "origin": "db"
         },
-        "deltaDps": -96.46343482648535,
-        "deltaPct": -4.189501814147071,
-        "se": 1.323962047803492,
+        "deltaDps": -96.51355785360147,
+        "deltaPct": -4.177425964849436,
+        "se": 1.3285466682079932,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5184,9 +5195,9 @@
           "boss": "High Astromancer Solarian",
           "origin": "db"
         },
-        "deltaDps": -107.21301931491553,
-        "deltaPct": -4.656366837112646,
-        "se": 1.3873356432827493,
+        "deltaDps": -107.45207151105978,
+        "deltaPct": -4.650881010811369,
+        "se": 1.3924189904925819,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5210,9 +5221,9 @@
           "boss": "Fathom-Lord Karathress",
           "origin": "db"
         },
-        "deltaDps": -109.60849160135467,
-        "deltaPct": -4.76040455366118,
-        "se": 1.3843290710112754,
+        "deltaDps": -109.70570501533575,
+        "deltaPct": -4.7484257218901735,
+        "se": 1.3895580997539503,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5236,9 +5247,9 @@
           "boss": "High King Maulgar",
           "origin": "db"
         },
-        "deltaDps": -116.15596260317943,
-        "deltaPct": -5.044767656525611,
-        "se": 1.3625644241033499,
+        "deltaDps": -116.20948471950533,
+        "deltaPct": -5.029930816201075,
+        "se": 1.3674042286923689,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5262,9 +5273,9 @@
           "boss": "Morogrim Tidewalker",
           "origin": "db"
         },
-        "deltaDps": -119.60732272117593,
-        "deltaPct": -5.194663619712391,
-        "se": 1.3195103770912742,
+        "deltaDps": -119.89433238928905,
+        "deltaPct": -5.189423209545635,
+        "se": 1.324389319502359,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5289,9 +5300,9 @@
           "boss": "Hydross the Unstable",
           "origin": "db"
         },
-        "deltaDps": -126.52466051465399,
-        "deltaPct": -5.495090400979022,
-        "se": 1.3168524545423896,
+        "deltaDps": -126.83384685574856,
+        "deltaPct": -5.489788345391204,
+        "se": 1.3216557047913606,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5316,9 +5327,9 @@
           "boss": "Lady Vashj",
           "origin": "db"
         },
-        "deltaDps": -126.6371567205365,
-        "deltaPct": -5.499976221803018,
-        "se": 1.3168120297871426,
+        "deltaDps": -126.9446428181277,
+        "deltaPct": -5.494583961057401,
+        "se": 1.3216513372801715,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5343,9 +5354,9 @@
           "boss": "Lady Vashj",
           "origin": "db"
         },
-        "deltaDps": -134.97439786480845,
-        "deltaPct": -5.86207080159626,
-        "se": 1.2987403536501732,
+        "deltaDps": -135.29771278030466,
+        "deltaPct": -5.856132453541039,
+        "se": 1.3035457255297584,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5370,9 +5381,9 @@
           "boss": "The Curator",
           "origin": "db"
         },
-        "deltaDps": -135.0985231328832,
-        "deltaPct": -5.867461684024571,
-        "se": 1.3004929078319085,
+        "deltaDps": -135.4236980251112,
+        "deltaPct": -5.8615855115833195,
+        "se": 1.3053038979480698,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5397,9 +5408,9 @@
           "boss": "The Curator",
           "origin": "db"
         },
-        "deltaDps": -135.3931849214232,
-        "deltaPct": -5.880259135202509,
-        "se": 1.3015867072830853,
+        "deltaDps": -135.71812732398166,
+        "deltaPct": -5.874329385348491,
+        "se": 1.3063937844546933,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5423,9 +5434,9 @@
           "zone": "Tempest Keep",
           "origin": "db"
         },
-        "deltaDps": -135.50444324714272,
-        "deltaPct": -5.885091193673984,
-        "se": 1.3057265856731155,
+        "deltaDps": -135.8259238723772,
+        "deltaPct": -5.878995176458085,
+        "se": 1.3104850302041644,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5455,9 +5466,9 @@
           "boss": "Shade of Aran",
           "origin": "db"
         },
-        "deltaDps": -136.53339610760395,
-        "deltaPct": -5.92977962803596,
-        "se": 1.3085719508174947,
+        "deltaDps": -136.85529726381264,
+        "deltaPct": -5.923549861090376,
+        "se": 1.3133469839989156,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5482,9 +5493,9 @@
           "boss": "Nightbane",
           "origin": "db"
         },
-        "deltaDps": -151.70347261658299,
-        "deltaPct": -6.588630965534338,
-        "se": 1.2974098387082396,
+        "deltaDps": -152.06981008715138,
+        "deltaPct": -6.582084292150917,
+        "se": 1.3022109133271644,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5509,9 +5520,9 @@
           "boss": "Morogrim Tidewalker",
           "origin": "db"
         },
-        "deltaDps": -151.90126654187588,
-        "deltaPct": -6.597221350174201,
-        "se": 1.2871204087964359,
+        "deltaDps": -152.26378540397582,
+        "deltaPct": -6.590480185360774,
+        "se": 1.2919155010263477,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5536,9 +5547,9 @@
           "boss": "Nightbane",
           "origin": "db"
         },
-        "deltaDps": -152.0925738265123,
-        "deltaPct": -6.6055300136329045,
-        "se": 1.2890753414138174,
+        "deltaDps": -152.45971630866052,
+        "deltaPct": -6.598960722880569,
+        "se": 1.2939741055354805,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5563,9 +5574,9 @@
           "boss": "Romulo and Julianne",
           "origin": "db"
         },
-        "deltaDps": -153.60990613860122,
-        "deltaPct": -6.671429247737463,
-        "se": 1.2946538792442868,
+        "deltaDps": -153.97094768195075,
+        "deltaPct": -6.664371814524851,
+        "se": 1.2993804441335473,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5581,6 +5592,59 @@
       },
       {
         "rank": null,
+        "itemId": 29098,
+        "name": "Stag-Helm of Malorne",
+        "slot": "head",
+        "source": {
+          "kind": "token",
+          "zone": "Karazhan",
+          "token": "Helm of the Fallen Defender",
+          "boss": "Prince Malchezaar",
+          "tokenId": 29761,
+          "origin": "two-hop"
+        },
+        "deltaDps": -167.09733732656287,
+        "deltaPct": -7.232525368757203,
+        "se": 1.5160489389591911,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true,
+        "sources": [
+          {
+            "kind": "token",
+            "zone": "Karazhan",
+            "token": "Helm of the Fallen Defender",
+            "boss": "Prince Malchezaar",
+            "tokenId": 29761,
+            "origin": "two-hop"
+          }
+        ],
+        "gemSubstitutions": [
+          {
+            "itemId": 29100,
+            "socketIndex": 0,
+            "from": 24028,
+            "to": 24061
+          },
+          {
+            "itemId": 29100,
+            "socketIndex": 1,
+            "from": 24028,
+            "to": 24055
+          }
+        ],
+        "setContext": {
+          "setId": 640,
+          "setName": "Malorne Harness",
+          "piecesWornBefore": 2,
+          "piecesAfterSwap": 3,
+          "nextThreshold": 4,
+          "crossesThreshold": false,
+          "prospectiveBonusDps": 17.139520877141422
+        }
+      },
+      {
+        "rank": null,
         "itemId": 30228,
         "name": "Nordrassil Headdress",
         "slot": "head",
@@ -5589,11 +5653,12 @@
           "zone": "Serpentshrine Cavern",
           "token": "Helm of the Vanquished Defender",
           "boss": "Lady Vashj",
+          "tokenId": 30243,
           "origin": "two-hop"
         },
-        "deltaDps": -206.46410883186127,
-        "deltaPct": -8.966939235195557,
-        "se": 1.457532729749276,
+        "deltaDps": -170.98382593393535,
+        "deltaPct": -7.400745448729351,
+        "se": 1.5081569364533296,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5603,10 +5668,30 @@
             "zone": "Serpentshrine Cavern",
             "token": "Helm of the Vanquished Defender",
             "boss": "Lady Vashj",
+            "tokenId": 30243,
             "origin": "two-hop"
           }
         ],
-        "emptyMetaSocket": true,
+        "gemSubstitutions": [
+          {
+            "itemId": 29100,
+            "socketIndex": 0,
+            "from": 24028,
+            "to": 24061
+          },
+          {
+            "itemId": 29100,
+            "socketIndex": 1,
+            "from": 24028,
+            "to": 24055
+          },
+          {
+            "itemId": 29096,
+            "socketIndex": 0,
+            "from": 24028,
+            "to": 24055
+          }
+        ],
         "setContext": {
           "setId": 641,
           "setName": "Nordrassil Harness",
@@ -5614,7 +5699,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "prospectiveBonusDps": 114.36522009413147,
+          "prospectiveBonusDps": 114.57123727356156,
           "prospectiveBonusBreaks": [
             {
               "setId": 640,
@@ -5628,44 +5713,6 @@
       },
       {
         "rank": null,
-        "itemId": 29098,
-        "name": "Stag-Helm of Malorne",
-        "slot": "head",
-        "source": {
-          "kind": "token",
-          "zone": "Karazhan",
-          "token": "Helm of the Fallen Defender",
-          "boss": "Prince Malchezaar",
-          "origin": "two-hop"
-        },
-        "deltaDps": -212.6928602197645,
-        "deltaPct": -9.237460031872878,
-        "se": 1.4571063153456127,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "token",
-            "zone": "Karazhan",
-            "token": "Helm of the Fallen Defender",
-            "boss": "Prince Malchezaar",
-            "origin": "two-hop"
-          }
-        ],
-        "emptyMetaSocket": true,
-        "setContext": {
-          "setId": 640,
-          "setName": "Malorne Harness",
-          "piecesWornBefore": 2,
-          "piecesAfterSwap": 3,
-          "nextThreshold": 4,
-          "crossesThreshold": false,
-          "prospectiveBonusDps": 17.13998100655772
-        }
-      },
-      {
-        "rank": null,
         "itemId": 28732,
         "name": "Cowl of Defiance",
         "slot": "head",
@@ -5675,9 +5722,9 @@
           "boss": "Netherspite",
           "origin": "db"
         },
-        "deltaDps": -222.55579476503954,
-        "deltaPct": -9.665816976082565,
-        "se": 1.4594287404273332,
+        "deltaDps": -223.27097626911382,
+        "deltaPct": -9.663906234589964,
+        "se": 1.4635033825591441,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5701,9 +5748,9 @@
           "boss": "High King Maulgar",
           "origin": "db"
         },
-        "deltaDps": -232.55397667171337,
-        "deltaPct": -10.100047846168499,
-        "se": 1.444046334929522,
+        "deltaDps": -233.2386959792948,
+        "deltaPct": -10.09534210799143,
+        "se": 1.4478671517707433,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5727,9 +5774,9 @@
           "boss": "Lady Vashj",
           "origin": "db"
         },
-        "deltaDps": -248.04405876657074,
-        "deltaPct": -10.772797340880395,
-        "se": 1.2884047363653495,
+        "deltaDps": -248.2760269295204,
+        "deltaPct": -10.746207521623703,
+        "se": 1.2933060495126023,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5753,9 +5800,9 @@
           "boss": "Void Reaver",
           "origin": "db"
         },
-        "deltaDps": -251.76495503134265,
-        "deltaPct": -10.934399523920584,
-        "se": 1.4255299788081814,
+        "deltaDps": -252.53141059441896,
+        "deltaPct": -10.930394599662085,
+        "se": 1.4300679224375912,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5779,9 +5826,9 @@
           "boss": "High Astromancer Solarian",
           "origin": "db"
         },
-        "deltaDps": -253.0308477426288,
-        "deltaPct": -10.989378488955246,
-        "se": 1.3125312072499724,
+        "deltaDps": -253.26859285128558,
+        "deltaPct": -10.962302285682036,
+        "se": 1.317522041246888,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5805,9 +5852,9 @@
           "boss": "Al'ar",
           "origin": "db"
         },
-        "deltaDps": -253.35611688136214,
-        "deltaPct": -11.00350524744421,
-        "se": 1.2634002922279477,
+        "deltaDps": -253.5203088780504,
+        "deltaPct": -10.973197387772988,
+        "se": 1.2682949237090106,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5831,9 +5878,9 @@
           "boss": "Kael'thas Sunstrider",
           "origin": "db"
         },
-        "deltaDps": -255.82238276252224,
-        "deltaPct": -11.110617599413375,
-        "se": 1.3082985595661387,
+        "deltaDps": -256.05578585933745,
+        "deltaPct": -11.082941216624194,
+        "se": 1.3131804994705916,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5857,9 +5904,9 @@
           "boss": "Kael'thas Sunstrider",
           "origin": "db"
         },
-        "deltaDps": -266.3759599317243,
-        "deltaPct": -11.568969831797014,
-        "se": 1.409825654591226,
+        "deltaDps": -267.16856447443456,
+        "deltaPct": -11.563939026266105,
+        "se": 1.4146663604500946,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5883,9 +5930,9 @@
           "boss": "Gruul the Dragonkiller",
           "origin": "db"
         },
-        "deltaDps": -267.7148513778866,
-        "deltaPct": -11.62711920365727,
-        "se": 1.4159580442988084,
+        "deltaDps": -268.51439494796887,
+        "deltaPct": -11.622191019969993,
+        "se": 1.4207927623282643,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5908,9 +5955,9 @@
           "zone": "Karazhan",
           "origin": "db"
         },
-        "deltaDps": -268.91409040678013,
-        "deltaPct": -11.679203333733943,
-        "se": 1.4198486657731906,
+        "deltaDps": -269.71172171463445,
+        "deltaPct": -11.67401528212252,
+        "se": 1.424593648756332,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5939,9 +5986,9 @@
           "boss": "Netherspite",
           "origin": "db"
         },
-        "deltaDps": -271.07658149620397,
-        "deltaPct": -11.773122447836757,
-        "se": 1.43177712130672,
+        "deltaDps": -271.89604450412617,
+        "deltaPct": -11.768559996247308,
+        "se": 1.436204568207298,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5965,9 +6012,9 @@
           "boss": "The Wizard of Oz",
           "origin": "db"
         },
-        "deltaDps": -273.0343058258193,
-        "deltaPct": -11.858148340241236,
-        "se": 1.4038402514276542,
+        "deltaDps": -273.8523189645193,
+        "deltaPct": -11.85323402450782,
+        "se": 1.40812121780162,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -5991,9 +6038,9 @@
           "boss": "Gruul the Dragonkiller",
           "origin": "db"
         },
-        "deltaDps": -273.88340654442436,
-        "deltaPct": -11.89502561925777,
-        "se": 1.4074297512187681,
+        "deltaDps": -274.6976478735146,
+        "deltaPct": -11.889822655284764,
+        "se": 1.4119460112026623,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6017,9 +6064,9 @@
           "boss": "The Lurker Below",
           "origin": "db"
         },
-        "deltaDps": -283.94271841196723,
-        "deltaPct": -12.331911423645186,
-        "se": 1.3000651871175808,
+        "deltaDps": -284.2004273228006,
+        "deltaPct": -12.301134376586141,
+        "se": 1.3055237018478656,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6043,9 +6090,9 @@
           "boss": "Prince Malchezaar",
           "origin": "db"
         },
-        "deltaDps": -284.7449981182747,
-        "deltaPct": -12.366755220064777,
-        "se": 1.2887970909590754,
+        "deltaDps": -284.998790030299,
+        "deltaPct": -12.335690154839911,
+        "se": 1.294264712441813,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6069,9 +6116,9 @@
           "boss": "Terestian Illhoof",
           "origin": "db"
         },
-        "deltaDps": -285.72623684098016,
-        "deltaPct": -12.40937138251307,
-        "se": 1.2997006687963564,
+        "deltaDps": -285.88247097349154,
+        "deltaPct": -12.373938788491305,
+        "se": 1.3045871956748027,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6095,9 +6142,9 @@
           "boss": "Romulo and Julianne",
           "origin": "db"
         },
-        "deltaDps": -285.9396411934249,
-        "deltaPct": -12.41863974335179,
-        "se": 1.3039707424848646,
+        "deltaDps": -286.1271354553537,
+        "deltaPct": -12.384528676398638,
+        "se": 1.3089940440852599,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6121,9 +6168,9 @@
           "boss": "The Big Bad Wolf",
           "origin": "db"
         },
-        "deltaDps": -290.32982872659863,
-        "deltaPct": -12.609309904203528,
-        "se": 1.2856428995149858,
+        "deltaDps": -290.47170942634943,
+        "deltaPct": -12.572576205847055,
+        "se": 1.2907117698411816,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6147,9 +6194,9 @@
           "boss": "Moroes",
           "origin": "db"
         },
-        "deltaDps": -291.50279975087165,
-        "deltaPct": -12.660253189013707,
-        "se": 1.2844063473306317,
+        "deltaDps": -291.7294572165754,
+        "deltaPct": -12.62701568971824,
+        "se": 1.2895045105356164,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6173,9 +6220,9 @@
           "zone": "World Bosses",
           "origin": "atlasloot"
         },
-        "deltaDps": -316.1822900808693,
-        "deltaPct": -13.732107718097527,
-        "se": 1.2694648408926876,
+        "deltaDps": -316.2482767823594,
+        "deltaPct": -13.688271286957033,
+        "se": 1.2743389098570297,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6199,9 +6246,9 @@
           "boss": "Kael'thas Sunstrider",
           "origin": "db"
         },
-        "deltaDps": -331.94494636371405,
-        "deltaPct": -14.41669537777957,
-        "se": 1.2500078030883477,
+        "deltaDps": -332.10182271513054,
+        "deltaPct": -14.374465184346546,
+        "se": 1.2550549812200888,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6225,9 +6272,9 @@
           "boss": "High Astromancer Solarian",
           "origin": "db"
         },
-        "deltaDps": -335.51843742538085,
-        "deltaPct": -14.571895607925022,
-        "se": 1.2703793132811507,
+        "deltaDps": -335.65007274214895,
+        "deltaPct": -14.528045179968805,
+        "se": 1.2754582554500535,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6251,9 +6298,9 @@
           "boss": "Magtheridon",
           "origin": "db"
         },
-        "deltaDps": -338.85516841746585,
-        "deltaPct": -14.716813115473931,
-        "se": 1.2706223333598516,
+        "deltaDps": -338.98215217981124,
+        "deltaPct": -14.672268597583823,
+        "se": 1.275842845214494,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6277,9 +6324,9 @@
           "boss": "Nightbane",
           "origin": "db"
         },
-        "deltaDps": -343.51138778803124,
-        "deltaPct": -14.919037300577223,
-        "se": 1.2584039991910387,
+        "deltaDps": -343.6439254253785,
+        "deltaPct": -14.874045560648566,
+        "se": 1.263452402602156,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6303,9 +6350,9 @@
           "boss": "The Curator",
           "origin": "db"
         },
-        "deltaDps": -343.9947539282239,
-        "deltaPct": -14.940030367275261,
-        "se": 1.2423580671947265,
+        "deltaDps": -344.1363778167031,
+        "deltaPct": -14.895360528739287,
+        "se": 1.2475243429617096,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6329,9 +6376,9 @@
           "zone": "World Bosses",
           "origin": "atlasloot"
         },
-        "deltaDps": -451.39337191402683,
-        "deltaPct": -19.60445793713897,
-        "se": 1.2019760508035384,
+        "deltaDps": -451.6339075790265,
+        "deltaPct": -19.54820912300078,
+        "se": 1.2070043926176603,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6355,9 +6402,9 @@
           "boss": "Prince Malchezaar",
           "origin": "db"
         },
-        "deltaDps": -467.7554810514148,
-        "deltaPct": -20.31508042365589,
-        "se": 1.1740840387931377,
+        "deltaDps": -468.0494734502897,
+        "deltaPct": -20.258729101989957,
+        "se": 1.1791396302268746,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6381,9 +6428,9 @@
           "boss": "Maiden of Virtue",
           "origin": "db"
         },
-        "deltaDps": -468.09142278427953,
-        "deltaPct": -20.32967070340091,
-        "se": 1.1699835997247163,
+        "deltaDps": -468.3864196738243,
+        "deltaPct": -20.273313248862735,
+        "se": 1.1749641528521746,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6407,9 +6454,9 @@
           "boss": "Lady Vashj",
           "origin": "db"
         },
-        "deltaDps": -468.33270852596456,
-        "deltaPct": -20.34014998038639,
-        "se": 1.1851893539846823,
+        "deltaDps": -468.6255779497892,
+        "deltaPct": -20.283664809969203,
+        "se": 1.1901042131569408,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6433,9 +6480,9 @@
           "boss": "Prince Malchezaar",
           "origin": "db"
         },
-        "deltaDps": -468.40804145217317,
-        "deltaPct": -20.34342176343645,
-        "se": 1.1737510476752349,
+        "deltaDps": -468.7059784854778,
+        "deltaPct": -20.287144811047213,
+        "se": 1.178759304896898,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true,
@@ -6444,214 +6491,6 @@
             "kind": "raid",
             "zone": "Karazhan",
             "boss": "Prince Malchezaar",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 29948,
-        "name": "Claw of the Phoenix",
-        "slot": "weapon",
-        "source": {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Al'ar",
-          "origin": "db"
-        },
-        "deltaDps": -555.9780414003772,
-        "deltaPct": -24.146672957091116,
-        "se": 1.1399053388824847,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Tempest Keep",
-            "boss": "Al'ar",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 30049,
-        "name": "Fathomstone",
-        "slot": "weapon",
-        "source": {
-          "kind": "raid",
-          "zone": "Serpentshrine Cavern",
-          "boss": "Hydross the Unstable",
-          "origin": "db"
-        },
-        "deltaDps": -590.6272168051262,
-        "deltaPct": -25.651520710833342,
-        "se": 1.1288434780344339,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Serpentshrine Cavern",
-            "boss": "Hydross the Unstable",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 28734,
-        "name": "Jewel of Infinite Possibilities",
-        "slot": "weapon",
-        "source": {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Netherspite",
-          "origin": "db"
-        },
-        "deltaDps": -590.7811744030055,
-        "deltaPct": -25.658207240675218,
-        "se": 1.1257243523015144,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Karazhan",
-            "boss": "Netherspite",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 28603,
-        "name": "Talisman of Nightbane",
-        "slot": "weapon",
-        "source": {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Nightbane",
-          "origin": "db"
-        },
-        "deltaDps": -590.8046169071299,
-        "deltaPct": -25.65922537167723,
-        "se": 1.1245008708035427,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Karazhan",
-            "boss": "Nightbane",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 28781,
-        "name": "Karaborian Talisman",
-        "slot": "weapon",
-        "source": {
-          "kind": "raid",
-          "zone": "Magtheridon's Lair",
-          "boss": "Magtheridon",
-          "origin": "db"
-        },
-        "deltaDps": -591.0748738341008,
-        "deltaPct": -25.670962895723175,
-        "se": 1.1261951138171205,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Magtheridon's Lair",
-            "boss": "Magtheridon",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 29923,
-        "name": "Talisman of the Sun King",
-        "slot": "weapon",
-        "source": {
-          "kind": "raid",
-          "zone": "Tempest Keep",
-          "boss": "Al'ar",
-          "origin": "db"
-        },
-        "deltaDps": -592.1299624110136,
-        "deltaPct": -25.71678642994641,
-        "se": 1.1192449320818494,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Tempest Keep",
-            "boss": "Al'ar",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 28525,
-        "name": "Signet of Unshakable Faith",
-        "slot": "weapon",
-        "source": {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Moroes",
-          "origin": "db"
-        },
-        "deltaDps": -592.1974961735598,
-        "deltaPct": -25.719719487650732,
-        "se": 1.1193544287668649,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Karazhan",
-            "boss": "Moroes",
-            "origin": "db"
-          }
-        ]
-      },
-      {
-        "rank": null,
-        "itemId": 28728,
-        "name": "Aran's Soothing Sapphire",
-        "slot": "weapon",
-        "source": {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Shade of Aran",
-          "origin": "db"
-        },
-        "deltaDps": -592.6835389130242,
-        "deltaPct": -25.74082880168669,
-        "se": 1.1183175926206954,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": true,
-        "sources": [
-          {
-            "kind": "raid",
-            "zone": "Karazhan",
-            "boss": "Shade of Aran",
             "origin": "db"
           }
         ]
@@ -6678,9 +6517,9 @@
           30223,
           30229
         ],
-        "packageDeltaDps": -41.36685786404223,
-        "bonusDps": 114.36522009413147,
-        "se": 3.37858728079181,
+        "packageDeltaDps": -41.729949596478036,
+        "bonusDps": 114.57123727356156,
+        "se": 3.3902510984496055,
         "breaks": [
           {
             "setId": 640,
@@ -6700,9 +6539,9 @@
           29097,
           29099
         ],
-        "packageDeltaDps": -41.08771081458053,
-        "bonusDps": 17.13998100655772,
-        "se": 2.828120209309391
+        "packageDeltaDps": -41.311881303050086,
+        "bonusDps": 17.139520877141422,
+        "se": 2.8376694817783767
       },
       {
         "setId": 619,

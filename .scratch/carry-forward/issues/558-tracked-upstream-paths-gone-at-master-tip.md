@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: ticket 551 fix on feat/silence-followups, 2026-10-05
 Blocks: none
@@ -145,3 +145,42 @@ may swap; 560 must come after this ticket.
 - `db.json` changes in range are Battlemaster trinkets phase 4 → 3 and Brewfest re-issues (`558-scope.md:81`; hypothesis for completeness).
 - `warn_upstream_drift.py` covers the engine lock only and is warn-only; the fork's drift is `pnpm fork:upstream-status` (P1).
 - Ticket 263 (meta-preference table from wowsims) reads upstream data this move changes; it stays open and is not P4 work.
+
+## Closed (2026-10-06)
+
+Closed by stage `558-p4-engine-move` (part P4) on `feat/upstream-react-port`,
+because the owner chose to follow upstream:
+
+> 558 cli follows: follows. this can be a big plan that may take multiple sessions if the planner so decides. but this is all work that imrpoves our tab and needs to be done anyway.
+
+(owner, 2026-10-06, session `52d5f63f`; quoted in "Owner's decision" above,
+source `.scratch/stage-gate/558-upstream-react-port/decision-log.md:34` in
+the owner's checkout)
+
+- Lock: `data/wowsims.lock.json` `tag` and `commit` are
+  `42c75dc9b6ef447202588250480a7d504182409a`. `TRACKED` is remapped to
+  upstream's `ui/specs/` and `ui/sim/` layout, and
+  `python scripts/sync_wowsims.py --check` prints `in sync.`.
+- Commits: `8b3b72eb` (pin move, protos, item index, listings),
+  `4efe18c2` (Mug id in the feral skeleton), `b0d70deb` (44 universes
+  reassembled), `22ec5bc3` (fork re-pin, interim), `9ee0c247` (synthetic
+  roster recordings re-recorded), `43e6323d` (`ENGINE_VERSION` 7 to 8),
+  and the commit that closes this ticket. Fork commit `54a7d5263` on
+  `feat/upgrades-tab-react` refreshes the bundled universes.
+- Fixed-gear, fixed-seed engine check (25000 iterations, seed 443754031):
+  ret 1909.30 to 1908.12 (delta -1.18, noise band 3.11); feral 787.74 to
+  787.67 (delta -0.06, band 0.88). The new binary gives the same result on
+  two runs.
+- Mug of Direbrew: upstream replaced item 38287 with 281739 (a stronger
+  phase-3 item). The feral skeleton's rotation now casts 281739, mapped from
+  the owner's capture through `data/presets/feral/upstream-item-id-renames.json`;
+  the capture itself is unchanged. On the new engine a rotation that names
+  38287 never presses a worn 281739 Mug (808.70 against 826.65 DPS).
+- SME verdict, old engine against new engine on the same code: slamaltman
+  (ret p3), shredzepelin (feral p2) and nexess (feral p2) are each
+  `trust with caveats`, and every caveat was there before the move. No
+  top-10 rank moved. The committed `.scratch/rank-reports/stage2-close-*`
+  files are the new-engine runs.
+- Evidence (gitignored, owner's checkout):
+  `.scratch/stage-gate/558-p4-engine-move/sme-verdict.md`,
+  `engine-delta.md`, `rank-old/`, `rank-new/`, `regen-reconciliation.md`.
