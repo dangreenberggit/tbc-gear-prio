@@ -13,9 +13,9 @@ writer? Read the contract in scripts/pinned_fetch.py first.
 
 The load-bearing field is CURRENT_PHASE.
 
-    // ui/core/constants/other.ts
+    // ui/sim/constants/other.ts (spec files live under ui/specs/)
     export enum Phase { Phase1 = 1, Phase2, Phase3, Phase4, Phase5 }
-    export const CURRENT_PHASE: Phase = Phase.Phase2;
+    export const CURRENT_PHASE = Phase.Phase3;
 
 That is upstream's own statement of what content tier the game is on, maintained by
 people who track it for a living. It is the source of DEFAULT_MAX_PHASE (PLAN.md
@@ -99,25 +99,25 @@ VENDOR = "vendor/wowsims"
 # variants are a different claim and would need their own tag vocabulary.
 TRACKED = {
     "db.json": "assets/database/db.json",
-    "constants_other.ts": "ui/core/constants/other.ts",
-    "ret_p1.gear.json": "ui/paladin/retribution/gear_sets/p1.gear.json",
-    "ret_p2.gear.json": "ui/paladin/retribution/gear_sets/p2.gear.json",
-    "ret_p3.gear.json": "ui/paladin/retribution/gear_sets/p3.gear.json",
-    "ret_preraid.gear.json": "ui/paladin/retribution/gear_sets/preraid.gear.json",
-    "ret_default.apl.json": "ui/paladin/retribution/apls/default.apl.json",
-    "feral_p2_6p.gear.json": "ui/druid/feralcat/gear_sets/p2_6p.gear.json",
-    "feral_p2_9p.gear.json": "ui/druid/feralcat/gear_sets/p2_9p.gear.json",
-    "feral_p3_6p.gear.json": "ui/druid/feralcat/gear_sets/p3_6p.gear.json",
-    "feral_p3_9p.gear.json": "ui/druid/feralcat/gear_sets/p3_9p.gear.json",
-    "feral_preraid.gear.json": "ui/druid/feralcat/gear_sets/pre_raid.gear.json",
-    "feral_default.apl.json": "ui/druid/feralcat/apls/default.apl.json",
+    "constants_other.ts": "ui/sim/constants/other.ts",
+    "ret_p1.gear.json": "ui/specs/paladin/retribution/gear_sets/p1.gear.json",
+    "ret_p2.gear.json": "ui/specs/paladin/retribution/gear_sets/p2.gear.json",
+    "ret_p3.gear.json": "ui/specs/paladin/retribution/gear_sets/p3.gear.json",
+    "ret_preraid.gear.json": "ui/specs/paladin/retribution/gear_sets/preraid.gear.json",
+    "ret_default.apl.json": "ui/specs/paladin/retribution/apls/default.apl.json",
+    "feral_p2_6p.gear.json": "ui/specs/druid/feralcat/gear_sets/p2_6p.gear.json",
+    "feral_p2_9p.gear.json": "ui/specs/druid/feralcat/gear_sets/p2_9p.gear.json",
+    "feral_p3_6p.gear.json": "ui/specs/druid/feralcat/gear_sets/p3_6p.gear.json",
+    "feral_p3_9p.gear.json": "ui/specs/druid/feralcat/gear_sets/p3_9p.gear.json",
+    "feral_preraid.gear.json": "ui/specs/druid/feralcat/gear_sets/pre_raid.gear.json",
+    "feral_default.apl.json": "ui/specs/druid/feralcat/apls/default.apl.json",
     # Sources for scripts/extract_sim_defaults.mjs (ADR-0022). Unlike everything
     # above these are TypeScript, not data: the buff/debuff defaults live in
-    # `sim.ts` as constructor calls, so they are parsed with the TS compiler API
+    # `spec.ts` as constructor calls, so they are parsed with the TS compiler API
     # rather than json.load'ed. Pinned here so a tag bump trips the checksum
     # instead of silently invalidating data/presets/*/buff-defaults.json.
-    "feral_sim.ts": "ui/druid/feralcat/sim.ts",
-    "proto_utils.ts": "ui/core/proto_utils/utils.ts",
+    "feral_sim.ts": "ui/specs/druid/feralcat/spec.ts",
+    "proto_utils.ts": "ui/sim/proto/utils.ts",
     # The nine DPS specs added by the all-DPS-specs pass. These feed only
     # `bisTags` and set membership -- never a ranking number -- so where a
     # spec's curated sets stop short of p5 the later phases carry tags traced
@@ -129,109 +129,109 @@ TRACKED = {
     # splits by build (bm/sv) and weapon layout (2h/dw) and tier-piece count.
     # Which variant a spec's EP weights come from is a separate, single choice
     # made in step 6 -- vendoring both families here does not prejudge it.
-    "balance_preraid.gear.json": "ui/druid/balance/gear_sets/preraid.gear.json",
-    "balance_p1.gear.json": "ui/druid/balance/gear_sets/p1_a.gear.json",
-    "balance_p2.gear.json": "ui/druid/balance/gear_sets/p2_a.gear.json",
-    "balance_p3.gear.json": "ui/druid/balance/gear_sets/p3.gear.json",
-    "balance_p4.gear.json": "ui/druid/balance/gear_sets/p4.gear.json",
-    "balance_p5.gear.json": "ui/druid/balance/gear_sets/p5.gear.json",
+    "balance_preraid.gear.json": "ui/specs/druid/balance/gear_sets/preraid.gear.json",
+    "balance_p1.gear.json": "ui/specs/druid/balance/gear_sets/p1_a.gear.json",
+    "balance_p2.gear.json": "ui/specs/druid/balance/gear_sets/p2_a.gear.json",
+    "balance_p3.gear.json": "ui/specs/druid/balance/gear_sets/p3.gear.json",
+    "balance_p4.gear.json": "ui/specs/druid/balance/gear_sets/p4.gear.json",
+    "balance_p5.gear.json": "ui/specs/druid/balance/gear_sets/p5.gear.json",
     # `simtest.gear.json` is a test fixture, not a curated set -- skipped.
-    "ele_preraid.gear.json": "ui/shaman/elemental/gear_sets/preraid.gear.json",
-    "ele_p1_a.gear.json": "ui/shaman/elemental/gear_sets/p1_a.gear.json",
-    "ele_p1_h.gear.json": "ui/shaman/elemental/gear_sets/p1_h.gear.json",
-    "ele_p2.gear.json": "ui/shaman/elemental/gear_sets/p2.gear.json",
-    "ele_p3.gear.json": "ui/shaman/elemental/gear_sets/p3.gear.json",
-    "ele_p4.gear.json": "ui/shaman/elemental/gear_sets/p4.gear.json",
-    "ele_p5.gear.json": "ui/shaman/elemental/gear_sets/p5.gear.json",
+    "ele_preraid.gear.json": "ui/specs/shaman/elemental/gear_sets/preraid.gear.json",
+    "ele_p1_a.gear.json": "ui/specs/shaman/elemental/gear_sets/p1_a.gear.json",
+    "ele_p1_h.gear.json": "ui/specs/shaman/elemental/gear_sets/p1_h.gear.json",
+    "ele_p2.gear.json": "ui/specs/shaman/elemental/gear_sets/p2.gear.json",
+    "ele_p3.gear.json": "ui/specs/shaman/elemental/gear_sets/p3.gear.json",
+    "ele_p4.gear.json": "ui/specs/shaman/elemental/gear_sets/p4.gear.json",
+    "ele_p5.gear.json": "ui/specs/shaman/elemental/gear_sets/p5.gear.json",
     # `*.itemswap.json` files describe a weapon swap, not a gear set.
-    "enh_preraid.gear.json": "ui/shaman/enhancement/gear_sets/preraid.gear.json",
-    "enh_p1.gear.json": "ui/shaman/enhancement/gear_sets/p1.gear.json",
-    "enh_p2.gear.json": "ui/shaman/enhancement/gear_sets/p2.gear.json",
-    "enh_p3.gear.json": "ui/shaman/enhancement/gear_sets/p3.gear.json",
-    "enh_p4.gear.json": "ui/shaman/enhancement/gear_sets/p4.gear.json",
-    "enh_p5.gear.json": "ui/shaman/enhancement/gear_sets/p5.gear.json",
-    "mage_prebis.gear.json": "ui/mage/dps/gear_sets/preBisArcane.gear.json",
-    "mage_p1.gear.json": "ui/mage/dps/gear_sets/p1Arcane.gear.json",
-    "mage_p2.gear.json": "ui/mage/dps/gear_sets/p2Arcane.gear.json",
+    "enh_preraid.gear.json": "ui/specs/shaman/enhancement/gear_sets/preraid.gear.json",
+    "enh_p1.gear.json": "ui/specs/shaman/enhancement/gear_sets/p1.gear.json",
+    "enh_p2.gear.json": "ui/specs/shaman/enhancement/gear_sets/p2.gear.json",
+    "enh_p3.gear.json": "ui/specs/shaman/enhancement/gear_sets/p3.gear.json",
+    "enh_p4.gear.json": "ui/specs/shaman/enhancement/gear_sets/p4.gear.json",
+    "enh_p5.gear.json": "ui/specs/shaman/enhancement/gear_sets/p5.gear.json",
+    "mage_prebis.gear.json": "ui/specs/mage/dps/gear_sets/preBisArcane.gear.json",
+    "mage_p1.gear.json": "ui/specs/mage/dps/gear_sets/p1Arcane.gear.json",
+    "mage_p2.gear.json": "ui/specs/mage/dps/gear_sets/p2Arcane.gear.json",
     # Upstream ships p3 Arcane in two weapon layouts and nothing past p3;
     # both are vendored and union-tagged. `blank.gear.json` is an empty
     # template, not a curated set.
-    "mage_p3_staff.gear.json": "ui/mage/dps/gear_sets/p3ArcaneStaff.gear.json",
-    "mage_p3_sword.gear.json": "ui/mage/dps/gear_sets/p3ArcaneSword.gear.json",
-    "shadow_preraid.gear.json": "ui/priest/dps/gear_sets/pre_raid.gear.json",
-    "shadow_p1.gear.json": "ui/priest/dps/gear_sets/p1.gear.json",
-    "shadow_p2.gear.json": "ui/priest/dps/gear_sets/p2.gear.json",
-    "shadow_p3.gear.json": "ui/priest/dps/gear_sets/p3.gear.json",
-    "rogue_preraid.gear.json": "ui/rogue/dps/gear_sets/preraid.gear.json",
-    "rogue_p1.gear.json": "ui/rogue/dps/gear_sets/p1.gear.json",
-    "rogue_p2.gear.json": "ui/rogue/dps/gear_sets/p2.gear.json",
-    "rogue_p3.gear.json": "ui/rogue/dps/gear_sets/p3.gear.json",
+    "mage_p3_staff.gear.json": "ui/specs/mage/dps/gear_sets/p3ArcaneStaff.gear.json",
+    "mage_p3_sword.gear.json": "ui/specs/mage/dps/gear_sets/p3ArcaneSword.gear.json",
+    "shadow_preraid.gear.json": "ui/specs/priest/dps/gear_sets/pre_raid.gear.json",
+    "shadow_p1.gear.json": "ui/specs/priest/dps/gear_sets/p1.gear.json",
+    "shadow_p2.gear.json": "ui/specs/priest/dps/gear_sets/p2.gear.json",
+    "shadow_p3.gear.json": "ui/specs/priest/dps/gear_sets/p3.gear.json",
+    "rogue_preraid.gear.json": "ui/specs/rogue/dps/gear_sets/preraid.gear.json",
+    "rogue_p1.gear.json": "ui/specs/rogue/dps/gear_sets/p1.gear.json",
+    "rogue_p2.gear.json": "ui/specs/rogue/dps/gear_sets/p2.gear.json",
+    "rogue_p3.gear.json": "ui/specs/rogue/dps/gear_sets/p3.gear.json",
     # Warlock names its sets by raid tier rather than phase. The mapping
     # t4->p1, t5->p2, t6->p3, za->p4, swp->p5 is restated in the spec profile
     # and is an SME item; data/phase_raids.json is a second in-repo witness
     # for the last two (Zul'Aman p4, Sunwell p5).
-    "warlock_preraid.gear.json": "ui/warlock/dps/gear_sets/preraid.gear.json",
-    "warlock_t4.gear.json": "ui/warlock/dps/gear_sets/t4.gear.json",
-    "warlock_t5.gear.json": "ui/warlock/dps/gear_sets/t5.gear.json",
-    "warlock_t6.gear.json": "ui/warlock/dps/gear_sets/t6.gear.json",
-    "warlock_za.gear.json": "ui/warlock/dps/gear_sets/za.gear.json",
-    "warlock_swp.gear.json": "ui/warlock/dps/gear_sets/swp.gear.json",
+    "warlock_preraid.gear.json": "ui/specs/warlock/dps/gear_sets/preraid.gear.json",
+    "warlock_t4.gear.json": "ui/specs/warlock/dps/gear_sets/t4.gear.json",
+    "warlock_t5.gear.json": "ui/specs/warlock/dps/gear_sets/t5.gear.json",
+    "warlock_t6.gear.json": "ui/specs/warlock/dps/gear_sets/t6.gear.json",
+    "warlock_za.gear.json": "ui/specs/warlock/dps/gear_sets/za.gear.json",
+    "warlock_swp.gear.json": "ui/specs/warlock/dps/gear_sets/swp.gear.json",
     "warlock_destro_preraid.gear.json": (
-        "ui/warlock/dps/gear_sets/destro_fire_preraid.gear.json"
+        "ui/specs/warlock/dps/gear_sets/destro_fire_preraid.gear.json"
     ),
     "warlock_destro_t4.gear.json": (
-        "ui/warlock/dps/gear_sets/destro_fire_t4.gear.json"
+        "ui/specs/warlock/dps/gear_sets/destro_fire_t4.gear.json"
     ),
-    "warrior_preraid_arms.gear.json": "ui/warrior/dps/gear_sets/preraid_arms.gear.json",
-    "warrior_preraid_fury.gear.json": "ui/warrior/dps/gear_sets/preraid_fury.gear.json",
-    "warrior_p1_arms.gear.json": "ui/warrior/dps/gear_sets/p1_arms.gear.json",
-    "warrior_p1_fury.gear.json": "ui/warrior/dps/gear_sets/p1_fury.gear.json",
-    "warrior_p2_arms.gear.json": "ui/warrior/dps/gear_sets/p2_arms.gear.json",
-    "warrior_p2_fury.gear.json": "ui/warrior/dps/gear_sets/p2_fury.gear.json",
-    "warrior_p3_arms.gear.json": "ui/warrior/dps/gear_sets/p3_arms.gear.json",
-    "warrior_p3_fury.gear.json": "ui/warrior/dps/gear_sets/p3_fury.gear.json",
-    "warrior_p4_arms.gear.json": "ui/warrior/dps/gear_sets/p4_arms.gear.json",
-    "warrior_p4_fury.gear.json": "ui/warrior/dps/gear_sets/p4_fury.gear.json",
-    "warrior_p5_arms.gear.json": "ui/warrior/dps/gear_sets/p5_arms.gear.json",
-    "warrior_p5_fury.gear.json": "ui/warrior/dps/gear_sets/p5_fury.gear.json",
+    "warrior_preraid_arms.gear.json": "ui/specs/warrior/dps/gear_sets/preraid_arms.gear.json",
+    "warrior_preraid_fury.gear.json": "ui/specs/warrior/dps/gear_sets/preraid_fury.gear.json",
+    "warrior_p1_arms.gear.json": "ui/specs/warrior/dps/gear_sets/p1_arms.gear.json",
+    "warrior_p1_fury.gear.json": "ui/specs/warrior/dps/gear_sets/p1_fury.gear.json",
+    "warrior_p2_arms.gear.json": "ui/specs/warrior/dps/gear_sets/p2_arms.gear.json",
+    "warrior_p2_fury.gear.json": "ui/specs/warrior/dps/gear_sets/p2_fury.gear.json",
+    "warrior_p3_arms.gear.json": "ui/specs/warrior/dps/gear_sets/p3_arms.gear.json",
+    "warrior_p3_fury.gear.json": "ui/specs/warrior/dps/gear_sets/p3_fury.gear.json",
+    "warrior_p4_arms.gear.json": "ui/specs/warrior/dps/gear_sets/p4_arms.gear.json",
+    "warrior_p4_fury.gear.json": "ui/specs/warrior/dps/gear_sets/p4_fury.gear.json",
+    "warrior_p5_arms.gear.json": "ui/specs/warrior/dps/gear_sets/p5_arms.gear.json",
+    "warrior_p5_fury.gear.json": "ui/specs/warrior/dps/gear_sets/p5_fury.gear.json",
     # Hunter nests two levels: phase_N/{bm,sv}/{2h,dw}_{3,6,9}p.gear.json,
     # loaded upstream by glob. Not every combination exists at every phase --
     # phase_1/sv has 3p and 6p but no 9p, phase_2/sv has only 6p -- so the
     # list below is what the pin actually carries, enumerated rather than
     # generated.
-    "hunter_p1_bm_2h_6p.gear.json": "ui/hunter/dps/gear_sets/phase_1/bm/2h_6p.gear.json",
-    "hunter_p1_bm_2h_9p.gear.json": "ui/hunter/dps/gear_sets/phase_1/bm/2h_9p.gear.json",
-    "hunter_p1_bm_dw_6p.gear.json": "ui/hunter/dps/gear_sets/phase_1/bm/dw_6p.gear.json",
-    "hunter_p1_bm_dw_9p.gear.json": "ui/hunter/dps/gear_sets/phase_1/bm/dw_9p.gear.json",
+    "hunter_p1_bm_2h_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_1/bm/2h_6p.gear.json",
+    "hunter_p1_bm_2h_9p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_1/bm/2h_9p.gear.json",
+    "hunter_p1_bm_dw_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_1/bm/dw_6p.gear.json",
+    "hunter_p1_bm_dw_9p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_1/bm/dw_9p.gear.json",
     "hunter_p1_bm_preraid.gear.json": (
-        "ui/hunter/dps/gear_sets/phase_1/bm/pre_raid.gear.json"
+        "ui/specs/hunter/dps/gear_sets/phase_1/bm/pre_raid.gear.json"
     ),
-    "hunter_p1_sv_2h_3p.gear.json": "ui/hunter/dps/gear_sets/phase_1/sv/2h_3p.gear.json",
-    "hunter_p1_sv_2h_6p.gear.json": "ui/hunter/dps/gear_sets/phase_1/sv/2h_6p.gear.json",
-    "hunter_p1_sv_dw_3p.gear.json": "ui/hunter/dps/gear_sets/phase_1/sv/dw_3p.gear.json",
-    "hunter_p1_sv_dw_6p.gear.json": "ui/hunter/dps/gear_sets/phase_1/sv/dw_6p.gear.json",
-    "hunter_p2_bm_2h_6p.gear.json": "ui/hunter/dps/gear_sets/phase_2/bm/2h_6p.gear.json",
-    "hunter_p2_bm_2h_9p.gear.json": "ui/hunter/dps/gear_sets/phase_2/bm/2h_9p.gear.json",
-    "hunter_p2_bm_dw_6p.gear.json": "ui/hunter/dps/gear_sets/phase_2/bm/dw_6p.gear.json",
-    "hunter_p2_bm_dw_9p.gear.json": "ui/hunter/dps/gear_sets/phase_2/bm/dw_9p.gear.json",
-    "hunter_p2_sv_2h_6p.gear.json": "ui/hunter/dps/gear_sets/phase_2/sv/2h_6p.gear.json",
-    "hunter_p2_sv_dw_6p.gear.json": "ui/hunter/dps/gear_sets/phase_2/sv/dw_6p.gear.json",
-    "hunter_p3_bm_2h_6p.gear.json": "ui/hunter/dps/gear_sets/phase_3/bm/2h_6p.gear.json",
-    "hunter_p3_bm_2h_9p.gear.json": "ui/hunter/dps/gear_sets/phase_3/bm/2h_9p.gear.json",
-    "hunter_p3_bm_dw_6p.gear.json": "ui/hunter/dps/gear_sets/phase_3/bm/dw_6p.gear.json",
-    "hunter_p3_bm_dw_9p.gear.json": "ui/hunter/dps/gear_sets/phase_3/bm/dw_9p.gear.json",
-    "hunter_p3_sv_2h_6p.gear.json": "ui/hunter/dps/gear_sets/phase_3/sv/2h_6p.gear.json",
-    "hunter_p3_sv_2h_9p.gear.json": "ui/hunter/dps/gear_sets/phase_3/sv/2h_9p.gear.json",
-    "hunter_p3_sv_dw_6p.gear.json": "ui/hunter/dps/gear_sets/phase_3/sv/dw_6p.gear.json",
-    "hunter_p3_sv_dw_9p.gear.json": "ui/hunter/dps/gear_sets/phase_3/sv/dw_9p.gear.json",
-    "hunter_p4_bm_2h_6p.gear.json": "ui/hunter/dps/gear_sets/phase_4/bm/2h_6p.gear.json",
-    "hunter_p4_bm_2h_9p.gear.json": "ui/hunter/dps/gear_sets/phase_4/bm/2h_9p.gear.json",
-    "hunter_p4_bm_dw_6p.gear.json": "ui/hunter/dps/gear_sets/phase_4/bm/dw_6p.gear.json",
-    "hunter_p4_bm_dw_9p.gear.json": "ui/hunter/dps/gear_sets/phase_4/bm/dw_9p.gear.json",
-    "hunter_p4_sv_2h_6p.gear.json": "ui/hunter/dps/gear_sets/phase_4/sv/2h_6p.gear.json",
-    "hunter_p4_sv_2h_9p.gear.json": "ui/hunter/dps/gear_sets/phase_4/sv/2h_9p.gear.json",
-    "hunter_p4_sv_dw_6p.gear.json": "ui/hunter/dps/gear_sets/phase_4/sv/dw_6p.gear.json",
-    "hunter_p4_sv_dw_9p.gear.json": "ui/hunter/dps/gear_sets/phase_4/sv/dw_9p.gear.json",
+    "hunter_p1_sv_2h_3p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_1/sv/2h_3p.gear.json",
+    "hunter_p1_sv_2h_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_1/sv/2h_6p.gear.json",
+    "hunter_p1_sv_dw_3p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_1/sv/dw_3p.gear.json",
+    "hunter_p1_sv_dw_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_1/sv/dw_6p.gear.json",
+    "hunter_p2_bm_2h_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_2/bm/2h_6p.gear.json",
+    "hunter_p2_bm_2h_9p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_2/bm/2h_9p.gear.json",
+    "hunter_p2_bm_dw_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_2/bm/dw_6p.gear.json",
+    "hunter_p2_bm_dw_9p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_2/bm/dw_9p.gear.json",
+    "hunter_p2_sv_2h_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_2/sv/2h_6p.gear.json",
+    "hunter_p2_sv_dw_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_2/sv/dw_6p.gear.json",
+    "hunter_p3_bm_2h_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_3/bm/2h_6p.gear.json",
+    "hunter_p3_bm_2h_9p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_3/bm/2h_9p.gear.json",
+    "hunter_p3_bm_dw_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_3/bm/dw_6p.gear.json",
+    "hunter_p3_bm_dw_9p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_3/bm/dw_9p.gear.json",
+    "hunter_p3_sv_2h_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_3/sv/2h_6p.gear.json",
+    "hunter_p3_sv_2h_9p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_3/sv/2h_9p.gear.json",
+    "hunter_p3_sv_dw_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_3/sv/dw_6p.gear.json",
+    "hunter_p3_sv_dw_9p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_3/sv/dw_9p.gear.json",
+    "hunter_p4_bm_2h_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_4/bm/2h_6p.gear.json",
+    "hunter_p4_bm_2h_9p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_4/bm/2h_9p.gear.json",
+    "hunter_p4_bm_dw_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_4/bm/dw_6p.gear.json",
+    "hunter_p4_bm_dw_9p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_4/bm/dw_9p.gear.json",
+    "hunter_p4_sv_2h_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_4/sv/2h_6p.gear.json",
+    "hunter_p4_sv_2h_9p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_4/sv/2h_9p.gear.json",
+    "hunter_p4_sv_dw_6p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_4/sv/dw_6p.gear.json",
+    "hunter_p4_sv_dw_9p.gear.json": "ui/specs/hunter/dps/gear_sets/phase_4/sv/dw_9p.gear.json",
 }
 
 # Per-file commit overrides for a TRACKED entry that must be fetched from a ref
@@ -291,9 +291,11 @@ def fetch(sha, path):
 
 # Upstream ported the UI to ui/sim/ in c86fd86f5 and deleted ui/core/ in
 # 7b539641 (both 2026-09-16), so the phase file's path depends on the commit.
-# TRACKED keeps the old path because --restore and --update read the pin, which
-# predates the move; --check reads newer tips and needs both (ticket 551).
+# The pin is now past the move (42c75dc9, ticket 558), so TRACKED names the new
+# path. The old path stays only so --check can still read a pre-move tip, e.g.
+# a watched ref that has not caught up (ticket 551).
 PHASE_FILE_AFTER_UI_PORT = "ui/sim/constants/other.ts"
+PHASE_FILE_BEFORE_UI_PORT = "ui/core/constants/other.ts"
 
 
 def read_phase_at(sha):
@@ -304,7 +306,7 @@ def read_phase_at(sha):
     (ticket 551). Convert it here, naming every path tried.
     """
     tried = []
-    for path in (PHASE_FILE_AFTER_UI_PORT, TRACKED["constants_other.ts"]):
+    for path in (PHASE_FILE_AFTER_UI_PORT, PHASE_FILE_BEFORE_UI_PORT):
         try:
             blob = fetch(sha, path)
         except urllib.error.HTTPError as e:
@@ -500,7 +502,7 @@ def do_update(tag, ref=None):
         # comparison", which names watchedRefs directly. One home, not two.
         "_comment": (
             "Generated by scripts/sync_wowsims.py. currentPhase is upstream's own "
-            "CURRENT_PHASE from ui/core/constants/other.ts and is the single source "
+            "CURRENT_PHASE from ui/sim/constants/other.ts and is the single source "
             "of DEFAULT_MAX_PHASE (PLAN.md 1.1). Never infer the content tier from a "
             "player's most recent log. Before concluding an upstream feature is "
             "absent, resolve every ref in watchedRefs -- see AGENTS.md."

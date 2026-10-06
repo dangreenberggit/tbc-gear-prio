@@ -100,8 +100,8 @@ absorbs it silently.
 
 ## Source inventory
 
-- `vendor/wowsims/db.json` — 8257 items, sha256 `0ee6cc3abe86b50bd970e215985aed9fc747a8a7bde923337b1439c73bf0f563` per `data/wowsims.lock.json`
-- pinned from `assets/database/db.json` of upstream `wowsims/tbc-new` at `17a8fb28c5ad14b649acecdaacd488594048f467`, commit `17a8fb28c5ad14b649acecdaacd488594048f467`
+- `vendor/wowsims/db.json` — 8256 items, sha256 `6b708ebb19d9e45ea9554a69f8f0b3f9db4600c7c71ef65dd50b3db7655ada2a` per `data/wowsims.lock.json`
+- pinned from `assets/database/db.json` of upstream `wowsims/tbc-new` at `42c75dc9b6ef447202588250480a7d504182409a`, commit `42c75dc9b6ef447202588250480a7d504182409a`
 - `data/universes/ret-p3.json` — 467 entries
 - `data/sim-implemented-effects.json` — 451 stub-only item ids
 
@@ -121,10 +121,10 @@ python -c "import json;a=json.load(open('vendor/wowsims/db.json'))['items'];b=js
 ## Counts
 
 - local membership (U): 467
-- wowsims-primary membership (W): 1595
+- wowsims-primary membership (W): 1607
 - in both: 456
 - universe-only (U \ W): 11
-- wowsims-only (W \ U): 1139
+- wowsims-only (W \ U): 1151
 - phase-disagreements: 0
 - universe ids absent from the wowsims DB: 0
 - unexplained: 0
@@ -1248,6 +1248,7 @@ carry. Each row names the rule that explains the absence.
 | 33811 | Vindicator's Plate Belt | 3 | f | no recognized source route | — |
 | 33812 | Vindicator's Plate Greaves | 3 | f | no recognized source route | — |
 | 33813 | Vindicator's Plate Bracers | 3 | f | no recognized source route | — |
+| 33832 | Battlemaster's Determination | 3 | f | no recognized source route | — |
 | 33842 | Vengeful Gladiator's Libram of Justice | 3 | c | stub-only sim effect | — |
 | 33853 | Vindicator's Band of Dominance | 3 | f | no recognized source route | — |
 | 33888 | Vindicator's Lamellar Belt | 3 | f | no recognized source route | — |
@@ -1273,13 +1274,18 @@ carry. Each row names the rule that explains the absence.
 | 33957 | Witches Band | 1 | f | no recognized source route | — |
 | 33958 | The Horseman's Signet Ring | 1 | f | no recognized source route | — |
 | 33959 | Ring of Ghoulish Delight | 1 | f | no recognized source route | — |
+| 34049 | Battlemaster's Audacity | 3 | f | no recognized source route | — |
+| 34050 | Battlemaster's Perseverance | 3 | f | no recognized source route | — |
 | 34073 | The Horseman's Signet Ring | 1 | f | no recognized source route | — |
 | 34074 | Witches Band | 1 | f | no recognized source route | — |
 | 34075 | Ring of Ghoulish Delight | 1 | f | no recognized source route | — |
+| 34162 | Battlemaster's Depravity | 3 | f | no recognized source route | — |
+| 34163 | Battlemaster's Cruelty | 3 | f | no recognized source route | — |
 | 34837 | The 2 Ring | 1 | f | no recognized source route | — |
 | 35317 | Vindicator's Pendant of Reprieve | 3 | f | no recognized source route | — |
 | 35319 | Vindicator's Pendant of Subjugation | 3 | f | no recognized source route | — |
 | 35320 | Vindicator's Band of Subjugation | 3 | f | no recognized source route | — |
+| 35327 | Battlemaster's Alacrity | 3 | f | no recognized source route | — |
 | 278774 | Cloak of the Frigid Winds | 2 | f | no recognized source route | — |
 | 278819 | The Frost Lord's War Cloak | 2 | f | no recognized source route | — |
 | 278823 | Icebound Cloak | 2 | f | no recognized source route | — |
@@ -1288,6 +1294,12 @@ carry. Each row names the rule that explains the absence.
 | 278838 | Amulet of Glacial Tranquility | 2 | f | no recognized source route | — |
 | 278847 | Hailstone Pendant | 2 | f | no recognized source route | — |
 | 279240 | Shroud of Winter's Chill | 2 | f | no recognized source route | — |
+| 281735 | Dark Iron Smoking Pipe | 3 | f | no recognized source route | — |
+| 281739 | Empty Mug of Direbrew | 3 | f | no recognized source route | — |
+| 281743 | Coren's Lucky Coin | 3 | f | no recognized source route | — |
+| 281748 | Direbrew Hops | 3 | f | no recognized source route | — |
+| 281893 | Balebrew Charm | 3 | f | no recognized source route | — |
+| 281895 | Brightbrew Charm | 3 | f | no recognized source route | — |
 
 ### Category totals
 
@@ -1299,7 +1311,7 @@ carry. Each row names the rule that explains the absence.
 | c — stub-only sim effect | 82 |
 | e1 — drops only outside this phase's zones | 343 |
 | e2 — sourced, but by a route the local assembly did not admit | 161 |
-| f — no recognized source route | 553 |
+| f — no recognized source route | 565 |
 | g — unexplained | 0 |
 
 ## Universe-only items, classified
