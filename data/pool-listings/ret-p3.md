@@ -121,10 +121,10 @@ python -c "import json;a=json.load(open('vendor/wowsims/db.json'))['items'];b=js
 ## Counts
 
 - local membership (U): 467
-- wowsims-primary membership (W): 1599
+- wowsims-primary membership (W): 1595
 - in both: 456
 - universe-only (U \ W): 11
-- wowsims-only (W \ U): 1143
+- wowsims-only (W \ U): 1139
 - phase-disagreements: 0
 - universe ids absent from the wowsims DB: 0
 - unexplained: 0
@@ -1280,10 +1280,6 @@ carry. Each row names the rule that explains the absence.
 | 35317 | Vindicator's Pendant of Reprieve | 3 | f | no recognized source route | — |
 | 35319 | Vindicator's Pendant of Subjugation | 3 | f | no recognized source route | — |
 | 35320 | Vindicator's Band of Subjugation | 3 | f | no recognized source route | — |
-| 38287 | Empty Mug of Direbrew | 1 | f | no recognized source route | — |
-| 38288 | Direbrew Hops | 1 | f | no recognized source route | — |
-| 38289 | Coren's Lucky Coin | 1 | f | no recognized source route | — |
-| 38290 | Dark Iron Smoking Pipe | 1 | f | no recognized source route | — |
 | 278774 | Cloak of the Frigid Winds | 2 | f | no recognized source route | — |
 | 278819 | The Frost Lord's War Cloak | 2 | f | no recognized source route | — |
 | 278823 | Icebound Cloak | 2 | f | no recognized source route | — |
@@ -1303,7 +1299,7 @@ carry. Each row names the rule that explains the absence.
 | c — stub-only sim effect | 82 |
 | e1 — drops only outside this phase's zones | 343 |
 | e2 — sourced, but by a route the local assembly did not admit | 161 |
-| f — no recognized source route | 557 |
+| f — no recognized source route | 553 |
 | g — unexplained | 0 |
 
 ## Universe-only items, classified
