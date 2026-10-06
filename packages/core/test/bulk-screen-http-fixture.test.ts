@@ -61,7 +61,7 @@ import { CURRENT_API_VERSION } from "../src/individual-settings.js";
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const forkEngineDir = join(
   root,
-  "vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine"
+  "vendor/tbc-new-fork/ui/features/upgrades/model/engine"
 );
 const forkPresent = existsSync(forkEngineDir);
 const seamModule = join(forkEngineDir, "seams/sim-runner.ts");

@@ -3,7 +3,7 @@
 
 `data/gems/meta-conditions.json` says when each TBC meta gem's bonus is active
 -- "Requires at least 2 Blue Gems", and so on. The fork owns the same facts in
-`ui/core/proto_utils/gems.ts`, and the copy here was made by hand.
+`ui/sim/proto/gems.ts`, and the copy here was made by hand.
 
 The plan for this branch left "gate it or justify it" to the executor, on the
 criterion of whether the fork's conditions are data-shaped or code-shaped. They
@@ -40,8 +40,8 @@ from _fork_gate import ForkGateError, require_pinned_fork  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
-GEMS_TS = FORK_ROOT / "ui/core/proto_utils/gems.ts"
-PROTO_COMMON = FORK_ROOT / "ui/core/proto/common.ts"
+GEMS_TS = FORK_ROOT / "ui/sim/proto/gems.ts"
+PROTO_COMMON = FORK_ROOT / "ui/generated/proto/common.ts"
 CONDITIONS = ROOT / "data/gems/meta-conditions.json"
 
 GEM_COLOR_RE = re.compile(r"^\s*(?P<name>GemColor\w+)\s*=\s*(?P<value>\d+),?\s*$", re.MULTILINE)
@@ -148,7 +148,7 @@ def main() -> int:
     if problems:
         print(
             "data/gems/meta-conditions.json disagrees with the fork's meta-gem "
-            "table (ui/core/proto_utils/gems.ts):\n",
+            "table (ui/sim/proto/gems.ts):\n",
             file=sys.stderr,
         )
         for problem in problems:

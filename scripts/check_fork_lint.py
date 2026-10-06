@@ -5,22 +5,24 @@ The Upgrades tab and our ported ranking engine live in
 `vendor/tbc-new-fork`, not in this repo's own source tree. Nothing in
 `pnpm verify` reached them: `pnpm lint` runs eslint over this repo, and
 `pnpm typecheck` runs `tsc --build` over this repo's projects. Neither
-one has ever opened `upgrades_tab.tsx`. A defect could reach our fork
+one has ever opened the Upgrades tab's files. A defect could reach our fork
 code -- a type error, a duplicate import, an unused binding -- and no
 gate would notice. The ticket-350 executor flagged exactly that hole.
 
 This script closes it, scoped to **our** files only:
 
-  - `ui/core/components/individual_sim_ui/upgrades/` -- the ported
-    engine, its adapters, tools and fixtures.
-  - `ui/core/components/individual_sim_ui/upgrades_tab.tsx` -- the tab.
-  - `ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss` --
-    the tab's style partial.
+  - `ui/features/upgrades/` -- the ported engine, its adapters, tools
+    and fixtures, and the tab's components, hooks and run model.
+  - `ui/app/tabs/UpgradesTabBody.tsx` -- the tab body, once it exists.
+
+The tab has no stylesheet of its own: upstream's React UI styles with
+Tailwind utilities, so the old SCSS partial and its stylelint run are
+gone (ticket 558).
 
 **Why the scope is narrow, and must stay narrow.** Everything else in
 the fork is upstream wowsims code. Upstream does not write to our lint
-rules and has no reason to: `ui/core/components/gear_picker` alone
-carries four `simple-import-sort` warnings today, so a whole-fork
+rules and has no reason to: when this gate was written, upstream's gear
+picker alone carried four `simple-import-sort` warnings, so a whole-fork
 `oxlint --deny-warnings` would fail this repo's build over code we do
 not own and must not reformat. Rearranging upstream's files to satisfy
 our gate would also poison the next upstream merge, which already
@@ -75,13 +77,13 @@ TSC = FORK_MODULES / "typescript/bin/tsc"
 
 CHECK_NAME = "fork lint check"
 
-# Fork-relative. oxlint and stylelint are given these verbatim, so the
-# gate can never read a path we do not own.
+# Fork-relative. oxlint is given these verbatim, so the gate can never read a
+# path we do not own. A path that does not exist yet is left out rather than
+# failing: the tab body lands after the engine on the React port (ticket 558).
 TS_PATHS = (
-    "ui/core/components/individual_sim_ui/upgrades",
-    "ui/core/components/individual_sim_ui/upgrades_tab.tsx",
+    "ui/features/upgrades",
+    "ui/app/tabs/UpgradesTabBody.tsx",
 )
-SCSS_PATH = "ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss"
 
 
 def binary(name: str) -> Path:
@@ -130,7 +132,7 @@ def main() -> int:
     if not FORK_MODULES.is_dir():
         print(
             f"{CHECK_NAME}: skipped -- the fork clone is present but has no "
-            "node_modules, so its oxlint, stylelint and tsc are not "
+            "node_modules, so its oxlint and tsc are not "
             "installed. Run `npm install` in vendor/tbc-new-fork to enable "
             "this gate."
         )
@@ -143,8 +145,7 @@ def main() -> int:
         return 2
 
     oxlint = binary("oxlint")
-    stylelint = binary("stylelint")
-    missing = [p for p in (oxlint, stylelint, TSC) if not p.is_file()]
+    missing = [p for p in (oxlint, TSC) if not p.is_file()]
     if missing:
         names = ", ".join(str(p.relative_to(FORK_ROOT)) for p in missing)
         print(
@@ -160,22 +161,15 @@ def main() -> int:
     # warning in the fork's .oxlintrc.json (simple-import-sort/imports,
     # import/no-duplicates). Without it oxlint exits 0 on a real finding and
     # the gate is decoration.
+    ts_paths = [p for p in TS_PATHS if (FORK_ROOT / p).exists()]
     rc, output = run(
-        [str(oxlint), "--deny-warnings", *TS_PATHS], "oxlint"
+        [str(oxlint), "--deny-warnings", *ts_paths], "oxlint"
     )
     if rc == 2:
         print(f"{CHECK_NAME}: {output}", file=sys.stderr)
         return 2
     if rc != 0:
         report("oxlint (our TypeScript/TSX)", output)
-        failures += 1
-
-    rc, output = run([str(stylelint), SCSS_PATH], "stylelint")
-    if rc == 2 and "could not launch" in output:
-        print(f"{CHECK_NAME}: {output}", file=sys.stderr)
-        return 2
-    if rc != 0:
-        report("stylelint (the tab's SCSS partial)", output)
         failures += 1
 
     rc, output = run(["node", str(TSC), "--noEmit"], "tsc")
@@ -185,10 +179,10 @@ def main() -> int:
 
     if failures:
         print(
-            f"\n{CHECK_NAME}: {failures} of 3 checks failed at fork commit "
+            f"\n{CHECK_NAME}: {failures} of 2 checks failed at fork commit "
             f"{pin[:12]}. Fix the files named above -- they are ours. If a "
             "failure names a path outside "
-            "ui/core/components/individual_sim_ui/upgrades*, it came from "
+            "ui/features/upgrades and the tab body, it came from "
             "the whole-project type-check and belongs to upstream: say so "
             "rather than editing their file.",
             file=sys.stderr,
@@ -197,8 +191,7 @@ def main() -> int:
 
     print(
         f"{CHECK_NAME} ok at fork commit {pin[:12]}: oxlint clean over "
-        "upgrades/ and upgrades_tab.tsx (--deny-warnings), stylelint clean "
-        "over _upgrades_tab.scss, fork type-check clean"
+        f"{', '.join(ts_paths)} (--deny-warnings), fork type-check clean"
     )
     return 0
 

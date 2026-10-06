@@ -37,8 +37,8 @@ import { CURRENT_API_VERSION } from "../src/individual-settings.js";
 
 const driverModule = join(forkUpgradesDir, "adapters/bulk_screen_driver.ts");
 const seamModule = join(forkUpgradesDir, "engine/seams/sim-runner.ts");
-const signalModule = join(forkRoot, "ui/core/sim_signal_manager.ts");
-const apiModule = join(forkRoot, "ui/core/proto/api.ts");
+const signalModule = join(forkRoot, "ui/sim/sim_signal_manager.ts");
+const apiModule = join(forkRoot, "ui/generated/proto/api.ts");
 
 // Derived from the live proto version rather than repeated as a literal
 // (ticket 390): this file's recordings just need one consistent stamp across

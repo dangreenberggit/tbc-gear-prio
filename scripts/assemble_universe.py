@@ -707,7 +707,7 @@ def _equip_eligibility() -> dict[str, frozenset[int]]:
     of drift in place.
 
     So the decision is borrowed instead of the data. The fork exporter at
-    ui/core/components/individual_sim_ui/upgrades/tools/export_equip_eligibility.mts
+    ui/features/upgrades/tools/export_equip_eligibility.mts
     runs the real canEquipItem over the fork's own db and writes this file;
     check_equip_eligibility.py re-runs it at the pin and diffs on every
     `pnpm verify`, so a fork-side rule change lands as a failed check rather

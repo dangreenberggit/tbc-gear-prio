@@ -14,8 +14,8 @@ transcription -- would sit in the ranking indefinitely.
 This reads the named symbol out of the named file and compares weight for
 weight. Two vocabularies have to meet: the fork writes `[Stat.StatAgility]:
 0.75`, the JSON writes `"1": 0.75`. The Stat/PseudoStat name -> number mapping
-is read from the fork's own generated `ui/core/proto/common.ts`, never written
-down here, so a renumbered proto enum cannot silently pass.
+is read from the fork's own generated `ui/generated/proto/common.ts`, never
+written down here, so a renumbered proto enum cannot silently pass.
 
 Skips cleanly (exit 0) when vendor/tbc-new-fork is absent -- it is gitignored,
 so a fresh clone has none. Refuses (exit 2) when the clone's HEAD is not the
@@ -46,7 +46,7 @@ from _fork_gate import ForkGateError, require_pinned_fork  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
-PROTO_COMMON = FORK_ROOT / "ui/core/proto/common.ts"
+PROTO_COMMON = FORK_ROOT / "ui/generated/proto/common.ts"
 PRESETS_DIR = ROOT / "data/presets"
 
 # Both sides are short decimal literals a human typed, so any real difference is

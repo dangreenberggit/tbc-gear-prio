@@ -24,7 +24,7 @@ import { describe, expect, it } from "vitest";
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const partitionModule = join(
   root,
-  "vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/bulk/partition.ts"
+  "vendor/tbc-new-fork/ui/features/upgrades/model/engine/bulk/partition.ts"
 );
 const forkPresent = existsSync(partitionModule);
 

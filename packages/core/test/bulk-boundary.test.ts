@@ -38,8 +38,8 @@ import {
   loadForkEngineEnvironment,
 } from "./fork-engine-harness.js";
 
-const estimateModule = join(forkRoot, "ui/core/wasm/bulk_sim/estimate.ts");
-const apiModule = join(forkRoot, "ui/core/proto/api.ts");
+const estimateModule = join(forkRoot, "ui/sim/wasm/bulk_sim/estimate.ts");
+const apiModule = join(forkRoot, "ui/generated/proto/api.ts");
 const partitionModule = join(forkUpgradesDir, "engine/bulk/partition.ts");
 const builderModule = join(forkUpgradesDir, "adapters/bulk_request_builder.ts");
 const seamModule = join(forkUpgradesDir, "engine/seams/sim-runner.ts");

@@ -45,7 +45,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
-DATA_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades/data"
+DATA_DIR = FORK_ROOT / "ui/features/upgrades/model/data"
 PROVENANCE_MD = DATA_DIR / "PROVENANCE.md"
 
 # One row per copied file in PROVENANCE.md's mapping table, e.g.

@@ -1,6 +1,6 @@
 // Record an Upgrades-tab fixture from a real run (ticket 504).
 //
-// Drives the fork's dev server (:5173, with the backend on :3333) in a
+// Drives the fork's dev server (:5173, or TBC_FORK_PORT; the backend on :3333) in a
 // headless Chromium over CDP, the way the round-2b scenario captures did
 // (.scratch/.../set-rule-scenarios/tools/capture3.mjs): set the page phase,
 // load the gear, run the tab, wait for "Took", then read the finished Ranking
@@ -42,11 +42,11 @@ const CALL_TIMEOUT_MS = 90 * 1000;
 const USAGE = `usage: node scripts/tab-fixtures/record.mjs --spec feral|ret --phase N --name NAME
          (--preset-tab "Phase 2" --preset "BiS 6%" --expect-gear-file <fork-relative .gear.json>
           | --gear-url <page link> --expect-item-ids 1,2,3)
-         [--iterations 3000] [--base http://localhost:5173]
+         [--iterations 3000] [--base http://localhost:$TBC_FORK_PORT, default 5173]
          [--out <dir> [--allow-dirty]]
 
 Writes data/tab-fixtures/<spec>-p<phase>-<name>.json, or the same name under
---out. Needs the fork dev server on :5173 and the backend on :3333, and a
+--out. Needs the fork dev server on :5173 (or TBC_FORK_PORT) and the backend on :3333, and a
 committed fork tree. --allow-dirty records an uncommitted fork tree; it needs
 an --out folder other than data/tab-fixtures, stamps forkDirty: true and the
 sha256 of the fork's diff, and refuses to write if that diff changed during
@@ -55,7 +55,8 @@ named phase tab; --gear-url opens a gear link. Either way the worn gear is
 checked item by item before the run, and the run is refused on a mismatch.`;
 
 function parseArgs(argv) {
-  const out = { iterations: 3000, base: "http://localhost:5173" };
+  const port = process.env.TBC_FORK_PORT ?? "5173";
+  const out = { iterations: 3000, base: `http://localhost:${port}` };
   const flags = { "--allow-dirty": "allowDirty" };
   const keys = {
     "--spec": "spec",
@@ -198,6 +199,8 @@ async function main() {
     await send("Page.navigate", { url });
     await sleep(5000);
 
+    // P3: the React tab has no phase control yet (ticket 558 P3 adds one);
+    // #phase-selector is the old tab's and is retired upstream.
     const setPhase = async () => {
       const r = await evaluate(
         send,
@@ -221,17 +224,17 @@ async function main() {
       const loaded = await evaluate(
         send,
         `(async () => {
-          const tab = [...document.querySelectorAll('.preset-group-phase-tab')].find(t => t.textContent.trim() === ${JSON.stringify(args.presetTab)});
+          const tab = [...document.querySelectorAll('[data-testid="preset-group-phase-tabs"] button')].find(t => t.textContent.trim() === ${JSON.stringify(args.presetTab)});
           if (!tab) return { error: 'no preset phase tab ' + ${JSON.stringify(args.presetTab)} };
           tab.click();
           await new Promise(r => setTimeout(r, 400));
-          const chips = [...document.querySelector('.preset-group-picker').querySelectorAll('.preset-group-section')]
-            .filter(s => s.querySelector('h6')?.textContent.trim() === 'Gear Sets')
-            .flatMap(s => [...s.querySelectorAll('.saved-data-set-chip')])
+          const chips = [...document.querySelectorAll('[data-testid="preset-group-picker"] [data-testid="content-block"]')]
+            .filter(s => s.querySelector('[data-testid="content-block-title"]')?.textContent.trim() === 'Gear Sets')
+            .flatMap(s => [...s.querySelectorAll('[data-testid="saved-data-set-chip"]')])
             .filter(c => c.offsetParent);
           const chip = chips.find(c => c.textContent.trim() === ${JSON.stringify(args.preset)});
           if (!chip) return { error: 'no Gear Sets chip; visible: ' + chips.map(c => c.textContent.trim()).join(', ') };
-          (chip.querySelector('.saved-data-set-name') ?? chip).click();
+          (chip.querySelector('[data-testid="saved-data-set-name"]') ?? chip).click();
           await new Promise(r => setTimeout(r, 1500));
           return { ok: true };
         })()`
@@ -244,6 +247,8 @@ async function main() {
     const act = await evaluate(send, activateTabExpression());
     if (act?.error) throw new Error(act.error);
 
+    // P3: .item-picker-root is the old gear picker's class, retired upstream;
+    // ticket 558 P3 picks the React gear picker's test id.
     // Names render after item levels, so poll. The id check after the run is
     // the exact one; this one stops a wrong-gear run before it costs minutes.
     const gearNames = `[...document.querySelectorAll('.item-picker-root')].map(e => e.innerText.split('\\n')[0]).filter(Boolean).join(' | ')`;
@@ -259,7 +264,7 @@ async function main() {
     const iterations = await evaluate(
       send,
       `(() => {
-        const input = document.querySelector('.upgrades-iterations-picker input');
+        const input = document.querySelector('[data-testid="upgrades-iterations-picker"] input');
         if (!input) return null;
         if (input.value !== ${JSON.stringify(String(args.iterations))}) {
           input.value = ${JSON.stringify(String(args.iterations))};
@@ -280,7 +285,7 @@ async function main() {
     );
     const clicked = await evaluate(
       send,
-      `(() => { const b = document.querySelector('.upgrades-run-button'); if (!b) return false; b.click(); return true; })()`
+      `(() => { const b = document.querySelector('[data-testid="upgrades-run-button"]'); if (!b) return false; b.click(); return true; })()`
     );
     if (!clicked) throw new Error("run button not found");
     log("run started");
@@ -289,7 +294,7 @@ async function main() {
       await sleep(10000);
       summary = await evaluate(
         send,
-        `document.querySelector('.upgrades-baseline-summary')?.textContent ?? ''`
+        `document.querySelector('[data-testid="upgrades-baseline-summary"]')?.textContent ?? ''`
       );
       if (/Took/.test(summary)) break;
     }

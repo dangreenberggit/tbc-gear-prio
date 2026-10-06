@@ -3,7 +3,7 @@
  * (docs/plans/wowsims-tab/plan.md §8, §9 slice 2 "done when").
  *
  * The port copies packages/core's ranking engine into
- * vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/.
+ * vendor/tbc-new-fork/ui/features/upgrades/model/engine/.
  * This test drives BOTH copies — this repo's `rankUpgrades` and the fork's
  * ported one, loaded from its actual file path — with the same slamaltman
  * fixture gear and the same recorded sim observations, and asserts they
@@ -36,7 +36,7 @@
  * must skip with a clear message in that case, not fail confusingly.
  *
  * Design point owned here: importing the fork's engine also imports its
- * generated proto types (`ui/core/proto/*.ts`), which are themselves
+ * generated proto types (`ui/generated/proto/*.ts`), which are themselves
  * gitignored INSIDE the fork's own repo (protoc output — confirmed via
  * `git check-ignore -v ui/core/proto/common.ts` in the clone, 2026-08-14).
  * So "the fork is present" and "the fork's protos are generated" are two
@@ -68,11 +68,8 @@ import { mapWclGearToSim, SIM_ORDER, type WclGearEntry } from "../src/slots.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const forkRoot = join(root, "vendor/tbc-new-fork");
-const forkEngineDir = join(
-  forkRoot,
-  "ui/core/components/individual_sim_ui/upgrades/engine"
-);
-const forkProtoDir = join(forkRoot, "ui/core/proto");
+const forkEngineDir = join(forkRoot, "ui/features/upgrades/model/engine");
+const forkProtoDir = join(forkRoot, "ui/generated/proto");
 
 const forkPresent = existsSync(forkEngineDir);
 // protoc output — see this file's top comment. Checking one generated file
@@ -785,7 +782,7 @@ async function loadForkEngine() {
   };
 
   vi.doMock(
-    pathToFileURL(join(forkRoot, "ui/core/proto_utils/database.ts")).href,
+    pathToFileURL(join(forkRoot, "ui/sim/proto/database.ts")).href,
     () => ({ Database: { getSync: () => fakeDatabase } })
   );
 
@@ -804,7 +801,7 @@ async function loadForkEngine() {
   // not modify and which stays covered by the fork's own eventual UI
   // testing (or lack of it — plan §8's "the fork has no TS test runner").
   vi.doMock(
-    pathToFileURL(join(forkRoot, "ui/core/proto_utils/utils.ts")).href,
+    pathToFileURL(join(forkRoot, "ui/sim/proto/items.ts")).href,
     () => ({
       enchantAppliesToItem: (
         enchant: { effectId: number },

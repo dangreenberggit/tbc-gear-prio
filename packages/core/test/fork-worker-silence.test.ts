@@ -56,7 +56,7 @@ const importFork = async <T>(relativePath: string): Promise<T> => {
 };
 
 const loadMonitor = () =>
-  importFork<SilenceMonitorModule>("ui/core/worker_silence.ts");
+  importFork<SilenceMonitorModule>("ui/sim/workers/worker_silence.ts");
 
 describe.skipIf(!forkPresent)("SilenceMonitor", () => {
   beforeEach(() => {
@@ -367,8 +367,10 @@ describe.skipIf(!forkPresent)("WorkerPool silence option", () => {
   let requestCount = 0;
 
   beforeEach(async () => {
-    api = await importFork<ApiModule>("ui/core/proto/api.ts");
-    ({ WorkerPool } = await importFork<PoolModule>("ui/core/worker_pool.ts"));
+    api = await importFork<ApiModule>("ui/generated/proto/api.ts");
+    ({ WorkerPool } = await importFork<PoolModule>(
+      "ui/sim/workers/worker_pool.ts"
+    ));
     vi.useFakeTimers();
     // Extend the harness's window, never replace it: constants/other.ts read
     // window.location when the fork was first imported.
@@ -377,6 +379,9 @@ describe.skipIf(!forkPresent)("WorkerPool silence option", () => {
       setTimeout: globalThis.setTimeout,
       clearTimeout: globalThis.clearTimeout,
     });
+    // Upstream's pool builds its workers with the global `Worker`, not
+    // `window.Worker` (ui/sim/workers/worker_pool.ts `new Worker(...)`).
+    vi.stubGlobal("Worker", FakeWorker);
     FakeWorker.instances = [];
     FakeWorker.script = { ready: false };
     vi.spyOn(console, "log").mockImplementation(() => {});
@@ -385,6 +390,7 @@ describe.skipIf(!forkPresent)("WorkerPool silence option", () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   const raidRequest = () =>
@@ -751,6 +757,9 @@ describe.skipIf(!forkPresent)("WorkerPoolSimRunner silence opt-in", () => {
       setTimeout: globalThis.setTimeout,
       clearTimeout: globalThis.clearTimeout,
     });
+    // Upstream's pool builds its workers with the global `Worker`, not
+    // `window.Worker` (ui/sim/workers/worker_pool.ts `new Worker(...)`).
+    vi.stubGlobal("Worker", FakeWorker);
     FakeWorker.instances = [];
     FakeWorker.script = { ready: false };
     vi.spyOn(console, "log").mockImplementation(() => {});
@@ -759,6 +768,7 @@ describe.skipIf(!forkPresent)("WorkerPoolSimRunner silence opt-in", () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
   });
 
   it("fails a lookup on a worker that never becomes ready at the start limit, and restarts it", async () => {

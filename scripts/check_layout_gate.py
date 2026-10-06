@@ -120,7 +120,7 @@ LAYOUT_TEST = FORK_ROOT / "test-layout.mjs"
 # so after the very `make host` this gate's own skip message tells you to run,
 # only `lib.wasm.gz` is on disk. Checking solely for `lib.wasm` made the gate
 # skip permanently and report success by skipping. The gzipped form is also the
-# one the app actually fetches (`SIM_WASM_URL` in ui/core/worker_pool.ts), so it
+# one the app actually fetches (`SIM_WASM_URL` in ui/sim/workers/worker_pool.ts), so it
 # is the normal post-build state, not a degraded one. Either file present means
 # the WASM build completed; nothing here reads the bytes.
 DIST_WASM_CANDIDATES = (
@@ -136,7 +136,7 @@ LOCK_PATH = ROOT / "data/wowsims-fork-layout.lock.json"
 # for the same reason the layout lock does: the fork is gitignored.
 A11Y_BASELINE_PATH = ROOT / "data/wowsims-fork-a11y-baseline.json"
 
-ENGINE_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades/engine"
+ENGINE_DIR = FORK_ROOT / "ui/features/upgrades/model/engine"
 
 # The fork source `test-layout.mjs` actually renders and measures.
 #
@@ -157,11 +157,14 @@ ENGINE_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades/engine"
 #   - vite.config.mts -- it defines `__TBC_TAB_FIXTURES__`, which decides
 #     whether the fixture pass's code is in the bundle at all (review round 10,
 #     finding A8).
+#
+# Ticket 558 moved the tab to a React feature: the old tab file, its two SCSS
+# files and `sim_tab.ts` are gone, so the list names the tab body and its
+# registration point. P3 of ticket 558 re-derives this list (and the shared
+# SCSS below) for the React layout when it rebuilds the gate.
 SHELL_FILES = (
-    "ui/core/components/individual_sim_ui/upgrades_tab.tsx",
-    "ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss",
-    "ui/scss/core/components/_sim_tab.scss",
-    "ui/core/components/sim_tab.ts",
+    "ui/app/tabs/UpgradesTabBody.tsx",
+    "ui/app/SimTabsSection.tsx",
     "assets/locales/en/translation.json",
     "vite.config.mts",
 )
@@ -169,7 +172,7 @@ SHELL_FILES = (
 # The tab's adapters (the fixture loader `adapters/fixture.ts` and the check
 # hooks among them) and its pool data feed the rows the fixture pass renders,
 # so they are hashed too (finding A8). They are globbed like the engine.
-UPGRADES_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades"
+UPGRADES_DIR = FORK_ROOT / "ui/features/upgrades/model"
 # Gitignored in the fork (its .gitignore names it): the owner's own WCL
 # credentials. Hashing it would tie the committed digest to one machine's
 # secrets file.

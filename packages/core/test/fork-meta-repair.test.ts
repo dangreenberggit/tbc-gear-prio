@@ -494,7 +494,7 @@ async function rogueAtDeficit(e: Engine, target: number) {
   const gear = (
     JSON.parse(
       readFileSync(
-        join(forkRoot, "ui/rogue/dps/gear_sets/p2.gear.json"),
+        join(forkRoot, "ui/specs/rogue/dps/gear_sets/p2.gear.json"),
         "utf8"
       )
     ) as { items: Array<{ id?: number; gems?: number[] }> }

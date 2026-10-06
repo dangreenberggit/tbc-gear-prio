@@ -2,13 +2,12 @@
 """Re-hash the fork's ported engine files against engine/PROVENANCE.md.
 
 The wowsims-tab detour (docs/plans/wowsims-tab/plan.md) ports packages/core's
-ranking engine into vendor/tbc-new-fork/ui/core/components/individual_sim_ui/
-upgrades/engine/. E-W3 (the fixture-parity test,
-packages/core/test/wowsims-fork-parity.test.ts) is the only thing that proves
-the port still *behaves* like packages/core. Per plan §8's "E-W3 runs here,
-not in the fork" decision, E-W3 lives in this repo rather than travelling
-with the fork, so a fork-only edit to a ported file could change its
-behaviour with nothing inside the fork noticing.
+ranking engine into vendor/tbc-new-fork/ui/features/upgrades/model/engine/.
+E-W3 (the fixture-parity test, packages/core/test/wowsims-fork-parity.test.ts)
+is the only thing that proves the port still *behaves* like packages/core.
+Per plan §8's "E-W3 runs here, not in the fork" decision, E-W3 lives in this
+repo rather than travelling with the fork, so a fork-only edit to a ported
+file could change its behaviour with nothing inside the fork noticing.
 
 This script is the compensating control named there: it re-hashes every file
 PROVENANCE.md lists and fails loudly the moment a file's content no longer
@@ -49,10 +48,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
-ENGINE_DIR = (
-    FORK_ROOT
-    / "ui/core/components/individual_sim_ui/upgrades/engine"
-)
+ENGINE_DIR = FORK_ROOT / "ui/features/upgrades/model/engine"
 PROVENANCE_MD = ENGINE_DIR / "PROVENANCE.md"
 
 # One row per ported file: `| `fork/relative/path.ts` | ... | ... | `<hash>` |`

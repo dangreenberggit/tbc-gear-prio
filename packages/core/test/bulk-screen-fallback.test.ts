@@ -76,7 +76,7 @@ const loadBuilder = async (): Promise<{
     ) => void;
   }>("adapters/bulk_request_builder.ts");
   const api = (await import(
-    pathToFileURL(join(forkRoot, "ui/core/proto/api.ts")).href
+    pathToFileURL(join(forkRoot, "ui/generated/proto/api.ts")).href
   )) as {
     BulkSimRequest: {
       create: (init: { highStageIterations: number }) => {

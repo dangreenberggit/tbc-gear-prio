@@ -61,10 +61,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
 DIST = FORK_ROOT / "dist/tbc"
-HARNESS = (
-    FORK_ROOT
-    / "ui/core/components/individual_sim_ui/upgrades/tools/run-tab-cdp.mjs"
-)
+HARNESS = FORK_ROOT / "ui/features/upgrades/tools/run-tab-cdp.mjs"
 SCRATCH = ROOT / ".scratch/desktop-gate"
 GOLDEN_DIR = ROOT / "data/desktop-gate"
 
