@@ -1,6 +1,6 @@
 # ADR-0033 — Upstream is `master` again; the pin follows the merged reforge work
 
-**Status:** accepted
+**Status:** accepted; Decision 1's "one commit named by both pins" clause superseded for the fork by [ADR-0036](0036-the-fork-follows-upstream-master-by-merge.md) on 2026-10-06
 **Date:** 2026-09-14
 **Corrected:** 2026-09-15 (ticket 402) — Consequence 5 calls its measurement
 input the "ret P2 skeleton". The file is named `p2.raid-sim-skeleton.json` but

@@ -28,7 +28,7 @@ results table has rows and there is no stale banner.
 ## Looking at one (the storybook)
 
 - **By hand.** Start `:5173` (the `wowsims-fork` entry in `.claude/launch.json`, or `npx vite serve --port 5173` in `vendor/tbc-new-fork`; no backend) and open `http://localhost:5173/tbc/tab-fixtures/`. Each link opens the Upgrades tab on that fixture; `<html data-upgrades-fixture>` becomes `loaded` or `failed`.
-- **Smoke.** `pnpm tab-fixtures:smoke` opens every link. It starts `:5173` only when the port is free, prints one line per fixture, writes PNGs to `.scratch/tab-fixtures-smoke/`, and exits 0 or 1.
+- **Smoke.** `pnpm tab-fixtures:smoke` opens every link. It starts `:5173` only when the port is free, prints one line per fixture, writes PNGs to `.scratch/tab-fixtures-smoke/`, and exits 0 or 1. To use another port, set `TBC_FORK_PORT` (for example `TBC_FORK_PORT=5174 pnpm tab-fixtures:smoke`); `record.mjs` reads it too. A second checkout with its own fork, such as a port worktree, needs this, because two fork dev servers cannot share `:5173`.
 - **Timing.** 1.4–5.6 s per fixture on a warm server; the first load after a server start took up to about 30 s (`pnpm tab-fixtures:smoke`, ticket 520).
 - **What it proves:** the fork's working tree, uncommitted edits included, renders the recorded result.
 - **What it does not prove:** that a run would give these figures today, fixed-width layout, or accessibility. Use `pnpm layout-gate:check` and `pnpm tab-review` for those.

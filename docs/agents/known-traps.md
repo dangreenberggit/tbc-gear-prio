@@ -71,7 +71,7 @@ Scratch and tempdir writes need neither, and `"wb"` cannot take one.
 ## Before editing a ported engine file
 
 Applies to anything under the fork's
-`ui/core/components/individual_sim_ui/upgrades/engine/` (`rank.ts`,
+`ui/features/upgrades/model/engine/` (`rank.ts`,
 `view.ts`, and neighbours) — **including comment-only edits**.
 
 **Symptom when armed:** `pnpm verify` fails with "engine/PROVENANCE.md is
@@ -81,7 +81,7 @@ The full cycle, in order, every time:
 
 1. `npx vitest run packages/core/test/wowsims-fork-parity.test.ts` (E-W3)
    from the repo root — green before any hash moves.
-2. Update the file's row in the fork's `upgrades/engine/PROVENANCE.md`
+2. Update the file's row in the fork's `model/engine/PROVENANCE.md`
    with the new sha256 (Edit tool, not sed — see the trap above).
 3. Fork commit.
 4. Re-pin: move `data/wowsims-fork.lock.json`'s `commit` to the new fork
