@@ -16,6 +16,28 @@ function load<T>(rel: string): T {
   return JSON.parse(readFileSync(join(root, rel), "utf8")) as T;
 }
 
+// The builder applies the same table, so the comparison is against what it
+// would build from the owner's capture, which predates upstream's re-issue.
+function withUpstreamItemIds(
+  node: unknown,
+  renames: Map<number, number>
+): unknown {
+  if (Array.isArray(node)) {
+    return node.map((child) => withUpstreamItemIds(child, renames));
+  }
+  if (node === null || typeof node !== "object") {
+    return node;
+  }
+  return Object.fromEntries(
+    Object.entries(node).map(([key, value]) => [
+      key,
+      key === "itemId" && typeof value === "number"
+        ? (renames.get(value) ?? value)
+        : withUpstreamItemIds(value, renames),
+    ])
+  );
+}
+
 describe("feral preset", () => {
   const skeleton = load<{
     raid: {
@@ -54,7 +76,13 @@ describe("feral preset", () => {
     const owner = load<{ player: { rotation: Record<string, unknown> } }>(
       "data/presets/feral/owner-p2.settings-export.json"
     );
-    const apl = owner.player.rotation;
+    const renames = load<{ renames: Record<string, number> }>(
+      "data/presets/feral/upstream-item-id-renames.json"
+    ).renames;
+    const apl = withUpstreamItemIds(
+      owner.player.rotation,
+      new Map(Object.entries(renames).map(([from, to]) => [Number(from), to]))
+    ) as Record<string, unknown>;
     for (const key of [
       "prepullActions",
       "priorityList",

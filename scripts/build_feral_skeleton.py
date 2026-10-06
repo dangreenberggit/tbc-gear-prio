@@ -67,6 +67,13 @@ RET_SKELETON = ROOT / "data/presets/ret/p2.raid-sim-skeleton.json"
 FERAL_APL = ROOT / "data/presets/feral/owner-p2.settings-export.json"
 FERAL_APL_PATH = ("player", "rotation")
 OUT = ROOT / "data/presets/feral/p2.raid-sim-skeleton.json"
+# Upstream re-issued some items under new ids (the Mug of Direbrew, 38287 ->
+# 281739, at 42c75dc9). The owner's capture above predates that and stays as
+# recorded, so the ids are followed here instead. The engine drops an APL cast
+# on an id it does not register with no error (ticket 558 P4, engine-delta.md
+# C27), so a stale id costs the trinket silently. check_raid_sim_skeleton.py
+# and feral-preset.test.ts read the same file.
+UPSTREAM_ITEM_ID_RENAMES = ROOT / "data/presets/feral/upstream-item-id-renames.json"
 
 APL_KEYS = ("prepullActions", "priorityList", "groups", "valueVariables")
 
@@ -129,8 +136,29 @@ CONSUMABLES_EXTRA = {"drumsId": "GreaterDrumsOfBattle"}
 BUFF_DEFAULTS = ROOT / "data/presets/feral/buff-defaults.json"
 
 
+def load_upstream_item_id_renames() -> dict[int, int]:
+    raw = json.loads(UPSTREAM_ITEM_ID_RENAMES.read_text(encoding="utf-8"))
+    return {int(old): int(new) for old, new in raw["renames"].items()}
+
+
+def with_upstream_item_ids(node: object, renames: dict[int, int]) -> object:
+    """A copy of `node` with every `itemId` value mapped through `renames`."""
+    if isinstance(node, list):
+        return [with_upstream_item_ids(child, renames) for child in node]
+    if not isinstance(node, dict):
+        return node
+    return {
+        key: (
+            renames.get(value, value)
+            if key == "itemId" and isinstance(value, int)
+            else with_upstream_item_ids(value, renames)
+        )
+        for key, value in node.items()
+    }
+
+
 def main() -> int:
-    for path in (RET_SKELETON, FERAL_APL, BUFF_DEFAULTS):
+    for path in (RET_SKELETON, FERAL_APL, BUFF_DEFAULTS, UPSTREAM_ITEM_ID_RENAMES):
         if not path.is_file():
             print(f"missing {path.relative_to(ROOT)}", file=sys.stderr)
             if path is FERAL_APL:
@@ -218,8 +246,9 @@ def main() -> int:
 
     # Rotation: the APL is what the Go sim runs (verification-log 2026-07-27).
     rotation = {"type": "TypeAPL"}
+    renames = load_upstream_item_id_renames()
     for key in APL_KEYS:
-        rotation[key] = apl.get(key)
+        rotation[key] = with_upstream_item_ids(apl.get(key), renames)
     player["rotation"] = rotation
 
     # Gear is filled per-candidate by compose; ship the skeleton bare so a
