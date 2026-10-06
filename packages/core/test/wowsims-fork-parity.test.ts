@@ -992,18 +992,23 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
   }, 30000);
 });
 
-describe.skipIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
-  it.skip(
-    forkPresent
-      ? "skipped: vendor/tbc-new-fork is present but its protos are not generated " +
-          "(run protoc — see .scratch/handoffs/wowsims-tab/slice-1/HANDOFF.md's " +
-          "'Both proto paths' section) — this is expected in most checkouts, " +
-          "since vendor/ is gitignored and its build artifacts are gitignored again inside it"
-      : "skipped: vendor/tbc-new-fork is absent (vendor/ is gitignored — D1) " +
-          "— clone it and generate protos to run this test locally; CI does not " +
-          "have the fork either, by design (plan §1: nothing pushed, no PR)",
-    () => {
-      // Intentionally empty — the skip reason is the point.
-    }
-  );
-});
+// A plain `if`, not `describe.skipIf(canRunForkSide)`: vitest still collects
+// the tests of a skipped describe as "skipped", so the placeholder reached
+// run_verify's skip-reason list even on runs where the suite above passed.
+if (!canRunForkSide) {
+  describe("wowsims-fork-parity (E-W3)", () => {
+    it.skip(
+      forkPresent
+        ? "skipped: vendor/tbc-new-fork is present but its protos are not generated " +
+            "(ui/generated/proto/common.ts is missing; run `make -C vendor/tbc-new-fork proto`) " +
+            "— expected in a fresh checkout, since vendor/ is gitignored and the " +
+            "fork's generated protos are gitignored again inside it"
+        : "skipped: vendor/tbc-new-fork is absent (vendor/ is gitignored — D1) " +
+            "— clone it and generate protos to run this test locally; CI does not " +
+            "have the fork either, by design (plan §1: nothing pushed, no PR)",
+      () => {
+        // Intentionally empty — the skip reason is the point.
+      }
+    );
+  });
+}
