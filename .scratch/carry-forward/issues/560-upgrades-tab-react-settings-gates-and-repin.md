@@ -75,3 +75,8 @@ L0-L2 per feature (settings reducer, staleness with `mockSubscriptions`, phase s
 - The desktop gate needs `run-tab-cdp.mjs`, `data-runner`, `--candidates` (default 40) and a golden per (spec, phase, cap) (`scripts/check_desktop_tab.py:11,33,66,91-92`).
 - The old fixtures' `forkSha` `cb561067` stays readable because the old fork branch is kept and the fork worktree shares its objects; `check_tab_fixtures.py` warns on stale and errors only on an unknown sha.
 - Ruling 8 (ADR-0036, written by P1): the fork follows upstream `master` by merge; a routine fork update is the short procedure in `upstream-catch-up.md`, and the desktop gate is needed only for a re-pin that `dev` receives.
+
+## Carried from P1 (stage 558-upstream-react-port)
+
+- **Source labels are English.** P1 renders the engine's `SOURCE_LABELS` text, not `upgrades_tab.*` i18n keys, because the desktop golden compares that text. When this part re-derives the golden, move the labels to `upgrades_tab.*` keys (rule I1). Source: `.scratch/stage-gate/558-upstream-react-port/execution-report.md` K4 ledger ("engine English `SOURCE_LABELS` kept (golden compares text)"); `decision-log.md` row K4-source-labels-not-i18n (2026-10-06T04:31Z).
+- **Capped run's 48 s tail.** P1's capped live run (ret, `?upgrades-dev&cap=10&iterations=500`) landed its last row at 16.3 s and finished at 64.3 s, with no new row in the 48 s between. Which `rankUpgrades` stage runs in that gap was not recorded (hypothesis: the post-sim stages; untested). When this part re-records the fixtures, measure the stage times; fix the gap or explain it. Source: `.scratch/stage-gate/558-upstream-react-port/live-check.md` (capped-run row and "Capped run tail"); `decision-log.md` row K5-18-capped-tail (2026-10-06T14:11Z).
