@@ -19,7 +19,7 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 3028,
+  "d7EligibleTotal": 3027,
   "excludedNoSource": 1288,
   "universeTotal": 364,
   "listOnlyMembership": 35,
@@ -189,9 +189,9 @@
       },
       {
         "itemId": 38287,
-        "name": "Empty Mug of Direbrew",
-        "slot": "trinket",
-        "d7Eligible": true
+        "name": null,
+        "slot": null,
+        "d7Eligible": false
       }
     ]
   },
