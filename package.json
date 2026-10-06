@@ -30,6 +30,7 @@
     "sync:wowsims:restore": "python scripts/sync_wowsims.py --restore",
     "sync:wowsims:check": "python scripts/sync_wowsims.py --check",
     "upstream-drift:warn": "python scripts/warn_upstream_drift.py",
+    "fork:upstream-status": "python scripts/fork_upstream_status.py",
     "sync-wowsims:unit:check": "python scripts/check_sync_wowsims.py",
     "feral-skeleton-apl:check": "python scripts/check_build_feral_skeleton.py",
     "sync:atlasloot:restore": "python scripts/sync_atlasloot.py --restore",
