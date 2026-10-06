@@ -1,0 +1,70 @@
+Status: open
+Type: task
+Origin: stage 558-upstream-react-port, branch feat/upstream-react-port (fork branch feat/upgrades-tab-react, in the port worktree C:/Users/dgree/Code/lulz/tbc-gear-prio-wt-react-port)
+Blocks: none
+Blocked by: the output of stage 558-upstream-react-port part P1 (the React tab core on upstream 42c75dc9); the Vercel skills `composition-patterns` and `react-best-practices` installed under `~/.claude/skills/` and listed in the session
+Related: 558, 560
+
+# Upgrades tab on React: results-side feature parity
+
+## Owner's words this serves
+
+> We should be up to date with wowsims.
+
+> I am concerned with the fork and it's upgrade tab only.
+
+(2026-10-05, session `ce6ca879`, `.scratch/stage-gate/555-557-silence-followups/decision-log.md:74`)
+
+> I am an experienced react developer and will be watching closely for skilled react practices and conventions, so please make me proud -- no overloaded react components or sloppy hook use. keep it tight.
+
+> before executing the react coding, we are going to bring in vercel labs agent skills globally, and the react coding will have reviews using composition-patterns and react-best-practices skills
+
+(2026-10-05/06, session `52d5f63f`, `.scratch/stage-gate/558-upstream-react-port/brief.md`, "Owner's React bar" and "Amendment 2026-10-06")
+
+## Goal
+
+The results half of the old tab (old fork branch `feat/upgrades-tab`, `cb561067:ui/core/components/individual_sim_ui/upgrades_tab.tsx`, line ranges below) exists again as React components under `ui/features/upgrades/components/` on branch `feat/upgrades-tab-react`, meeting the React bar (rules R1-R7 and I1 in the stage's `plan.md`). Features, with the old implementation to read for behaviour (not to copy):
+
+- Sub-tab strip: Shopping List plus one tab per populated slot (`renderSubTabs` 2669-2775, `slotPaneContent` 2978, `slotsInView` 3746). Use upstream `TabNav`/`TabPanels` inside `Tabs.Root`, as `ui/app/tabs/BulkTabBody.tsx:45-52` does.
+- Shortlist plus a below-cutoff group (`rowsTable` 2994-3084, `expandableRowGroup` 3143-3203, `resultsContent` 2851). Use upstream `Accordion` for the disclosure.
+- Mid-run table filling as rows land, and empty states (`landedRowsTable` 2945, `emptyState` 2923); P1's `UpgradesResults` already switches on `run.status`.
+- Sortable columns rank, item, slot, ΔDPS, source, favorite, batch (611-766, `sortableResultsTableHead` 3085, `toggleResultsSort` 3132). Use upstream `MetricsTable` with `useMetricsTable` (`ui/features/results/hooks/useMetricsTable.ts`, on `@tanstack/react-table` 9.2.4, already a dependency); sort state is table-local.
+- Row: item cell with icon, quality colour and wowhead link; source cell (`item.sources`, since `getSourceInfo` is gone); owned-row greying; set-name tags; percent-cutoff note (`resultRow` 3204-3292, `itemCell` 3539-3616, `rowTagLabels` 3520).
+- ΔDPS popover with the set-bonus breakdown (`setBonusPresentation` 3420-3500, helpers 364-610, `ownSwapBreaks` 3501, `removedItemsLine` 3380). Use upstream `Popover` with its `testId` prop.
+- Favorite and batch toggles per row (`gear_picker/item_toggles.tsx`) against upstream's sim filters (`host.sim.getFilters().favoriteItems`) and Bulk's item list (`addBulkItems` in `features/bulk/model/items.ts`), through their existing writers, never `patchKeyed` directly.
+- Baseline summary (`baselineSummaryContent` 2238), substitutions list (`substitutionsContent` 3673), assumptions to console (`logAssumptions` 3617).
+- ThatsMyBis export with token/gear-id flavour (1282-1309, 1391-1420, `updateExport` 3322, `exportIdForRow` 3359). Use upstream `CopyButton`.
+
+## Checks (test ladder, `test-ladder.md` § 3)
+
+- Inner loop: L0 (`type-check`, `lint:js`) and the folder run L1/L2 (`npx vitest run ui/features/upgrades`, about 10 s). L2b (`npm run test:unit`, compared with P1's `baseline.md`) before each fork commit.
+- Mid-run filling is an L2 test on a `running` state with `landedRows` from `testing/ranking.fixture.ts` (extend the fixture for popovers and tags), and is seen in a browser through P1's replay runner: `?upgrades-runner=replay:<fixture>` then Run (L4r, seconds, no WASM).
+- Each feature's `Visual acceptance:` block uses fixture replay (L4: Browser pane `http://localhost:5174/tbc/tab-fixtures/` or `TBC_FORK_PORT=5174 pnpm tab-fixtures:smoke`), never a live run.
+- One L6 Stop check at the end of the part (Run, 5 rows, Stop on `/tbc/paladin/retribution/`). No L8: P2 changes no engine input.
+- Every chunk that writes React code ends with the React review gate exactly as `plan.md` § React review gate describes (its prompt core verbatim: skills loaded or read from disk, Next.js and server rules skipped by name, R1 wins a conflict): a blocking or material finding is fixed in the chunk, or ledgered with a reason; the session dispositions every ledgered row at Gate C; the ledger is `react-review-<chunk>.md` in the stage folder.
+
+## Done means
+
+- Each feature above renders from the five `data/tab-fixtures/*.json` through `pnpm tab-fixtures:smoke` (exit 0) and is judged in a `Visual acceptance:` block per the plan template.
+- Formatting and selection logic are pure functions under `ui/features/upgrades/model/` or `utils/` with vitest tests in the fork.
+- Every new string is an `upgrades_tab.*` key (rule I1); every element a script or test finds carries `data-testid` with the old class name verbatim (`ui/STYLING.md:185`): `upgrades-item-name`, `upgrades-bis-badge`, `upgrades-set-bonus`, `upgrades-cutoff-arm`, `upgrades-table-scroll`, `upgrades-tab-tabs`, `upgrades-tab-left`, which P3's layout gate reads.
+- `react-review-<chunk>.md` for every chunk, no undispositioned row; `pre-merge-review` React-practices axis: no `pending` row.
+
+## Seam contract (what P1 gives this part)
+
+- `ui/features/upgrades/model/` holds the engine (`rank.ts`, `view.ts`, `set-bonus.ts`, ...) unchanged in behaviour; `model/run_reducer.ts` with `RunState` (`idle | running{runId, startedAt, landedRows} | done{result & durationMs} | stopped{result & durationMs} | error{message}`), the `fixtureLoaded` action and `RunSettings`; `model/run.ts` with `createRunContext(host, env)` and `rankForPlayer: RunFn` (`RunFn = (host, settings, {signal, onLanded, runContext}) => Promise<Ranking | PartialRanking>`; the runner bundle is created lazily through `runContext()` and lives one per mounted tab); `model/replay_run.ts` (`replayRows(ranking): RunFn`) and `utils/select_run_fn.ts` (`replayFixture(name)`, `selectRunFn`); `model/progress_channel.ts` (`subscribeProgress`, `clearProgress`).
+- `hooks/useUpgradesRun(runFn)` returns `{run, start(settings), stop(), dispatchFixture}`; `UpgradesTabBody` calls it once and passes `run` down as props. If P2's tree needs it more than two levels deep, add a React context provider in `UpgradesTabBody`, not a store slice. `hooks/useFixtureAutoload({onLoaded, currentRanking})` is the only `window` toucher among the hooks; it installs `window.__upgradesFixture(payload)` (returns `{ok, rows}` or `{ok: false, reason, detail}`) and `window.__upgradesRanking`, behind `__TBC_TAB_FIXTURES__`, with `useEffectEvent` for its callbacks.
+- `components/UpgradesResults/UpgradesResults.tsx` switches on `run.status`; `components/ResultsTable/{ResultsTable,ResultRow}.tsx` render the flat table with `data-testid="upgrades-results-table"`. P2 replaces `ResultsTable` with the sub-tab layout and keeps that testid on each rendered table. `components/RunProgress/RunProgressDialog.tsx` subscribes to the channel itself (a copy of `BulkProgressDialog`); `StatusLine` shows "Took Ns" from `durationMs`.
+- `utils/format.ts`, `utils/dev_flags.ts` (`readDevFlags` pure, `DEV_FLAGS` read only in `UpgradesTabBody`; every read of `__TBC_TAB_FIXTURES__` is `typeof`-guarded and tests stub it with `vi.stubGlobal`), `testing/ranking.fixture.ts`, and the `upgrades_tab.*` i18n subtree in `assets/locales/en/translation.json`.
+- Command forms: fork tools run as `npm --prefix $FORK run …` or with `$FORK` as cwd; never `npx --prefix $FORK` (plan § Two checkouts).
+- Assumed about P2: it adds no new global store slice and no new run kind, unless a distant reader appears, in which case it moves run status and results to a store slice behind a `ui/sim` facade and records the switch to the plan's option (b); row identity keys are the engine's candidate ids; it reads no dev flag outside `UpgradesTabBody`.
+
+## What P1's planning learned that this part needs
+
+- Upstream bans class hooks (`ui/no_class_hooks.test.ts` in `npm run test:unit`); `ui/retired_class_names.json` lists 746 retired names, so an old class name may not come back as a class. Upstream's own suite fails at `42c75dc9` on one warlock token (plan C47); compare with `baseline.md`, never "fix" the upstream file.
+- Upstream's lint fails on any `react-hooks/exhaustive-deps` warning (`.oxlintrc.json:237-238`, `lint:js` uses `--max-warnings 0`); `ui/**` imports carry no `.js` extension (`import/extensions`).
+- `features/*/model/**` may not import React or touch `window`/`document`/`localStorage`/`navigator` (`.oxlintrc.json:94-96,176`).
+- Upstream's run-state pattern is Bulk's (`features/bulk/model/run.ts:21-38`, `ui/sim/settings/bulk_settings.ts:42-46`); P1 deviates on purpose (reducer in the tab) and says why in `plan.md` § Run state.
+- The old tab persisted nothing in localStorage of its own; favorites persist through upstream's sim filters.
+- The WCL import modal was dead code on the old branch; it is not ported.
+- All work happens in the port worktree; the owner's checkout and its fork clone are never switched or edited (plan § Two checkouts).
