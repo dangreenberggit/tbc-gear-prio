@@ -94,3 +94,9 @@ L0-L2 per feature (settings reducer, staleness with `mockSubscriptions`, phase s
   `grep -c 38287 data/tab-fixtures/*.json` (4 feral files today). Source:
   `.scratch/stage-gate/558-p4-engine-move/engine-delta.md`, section "C27"
   (gitignored, owner's checkout).
+
+## Carried from P2 (stage 558-p2-results-parity)
+
+- **Below-cutoff group column alignment** (visual advisory A1): when the below-cutoff group is open, its columns sit about 40 px left of the shortlist header, because the group table has no head of its own and sizes its columns separately. Evidence, in the gitignored stage folder of the owner's checkout: `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate/558-p2-results-parity/captures/ret-p3-p2-1280-04-slot-below-cutoff-open.png`, and A1 in `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/handoffs/visual-review-558-p2-K4.md`. P3's layout work fixes it or records a ruling on it.
+- **Quality-colour coverage** (visual advisory A4): every row in P2's captures is epic, so only one quality colour was judged. P3's re-recorded fixtures or its layout gate include at least one non-epic row.
+- **559's review condition:** ticket 559's done line includes "`pre-merge-review` React-practices axis: no `pending` row". 559 was closed at the end of P2 with that review still pending (559's closing note). The branch's `pre-merge-review` before the merge ask covers P2's fork code, `54a7d526..b15f397cb` on `feat/upgrades-tab-react`, on that axis.
