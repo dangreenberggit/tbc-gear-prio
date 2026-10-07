@@ -5,12 +5,13 @@
  * this enforces is what keeps both engines inside their no-culling regime).
  *
  * Dead code cover: nothing here is reachable from the upgrades tab at runtime.
- * Since ticket 403 both transports take the per-candidate loop, and the switch
- * is `makeSimRunner(bulk = false)` in the fork's
- * `upgrades/adapters/bulk_wasm_sim_runner.ts`. Green means the machinery still
- * works, not that the tab uses it. The code is kept on purpose (ticket 406,
- * resolved keep) and these tests are its re-enable safety net. Re-check with:
- * `grep -rn 'makeSimRunner(' vendor/tbc-new-fork/ui --include=*.ts --include=*.tsx --include=*.mts | grep -v node_modules`
+ * The tab's only runner, `WorkerPoolSimRunner`, has no `runBulkScreen`, and the
+ * fork's bulk adapters are deleted (fork `02cca7b70`). This suite covers the
+ * engine's bulk branch that is still there (`engine/bulk/partition.ts`,
+ * `rank.ts`'s screening pass, the seam's bulk types); ticket 567 deletes that
+ * branch and this suite with it. Re-check with
+ * `git -C vendor/tbc-new-fork grep -n runBulkScreen -- ui ':!ui/features/upgrades/model/engine'`,
+ * which prints only a doc comment in `worker_pool_sim_runner.ts`.
  *
  * The module lives in the fork, which is gitignored (`vendor/`), so the suite
  * skips when the clone is absent — same pattern as `wowsims-fork-parity`.
@@ -47,7 +48,8 @@ describe.skipIf(!forkPresent)("partitionForBulkScreen", () => {
     const { MAX_CANDIDATES_PER_BULK_REQUEST } = await load();
     // 25 is single-stage on both engines at every iteration count measured, so
     // the bound is iteration-invariant rather than tuned to today's default —
-    // see `bulk-boundary.test.ts` for the table and the mechanism. A change
+    // see the deleted `bulk-boundary.test.ts` for the table and the mechanism
+    // (`git show 1964ecb0:packages/core/test/bulk-boundary.test.ts`). A change
     // here is a cross-engine decision, not a tuning knob.
     expect(MAX_CANDIDATES_PER_BULK_REQUEST).toBe(25);
     expect(MAX_CANDIDATES_PER_BULK_REQUEST).toBeLessThan(26);

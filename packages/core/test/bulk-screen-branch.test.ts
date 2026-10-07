@@ -3,12 +3,13 @@
  * round-2 condition N1).
  *
  * Dead code cover: nothing here is reachable from the upgrades tab at runtime.
- * Since ticket 403 both transports take the per-candidate loop, and the switch
- * is `makeSimRunner(bulk = false)` in the fork's
- * `upgrades/adapters/bulk_wasm_sim_runner.ts`. Green means the machinery still
- * works, not that the tab uses it. The code is kept on purpose (ticket 406,
- * resolved keep) and these tests are its re-enable safety net. Re-check with:
- * `grep -rn 'makeSimRunner(' vendor/tbc-new-fork/ui --include=*.ts --include=*.tsx --include=*.mts | grep -v node_modules`
+ * The tab's only runner, `WorkerPoolSimRunner`, has no `runBulkScreen`, and the
+ * fork's bulk adapters are deleted (fork `02cca7b70`). This suite covers the
+ * engine's bulk branch that is still there (`engine/bulk/partition.ts`,
+ * `rank.ts`'s screening pass, the seam's bulk types); ticket 567 deletes that
+ * branch and this suite with it. Re-check with
+ * `git -C vendor/tbc-new-fork grep -n runBulkScreen -- ui ':!ui/features/upgrades/model/engine'`,
+ * which prints only a doc comment in `worker_pool_sim_runner.ts`.
  *
  * Two layers, and the first is the one that matters.
  *

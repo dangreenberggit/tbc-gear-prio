@@ -3,12 +3,13 @@
  * 347).
  *
  * Dead code cover: nothing here is reachable from the upgrades tab at runtime.
- * Since ticket 403 both transports take the per-candidate loop, and the switch
- * is `makeSimRunner(bulk = false)` in the fork's
- * `upgrades/adapters/bulk_wasm_sim_runner.ts`. Green means the machinery still
- * works, not that the tab uses it. The code is kept on purpose (ticket 406,
- * resolved keep) and these tests are its re-enable safety net. Re-check with:
- * `grep -rn 'makeSimRunner(' vendor/tbc-new-fork/ui --include=*.ts --include=*.tsx --include=*.mts | grep -v node_modules`
+ * The tab's only runner, `WorkerPoolSimRunner`, has no `runBulkScreen`, and the
+ * fork's bulk adapters are deleted (fork `02cca7b70`). This suite covers the
+ * engine's bulk branch that is still there (`engine/bulk/partition.ts`,
+ * `rank.ts`'s screening pass, the seam's bulk types); ticket 567 deletes that
+ * branch and this suite with it. Re-check with
+ * `git -C vendor/tbc-new-fork grep -n runBulkScreen -- ui ':!ui/features/upgrades/model/engine'`,
+ * which prints only a doc comment in `worker_pool_sim_runner.ts`.
  *
  * Three outcomes have to stay distinguishable at the seam, and each is a
  * different promise to the user:
@@ -28,15 +29,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { join } from "node:path";
-import { pathToFileURL } from "node:url";
-
-import {
-  forkPresent,
-  forkRoot,
-  importForkUpgrades,
-  loadForkEngineEnvironment,
-} from "./fork-engine-harness.js";
+import { forkPresent } from "./fork-engine-harness.js";
 import {
   baseDeps,
   buildRankFixture,
@@ -52,40 +45,6 @@ import {
   type SimObservation,
   type SimRunOpts,
 } from "./bulk-screen-fixture.js";
-
-/**
- * The single-stage guard and the proto its argument is, so one test can trip
- * the real guard rather than stand in a look-alike error for it.
- */
-const loadBuilder = async (): Promise<{
-  assertSingleStageChunk: (
-    request: { highStageIterations: number },
-    candidateCount: number
-  ) => void;
-  BulkSimRequest: {
-    create: (init: { highStageIterations: number }) => {
-      highStageIterations: number;
-    };
-  };
-}> => {
-  await loadForkEngineEnvironment();
-  const builder = await importForkUpgrades<{
-    assertSingleStageChunk: (
-      request: { highStageIterations: number },
-      candidateCount: number
-    ) => void;
-  }>("adapters/bulk_request_builder.ts");
-  const api = (await import(
-    pathToFileURL(join(forkRoot, "ui/generated/proto/api.ts")).href
-  )) as {
-    BulkSimRequest: {
-      create: (init: { highStageIterations: number }) => {
-        highStageIterations: number;
-      };
-    };
-  };
-  return { ...builder, ...api };
-};
 
 /** Prices any request the same deterministic way, counting the calls. */
 function countingRunner(): {
@@ -243,35 +202,6 @@ describe.skipIf(!forkPresent)("screening failure handling", () => {
         pool,
       })
     ).rejects.toBe(thrown);
-  }, 120_000);
-
-  it("surfaces the single-stage guard's own refusal rather than degrading it", async () => {
-    const { rankUpgrades } = await loadRank();
-    const { BulkScreenIntegrityError } = await loadSeam();
-    const { assertSingleStageChunk, BulkSimRequest } = await loadBuilder();
-    const { input, makeGearSource, pool } = await buildRankFixture();
-
-    // The guard's real refusal, produced by calling it — not a hand-made error
-    // that happens to look like one. A chunk of 27 at 30,000 iterations is the
-    // measured first multi-stage combination (`bulk-boundary.test.ts`), which is
-    // what a raised `MAX_CANDIDATES_PER_BULK_REQUEST` would hand it.
-    await expect(
-      rankUpgrades(input, {
-        ...(await baseDeps()),
-        gear: makeGearSource(),
-        sim: {
-          ...countingRunner().runner,
-          runBulkScreen: async () => {
-            assertSingleStageChunk(
-              BulkSimRequest.create({ highStageIterations: 30_000 }),
-              27
-            );
-            throw new Error("unreachable: the guard must have refused");
-          },
-        },
-        pool,
-      })
-    ).rejects.toThrow(BulkScreenIntegrityError);
   }, 120_000);
 
   it("lands a partial ranking when Stop aborts the screening pass", async () => {

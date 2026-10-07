@@ -3,12 +3,13 @@
  * same seam the WASM transport uses (batch-sim local plan Step 4).
  *
  * Dead code cover: nothing here is reachable from the upgrades tab at runtime.
- * Since ticket 403 both transports take the per-candidate loop, and the switch
- * is `makeSimRunner(bulk = false)` in the fork's
- * `upgrades/adapters/bulk_wasm_sim_runner.ts`. Green means the machinery still
- * works, not that the tab uses it. The code is kept on purpose (ticket 406,
- * resolved keep) and these tests are its re-enable safety net. Re-check with:
- * `grep -rn 'makeSimRunner(' vendor/tbc-new-fork/ui --include=*.ts --include=*.tsx --include=*.mts | grep -v node_modules`
+ * The tab's only runner, `WorkerPoolSimRunner`, has no `runBulkScreen`, and the
+ * fork's bulk adapters are deleted (fork `02cca7b70`). This suite covers the
+ * engine's bulk branch that is still there (`engine/bulk/partition.ts`,
+ * `rank.ts`'s screening pass, the seam's bulk types); ticket 567 deletes that
+ * branch and this suite with it. Re-check with
+ * `git -C vendor/tbc-new-fork grep -n runBulkScreen -- ui ':!ui/features/upgrades/model/engine'`,
+ * which prints only a doc comment in `worker_pool_sim_runner.ts`.
  *
  * The point is not to re-test the seam - `bulk-screen-branch.test.ts` does that
  * with synthetic numbers. The point is that observations produced by a
@@ -24,7 +25,8 @@
  * the page. Candidates are the character's own gear with the back slot replaced
  * by an unworn phase-2 pool item. The request went through the shared
  * `buildBulkSimRequest` and the response through the shared
- * `bulkScreenResultFrom` - i.e. exactly `BulkHttpSimRunner`'s code path.
+ * `bulkScreenResultFrom` - i.e. exactly `BulkHttpSimRunner`'s code path
+ * (the HTTP runner and both helpers are deleted since fork `02cca7b70`).
  *
  * The full 21-candidate dump, the loop-vs-bulk equivalence scores and the
  * loop-vs-loop control live in
