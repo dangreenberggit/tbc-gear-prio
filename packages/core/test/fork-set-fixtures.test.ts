@@ -227,58 +227,59 @@ function ownFromRow(row: Row, setBonuses: SetBonus[]): number | undefined {
   return own;
 }
 
-// ON top 16 of the tab's view, from the ticket 502 stage recordings (a stage
-// tool's independent R1 walk over each file, printed at 4 decimals). The
-// ret-p3-p2 entry was re-derived on the ticket 511 re-record (a stage tool's
-// independent step-rule walk) and did not change: no ret row gets Set
-// potential, because no ret bonus clears its same-gear gate and the screen
-// drops Justicar.
+// ON top 16 of the tab's view, printed at 4 decimals. Re-derived on the
+// ticket 560 re-record (fork 43e3963d6, engine 42c75dc9), where every file is
+// a step ranking: each row's credit is the one check 3s compares with
+// `referenceStep`, written from the step rule, so this list pins the order
+// and sums that check already holds row by row. No ret row gets Set
+// potential (no ret bonus clears its same-gear gate and the screen drops
+// Justicar), so ret's figures are its rows' deltaDps.
 const PINNED_ON_TOP16: Record<string, Array<[string, number]>> = {
   "feral-p3-nordrassil4": [
-    ["Thunderheart Gauntlets", 179.1494],
-    ["Thunderheart Chestguard", 179.1494],
-    ["Thunderheart Leggings", 179.1494],
-    ["Thunderheart Pauldrons", 179.1494],
-    ["Vengeful Gladiator's Staff", 44.0914],
-    ["Everbloom Idol", 38.2041],
-    ["Breastplate of Malorne", 30.37],
-    ["Gauntlets of Malorne", 30.37],
-    ["Mantle of Malorne", 28.5432],
-    ["Band of the Eternal Champion", 19.3488],
-    ["Shadowmaster's Boots", 15.3138],
-    ["Idol of the White Stag", 14.4712],
-    ["Vindicator's Dragonhide Bracers", 12.5265],
-    ["Greaves of Malorne", 11.89],
-    ["Band of Eternity", 10.509],
-    ["Unstoppable Aggressor's Ring", 8.7524],
+    ["Thunderheart Gauntlets", 167.2134],
+    ["Thunderheart Chestguard", 167.2134],
+    ["Thunderheart Leggings", 167.2134],
+    ["Thunderheart Pauldrons", 167.2134],
+    ["Thunderheart Cover", 89.7068],
+    ["Vengeful Gladiator's Staff", 45.5645],
+    ["Everbloom Idol", 39.3513],
+    ["Breastplate of Malorne", 22.0466],
+    ["Gauntlets of Malorne", 22.0466],
+    ["Mantle of Malorne", 17.8066],
+    ["Band of the Eternal Champion", 17.4232],
+    ["Idol of the White Stag", 15.4655],
+    ["Shadowmaster's Boots", 14.6446],
+    ["Vindicator's Dragonhide Bracers", 13.9207],
+    ["Band of Eternity", 8.6648],
+    ["Insidious Bands", 6.9568],
   ],
   "ret-p3-p2": [
-    ["Torch of the Damned", 45.7454],
-    ["Cataclysm's Edge", 28.5611],
-    ["Cursed Vision of Sargeras", 20.5819],
-    ["Vengeful Gladiator's Greatsword", 17.0528],
-    ["Bulwark of the Ancient Kings", 16.2207],
-    ["Band of Devastation", 13.6834],
-    ["Shadowmaster's Boots", 13.5273],
-    ["Unstoppable Aggressor's Ring", 10.197],
-    ["Bindings of Lightning Reflexes", 9.0242],
-    ["Dreadboots of the Legion", 8.5774],
-    ["Leggings of Divine Retribution", 7.7201],
-    ["Band of the Eternal Champion", 7.0178],
-    ["Bow-stitched Leggings", 5.8536],
-    ["Swiftsteel Bracers", 5.257],
-    ["Twinblade of the Phoenix", 4.1674],
-    ["Lightbringer Breastplate", 3.948],
+    ["Torch of the Damned", 44.3925],
+    ["Cataclysm's Edge", 26.44],
+    ["Cursed Vision of Sargeras", 20.2975],
+    ["Bulwark of the Ancient Kings", 16.1735],
+    ["Shadowmaster's Boots", 13.421],
+    ["Band of Devastation", 10.9385],
+    ["Bindings of Lightning Reflexes", 10.9229],
+    ["Unstoppable Aggressor's Ring", 10.2146],
+    ["Vengeful Gladiator's Greatsword", 10.0227],
+    ["Dreadboots of the Legion", 8.554],
+    ["Leggings of Divine Retribution", 8.2749],
+    ["Swiftsteel Bracers", 7.658],
+    ["Band of the Eternal Champion", 7.0206],
+    ["Bow-stitched Leggings", 6.3641],
+    ["Lightbringer Breastplate", 3.8569],
+    ["Twinblade of the Phoenix", 3.7432],
   ],
 };
 
 // Identity rows are counted on rankings without the step rule only. A step
-// ranking (feral-p3-p2bis since the ticket 511 re-record) checks its credited
+// ranking (every file since the ticket 560 re-record) checks its credited
 // rows against their stop gear's sim in check 4s instead.
 const FIXTURES: Array<{ name: string; identityRows: number }> = [
-  { name: "feral-p3-nordrassil4", identityRows: 6 },
+  { name: "feral-p3-nordrassil4", identityRows: 0 },
   { name: "feral-p3-p2bis", identityRows: 0 },
-  { name: "feral-p3-th-hands-legs", identityRows: 4 },
+  { name: "feral-p3-th-hands-legs", identityRows: 0 },
   { name: "feral-p2-malorne4", identityRows: 0 },
   { name: "ret-p3-p2", identityRows: 0 },
 ];
@@ -516,7 +517,7 @@ describe.skipIf(!forkPresent)("own-swap breaks on tab fixtures (536)", () => {
             setId: 640,
             setName: "Malorne Harness",
             threshold: 4,
-            dps: 22.857401253672833,
+            dps: 22.55810341759934,
           },
         ]);
       }
