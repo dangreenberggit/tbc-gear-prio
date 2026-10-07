@@ -43,19 +43,36 @@ therefore contains the loader, and must not be served as a user build.**
 
 ## Re-recording
 
-Recording needs the backend on `:3333`, the fork dev server on `:5173`, and a
-committed fork tree. A run takes about 5 minutes. Each fixture's command:
+Recording needs a fork dev server that can run the sim: either
+`WASM_WORKER=1 node node_modules/vite/bin/vite.js serve --port 5173 --strictPort`
+in `vendor/tbc-new-fork` (the sim runs in the page; build it first with
+`make -C vendor/tbc-new-fork wasm`), or the plain dev server with the backend on
+`:3333`. It also needs a committed fork tree. A run takes about 5 minutes.
+Each fixture's command:
 
 ```sh
-pnpm tab-fixtures:record --spec feral --phase 3 --name p2bis --preset-tab "Phase 2" --preset "BiS 6%" --expect-gear-file ui/druid/feralcat/gear_sets/p2_6p.gear.json
-pnpm tab-fixtures:record --spec feral --phase 3 --name nordrassil4 --preset-tab "Phase 2" --preset "Alt 6%" --expect-gear-file ui/druid/feralcat/gear_sets/p2_alt_6p.gear.json
+pnpm tab-fixtures:record --spec feral --phase 3 --name p2bis --preset-tab "Phase 2" --preset "BiS 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p2_6p.gear.json
+pnpm tab-fixtures:record --spec feral --phase 3 --name nordrassil4 --preset-tab "Phase 2" --preset "Alt 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p2_alt_6p.gear.json
 pnpm tab-fixtures:record --spec feral --phase 3 --name th-hands-legs --gear-url "<this fixture's gearUrl>" --expect-item-ids 8345,30017,29994,29966,30106,28545,29997,30052,30627,29383,32014,32387,30055,30101,31034,31044
-pnpm tab-fixtures:record --spec ret --phase 3 --name p2 --preset-tab "Phase 2" --preset "P2" --expect-gear-file ui/paladin/retribution/gear_sets/p2.gear.json
-pnpm tab-fixtures:record --spec feral --phase 2 --name malorne4 --preset-tab "Phase 1" --preset "Alt 6%" --expect-gear-file ui/druid/feralcat/gear_sets/p1_alt_6p.gear.json
+pnpm tab-fixtures:record --spec ret --phase 3 --name p2 --preset-tab "Phase 2" --preset "P2" --expect-gear-file ui/specs/paladin/retribution/gear_sets/p2.gear.json
+pnpm tab-fixtures:record --spec feral --phase 2 --name malorne4 --preset-tab "Phase 1" --preset "Alt 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p1_alt_6p.gear.json
 ```
 
 Test gear is the previous phase's preset at the next page phase, as for every
-live run and capture in this repo.
+live run and capture in this repo. The recorder loads the preset, opens the
+Upgrades tab, and then sets the phase in the tab's own Phase selector.
+
+**Port worktree: `TBC_FORK_PORT=5174`.** A second checkout with its own fork
+runs its dev server on another port and sets `TBC_FORK_PORT` for every command
+above, for example `TBC_FORK_PORT=5174 pnpm tab-fixtures:record …`.
+
+**`th-hands-legs` is recorded from a gear link**, the `gearUrl` stored in the
+fixture, which names `localhost:5173`. With `TBC_FORK_PORT` set, the recorder
+opens the same link on that port instead and logs the rewritten link. The link
+was made on the old (pre-React) page. `--expect-item-ids` is the check that the
+React page decoded it: the recorder refuses to run when the worn gear lacks any
+of those 16 items. Whether the React page decodes an old-page link is a
+hypothesis until this fixture is re-recorded.
 
 ### Recording uncommitted fork code for review
 
