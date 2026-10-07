@@ -338,6 +338,30 @@ type ApiModule = {
 
 const POOL_LIMITS = { startMs: 2000, runMs: 1000, presimMs: 5000 };
 
+/** Fake timers, and `FakeWorker` wherever the fork's pool looks for `Worker`. */
+function installFakeWorkers(): void {
+  vi.useFakeTimers();
+  // Extend the harness's window, never replace it: constants/other.ts read
+  // window.location when the fork was first imported.
+  Object.assign((globalThis as unknown as { window: object }).window, {
+    Worker: FakeWorker,
+    setTimeout: globalThis.setTimeout,
+    clearTimeout: globalThis.clearTimeout,
+  });
+  // Upstream's pool builds its workers with the global `Worker`, not
+  // `window.Worker` (ui/sim/workers/worker_pool.ts `new Worker(...)`).
+  vi.stubGlobal("Worker", FakeWorker);
+  FakeWorker.instances = [];
+  FakeWorker.script = { ready: false };
+  vi.spyOn(console, "log").mockImplementation(() => {});
+}
+
+function removeFakeWorkers(): void {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+}
+
 /** A signals object whose abort is never triggered; abort is not under test. */
 const SIGNALS = { abort: { onTrigger: () => () => {} } };
 
@@ -371,27 +395,10 @@ describe.skipIf(!forkPresent)("WorkerPool silence option", () => {
     ({ WorkerPool } = await importFork<PoolModule>(
       "ui/sim/workers/worker_pool.ts"
     ));
-    vi.useFakeTimers();
-    // Extend the harness's window, never replace it: constants/other.ts read
-    // window.location when the fork was first imported.
-    Object.assign((globalThis as unknown as { window: object }).window, {
-      Worker: FakeWorker,
-      setTimeout: globalThis.setTimeout,
-      clearTimeout: globalThis.clearTimeout,
-    });
-    // Upstream's pool builds its workers with the global `Worker`, not
-    // `window.Worker` (ui/sim/workers/worker_pool.ts `new Worker(...)`).
-    vi.stubGlobal("Worker", FakeWorker);
-    FakeWorker.instances = [];
-    FakeWorker.script = { ready: false };
-    vi.spyOn(console, "log").mockImplementation(() => {});
+    installFakeWorkers();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
-  });
+  afterEach(removeFakeWorkers);
 
   const raidRequest = () =>
     api.RaidSimRequest.create({ requestId: `raidSimAsync-t${++requestCount}` });
@@ -751,25 +758,10 @@ describe.skipIf(!forkPresent)("WorkerPoolSimRunner silence opt-in", () => {
     runnerModule = await importForkUpgrades<SimRunnerModule>(
       "adapters/worker_pool_sim_runner.ts"
     );
-    vi.useFakeTimers();
-    Object.assign((globalThis as unknown as { window: object }).window, {
-      Worker: FakeWorker,
-      setTimeout: globalThis.setTimeout,
-      clearTimeout: globalThis.clearTimeout,
-    });
-    // Upstream's pool builds its workers with the global `Worker`, not
-    // `window.Worker` (ui/sim/workers/worker_pool.ts `new Worker(...)`).
-    vi.stubGlobal("Worker", FakeWorker);
-    FakeWorker.instances = [];
-    FakeWorker.script = { ready: false };
-    vi.spyOn(console, "log").mockImplementation(() => {});
+    installFakeWorkers();
   });
 
-  afterEach(() => {
-    vi.useRealTimers();
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
-  });
+  afterEach(removeFakeWorkers);
 
   it("fails a lookup on a worker that never becomes ready at the start limit, and restarts it", async () => {
     const { WorkerPoolSimRunner, WORKER_SILENCE_LIMITS } = runnerModule;

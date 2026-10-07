@@ -292,9 +292,10 @@ def fetch(sha, path):
 # Upstream ported the UI to ui/sim/ in c86fd86f5 and deleted ui/core/ in
 # 7b539641 (both 2026-09-16), so the phase file's path depends on the commit.
 # The pin is now past the move (42c75dc9, ticket 558), so TRACKED names the new
-# path. The old path stays only so --check can still read a pre-move tip, e.g.
-# a watched ref that has not caught up (ticket 551).
-PHASE_FILE_AFTER_UI_PORT = "ui/sim/constants/other.ts"
+# path, and this reads it from there rather than repeating it. The old path
+# stays only so --check can still read a pre-move tip, e.g. a watched ref that
+# has not caught up (ticket 551).
+PHASE_FILE_AFTER_UI_PORT = TRACKED["constants_other.ts"]
 PHASE_FILE_BEFORE_UI_PORT = "ui/core/constants/other.ts"
 
 
