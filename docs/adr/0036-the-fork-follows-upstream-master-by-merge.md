@@ -31,10 +31,12 @@ modify/delete and 5 content (`git -C vendor/tbc-new-fork merge-tree
 --write-tree --name-only cb561067 42c75dc9 | grep -c '^CONFLICT'`). 140 of
 them came from our files living inside the deleted `ui/core`. Ticket 558 moves
 the tab to a new fork branch, `feat/upgrades-tab-react`, cut from `42c75dc9`,
-with the tab in its own folder `ui/features/upgrades/`. On that branch about 24
-upstream files carry our edits, against 34 before. The measurements are in the
-gitignored stage folder `.scratch/stage-gate/558-upstream-react-port/`
-(`local-setup.md` § 3).
+with the tab in its own folder `ui/features/upgrades/`. At the fork pin
+`43e3963d` that branch modifies 19 upstream files, against 34 on the old branch
+(`git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 42c75dc9 43e3963d | wc -l`
+gives 19; the same command over `17a8fb28 cb561067` gives 34). The other
+measurements are in the gitignored stage folder
+`.scratch/stage-gate/558-upstream-react-port/` (`local-setup.md` § 3).
 
 The owner's ruling, verbatim from that stage's `decision-log.md`
 (2026-10-06T01:26Z, question Q-558-pin-coupling):
