@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-upstream-react-port.md (pre-merge review round 1, S8 and the bulk half of A5)
 Blocks: none
@@ -35,3 +35,13 @@ The re-pin round's limit for an engine edit was about 100 changed lines. The for
 ## Done when
 
 `git -C vendor/tbc-new-fork grep -n "runBulkScreen\|BulkScreen\|engine/bulk" -- ui` prints nothing, `git ls-files 'packages/core/test/bulk-*'` prints nothing, E-W3 (`npx vitest run packages/core/test/wowsims-fork-parity.test.ts`) passes, the fork's `lint:js` and unit tests pass, and `pnpm verify` is rc=0 at the new pin.
+
+## Closing note (2026-10-07, stage 567-engine-bulk, branch `feat/upstream-react-port`)
+
+Fixed.
+
+- **Fork `feat/upgrades-tab-react`, `095e0afa2`** ("Delete the engine's bulk screening branch"). `engine/bulk/partition.ts` is deleted. `engine/rank.ts` loses the screening pass, its widened-database request builder, the screening-fallback field on `Ranking`, `BestSwap.baselineDps` and the `screen:` store key, so every candidate delta is taken against the loop's own baseline, as in `packages/core/src/rank.ts`. `engine/seams/sim-runner.ts` loses the optional bulk method, its types and error classes, its cache key and `RecordedSimRunner`'s third parameter. The `IndividualDelta` comment in `engine/set-value.ts` and the header comment of `adapters/worker_pool_sim_runner.ts` no longer use the bulk pass as an example. The `PROVENANCE.md` rows for `rank.ts`, `seams/sim-runner.ts` and `set-value.ts` carry the new sha256 values. No upstream-owned file changed: no path in `git -C vendor/tbc-new-fork diff --name-only d52c8e91e 095e0afa2` exists at `42c75dc9`.
+- **Port `fca228bc`.** Deletes `bulk-partition.test.ts`, `bulk-screen-branch.test.ts`, `bulk-screen-fallback.test.ts` and `bulk-screen-http-fixture.test.ts`. Their helper is renamed to `packages/core/test/feral-rank-fixture.ts` with the bulk parts removed, because `fork-worker-silence.test.ts` imports its rank fixture. Re-pins `data/wowsims-fork.lock.json` to `095e0afa2`; `data/sim-implemented-effects.json` moves only its `forkCommit`.
+- **Checks, all at fork `095e0afa2`.** `git -C vendor/tbc-new-fork grep -n "runBulkScreen\|BulkScreen\|engine/bulk\|screenCandidates\|composeForBulk\|screeningFallbacks" HEAD -- ui` prints nothing; `git ls-files 'packages/core/test/bulk-*'` prints nothing. E-W3 (`npx vitest run packages/core/test/wowsims-fork-parity.test.ts`) passed before and after the fork edit. The fork's `lint:js` and `tsc --noEmit` pass; the fork's full vitest run passes 2,333 of 2,334, and the one failure is upstream's known `no_class_hooks` token in `ui/specs/warlock/dps/inputs.ts:75`. The eight fork-gated suites (`npx vitest run $(grep -l forkPresent packages/core/test/*.test.ts)`) pass, rc=0. `pnpm verify` rc=0.
+- **No ranking changed.** The Stop check (`node test-stop.mjs --base http://localhost:5174 --preset-tab "Phase 2" --preset P2` on a `WASM_WORKER=1` dev server) passes with 2,082.7 DPS and 9 rows kept, as in earlier rounds. `pnpm desktop-gate:check` passes (a)-(h) against the unchanged `data/desktop-gate/golden-ret-p4-cap40.json`. `pnpm layout-gate:check` measured 36 PASS, 0 FAIL, a11yFailed 0, and advanced the layout baseline. No file under `data/tab-fixtures/` and no golden changed.
+- Review row S8 in `docs/reviews/feat-upstream-react-port.md` is set to `fixed` in the commit that closes this ticket.
