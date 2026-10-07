@@ -118,3 +118,8 @@ Done on `feat/upgrades-tab-react` (fork) and `feat/upstream-react-port` (port wo
 - **Read paths.** Per session ruling Q-564-read-paths, see the read-path table in ticket 564's closing note.
 - **Tickets filed in this stage.** 566 (progress total over-counts).
 - **Next, by the session.** `pre-merge-review` on the branch, whose React-practices axis covers P2's and P3's fork code. Then the hand-back (this ticket's "Hand-back"; preconditions in the stage's `progress.md`), with the owner's confirmation first. Then the merge ask.
+
+## Closing note addendum (2026-10-07, round B2b)
+
+- The pre-merge review's React condition is met: `docs/reviews/feat-upstream-react-port.md` rows RP1-RP6 are `fixed`, by fork `feat/upgrades-tab-react` commits `90f06c690` (RP1, RP2, RP4, RP5) and `7af542f21` (RP3, RP6). The lock pins fork `d52c8e91e`, which holds both (port `777c3c68`).
+- Review row SP3: all five entries of `review-560.json` now run at 375, 768 and 1280 px. `corepack pnpm tab-review` at fork `d52c8e91e` captured 15 states with 0 errors; axe recorded 7 serious `color-contrast` failures, all on epic item names in `560-group-columns` at 375 px. The final `gate-visual` verdict is `pass` on every entry and width, with the contrast result as an advisory finding: the seat measured every epic item name at about 3.3 to 3.9 : 1 in every state, including the earlier captures, so the 560 work did not introduce it. Handoff and captures: `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate/558-p3-settings-gates/visual-final.md` and `review-560-final/` (gitignored, owner's checkout).

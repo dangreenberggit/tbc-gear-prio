@@ -84,3 +84,7 @@ Closed by the P2 stage. Fork `feat/upgrades-tab-react` tip `b15f397cbb2288d44f6b
 - Carried item, Rank column: kept as position within its own table, as the old tab did on an owner ruling (ticket 287). The below-cutoff group restarts at 1.
 - Carried item, Stop: option (a). Stop aborts no sim, and the status text says what happens: "Stopping — finishing the current step." in the progress dialog, then "Stopped early. … The rows below finished before Stop." This follows the owner's ruling Q-559-stop-abort: "Stop resulting in a fairly quickly graceful finish of currently running sims is fine for now." The L6 check (ret, previous-phase preset gear) measured Stop → dialog closed in 7.12 s. There were 5 rows at the click, 9 rows were kept, and no console error appeared (`.scratch/stage-gate/558-p2-results-parity/live-check.md`, gitignored). A real abort is filed as ticket 563.
 - Deviations from this ticket's text, recorded in the stage plan's Decisions: `MetricsTable` is not used, and one sort is shared across every pane and the export instead of a sort per table (old-tab parity, ticket 280). Each reason is in `plan.md` § Approach.
+
+## Closing note addendum (2026-10-07, round B2b)
+
+The pre-merge review's React condition is met: `docs/reviews/feat-upstream-react-port.md` rows RP1-RP6 are `fixed`, by fork `feat/upgrades-tab-react` commits `90f06c690` (RP1, RP2, RP4, RP5) and `7af542f21` (RP3, RP6). The lock pins fork `d52c8e91e`, which holds both (port `777c3c68`).
