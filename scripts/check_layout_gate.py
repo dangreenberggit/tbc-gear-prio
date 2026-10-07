@@ -30,8 +30,9 @@ wrong instrument.
 Instead this compares CONTENT. It hashes the fork's layout source -- the
 React tab's own source under `ui/features/upgrades/` (components, hooks, model
 including the ranking engine whose view code renders the rows the fixture pass
-measures, and the pool data), the tab body and its registration point, and the
-theme CSS the tab's measured geometry resolves through (breakpoints, spacing,
+measures, and the pool data), the tab body and its registration point, the
+upstream ui-kit modules they import, and the theme CSS the tab's measured
+geometry and contrast resolve through (breakpoints, colours, spacing,
 typography, the two-column frame) -- see `_iter_layout_files` -- into one digest, and
 compares it to the digest recorded the last time the gate ran green
 (`data/wowsims-fork-layout.lock.json`, `testedTabHash`). Equal digest ->
@@ -101,6 +102,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -162,25 +164,41 @@ LOCAL_ONLY_FILES = frozenset({"local.wcl-credentials.ts"})
 #   - ui/styles/theme/spacing.css, typography.css -- the spacing scale and
 #     the root font size every rem-based width (the results column widths
 #     among them) resolves through.
+#   - ui/styles/theme/colors.css, vars.css -- the colour tokens the axe pass's
+#     contrast checks resolve through.
 #   - ui/ui-kit/TabPanelColumns/TabPanelColumns.css -- the two-column frame
 #     whose gap check 13 measures.
 #   - assets/locales/en/translation.json -- the accessible names the axe pass
 #     reads are locale strings, so a copy edit can be an accessibility change.
 #   - vite.config.mts -- it defines `__TBC_TAB_FIXTURES__`, which decides
 #     whether the fixture pass's code is in the bundle at all (finding A8).
-# NOT covered: Tailwind's own utilities and the upstream ui-kit components
-# other than the frame above; the fork's lockfile and upstream base pin them,
-# and the tab does not edit them.
+# The upstream ui-kit modules the tab renders through (Button, Dialog,
+# Popover, ...) are not listed here: `_iter_ui_kit_files` follows the imports,
+# so a wowsims sync that changes one moves the digest. The fork pins no upstream
+# base sha into the digest, so naming "the upstream base" as their pin, as this
+# comment once did, left them unhashed (pre-merge review of
+# feat/upstream-react-port, finding A2).
+# NOT covered: Tailwind's own utilities, which the fork's package-lock pins.
 LAYOUT_FILES = (
     "ui/app/tabs/UpgradesTabBody.tsx",
     "ui/app/SimTabsSection.tsx",
     "ui/styles/theme/breakpoints.css",
+    "ui/styles/theme/colors.css",
     "ui/styles/theme/spacing.css",
     "ui/styles/theme/typography.css",
+    "ui/styles/theme/vars.css",
     "ui/ui-kit/TabPanelColumns/TabPanelColumns.css",
     "assets/locales/en/translation.json",
     "vite.config.mts",
 )
+
+UI_KIT_DIR = FORK_ROOT / "ui/ui-kit"
+# `@ui-kit/<path>` (the alias in the fork's tsconfig.json and vite.config.mts)
+# or a relative path, in any quoted string. A quoted path that is not an
+# import only adds a file to the digest, the safe direction.
+UI_KIT_ALIAS_RE = re.compile(r"""['"]@ui-kit/([^'"]+)['"]""")
+RELATIVE_IMPORT_RE = re.compile(r"""['"](\.{1,2}/[^'"]+)['"]""")
+MODULE_SUFFIXES = (".ts", ".tsx", ".css")
 
 
 # Files outside the fork source that decide what the gate measures, hashed by
@@ -220,15 +238,63 @@ def _iter_layout_files() -> list[Path]:
     renamed tab file just changes the digest.
     """
     files = {FORK_ROOT / rel for rel in LAYOUT_FILES}
+    sources: set[Path] = set()
     if TAB_DIR.is_dir():
-        files.update(
+        sources.update(
             p for p in TAB_DIR.rglob("*") if _is_hashed_tab_file(p, TAB_SOURCE_SUFFIXES)
         )
+        files.update(sources)
         for sub in TAB_DATA_DIRS:
             d = TAB_DIR / sub
             if d.is_dir():
                 files.update(p for p in d.rglob("*") if _is_hashed_tab_file(p, None))
+    sources.update(p for p in files if p.is_file() and p.suffix in (".ts", ".tsx"))
+    files.update(_iter_ui_kit_files(sources))
     return sorted(files, key=_rel)
+
+
+def _resolve_module(base: Path, spec: str) -> set[Path]:
+    """The ui-kit files an import of `spec` from `base` reaches.
+
+    A directory import (`@ui-kit/Dialog`) takes the whole component folder, its
+    CSS included, since the folder's index re-exports from its siblings. Files
+    outside ui/ui-kit are dropped: the tab's own folder is globbed already.
+    """
+    target = (base / spec).resolve()
+    if target.is_dir():
+        found = {p for p in target.rglob("*") if _is_hashed_tab_file(p, TAB_SOURCE_SUFFIXES)}
+    elif target.is_file():
+        found = {target}
+    else:
+        found = {
+            target.with_name(target.name + s)
+            for s in MODULE_SUFFIXES
+            if target.with_name(target.name + s).is_file()
+        }
+    ui_kit = UI_KIT_DIR.resolve()
+    return {p for p in found if p.is_relative_to(ui_kit)}
+
+
+def _iter_ui_kit_files(sources: set[Path]) -> set[Path]:
+    """Every ui-kit file reachable by imports from `sources`, transitively."""
+    seen: set[Path] = set()
+    queue = list(sources)
+    while queue:
+        path = queue.pop()
+        text = path.read_text(encoding="utf-8", errors="replace")
+        reached: set[Path] = set()
+        for m in UI_KIT_ALIAS_RE.finditer(text):
+            reached |= _resolve_module(UI_KIT_DIR, m.group(1))
+        for m in RELATIVE_IMPORT_RE.finditer(text):
+            reached |= _resolve_module(path.parent, m.group(1))
+        for p in reached - seen:
+            seen.add(p)
+            if p.suffix in (".ts", ".tsx"):
+                queue.append(p)
+    # Back to FORK_ROOT-based paths so `_rel` works on a resolved symlink or
+    # junction too.
+    root = FORK_ROOT.resolve()
+    return {FORK_ROOT / p.relative_to(root) for p in seen}
 
 
 def _rel(path: Path) -> str:
@@ -306,22 +372,26 @@ def write_baseline(digest: str) -> None:
         "ranking engine), every non-test file of its model/adapters/ and "
         "model/data/ (pool data, except the gitignored local.wcl-credentials.ts), "
         "the tab body ui/app/tabs/UpgradesTabBody.tsx and its registration "
-        "ui/app/SimTabsSection.tsx, the theme CSS the measured geometry resolves "
-        "through (ui/styles/theme/{breakpoints,spacing,typography}.css and "
-        "ui/ui-kit/TabPanelColumns/TabPanelColumns.css), "
+        "ui/app/SimTabsSection.tsx, every ui/ui-kit/ file those sources reach by "
+        "import (followed transitively; a component folder counts whole), the "
+        "theme CSS the measured geometry and the axe contrast checks resolve "
+        "through (ui/styles/theme/{breakpoints,colors,spacing,typography,vars}.css "
+        "and ui/ui-kit/TabPanelColumns/TabPanelColumns.css), "
         "assets/locales/en/translation.json (the axe pass's accessible names are "
         "locale strings) and vite.config.mts (it defines __TBC_TAB_FIXTURES__). "
         "It also covers, by repo-relative name, the gate's own harness "
         "(vendor/tbc-new-fork/test-layout.mjs, test-tab-harness.mjs, "
         "test-review.mjs) and the recorded tab fixtures the fixture pass renders "
-        "(data/tab-fixtures/*.json, ticket 504). NOT covered: Tailwind and the "
-        "upstream ui-kit beyond the frame CSS, which the fork's lockfile and "
-        "upstream base pin. scripts/check_layout_gate.py compares the live digest "
-        "to this on `pnpm merge-to-dev`; equal means the layout source that last "
-        "passed is still on disk, so the gate is skipped. Advanced only by a green "
-        "measured gate run (merge_to_dev commits the advance onto the feature "
-        "branch so it enters the merge). The fork itself is gitignored, so this "
-        "record lives here rather than in the fork."
+        "(data/tab-fixtures/*.json, ticket 504). NOT covered: Tailwind's own "
+        "utilities, which the fork's package-lock pins. "
+        "scripts/check_layout_gate.py compares the live digest to this on "
+        "`pnpm merge-to-dev`; equal means the layout source that last passed is "
+        "still on disk, so the gate is skipped. A green measured gate run "
+        "advances it (merge_to_dev commits the advance onto the feature branch "
+        "so it enters the merge); `--update-baseline` also writes it without "
+        "running the gate, for seeding or after a change proven by hand, so a "
+        "value here is not by itself proof of a green run. The fork itself is "
+        "gitignored, so this record lives here rather than in the fork."
     )
     # newline="\n": the committed lock is LF; Windows text mode would otherwise
     # rewrite it as CRLF. Ticket 399.
@@ -637,7 +707,7 @@ def run(
 
     digest, missing = compute_tab_hash()
     if missing:
-        # A shell file the tab cannot render without is gone. This is not an
+        # A named LAYOUT_FILES entry is gone. This is not an
         # ordinary absence like a missing clone -- the fork is present but a
         # tracked layout source is not. Report it as an error, not a skip.
         print(
