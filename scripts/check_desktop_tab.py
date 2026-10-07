@@ -74,8 +74,8 @@ GOLDEN_FIELDS = ("rows", "aboveCutoffItems", "baselineDps")
 
 GOLDEN_NOTE = (
     "Golden readback for scripts/check_desktop_tab.py check (h): rows, "
-    "aboveCutoffItems and baselineDps of a known-good ret P5 cap-40 run on the "
-    "desktop (HTTP) transport. The gate fails when a run differs from these "
+    "aboveCutoffItems and baselineDps of a known-good ret phase-4 cap-40 run "
+    "from the P3 gear preset on the desktop (HTTP) transport. The gate fails when a run differs from these "
     "three fields; every other field here is provenance. Regenerate ONLY when a "
     "change is meant to alter the tab's output (fork re-pin, universe regen, "
     "intended ranking change) and after the printed diff is explained: pnpm "
@@ -92,24 +92,36 @@ CHECK_NAME = "desktop-gate"
 PORT = 3333
 ORIGIN = f"http://localhost:{PORT}"
 
-# Pinned eligible-candidate count, measured in step 5 of the
-# desktop-transport-gate plan on both the embedded and WASM origins at fork
-# 2781486d6 (ret, phase 5). A universe regen that changes the ret P5 eligible
-# pool must update this. Bounded above by the committed ret-p5 universe size
-# (617 entries, plan C31).
-# Measured in step 5 (2026-09-14) on both the embedded (3333) and WASM origins
-# at fork 2781486d6, ret phase 5: both reported eligibleCount 617, equal to the
-# committed ret-p5 universe size (data/universes/ret-p5.json, plan C31). A
-# universe regen that changes the ret P5 eligible pool must update this.
-EXPECTED_ELIGIBLE = {"ret": {5: 617}}
-UNIVERSE_CAP = {"ret": {5: 617}}
+# The phase the gate ranks, and the gear it starts from. Owner rule (ticket
+# 560 brief): a live run starts from the preset of the phase BEFORE the phase
+# it ranks. Retribution's gear presets are P1, P2, P3, Bulwark (phase 3) and
+# Pre-raid -- there is no phase-4 preset (vendor/tbc-new-fork/ui/specs/paladin/
+# retribution/presets.ts) -- so phase 5 has no previous-phase start gear and
+# the gate ranks phase 4 from the P3 preset (session ruling Q-560-desktop-phase).
+# The pair is (preset phase tab, preset name), as run-tab-cdp.mjs takes them.
+DESKTOP_PHASE = 4
+START_PRESET = {"ret": {4: ("Phase 3", "P3")}}
 
-# Measured full-pool row count (plan step 5, D4): C14 was ruled FALSE -- an
-# uncapped run lands 601 rows against 617 eligible candidates (16 screened-out
-# candidates do not land as rows), on both the 3333 and WASM origins at fork
-# 2781486d6. The --full branch of assertion (e) compares rowCount against this,
-# NOT against eligibleCount. A universe regen must re-measure it.
-FULL_ROWS = {"ret": {5: 601}}
+# Pinned eligible-candidate count and its upper bound, from the committed
+# universe, before any run (ticket 560 amendment A-F31):
+#   node -e "console.log(require('<fork>/ui/features/upgrades/model/data/ret-p4.universe.json').entries.length)"
+# prints 523 (2026-10-07, fork feat/upgrades-tab-react). Every ret-p4 entry is
+# phase <= 4 and none is a Kael temporary legendary, so neither the phase filter
+# (model/engine/pool.ts filterPoolByPhase) nor the Kael exclusion removes one,
+# and the tab's default settings (no source excluded, prune off) do not filter:
+# the gate's eligibleCount should be 523. If a run reads another number, explain
+# the filter responsible in the stage's desktop-gate.md before changing this.
+# A universe regen that changes the ret-p4 pool must re-measure both.
+EXPECTED_ELIGIBLE = {"ret": {4: 523}}
+UNIVERSE_CAP = {"ret": {4: 523}}
+
+# Measured full-pool row count for the --full branch of assertion (e): an
+# uncapped run lands fewer rows than eligible candidates, because screened-out
+# candidates do not all land as rows (C14 false). Not measured for ret phase 4:
+# the gate runs capped at 40 < eligible, and a capped run never reads it, so
+# the key is left out (amendment A-F31a); a --full run falls back to the
+# eligible count and must measure and pin the value here first.
+FULL_ROWS: dict[str, dict[int, int]] = {}
 
 # Tolerances (plan §Approach; out of scope to edit these in response to a
 # failure -- a failure is a finding and a ticket).
@@ -218,13 +230,25 @@ def start_server(serve_args: list[str]) -> subprocess.Popen:
     raise SystemExit(2)
 
 
-def run_harness(out_path: Path, candidates: int) -> dict:
+def run_harness(out_path: Path, candidates: int, spec: str, phase: int) -> dict:
     SCRATCH.mkdir(parents=True, exist_ok=True)
+    start = START_PRESET.get(spec, {}).get(phase)
+    if start is None:
+        eprint(f"{CHECK_NAME}: no start preset pinned for {spec} phase {phase} "
+               "(START_PRESET) -- the gate runs only where one is.")
+        raise SystemExit(2)
+    preset_tab, preset = start
     args = [
         "node",
         str(HARNESS),
         "--origin",
         ORIGIN,
+        "--phase",
+        str(phase),
+        "--preset-tab",
+        preset_tab,
+        "--preset",
+        preset,
         "--candidates",
         str(candidates),
         "--out",
@@ -556,7 +580,7 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
 
     eligible = rb.get("eligibleCount")
     expected = EXPECTED_ELIGIBLE.get(spec, {}).get(phase)
-    cap = UNIVERSE_CAP.get(spec, {}).get(phase, 617)
+    cap = UNIVERSE_CAP.get(spec, {}).get(phase)
     full_rows = FULL_ROWS.get(spec, {}).get(phase)
     requested = rb.get("candidatesRequested") or 0
     # C14 is FALSE (D4): an uncapped run lands FULL_ROWS (< eligibleCount), not
@@ -566,12 +590,15 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
         expected_rows = min(requested, eligible) if eligible else requested
     else:
         expected_rows = full_rows if full_rows is not None else eligible
+    # An unpinned spec/phase fails (e): a gate that passed on numbers nobody
+    # measured would hide a pool change.
     e_ok = (rb.get("rowCount") == expected_rows
-            and (expected is None or eligible == expected)
-            and (eligible is None or eligible <= cap))
+            and expected is not None and cap is not None
+            and eligible == expected and eligible <= cap)
     mark("e", e_ok,
          f"rowCount={rb.get('rowCount')} expected={expected_rows} "
-         f"eligibleCount={eligible} EXPECTED_ELIGIBLE={expected} cap={cap} "
+         f"eligibleCount={eligible} EXPECTED_ELIGIBLE={expected or 'unpinned'} "
+         f"cap={cap or 'unpinned'} "
          f"(uncapped uses FULL_ROWS={full_rows}, C14 false)")
 
     mark("f", not rb.get("panicHit"), f"panicHit={rb.get('panicHit')}")
@@ -605,7 +632,7 @@ def main() -> int:
     ap.add_argument("--compare", nargs=2, metavar=("A", "B"))
     ap.add_argument("--cross-transport", action="store_true")
     ap.add_argument("--spec", default="ret")
-    ap.add_argument("--phase", type=int, default=5)
+    ap.add_argument("--phase", type=int, default=DESKTOP_PHASE)
     args = ap.parse_args()
 
     # --compare: no server, no node -- just T1-T4 on two JSONs.
@@ -637,7 +664,7 @@ def main() -> int:
         candidates = 0 if args.full else args.candidates
         main_json = SCRATCH / "last-run.json"
         print(f"{CHECK_NAME}: running harness (candidates={candidates})...")
-        rb = run_harness(main_json, candidates)
+        rb = run_harness(main_json, candidates, args.spec, args.phase)
         print(f"{CHECK_NAME}: assertions:")
         gate_ok, checks = assert_gate(rb, candidates, args.spec, args.phase)
 
