@@ -55,9 +55,10 @@ output changed. Find out why before you touch this file.
 to alter the output — a fork re-pin, a universe regen, an intended ranking
 change. Run `pnpm desktop-gate:check --update-golden`, read the diff it prints,
 and commit the new file with the reason the output changed in the commit body.
-The write is gated on checks (a)-(g) passing, which stops a *broken* run
-(timeout, panic, wrong worker, wrong row count) from becoming a golden. It does
-**not** stop a ranking regression: that preserves shape and passes (a)-(g). The
+The write is gated on checks (a)-(f) passing ((g) removed), which stops a
+*broken* run (timeout, panic, wrong worker, wrong row count) from becoming a
+golden. It does **not** stop a ranking regression: that preserves shape and
+passes (a)-(f). The
 only thing standing between a regression and a committed golden is you reading
 the printed diff.
 

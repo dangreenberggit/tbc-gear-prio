@@ -297,7 +297,7 @@ A recorded-fixture miss (`no recording for sim key`) is a **stop-and-report**, n
 a re-record.
 
 Before every fork re-pin, hand-run `pnpm desktop-gate:check` and paste its
-assertion lines (a)–(h) into the commit body or the stage's `desktop-gate.md`. It
+assertion lines (a)–(f) and (h) ((g) removed) into the commit body or the stage's `desktop-gate.md`. It
 proves the upgrades tab still runs on the packaged desktop binary over the HTTP
 transport and cannot pass on a page served by vite. It is deliberately **not** in
 `pnpm verify` — it needs `go`, `make` and Chrome, none of which CI has — so

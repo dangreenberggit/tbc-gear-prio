@@ -5,7 +5,7 @@ Proves the tab runs on the **packaged desktop binary**, served by the embedded
 Go server, and cannot pass on a page served by vite. Since ticket 403 the tab
 takes the per-candidate loop on both transports, so the desktop signature is a
 native-served page whose sims go out as `raidSimAsync` over HTTP — not a bulk
-RPC. This gate rests on four independent signals the CDP harness
+RPC. This gate rests on three independent signals the CDP harness
 (`run-tab-cdp.mjs`) measures and this script judges:
 
   S1 runner class          data-runner attribute the tab writes; WorkerPoolSimRunner
@@ -17,7 +17,10 @@ RPC. This gate rests on four independent signals the CDP harness
   S3 served worker body     sim_worker.js has zero WebAssembly refs (embedded
                            server rewrites it to net_worker.js) -- this is what
                            a vite-served page cannot fake
-  S4 fallback warnings      "[upgrades] screening fell back" console count
+
+Signal S4 and its check (g) are removed: they counted "[upgrades] screening
+fell back" console lines, which nothing prints since the bulk screening pass
+was deleted (ticket 567). The other letters keep their meaning.
 
 and a comparison of the run's ranking output against a committed golden readback
 (h), which is the only automatic check on DPS values, row order and the
@@ -30,11 +33,11 @@ CI has none. Run it by hand before every fork re-pin
 Modes:
   (default)         build (make wowsimtbc) unless --no-build, start the packaged
                     binary on :3333, run the byte check + the harness at
-                    --candidates (default 40), assert (a)-(h). --full uncaps and
+                    --candidates (default 40), assert (a)-(f) and (h). --full uncaps and
                     skips (h) (no golden for an uncapped run).
   --serve-args S    extra flags for the server (e.g. "--usefs=true --wasm=true"
                     for the N1 negative).
-  --update-golden   after (a)-(g) pass, rewrite the committed golden readback for
+  --update-golden   after (a)-(f) pass, rewrite the committed golden readback for
                     this spec/phase/cap. A deliberate act -- read
                     data/desktop-gate/README.md first.
   --bytes-only      just the Q1 byte comparison of dist/tbc against the origin.
@@ -564,7 +567,7 @@ def bytes_check(origin: str) -> int:
 # --- assertions -------------------------------------------------------------
 
 def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool, dict]:
-    """Assert (a)-(g) against a readback. Returns (all_ok, per-check dict)."""
+    """Assert (a)-(f) against a readback. Returns (all_ok, per-check dict)."""
     checks: dict = {}
 
     def mark(name: str, ok: bool, line: str) -> None:
@@ -618,18 +621,7 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
 
     mark("f", not rb.get("panicHit"), f"panicHit={rb.get('panicHit')}")
 
-    warns = rb.get("screeningFallbackWarnings", 0)
-    if done:
-        mark("g", warns == 0,
-             f"screeningFallbackWarnings={warns} (S4; meaningful only because "
-             "(d) passed)")
-    else:
-        checks["g"] = None
-        print(f"  (g) n/a: screeningFallbackWarnings={warns} -- (d) did not "
-              "pass, so on a run that did not complete this count is not "
-              "evidence (G4, C30)")
-    all_ok = all(v for v in checks.values() if v is not None) and checks.get("d")
-    return bool(all_ok), checks
+    return all(checks.values()), checks
 
 
 def main() -> int:
@@ -683,14 +675,14 @@ def main() -> int:
         print(f"{CHECK_NAME}: assertions:")
         gate_ok, checks = assert_gate(rb, candidates, args.spec, args.phase)
 
-        # --update-golden: (a)-(g) gate the write, which stops a *broken* run
+        # --update-golden: (a)-(f) gate the write, which stops a *broken* run
         # (timeout, panic, wrong worker, wrong row count) from becoming a
         # golden. It does NOT stop a ranking regression -- that preserves shape
-        # and passes (a)-(g). Value-level correctness rests on the developer
+        # and passes (a)-(f). Value-level correctness rests on the developer
         # reading the diff printed above.
         if args.update_golden:
             if not gate_ok:
-                print(f"{CHECK_NAME}: refusing to write a golden -- (a)-(g) did "
+                print(f"{CHECK_NAME}: refusing to write a golden -- (a)-(f) did "
                       "not all pass.")
                 return 1
             write_golden(rb, args.spec, args.phase, candidates)
@@ -700,7 +692,7 @@ def main() -> int:
             print("  (h) skipped: no golden for an uncapped run")
             golden_rc = 0
         elif not gate_ok:
-            print("  (h) skipped -- (a)-(g) did not all pass.")
+            print("  (h) skipped -- (a)-(f) did not all pass.")
             golden_rc = 0
         else:
             golden_rc = check_golden(rb, args.spec, args.phase, candidates)
