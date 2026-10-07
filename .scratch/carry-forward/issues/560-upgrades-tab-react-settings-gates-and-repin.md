@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: stage 558-upstream-react-port, branch feat/upstream-react-port (fork branch feat/upgrades-tab-react, in the port worktree C:/Users/dgree/Code/lulz/tbc-gear-prio-wt-react-port)
 Blocks: none
@@ -100,3 +100,21 @@ L0-L2 per feature (settings reducer, staleness with `mockSubscriptions`, phase s
 - **Below-cutoff group column alignment** (visual advisory A1): when the below-cutoff group is open, its columns sit about 40 px left of the shortlist header, because the group table has no head of its own and sizes its columns separately. Evidence, in the gitignored stage folder of the owner's checkout: `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate/558-p2-results-parity/captures/ret-p3-p2-1280-04-slot-below-cutoff-open.png`, and A1 in `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/handoffs/visual-review-558-p2-K4.md`. P3's layout work fixes it or records a ruling on it.
 - **Quality-colour coverage** (visual advisory A4): every row in P2's captures is epic, so only one quality colour was judged. P3's re-recorded fixtures or its layout gate include at least one non-epic row.
 - **559's review condition:** ticket 559's done line includes "`pre-merge-review` React-practices axis: no `pending` row". 559 was closed at the end of P2 with that review still pending (559's closing note). The branch's `pre-merge-review` before the merge ask covers P2's fork code, `54a7d526..b15f397cb` on `feat/upgrades-tab-react`, on that axis.
+
+## Closing note (2026-10-07, stage 558-p3-settings-gates, chunk K6)
+
+Done on `feat/upgrades-tab-react` (fork) and `feat/upstream-react-port` (port worktree). Stage records are in the owner's checkout under `.scratch/stage-gate/558-p3-settings-gates/` (gitignored).
+
+- **Pins.** Fork tip `43e3963d6b296806e407fdd9ba88f78bda083104`, 29 commits past `b15f397cb` (chunks K1-K6 and ticket 564; listed by chunk in `data/wowsims-fork.lock.json` `_comment`). The lock names that tip; port tip at the re-pin `1cf24330` ("Re-pin the fork to the React Upgrades tab tip"). `corepack pnpm verify` rc=0 at the re-pin (`verify-k6.log`). Nothing is pushed.
+- **Settings side.** Sources dialog, sim-set chips with "Other sets (n)" and prune, phase selector, eligible count, iterations, dev-only cap and fixture input, the collapsible run card below `xl`, staleness (raid, encounter, phase, tab settings and iterations; A-K1-stale-scope), polite and alert status regions, `data-runner`. React review ledgers `react-review-K2.md` to `react-review-K6.md`, every row dispositioned.
+- **Badges (ticket 430).** Done: one badge per selected set that holds the item (K3).
+- **Gates.** `test-layout.mjs`, `test-review.mjs`, `test-stop.mjs` and `tools/run-tab-cdp.mjs` run on the React DOM. The layout gate passed a measured run after the re-record (`layout-k6.log`: 32 PASS, 0 FAIL, a11y 0 failing; `testedTabHash` `cea82477da02…`). Its new check 14 fails any item name split inside a word. The production bundle holds none of the dev-only names (`dist-grep.md`), and `window.__upgradesFixture` is `undefined` on the desktop binary (`desktop-gate.md`).
+- **Desktop gate.** Moved from ret phase 5 to **ret phase 4 from the P3 preset** (session ruling Q-560-desktop-phase: ret has no phase-4 preset, so phase 5 has no previous-phase start gear). Green with a new golden `data/desktop-gate/golden-ret-p4-cap40.json`; the phase-5 golden is removed. A capped run shows 39 rows, not 40: one worn item is inside the first 40 and owned rows are not listed (`CAPPED_ROWS` in `scripts/check_desktop_tab.py`; `desktop-gate.md`).
+- **Fixtures.** All five re-recorded once, each with `forkSha` `43e3963d6b29…`. The recordings ran on the native backend, because in-page WASM ran a feral run past the recorder's 25 min guard (`record.md`). `grep -c 38287` is 0 in each file, which settles the carried P4 Mug item. `tab-fixtures:check` shows no stale input. The two `packages/core` fixture tests were re-pinned and pass, 36 passed and 0 skipped (`fixture-tests.md`).
+- **SME.** `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/handoffs/sme-rank-judgment-560-fixtures.md` (copy: `sme-verdict.md`): ret-p3-p2 trust, the four feral fixtures trust-with-caveats, no stop. Its caveat: two feral baselines fell 8 and 11 DPS with the same gear; the SME's hypothesis (untested) is upstream's feral rotation change `6163fdbff`.
+- **Visual.** `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/handoffs/visual-review-558-p3-K5.md`: pass on all five entries.
+- **Carried from P2.** A1: the below-cutoff columns sit 0 px from their heads on all seven columns at 375, 653, 768 and 1280 px (layout gate fact). A4: every fixture has non-epic rows (rare: 7, 8, 8, 8, 9 per fixture, `record.md`). The 559 review condition passes to `pre-merge-review`.
+- **Carried from P1.** Source labels are `upgrades_tab.sources.*` keys (K3). The capped run's tail is the re-sim of the shown rows (`cdp-k4.md`); its progress total over-counts, ticket 566.
+- **Read paths.** Per session ruling Q-564-read-paths, see the read-path table in ticket 564's closing note.
+- **Tickets filed in this stage.** 566 (progress total over-counts).
+- **Next, by the session.** `pre-merge-review` on the branch, whose React-practices axis covers P2's and P3's fork code. Then the hand-back (this ticket's "Hand-back"; preconditions in the stage's `progress.md`), with the owner's confirmation first. Then the merge ask.
