@@ -41,6 +41,10 @@ The same edits are needed in:
 
 Also check `SimSignalManager.abortType`. It awaits each trigger while it iterates a live `Map`, so a run started right after a settled Stop could have its sims aborted. The adapter should snapshot its own in-flight set (`plan-review.md` round 1, F14).
 
+## Also: terminate leaves in-flight sims unsettled (pre-merge review A4)
+
+From `docs/reviews/feat-upstream-react-port.md`, round 1, A4. At fork `43e3963d`, `WorkerPool.terminate()` (`ui/sim/workers/worker_pool.ts`, a shared upstream file) ends the workers without rejecting the requests still waiting on them. `RunSession.dispose()` (`ui/features/upgrades/model/run_session.ts:119-123`) aborts, then terminates, so a sim in flight never settles and the store stays `running`. A remounted session reads that `runId` (`:72-73`) with a null `controller`, so `stop()` (`:100-101`) does nothing and the dialog's Stop button is dead. How a user reaches this is a hypothesis, untested: `SimTabs.tsx` mounts every pane with `keepMounted`, so a tab switch never unmounts the Upgrades tab. A real abort (this ticket) should settle every pending request on terminate, preferably in the fork's adapter rather than in the shared `worker_pool.ts` (owner: "keep a clean footprint in wowsims shared files").
+
 ## Done when
 
 - Stop aborts the in-flight sims in every phase: pool building, baseline, candidate loop, set phase and replication. Each phase ends in `stopped`, never `failed`.
