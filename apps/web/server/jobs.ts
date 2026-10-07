@@ -313,7 +313,7 @@ async function composeBaseline(
 }
 
 /**
- * `rank.ts` emits `simming` from three places and only the first carries
+ * `rank.ts` emits `simming` from four places and only the first carries
  * `candidates`, so a later event must not blank a count the UI has already
  * sized its skeleton list against.
  */
