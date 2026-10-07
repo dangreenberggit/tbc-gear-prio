@@ -66,6 +66,24 @@ The ban covers only those four sim-store writers. Whether a store the tab create
 
 This ticket reverses those decisions on the owner's request.
 
+## Upstream libraries the owner flagged
+
+After a survey of the libraries upstream's UI uses (`C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate/558-p3-settings-gates/upstream-libraries.html`, gitignored, owner's checkout), the owner said:
+
+> Yes, the UI kit is generic and less interesting (well, not necessarily interesting) but the other ones particularly tanstack tools seem on point.
+
+> Just this part of the plan will likely take a full orchestration session with another agent, so* how* to fold in different parts isn't your concern
+
+Source: the owner in chat, 2026-10-06, logged in `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate/558-p3-settings-gates/decision-log.md` (gitignored, owner's checkout).
+
+The survey lists four upstream libraries the tab does not use yet, all in upstream's `package.json` at `42c75dc9`:
+- `@tanstack/react-virtual`, wrapped as `ui/ui-kit/VirtualList`;
+- `@tanstack/react-table`;
+- `react-i18next` (its `useTranslation` hook);
+- `react-use`.
+
+The session that takes this ticket decides whether and how each is folded into this work or into separate tickets. The owner's rule on upstream code above applies.
+
 ## Open questions for the planner
 
 The planner answers these. They are not answered here.
