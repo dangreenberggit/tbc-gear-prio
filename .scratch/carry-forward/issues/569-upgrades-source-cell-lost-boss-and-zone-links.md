@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-upstream-react-port.md (pre-merge review round 1, SP1)
 Blocks: none
@@ -24,3 +24,12 @@ Ticket 559's spec line said "source cell (`item.sources`, since `getSourceInfo` 
 ## Done when
 
 The Source cell shows the same linked source text the old tab showed for a raid drop (boss and zone), falls back to the plain label otherwise, the layout gate and desktop gate pass with the regenerated golden, and the fork is re-pinned with `pnpm verify` rc=0.
+
+## Closing note (2026-10-07, round B2b, branch `feat/upstream-react-port`)
+
+Fixed.
+
+- **Fork `feat/upgrades-tab-react`.** `ce8ee77de` ("Link the Source cell's zone and boss again") renders upstream's `ItemSource` unchanged in the Source cell, and the engine's label when `ItemSource` would render nothing; a test renders `ItemSource` for each of its branches. `68c4b317e` ("Pass the Source cell its item through the row context") passes the item and the sim through `RowContext`, as the other cells get page data. No upstream file is edited for this: `ItemSource` is imported.
+- **Port.** `777c3c68` re-pins the fork to `d52c8e91e`, which holds both commits. `ed3e2641` regenerates `data/desktop-gate/golden-ret-p4-cap40.json`: 32 of 39 rows show upstream's source text, 7 keep their label, and row order, DPS, `aboveCutoffItems` and `baselineDps` are unchanged. Its commit body records that the plain desktop gate passes. `bdf18838` advances the layout baseline after a measured layout-gate run (36 PASS, per the stage decision log, 2026-10-07T08:53Z).
+- **Visual.** The final `gate-visual` run at fork `d52c8e91e` passes at 375, 768 and 1280 px and judges this cell: raid drops show the zone with "(N)" and the boss on a second line, and a four-line cell makes its row taller without overlapping anything. Handoff: `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate/558-p3-settings-gates/visual-final.md` (gitignored, owner's checkout).
+- Review row SP1 in `docs/reviews/feat-upstream-react-port.md` is set to `fixed` in the commit that closes this ticket.

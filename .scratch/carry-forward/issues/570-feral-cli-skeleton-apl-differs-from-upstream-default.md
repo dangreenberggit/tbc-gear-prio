@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: docs/reviews/feat-upstream-react-port.md (fix round B1; not a review finding, filed at the session's request)
 Blocks: none
@@ -92,3 +92,11 @@ Choose one:
 The owner has picked 1 or 2, and for 2 the skeleton is rebuilt, `pnpm
 skeleton:check` passes, and every pinned CLI feral value that moved is
 re-recorded with the old and new values written here.
+
+## Closing note (2026-10-07, round B2b)
+
+`wontfix`: option 1 above, keep the owner's export as the source. This is a session ruling, not an owner pick. The stage decision log (`C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate/558-p3-settings-gates/decision-log.md`, gitignored, owner's checkout) records it verbatim:
+
+> 2026-10-07T07:55Z | ef13ce60-a835-4a9f-b024-892080124bda | row Q-570-feral-skeleton-apl | wontfix (session ruling) | the feral CLI skeleton is the owner's own export by design (build_feral_skeleton.py docstring; tickets 244, 250; check_raid_sim_skeleton.py gates it against that export); ret follows upstream and is current; CLI-only (ADR-0031); the owner said tuning rotations is not the job; the later agent closes 570 with this ruling | evidence: B1 report § Ticket 570
+
+The owner's words the ruling rests on, as quoted in `docs/reviews/feat-upstream-react-port.md`: "I'm just making sure this upgrades tab gets made. Our job is not to make a good player rotation. Stay on target". If the owner wants feral to follow upstream's default APL, option 2 above is the work.
