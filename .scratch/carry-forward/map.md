@@ -304,3 +304,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 567 Delete the dead bulk sim path from the Upgrades tab and its core tests (pre-merge review feat-upstream-react-port round 1, S8, A5) 2026-10-07
 - 568 Shrink the fork's edits to shared upstream files, and bring the ledger up to date (pre-merge review feat-upstream-react-port round 1, S1, S2, S6, S9, S12) 2026-10-07
 - 569 Upgrades tab: the Source cell lost the old tab's linked boss and zone (pre-merge review feat-upstream-react-port round 1, SP1) 2026-10-07
+- 570 The feral CLI skeleton's rotation differs from upstream's default APL at the engine pin (fix round B1 after the feat-upstream-react-port review, filed at the session's request) 2026-10-07
