@@ -305,3 +305,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 568 Shrink the fork's edits to shared upstream files, and bring the ledger up to date (pre-merge review feat-upstream-react-port round 1, S1, S2, S6, S9, S12) 2026-10-07
 - 569 Upgrades tab: the Source cell lost the old tab's linked boss and zone (pre-merge review feat-upstream-react-port round 1, SP1) 2026-10-07
 - 570 The feral CLI skeleton's rotation differs from upstream's default APL at the engine pin (fix round B1 after the feat-upstream-react-port review, filed at the session's request) 2026-10-07
+- 571 Epic item names are below 4.5:1 contrast on the Upgrades tab (visual review of ticket 560 final round, F1) 2026-10-07
