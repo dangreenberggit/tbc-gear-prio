@@ -104,10 +104,12 @@ committed, re-record with the commands above.
 fixture <name>: recorded at <sha>; inputs changed since: <paths|none>
 ```
 
-The inputs are the fork paths that can change a `Ranking`:
-`upgrades/engine/**` (except `view.ts`, `PROVENANCE.md` and the engine's test
-`fixtures/`), `upgrades/adapters/**`, `upgrades/data/**`, and
-`upgrades_tab.tsx`, whose `run()` builds the engine's input. A listed path means
+The inputs are the fork paths that can change a `Ranking`, all under
+`ui/features/upgrades/model/` (`INPUT_PATHS` in `scripts/check_tab_fixtures.py`):
+`engine/**` (except `view.ts`, `PROVENANCE.md` and the engine's test
+`fixtures/`), `adapters/**`, `data/**`, `run.ts`, which builds the engine's
+input, and `settings_pool.ts`, whose `effectivePool` builds the pool `run.ts`
+hands the engine. A listed path means
 the fixture may no longer match what a run would produce now. Read the diff and
 re-record when it changes what a run computes; a change that only affects
 rendering does not need one.
