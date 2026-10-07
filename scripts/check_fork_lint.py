@@ -13,7 +13,7 @@ This script closes it, scoped to **our** files only:
 
   - `ui/features/upgrades/` -- the ported engine, its adapters, tools
     and fixtures, and the tab's components, hooks and run model.
-  - `ui/app/tabs/UpgradesTabBody.tsx` -- the tab body, once it exists.
+  - `ui/app/tabs/UpgradesTabBody.tsx` -- the tab body.
 
 The tab has no stylesheet of its own: upstream's React UI styles with
 Tailwind utilities, so the old SCSS partial and its stylelint run are
@@ -78,12 +78,18 @@ TSC = FORK_MODULES / "typescript/bin/tsc"
 CHECK_NAME = "fork lint check"
 
 # Fork-relative. oxlint is given these verbatim, so the gate can never read a
-# path we do not own. A path that does not exist yet is left out rather than
-# failing: the tab body lands after the engine on the React port (ticket 558).
+# path we do not own. Every entry must exist: dropping a missing one in silence
+# let a moved or renamed path go unlinted while the gate still printed "ok"
+# (pre-merge review of feat/upstream-react-port, findings A7 and S5).
 TS_PATHS = (
     "ui/features/upgrades",
     "ui/app/tabs/UpgradesTabBody.tsx",
 )
+
+
+def missing_ts_paths(fork_root: Path) -> list[str]:
+    """The TS_PATHS entries absent under `fork_root`."""
+    return [p for p in TS_PATHS if not (fork_root / p).exists()]
 
 
 def binary(name: str) -> Path:
@@ -155,15 +161,25 @@ def main() -> int:
         )
         return 2
 
+    absent = missing_ts_paths(FORK_ROOT)
+    if absent:
+        print(
+            f"{CHECK_NAME}: these TS_PATHS entries are missing from the fork at "
+            f"{pin[:12]}: {', '.join(absent)}. The gate would lint less than it "
+            "claims. Update TS_PATHS in scripts/check_fork_lint.py to the "
+            "paths' new names.",
+            file=sys.stderr,
+        )
+        return 1
+
     failures = 0
 
     # --deny-warnings because every rule our files trip is configured as a
     # warning in the fork's .oxlintrc.json (simple-import-sort/imports,
     # import/no-duplicates). Without it oxlint exits 0 on a real finding and
     # the gate is decoration.
-    ts_paths = [p for p in TS_PATHS if (FORK_ROOT / p).exists()]
     rc, output = run(
-        [str(oxlint), "--deny-warnings", *ts_paths], "oxlint"
+        [str(oxlint), "--deny-warnings", *TS_PATHS], "oxlint"
     )
     if rc == 2:
         print(f"{CHECK_NAME}: {output}", file=sys.stderr)
@@ -191,7 +207,7 @@ def main() -> int:
 
     print(
         f"{CHECK_NAME} ok at fork commit {pin[:12]}: oxlint clean over "
-        f"{', '.join(ts_paths)} (--deny-warnings), fork type-check clean"
+        f"{', '.join(TS_PATHS)} (--deny-warnings), fork type-check clean"
     )
     return 0
 
