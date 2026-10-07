@@ -123,6 +123,20 @@ UNIVERSE_CAP = {"ret": {4: 523}}
 # eligible count and must measure and pin the value here first.
 FULL_ROWS: dict[str, dict[int, int]] = {}
 
+# Measured row count of a capped run, per (spec, phase, cap): the rows the
+# Upgrades list pane shows. The cap sims the first N candidates in EP order
+# plus every worn item (model/engine/rank.ts, "the cap keeps the first N of
+# the EP order plus every owned row"), and owned rows stay out of the list
+# pane (model/results_view.ts paneRows), so a capped run shows N minus the
+# worn items inside the first N. ret phase 4 from the P3 preset, cap 40:
+# the ranking holds 55 rows, 16 of them owned (the 16 worn items), so
+# 55 = 40 + 15 owned rows outside the first 40, one worn item sits inside
+# it, and the pane shows 39. Measured 2026-10-07 on the desktop binary and,
+# with the same 39 rows, on the WASM dev server (window.__upgradesRanking;
+# ticket 560 stage desktop-gate.md). A change to the pool, the EP order or
+# the preset gear can move it; re-measure and explain before changing it.
+CAPPED_ROWS = {"ret": {4: {40: 39}}}
+
 # Tolerances (plan §Approach; out of scope to edit these in response to a
 # failure -- a failure is a finding and a ticket).
 K_DPS = 12.0  # T2: per-row |d_screened - d_loop| bound for rows 9..N
@@ -585,18 +599,19 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
     requested = rb.get("candidatesRequested") or 0
     # C14 is FALSE (D4): an uncapped run lands FULL_ROWS (< eligibleCount), not
     # eligibleCount, because screened-out candidates do not all land as rows. A
-    # capped run lands min(cap, eligibleCount).
+    # capped run lands its pinned CAPPED_ROWS (worn items inside the cap are
+    # simmed but not listed).
     if requested > 0:
-        expected_rows = min(requested, eligible) if eligible else requested
+        expected_rows = CAPPED_ROWS.get(spec, {}).get(phase, {}).get(requested)
     else:
         expected_rows = full_rows if full_rows is not None else eligible
     # An unpinned spec/phase fails (e): a gate that passed on numbers nobody
     # measured would hide a pool change.
-    e_ok = (rb.get("rowCount") == expected_rows
+    e_ok = (expected_rows is not None and rb.get("rowCount") == expected_rows
             and expected is not None and cap is not None
             and eligible == expected and eligible <= cap)
     mark("e", e_ok,
-         f"rowCount={rb.get('rowCount')} expected={expected_rows} "
+         f"rowCount={rb.get('rowCount')} expected={expected_rows or 'unpinned'} "
          f"eligibleCount={eligible} EXPECTED_ELIGIBLE={expected or 'unpinned'} "
          f"cap={cap or 'unpinned'} "
          f"(uncapped uses FULL_ROWS={full_rows}, C14 false)")

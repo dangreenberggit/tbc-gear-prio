@@ -27,6 +27,13 @@ golden is `golden-ret-p4-cap40.json`.
   run with the tab's default settings should report `eligibleCount` 523.
   `FULL_ROWS` has no phase-4 entry: the gate runs capped, and a capped run
   never reads it.
+- **Pinned row count.** `CAPPED_ROWS["ret"][4][40]` is 39, not 40. The cap
+  sims the first 40 candidates in EP order plus every worn item, and the
+  Upgrades list pane leaves worn (owned) rows out. On this run one worn item
+  is inside the first 40: the ranking holds 55 rows, 16 of them the worn
+  items, so 15 worn rows lie outside the first 40 and the pane shows 39.
+  Measured on the desktop binary and, with the same 39 rows, on the WASM dev
+  server (2026-10-07, ticket 560 stage `desktop-gate.md`).
 - **Where the run's values are explained.** The phase-4 golden's rows and
   `baselineDps`, against the old phase-5 golden, are explained in the commit
   that writes the golden and in the ticket-560 stage's `desktop-gate.md`.
