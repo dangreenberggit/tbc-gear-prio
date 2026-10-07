@@ -21,7 +21,7 @@ import {
   buildRankFixture,
   loadRank,
   SIM_VERSION,
-} from "./bulk-screen-fixture.js";
+} from "./feral-rank-fixture.js";
 import {
   forkPresent,
   forkRoot,
