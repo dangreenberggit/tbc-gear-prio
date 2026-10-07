@@ -37,8 +37,9 @@
  *
  * Design point owned here: importing the fork's engine also imports its
  * generated proto types (`ui/generated/proto/*.ts`), which are themselves
- * gitignored INSIDE the fork's own repo (protoc output — confirmed via
- * `git check-ignore -v ui/core/proto/common.ts` in the clone, 2026-08-14).
+ * gitignored INSIDE the fork's own repo (protoc output: the fork's
+ * `ui/generated/proto/.gitignore` ignores `*.ts`; confirm with
+ * `git -C vendor/tbc-new-fork check-ignore -v ui/generated/proto/common.ts`).
  * So "the fork is present" and "the fork's protos are generated" are two
  * independent conditions, and both gate this test the same way: skip, don't
  * fail. `describeOrSkip` below handles both — see its comment.

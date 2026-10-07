@@ -82,9 +82,8 @@ Every command below was run on 2026-09-14 moving both pins from `ec5c5f2` to
 
 Both trees clean, the fork lock naming the clone's actual HEAD, the expected
 worktree registrations, and a known `pushed` flag. `git -C <fork> worktree list`
-prints one line, or two while a port worktree exists. Ticket 558 added one:
-`C:/Users/dgree/Code/lulz/tbc-gear-prio-wt-react-port/vendor/tbc-new-fork` on
-`feat/upgrades-tab-react`, removed when that branch merges.
+prints one line, or one more for each port worktree that is open. Name each
+extra line's path and branch in your notes before you start.
 
 ```bash
 git -C <core> status --porcelain
