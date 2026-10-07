@@ -1,19 +1,19 @@
 {
   "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a known-good ret phase-4 cap-40 run from the P3 gear preset on the desktop (HTTP) transport. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter the tab's output (fork re-pin, universe regen, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate. See README.md beside this file.",
-  "recordedAt": "2026-10-07T06:54:28.528Z",
-  "forkCommit": "43e3963d6b296806e407fdd9ba88f78bda083104",
+  "recordedAt": "2026-10-07T08:44:34.054Z",
+  "forkCommit": "d52c8e91ea3f3d8d028ecb8e7c99e2df9188b6d6",
   "cpuCount": 20,
   "candidatesRequested": 40,
   "spec": "ret",
   "phase": 4,
-  "elapsedS": 9.3,
+  "elapsedS": 9.6,
   "rows": [
     {
       "rank": "1",
       "item": "Berserker's Call",
       "slot": "Trinket 1",
       "dps": 16.9,
-      "source": "Zul'Aman",
+      "source": "Zul'Aman (N)\nZul'jin",
       "belowCutoff": false
     },
     {
@@ -21,7 +21,7 @@
       "item": "Cloak of Fiends",
       "slot": "Back",
       "dps": 2.4,
-      "source": "Zul'Aman",
+      "source": "Zul'Aman\nTimed Chest",
       "belowCutoff": true
     },
     {
@@ -29,7 +29,7 @@
       "item": "Choker of Endless Nightmares",
       "slot": "Neck",
       "dps": 1.4,
-      "source": "Black Temple",
+      "source": "Black Temple (N)\nSupremus",
       "belowCutoff": true
     },
     {
@@ -37,7 +37,7 @@
       "item": "Shadowmoon Destroyer's Drape",
       "slot": "Back",
       "dps": -3.1,
-      "source": "Black Temple",
+      "source": "Black Temple (N)\nTeron Gorefiend",
       "belowCutoff": true
     },
     {
@@ -45,7 +45,7 @@
       "item": "Leggings of Divine Retribution",
       "slot": "Legs",
       "dps": -3.8,
-      "source": "Black Temple",
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
       "belowCutoff": true
     },
     {
@@ -53,7 +53,7 @@
       "item": "Dreadboots of the Legion",
       "slot": "Feet",
       "dps": -7.3,
-      "source": "Black Temple",
+      "source": "Black Temple (N)\nReliquary of the Lost",
       "belowCutoff": true
     },
     {
@@ -69,7 +69,7 @@
       "item": "Legguards of Endless Rage",
       "slot": "Legs",
       "dps": -11.9,
-      "source": "Hyjal Summit",
+      "source": "Hyjal Summit (N)\nArchimonde",
       "belowCutoff": true
     },
     {
@@ -77,7 +77,7 @@
       "item": "Heartshatter Breastplate",
       "slot": "Chest",
       "dps": -12.4,
-      "source": "Black Temple",
+      "source": "Black Temple (N)\nMother Shahraz",
       "belowCutoff": true
     },
     {
@@ -85,7 +85,7 @@
       "item": "Swiftstrike Shoulders",
       "slot": "Shoulders",
       "dps": -12.8,
-      "source": "Crafted",
+      "source": "Leatherworking",
       "belowCutoff": true
     },
     {
@@ -101,7 +101,7 @@
       "item": "Worgen Claw Necklace",
       "slot": "Neck",
       "dps": -15.8,
-      "source": "Karazhan",
+      "source": "Karazhan (N)\nAttumen the Huntsman",
       "belowCutoff": true
     },
     {
@@ -117,7 +117,7 @@
       "item": "Krakken-Heart Breastplate",
       "slot": "Chest",
       "dps": -15.8,
-      "source": "Serpentshrine Cavern",
+      "source": "Serpentshrine Cavern (N)\nLady Vashj",
       "belowCutoff": true
     },
     {
@@ -125,7 +125,7 @@
       "item": "Softstep Boots of Tracking",
       "slot": "Feet",
       "dps": -15.8,
-      "source": "Black Temple",
+      "source": "Black Temple (N)\nTeron Gorefiend",
       "belowCutoff": true
     },
     {
@@ -133,7 +133,7 @@
       "item": "Tsunami Talisman",
       "slot": "Trinket 1",
       "dps": -16.4,
-      "source": "Serpentshrine Cavern",
+      "source": "Serpentshrine Cavern (N)\nLeotheras the Blind",
       "belowCutoff": true
     },
     {
@@ -141,7 +141,7 @@
       "item": "Band of the Ranger-General",
       "slot": "Ring 2",
       "dps": -17.1,
-      "source": "Tempest Keep",
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
       "belowCutoff": true
     },
     {
@@ -149,7 +149,7 @@
       "item": "Leggings of Murderous Intent",
       "slot": "Legs",
       "dps": -18.3,
-      "source": "Tempest Keep",
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
       "belowCutoff": true
     },
     {
@@ -157,7 +157,7 @@
       "item": "Drape of the Dark Reavers",
       "slot": "Back",
       "dps": -18.8,
-      "source": "Karazhan",
+      "source": "Karazhan (N)\nShade of Aran",
       "belowCutoff": true
     },
     {
@@ -173,7 +173,7 @@
       "item": "Bracers of Eradication",
       "slot": "Wrist",
       "dps": -19.7,
-      "source": "Serpentshrine Cavern",
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
       "belowCutoff": true
     },
     {
@@ -181,7 +181,7 @@
       "item": "Pillager's Gauntlets",
       "slot": "Hands",
       "dps": -20,
-      "source": "Black Temple",
+      "source": "Black Temple\nTrash",
       "belowCutoff": true
     },
     {
@@ -189,7 +189,7 @@
       "item": "Quickstrider Moccasins",
       "slot": "Feet",
       "dps": -20.5,
-      "source": "Hyjal Summit",
+      "source": "Hyjal Summit (N)\nAnetheron",
       "belowCutoff": true
     },
     {
@@ -197,7 +197,7 @@
       "item": "Stormrage Signet Ring",
       "slot": "Ring 2",
       "dps": -20.8,
-      "source": "Black Temple",
+      "source": "Black Temple (N)\nIllidan Stormrage",
       "belowCutoff": true
     },
     {
@@ -213,7 +213,7 @@
       "item": "Ring of Deceitful Intent",
       "slot": "Ring 2",
       "dps": -21.6,
-      "source": "Black Temple",
+      "source": "Black Temple (N)\nShade of Akama",
       "belowCutoff": true
     },
     {
@@ -221,7 +221,7 @@
       "item": "Madness of the Betrayer",
       "slot": "Trinket 1",
       "dps": -21.8,
-      "source": "Black Temple",
+      "source": "Black Temple (N)\nThe Illidari Council",
       "belowCutoff": true
     },
     {
@@ -229,7 +229,7 @@
       "item": "Ring of Lethality",
       "slot": "Ring 2",
       "dps": -22.9,
-      "source": "Serpentshrine Cavern",
+      "source": "Serpentshrine Cavern (N)\nHydross the Unstable",
       "belowCutoff": true
     },
     {
@@ -237,7 +237,7 @@
       "item": "Royal Cloak of Arathi Kings",
       "slot": "Back",
       "dps": -23.2,
-      "source": "Karazhan",
+      "source": "Karazhan (N)\nMoroes",
       "belowCutoff": true
     },
     {
@@ -245,7 +245,7 @@
       "item": "Ring of a Thousand Marks",
       "slot": "Ring 2",
       "dps": -25.2,
-      "source": "Karazhan",
+      "source": "Karazhan (N)\nPrince Malchezaar",
       "belowCutoff": true
     },
     {
@@ -261,7 +261,7 @@
       "item": "Abacus of Violent Odds",
       "slot": "Trinket 1",
       "dps": -27.9,
-      "source": "Source not recorded",
+      "source": "The Mechanar (N)\nPathaleon the Calculator",
       "belowCutoff": true
     },
     {
@@ -269,7 +269,7 @@
       "item": "Blood-stained Pauldrons",
       "slot": "Shoulders",
       "dps": -30.6,
-      "source": "Hyjal Summit",
+      "source": "Hyjal Summit (N)\nRage Winterchill",
       "belowCutoff": true
     },
     {
@@ -277,7 +277,7 @@
       "item": "Mantle of Darkness",
       "slot": "Shoulders",
       "dps": -37.6,
-      "source": "Black Temple",
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
       "belowCutoff": true
     },
     {
@@ -285,7 +285,7 @@
       "item": "Skulker's Greaves",
       "slot": "Legs",
       "dps": -38,
-      "source": "Karazhan",
+      "source": "Karazhan (N)\nNetherspite",
       "belowCutoff": true
     },
     {
@@ -293,7 +293,7 @@
       "item": "Black Featherlight Boots",
       "slot": "Feet",
       "dps": -43.9,
-      "source": "Hyjal Summit",
+      "source": "Hyjal Summit (N)\nKaz'rogal",
       "belowCutoff": true
     },
     {
@@ -309,7 +309,7 @@
       "item": "Pepe's Shroud of Pacification",
       "slot": "Back",
       "dps": -48.1,
-      "source": "Hyjal Summit",
+      "source": "Hyjal Summit\nTrash",
       "belowCutoff": true
     },
     {
@@ -317,7 +317,7 @@
       "item": "Romulo's Poison Vial",
       "slot": "Trinket 1",
       "dps": -55.9,
-      "source": "Karazhan",
+      "source": "Karazhan (N)\nRomulo and Julianne",
       "belowCutoff": true
     }
   ],
