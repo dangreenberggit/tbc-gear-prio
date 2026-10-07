@@ -51,3 +51,7 @@ From `docs/reviews/feat-upstream-react-port.md`, round 1, A4. At fork `43e3963d`
 - Tests run on the real engine and cover a Stop in each of the four sim phases: baseline, candidates, set phase and replication. Ticket 533's tests in `packages/core/test/fork-set-net.test.ts` are the pattern.
 - The parity test passes, and `pnpm verify` is green with the lock on the new fork tip.
 - An L6 live check measures the Stop → dialog-closed time and compares it with the figures above.
+
+## Comments
+
+**2026-10-07, from the review of ticket 566.** The `Progress` type's doc comment says the run "ends on `done === total`" in both `rank.ts` files: the fork's `ui/features/upgrades/model/engine/rank.ts:267` and this repo's `packages/core/src/rank.ts:184`. That holds only for a run that is not stopped: a stopped run skips the sims it has not dispatched, so `done` can end below `total` (`packages/core/test/rank.test.ts`, "dispatches no replication sims when aborted after the last candidate"). It was left as it is because a `rank.ts` edit moves the fork's PROVENANCE hash. When this ticket changes Stop, make the sentence say "a run that is not stopped ends on `done === total`" in both files, through the PROVENANCE cycle (`docs/agents/known-traps.md` § "Before editing a ported engine file").

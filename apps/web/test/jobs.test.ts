@@ -182,7 +182,7 @@ describe("GET /api/jobs/:id", () => {
   });
 
   it("keeps the candidate count once it is known", async () => {
-    // rank.ts emits `simming` from three sites and only one carries
+    // rank.ts emits `simming` from four sites and only one carries
     // `candidates`; a later event must not blank a count the UI already sized
     // its skeleton list against.
     server = await startServer();
