@@ -27,13 +27,12 @@ big `feat/wowsims-tab-tickets` merge shows zero fork files in `git show --stat`,
 because the fork's files are not tracked here at all. So the merge diff is the
 wrong instrument.
 
-Instead this compares CONTENT. It hashes the fork's layout source -- the tab
-component, its SCSS, the sim-tab shell, the ranking engine whose view code
-renders the recorded result rows assertions 6-8 measure, AND the shared SCSS the tab's asserted
-geometry resolves through (the breakpoint map and layout tokens in
-`shared/_variables.scss`, the root font-size and spacer overrides in
-`shared/_global.scss`, and `--sim-header-height` in `core/sim_ui/_shared.scss`
--- see SHARED_LAYOUT_FILES for why each is load-bearing) -- into one digest, and
+Instead this compares CONTENT. It hashes the fork's layout source -- the
+React tab's own source under `ui/features/upgrades/` (components, hooks, model
+including the ranking engine whose view code renders the rows the fixture pass
+measures, and the pool data), the tab body and its registration point, and the
+theme CSS the tab's measured geometry resolves through (breakpoints, spacing,
+typography, the two-column frame) -- see `_iter_layout_files` -- into one digest, and
 compares it to the digest recorded the last time the gate ran green
 (`data/wowsims-fork-layout.lock.json`, `testedTabHash`). Equal digest ->
 the exact tab source that last passed is still on disk -> nothing to re-test ->
@@ -136,83 +135,51 @@ LOCK_PATH = ROOT / "data/wowsims-fork-layout.lock.json"
 # for the same reason the layout lock does: the fork is gitignored.
 A11Y_BASELINE_PATH = ROOT / "data/wowsims-fork-a11y-baseline.json"
 
-ENGINE_DIR = FORK_ROOT / "ui/features/upgrades/model/engine"
-
-# The fork source `test-layout.mjs` actually renders and measures.
+# The fork source `test-layout.mjs` renders and measures (ticket 560 re-derived
+# it for the React tab; the old tab's files and its shared SCSS are gone).
 #
-# The shell files drive assertions 1-5 (the pre-run layout): the tab component
-# builds the DOM, the two SCSS files style it, and the sim-tab shell hosts it.
-# The engine directory drives assertions 6-8 (row legibility): since ticket 520
-# those measure a recorded fixture's rows, not a live run's, but the tab still
-# renders them through the engine's view code (`grep -n "engine/view"
-# upgrades_tab.tsx`), so the engine stays hashed. Narrowing the digest is out
-# of scope for ticket 520. A change to any of these can change what the gate observes, so any of
-# them moving must re-arm the gate.
-#   - assets/locales/en/translation.json -- the accessible names the a11y
-#     probe reads (button labels, aria-labels, the phase-selector option text)
-#     are locale strings, so a copy edit that empties or breaks a label is an
-#     accessibility change the gate must re-run to see. Adding it re-arms the
-#     gate on a copy change at the cost of one gate run per re-pin, which the
-#     re-pin cycle already pays.
-#   - vite.config.mts -- it defines `__TBC_TAB_FIXTURES__`, which decides
-#     whether the fixture pass's code is in the bundle at all (review round 10,
-#     finding A8).
-#
-# Ticket 558 moved the tab to a React feature: the old tab file, its two SCSS
-# files and `sim_tab.ts` are gone, so the list names the tab body and its
-# registration point. P3 of ticket 558 re-derives this list (and the shared
-# SCSS below) for the React layout when it rebuilds the gate.
-SHELL_FILES = (
-    "ui/app/tabs/UpgradesTabBody.tsx",
-    "ui/app/SimTabsSection.tsx",
-    "assets/locales/en/translation.json",
-    "vite.config.mts",
-)
-
-# The tab's adapters (the fixture loader `adapters/fixture.ts` and the check
-# hooks among them) and its pool data feed the rows the fixture pass renders,
-# so they are hashed too (finding A8). They are globbed like the engine.
-UPGRADES_DIR = FORK_ROOT / "ui/features/upgrades/model"
+# TAB_DIR: every non-test `.ts`, `.tsx` and `.css` file of the tab feature --
+# its components and hooks build the DOM the pre-run checks measure, and its
+# model (the ranking engine's view code among it) renders the rows the fixture
+# pass measures. Globbed, so a new or renamed tab file moves the digest.
+# TAB_DATA_DIRS: every non-test file of the tab's adapters and pool data, JSON
+# included (the fixture loader is an adapter, and the pool feeds the settings
+# column's sources, sets and eligible count), as before ticket 560 (finding A8).
+TAB_DIR = FORK_ROOT / "ui/features/upgrades"
+TAB_SOURCE_SUFFIXES = frozenset({".ts", ".tsx", ".css"})
+TAB_DATA_DIRS = ("model/adapters", "model/data")
 # Gitignored in the fork (its .gitignore names it): the owner's own WCL
 # credentials. Hashing it would tie the committed digest to one machine's
 # secrets file.
 LOCAL_ONLY_FILES = frozenset({"local.wcl-credentials.ts"})
 
-# The shared SCSS the tab's asserted geometry resolves THROUGH. The two tab SCSS
-# files above declare no `@use`/`@import`; they consume globally-injected Sass
-# variables and CSS custom properties, so a change in these shared files re-lays
-# the tab at the exact widths the gate measures without touching a SHELL_FILE.
-# Omitting them was finding A1 (round-2 review): editing `xl: 1200px -> 1100px`
-# re-lays the tab at the asserted widths while `testedTabHash` stays put, so the
-# gate would SKIP and a broken tab would merge green.
-#
-# Each is here because it feeds a measured assertion, not merely because the tab
-# imports it:
-#   - shared/_variables.scss  -- `$grid-breakpoints` (the values the
-#     `media-breakpoint-*` mixins read; asserts 2/4/5 gate on xl=1200 / lg=992 /
-#     md) AND the layout tokens the asserted rules consume (`--gap-width`,
-#     `--container-padding`, `--section-spacer`, `--spacer-3`, `--border-default`).
-#   - shared/_global.scss  -- the `:root` font-size (the rem base under every
-#     dimension) and the `lg`/`xxl` `!important` overrides of `--section-spacer`
-#     / `--container-padding` (they apply at >= lg = 992, i.e. the 1280 band).
-#   - core/sim_ui/_shared.scss  -- `--sim-header-height` (assert 3's sticky
-#     `top:`) with its `lg` override, and the `.sim-container` / `.sim-content`
-#     flex host the tab renders inside.
-#   - core/components/_item_row.scss  -- the `item-row-icon` mixin, which is
-#     where the results row's icon size now comes from (ticket 472). The
-#     asserted row heights and the all-cell clip check resolve through it, so
-#     changing 3rem there re-lays the rows with the tab's own SCSS untouched.
-#
-# Boundary this digest does NOT cover (stated, not hidden): the Bootstrap
-# `media-breakpoint-*` mixins themselves live in `node_modules`
-# (`bootstrap/scss/mixins`), pinned by the fork's lockfile, not in the fork's own
-# source -- a Bootstrap bump is governed by the lockfile, not by this hash. The
-# digest is over the fork's OWN layout source.
-SHARED_LAYOUT_FILES = (
-    "ui/scss/shared/_variables.scss",
-    "ui/scss/shared/_global.scss",
-    "ui/scss/core/sim_ui/_shared.scss",
-    "ui/scss/core/components/_item_row.scss",
+# Named fork files outside the tab feature that change what the gate observes.
+# Each must exist: a missing one fails the script with its name (exit 2).
+#   - ui/app/tabs/UpgradesTabBody.tsx, ui/app/SimTabsSection.tsx -- the tab
+#     body and the place the tab is registered among the sim tabs.
+#   - ui/styles/theme/breakpoints.css -- the only `--breakpoint-*` definer;
+#     the gate's widths straddle `xl` (checks 2 and 3 switch on it).
+#   - ui/styles/theme/spacing.css, typography.css -- the spacing scale and
+#     the root font size every rem-based width (the results column widths
+#     among them) resolves through.
+#   - ui/ui-kit/TabPanelColumns/TabPanelColumns.css -- the two-column frame
+#     whose gap check 13 measures.
+#   - assets/locales/en/translation.json -- the accessible names the axe pass
+#     reads are locale strings, so a copy edit can be an accessibility change.
+#   - vite.config.mts -- it defines `__TBC_TAB_FIXTURES__`, which decides
+#     whether the fixture pass's code is in the bundle at all (finding A8).
+# NOT covered: Tailwind's own utilities and the upstream ui-kit components
+# other than the frame above; the fork's lockfile and upstream base pin them,
+# and the tab does not edit them.
+LAYOUT_FILES = (
+    "ui/app/tabs/UpgradesTabBody.tsx",
+    "ui/app/SimTabsSection.tsx",
+    "ui/styles/theme/breakpoints.css",
+    "ui/styles/theme/spacing.css",
+    "ui/styles/theme/typography.css",
+    "ui/ui-kit/TabPanelColumns/TabPanelColumns.css",
+    "assets/locales/en/translation.json",
+    "vite.config.mts",
 )
 
 
@@ -224,6 +191,7 @@ SHARED_LAYOUT_FILES = (
 ROOT_GATE_FILES = (
     "vendor/tbc-new-fork/test-layout.mjs",
     "vendor/tbc-new-fork/test-tab-harness.mjs",
+    "vendor/tbc-new-fork/test-review.mjs",
 )
 # The fixture the fixture pass renders unless `--fixture` names another: feral
 # on the Phase 2 BiS preset at page phase 3, which has set rows.
@@ -237,28 +205,30 @@ def _iter_root_gate_files() -> list[Path]:
     return files
 
 
+def _is_hashed_tab_file(path: Path, suffixes: frozenset[str] | None) -> bool:
+    if not path.is_file() or ".test." in path.name or path.name in LOCAL_ONLY_FILES:
+        return False
+    return suffixes is None or path.suffix in suffixes
+
+
 def _iter_layout_files() -> list[Path]:
     """Every fork source file whose content the gate depends on, sorted.
 
     Sorted by fork-relative posix path so the digest is stable across OSes and
-    filesystem walk order. Missing shell files are reported by the caller (they
-    are a real error -- the tab cannot render without them); the engine dir is
-    globbed, so a renamed engine file just changes the digest.
+    filesystem walk order. A missing LAYOUT_FILES entry stays in the list so
+    the caller reports it by name; the tab directories are globbed, so a
+    renamed tab file just changes the digest.
     """
-    files = [FORK_ROOT / rel for rel in SHELL_FILES + SHARED_LAYOUT_FILES]
-    if ENGINE_DIR.is_dir():
-        files.extend(sorted(ENGINE_DIR.rglob("*.ts")))
-    for sub in ("adapters", "data"):
-        d = UPGRADES_DIR / sub
-        if d.is_dir():
-            files.extend(
-                sorted(
-                    p
-                    for p in d.rglob("*")
-                    if p.is_file() and p.name not in LOCAL_ONLY_FILES
-                )
-            )
-    return files
+    files = {FORK_ROOT / rel for rel in LAYOUT_FILES}
+    if TAB_DIR.is_dir():
+        files.update(
+            p for p in TAB_DIR.rglob("*") if _is_hashed_tab_file(p, TAB_SOURCE_SUFFIXES)
+        )
+        for sub in TAB_DATA_DIRS:
+            d = TAB_DIR / sub
+            if d.is_dir():
+                files.update(p for p in d.rglob("*") if _is_hashed_tab_file(p, None))
+    return sorted(files, key=_rel)
 
 
 def _rel(path: Path) -> str:
@@ -282,7 +252,7 @@ def compute_tab_hash() -> tuple[str, list[str]]:
 
     The digest folds in each file's fork-relative path as well as its bytes, so
     a rename or a delete moves the digest even when the surviving bytes are
-    unchanged. `missing` lists any expected shell file absent from disk.
+    unchanged. `missing` lists any LAYOUT_FILES entry absent from disk.
     """
     h = hashlib.sha256()
     missing: list[str] = []
@@ -329,34 +299,29 @@ def write_baseline(digest: str) -> None:
     data["testedTabHash"] = digest
     data["_comment"] = (
         "testedTabHash is the sha256 (over fork-relative path + bytes) of the "
-        "Upgrades-tab layout source at the last green run of the layout gate: the "
-        "shell files (upgrades_tab.tsx, _upgrades_tab.scss, _sim_tab.scss, "
-        "sim_tab.ts, assets/locales/en/translation.json -- the a11y probe's "
-        "accessible names are locale strings -- and vite.config.mts, which "
-        "defines __TBC_TAB_FIXTURES__), the ranking engine "
-        "(upgrades/engine/**/*.ts), the tab's adapters and pool data "
-        "(upgrades/adapters/** and upgrades/data/**, except the gitignored "
-        "local.wcl-credentials.ts), AND the shared "
-        "SCSS the tab's asserted geometry resolves through -- shared/_variables.scss "
-        "($grid-breakpoints + the layout tokens the asserted rules read), "
-        "shared/_global.scss (root font-size + lg/xxl spacer overrides), "
-        "core/sim_ui/_shared.scss (--sim-header-height + the sim-content host), and "
-        "core/components/_item_row.scss (the item-row-icon mixin the results row's "
-        "icon size comes from, ticket 472). It also covers, by repo-relative "
-        "name, the gate's own harness (vendor/tbc-new-fork/test-layout.mjs and "
-        "test-tab-harness.mjs) and the recorded tab fixtures the fixture pass "
-        "renders (data/tab-fixtures/*.json, ticket 504). The "
-        "shared files are hashed because the two tab SCSS files import nothing and "
-        "consume globally-injected variables, so a breakpoint or token edit re-lays "
-        "the tab at the asserted widths without touching a shell file (review "
-        "finding A1). NOT covered: Bootstrap's own media-breakpoint mixins, which "
-        "live in node_modules and are pinned by the fork's lockfile, not the fork's "
-        "source. scripts/check_layout_gate.py compares the live digest to this on "
-        "`pnpm merge-to-dev`; equal means the layout source that last passed is "
-        "still on disk, so the gate is skipped. Advanced only by a green gate "
-        "run (merge_to_dev commits the advance onto the feature branch so it enters "
-        "the merge) or by --update-baseline after a hand-proven layout change. The "
-        "fork itself is gitignored, so this record lives here rather than in the fork."
+        "Upgrades-tab layout source at the last green run of the layout gate "
+        "(scripts/check_layout_gate.py `_iter_layout_files`; re-derived for the "
+        "React tab by ticket 560): every non-test .ts/.tsx/.css file under "
+        "ui/features/upgrades/ (components, hooks, and the model with the "
+        "ranking engine), every non-test file of its model/adapters/ and "
+        "model/data/ (pool data, except the gitignored local.wcl-credentials.ts), "
+        "the tab body ui/app/tabs/UpgradesTabBody.tsx and its registration "
+        "ui/app/SimTabsSection.tsx, the theme CSS the measured geometry resolves "
+        "through (ui/styles/theme/{breakpoints,spacing,typography}.css and "
+        "ui/ui-kit/TabPanelColumns/TabPanelColumns.css), "
+        "assets/locales/en/translation.json (the axe pass's accessible names are "
+        "locale strings) and vite.config.mts (it defines __TBC_TAB_FIXTURES__). "
+        "It also covers, by repo-relative name, the gate's own harness "
+        "(vendor/tbc-new-fork/test-layout.mjs, test-tab-harness.mjs, "
+        "test-review.mjs) and the recorded tab fixtures the fixture pass renders "
+        "(data/tab-fixtures/*.json, ticket 504). NOT covered: Tailwind and the "
+        "upstream ui-kit beyond the frame CSS, which the fork's lockfile and "
+        "upstream base pin. scripts/check_layout_gate.py compares the live digest "
+        "to this on `pnpm merge-to-dev`; equal means the layout source that last "
+        "passed is still on disk, so the gate is skipped. Advanced only by a green "
+        "measured gate run (merge_to_dev commits the advance onto the feature "
+        "branch so it enters the merge). The fork itself is gitignored, so this "
+        "record lives here rather than in the fork."
     )
     # newline="\n": the committed lock is LF; Windows text mode would otherwise
     # rewrite it as CRLF. Ticket 399.

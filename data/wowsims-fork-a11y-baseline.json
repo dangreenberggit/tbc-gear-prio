@@ -1,20 +1,11 @@
 {
-  "_comment": "Accepted/known accessibility debt for the Upgrades tab, seeded from a real layout-gate run at fork 9b407a5f3 on 2026-09-19 (stage visual-a11y-reviewer), and re-seeded at fork baf02292d on 2026-09-19 after tickets 444/445/446 were fixed (their entries removed; they no longer fire). Each entry is a (ruleId, selector) axe reports; scripts/check_layout_gate.py passes this file to the fork test-layout.mjs via TBC_A11Y_BASELINE, so these are tracked debt and only NEW critical/serious WCAG violations block pnpm merge-to-dev. Every entry carries EITHER a ticket (a fix is owed) OR a wontfix reason. An entry that no longer fires prints a stale-baseline WARN and should be removed, unless it carries \"mayNotFire\": true: that marks debt the gate's capture may not show, prints no stale-baseline WARN, and its reason must say why. Re-seed after a fix or a tab change with TBC_A11Y_DUMP=<path> pnpm layout-gate:check, then rebuild this file from the dump (dedupe on ruleId+selector, sort, assign ticket/reason).",
+  "_comment": "Accepted/known accessibility debt for the Upgrades tab. scripts/check_layout_gate.py and scripts/check_tab_review.py pass this file to the fork's test-layout.mjs / test-review.mjs via TBC_A11Y_BASELINE, so these are tracked debt and only NEW critical/serious WCAG violations block. Every entry carries EITHER a ticket (a fix is owed) OR a wontfix reason. An entry that no longer fires prints a stale-baseline WARN and should be removed, unless it carries \"mayNotFire\": true: that marks debt the gate's capture may not show, prints no stale-baseline WARN, and its reason must say why. Match \"css\" compares the selector's [attr=value] and .class parts with the attributes of the node axe reports (test-tab-harness.mjs a11yClassify). Re-derived for the React tab by ticket 560 (stage 558-p3-settings-gates, K5) from what test-layout.mjs (feral-p3-p2bis, 375/653/768/1280, pre-run and post-run) and test-review.mjs (manifest review-560.json: settings column, Sources dialog, view toggles, below-cutoff group) measured at fork b3e50d8e0 and its K5 successors: no color-contrast violation fires on the React tab, so the old tab's two entries (color-contrast on .upgrades-item-name.text-epic, ticket 473, and .text-rare, ticket 480; both tickets closed) were removed -- their class selectors cannot match the React DOM, whose item name carries data-testid=upgrades-item-name. If a later fixture shows a contrast finding on an item-quality colour, add it here with its selector and the measurement.",
   "entries": [
     {
-      "ruleId": "color-contrast",
-      "selector": ".upgrades-item-name.text-epic",
+      "ruleId": "heading-order",
+      "selector": ".ui-accordion-header",
       "match": "css",
-      "ticket": "473",
-      "reason": "inherited item-quality colour (#a335ee epic) on the 472 zebra rows; identical pair on the Gear-tab item list; owner-accepted debt 2026-09-22"
-    },
-    {
-      "ruleId": "color-contrast",
-      "selector": ".upgrades-item-name.text-rare",
-      "match": "css",
-      "ticket": "480",
-      "mayNotFire": true,
-      "reason": "inherited item-quality colour (#0070dd rare: 3.26:1 on #222328, 3.65:1 on #18191e) on the 472 zebra rows; same pair as the Gear-tab item list; measured under ticket 480, sibling of the 473 epic entry. The gate's mid-run ret capture may hold no rare-quality name, so this entry often matches nothing; mayNotFire stops the fork's test-layout.mjs printing a 'stale-baseline ... never fired -- remove it' warning for it (owner, 2026-09-27: 'Flag is fine for this'). Do not remove it because it did not fire"
+      "reason": "wontfix in the tab: the below-cutoff group's header is the <h6> that upstream's ui-kit AccordionItem renders (ui/ui-kit/Accordion/AccordionItem.tsx, render={<h6 />}), with no heading-level prop, and ui-kit is upstream code the tab does not edit (ticket 560 plan, Paths manifest). axe impact moderate, so it is a warning, never a failure; baselined so the warning names its reason (ticket 560, Gate C K4 amendments A-K4-group-head and A-K4-a11y)."
     }
   ]
 }
