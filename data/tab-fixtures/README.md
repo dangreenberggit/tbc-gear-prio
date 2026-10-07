@@ -59,8 +59,10 @@ pnpm tab-fixtures:record --spec feral --phase 2 --name malorne4 --preset-tab "Ph
 ```
 
 Test gear is the previous phase's preset at the next page phase, as for every
-live run and capture in this repo. The recorder loads the preset, opens the
-Upgrades tab, and then sets the phase in the tab's own Phase selector.
+live run and capture in this repo, with one exception: `th-hands-legs` wears
+Thunderheart Gauntlets and Leggings (31034, 31044), which are phase 3 items, at
+page phase 3. The recorder loads the preset or gear link, opens the Upgrades
+tab, and then sets the phase in the tab's own Phase selector.
 
 **Port worktree: `TBC_FORK_PORT=5174`.** A second checkout with its own fork
 runs its dev server on another port and sets `TBC_FORK_PORT` for every command
@@ -71,8 +73,9 @@ fixture, which names `localhost:5173`. With `TBC_FORK_PORT` set, the recorder
 opens the same link on that port instead and logs the rewritten link. The link
 was made on the old (pre-React) page. `--expect-item-ids` is the check that the
 React page decoded it: the recorder refuses to run when the worn gear lacks any
-of those 16 items. Whether the React page decodes an old-page link is a
-hypothesis until this fixture is re-recorded.
+of those 16 items. The fixture was re-recorded on the React tab
+(`recordedAt` 2026-10-07, `forkSha` 43e3963d), and its `gear.items` holds all
+16, so the React page decoded the old-page link at that fork commit.
 
 ### Recording uncommitted fork code for review
 
