@@ -20,7 +20,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { URL, fileURLToPath, pathToFileURL } from "node:url";
 
 import { holdKeepAwake } from "./keep-awake.mjs";
 import { armRunDeadline, guardPage, withTimeout } from "./run-guard.mjs";
