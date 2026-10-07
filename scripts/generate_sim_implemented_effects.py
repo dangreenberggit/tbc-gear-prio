@@ -99,8 +99,16 @@ ACTIVE_CALL_RE = re.compile(
 # place this must NOT fire is the stub auto-gen files, where every
 # `{ItemID: <n>, ItemName: "..."}` line is already inside a `//` comment and
 # so never matches `^\s*\{` (no leading `//`) in the first place.
+#
+# The brace is optional because a struct literal passed to a helper call puts
+# its `ItemID:` field on the next line, not after the brace: upstream's
+# `itemhelpers.CreateWeaponProcSpell(itemhelpers.WeaponProcSpell{` is followed
+# by `ItemID: 28573,` (sim/common/tbc/items_weapons.go at fork 43e3963d), and
+# auto-gen `shared.NewProcDamageEffect(...{` blocks do the same. Requiring the
+# brace dropped seven weapon procs from this list when upstream moved to that
+# form (pre-merge review of feat/upstream-react-port, finding D1).
 ACTIVE_STRUCT_LITERAL_RE = re.compile(
-    r"^\s*\{ItemID:\s*(\d+)",
+    r"^\s*(?:\{\s*)?ItemID:\s*(\d+)",
     re.MULTILINE,
 )
 
@@ -260,7 +268,8 @@ def main() -> int:
             "Membership in implementedEffectItemIds means the item is actively "
             "registered or referenced in the fork's Go tree -- through a "
             "core.NewItemEffect / shared.NewSimpleStatActive call, a LibramMap "
-            "{ItemID: ...} struct literal, or a runtime HasItemEquipped(<id>, "
+            "{ItemID: ...} struct literal, an ItemID: field of a struct "
+            "passed to a registration helper, or a runtime HasItemEquipped(<id>, "
             "...) gate. It does NOT mean the item's proc contributes DPS for "
             "your spec: ticket 226's direct sims measured a member of this "
             "list contributing nothing for the spec under test "
