@@ -301,3 +301,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 555 Chrome Energy Saver may freeze a hidden tab run after 5 min (Chrome 133+) (stage-gate 553-554 plan C19) 2026-10-05
 - 556 Silence check: a new request can extend a hung worker's limit, and five comments are wrong or unsourced (pre-merge review round 15, R15-A1, R15-A2, R15-D1 and others) 2026-10-05
 - 557 Silence-check limits are unmeasured for pet, totem and melee specs and on the desktop build (pre-merge review round 15, R15-D2, R15-D3, R15-P1) 2026-10-05
+- 559 Run-log report keeps the price each line was written with, so a price fix misses old lines (pre-merge review fix/hook-sonnet-cache-price, A1, D2) 2026-10-08
