@@ -161,7 +161,8 @@ async function main() {
   const expectNames = expectIds.map((id) => db.get(id)).filter(Boolean);
 
   const harness = await import(
-    pathToFileURL(path.join(FORK, "test-tab-harness.mjs")).href
+    pathToFileURL(path.join(ROOT, "scripts/tab-harness/test-tab-harness.mjs"))
+      .href
   );
   const { launchChrome, cdp, attachPage, evaluate, activateTabExpression } =
     harness;

@@ -27,7 +27,7 @@ results table has rows and there is no stale banner.
 
 ## Looking at one (the storybook)
 
-- **By hand.** Start `:5173` (the `wowsims-fork` entry in `.claude/launch.json`, or `npx vite serve --port 5173` in `vendor/tbc-new-fork`; no backend) and open `http://localhost:5173/tbc/tab-fixtures/`. Each link opens the Upgrades tab on that fixture; `<html data-upgrades-fixture>` becomes `loaded` or `failed`.
+- **By hand.** Start `:5173` (the `wowsims-fork` entry in `.claude/launch.json`, or `npx vite serve --config ../../scripts/tab-harness/vite.config.mjs --port 5173` in `vendor/tbc-new-fork`; no backend) and open `http://localhost:5173/tbc/tab-fixtures/`. Each link opens the Upgrades tab on that fixture; `<html data-upgrades-fixture>` becomes `loaded` or `failed`.
 - **Smoke.** `pnpm tab-fixtures:smoke` opens every link. It starts `:5173` only when the port is free, prints one line per fixture, writes PNGs to `.scratch/tab-fixtures-smoke/`, and exits 0 or 1. To use another port, set `TBC_FORK_PORT` (for example `TBC_FORK_PORT=5174 pnpm tab-fixtures:smoke`); `record.mjs` reads it too. A second checkout with its own fork, such as a port worktree, needs this, because two fork dev servers cannot share `:5173`.
 - **Timing.** 1.4–5.6 s per fixture on a warm server; the first load after a server start took up to about 30 s (`pnpm tab-fixtures:smoke`, ticket 520).
 - **What it proves:** the fork's working tree, uncommitted edits included, renders the recorded result.
@@ -35,9 +35,11 @@ results table has rows and there is no stale banner.
 - **Without a backend** the `:3333` calls are refused and the left Stats panel shows zeros. The results table is not affected.
 - **Other ways.** `?upgrades-dev` still shows a **Load fixture** file input, for a fixture kept outside this folder. A script can call `await window.__upgradesFixture(<parsed JSON>)`, which returns `{ ok: true, rows }` or `{ ok: false, reason }`.
 
-The loader exists only in builds where the `__TBC_TAB_FIXTURES__` define is
-true: the dev server, and the gate harness's own build (it sets
-`TBC_TAB_FIXTURES=1`). A production build has none of it. **The local
+The loader exists only on the dev server (`import.meta.env.DEV`) and in the
+gate harness's own build, which sets `VITE_TBC_TAB_FIXTURES=1`
+(`scripts/tab-harness/test-tab-harness.mjs`). A production build has none
+of it. The fixture index at `/tbc/tab-fixtures/` needs the dev server to
+run with `--config ../../scripts/tab-harness/vite.config.mjs`. **The local
 `vendor/tbc-new-fork/dist/` that the layout gate and `pnpm tab-review` build
 therefore contains the loader, and must not be served as a user build.**
 
@@ -106,7 +108,7 @@ fixture <name>: recorded at <sha>; inputs changed since: <paths|none>
 
 The inputs are the fork paths that can change a `Ranking`, all under
 `ui/features/upgrades/model/` (`INPUT_PATHS` in `scripts/check_tab_fixtures.py`):
-`engine/**` (except `view.ts`, `PROVENANCE.md` and the engine's test
+`engine/**` (except `view.ts` and the engine's test
 `fixtures/`), `adapters/**`, `data/**`, `run.ts`, which builds the engine's
 input, and `settings_pool.ts`, whose `effectivePool` builds the pool `run.ts`
 hands the engine. A listed path means

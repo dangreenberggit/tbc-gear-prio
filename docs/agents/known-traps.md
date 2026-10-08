@@ -74,16 +74,18 @@ Applies to anything under the fork's
 `ui/features/upgrades/model/engine/` (`rank.ts`,
 `view.ts`, and neighbours) — **including comment-only edits**.
 
-**Symptom when armed:** `pnpm verify` fails with "engine/PROVENANCE.md is
-stale against the fork's ported files".
+**Symptom when armed:** `pnpm verify` fails with
+"docs/fork-provenance/engine.md is stale against the fork's ported files".
 
 The full cycle, in order, every time:
 
 1. `npx vitest run packages/core/test/wowsims-fork-parity.test.ts` (E-W3)
    from the repo root — green before any hash moves.
-2. Update the file's row in the fork's `model/engine/PROVENANCE.md`
-   with the new sha256 (Edit tool, not sed — see the trap above).
-3. Fork commit.
+2. Update the file's row in `docs/fork-provenance/engine.md` (in this
+   repo, not the fork) with the new sha256 (Edit tool, not sed — see the
+   trap above).
+3. Fork commit of the ported file. The record change is committed in this
+   repo with the re-pin.
 4. Re-pin: move `data/wowsims-fork.lock.json`'s `commit` to the new fork
    tip and run `pnpm sim-implemented-effects:generate` (the artifact
    embeds the pin).
@@ -216,7 +218,7 @@ after `capture[0]` shows the tab's nav bar instead of its target, and
 
 `capture[0]` is clipped where it stands, so a hovered tooltip stays open
 for it. Each later capture goes through the scroll branch of `captureClip`
-in the fork's `test-review.mjs`, which offsets the clip by `window.scrollY`.
+in `scripts/tab-harness/test-review.mjs`, which offsets the clip by `window.scrollY`.
 Hypothesis, untested: the page scrolls an inner container, so
 `window.scrollY` stays 0 and the clip is taken at the top of the page. Make
 each element `capture[0]` of its own entry: one entry for the popover, one

@@ -17,8 +17,8 @@ Two kinds of problem, treated differently:
 
 The inputs are the fork paths that can change a Ranking, all under
 `ui/features/upgrades/model/`: the engine (`engine/**`, except `view.ts`,
-which only shapes a recorded Ranking for display, `PROVENANCE.md` and the
-engine's own test `fixtures/`), the adapters, the pool data, `run.ts`
+which only shapes a recorded Ranking for display, and the engine's own
+test `fixtures/`), the adapters, the pool data, `run.ts`
 (it builds the engine's input, as the old tab's `run()` did) and
 `settings_pool.ts` (its `effectivePool` builds the pool `run.ts` hands the
 engine). What this cannot see -- the Go sim / WASM, the item
@@ -56,7 +56,6 @@ INPUT_PATHS = (
 )
 ENGINE_EXCLUDED = (
     f"{ENGINE}/view.ts",
-    f"{ENGINE}/PROVENANCE.md",
 )
 ENGINE_EXCLUDED_DIRS = (f"{ENGINE}/fixtures/",)
 

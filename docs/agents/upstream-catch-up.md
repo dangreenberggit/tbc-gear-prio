@@ -242,12 +242,12 @@ Then verify the merged tree:
 ```bash
 go build ./sim/core/... ; go build ./sim/hunter/... ; go vet ./sim/hunter/
 pnpm fork-lint:check            # from <core>: oxlint over our fork paths, then the fork's tsc
-npm run test:layout             # from <fork>
+node scripts/tab-harness/test-layout.mjs   # from <core>
 ```
 
 `go build ./sim/...` cannot pass in this checkout: `sim/web/main.go` imports
 `binary_dist`, which is gitignored and built only by `make binary_dist`. Build the
-packages that hold the merged code instead. Read `test:layout`'s log for its
+packages that hold the merged code instead. Read `test-layout.mjs`'s log for its
 assertion line, not just the rc.
 
 Refresh the bundled data the tab ranks from, then commit again:
@@ -257,7 +257,7 @@ python scripts/sync_fork_universes.py --write
 python scripts/sync_fork_universes.py --check
 ```
 
-Add a dated section to the fork's `ui/features/upgrades/model/data/PROVENANCE.md`
+Add a dated section to `docs/fork-provenance/data.md` (in this repo)
 saying what moved and why. That script compares **raw bytes**, so a pure CRLF/LF difference reads
 exactly like a real drift — check with `--ignore-cr-at-eol` before writing a
 cause down.

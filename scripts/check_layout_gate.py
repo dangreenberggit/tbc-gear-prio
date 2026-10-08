@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run the Upgrades-tab layout gate when a merge changed the tab's layout.
 
-Ticket 322 shipped `vendor/tbc-new-fork/test-layout.mjs` (`npm run test:layout`):
+Ticket 322 shipped `test-layout.mjs` (now `scripts/tab-harness/test-layout.mjs`):
 a DOM-geometry gate that renders the Upgrades tab headless and asserts layout
 facts at four widths. It works and it bites -- but ticket 325 found nothing runs
 it. This script is that wiring, invoked from `scripts/merge_to_dev.py` so the
@@ -85,14 +85,14 @@ Usage
 
 Exit codes: 0 = ok (ran green, or skipped for any reason above); 1 = the gate
 ran and MEASURED a failure -- a broken layout OR an unbaselined critical/serious
-accessibility violation (the fork's test-layout.mjs exits 1 for either, and this
+accessibility violation (test-layout.mjs exits 1 for either, and this
 script blocks on any measured nonzero exit, so the a11y ratchet needs no branch
 here), or the gate would run but its tab fixture is missing or unreadable; 2 = a
 real error (could not read a tracked source file that the record
 expects).
 
 Accessibility: the gate passes TBC_A11Y_BASELINE (data/wowsims-fork-a11y-baseline.json)
-to the fork script when it exists, so seeded/known violations are tracked debt
+to the gate script when it exists, so seeded/known violations are tracked debt
 and only NEW critical/serious ones block. Absent -> the fork runs strict.
 """
 
@@ -114,7 +114,10 @@ from check_tab_fixtures import FIXTURE_DIR, check_fixture
 
 ROOT = Path(__file__).resolve().parents[1]
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
-LAYOUT_TEST = FORK_ROOT / "test-layout.mjs"
+# The gate scripts live in this repo (scripts/tab-harness/) and start their
+# fork commands with the fork as cwd themselves, so they run with cwd at ROOT.
+HARNESS_DIR = ROOT / "scripts/tab-harness"
+LAYOUT_TEST = HARNESS_DIR / "test-layout.mjs"
 # The build-completed sentinel, in both the shapes `make host` can leave behind.
 # The makefile's wasm recipe (vendor/tbc-new-fork/makefile:112) ends with
 # `gzip -9 -f -n $(OUT_DIR)/lib.wasm`, which REPLACES the uncompressed file --
@@ -130,8 +133,8 @@ DIST_WASM_CANDIDATES = (
 )
 DIST_ASSETS = FORK_ROOT / "dist/tbc/assets"
 LOCK_PATH = ROOT / "data/wowsims-fork-layout.lock.json"
-# The accepted-a11y-debt baseline the fork's test-layout.mjs reads via
-# TBC_A11Y_BASELINE. Absent -> the fork script runs strict (every
+# The accepted-a11y-debt baseline test-layout.mjs reads via
+# TBC_A11Y_BASELINE. Absent -> the gate script runs strict (every
 # critical/serious WCAG violation fails). Seeded once from a real gate run;
 # each entry carries a ticket or a wontfix reason. Lives here, not in the fork,
 # for the same reason the layout lock does: the fork is gitignored.
@@ -168,10 +171,12 @@ LOCAL_ONLY_FILES = frozenset({"local.wcl-credentials.ts"})
 #     contrast checks resolve through.
 #   - ui/ui-kit/TabPanelColumns/TabPanelColumns.css -- the two-column frame
 #     whose gap check 13 measures.
-#   - assets/locales/en/translation.json -- the accessible names the axe pass
+#   - assets/locales/en/upgrades.json -- the accessible names the axe pass
 #     reads are locale strings, so a copy edit can be an accessibility change.
-#   - vite.config.mts -- it defines `__TBC_TAB_FIXTURES__`, which decides
-#     whether the fixture pass's code is in the bundle at all (finding A8).
+#   - vite.config.mts -- the gate's `vite build` reads it. Whether the fixture
+#     pass's code is in the bundle at all (finding A8) is now decided by the
+#     tab's own `utils/dev_flags.ts` and the harness's VITE_TBC_TAB_FIXTURES=1
+#     environment (scripts/tab-harness/test-tab-harness.mjs), not by this file.
 # The upstream ui-kit modules the tab renders through (Button, Dialog,
 # Popover, ...) are not listed here: `_iter_ui_kit_files` follows the imports,
 # so a wowsims sync that changes one moves the digest. The fork pins no upstream
@@ -188,7 +193,7 @@ LAYOUT_FILES = (
     "ui/styles/theme/typography.css",
     "ui/styles/theme/vars.css",
     "ui/ui-kit/TabPanelColumns/TabPanelColumns.css",
-    "assets/locales/en/translation.json",
+    "assets/locales/en/upgrades.json",
     "vite.config.mts",
 )
 
@@ -207,9 +212,9 @@ MODULE_SUFFIXES = (".ts", ".tsx", ".css")
 # two harness files are the assertions themselves: editing either changes the
 # gate's verdict without touching a line of tab source.
 ROOT_GATE_FILES = (
-    "vendor/tbc-new-fork/test-layout.mjs",
-    "vendor/tbc-new-fork/test-tab-harness.mjs",
-    "vendor/tbc-new-fork/test-review.mjs",
+    "scripts/tab-harness/test-layout.mjs",
+    "scripts/tab-harness/test-tab-harness.mjs",
+    "scripts/tab-harness/test-review.mjs",
 )
 # The fixture the fixture pass renders unless `--fixture` names another: feral
 # on the Phase 2 BiS preset at page phase 3, which has set rows.
@@ -377,10 +382,10 @@ def write_baseline(digest: str) -> None:
         "theme CSS the measured geometry and the axe contrast checks resolve "
         "through (ui/styles/theme/{breakpoints,colors,spacing,typography,vars}.css "
         "and ui/ui-kit/TabPanelColumns/TabPanelColumns.css), "
-        "assets/locales/en/translation.json (the axe pass's accessible names are "
-        "locale strings) and vite.config.mts (it defines __TBC_TAB_FIXTURES__). "
+        "assets/locales/en/upgrades.json (the axe pass's accessible names are "
+        "locale strings) and vite.config.mts (the gate's build reads it). "
         "It also covers, by repo-relative name, the gate's own harness "
-        "(vendor/tbc-new-fork/test-layout.mjs, test-tab-harness.mjs, "
+        "(scripts/tab-harness/test-layout.mjs, test-tab-harness.mjs, "
         "test-review.mjs) and the recorded tab fixtures the fixture pass renders "
         "(data/tab-fixtures/*.json, ticket 504). NOT covered: Tailwind's own "
         "utilities, which the fork's package-lock pins. "
@@ -440,37 +445,33 @@ def _node_major(node_exe: str = "node") -> int | None:
         return None
 
 
-def _npm_command(
-    script: str, extra: Sequence[str] = ()
+def _node_command(
+    script: Path, extra: Sequence[str] = ()
 ) -> tuple[list[str], str] | None:
-    """The argv that runs a fork npm script under Node >= 22, or None.
+    """The argv that runs a harness script under Node >= 22, or None.
 
     Returns (argv, how) where `how` names the interpreter path chosen, for the
-    log. `npm run <script>` is the fork's own script (package.json), run with
-    cwd at the fork. When `extra` is non-empty it is appended after `--` so npm
-    forwards the arguments to the script (e.g. --manifest/--out for test:review).
-    Node 22 is required; if the ambient node is already >= 22 it is used
-    directly, else `fnm exec --using=22` is preferred when fnm is on PATH. When
-    neither is available the gate is skipped, not run wrong.
+    log. `script` is a file under scripts/tab-harness/, run with cwd at ROOT;
+    `extra` is appended as its arguments (e.g. --manifest/--out for
+    test-review.mjs). Node 22 is required; if the ambient node is already >= 22
+    it is used directly, else `fnm exec --using=22` is preferred when fnm is on
+    PATH. When neither is available the gate is skipped, not run wrong.
     """
-    npm = "npm.cmd" if os.name == "nt" and shutil.which("npm.cmd") else "npm"
-    tail = ["run", script]
-    if extra:
-        tail += ["--", *extra]
+    tail = [str(script), *extra]
     ambient = _node_major("node")
     if ambient is not None and ambient >= 22:
-        return [npm, *tail], f"ambient node v{ambient}"
+        return ["node", *tail], f"ambient node v{ambient}"
 
     fnm = shutil.which("fnm")
     if fnm:
-        return [fnm, "exec", "--using=22", npm, *tail], "fnm --using=22"
+        return [fnm, "exec", "--using=22", "node", *tail], "fnm --using=22"
 
     return None
 
 
 def _layout_command() -> tuple[list[str], str] | None:
-    """The argv that runs test:layout under Node >= 22, or None if unavailable."""
-    return _npm_command("test:layout")
+    """The argv that runs test-layout.mjs under Node >= 22, or None if unavailable."""
+    return _node_command(LAYOUT_TEST)
 
 
 # The tagged verdict line `test-layout.mjs` prints just before it exits. The
@@ -518,7 +519,7 @@ class GateResult(NamedTuple):
     """What `run_gate` learned. `rc` is 0/1/GATE_UNMEASURED as before; the two
     counts are the parsed verdict fields (None when the verdict was absent or
     unmeasured) so `run()` can name both in the FAILED message. The a11y block
-    itself does not need a Python branch: the fork's test-layout.mjs exits 1 on
+    itself does not need a Python branch: test-layout.mjs exits 1 on
     any unbaselined critical/serious violation, and a nonzero measured exit is
     already `rc == 1` below -- the counts here are for the message only."""
 
@@ -528,10 +529,10 @@ class GateResult(NamedTuple):
 
 
 def run_gate(fixture: Path | None = None) -> GateResult:
-    """Run test:layout in the fork.
+    """Run scripts/tab-harness/test-layout.mjs against the fork.
 
     rc is 0 (the gate ran green), 1 (the gate MEASURED and something is broken
-    -- layout OR a11y; the fork script's own exit 1 covers both), or
+    -- layout OR a11y; the gate script's own exit 1 covers both), or
     GATE_UNMEASURED (it never measured a width, so it learned nothing about the
     tab and nothing may be blamed on it -- and nothing may be recorded as tested
     either).
@@ -547,10 +548,10 @@ def run_gate(fixture: Path | None = None) -> GateResult:
         )
         return GateResult(GATE_UNMEASURED, None, None)
     argv, how = cmd
-    print(f"layout gate: running `{' '.join(argv)}` in {FORK_ROOT} ({how})")
+    print(f"layout gate: running `{' '.join(argv)}` in {ROOT} ({how})")
     print("(this renders the Upgrades tab headless at 4 widths)")
     # The child inherits the parent environment plus TBC_A11Y_BASELINE when the
-    # baseline file exists (absent -> the fork script runs strict, its own
+    # baseline file exists (absent -> the gate script runs strict, its own
     # rule). TBC_A11Y_DUMP is left inherited so a caller that sets it (baseline
     # seeding) still reaches the child; nothing here sets it.
     env = dict(os.environ)
@@ -566,7 +567,7 @@ def run_gate(fixture: Path | None = None) -> GateResult:
     stdout_lines: list[str] = []
     with subprocess.Popen(
         argv,
-        cwd=str(FORK_ROOT),
+        cwd=str(ROOT),
         env=env,
         stdout=subprocess.PIPE,
         text=True,
@@ -651,9 +652,8 @@ def preview_skip_reason() -> str | None:
 
     if not LAYOUT_TEST.is_file():
         return (
-            f"{LAYOUT_TEST.relative_to(FORK_ROOT).as_posix()} is absent from the "
-            "fork -- the clone is present but predates the layout gate "
-            "(ticket 322). Nothing to run."
+            f"{LAYOUT_TEST.relative_to(ROOT).as_posix()} is absent from this "
+            "repo. Nothing to run."
         )
     if not any(p.is_file() for p in DIST_WASM_CANDIDATES) or not DIST_ASSETS.is_dir():
         wanted = " or ".join(
@@ -738,9 +738,8 @@ def run(
 
     if not LAYOUT_TEST.is_file():
         return _skip(
-            f"{LAYOUT_TEST.relative_to(FORK_ROOT).as_posix()} is absent from the "
-            "fork -- the clone is present but predates the layout gate "
-            "(ticket 322). Nothing to run."
+            f"{LAYOUT_TEST.relative_to(ROOT).as_posix()} is absent from this "
+            "repo. Nothing to run."
         )
     if not any(p.is_file() for p in DIST_WASM_CANDIDATES) or not DIST_ASSETS.is_dir():
         wanted = " or ".join(
@@ -815,7 +814,7 @@ def run(
             on_baseline_advanced(LOCK_PATH, digest)
         return 0
 
-    # A measured failure blocks the merge. The fork script exits 1 for a layout
+    # A measured failure blocks the merge. The gate script exits 1 for a layout
     # failure OR an unbaselined critical/serious a11y violation, so name both
     # counts (unknown -> "?") rather than saying "layout is broken" alone.
     layout = "?" if result.layout_failed is None else result.layout_failed
