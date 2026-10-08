@@ -121,10 +121,10 @@ python -c "import json;a=json.load(open('vendor/wowsims/db.json'))['items'];b=js
 ## Counts
 
 - local membership (U): 364
-- wowsims-primary membership (W): 1358
+- wowsims-primary membership (W): 1326
 - in both: 355
 - universe-only (U \ W): 9
-- wowsims-only (W \ U): 1003
+- wowsims-only (W \ U): 971
 - phase-disagreements: 0
 - universe ids absent from the wowsims DB: 0
 - unexplained: 0
@@ -569,14 +569,6 @@ carry. Each row names the rule that explains the absence.
 | 22113 | Feralheart Vest | 1 | f | no recognized source route | — |
 | 22384 | Persuader | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 22399 | Idol of Health | 1 | c | stub-only sim effect | — |
-| 22476 | Bonescythe Breastplate | 1 | f | no recognized source route | — |
-| 22477 | Bonescythe Legplates | 1 | f | no recognized source route | — |
-| 22478 | Bonescythe Helmet | 1 | f | no recognized source route | — |
-| 22479 | Bonescythe Pauldrons | 1 | f | no recognized source route | — |
-| 22480 | Bonescythe Sabatons | 1 | f | no recognized source route | — |
-| 22481 | Bonescythe Gauntlets | 1 | f | no recognized source route | — |
-| 22482 | Bonescythe Waistguard | 1 | f | no recognized source route | — |
-| 22483 | Bonescythe Bracers | 1 | f | no recognized source route | — |
 | 22488 | Dreamwalker Tunic | 1 | f | no recognized source route | — |
 | 22489 | Dreamwalker Legguards | 1 | f | no recognized source route | — |
 | 22490 | Dreamwalker Headpiece | 1 | f | no recognized source route | — |
@@ -585,30 +577,6 @@ carry. Each row names the rule that explains the absence.
 | 22493 | Dreamwalker Handguards | 1 | f | no recognized source route | — |
 | 22494 | Dreamwalker Girdle | 1 | f | no recognized source route | — |
 | 22495 | Dreamwalker Wristguards | 1 | f | no recognized source route | — |
-| 22496 | Frostfire Robe | 1 | f | no recognized source route | — |
-| 22497 | Frostfire Leggings | 1 | f | no recognized source route | — |
-| 22498 | Frostfire Circlet | 1 | f | no recognized source route | — |
-| 22499 | Frostfire Shoulderpads | 1 | f | no recognized source route | — |
-| 22500 | Frostfire Sandals | 1 | f | no recognized source route | — |
-| 22501 | Frostfire Gloves | 1 | f | no recognized source route | — |
-| 22502 | Frostfire Belt | 1 | f | no recognized source route | — |
-| 22503 | Frostfire Bindings | 1 | f | no recognized source route | — |
-| 22504 | Plagueheart Robe | 1 | f | no recognized source route | — |
-| 22505 | Plagueheart Leggings | 1 | f | no recognized source route | — |
-| 22506 | Plagueheart Circlet | 1 | f | no recognized source route | — |
-| 22507 | Plagueheart Shoulderpads | 1 | f | no recognized source route | — |
-| 22508 | Plagueheart Sandals | 1 | f | no recognized source route | — |
-| 22509 | Plagueheart Gloves | 1 | f | no recognized source route | — |
-| 22510 | Plagueheart Belt | 1 | f | no recognized source route | — |
-| 22511 | Plagueheart Bindings | 1 | f | no recognized source route | — |
-| 22512 | Robe of Faith | 1 | f | no recognized source route | — |
-| 22513 | Leggings of Faith | 1 | f | no recognized source route | — |
-| 22514 | Circlet of Faith | 1 | f | no recognized source route | — |
-| 22515 | Shoulderpads of Faith | 1 | f | no recognized source route | — |
-| 22516 | Sandals of Faith | 1 | f | no recognized source route | — |
-| 22517 | Gloves of Faith | 1 | f | no recognized source route | — |
-| 22518 | Belt of Faith | 1 | f | no recognized source route | — |
-| 22519 | Bindings of Faith | 1 | f | no recognized source route | — |
 | 22652 | Glacial Vest | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 22654 | Glacial Gloves | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 22655 | Glacial Wrists | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
@@ -1163,7 +1131,7 @@ carry. Each row names the rule that explains the absence.
 | c — stub-only sim effect | 67 |
 | e1 — drops only outside this phase's zones | 296 |
 | e2 — sourced, but by a route the local assembly did not admit | 97 |
-| f — no recognized source route | 543 |
+| f — no recognized source route | 511 |
 | g — unexplained | 0 |
 
 ## Universe-only items, classified

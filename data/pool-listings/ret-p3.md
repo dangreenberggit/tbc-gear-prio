@@ -121,10 +121,10 @@ python -c "import json;a=json.load(open('vendor/wowsims/db.json'))['items'];b=js
 ## Counts
 
 - local membership (U): 467
-- wowsims-primary membership (W): 1607
+- wowsims-primary membership (W): 1543
 - in both: 456
 - universe-only (U \ W): 11
-- wowsims-only (W \ U): 1151
+- wowsims-only (W \ U): 1087
 - phase-disagreements: 0
 - universe ids absent from the wowsims DB: 0
 - unexplained: 0
@@ -620,14 +620,6 @@ carry. Each row names the rule that explains the absence.
 | 22196 | Thick Obsidian Breastplate | 1 | c | stub-only sim effect | — |
 | 22385 | Titanic Leggings | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 22402 | Libram of Grace | 1 | c | stub-only sim effect | — |
-| 22416 | Dreadnaught Breastplate | 1 | f | no recognized source route | — |
-| 22417 | Dreadnaught Legplates | 1 | f | no recognized source route | — |
-| 22418 | Dreadnaught Helmet | 1 | f | no recognized source route | — |
-| 22419 | Dreadnaught Pauldrons | 1 | f | no recognized source route | — |
-| 22420 | Dreadnaught Sabatons | 1 | f | no recognized source route | — |
-| 22421 | Dreadnaught Gauntlets | 1 | f | no recognized source route | — |
-| 22422 | Dreadnaught Waistguard | 1 | f | no recognized source route | — |
-| 22423 | Dreadnaught Bracers | 1 | f | no recognized source route | — |
 | 22424 | Redemption Wristguards | 1 | f | no recognized source route | — |
 | 22425 | Redemption Tunic | 1 | f | no recognized source route | — |
 | 22426 | Redemption Handguards | 1 | f | no recognized source route | — |
@@ -636,62 +628,6 @@ carry. Each row names the rule that explains the absence.
 | 22429 | Redemption Spaulders | 1 | f | no recognized source route | — |
 | 22430 | Redemption Boots | 1 | f | no recognized source route | — |
 | 22431 | Redemption Girdle | 1 | f | no recognized source route | — |
-| 22436 | Cryptstalker Tunic | 1 | f | no recognized source route | — |
-| 22437 | Cryptstalker Legguards | 1 | f | no recognized source route | — |
-| 22438 | Cryptstalker Headpiece | 1 | f | no recognized source route | — |
-| 22439 | Cryptstalker Spaulders | 1 | f | no recognized source route | — |
-| 22440 | Cryptstalker Boots | 1 | f | no recognized source route | — |
-| 22441 | Cryptstalker Handguards | 1 | f | no recognized source route | — |
-| 22442 | Cryptstalker Girdle | 1 | f | no recognized source route | — |
-| 22443 | Cryptstalker Wristguards | 1 | f | no recognized source route | — |
-| 22464 | Earthshatter Tunic | 1 | f | no recognized source route | — |
-| 22465 | Earthshatter Legguards | 1 | f | no recognized source route | — |
-| 22466 | Earthshatter Headpiece | 1 | f | no recognized source route | — |
-| 22467 | Earthshatter Spaulders | 1 | f | no recognized source route | — |
-| 22468 | Earthshatter Boots | 1 | f | no recognized source route | — |
-| 22469 | Earthshatter Handguards | 1 | f | no recognized source route | — |
-| 22470 | Earthshatter Girdle | 1 | f | no recognized source route | — |
-| 22471 | Earthshatter Wristguards | 1 | f | no recognized source route | — |
-| 22476 | Bonescythe Breastplate | 1 | f | no recognized source route | — |
-| 22477 | Bonescythe Legplates | 1 | f | no recognized source route | — |
-| 22478 | Bonescythe Helmet | 1 | f | no recognized source route | — |
-| 22479 | Bonescythe Pauldrons | 1 | f | no recognized source route | — |
-| 22480 | Bonescythe Sabatons | 1 | f | no recognized source route | — |
-| 22481 | Bonescythe Gauntlets | 1 | f | no recognized source route | — |
-| 22482 | Bonescythe Waistguard | 1 | f | no recognized source route | — |
-| 22483 | Bonescythe Bracers | 1 | f | no recognized source route | — |
-| 22488 | Dreamwalker Tunic | 1 | f | no recognized source route | — |
-| 22489 | Dreamwalker Legguards | 1 | f | no recognized source route | — |
-| 22490 | Dreamwalker Headpiece | 1 | f | no recognized source route | — |
-| 22491 | Dreamwalker Spaulders | 1 | f | no recognized source route | — |
-| 22492 | Dreamwalker Boots | 1 | f | no recognized source route | — |
-| 22493 | Dreamwalker Handguards | 1 | f | no recognized source route | — |
-| 22494 | Dreamwalker Girdle | 1 | f | no recognized source route | — |
-| 22495 | Dreamwalker Wristguards | 1 | f | no recognized source route | — |
-| 22496 | Frostfire Robe | 1 | f | no recognized source route | — |
-| 22497 | Frostfire Leggings | 1 | f | no recognized source route | — |
-| 22498 | Frostfire Circlet | 1 | f | no recognized source route | — |
-| 22499 | Frostfire Shoulderpads | 1 | f | no recognized source route | — |
-| 22500 | Frostfire Sandals | 1 | f | no recognized source route | — |
-| 22501 | Frostfire Gloves | 1 | f | no recognized source route | — |
-| 22502 | Frostfire Belt | 1 | f | no recognized source route | — |
-| 22503 | Frostfire Bindings | 1 | f | no recognized source route | — |
-| 22504 | Plagueheart Robe | 1 | f | no recognized source route | — |
-| 22505 | Plagueheart Leggings | 1 | f | no recognized source route | — |
-| 22506 | Plagueheart Circlet | 1 | f | no recognized source route | — |
-| 22507 | Plagueheart Shoulderpads | 1 | f | no recognized source route | — |
-| 22508 | Plagueheart Sandals | 1 | f | no recognized source route | — |
-| 22509 | Plagueheart Gloves | 1 | f | no recognized source route | — |
-| 22510 | Plagueheart Belt | 1 | f | no recognized source route | — |
-| 22511 | Plagueheart Bindings | 1 | f | no recognized source route | — |
-| 22512 | Robe of Faith | 1 | f | no recognized source route | — |
-| 22513 | Leggings of Faith | 1 | f | no recognized source route | — |
-| 22514 | Circlet of Faith | 1 | f | no recognized source route | — |
-| 22515 | Shoulderpads of Faith | 1 | f | no recognized source route | — |
-| 22516 | Sandals of Faith | 1 | f | no recognized source route | — |
-| 22517 | Gloves of Faith | 1 | f | no recognized source route | — |
-| 22518 | Belt of Faith | 1 | f | no recognized source route | — |
-| 22519 | Bindings of Faith | 1 | f | no recognized source route | — |
 | 22651 | Outrider's Plate Legguards | 1 | f | no recognized source route | — |
 | 22652 | Glacial Vest | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 22654 | Glacial Gloves | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
@@ -1311,7 +1247,7 @@ carry. Each row names the rule that explains the absence.
 | c — stub-only sim effect | 82 |
 | e1 — drops only outside this phase's zones | 343 |
 | e2 — sourced, but by a route the local assembly did not admit | 161 |
-| f — no recognized source route | 565 |
+| f — no recognized source route | 501 |
 | g — unexplained | 0 |
 
 ## Universe-only items, classified

@@ -1,0 +1,50 @@
+{
+  "_comment": "Item sets only one class can equip, by Wowhead's 'Class:' line on the set's tooltip (the source URL per row). Hand-written. assemble_universe.py drops a piece of one of these sets from every other class's universe, and scripts/check_class_restricted_sets.py fails pnpm verify if one is left in. classId is the common.proto Class enum, which matches Wowhead's class ids. Only the Naxxramas Tier 3 sets are listed: Wowhead tags Dungeon Set 2 (setIds 511-519) with an armor type and no class, so any class that wears that armor can equip them. Decided at stage-gate cleanup-upstream-footprint, decision-log 2026-10-08T23:36Z; ticket 576.",
+  "sets": {
+    "521": {
+      "name": "Dreamwalker Raiment",
+      "classId": 11,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/521"
+    },
+    "523": {
+      "name": "Dreadnaught's Battlegear",
+      "classId": 1,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/523"
+    },
+    "524": {
+      "name": "Bonescythe Armor",
+      "classId": 4,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/524"
+    },
+    "525": {
+      "name": "Vestments of Faith",
+      "classId": 5,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/525"
+    },
+    "526": {
+      "name": "Frostfire Regalia",
+      "classId": 8,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/526"
+    },
+    "527": {
+      "name": "The Earthshatterer",
+      "classId": 7,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/527"
+    },
+    "528": {
+      "name": "Redemption Armor",
+      "classId": 2,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/528"
+    },
+    "529": {
+      "name": "Plagueheart Raiment",
+      "classId": 9,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/529"
+    },
+    "530": {
+      "name": "Cryptstalker Armor",
+      "classId": 3,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/530"
+    }
+  }
+}

@@ -535,3 +535,30 @@ Verify:
 ```bash
 pnpm fork-universes:check
 ```
+
+## Refresh, 2026-10-08 (other classes' Tier 3 pieces dropped, ticket 576)
+
+`scripts/assemble_universe.py` now drops a piece of a set listed in
+`data/class-restricted-sets.json` from every other class's universe. That
+table holds the nine Naxxramas Tier 3 sets (setIds 521 and 523-530), each
+with the one class Wowhead tags it with. The fork's `canEquipItem` had let
+them into other classes' pools. Dungeon Set 2 (511-519) is not listed:
+Wowhead tags it with an armor type and no class.
+
+`python scripts/sync_fork_universes.py --write` reported **36 refreshed, 27
+already matching, 63 listed here**: the p2-p5 universes of balance, ele, enh,
+hunter, mage, rogue, shadow, warlock and warrior. Each loses only entries,
+the same number at every phase: warrior 64, hunter 48, ele 48, enh 48,
+balance 32, rogue 32, mage 16, shadow 16, warlock 16 (1,280 in all). No
+other entry and no header field changed. The ret and feral universes and
+all 19 EP-weight files are unchanged. `git diff --stat` and
+`git diff --stat --ignore-cr-at-eol` agree (36 files).
+
+No engine file changed: this touches only `ui/features/upgrades/model/data/`.
+
+Verify:
+
+```bash
+pnpm fork-universes:check
+pnpm class-restricted-sets:check
+```
