@@ -306,3 +306,9 @@ file contention, worker prompt. This file stays the chronological log.
 - 569 Upgrades tab: the Source cell lost the old tab's linked boss and zone (pre-merge review feat-upstream-react-port round 1, SP1) 2026-10-07
 - 570 The feral CLI skeleton's rotation differs from upstream's default APL at the engine pin (fix round B1 after the feat-upstream-react-port review, filed at the session's request) 2026-10-07
 - 571 Epic item names are below 4.5:1 contrast on the Upgrades tab (visual review of ticket 560 final round, F1) 2026-10-07
+- 573 The engine fixes are parked on a fork branch that is never merged (stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
+- 574 The worker silence check is deleted; bring it back later or never (stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
+- 575 Load the Upgrades tab's code and item data only when the tab is first opened (stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
+- 576 Candidate lists hold set pieces that belong to another class (stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
+- 577 Share the browser-driving helpers between the two tab harness scripts (pre-merge review feat-upstream-react-port round 1, S9, via ticket 568; stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
+- 578 100 of the tab's files fail wowsims' formatting check (stage-gate cleanup-upstream-footprint, Gate B row R4-1) 2026-10-08

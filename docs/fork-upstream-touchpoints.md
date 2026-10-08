@@ -104,8 +104,11 @@ file is formatted, from the fork root:
 
 The branch changed 19 upstream files at one time or another
 (`git -C vendor/tbc-new-fork log --format= --name-only 42c75dc9..9c367c242`,
-keeping the paths that exist at `42c75dc9`). Apart from #1 above, each of them
-is now byte-identical to `42c75dc9`:
+keeping the paths that exist at `42c75dc9`). At the pin before the cleanup,
+`b2851da58`, 18 of them were modified, #1 among them
+(`git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 42c75dc9 b2851da58`);
+the 19th, `sim/core/gem_test.go`, was already back to upstream's text there.
+Apart from #1 above, each of them is now byte-identical to `42c75dc9`:
 
 | File                                                                                                                                                                                                                                                                                                                   | What the branch had in it                                                                                                  | Where that went                                                                                                                                                                                          |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -120,9 +123,12 @@ is now byte-identical to `42c75dc9`:
 ### Parked
 
 Fork branch `fix/engine-item-swap-and-off-class-guards` at `fa57ef5b7`, parent
-`42c75dc9`, 14 files: the 11 Go files in the table above,
-`sim/item_swap_weapon_proc_test.go`, `sim/off_class_set_bonus_test.go` and
-`sim/core/meta_socket_bonus_test.go`. It is never merged into the tab branch;
+`42c75dc9`, 14 files: the 11 modified Go files in the table above, and 3
+test files that upstream does not have, added by the branch
+(`sim/item_swap_weapon_proc_test.go`, `sim/off_class_set_bonus_test.go` and
+`sim/core/meta_socket_bonus_test.go`;
+`git -C vendor/tbc-new-fork diff --name-only --diff-filter=A 42c75dc9 fa57ef5b7`).
+It is never merged into the tab branch;
 the tab does not need these fixes. Ticket 573 records it. Re-run:
 `git -C vendor/tbc-new-fork show --stat fa57ef5b7`.
 
