@@ -14,6 +14,24 @@ directory.
 - `tab_fixtures.mjs` and `vite.config.mjs`: the dev server's fixture index and
   autoload, added to upstream's Vite config without editing it.
 - `run-tab-cdp.mjs`: the desktop-transport gate's driver, below.
+- `rows.mjs`: how the scripts read result rows, below.
+
+## Reading result rows (`rows.mjs`)
+
+The tab renders only the result rows in or near the page's view (ticket 565),
+so a count of `upgrades-result-row` elements is the rows on screen, not the
+ranking. The scripts read rows two ways. A count comes from each table's
+`<tbody data-testid="upgrades-result-rows">`, whose `data-row-count` is that
+table's ranked row count; a pane's count is the sum over its tables. Content
+comes from `collectRows(table, readRow)`, which scrolls the page's scroll box
+(`div[data-testid="sim-ui"]`, not the window) top to bottom and calls
+`readRow` once on each row, by `data-index`, while it is rendered. It reads one
+table at a time because `data-index` starts at 0 in each table. Both are
+page-side source text (`ROW_HELPERS`) that a script puts inside its in-page
+expression, because the scripts drive the page with expression strings over
+CDP. `rows.mjs` is in the layout gate's hashed file list
+(`ROOT_GATE_FILES` in `scripts/check_layout_gate.py`, ticket 580), so an edit
+to it marks the layout baseline stale and `pnpm layout-gate:check` re-measures.
 
 ## `run-tab-cdp.mjs`
 

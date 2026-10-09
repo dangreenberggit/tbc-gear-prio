@@ -15,6 +15,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { ROW_HELPERS } from "./rows.mjs";
 import * as H from "./test-tab-harness.mjs";
 
 const VERDICT_TAG = "STOP_CHECK_VERDICT";
@@ -121,21 +122,39 @@ const runAndStopExpression = (rows, timeoutMs) => `(async () => {
 	const t0 = performance.now();
 	const at = () => Math.round(performance.now() - t0);
 	runBtn.click();
-	const provisional = () => [...document.querySelectorAll('[data-testid="upgrades-results-table"] tbody tr')];
+	${ROW_HELPERS}
+	// While the run is in flight its table is the only one on the page, so the page's row count is the rows
+	// landed. Only the rows in view are rendered, so the landed rows are read by scrolling (collectRows). A row
+	// that lands during that walk moves the rows below it, so the walk is repeated until the count holds over it.
+	const readLanded = async () => {
+		for (let attempt = 0; attempt < 20; attempt++) {
+			const table = q('[data-testid="upgrades-results-table"][data-provisional="true"]');
+			if (!table) return { error: 'no in-flight results table to read' };
+			const count = tableRowCount(table);
+			const read = await collectRows(table, tr => ({
+				owned: tr.dataset.owned === 'true',
+				name: tr.querySelector('[data-testid="upgrades-item-name"]')?.textContent.trim(),
+			}));
+			if (!read.error && tableRowCount(table) === count) return { count, rows: read.rows };
+		}
+		return { error: 'rows kept landing while the landed rows were read' };
+	};
 	const timeline = [];
 	let last = -1;
 	let atClick;
 	while (performance.now() - t0 < ${timeoutMs}) {
-		const landed = provisional();
-		if (landed.length !== last) { last = landed.length; timeline.push([at(), last]); }
-		if (landed.length >= ${rows}) {
+		const landed = documentRowCount();
+		if (landed !== last) { last = landed; timeline.push([at(), last]); }
+		if (landed >= ${rows}) {
+			const read = await readLanded();
+			if (read.error) return { error: read.error, timeline };
 			const cancel = q('[data-testid="progress-tracker-modal-cancel-btn"]');
 			if (!cancel) return { error: 'no Cancel button in the progress dialog', timeline };
 			atClick = {
 				t: at(),
-				rows: landed.length,
-				nonOwned: landed.filter(r => r.dataset.owned !== 'true').length,
-				names: landed.map(r => r.querySelector('[data-testid="upgrades-item-name"]')?.textContent.trim()),
+				rows: read.count,
+				nonOwned: read.rows.filter(r => !r.owned).length,
+				names: read.rows.map(r => r.name),
 			};
 			cancel.click();
 			break;
@@ -151,14 +170,16 @@ const runAndStopExpression = (rows, timeoutMs) => `(async () => {
 		if (!dialog) { closedAt = at(); break; }
 		const text = q('[data-testid="progress-tracker-modal-message"]')?.textContent.trim() ?? '';
 		if (messages.at(-1)?.text !== text) messages.push({ t: at(), text });
-		const landed = provisional().length;
+		const landed = documentRowCount();
 		if (landed !== last) { last = landed; timeline.push([at(), last]); }
 		await sleep(POLL);
 	}
 	if (closedAt === undefined) return { error: 'the progress dialog never closed after Stop', atClick, messages, timeline };
 	await sleep(500);
 	const pane = q('[id^="upgrades-pane-"][data-testid="tab-pane"]:not([inert])');
-	const shortlistRows = pane ? [...pane.querySelectorAll('[data-testid="upgrades-results-table"] tbody tr')].filter(r => !r.closest('[data-testid="upgrades-below-cutoff"]')).length : 0;
+	// The shortlist is the pane's table outside the below-cutoff group; hidden panes are not mounted.
+	const shortlist = pane ? [...pane.querySelectorAll('[data-testid="upgrades-results-table"]')].find(t => !t.closest('[data-testid="upgrades-below-cutoff"]')) : null;
+	const shortlistRows = tableRowCount(shortlist);
 	const groupText = pane?.querySelector('[data-testid="upgrades-below-cutoff"]')?.textContent ?? '';
 	const groupCount = Number(/(\\d+) item/.exec(groupText)?.[1] ?? 0);
 	return {

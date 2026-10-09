@@ -62,6 +62,8 @@ import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
+import { RESULT_ROW, ROW_HELPERS } from "./rows.mjs";
+
 const WIDTH = 1280;
 const HEIGHT = 1400;
 
@@ -321,7 +323,7 @@ const setIterations = (n) => `(async () => {
 // at the first results-table row. firstRowS is (firstRowAt - clickAt).
 const installFirstRowObserver = `(() => {
 	window.__harnessFirstRowAt = null;
-	const sel = '[data-testid="upgrades-result-row"]';
+	const sel = ${JSON.stringify(RESULT_ROW)};
 	if (document.querySelector(sel)) { window.__harnessFirstRowAt = performance.now(); return {ok:true, already:true}; }
 	const obs = new MutationObserver(() => {
 		if (window.__harnessFirstRowAt == null && document.querySelector(sel)) {
@@ -381,8 +383,10 @@ const clickRun = `(async () => {
 // The done line ("… Took Ns.") is in the status line's polite region and an
 // error in its alert region; both are inside [data-testid="upgrades-status"].
 // With `trace`, one sample every 500 ms: seconds since the click, the progress
-// dialog's message and its done/total counter, and the rows landed so far.
+// dialog's message and its done/total counter, and the rows landed so far
+// (the ranked count, not the rows rendered).
 const pollDone = (ms, trace) => `(async () => {
+	${ROW_HELPERS}
 	const deadline = Date.now() + ${ms};
 	const statusText = () => document.querySelector('[data-testid="upgrades-status"]')?.innerText ?? '';
 	const tail = [];
@@ -392,7 +396,7 @@ const pollDone = (ms, trace) => `(async () => {
 			s: +((performance.now() - window.__harnessClickAt) / 1000).toFixed(2),
 			message: document.querySelector('[data-testid="progress-tracker-modal-message"]')?.innerText ?? null,
 			counter: document.querySelector('[data-testid="progress-tracker-modal-progress-text"]')?.innerText ?? null,
-			rows: document.querySelectorAll('[data-testid="upgrades-result-row"]').length,
+			rows: documentRowCount(),
 		});
 	};
 	while (Date.now() < deadline) {
@@ -407,15 +411,18 @@ const pollDone = (ms, trace) => `(async () => {
 
 // Reads the Upgrades list pane, which holds every row: its shortlist, then the
 // below-cutoff group, opened first because its table mounts only when open.
-// Cells are read by position: rank, item, slot, ΔDPS, source.
+// Only the rows in view are rendered, so each table is read by scrolling
+// through it (rows.mjs collectRows). Cells are read by position: rank, item,
+// slot, ΔDPS, source.
 const readResults = `(async () => {
 	${WF}
+	${ROW_HELPERS}
 	const pane = document.getElementById('upgrades-pane-shopping-list');
 	if(!pane) return {error:'no Upgrades list pane'};
 	const group = pane.querySelector('[data-testid="upgrades-below-cutoff"]');
 	if (group && !group.querySelector('[data-testid="upgrades-results-table"]')) {
 		group.querySelector('[data-testid="upgrades-below-cutoff-trigger"]')?.click();
-		if (!await wf(()=>group.querySelector('[data-testid="upgrades-results-table"] tbody tr'),10000)) return {error:'the below-cutoff group did not open'};
+		if (!await wf(()=>group.querySelector(${JSON.stringify(`[data-testid="upgrades-results-table"] ${RESULT_ROW}`)}),10000)) return {error:'the below-cutoff group did not open'};
 	}
 	const number = s => {
 		const m = (s||'').replace(/,/g,'').match(/[+-]?[0-9]+(?:\\.[0-9]+)?/);
@@ -425,21 +432,24 @@ const readResults = `(async () => {
 	const aboveCutoffItems = [];
 	for (const table of pane.querySelectorAll('[data-testid="upgrades-results-table"]')) {
 		const below = group !== null && group.contains(table);
-		for (const tr of table.querySelectorAll('tbody tr')) {
+		const read = await collectRows(table, tr => {
 			const tds = Array.from(tr.querySelectorAll('td'));
-			if (tds.length < 5) continue;
+			if (tds.length < 5) return null;
 			const text = i => (tds[i]?.innerText ?? '').trim();
-			const item = text(1).split('\\n')[0].trim();
-			const row = {
+			return {
 				rank: text(0),
-				item,
+				item: text(1).split('\\n')[0].trim(),
 				slot: text(2),
 				dps: number(text(3).split('\\n')[0]),
 				source: text(4),
 				belowCutoff: below,
 			};
+		});
+		if (read.error) return {error: (below ? 'below-cutoff table: ' : 'shortlist table: ') + read.error};
+		for (const row of read.rows) {
+			if (!row) continue;
 			rows.push(row);
-			if (!below) aboveCutoffItems.push(item);
+			if (!below) aboveCutoffItems.push(row.item);
 		}
 	}
 	const root = document.querySelector('[data-testid="upgrades-tab-root"]');

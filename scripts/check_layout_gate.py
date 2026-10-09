@@ -169,6 +169,23 @@ LOCAL_ONLY_FILES = frozenset({"local.wcl-credentials.ts"})
 #     among them) resolves through.
 #   - ui/styles/theme/colors.css, vars.css -- the colour tokens the axe pass's
 #     contrast checks resolve through.
+#   - ui/styles/theme/specs.css -- each spec's `--color-primary`, which those
+#     contrast checks also resolve through (ticket 580).
+#   - ui/styles/theme/z-index.css -- the stacking order of popovers, dialogs and
+#     toasts over the table (ticket 580).
+#   - ui/styles/theme/effects.css -- radii, shadows and background images.
+#     Whether it changes what the gate measures is untested; it is hashed
+#     because `theme/index.css` imports it, so every theme file the tab loads is
+#     in the digest (ticket 580).
+#   - ui/styles/theme/index.css -- the `@import` list of the theme files above,
+#     so a theme file upstream adds there moves the digest (ticket 581).
+#   - package.json, package-lock.json -- the pinned versions of what renders
+#     and measures the rows: `@tanstack/react-virtual` decides which rows are
+#     in the DOM, `@tanstack/react-table` their order, and Tailwind the
+#     utilities every width and gap resolves through (ticket 581). The whole
+#     files are hashed, not those three entries: any dependency bump then
+#     moves the digest and costs one measured run, the safe direction, and a
+#     parser of the lock file's format is not needed.
 #   - ui/ui-kit/TabPanelColumns/TabPanelColumns.css -- the two-column frame
 #     whose gap check 13 measures.
 #   - assets/locales/en/upgrades.json -- the accessible names the axe pass
@@ -183,15 +200,20 @@ LOCAL_ONLY_FILES = frozenset({"local.wcl-credentials.ts"})
 # base sha into the digest, so naming "the upstream base" as their pin, as this
 # comment once did, left them unhashed (pre-merge review of
 # feat/upstream-react-port, finding A2).
-# NOT covered: Tailwind's own utilities, which the fork's package-lock pins.
 LAYOUT_FILES = (
     "ui/app/tabs/UpgradesTabBody.tsx",
     "ui/app/SimTabsSection.tsx",
+    "package.json",
+    "package-lock.json",
     "ui/styles/theme/breakpoints.css",
     "ui/styles/theme/colors.css",
+    "ui/styles/theme/effects.css",
+    "ui/styles/theme/index.css",
     "ui/styles/theme/spacing.css",
+    "ui/styles/theme/specs.css",
     "ui/styles/theme/typography.css",
     "ui/styles/theme/vars.css",
+    "ui/styles/theme/z-index.css",
     "ui/ui-kit/TabPanelColumns/TabPanelColumns.css",
     "assets/locales/en/upgrades.json",
     "vite.config.mts",
@@ -209,9 +231,11 @@ MODULE_SUFFIXES = (".ts", ".tsx", ".css")
 # Files outside the fork source that decide what the gate measures, hashed by
 # ROOT-relative name (never through `_rel`, which is fork-relative). The
 # recorded tab fixtures (ticket 504) are what the fixture pass renders, and the
-# two harness files are the assertions themselves: editing either changes the
-# gate's verdict without touching a line of tab source.
+# harness files are the assertions themselves: editing one changes the gate's
+# verdict without touching a line of tab source. `rows.mjs` is the row reader
+# `test-layout.mjs` and `test-tab-harness.mjs` import (ticket 580).
 ROOT_GATE_FILES = (
+    "scripts/tab-harness/rows.mjs",
     "scripts/tab-harness/test-layout.mjs",
     "scripts/tab-harness/test-tab-harness.mjs",
     "scripts/tab-harness/test-review.mjs",
@@ -377,18 +401,21 @@ def write_baseline(digest: str) -> None:
         "ranking engine), every non-test file of its model/adapters/ and "
         "model/data/ (pool data, except the gitignored local.wcl-credentials.ts), "
         "the tab body ui/app/tabs/UpgradesTabBody.tsx and its registration "
-        "ui/app/SimTabsSection.tsx, every ui/ui-kit/ file those sources reach by "
-        "import (followed transitively; a component folder counts whole), the "
-        "theme CSS the measured geometry and the axe contrast checks resolve "
-        "through (ui/styles/theme/{breakpoints,colors,spacing,typography,vars}.css "
-        "and ui/ui-kit/TabPanelColumns/TabPanelColumns.css), "
+        "ui/app/SimTabsSection.tsx, the fork's package.json and package-lock.json "
+        "(the pinned TanStack Virtual, TanStack Table and Tailwind versions that "
+        "render and measure the rows; ticket 581), every ui/ui-kit/ file those "
+        "sources reach by "
+        "import (followed transitively; a component folder counts whole), every "
+        "theme CSS file the tab loads, which the measured geometry and the axe "
+        "contrast checks resolve through (ui/styles/theme/{breakpoints,colors,"
+        "effects,index,spacing,specs,typography,vars,z-index}.css; tickets 580 "
+        "and 581), ui/ui-kit/TabPanelColumns/TabPanelColumns.css, "
         "assets/locales/en/upgrades.json (the axe pass's accessible names are "
         "locale strings) and vite.config.mts (the gate's build reads it). "
         "It also covers, by repo-relative name, the gate's own harness "
-        "(scripts/tab-harness/test-layout.mjs, test-tab-harness.mjs, "
-        "test-review.mjs) and the recorded tab fixtures the fixture pass renders "
-        "(data/tab-fixtures/*.json, ticket 504). NOT covered: Tailwind's own "
-        "utilities, which the fork's package-lock pins. "
+        "(scripts/tab-harness/rows.mjs, test-layout.mjs, test-tab-harness.mjs, "
+        "test-review.mjs; rows.mjs by ticket 580) and the recorded tab fixtures "
+        "the fixture pass renders (data/tab-fixtures/*.json, ticket 504). "
         "scripts/check_layout_gate.py compares the live digest to this on "
         "`pnpm merge-to-dev`; equal means the layout source that last passed is "
         "still on disk, so the gate is skipped. A green measured gate run "
