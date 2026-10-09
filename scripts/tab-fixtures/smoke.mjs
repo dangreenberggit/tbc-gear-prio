@@ -14,9 +14,12 @@ const BASE = `http://localhost:${PORT}`;
 const H = await import(
   pathToFileURL(path.join(ROOT, "scripts/tab-harness/test-tab-harness.mjs"))
 );
+const { documentRowCountExpression } = await import(
+  pathToFileURL(path.join(ROOT, "scripts/tab-harness/rows.mjs"))
+);
 // The row count is the ranked rows summed over every table on the page, read
 // from each table's data-row-count: only the rows in view are rendered.
-const PROBE = `[document.documentElement.dataset.upgradesFixture, ${H.rowCountExpression}, document.querySelector('#upgrades-fixture-error')?.textContent]`;
+const PROBE = `[document.documentElement.dataset.upgradesFixture, ${documentRowCountExpression}, document.querySelector('#upgrades-fixture-error')?.textContent]`;
 const t0 = Date.now();
 const secs = (t) => ((Date.now() - t) / 1000).toFixed(1);
 const fail = (msg) => (console.log(`FAIL ${msg}`), process.exit(1));

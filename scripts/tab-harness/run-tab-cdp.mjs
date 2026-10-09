@@ -62,7 +62,7 @@ import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { ROW_HELPERS } from "./rows.mjs";
+import { RESULT_ROW, ROW_HELPERS } from "./rows.mjs";
 
 const WIDTH = 1280;
 const HEIGHT = 1400;
@@ -323,7 +323,7 @@ const setIterations = (n) => `(async () => {
 // at the first results-table row. firstRowS is (firstRowAt - clickAt).
 const installFirstRowObserver = `(() => {
 	window.__harnessFirstRowAt = null;
-	const sel = '[data-testid="upgrades-result-row"]';
+	const sel = ${JSON.stringify(RESULT_ROW)};
 	if (document.querySelector(sel)) { window.__harnessFirstRowAt = performance.now(); return {ok:true, already:true}; }
 	const obs = new MutationObserver(() => {
 		if (window.__harnessFirstRowAt == null && document.querySelector(sel)) {
@@ -422,7 +422,7 @@ const readResults = `(async () => {
 	const group = pane.querySelector('[data-testid="upgrades-below-cutoff"]');
 	if (group && !group.querySelector('[data-testid="upgrades-results-table"]')) {
 		group.querySelector('[data-testid="upgrades-below-cutoff-trigger"]')?.click();
-		if (!await wf(()=>group.querySelector('[data-testid="upgrades-results-table"] [data-testid="upgrades-result-row"]'),10000)) return {error:'the below-cutoff group did not open'};
+		if (!await wf(()=>group.querySelector(${JSON.stringify(`[data-testid="upgrades-results-table"] ${RESULT_ROW}`)}),10000)) return {error:'the below-cutoff group did not open'};
 	}
 	const number = s => {
 		const m = (s||'').replace(/,/g,'').match(/[+-]?[0-9]+(?:\\.[0-9]+)?/);

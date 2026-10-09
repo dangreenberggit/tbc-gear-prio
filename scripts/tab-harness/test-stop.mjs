@@ -124,8 +124,21 @@ const runAndStopExpression = (rows, timeoutMs) => `(async () => {
 	runBtn.click();
 	${ROW_HELPERS}
 	// While the run is in flight its table is the only one on the page, so the page's row count is the rows
-	// landed. Its first rows are in view, so they are rendered and their content can be read.
-	const provisional = () => [...document.querySelectorAll('[data-testid="upgrades-results-table"] [data-testid="upgrades-result-row"]')];
+	// landed. Only the rows in view are rendered, so the landed rows are read by scrolling (collectRows). A row
+	// that lands during that walk moves the rows below it, so the walk is repeated until the count holds over it.
+	const readLanded = async () => {
+		for (let attempt = 0; attempt < 20; attempt++) {
+			const table = q('[data-testid="upgrades-results-table"][data-provisional="true"]');
+			if (!table) return { error: 'no in-flight results table to read' };
+			const count = tableRowCount(table);
+			const read = await collectRows(table, tr => ({
+				owned: tr.dataset.owned === 'true',
+				name: tr.querySelector('[data-testid="upgrades-item-name"]')?.textContent.trim(),
+			}));
+			if (!read.error && tableRowCount(table) === count) return { count, rows: read.rows };
+		}
+		return { error: 'rows kept landing while the landed rows were read' };
+	};
 	const timeline = [];
 	let last = -1;
 	let atClick;
@@ -133,14 +146,15 @@ const runAndStopExpression = (rows, timeoutMs) => `(async () => {
 		const landed = documentRowCount();
 		if (landed !== last) { last = landed; timeline.push([at(), last]); }
 		if (landed >= ${rows}) {
+			const read = await readLanded();
+			if (read.error) return { error: read.error, timeline };
 			const cancel = q('[data-testid="progress-tracker-modal-cancel-btn"]');
 			if (!cancel) return { error: 'no Cancel button in the progress dialog', timeline };
-			const rendered = provisional();
 			atClick = {
 				t: at(),
-				rows: landed,
-				nonOwned: rendered.filter(r => r.dataset.owned !== 'true').length,
-				names: rendered.map(r => r.querySelector('[data-testid="upgrades-item-name"]')?.textContent.trim()),
+				rows: read.count,
+				nonOwned: read.rows.filter(r => !r.owned).length,
+				names: read.rows.map(r => r.name),
 			};
 			cancel.click();
 			break;

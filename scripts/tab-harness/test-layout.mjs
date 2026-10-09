@@ -39,7 +39,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { ROW_HELPERS } from "./rows.mjs";
+import { RESULT_ROW, ROW_HELPERS } from "./rows.mjs";
 import * as H from "./test-tab-harness.mjs";
 
 const WIDTHS = [375, 653, 768, 1280];
@@ -116,7 +116,7 @@ const postRunExpression = `(async () => {
 	const group = pane.querySelector('[data-testid="upgrades-below-cutoff"]');
 	if (group && !group.querySelector('[data-testid="upgrades-results-table"]')) {
 		group.querySelector('[data-testid="upgrades-below-cutoff-trigger"]')?.click();
-		await waitFor(() => group.querySelector('[data-testid="upgrades-results-table"] [data-testid="upgrades-result-row"]'), 5000);
+		await waitFor(() => group.querySelector(${JSON.stringify(`[data-testid="upgrades-results-table"] ${RESULT_ROW}`)}), 5000);
 		await sleep(200);
 	}
 	const multiLine = [], clipped = [], pastCell = [], figureOutside = [], midWord = [];
@@ -176,7 +176,7 @@ const postRunExpression = `(async () => {
 	}
 	for (const cell of tables.flatMap(t => [...t.querySelectorAll('thead th')])) checkCell(cell);
 	for (const el of root.querySelectorAll('*')) {
-		if (!el.closest('[data-testid="upgrades-result-row"]') && isClipped(el)) clipped.push(name(el));
+		if (!el.closest(${JSON.stringify(RESULT_ROW)}) && isClipped(el)) clipped.push(name(el));
 	}
 	const left = byTestId('upgrades-tab-left').getBoundingClientRect();
 	const card = byTestId('upgrades-run-settings').getBoundingClientRect();

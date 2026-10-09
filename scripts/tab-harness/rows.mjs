@@ -26,7 +26,8 @@
 // rows not rendered are never read.
 
 const RESULT_ROWS = '[data-testid="upgrades-result-rows"]';
-const RESULT_ROW = '[data-testid="upgrades-result-row"]';
+/** One rendered result row; the harness scripts select rows only through this. */
+export const RESULT_ROW = '[data-testid="upgrades-result-row"]';
 // The page scrolls this box, not the window (`ui/app/SimShell.tsx` in the fork).
 const SCROLL_BOX = '[data-testid="sim-ui"]';
 

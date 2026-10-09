@@ -19,7 +19,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { documentRowCountExpression } from "./rows.mjs";
+import { documentRowCountExpression, RESULT_ROW } from "./rows.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const FORK_ROOT = path.resolve(
@@ -372,10 +372,6 @@ export async function evaluate(send, expression) {
 /** The Upgrades button in the sim tab strip (`ui/app/SimTabs.tsx`; `TabNav` gives each tab its id as testid). */
 export const upgradesTabButtonSelector =
   '[data-testid="sim-tabs"] [data-testid="upgrades-tab"]';
-/** A results table's tbody, which carries the table's ranked row count (`data-row-count`; rows.mjs). */
-export const resultRowsSelector = '[data-testid="upgrades-result-rows"]';
-/** One rendered result row: only the rows in or near the view are rendered (ticket 565). */
-export const resultRowSelector = '[data-testid="upgrades-result-row"]';
 
 const WAIT_FOR = `const waitFor = async (fn, ms) => { const end = Date.now() + ms; while (Date.now() < end) { const v = fn(); if (v) return v; await new Promise(r => setTimeout(r, 100)); } return fn(); };`;
 const OPEN_TAB = `const navBtn = await waitFor(() => document.querySelector(${JSON.stringify(upgradesTabButtonSelector)}), 30000);
@@ -396,9 +392,6 @@ export function startRunExpression() {
 		return { ok: true };
 	})()`;
 }
-
-/** The ranked row count summed over every results table on the page, not the rows rendered. */
-export const rowCountExpression = documentRowCountExpression;
 
 // ---------------------------------------------------------------------------
 // Recorded fixtures (ticket 504): a finished Ranking recorded from a real run
@@ -432,7 +425,7 @@ export function loadFixtureExpression(fixtureJson) {
 
 // A fixture load is settled when a result row has rendered. Never wait for
 // "Took": no run happened, so the timing it shows is not a run's.
-export const fixtureSettledExpression = `(document.querySelectorAll(${JSON.stringify(resultRowSelector)}).length >= 1)`;
+export const fixtureSettledExpression = `(document.querySelectorAll(${JSON.stringify(RESULT_ROW)}).length >= 1)`;
 
 // Navigate `send`'s page to the fixture's spec, load it and wait until settled.
 // Returns { ok, rows, ms } or { error }.
@@ -451,7 +444,7 @@ export async function loadFixturePage(send, base, fixtureText) {
   const deadline = Date.now() + FIXTURE_DEADLINE_MS;
   while (Date.now() < deadline) {
     if (await evaluate(send, fixtureSettledExpression)) {
-      const rows = await evaluate(send, rowCountExpression);
+      const rows = await evaluate(send, documentRowCountExpression);
       return { ok: true, rows, ms: Date.now() - t0 };
     }
     await sleep(250);
