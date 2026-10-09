@@ -1,6 +1,6 @@
 // Record an Upgrades-tab fixture from a real run (ticket 504).
 //
-// Drives the fork's dev server (:5173, with the backend on :3333) in a
+// Drives the fork's dev server (:5173, or TBC_FORK_PORT; WASM_WORKER=1 or the backend on :3333) in a
 // headless Chromium over CDP, the way the round-2b scenario captures did
 // (.scratch/.../set-rule-scenarios/tools/capture3.mjs): set the page phase,
 // load the gear, run the tab, wait for "Took", then read the finished Ranking
@@ -20,7 +20,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { URL, fileURLToPath, pathToFileURL } from "node:url";
 
 import { holdKeepAwake } from "./keep-awake.mjs";
 import { armRunDeadline, guardPage, withTimeout } from "./run-guard.mjs";
@@ -42,11 +42,11 @@ const CALL_TIMEOUT_MS = 90 * 1000;
 const USAGE = `usage: node scripts/tab-fixtures/record.mjs --spec feral|ret --phase N --name NAME
          (--preset-tab "Phase 2" --preset "BiS 6%" --expect-gear-file <fork-relative .gear.json>
           | --gear-url <page link> --expect-item-ids 1,2,3)
-         [--iterations 3000] [--base http://localhost:5173]
+         [--iterations 3000] [--base http://localhost:$TBC_FORK_PORT, default 5173]
          [--out <dir> [--allow-dirty]]
 
 Writes data/tab-fixtures/<spec>-p<phase>-<name>.json, or the same name under
---out. Needs the fork dev server on :5173 and the backend on :3333, and a
+--out. Needs the fork dev server on :5173 (or TBC_FORK_PORT), served with WASM_WORKER=1 or with the backend on :3333, and a
 committed fork tree. --allow-dirty records an uncommitted fork tree; it needs
 an --out folder other than data/tab-fixtures, stamps forkDirty: true and the
 sha256 of the fork's diff, and refuses to write if that diff changed during
@@ -55,7 +55,8 @@ named phase tab; --gear-url opens a gear link. Either way the worn gear is
 checked item by item before the run, and the run is refused on a mismatch.`;
 
 function parseArgs(argv) {
-  const out = { iterations: 3000, base: "http://localhost:5173" };
+  const port = process.env.TBC_FORK_PORT ?? "5173";
+  const out = { iterations: 3000, base: `http://localhost:${port}` };
   const flags = { "--allow-dirty": "allowDirty" };
   const keys = {
     "--spec": "spec",
@@ -160,14 +161,25 @@ async function main() {
   const expectNames = expectIds.map((id) => db.get(id)).filter(Boolean);
 
   const harness = await import(
-    pathToFileURL(path.join(FORK, "test-tab-harness.mjs")).href
+    pathToFileURL(path.join(ROOT, "scripts/tab-harness/test-tab-harness.mjs"))
+      .href
   );
   const { launchChrome, cdp, attachPage, evaluate, activateTabExpression } =
     harness;
 
-  const url = args.gearUrl ?? `${args.base}${PAGE_BY_SPEC[args.spec]}`;
   const log = (...a) =>
     console.log(`[record ${args.spec}-p${args.phase}-${args.name}]`, ...a);
+  // A committed gear link names the server it was made on (:5173); with
+  // TBC_FORK_PORT set, open the same link on the server this run drives.
+  let url = args.gearUrl ?? `${args.base}${PAGE_BY_SPEC[args.spec]}`;
+  if (args.gearUrl !== undefined && process.env.TBC_FORK_PORT !== undefined) {
+    const rewritten = new URL(args.gearUrl);
+    const base = new URL(args.base);
+    rewritten.protocol = base.protocol;
+    rewritten.host = base.host;
+    url = rewritten.href;
+    log("gear link rewritten to", url);
+  }
   const releaseKeepAwake = await holdKeepAwake(
     `record ${args.spec}-p${args.phase}-${args.name}`
   );
@@ -198,55 +210,39 @@ async function main() {
     await send("Page.navigate", { url });
     await sleep(5000);
 
-    const setPhase = async () => {
-      const r = await evaluate(
-        send,
-        `(async () => {
-          const end = Date.now() + 15000;
-          let s; while (!(s = document.getElementById('phase-selector')) && Date.now() < end) await new Promise(r => setTimeout(r, 100));
-          if (!s) return { error: 'no #phase-selector' };
-          s.value = ${JSON.stringify(String(args.phase))};
-          s.dispatchEvent(new Event('change', { bubbles: true }));
-          await new Promise(r => setTimeout(r, 1500));
-          return { after: document.getElementById('phase-selector').value };
-        })()`
-      );
-      if (r?.error) throw new Error(r.error);
-      if (r.after !== String(args.phase))
-        throw new Error(`phase did not stick: ${JSON.stringify(r)}`);
-    };
-    await setPhase();
-
     if (args.preset !== undefined) {
       const loaded = await evaluate(
         send,
         `(async () => {
-          const tab = [...document.querySelectorAll('.preset-group-phase-tab')].find(t => t.textContent.trim() === ${JSON.stringify(args.presetTab)});
+          const end = Date.now() + 30000;
+          let tab;
+          while (!(tab = [...document.querySelectorAll('[data-testid="preset-group-phase-tabs"] button')].find(t => t.textContent.trim() === ${JSON.stringify(args.presetTab)})) && Date.now() < end) await new Promise(r => setTimeout(r, 100));
           if (!tab) return { error: 'no preset phase tab ' + ${JSON.stringify(args.presetTab)} };
           tab.click();
-          await new Promise(r => setTimeout(r, 400));
-          const chips = [...document.querySelector('.preset-group-picker').querySelectorAll('.preset-group-section')]
-            .filter(s => s.querySelector('h6')?.textContent.trim() === 'Gear Sets')
-            .flatMap(s => [...s.querySelectorAll('.saved-data-set-chip')])
-            .filter(c => c.offsetParent);
-          const chip = chips.find(c => c.textContent.trim() === ${JSON.stringify(args.preset)});
-          if (!chip) return { error: 'no Gear Sets chip; visible: ' + chips.map(c => c.textContent.trim()).join(', ') };
-          (chip.querySelector('.saved-data-set-name') ?? chip).click();
+          // On a fresh page the chips render seconds after the tabs.
+          const gearChips = () =>
+            [...document.querySelectorAll('[data-testid="preset-group-picker"] [data-testid="content-block"]')]
+              .filter(s => s.querySelector('[data-testid="content-block-title"]')?.textContent.trim() === 'Gear Sets')
+              .flatMap(s => [...s.querySelectorAll('[data-testid="saved-data-set-chip"]')])
+              .filter(c => c.offsetParent);
+          let chips = gearChips();
+          let chip;
+          while (!(chip = chips.find(c => c.textContent.trim() === ${JSON.stringify(args.preset)})) && Date.now() < end) {
+            await new Promise(r => setTimeout(r, 100));
+            chips = gearChips();
+          }
+          if (!chip) return { error: 'no Gear Sets chip ' + ${JSON.stringify(args.preset)} + '; visible: ' + chips.map(c => c.textContent.trim()).join(', ') };
+          (chip.querySelector('[data-testid="saved-data-set-name"]') ?? chip).click();
           await new Promise(r => setTimeout(r, 1500));
           return { ok: true };
         })()`
       );
       if (loaded?.error) throw new Error(loaded.error);
-      // A preset can carry its own phase; put the page back on the asked one.
-      await setPhase();
     }
-
-    const act = await evaluate(send, activateTabExpression());
-    if (act?.error) throw new Error(act.error);
 
     // Names render after item levels, so poll. The id check after the run is
     // the exact one; this one stops a wrong-gear run before it costs minutes.
-    const gearNames = `[...document.querySelectorAll('.item-picker-root')].map(e => e.innerText.split('\\n')[0]).filter(Boolean).join(' | ')`;
+    const gearNames = `[...document.querySelectorAll('[data-testid="gear-picker-root"] [data-testid="item-picker-name"]')].map(e => e.textContent.trim()).filter(Boolean).join(' | ')`;
     let missing = expectNames;
     for (let i = 0; i < 30 && missing.length; i++) {
       await sleep(1000);
@@ -256,10 +252,31 @@ async function main() {
     if (missing.length)
       throw new Error(`gear not loaded; missing ${missing.join(", ")}`);
 
+    const act = await evaluate(send, activateTabExpression());
+    if (act?.error) throw new Error(act.error);
+
+    // The phase selector is in the tab's settings column, so it is set once
+    // the tab is open, and after the preset, which can carry its own phase.
+    const pagePhase = await evaluate(
+      send,
+      `(async () => {
+        const end = Date.now() + 15000;
+        let s; while (!(s = document.querySelector('[data-testid="phase-selector"] select')) && Date.now() < end) await new Promise(r => setTimeout(r, 100));
+        if (!s) return { error: 'no [data-testid="phase-selector"] select' };
+        s.value = ${JSON.stringify(String(args.phase))};
+        s.dispatchEvent(new Event('change', { bubbles: true }));
+        await new Promise(r => setTimeout(r, 1500));
+        return { after: document.querySelector('[data-testid="phase-selector"] select').value };
+      })()`
+    );
+    if (pagePhase?.error) throw new Error(pagePhase.error);
+    if (pagePhase.after !== String(args.phase))
+      throw new Error(`phase did not stick: ${JSON.stringify(pagePhase)}`);
+
     const iterations = await evaluate(
       send,
       `(() => {
-        const input = document.querySelector('.upgrades-iterations-picker input');
+        const input = document.querySelector('[data-testid="upgrades-iterations-picker"] input');
         if (!input) return null;
         if (input.value !== ${JSON.stringify(String(args.iterations))}) {
           input.value = ${JSON.stringify(String(args.iterations))};
@@ -280,7 +297,7 @@ async function main() {
     );
     const clicked = await evaluate(
       send,
-      `(() => { const b = document.querySelector('.upgrades-run-button'); if (!b) return false; b.click(); return true; })()`
+      `(() => { const b = document.querySelector('[data-testid="upgrades-run-button"]'); if (!b) return false; b.click(); return true; })()`
     );
     if (!clicked) throw new Error("run button not found");
     log("run started");
@@ -289,7 +306,7 @@ async function main() {
       await sleep(10000);
       summary = await evaluate(
         send,
-        `document.querySelector('.upgrades-baseline-summary')?.textContent ?? ''`
+        `document.querySelector('[data-testid="upgrades-baseline-summary"]')?.textContent ?? ''`
       );
       if (/Took/.test(summary)) break;
     }

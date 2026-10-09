@@ -27,35 +27,57 @@ results table has rows and there is no stale banner.
 
 ## Looking at one (the storybook)
 
-- **By hand.** Start `:5173` (the `wowsims-fork` entry in `.claude/launch.json`, or `npx vite serve --port 5173` in `vendor/tbc-new-fork`; no backend) and open `http://localhost:5173/tbc/tab-fixtures/`. Each link opens the Upgrades tab on that fixture; `<html data-upgrades-fixture>` becomes `loaded` or `failed`.
-- **Smoke.** `pnpm tab-fixtures:smoke` opens every link. It starts `:5173` only when the port is free, prints one line per fixture, writes PNGs to `.scratch/tab-fixtures-smoke/`, and exits 0 or 1.
+- **By hand.** Start `:5173` (the `wowsims-fork` entry in `.claude/launch.json`, or `npx vite serve --config ../../scripts/tab-harness/vite.config.mjs --port 5173` in `vendor/tbc-new-fork`; no backend) and open `http://localhost:5173/tbc/tab-fixtures/`. Each link opens the Upgrades tab on that fixture; `<html data-upgrades-fixture>` becomes `loaded` or `failed`.
+- **Smoke.** `pnpm tab-fixtures:smoke` opens every link. It starts `:5173` only when the port is free, prints one line per fixture, writes PNGs to `.scratch/tab-fixtures-smoke/`, and exits 0 or 1. To use another port, set `TBC_FORK_PORT` (for example `TBC_FORK_PORT=5174 pnpm tab-fixtures:smoke`); `record.mjs` reads it too. A second checkout with its own fork, such as a port worktree, needs this, because two fork dev servers cannot share `:5173`.
 - **Timing.** 1.4–5.6 s per fixture on a warm server; the first load after a server start took up to about 30 s (`pnpm tab-fixtures:smoke`, ticket 520).
 - **What it proves:** the fork's working tree, uncommitted edits included, renders the recorded result.
 - **What it does not prove:** that a run would give these figures today, fixed-width layout, or accessibility. Use `pnpm layout-gate:check` and `pnpm tab-review` for those.
 - **Without a backend** the `:3333` calls are refused and the left Stats panel shows zeros. The results table is not affected.
 - **Other ways.** `?upgrades-dev` still shows a **Load fixture** file input, for a fixture kept outside this folder. A script can call `await window.__upgradesFixture(<parsed JSON>)`, which returns `{ ok: true, rows }` or `{ ok: false, reason }`.
 
-The loader exists only in builds where the `__TBC_TAB_FIXTURES__` define is
-true: the dev server, and the gate harness's own build (it sets
-`TBC_TAB_FIXTURES=1`). A production build has none of it. **The local
+The loader exists only on the dev server (`import.meta.env.DEV`) and in the
+gate harness's own build, which sets `VITE_TBC_TAB_FIXTURES=1`
+(`scripts/tab-harness/test-tab-harness.mjs`). A production build has none
+of it. The fixture index at `/tbc/tab-fixtures/` needs the dev server to
+run with `--config ../../scripts/tab-harness/vite.config.mjs`. **The local
 `vendor/tbc-new-fork/dist/` that the layout gate and `pnpm tab-review` build
 therefore contains the loader, and must not be served as a user build.**
 
 ## Re-recording
 
-Recording needs the backend on `:3333`, the fork dev server on `:5173`, and a
-committed fork tree. A run takes about 5 minutes. Each fixture's command:
+Recording needs a fork dev server that can run the sim: either
+`WASM_WORKER=1 node node_modules/vite/bin/vite.js serve --port 5173 --strictPort`
+in `vendor/tbc-new-fork` (the sim runs in the page; build it first with
+`make -C vendor/tbc-new-fork wasm`), or the plain dev server with the backend on
+`:3333`. It also needs a committed fork tree. A run takes about 5 minutes.
+Each fixture's command:
 
 ```sh
-pnpm tab-fixtures:record --spec feral --phase 3 --name p2bis --preset-tab "Phase 2" --preset "BiS 6%" --expect-gear-file ui/druid/feralcat/gear_sets/p2_6p.gear.json
-pnpm tab-fixtures:record --spec feral --phase 3 --name nordrassil4 --preset-tab "Phase 2" --preset "Alt 6%" --expect-gear-file ui/druid/feralcat/gear_sets/p2_alt_6p.gear.json
+pnpm tab-fixtures:record --spec feral --phase 3 --name p2bis --preset-tab "Phase 2" --preset "BiS 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p2_6p.gear.json
+pnpm tab-fixtures:record --spec feral --phase 3 --name nordrassil4 --preset-tab "Phase 2" --preset "Alt 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p2_alt_6p.gear.json
 pnpm tab-fixtures:record --spec feral --phase 3 --name th-hands-legs --gear-url "<this fixture's gearUrl>" --expect-item-ids 8345,30017,29994,29966,30106,28545,29997,30052,30627,29383,32014,32387,30055,30101,31034,31044
-pnpm tab-fixtures:record --spec ret --phase 3 --name p2 --preset-tab "Phase 2" --preset "P2" --expect-gear-file ui/paladin/retribution/gear_sets/p2.gear.json
-pnpm tab-fixtures:record --spec feral --phase 2 --name malorne4 --preset-tab "Phase 1" --preset "Alt 6%" --expect-gear-file ui/druid/feralcat/gear_sets/p1_alt_6p.gear.json
+pnpm tab-fixtures:record --spec ret --phase 3 --name p2 --preset-tab "Phase 2" --preset "P2" --expect-gear-file ui/specs/paladin/retribution/gear_sets/p2.gear.json
+pnpm tab-fixtures:record --spec feral --phase 2 --name malorne4 --preset-tab "Phase 1" --preset "Alt 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p1_alt_6p.gear.json
 ```
 
 Test gear is the previous phase's preset at the next page phase, as for every
-live run and capture in this repo.
+live run and capture in this repo, with one exception: `th-hands-legs` wears
+Thunderheart Gauntlets and Leggings (31034, 31044), which are phase 3 items, at
+page phase 3. The recorder loads the preset or gear link, opens the Upgrades
+tab, and then sets the phase in the tab's own Phase selector.
+
+**Port worktree: `TBC_FORK_PORT=5174`.** A second checkout with its own fork
+runs its dev server on another port and sets `TBC_FORK_PORT` for every command
+above, for example `TBC_FORK_PORT=5174 pnpm tab-fixtures:record …`.
+
+**`th-hands-legs` is recorded from a gear link**, the `gearUrl` stored in the
+fixture, which names `localhost:5173`. With `TBC_FORK_PORT` set, the recorder
+opens the same link on that port instead and logs the rewritten link. The link
+was made on the old (pre-React) page. `--expect-item-ids` is the check that the
+React page decoded it: the recorder refuses to run when the worn gear lacks any
+of those 16 items. The fixture was re-recorded on the React tab
+(`recordedAt` 2026-10-07, `forkSha` 43e3963d), and its `gear.items` holds all
+16, so the React page decoded the old-page link at that fork commit.
 
 ### Recording uncommitted fork code for review
 
@@ -84,10 +106,12 @@ committed, re-record with the commands above.
 fixture <name>: recorded at <sha>; inputs changed since: <paths|none>
 ```
 
-The inputs are the fork paths that can change a `Ranking`:
-`upgrades/engine/**` (except `view.ts`, `PROVENANCE.md` and the engine's test
-`fixtures/`), `upgrades/adapters/**`, `upgrades/data/**`, and
-`upgrades_tab.tsx`, whose `run()` builds the engine's input. A listed path means
+The inputs are the fork paths that can change a `Ranking`, all under
+`ui/features/upgrades/model/` (`INPUT_PATHS` in `scripts/check_tab_fixtures.py`):
+`engine/**` (except `view.ts` and the engine's test
+`fixtures/`), `adapters/**`, `data/**`, `run.ts`, which builds the engine's
+input, and `settings_pool.ts`, whose `effectivePool` builds the pool `run.ts`
+hands the engine. A listed path means
 the fixture may no longer match what a run would produce now. Read the diff and
 re-record when it changes what a run computes; a change that only affects
 rendering does not need one.

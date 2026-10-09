@@ -4288,6 +4288,36 @@ describe("rankUpgrades — M1 candidate pool controls", () => {
       expect(eventItemIds).toEqual(rankedItemIds);
     });
   });
+
+  describe("progress total (ticket 566)", () => {
+    it("restates the total after ranking and ends on done === total", async () => {
+      const { deps } = m1Deps();
+      const seeds = [42, 3042, 6042, 9042, 12042];
+      const sims: Array<{ done: number; total: number; after: boolean }> = [];
+      let afterRanking = false;
+      const ranking = await rankUpgrades({ ...m1Input, seeds }, deps, (p) => {
+        if (!("stage" in p)) return;
+        if (p.stage === "ranking") afterRanking = true;
+        if (p.stage === "simming")
+          sims.push({ done: p.done, total: p.total, after: afterRanking });
+      });
+
+      const reSimmed = ranking.items.filter(
+        (i) => i.seMethod === "paired-replicate"
+      ).length;
+      // Vacuity guard: with no re-simmed row the restated total is just the
+      // done count, so the formula below would prove nothing.
+      expect(reSimmed).toBeGreaterThan(0);
+      const lastBefore = sims.filter((s) => !s.after).at(-1)!;
+      const restated = sims.find((s) => s.after)!;
+      expect(restated.done).toBe(lastBefore.done);
+      expect(restated.total).toBe(
+        restated.done + (seeds.length - 1) * (1 + reSimmed)
+      );
+      const last = sims.at(-1)!;
+      expect(last.done).toBe(last.total);
+    });
+  });
 });
 
 // Ticket 212: the browser's WASM sim is built without `with_db`, so its item

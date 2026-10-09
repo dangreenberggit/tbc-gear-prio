@@ -9,9 +9,10 @@
  *   and every expected value is worked out by hand in the comment beside it;
  * - the engine-order block drives the real fork `rankUpgrades` with a
  *   controlled sim and the engine's default seeds, the way the tab calls it
- *   (no `seeds`), on a seven- and a twelve-candidate pool, and checks the
- *   tracker's set-phase boundary, phases and replication count against the
- *   events the engine really sends.
+ *   (no `seeds`), on a seven- and a twelve-candidate pool, a pool where no
+ *   row clears the cutoff and a capped pool, and checks the tracker's
+ *   set-phase boundary, phases and replication count, and that each run ends
+ *   on `done === total`, against the events the engine really sends.
  *
  * The fork is gitignored (`vendor/`), so both blocks skip when the module is
  * absent, which includes every CI run.
@@ -60,6 +61,7 @@ type RunTimeline = {
   qualifyingRows: number;
   seedCount: number;
   topN: number;
+  finalTotal?: number;
 };
 
 type RunProgressView = {
@@ -215,6 +217,13 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
         stage: "ranking",
         done: 21,
       });
+      // The engine restates the total: eight rows re-simmed, 21 + 4 * 9 = 57.
+      t.observe(sim(21, 57), 450);
+      expect(t.view()).toMatchObject({
+        phase: "replication",
+        done: 21,
+        total: 57,
+      });
       t.observe(sim(40, 57), 500);
       expect(t.view().phase).toBe("replication");
       t.observe(sim(57, 57), 600);
@@ -300,6 +309,10 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       expect(t.view().remainingMs).toBe(9_200);
       // b = 21; r_B * k * (T - b) = 100 * 2 * 36
       t.observe(RANKING, 5_000);
+      expect(t.view().remainingMs).toBe(7_200);
+      // The engine restates T = 57 (eight rows re-simmed); m = 0, so the
+      // same 100 * 2 * (57 - 21)
+      t.observe(sim(21, 57), 5_000);
       expect(t.view().remainingMs).toBe(7_200);
       // m = 1: r_B * k * (T - d) = 100 * 2 * 35
       t.observe(sim(22, 57), 5_300);
@@ -461,18 +474,23 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       t.observe(RANKING, 5_000);
       expect(t.view().phase).toBe("replication");
       expect(t.view().remainingMs).toBeCloseTo(3_200, 6);
+      // The engine restates the total as 21 + 4 * (1 + 3) = 37, the count
+      // already expected: m = 0, 100 * 2 * (37 - 21)
+      t.observe(sim(21, 37), 5_000);
+      expect(t.view()).toMatchObject({ phase: "replication", total: 37 });
+      expect(t.view().remainingMs).toBeCloseTo(3_200, 6);
       // m = 1: 100 * 2 * (37 - 22)
-      t.observe(sim(22, 57), 5_300);
+      t.observe(sim(22, 37), 5_300);
       expect(t.view().remainingMs).toBeCloseTo(3_000, 6);
       // m = 2: (5700 - 5000) / 2 * (37 - 23)
-      t.observe(sim(23, 57), 5_700);
+      t.observe(sim(23, 37), 5_700);
       expect(t.view().remainingMs).toBeCloseTo(4_900, 6);
-      t.observe(sim(37, 57), 9_000);
+      t.observe(sim(37, 37), 9_000);
       expect(t.view().phase).toBe("ranking");
       expect(t.view().remainingMs).toBeCloseTo(0, 6);
     });
 
-    it("N3 and N4: counts a row after the boundary event, then self-checks", () => {
+    it("N3 and N4: counts a row after the boundary event, then takes the engine's total", () => {
       const t = tracker(config, 4);
       t.observe(sim(1, 57), 1_000);
       for (let i = 0; i < 10; i++) t.observe(row(true), 1_500);
@@ -486,16 +504,51 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       t.observe(RANKING, 5_000);
       expect(t.view().phase).toBe("replication");
       expect(t.view().remainingMs).toBeCloseTo(1_600, 6);
-      // N4. m = 1: 100 * 2 * (29 - 22)
-      t.observe(sim(22, 57), 5_300);
-      expect(t.view().remainingMs).toBeCloseTo(1_400, 6);
-      // m = 2: 350 * (29 - 23)
-      t.observe(sim(23, 57), 5_700);
-      expect(t.view().remainingMs).toBeCloseTo(2_100, 6);
-      // 30 > 29, so the count was wrong and total is used: 3000 / 9 * 27
-      t.observe(sim(30, 57), 8_000);
+      // N4. The engine restates 33 = 21 + 4 * (1 + 2): two rows, not the one
+      // counted. Its total replaces the projection: m = 0, 100 * 2 * (33 - 21)
+      t.observe(sim(21, 33), 5_000);
+      expect(t.view()).toMatchObject({ phase: "replication", total: 33 });
+      expect(t.view().remainingMs).toBeCloseTo(2_400, 6);
+      // m = 1: 100 * 2 * (33 - 22)
+      t.observe(sim(22, 33), 5_300);
+      expect(t.view().remainingMs).toBeCloseTo(2_200, 6);
+      // m = 2: 350 * (33 - 23)
+      t.observe(sim(23, 33), 5_700);
+      expect(t.view().remainingMs).toBeCloseTo(3_500, 6);
+      // 30 is past the projected 29 but short of 33: m = 9, 3000 / 9 * 3
+      t.observe(sim(30, 33), 8_000);
       expect(t.view().phase).toBe("replication");
-      expect(t.view().remainingMs).toBeCloseTo(9_000, 6);
+      expect(t.view().remainingMs).toBeCloseTo(1_000, 6);
+      t.observe(sim(33, 33), 9_000);
+      expect(t.view().phase).toBe("ranking");
+      expect(t.view().remainingMs).toBeCloseTo(0, 6);
+    });
+
+    // A timeline with no restated total: the projection's self-check.
+    const timeline = (over: Partial<RunTimeline>): RunTimeline => ({
+      sims: [
+        { t: 1_000, done: 1, afterRanking: false },
+        { t: 3_000, done: 21, afterRanking: false },
+        { t: 8_000, done: 30, afterRanking: true },
+      ],
+      rankingAt: 5_000,
+      total: 57,
+      boundary: 21,
+      concurrency: 4,
+      now: 8_000,
+      qualifyingRows: 1,
+      seedCount: 5,
+      topN: 8,
+      ...over,
+    });
+
+    it("uses total when a replication event passes the projection and no total was restated", () => {
+      // Projection 21 + 4 * (1 + 1) = 29; done 30 > 29, so total 57.
+      expect(mod.expectedFinalDone(timeline({}))).toBe(57);
+    });
+
+    it("returns the restated total when there is one", () => {
+      expect(mod.expectedFinalDone(timeline({ finalTotal: 33 }))).toBe(33);
     });
   });
 
@@ -642,11 +695,13 @@ type RecordedEvent = { progress: Progress; simCallsSoFar: number };
  * One cold run: Malorne 2pc worn in hands and legs, Thunderheart and neutral
  * candidates, the broken-bonus measurement on, and no `seeds`, as the tab
  * calls it. The fake sim has no `computeStats`, so the engine skips its stats
- * reads (rank.ts `hitCapReadable`).
+ * reads (rank.ts `hitCapReadable`). `candidateCap` defaults to 100, more than
+ * any pool here, so only a run that passes a smaller one is capped.
  */
 async function recordRun(
   candidateValue: ReadonlyMap<number, number> = ITEM_VALUE,
-  poolSlots: readonly PoolSlot[] = SMALL_POOL
+  poolSlots: readonly PoolSlot[] = SMALL_POOL,
+  { candidateCap = 100 }: { candidateCap?: number } = {}
 ): Promise<RecordedEvent[]> {
   const rankMod = await importForkUpgrades<{
     rankUpgrades: (
@@ -742,7 +797,7 @@ async function recordRun(
       maxPhase: 5,
       fight: fightRef,
       iterations: 3000,
-      candidateCap: 100,
+      candidateCap,
     },
     {
       gear: gearSource,
@@ -773,6 +828,8 @@ describe.skipIf(!forkPresent || !moduleExists())(
     };
     const pools = ["seven", "twelve"] as const;
     let zeroQualifyEvents: RecordedEvent[];
+    const CAPPED_CANDIDATES = 4;
+    let cappedEvents: RecordedEvent[];
 
     beforeAll(async () => {
       mod = await importForkUpgrades<RunProgressModule>("run_progress.ts");
@@ -786,6 +843,13 @@ describe.skipIf(!forkPresent || !moduleExists())(
       // Every candidate loses 50 DPS, so no row clears the cutoff.
       zeroQualifyEvents = await recordRun(
         new Map([...ITEM_VALUE.keys()].map((id) => [id, -50] as const))
+      );
+      // Capped at four of twelve, and the Thunderheart chest loses DPS, so
+      // fewer rows clear the cutoff than the cap or top-N (ticket 566).
+      cappedEvents = await recordRun(
+        new Map([...ITEM_VALUE, [THUNDERHEART.chest, -50]]),
+        LARGE_POOL,
+        { candidateCap: CAPPED_CANDIDATES }
       );
     }, 240_000);
 
@@ -814,7 +878,15 @@ describe.skipIf(!forkPresent || !moduleExists())(
           (p): p is Extract<Progress, { kind: "row" }> =>
             "kind" in p && p.kind === "row"
         )
-        .map((p) => p.row as { belowCutoff?: boolean; simmed?: boolean });
+        .map(
+          (p) =>
+            p.row as { belowCutoff?: boolean; simmed?: boolean; owned?: true }
+        );
+    /** Rows replication can re-sim: rank.ts `replicateTopItems`' filter. */
+    const qualifyingRows = (from: RecordedEvent[]) =>
+      landedRows(from).filter(
+        (r) => r.belowCutoff === false && r.simmed !== false
+      ).length;
 
     /** Feeds a recording to a tracker; returns it and the phases it named. */
     const replay = (
@@ -893,8 +965,14 @@ describe.skipIf(!forkPresent || !moduleExists())(
         const after = simmingAfterRanking(from).map(
           (e) => e.progress as { done: number; total: number }
         );
-        expect(after.length).toBeGreaterThan(0);
-        for (const p of after) {
+        expect(after.length).toBeGreaterThan(1);
+        // The first event after ranking restates the total and runs no sim
+        // (ticket 566): it repeats the boundary and names the done the run
+        // ends on.
+        const [restated, ...replicas] = after;
+        expect(restated!.done).toBe(boundary);
+        expect(restated!.total).toBe(after[after.length - 1]!.done);
+        for (const p of replicas) {
           expect(p.done).toBeGreaterThan(boundary);
           expect(p.done).toBeLessThanOrEqual(first.total);
         }
@@ -922,7 +1000,8 @@ describe.skipIf(!forkPresent || !moduleExists())(
         const from = recordings[name];
         const q = replay(from).tracker.view().qualifyingRows;
         expect(q).toBeGreaterThan(0);
-        expect(simmingAfterRanking(from)).toHaveLength(
+        // The first event after ranking restates the total; the rest are sims.
+        expect(simmingAfterRanking(from).slice(1)).toHaveLength(
           (mod.TAB_REPLICATE_SEED_COUNT - 1) * (1 + Math.min(topN, q))
         );
       }
@@ -933,7 +1012,19 @@ describe.skipIf(!forkPresent || !moduleExists())(
       expect(landed.length).toBeGreaterThan(0);
       for (const r of landed) expect(r.belowCutoff).toBe(true);
       expect(rankingIndex(zeroQualifyEvents)).toBeGreaterThan(0);
-      expect(simmingAfterRanking(zeroQualifyEvents)).toHaveLength(0);
+      // One event restates the total as the done so far; no sim follows it.
+      const before = simmingBeforeRanking(zeroQualifyEvents);
+      const boundary = (before[before.length - 1]!.progress as { done: number })
+        .done;
+      const after = simmingAfterRanking(zeroQualifyEvents);
+      expect(after.map((e) => e.progress)).toEqual([
+        { stage: "simming", done: boundary, total: boundary },
+      ]);
+      const ranking =
+        stageEvents(zeroQualifyEvents)[rankingIndex(zeroQualifyEvents)]!;
+      expect(
+        zeroQualifyEvents[zeroQualifyEvents.length - 1]!.simCallsSoFar
+      ).toBe(ranking.simCallsSoFar);
 
       const { tracker, phases } = replay(
         zeroQualifyEvents,
@@ -946,6 +1037,40 @@ describe.skipIf(!forkPresent || !moduleExists())(
         "ranking",
       ]);
       expect(tracker.view().remainingMs).toBe(0);
+    });
+
+    it("caps the candidates and has fewer rows above the cutoff than the cap", () => {
+      const candidates = simmingBeforeRanking(cappedEvents).length - 1;
+      const owned = landedRows(cappedEvents).filter((r) => r.owned).length;
+      expect(candidates).toBe(CAPPED_CANDIDATES + owned);
+      const q = qualifyingRows(cappedEvents);
+      expect(q).toBeGreaterThan(0);
+      expect(q).toBeLessThan(CAPPED_CANDIDATES);
+      expect(q).toBeLessThan(topN);
+    });
+
+    // Ticket 566: the first total budgets re-sims for min(top-N, candidates)
+    // rows; the run re-sims only the rows that clear the cutoff, so the
+    // counter used to end short of its total.
+    it.each([
+      ["seven", () => recordings.seven],
+      ["twelve", () => recordings.twelve],
+      ["zero-qualify", () => zeroQualifyEvents],
+      ["capped", () => cappedEvents],
+    ] as const)("ends with done equal to total (%s)", (_name, from) => {
+      const events = from();
+      const sims = stageEvents(events)
+        .filter((e) => e.progress.stage === "simming")
+        .map((e) => e.progress as { done: number; total: number });
+      const last = sims[sims.length - 1]!;
+      expect(last.done).toBe(last.total);
+      const candidates = simmingBeforeRanking(events).length - 1;
+      const rows = Math.min(topN, qualifyingRows(events));
+      expect(last.total).toBe(
+        1 +
+          candidates +
+          (rows === 0 ? 0 : (mod.TAB_REPLICATE_SEED_COUNT - 1) * (1 + rows))
+      );
     });
   }
 );

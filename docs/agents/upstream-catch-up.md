@@ -1,29 +1,95 @@
-# Catching both pins up to upstream
+# Catching up to upstream
 
 This repo pins upstream `wowsims/tbc-new` twice: the **engine pin**
 (`data/wowsims.lock.json` → `vendor/wowsims/`) and the **fork pin**
-(`data/wowsims-fork.lock.json` → `vendor/tbc-new-fork/`). Moving them is a
-routine, not an event. ADR-0030 and ADR-0033 record why they are two pins and
-what they name today.
+(`data/wowsims-fork.lock.json` → `vendor/tbc-new-fork/`). ADR-0030 and ADR-0033
+record why they are two pins. ADR-0036 lets them move separately:
 
-Every command below was run on 2026-09-14 moving both pins from `ec5c5f2` to
-`master` tip `17a8fb28c5ad14b649acecdaacd488594048f467`; the outputs are in
-`.scratch/stage-gate/upstream-catchup-chunk1/execution-report.md`.
+- **Routine fork update (fork only)**, next section: the fork branch merges
+  upstream `master`. Do it whenever `pnpm fork:upstream-status` shows content
+  conflicts only.
+- **Moving the engine version (both pins)**, §0–§7: the full procedure, run
+  when the command-line tool needs a newer engine.
 
 Throughout: use `git -C <abs path>`, never `cd X && git …` — fnm emits an error
 that breaks the chain. A pipe reports the **last** command's status, so append
 `; echo "rc=${PIPESTATUS[0]}"` or redirect and inspect separately.
 
-## 0. Preconditions
+## Routine fork update (fork only)
 
-Both trees clean, the fork lock naming the clone's actual HEAD, one worktree
-registration, and a known `pushed` flag:
+`<fork>` is the fork checkout whose branch the fork lock names (`branch` in
+`data/wowsims-fork.lock.json`). Every step runs against that checkout.
+
+1. See how far behind the fork is and what a merge would conflict on:
+
+   ```bash
+   pnpm fork:upstream-status
+   ```
+
+   It fetches `upstream/master`, then prints the commits behind and the
+   dry-run conflicts by type. Content conflicts only: continue. Any location
+   or modify/delete conflict means upstream moved something the fork builds
+   on: stop here and plan that merge as its own piece of work.
+
+2. Record the unit-test result on the fork tip before merging
+   (`npm run test:unit` from `<fork>`), so step 4 has a baseline. Then merge
+   on the fork branch:
+
+   ```bash
+   git -C <fork> merge upstream/master
+   ```
+
+   Resolve conflicts by the rules in §4. For `package-lock.json`, take
+   upstream's version and run `npm install` in `<fork>`.
+
+3. Regenerate the gitignored bindings: `make -C <fork> proto` and
+   `make -C <fork> go-to-ts` (both ran on Windows at `42c75dc9`; ticket 558).
+4. Check the merged tree, from `<fork>`:
+   `node node_modules/typescript/bin/tsc --noEmit`, `npm run lint:js`,
+   `go test --tags=with_db ./sim/...` (`sim/web` always fails its setup: it
+   needs `binary_dist`), and `npm run test:unit`. Done when `tsc` and
+   `lint:js` exit 0, `go test` fails only on `sim/web`, and every unit-test
+   failure also failed in step 2's baseline; a new
+   failure is a finding. A merge with no conflicts can still break the build,
+   because upstream renames APIs our feature folder calls.
+5. Commit the merge in the fork.
+6. Re-pin in this repo: set the fork lock's `commit` to the fork tip and
+   `branchedFrom` to the upstream commit you merged, with a dated `_comment`
+   line. Then run:
+
+   ```bash
+   pnpm sim-implemented-effects:generate
+   pnpm equip-eligibility:check
+   pnpm fork-universes:check
+   pnpm verify
+   ```
+
+7. Run the desktop gate (§5, last paragraphs) only when `dev` will receive this
+   re-pin.
+
+The engine lock does not move here. Between engine moves the two locks can name
+different upstream commits (ADR-0036).
+
+## Moving the engine version (both pins)
+
+Every command below was run on 2026-09-14 moving both pins from `ec5c5f2` to
+`master` tip `17a8fb28c5ad14b649acecdaacd488594048f467`; the outputs are in
+`.scratch/stage-gate/upstream-catchup-chunk1/execution-report.md`.
+
+2026-10-06 (ticket 558 P4): the engine pin moved from `17a8fb28` to `42c75dc9`. `TRACKED` was remapped to upstream's `ui/specs/` and `ui/sim/` layout, and the three CLI rankings were compared old engine against new engine on the same code; outputs in `.scratch/stage-gate/558-p4-engine-move/`.
+
+### 0. Preconditions
+
+Both trees clean, the fork lock naming the clone's actual HEAD, the expected
+worktree registrations, and a known `pushed` flag. `git -C <fork> worktree list`
+prints one line, or one more for each port worktree that is open. Name each
+extra line's path and branch in your notes before you start.
 
 ```bash
 git -C <core> status --porcelain
 git -C <fork> status --porcelain
 git -C <fork> rev-parse HEAD
-git -C <fork> ls-remote origin refs/heads/feat/upgrades-tab
+git -C <fork> ls-remote origin refs/heads/<branch from the fork lock>
 git -C <fork> worktree list
 python -c "import json;l=json.load(open('data/wowsims-fork.lock.json'));print(l['commit'],l['pushed'])"
 ```
@@ -31,7 +97,7 @@ python -c "import json;l=json.load(open('data/wowsims-fork.lock.json'));print(l[
 Read the `pushed` flag **before** you start and write it down. It flips to
 `false` the moment you make a fork commit, and you want to know what it was.
 
-## 1. Pick the sha and measure the conflict surface first
+### 1. Pick the sha and measure the conflict surface first
 
 ```bash
 gh api repos/wowsims/tbc-new/commits/master --jq .sha
@@ -59,9 +125,9 @@ python scripts/fetch_wowsimcli.py --commit <TARGET_SHA> --tag-dir <TARGET_SHA>
 ```
 
 Two identical `sha256=` lines is the proof. `git -C <fork> worktree list` must
-still print one line afterwards.
+print the same lines afterwards as in §0.
 
-## 2. Engine side
+### 2. Engine side
 
 ```bash
 python scripts/sync_wowsims.py --update --ref <TARGET_SHA>
@@ -100,7 +166,7 @@ pnpm proto:generate
 git -C <core> diff --exit-code -- packages/core/src/proto data/proto
 ```
 
-## 3. Predict, then diff
+### 3. Predict, then diff
 
 Write the expected regen list down **before** running anything
 (`data-pipeline-work` rule 2), then reconcile every changed path against it. A
@@ -120,7 +186,7 @@ Identical output means no line-ending flip. If they differ, the files in the
 first list but not the second changed only their endings — rewrite those to LF
 before committing.
 
-## 4. Fork side
+### 4. Fork side
 
 Save the pre-merge lock **before** resolving, because `checkout --theirs`
 overwrites it and mid-merge the recovery path is not obvious:
@@ -158,9 +224,11 @@ grep -n '<pattern>' <file>
 
 **The generated protobuf bindings are untracked and go stale across a pin move.**
 If upstream's source arrives referencing new proto fields, Go and TypeScript both
-fail to compile until you regenerate. On Windows, `make proto` fails (the makefile
-assumes a POSIX shell) and PowerShell mangles `-I=./proto`; run protoc from
-Python with an argument list instead, the same shell-free form
+fail to compile until you regenerate with `make -C <fork> proto` and
+`make -C <fork> go-to-ts`. Both ran on Windows at upstream `42c75dc9` (ticket
+558). The old fork branch's makefile failed on Windows (it assumed a POSIX
+shell), and PowerShell mangles `-I=./proto`. If `make` fails again, run protoc
+from Python with an argument list instead, the same shell-free form
 `scripts/fetch_wowsimcli.py` uses:
 
 ```python
@@ -173,15 +241,13 @@ Then verify the merged tree:
 
 ```bash
 go build ./sim/core/... ; go build ./sim/hunter/... ; go vet ./sim/hunter/
-node_modules\.bin\oxlint.cmd --deny-warnings ui/core/components/individual_sim_ui/upgrades ui/core/components/individual_sim_ui/upgrades_tab.tsx
-node_modules\.bin\stylelint.cmd ui/scss/core/components/individual_sim_ui/_upgrades_tab.scss
-node_modules\.bin\tsc.cmd --noEmit -p tsconfig.json
-npm run test:layout
+pnpm fork-lint:check            # from <core>: oxlint over our fork paths, then the fork's tsc
+node scripts/tab-harness/test-layout.mjs   # from <core>
 ```
 
 `go build ./sim/...` cannot pass in this checkout: `sim/web/main.go` imports
 `binary_dist`, which is gitignored and built only by `make binary_dist`. Build the
-packages that hold the merged code instead. Read `test:layout`'s log for its
+packages that hold the merged code instead. Read `test-layout.mjs`'s log for its
 assertion line, not just the rc.
 
 Refresh the bundled data the tab ranks from, then commit again:
@@ -191,12 +257,12 @@ python scripts/sync_fork_universes.py --write
 python scripts/sync_fork_universes.py --check
 ```
 
-Add a dated section to the fork's `upgrades/data/PROVENANCE.md` saying what moved
-and why. That script compares **raw bytes**, so a pure CRLF/LF difference reads
+Add a dated section to `docs/fork-provenance/data.md` (in this repo)
+saying what moved and why. That script compares **raw bytes**, so a pure CRLF/LF difference reads
 exactly like a real drift — check with `--ignore-cr-at-eol` before writing a
 cause down.
 
-## 5. Re-pin the fork
+### 5. Re-pin the fork
 
 Edit `data/wowsims-fork.lock.json`: `commit` → the new fork tip, `branchedFrom` →
 the upstream sha, `pushed` → **false**, plus a dated `_comment`. Verify
@@ -231,7 +297,7 @@ A recorded-fixture miss (`no recording for sim key`) is a **stop-and-report**, n
 a re-record.
 
 Before every fork re-pin, hand-run `pnpm desktop-gate:check` and paste its
-assertion lines (a)–(h) into the commit body or the stage's `desktop-gate.md`. It
+assertion lines (a)–(f) and (h) ((g) removed) into the commit body or the stage's `desktop-gate.md`. It
 proves the upgrades tab still runs on the packaged desktop binary over the HTTP
 transport and cannot pass on a page served by vite. It is deliberately **not** in
 `pnpm verify` — it needs `go`, `make` and Chrome, none of which CI has — so
@@ -242,7 +308,7 @@ Check (h) compares the run against `data/desktop-gate/golden-ret-p5-cap40.json`;
 a re-pin that changes the tab's output regenerates it with `--update-golden` and
 explains the diff in the commit body.
 
-## 6. The tag trigger
+### 6. The tag trigger
 
 ADR-0030 D2 keeps `wowsimcli` on build-from-source until a release tag contains
 the reforge merge. Re-measure it each time:
@@ -256,7 +322,7 @@ gh api repos/wowsims/tbc-new/compare/3163bcfaf791ed9818463e07fa6ba438c0099d6e...
 and it was recorded rather than acted on: restoring the zip path changes how every
 fresh clone obtains the binary and is its own decision.
 
-## 7. Push and verify — the order
+### 7. Push and verify — the order
 
 No gate checks whether a fork commit was pushed. `git ls-remote` appears in no
 executable file and the `pushed` boolean has no code readers, so a core branch can
@@ -265,7 +331,7 @@ ADR-0030 Consequence 4 accepts that risk; ticket 355 was filed when it bit.
 
 1. Fork commit in `vendor/tbc-new-fork/`.
 2. Push the fork branch — **owner-authorised, an explicit ask**.
-3. Verify with `git -C <fork> ls-remote origin refs/heads/feat/upgrades-tab`
+3. Verify with `git -C <fork> ls-remote origin refs/heads/<branch from the fork lock>`
    returning the same sha. **Do not trust the lockfile's `pushed` flag.**
 4. Re-pin `data/wowsims-fork.lock.json`; set `pushed`.
 5. Regenerate the pin-derived artifacts.

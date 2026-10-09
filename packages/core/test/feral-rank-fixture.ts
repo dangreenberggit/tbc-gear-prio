@@ -1,19 +1,11 @@
 /**
- * The shared feral-P2 fixture the bulk-screening seam tests drive `rankUpgrades`
- * with.
+ * The shared feral-P2 fixture for suites that drive the fork's `rankUpgrades`:
+ * real committed gear, EP weights, raid-sim skeleton and candidate universe.
+ * Each suite supplies its own runner. No assertion lives in this file; what
+ * each test asserts stays in that test.
  *
- * Extracted from `bulk-screen-branch.test.ts` when `bulk-screen-fallback.test.ts`
- * needed the same setup (ticket 347's rider). Everything here is fixture
- * construction — real committed gear, EP weights, raid-sim skeleton and
- * candidate universe, plus a deterministic stand-in for the simulator. No
- * assertion lives in this file; what each test asserts stays in that test.
- *
- * The synthetic DPS is a function of the GEAR rather than of the whole request,
- * because that is the only way the two routes are comparable at all: the loop
- * hands its runner a fully composed `RaidSimRequest` while the bulk route hands
- * its runner an `EquipmentSpec` per candidate against one shared base request.
- * Reducing both to the equipped items makes "same gear, same DPS" true by
- * construction, which is the property a real simulator has.
+ * Until ticket 567 it also served the bulk screening suites, which were
+ * deleted with the engine's bulk branch.
  */
 
 import { readFileSync } from "node:fs";
@@ -24,35 +16,7 @@ import { importForkUpgrades } from "./fork-engine-harness.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
-export type SimObservation = {
-  dps: number;
-  stdev: number;
-  iterationsDone: number;
-  simVersion: string;
-};
-
 export type RaidSimRequest = Readonly<Record<string, unknown>>;
-
-export type BulkScreenCandidate = {
-  index: number;
-  gear: Readonly<Record<string, unknown>>;
-};
-
-export type BulkScreenRequest = {
-  baseRequest: RaidSimRequest;
-  candidates: readonly BulkScreenCandidate[];
-  iterations: number;
-  seed: number;
-  signal?: AbortSignal;
-};
-
-export type BulkScreenResult = {
-  baseline: SimObservation;
-  rows: ReadonlyArray<{ index: number; observation: SimObservation }>;
-  failures?: ReadonlyArray<{ indices: readonly number[]; reason: string }>;
-};
-
-export type SimRunOpts = { seed: number; iterations: number };
 
 export type FightSummary = {
   reportCode: string;
@@ -65,15 +29,6 @@ export type FightSummary = {
 
 export const SIM_VERSION = "v0.0.101";
 export const ITERATIONS = 5000;
-
-/**
- * The measured baseline gap, applied to the synthetic fixture so the two routes
- * disagree about the baseline exactly the way the real ones did. Loop baseline
- * 2246.99, screening probe 2181.67 (execution-ledger-local.md).
- */
-export const LOOP_BASELINE_DPS = 2246.99;
-export const BULK_BASELINE_DPS = 2181.67;
-export const BASELINE_OFFSET = LOOP_BASELINE_DPS - BULK_BASELINE_DPS;
 
 export const FERAL_CHAR = {
   region: "US" as const,
@@ -103,44 +58,6 @@ export const feralSkeleton = JSON.parse(
   )
 ) as RaidSimRequest;
 
-/** The gear a request equips, as a stable string. */
-export function gearFingerprint(items: unknown): string {
-  const list = Array.isArray(items) ? items : [];
-  return JSON.stringify(
-    list.map((item) => {
-      const spec = (item ?? {}) as {
-        id?: number;
-        gems?: number[];
-        enchant?: number;
-      };
-      return [spec.id ?? 0, spec.enchant ?? 0, [...(spec.gems ?? [])]];
-    })
-  );
-}
-
-/** Pulls the equipped items out of a composed raid-sim request. */
-export function equipmentOf(req: RaidSimRequest): unknown {
-  const raid = (req as { raid?: { parties?: unknown[] } }).raid;
-  const party = raid?.parties?.[0] as { players?: unknown[] } | undefined;
-  const player = party?.players?.[0] as
-    { equipment?: { items?: unknown[] } } | undefined;
-  return player?.equipment?.items ?? [];
-}
-
-/**
- * A deterministic stand-in for the simulator: the same gear always prices the
- * same, so two runs of the same fixture are comparable by construction. Spread
- * is wide enough that rows land on both sides of the cutoff.
- */
-export function syntheticDps(items: unknown, baseline: number): number {
-  const canonical = gearFingerprint(items);
-  let hash = 0;
-  for (let i = 0; i < canonical.length; i++) {
-    hash = (hash * 31 + canonical.charCodeAt(i)) | 0;
-  }
-  return baseline + ((hash >>> 0) % 20_000) / 100 - 40;
-}
-
 export type RankModule = {
   rankUpgrades: (
     input: Record<string, unknown>,
@@ -156,7 +73,6 @@ export type RankModule = {
       setContext?: { rankableSetPotential?: number };
     }>;
     baseline: { dps: number };
-    screeningFallbacks?: ReadonlyArray<{ candidates: number; reason: string }>;
     setBonuses?: Array<{
       setId: number;
       setName: string;
@@ -168,29 +84,6 @@ export type RankModule = {
     }>;
   }>;
 };
-
-export type SeamModule = {
-  bulkScreenCacheKey: (req: BulkScreenRequest, simVersion: string) => string;
-  simCacheKey: (
-    req: RaidSimRequest,
-    simVersion: string,
-    opts: SimRunOpts
-  ) => string;
-  BulkScreenAbortedError: new () => Error;
-  BulkScreenIntegrityError: new (message: string) => Error;
-  RecordedSimRunner: new (
-    simVersion: string,
-    recordings: ReadonlyMap<string, SimObservation>,
-    bulkRecordings?: ReadonlyMap<string, BulkScreenResult>
-  ) => {
-    version(): Promise<string>;
-    run(req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation>;
-    runBulkScreen?: (req: BulkScreenRequest) => Promise<BulkScreenResult>;
-  };
-};
-
-export const loadSeam = () =>
-  importForkUpgrades<SeamModule>("engine/seams/sim-runner.ts");
 
 export const loadRank = () => importForkUpgrades<RankModule>("engine/rank.ts");
 
@@ -281,8 +174,7 @@ export async function buildRankFixture(): Promise<{
     maxPhase: 2,
     fight: fightRef,
     iterations: ITERATIONS,
-    // One seed: paired replication re-sims through `deps.sim.run`, and these
-    // tests are about the screening route, not the final pass.
+    // One seed, so paired replication adds no extra sims.
     seeds: [11],
     // Wide enough that the set pieces reach the candidate set.
     candidateCap: 60,

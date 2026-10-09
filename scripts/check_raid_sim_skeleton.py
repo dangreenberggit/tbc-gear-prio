@@ -25,6 +25,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from build_feral_skeleton import (  # noqa: E402
+    load_upstream_item_id_renames,
+    with_upstream_item_ids,
+)
+
 # Equipment items[] indices in SIM_ORDER (packages/core/src/slots-table.json).
 FINGER1 = 10
 FINGER2 = 11
@@ -83,6 +90,11 @@ def main() -> int:
             )
             return 2
         apl = apl[key]
+    # The builder maps the owner's capture through upstream's id re-issues, so
+    # the gate compares against what the builder would build. Only the feral
+    # source is an owner capture; ret's APL is upstream's own.
+    if args.spec in APL_SOURCES:
+        apl = with_upstream_item_ids(apl, load_upstream_item_id_renames())
     assert isinstance(golden, dict) and isinstance(apl, dict)
 
     errors: list[str] = []

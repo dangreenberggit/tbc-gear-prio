@@ -1,0 +1,104 @@
+{
+  "_comment": "Item sets that only one class can obtain, two groups with different evidence. Naxxramas Tier 3 (setIds 521 and 523-530): Wowhead tags the set with one class, the 'Class:' line on the set's tooltip (source: https://nether.wowhead.com/tbc/tooltip/item-set/<setId>); the pieces' own tooltips have no class line (e.g. https://nether.wowhead.com/tbc/tooltip/item/22436), and in vendor/wowsims/db.json each set's ring carries a classAllowlist, which scripts/check_class_restricted_sets.py holds each classId to. Dungeon Set 2 (setIds 511-519): Wowhead's TBC set tooltip names an armor type and no class, and db.json gives no piece a classAllowlist, so the class comes from Wowhead's appearance-set page for the set (its Quick Facts 'Classes:' line; source: https://www.wowhead.com/classic/transmog-set=<id>), and the rule that another class cannot obtain these pieces rests on the owner's confirmation (the 'confirmed' field; ticket 579). Hand-written. assemble_universe.py drops a piece of one of these sets from every other class's universe, and scripts/check_class_restricted_sets.py fails pnpm verify if one is left in. classId is the common.proto Class enum, which matches Wowhead's class ids. Tier 3 decided at stage-gate cleanup-upstream-footprint, decision-log 2026-10-08T23:36Z, ticket 576; Dungeon Set 2 added 2026-10-09, ticket 579.",
+  "sets": {
+    "511": {
+      "name": "Battlegear of Heroism",
+      "classId": 1,
+      "source": "https://www.wowhead.com/classic/transmog-set=935",
+      "confirmed": "owner, 2026-10-09 (\"I'm confirming it. Remove.\"), decision-log; ticket 579"
+    },
+    "512": {
+      "name": "Darkmantle Armor",
+      "classId": 4,
+      "source": "https://www.wowhead.com/classic/transmog-set=640",
+      "confirmed": "owner, 2026-10-09 (\"I'm confirming it. Remove.\"), decision-log; ticket 579"
+    },
+    "513": {
+      "name": "Feralheart Raiment",
+      "classId": 11,
+      "source": "https://www.wowhead.com/classic/transmog-set=530",
+      "confirmed": "owner, 2026-10-09 (\"I'm confirming it. Remove.\"), decision-log; ticket 579"
+    },
+    "514": {
+      "name": "Vestments of the Virtuous",
+      "classId": 5,
+      "source": "https://www.wowhead.com/classic/transmog-set=618",
+      "confirmed": "owner, 2026-10-09 (\"I'm confirming it. Remove.\"), decision-log; ticket 579"
+    },
+    "515": {
+      "name": "Beastmaster Armor",
+      "classId": 3,
+      "source": "https://www.wowhead.com/classic/transmog-set=552",
+      "confirmed": "owner, 2026-10-09 (\"I'm confirming it. Remove.\"), decision-log; ticket 579"
+    },
+    "516": {
+      "name": "Soulforge Armor",
+      "classId": 2,
+      "source": "https://www.wowhead.com/classic/transmog-set=596",
+      "confirmed": "owner, 2026-10-09 (\"I'm confirming it. Remove.\"), decision-log; ticket 579"
+    },
+    "517": {
+      "name": "Sorcerer's Regalia",
+      "classId": 8,
+      "source": "https://www.wowhead.com/classic/transmog-set=574",
+      "confirmed": "owner, 2026-10-09 (\"I'm confirming it. Remove.\"), decision-log; ticket 579"
+    },
+    "518": {
+      "name": "Deathmist Raiment",
+      "classId": 9,
+      "source": "https://www.wowhead.com/classic/transmog-set=684",
+      "confirmed": "owner, 2026-10-09 (\"I'm confirming it. Remove.\"), decision-log; ticket 579"
+    },
+    "519": {
+      "name": "The Five Thunders",
+      "classId": 7,
+      "source": "https://www.wowhead.com/classic/transmog-set=662",
+      "confirmed": "owner, 2026-10-09 (\"I'm confirming it. Remove.\"), decision-log; ticket 579"
+    },
+    "521": {
+      "name": "Dreamwalker Raiment",
+      "classId": 11,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/521"
+    },
+    "523": {
+      "name": "Dreadnaught's Battlegear",
+      "classId": 1,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/523"
+    },
+    "524": {
+      "name": "Bonescythe Armor",
+      "classId": 4,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/524"
+    },
+    "525": {
+      "name": "Vestments of Faith",
+      "classId": 5,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/525"
+    },
+    "526": {
+      "name": "Frostfire Regalia",
+      "classId": 8,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/526"
+    },
+    "527": {
+      "name": "The Earthshatterer",
+      "classId": 7,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/527"
+    },
+    "528": {
+      "name": "Redemption Armor",
+      "classId": 2,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/528"
+    },
+    "529": {
+      "name": "Plagueheart Raiment",
+      "classId": 9,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/529"
+    },
+    "530": {
+      "name": "Cryptstalker Armor",
+      "classId": 3,
+      "source": "https://nether.wowhead.com/tbc/tooltip/item-set/530"
+    }
+  }
+}

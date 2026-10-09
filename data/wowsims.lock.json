@@ -1,515 +1,515 @@
 {
   "repo": "wowsims/tbc-new",
-  "tag": "17a8fb28c5ad14b649acecdaacd488594048f467",
-  "commit": "17a8fb28c5ad14b649acecdaacd488594048f467",
+  "tag": "42c75dc9b6ef447202588250480a7d504182409a",
+  "commit": "42c75dc9b6ef447202588250480a7d504182409a",
   "currentPhase": 3,
   "defaultMaxPhase": 3,
   "files": {
     "db.json": {
       "path": "assets/database/db.json",
-      "sha256": "0ee6cc3abe86b50bd970e215985aed9fc747a8a7bde923337b1439c73bf0f563",
-      "bytes": 3113736
+      "sha256": "6b708ebb19d9e45ea9554a69f8f0b3f9db4600c7c71ef65dd50b3db7655ada2a",
+      "bytes": 3113359
     },
     "constants_other.ts": {
-      "path": "ui/core/constants/other.ts",
-      "sha256": "d1c5a785cec39cac0196a88d44caa8b53ff2eb641807f236c14355c2fcb18757",
-      "bytes": 1110
+      "path": "ui/sim/constants/other.ts",
+      "sha256": "320b3769bb066f4408dbb68ed657e420bf317ab2161e5e9511276333335ae157",
+      "bytes": 2065
     },
     "ret_p1.gear.json": {
-      "path": "ui/paladin/retribution/gear_sets/p1.gear.json",
+      "path": "ui/specs/paladin/retribution/gear_sets/p1.gear.json",
       "sha256": "a6922f207e92f132b1942318f7964d0e4eab0fabfc2b12b8977a13980abfb6ec",
       "bytes": 539
     },
     "ret_p2.gear.json": {
-      "path": "ui/paladin/retribution/gear_sets/p2.gear.json",
+      "path": "ui/specs/paladin/retribution/gear_sets/p2.gear.json",
       "sha256": "c0f8d16529642bbbbb8c9dc2334af2bbbc2ec9b69ab2d48e95fe0d6bea549e14",
       "bytes": 623
     },
     "ret_p3.gear.json": {
-      "path": "ui/paladin/retribution/gear_sets/p3.gear.json",
+      "path": "ui/specs/paladin/retribution/gear_sets/p3.gear.json",
       "sha256": "673db016901a98c2685c2cc484ca94ac9a92920169c2ad0cc62f800ece0c3979",
       "bytes": 647
     },
     "ret_preraid.gear.json": {
-      "path": "ui/paladin/retribution/gear_sets/preraid.gear.json",
+      "path": "ui/specs/paladin/retribution/gear_sets/preraid.gear.json",
       "sha256": "b00f840b57e09238bfacb410c631af0786c8ec4b1f73b52a1a32020c63d7b8c2",
       "bytes": 493
     },
     "ret_default.apl.json": {
-      "path": "ui/paladin/retribution/apls/default.apl.json",
+      "path": "ui/specs/paladin/retribution/apls/default.apl.json",
       "sha256": "09c9205c198bcca761fd1517c0f3d17580a459e051b9aeed0584547c8393cc93",
       "bytes": 3497
     },
     "feral_p2_6p.gear.json": {
-      "path": "ui/druid/feralcat/gear_sets/p2_6p.gear.json",
+      "path": "ui/specs/druid/feralcat/gear_sets/p2_6p.gear.json",
       "sha256": "c70aa52f0aa20d78efe54665728f7913aeb28522f62acdc91a56cb5a5dfd3d12",
       "bytes": 633
     },
     "feral_p2_9p.gear.json": {
-      "path": "ui/druid/feralcat/gear_sets/p2_9p.gear.json",
+      "path": "ui/specs/druid/feralcat/gear_sets/p2_9p.gear.json",
       "sha256": "1920540f69c0caf3e5123d93a5f6785bb90753ed395f37a1d9b9a1931b25a750",
       "bytes": 664
     },
     "feral_p3_6p.gear.json": {
-      "path": "ui/druid/feralcat/gear_sets/p3_6p.gear.json",
+      "path": "ui/specs/druid/feralcat/gear_sets/p3_6p.gear.json",
       "sha256": "26db156ca5387647bb26db8e812a6395bb82166184ff49beb28960ff9e9b1abc",
       "bytes": 667
     },
     "feral_p3_9p.gear.json": {
-      "path": "ui/druid/feralcat/gear_sets/p3_9p.gear.json",
+      "path": "ui/specs/druid/feralcat/gear_sets/p3_9p.gear.json",
       "sha256": "9bcea727faf49ae5fac1db9e5a914f3c0a5c51ab47e6b4750304798f45672d71",
       "bytes": 687
     },
     "feral_preraid.gear.json": {
-      "path": "ui/druid/feralcat/gear_sets/pre_raid.gear.json",
+      "path": "ui/specs/druid/feralcat/gear_sets/pre_raid.gear.json",
       "sha256": "53fe6584b383202cc3e8bd7047fa02cef012619c5effec20da2dac14d64c49f2",
       "bytes": 659
     },
     "feral_default.apl.json": {
-      "path": "ui/druid/feralcat/apls/default.apl.json",
-      "sha256": "a8090907a1b006089ea61cd9e0d9207497bf270609bab3ab4694d91c132c4eb5",
-      "bytes": 21743
+      "path": "ui/specs/druid/feralcat/apls/default.apl.json",
+      "sha256": "434c5433a98677451f820464dc4db3ff8bbd8c01d56afa24bcbcbf95ff6357cf",
+      "bytes": 22017
     },
     "feral_sim.ts": {
-      "path": "ui/druid/feralcat/sim.ts",
-      "sha256": "f12bc2e6c3374175c887e2e2f4a11fc44a92fe1bc0d70c012e18150c69357a86",
-      "bytes": 7728
+      "path": "ui/specs/druid/feralcat/spec.ts",
+      "sha256": "6861bd51e71ce33bd52b8199fa6c865d5fbef9cfee1e0dbf84810f2cc07d7bf1",
+      "bytes": 7339
     },
     "proto_utils.ts": {
-      "path": "ui/core/proto_utils/utils.ts",
-      "sha256": "4ba6c3b96157bb8b3bdd1e60aaef911855f056ec62301c7691dfe7b7f5886d6e",
-      "bytes": 57361
+      "path": "ui/sim/proto/utils.ts",
+      "sha256": "3972e0dcce3f17879879a7c38d58ada28cd71b0367f4879db71f79d9b3f36faa",
+      "bytes": 6799
     },
     "balance_preraid.gear.json": {
-      "path": "ui/druid/balance/gear_sets/preraid.gear.json",
+      "path": "ui/specs/druid/balance/gear_sets/preraid.gear.json",
       "sha256": "af47d9c57c5b1aa42c6428e379187450fd72c6c1eca14ee1c0152f422a315592",
       "bytes": 701
     },
     "balance_p1.gear.json": {
-      "path": "ui/druid/balance/gear_sets/p1_a.gear.json",
+      "path": "ui/specs/druid/balance/gear_sets/p1_a.gear.json",
       "sha256": "87af562033e1aca067338142f7749c30834c4d39c3c40d4c6ed46f653256ec32",
       "bytes": 873
     },
     "balance_p2.gear.json": {
-      "path": "ui/druid/balance/gear_sets/p2_a.gear.json",
+      "path": "ui/specs/druid/balance/gear_sets/p2_a.gear.json",
       "sha256": "0b80f0fd0597ee3aa746a6769cca35f644b35999f58420e619a979afb70c42ad",
       "bytes": 788
     },
     "balance_p3.gear.json": {
-      "path": "ui/druid/balance/gear_sets/p3.gear.json",
+      "path": "ui/specs/druid/balance/gear_sets/p3.gear.json",
       "sha256": "0b5a5049599f82d727184fa3878c5a8ccceede4557389911153ee88563facf92",
       "bytes": 808
     },
     "balance_p4.gear.json": {
-      "path": "ui/druid/balance/gear_sets/p4.gear.json",
+      "path": "ui/specs/druid/balance/gear_sets/p4.gear.json",
       "sha256": "2a415ca7b257c67ef60edcae8193f93a0e089b1339589e6d9722ab0adc45b679",
       "bytes": 808
     },
     "balance_p5.gear.json": {
-      "path": "ui/druid/balance/gear_sets/p5.gear.json",
+      "path": "ui/specs/druid/balance/gear_sets/p5.gear.json",
       "sha256": "2a3603e4c436a6f9b4ee31de8f2a8ed17a872ab053cbcb80dbfa3a8f0d7a7e03",
       "bytes": 886
     },
     "ele_preraid.gear.json": {
-      "path": "ui/shaman/elemental/gear_sets/preraid.gear.json",
+      "path": "ui/specs/shaman/elemental/gear_sets/preraid.gear.json",
       "sha256": "fb2aff0f6ce11e03b997dc100e89d6562ddc66a6f5eb8869dc4ba3895c5d3aaf",
       "bytes": 720
     },
     "ele_p1_a.gear.json": {
-      "path": "ui/shaman/elemental/gear_sets/p1_a.gear.json",
+      "path": "ui/specs/shaman/elemental/gear_sets/p1_a.gear.json",
       "sha256": "9a7632f4790f87fa4410ca77f28e62aaedb6e75cf5222644fc8265b605b53b8a",
       "bytes": 744
     },
     "ele_p1_h.gear.json": {
-      "path": "ui/shaman/elemental/gear_sets/p1_h.gear.json",
+      "path": "ui/specs/shaman/elemental/gear_sets/p1_h.gear.json",
       "sha256": "9c6c2f2e2d6fa3dce69a6fe5ec9f9a1ca2311b3705fb3b78f68a148ace7e32b6",
       "bytes": 744
     },
     "ele_p2.gear.json": {
-      "path": "ui/shaman/elemental/gear_sets/p2.gear.json",
+      "path": "ui/specs/shaman/elemental/gear_sets/p2.gear.json",
       "sha256": "701c0119361bc6f1b9a754d0f4c043af5f62745675f172514a7274fa4afa2766",
       "bytes": 659
     },
     "ele_p3.gear.json": {
-      "path": "ui/shaman/elemental/gear_sets/p3.gear.json",
+      "path": "ui/specs/shaman/elemental/gear_sets/p3.gear.json",
       "sha256": "b806c1d74f11af4f6eb065a599f2fa1560b3c45b2d3a4a4ed117e708be546a79",
       "bytes": 666
     },
     "ele_p4.gear.json": {
-      "path": "ui/shaman/elemental/gear_sets/p4.gear.json",
+      "path": "ui/specs/shaman/elemental/gear_sets/p4.gear.json",
       "sha256": "f607bb740fceda181791c833dd2d372da3b00056043f1571a61f981bc7fb2359",
       "bytes": 666
     },
     "ele_p5.gear.json": {
-      "path": "ui/shaman/elemental/gear_sets/p5.gear.json",
+      "path": "ui/specs/shaman/elemental/gear_sets/p5.gear.json",
       "sha256": "7552b04631055c18539eaa7725b2adc4a27839eb6731b60b08e1d98bb6fb8dab",
       "bytes": 730
     },
     "enh_preraid.gear.json": {
-      "path": "ui/shaman/enhancement/gear_sets/preraid.gear.json",
+      "path": "ui/specs/shaman/enhancement/gear_sets/preraid.gear.json",
       "sha256": "d55a596389609957131482e78f4921aadc3608150367ba9f943c8305a3339bd2",
       "bytes": 736
     },
     "enh_p1.gear.json": {
-      "path": "ui/shaman/enhancement/gear_sets/p1.gear.json",
+      "path": "ui/specs/shaman/enhancement/gear_sets/p1.gear.json",
       "sha256": "9e49ad1ea22b4c7c79e2ca13ee2ca92d4eed7f9b0fb9e70379c01e2c216f939c",
       "bytes": 767
     },
     "enh_p2.gear.json": {
-      "path": "ui/shaman/enhancement/gear_sets/p2.gear.json",
+      "path": "ui/specs/shaman/enhancement/gear_sets/p2.gear.json",
       "sha256": "ba58fa5d8abe03f6fee61f43112c16ac8f4803ac62cf6930d57180f453d697bc",
       "bytes": 681
     },
     "enh_p3.gear.json": {
-      "path": "ui/shaman/enhancement/gear_sets/p3.gear.json",
+      "path": "ui/specs/shaman/enhancement/gear_sets/p3.gear.json",
       "sha256": "9ed0f5e0ad0cc8ddab7c1ac4b2b2a62e4876c2ae4b71d5a4e2fb357e948db244",
       "bytes": 661
     },
     "enh_p4.gear.json": {
-      "path": "ui/shaman/enhancement/gear_sets/p4.gear.json",
+      "path": "ui/specs/shaman/enhancement/gear_sets/p4.gear.json",
       "sha256": "891d1f0bc896002071a2dbaa299bd3761b8bfb9c4d3a73142451ece620315952",
       "bytes": 678
     },
     "enh_p5.gear.json": {
-      "path": "ui/shaman/enhancement/gear_sets/p5.gear.json",
+      "path": "ui/specs/shaman/enhancement/gear_sets/p5.gear.json",
       "sha256": "9716e9fd46ced55e0ad86a0b026d4713fa4bf33539664371fe71bfce6f0f7b8d",
       "bytes": 819
     },
     "mage_prebis.gear.json": {
-      "path": "ui/mage/dps/gear_sets/preBisArcane.gear.json",
+      "path": "ui/specs/mage/dps/gear_sets/preBisArcane.gear.json",
       "sha256": "84c787118df7312cb70d79306317add6c307b314dc00b289a6badd0366caf7af",
       "bytes": 662
     },
     "mage_p1.gear.json": {
-      "path": "ui/mage/dps/gear_sets/p1Arcane.gear.json",
+      "path": "ui/specs/mage/dps/gear_sets/p1Arcane.gear.json",
       "sha256": "a26a226fbe129a694100c1fd667bc5a02c63a0caa37a89d1435d1e2754fb7916",
       "bytes": 655
     },
     "mage_p2.gear.json": {
-      "path": "ui/mage/dps/gear_sets/p2Arcane.gear.json",
+      "path": "ui/specs/mage/dps/gear_sets/p2Arcane.gear.json",
       "sha256": "50c1396dfcf1892ed9a4c041e054ef45ef15582d0a2f749ab162c1edda96db53",
       "bytes": 601
     },
     "mage_p3_staff.gear.json": {
-      "path": "ui/mage/dps/gear_sets/p3ArcaneStaff.gear.json",
+      "path": "ui/specs/mage/dps/gear_sets/p3ArcaneStaff.gear.json",
       "sha256": "2900733c12e8ab6bcd161d91f5bc8722a9c2fc876f9c02c5ec1016d7fd67b3a4",
       "bytes": 652
     },
     "mage_p3_sword.gear.json": {
-      "path": "ui/mage/dps/gear_sets/p3ArcaneSword.gear.json",
+      "path": "ui/specs/mage/dps/gear_sets/p3ArcaneSword.gear.json",
       "sha256": "7e20d98440fe754758fe34d8da36239b4c93da00c81a8d6fee20b5f494c865f4",
       "bytes": 674
     },
     "shadow_preraid.gear.json": {
-      "path": "ui/priest/dps/gear_sets/pre_raid.gear.json",
+      "path": "ui/specs/priest/dps/gear_sets/pre_raid.gear.json",
       "sha256": "8b6e39482d52e76247270b77ae21a00378816255d1bccfcab859faf878a03d52",
       "bytes": 784
     },
     "shadow_p1.gear.json": {
-      "path": "ui/priest/dps/gear_sets/p1.gear.json",
+      "path": "ui/specs/priest/dps/gear_sets/p1.gear.json",
       "sha256": "60d44d30eb484be3416f710d803af118c663ea7cdd54a1a08a97d56f9153ef4e",
       "bytes": 727
     },
     "shadow_p2.gear.json": {
-      "path": "ui/priest/dps/gear_sets/p2.gear.json",
-      "sha256": "c6e57aa3cb3a1ce1276fb7768f3d763e81ea09b68a09e2e52d4fe30bd9e9d788",
-      "bytes": 731
+      "path": "ui/specs/priest/dps/gear_sets/p2.gear.json",
+      "sha256": "afcc05620452c29e5ef4b51dddbcfa31e466c4563c8af775ba324ea28e9dd51f",
+      "bytes": 732
     },
     "shadow_p3.gear.json": {
-      "path": "ui/priest/dps/gear_sets/p3.gear.json",
+      "path": "ui/specs/priest/dps/gear_sets/p3.gear.json",
       "sha256": "97068389cc9043c77793e7d5d36191317f3a00a0eafde2882133cd905c81bead",
       "bytes": 683
     },
     "rogue_preraid.gear.json": {
-      "path": "ui/rogue/dps/gear_sets/preraid.gear.json",
+      "path": "ui/specs/rogue/dps/gear_sets/preraid.gear.json",
       "sha256": "82f6f74894bcdf3e9940599a18019832e2ff59c48049c14aa81310e764321a11",
       "bytes": 692
     },
     "rogue_p1.gear.json": {
-      "path": "ui/rogue/dps/gear_sets/p1.gear.json",
+      "path": "ui/specs/rogue/dps/gear_sets/p1.gear.json",
       "sha256": "82beac00842e2b034d04d486aea552e194bc431ae37ccdd1f0f946e4671881ed",
       "bytes": 677
     },
     "rogue_p2.gear.json": {
-      "path": "ui/rogue/dps/gear_sets/p2.gear.json",
+      "path": "ui/specs/rogue/dps/gear_sets/p2.gear.json",
       "sha256": "ca7021dece14aa43fbb8a6dac4f8d5bbc832b8c35d2b75415f19d2c81e05cf7d",
       "bytes": 680
     },
     "rogue_p3.gear.json": {
-      "path": "ui/rogue/dps/gear_sets/p3.gear.json",
+      "path": "ui/specs/rogue/dps/gear_sets/p3.gear.json",
       "sha256": "64283f20fd2b0b35db302b2a9bca4e5bb248cc2c7b2375e87d8106e73cfb4549",
       "bytes": 695
     },
     "warlock_preraid.gear.json": {
-      "path": "ui/warlock/dps/gear_sets/preraid.gear.json",
+      "path": "ui/specs/warlock/dps/gear_sets/preraid.gear.json",
       "sha256": "45b507111c927ad77107a685b399858fb25ca91962c99fd00f1cda0de2319ebb",
       "bytes": 686
     },
     "warlock_t4.gear.json": {
-      "path": "ui/warlock/dps/gear_sets/t4.gear.json",
+      "path": "ui/specs/warlock/dps/gear_sets/t4.gear.json",
       "sha256": "be3c0f479da9840b653b88b153f43ef4d603e3cafed289b134286d101606a2ed",
       "bytes": 669
     },
     "warlock_t5.gear.json": {
-      "path": "ui/warlock/dps/gear_sets/t5.gear.json",
+      "path": "ui/specs/warlock/dps/gear_sets/t5.gear.json",
       "sha256": "7cf8f8dd5554cf9e47ea87efcffeba020020e1e8fe3db7dd58e5f1419991e18e",
       "bytes": 614
     },
     "warlock_t6.gear.json": {
-      "path": "ui/warlock/dps/gear_sets/t6.gear.json",
+      "path": "ui/specs/warlock/dps/gear_sets/t6.gear.json",
       "sha256": "dce2d759e5cae17cb26f44bf07d0cd2ad4a08a4f44e604ba6ccf2462238e4969",
       "bytes": 642
     },
     "warlock_za.gear.json": {
-      "path": "ui/warlock/dps/gear_sets/za.gear.json",
+      "path": "ui/specs/warlock/dps/gear_sets/za.gear.json",
       "sha256": "6bb8dac125a8a7b51d3dbbc1f313e694419fb730d60937162d5365b9e181cb16",
       "bytes": 625
     },
     "warlock_swp.gear.json": {
-      "path": "ui/warlock/dps/gear_sets/swp.gear.json",
+      "path": "ui/specs/warlock/dps/gear_sets/swp.gear.json",
       "sha256": "d10616ff369484737ed53d1c5403a5bee5d047c634b9e031ae3ee51d0b011bbf",
       "bytes": 713
     },
     "warlock_destro_preraid.gear.json": {
-      "path": "ui/warlock/dps/gear_sets/destro_fire_preraid.gear.json",
+      "path": "ui/specs/warlock/dps/gear_sets/destro_fire_preraid.gear.json",
       "sha256": "f2da7332f310cc7fa6f032e7151b8771ef2239ae0f5cc8a758b2a2a076c7ed3f",
       "bytes": 686
     },
     "warlock_destro_t4.gear.json": {
-      "path": "ui/warlock/dps/gear_sets/destro_fire_t4.gear.json",
+      "path": "ui/specs/warlock/dps/gear_sets/destro_fire_t4.gear.json",
       "sha256": "22e3fc38bb0793177c50d592520481fba056993a9e255a052e7a0a46c44ec109",
       "bytes": 686
     },
     "warrior_preraid_arms.gear.json": {
-      "path": "ui/warrior/dps/gear_sets/preraid_arms.gear.json",
+      "path": "ui/specs/warrior/dps/gear_sets/preraid_arms.gear.json",
       "sha256": "048e86b24b214f0ad2c1ae1b6e7d2605897129af706af7f930810efd05569b82",
       "bytes": 647
     },
     "warrior_preraid_fury.gear.json": {
-      "path": "ui/warrior/dps/gear_sets/preraid_fury.gear.json",
+      "path": "ui/specs/warrior/dps/gear_sets/preraid_fury.gear.json",
       "sha256": "6b3d9bd73c55f6a30f947323d2f4d0e1b966c43e0644a2928c4eaba73ea288ee",
       "bytes": 677
     },
     "warrior_p1_arms.gear.json": {
-      "path": "ui/warrior/dps/gear_sets/p1_arms.gear.json",
+      "path": "ui/specs/warrior/dps/gear_sets/p1_arms.gear.json",
       "sha256": "2f4be92bc97c8bda3353a4698b65411206232526e7031b044a9e2861759d9164",
       "bytes": 702
     },
     "warrior_p1_fury.gear.json": {
-      "path": "ui/warrior/dps/gear_sets/p1_fury.gear.json",
+      "path": "ui/specs/warrior/dps/gear_sets/p1_fury.gear.json",
       "sha256": "09f79b347eb269e17d839f87ccb147079f5c4f486f4c6ba2897c274eafcfd1d5",
       "bytes": 732
     },
     "warrior_p2_arms.gear.json": {
-      "path": "ui/warrior/dps/gear_sets/p2_arms.gear.json",
+      "path": "ui/specs/warrior/dps/gear_sets/p2_arms.gear.json",
       "sha256": "e201c5fbf7f39dd4cfb328740076524e8c1acd49d0f633e4b187428d5893e248",
       "bytes": 640
     },
     "warrior_p2_fury.gear.json": {
-      "path": "ui/warrior/dps/gear_sets/p2_fury.gear.json",
+      "path": "ui/specs/warrior/dps/gear_sets/p2_fury.gear.json",
       "sha256": "6dcc0f41aadbce6a6a1bd7911d93e631b913674113a3cf5ddc6d9233d5073d83",
       "bytes": 646
     },
     "warrior_p3_arms.gear.json": {
-      "path": "ui/warrior/dps/gear_sets/p3_arms.gear.json",
+      "path": "ui/specs/warrior/dps/gear_sets/p3_arms.gear.json",
       "sha256": "af669b404fd09612631684935048f94b23edc00716433c0a66c8b8e98fa6986d",
       "bytes": 640
     },
     "warrior_p3_fury.gear.json": {
-      "path": "ui/warrior/dps/gear_sets/p3_fury.gear.json",
+      "path": "ui/specs/warrior/dps/gear_sets/p3_fury.gear.json",
       "sha256": "3f240a5d96ccc6d49e46f73b3fd08e403bbe46c83f158b850bf9a893a7ec7332",
       "bytes": 677
     },
     "warrior_p4_arms.gear.json": {
-      "path": "ui/warrior/dps/gear_sets/p4_arms.gear.json",
+      "path": "ui/specs/warrior/dps/gear_sets/p4_arms.gear.json",
       "sha256": "c03a4b975ac5d524c5d2f313455939d54269dd064fab0b480e8adf53e8884717",
       "bytes": 640
     },
     "warrior_p4_fury.gear.json": {
-      "path": "ui/warrior/dps/gear_sets/p4_fury.gear.json",
+      "path": "ui/specs/warrior/dps/gear_sets/p4_fury.gear.json",
       "sha256": "f8bf75b40c502dee771a350ae04a1879938b977f074a93060220e4482799bfd6",
       "bytes": 677
     },
     "warrior_p5_arms.gear.json": {
-      "path": "ui/warrior/dps/gear_sets/p5_arms.gear.json",
+      "path": "ui/specs/warrior/dps/gear_sets/p5_arms.gear.json",
       "sha256": "c4605e8045b104c09f3967ed6c41624b7460da71578d73e22a13bb03ce1419ba",
       "bytes": 729
     },
     "warrior_p5_fury.gear.json": {
-      "path": "ui/warrior/dps/gear_sets/p5_fury.gear.json",
+      "path": "ui/specs/warrior/dps/gear_sets/p5_fury.gear.json",
       "sha256": "312748fe13792a8f90e5aaadbf5c29d1ca7fbf129783af5901c5bc3395c15c85",
       "bytes": 728
     },
     "hunter_p1_bm_2h_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_1/bm/2h_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_1/bm/2h_6p.gear.json",
       "sha256": "a86c63e8ec9dd329936efa6c7736d7d29a5cf67cd0d97da6cfb6877eb0167f12",
       "bytes": 696
     },
     "hunter_p1_bm_2h_9p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_1/bm/2h_9p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_1/bm/2h_9p.gear.json",
       "sha256": "7f24ac813f3d1648c1af7698e926a668b3043a194de469862fb278a557c90f3e",
       "bytes": 679
     },
     "hunter_p1_bm_dw_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_1/bm/dw_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_1/bm/dw_6p.gear.json",
       "sha256": "00b9caf1b0b3baa04dc69e20686c2eecd48a1ffbc1b9443a9614c7cef7d9c8a0",
       "bytes": 781
     },
     "hunter_p1_bm_dw_9p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_1/bm/dw_9p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_1/bm/dw_9p.gear.json",
       "sha256": "2f310f79895f096158a427c7b6a194de9ae1f9df492aca13a80550d86f9e16c0",
       "bytes": 764
     },
     "hunter_p1_bm_preraid.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_1/bm/pre_raid.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_1/bm/pre_raid.gear.json",
       "sha256": "59696729c47eb97ed787b5ea980208d8d29c2a62ba907c29d50b3146a07b6880",
       "bytes": 672
     },
     "hunter_p1_sv_2h_3p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_1/sv/2h_3p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_1/sv/2h_3p.gear.json",
       "sha256": "b5e7f96157cd98ecb9091b1d34974ec8bf8efe9881c183fd90f8509ff3cd57f6",
       "bytes": 696
     },
     "hunter_p1_sv_2h_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_1/sv/2h_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_1/sv/2h_6p.gear.json",
       "sha256": "57390a453f17b6006c95dcc5ea70cf2e33724747ed8ab2ae16892f845ed74073",
       "bytes": 696
     },
     "hunter_p1_sv_dw_3p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_1/sv/dw_3p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_1/sv/dw_3p.gear.json",
       "sha256": "f0fc3e6b25c6bace7b74d40df7d94f1df63a2a6e50c4af1645142e2e6bcce2a0",
       "bytes": 781
     },
     "hunter_p1_sv_dw_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_1/sv/dw_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_1/sv/dw_6p.gear.json",
       "sha256": "ed2604e5e1289fe1d4b7e49e13c8a09ddd75385994cc96b7d3a58d2874a436e5",
       "bytes": 781
     },
     "hunter_p2_bm_2h_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_2/bm/2h_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_2/bm/2h_6p.gear.json",
       "sha256": "9ff2eb6f771e633aa36cae271d2a99c1cc2e0e0adc476e2e271096d5387a55b8",
       "bytes": 672
     },
     "hunter_p2_bm_2h_9p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_2/bm/2h_9p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_2/bm/2h_9p.gear.json",
       "sha256": "7f2370bac871fedeb4a9adddfba989834f230d3d8fe3a6a41ee4aa8c0ba2fb51",
       "bytes": 672
     },
     "hunter_p2_bm_dw_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_2/bm/dw_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_2/bm/dw_6p.gear.json",
       "sha256": "feacd49878c718c83e1280c941365455ca1479b5b7794cab8442ca3051de2022",
       "bytes": 671
     },
     "hunter_p2_bm_dw_9p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_2/bm/dw_9p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_2/bm/dw_9p.gear.json",
       "sha256": "e3eb6555162f9bb44ff6f540af203f9191a72cb7f072fefc1e437fa5a913de8c",
       "bytes": 671
     },
     "hunter_p2_sv_2h_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_2/sv/2h_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_2/sv/2h_6p.gear.json",
       "sha256": "1564ebcfceafe2d6ca9fe888b589e8e95b62df7d50097f8d0173e5bd463e81e9",
       "bytes": 745
     },
     "hunter_p2_sv_dw_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_2/sv/dw_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_2/sv/dw_6p.gear.json",
       "sha256": "395a9052a162b03b72b40f5e748935788e8f02a90e24e655c3efa0610418d7fa",
       "bytes": 742
     },
     "hunter_p3_bm_2h_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_3/bm/2h_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_3/bm/2h_6p.gear.json",
       "sha256": "f9b7537ff2f08e8f98b1c62f72da11c6d393e46dff020999a86756e2b52d6eae",
       "bytes": 724
     },
     "hunter_p3_bm_2h_9p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_3/bm/2h_9p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_3/bm/2h_9p.gear.json",
       "sha256": "ef1c5cacd47797ad104cbbbf156935d9678b262fdc81bc6e3196d5935bd5015b",
       "bytes": 698
     },
     "hunter_p3_bm_dw_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_3/bm/dw_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_3/bm/dw_6p.gear.json",
       "sha256": "ed1e9dfe9a9d7dc713b25573896726d103ece9348377901fdce905cb7e4ecb30",
       "bytes": 721
     },
     "hunter_p3_bm_dw_9p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_3/bm/dw_9p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_3/bm/dw_9p.gear.json",
       "sha256": "c3fa0b2503945df8d08fd43406602392dd610bf6b8bc56ba76421463e3a40c4c",
       "bytes": 695
     },
     "hunter_p3_sv_2h_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_3/sv/2h_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_3/sv/2h_6p.gear.json",
       "sha256": "c259981c66ef133dd6ab776d91900c8314b576c9b11dbdbf988cc6bd60c3a138",
       "bytes": 738
     },
     "hunter_p3_sv_2h_9p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_3/sv/2h_9p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_3/sv/2h_9p.gear.json",
       "sha256": "6eed005408bc0a320c982e735fe074dd2106ef658cb73995449e674e0d59ad17",
       "bytes": 738
     },
     "hunter_p3_sv_dw_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_3/sv/dw_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_3/sv/dw_6p.gear.json",
       "sha256": "66b7343695222ff31be7adecc86dbb4494e5c6a19bbdb9cc83c196ea3f6e3896",
       "bytes": 735
     },
     "hunter_p3_sv_dw_9p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_3/sv/dw_9p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_3/sv/dw_9p.gear.json",
       "sha256": "dde978b5930bb9253407b405fd839b66476e3cace0a5b4c132289744f94c473c",
       "bytes": 735
     },
     "hunter_p4_bm_2h_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_4/bm/2h_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_4/bm/2h_6p.gear.json",
       "sha256": "32218c3c54e40e750c9217344cdd30edeb2958beb9f48a36a4efa0e7e45d843f",
       "bytes": 724
     },
     "hunter_p4_bm_2h_9p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_4/bm/2h_9p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_4/bm/2h_9p.gear.json",
       "sha256": "e8b59ce33c19a65beeaf1503f341f1908ba6d6fa93b13ebd4ad4ee6a40105b7c",
       "bytes": 698
     },
     "hunter_p4_bm_dw_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_4/bm/dw_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_4/bm/dw_6p.gear.json",
       "sha256": "4a2ea188e7137f5d4492b5b76d1341c114352642db92421f13e1b9b2dee9598c",
       "bytes": 721
     },
     "hunter_p4_bm_dw_9p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_4/bm/dw_9p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_4/bm/dw_9p.gear.json",
       "sha256": "1fe22149c59800afacea60cca85fe23a7edd1e0a1c96f954b84cb838694ba915",
       "bytes": 695
     },
     "hunter_p4_sv_2h_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_4/sv/2h_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_4/sv/2h_6p.gear.json",
       "sha256": "f6aac83999c4af8977071399158976c9b2a9379c85fc37fc4f1f1c7394cf3e45",
       "bytes": 724
     },
     "hunter_p4_sv_2h_9p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_4/sv/2h_9p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_4/sv/2h_9p.gear.json",
       "sha256": "85e5a01f71c7e42e63a532baa7722a39c116f4a62e62c7dcfd17cc313d95e0de",
       "bytes": 738
     },
     "hunter_p4_sv_dw_6p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_4/sv/dw_6p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_4/sv/dw_6p.gear.json",
       "sha256": "13fc378bc989a1c8499f4134614b55f6e591f99ffd73d74388d4de0e15ca612f",
       "bytes": 721
     },
     "hunter_p4_sv_dw_9p.gear.json": {
-      "path": "ui/hunter/dps/gear_sets/phase_4/sv/dw_9p.gear.json",
+      "path": "ui/specs/hunter/dps/gear_sets/phase_4/sv/dw_9p.gear.json",
       "sha256": "0147fc66b0a4105aface7522515eca12cc7bbfe235288fa28a4be01dd6c12ff4",
       "bytes": 735
     }
   },
-  "_comment": "Generated by scripts/sync_wowsims.py. currentPhase is upstream's own CURRENT_PHASE from ui/core/constants/other.ts and is the single source of DEFAULT_MAX_PHASE (PLAN.md 1.1). Never infer the content tier from a player's most recent log. Before concluding an upstream feature is absent, resolve every ref in watchedRefs -- see AGENTS.md.",
+  "_comment": "Generated by scripts/sync_wowsims.py. currentPhase is upstream's own CURRENT_PHASE from ui/sim/constants/other.ts and is the single source of DEFAULT_MAX_PHASE (PLAN.md 1.1). Never infer the content tier from a player's most recent log. Before concluding an upstream feature is absent, resolve every ref in watchedRefs -- see AGENTS.md.",
   "watchedRefs": {
     "master": {
-      "commit": "17a8fb28c5ad14b649acecdaacd488594048f467",
-      "fetchedAt": "2026-09-14"
+      "commit": "42c75dc9b6ef447202588250480a7d504182409a",
+      "fetchedAt": "2026-10-06"
     }
   },
   "proto": {
-    "commit": "17a8fb28c5ad14b649acecdaacd488594048f467",
+    "commit": "42c75dc9b6ef447202588250480a7d504182409a",
     "files": {
       "api.proto": {
         "path": "proto/api.proto",
-        "sha256": "ba988b03feb6eccdc362d9540a498bb4d290641fee3f925e185cbb126367f763",
-        "bytes": 21407
+        "sha256": "494aee727deafa350fea2a57e87501481a5eb917c068db9aedfcf05c5ecd8940",
+        "bytes": 23041
       },
       "apl.proto": {
         "path": "proto/apl.proto",
@@ -518,8 +518,8 @@
       },
       "common.proto": {
         "path": "proto/common.proto",
-        "sha256": "ec08cfe6bc96fdc888518529183a05fdaae655bb416a0aa18aff59f73760cd75",
-        "bytes": 24974
+        "sha256": "45a5ebf47554e954a4aac8f1fd52c27bc6b528f1dfd731221aa4d41cd14c3378",
+        "bytes": 25001
       },
       "db.proto": {
         "path": "proto/db.proto",
@@ -548,8 +548,8 @@
       },
       "priest.proto": {
         "path": "proto/priest.proto",
-        "sha256": "ff7afcce5aadfe55c92cba1cb9f1415fdf136801608375f1dba6d80e6889836c",
-        "bytes": 2569
+        "sha256": "a93e5e2221ffad0dd9d34276e359d966d45774a9f9786915d8d70e06d93b811a",
+        "bytes": 2699
       },
       "rogue.proto": {
         "path": "proto/rogue.proto",

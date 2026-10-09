@@ -989,22 +989,6 @@
       "curationHint": 62.1
     },
     {
-      "itemId": 22113,
-      "name": "Feralheart Vest",
-      "slot": "chest",
-      "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 37.3
-    },
-    {
       "itemId": 30762,
       "name": "Infernoweave Robe",
       "slot": "chest",
@@ -1109,22 +1093,6 @@
       "curationHint": 0.34
     },
     {
-      "itemId": 22488,
-      "name": "Dreamwalker Tunic",
-      "slot": "chest",
-      "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.29
-    },
-    {
       "itemId": 30107,
       "name": "Vestments of the Sea-Witch",
       "slot": "chest",
@@ -1143,38 +1111,6 @@
       "curationHint": 0.28
     },
     {
-      "itemId": 22075,
-      "name": "Deathmist Robe",
-      "slot": "chest",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.27
-    },
-    {
-      "itemId": 22504,
-      "name": "Plagueheart Robe",
-      "slot": "chest",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.27
-    },
-    {
       "itemId": 28602,
       "name": "Robe of the Elder Scribes",
       "slot": "chest",
@@ -1191,54 +1127,6 @@
         }
       ],
       "curationHint": 0.27
-    },
-    {
-      "itemId": 22512,
-      "name": "Robe of Faith",
-      "slot": "chest",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.26
-    },
-    {
-      "itemId": 22083,
-      "name": "Virtuous Robe",
-      "slot": "chest",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.21
-    },
-    {
-      "itemId": 22496,
-      "name": "Frostfire Robe",
-      "slot": "chest",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.21
     },
     {
       "itemId": 21527,
@@ -1271,22 +1159,6 @@
         }
       ],
       "curationHint": 0.16
-    },
-    {
-      "itemId": 22069,
-      "name": "Sorcerer's Robes",
-      "slot": "chest",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.14
     },
     {
       "itemId": 31340,
@@ -1591,22 +1463,6 @@
       "curationHint": 51.39
     },
     {
-      "itemId": 22107,
-      "name": "Feralheart Boots",
-      "slot": "feet",
-      "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 28.52
-    },
-    {
       "itemId": 30050,
       "name": "Boots of the Shifting Nightmare",
       "slot": "feet",
@@ -1807,22 +1663,6 @@
       "curationHint": 0.27
     },
     {
-      "itemId": 22076,
-      "name": "Deathmist Sandals",
-      "slot": "feet",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.24
-    },
-    {
       "itemId": 28663,
       "name": "Boots of the Incorrupt",
       "slot": "feet",
@@ -1882,38 +1722,6 @@
       "curationHint": 0.21
     },
     {
-      "itemId": 22492,
-      "name": "Dreamwalker Boots",
-      "slot": "feet",
-      "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.2
-    },
-    {
-      "itemId": 22508,
-      "name": "Plagueheart Sandals",
-      "slot": "feet",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.2
-    },
-    {
       "itemId": 30100,
       "name": "Soul-Strider Boots",
       "slot": "feet",
@@ -1930,22 +1738,6 @@
         }
       ],
       "curationHint": 0.2
-    },
-    {
-      "itemId": 22516,
-      "name": "Sandals of Faith",
-      "slot": "feet",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.19
     },
     {
       "itemId": 30092,
@@ -1966,56 +1758,8 @@
       "curationHint": 0.19
     },
     {
-      "itemId": 22500,
-      "name": "Frostfire Sandals",
-      "slot": "feet",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.17
-    },
-    {
-      "itemId": 22064,
-      "name": "Sorcerer's Boots",
-      "slot": "feet",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.14
-    },
-    {
       "itemId": 20631,
       "name": "Mendicant's Slippers",
-      "slot": "feet",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.12
-    },
-    {
-      "itemId": 22084,
-      "name": "Virtuous Sandals",
       "slot": "feet",
       "armorType": 1,
       "handType": null,
@@ -3809,22 +3553,6 @@
       "curationHint": 0.27
     },
     {
-      "itemId": 22509,
-      "name": "Plagueheart Gloves",
-      "slot": "hands",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.25
-    },
-    {
       "itemId": 28521,
       "name": "Mitts of the Treemender",
       "slot": "hands",
@@ -3859,54 +3587,6 @@
         }
       ],
       "curationHint": 0.24
-    },
-    {
-      "itemId": 22493,
-      "name": "Dreamwalker Handguards",
-      "slot": "hands",
-      "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.17
-    },
-    {
-      "itemId": 22501,
-      "name": "Frostfire Gloves",
-      "slot": "hands",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.17
-    },
-    {
-      "itemId": 22517,
-      "name": "Gloves of Faith",
-      "slot": "hands",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.16
     },
     {
       "itemId": 20618,
@@ -4230,22 +3910,6 @@
       "curationHint": 72.14
     },
     {
-      "itemId": 22109,
-      "name": "Feralheart Cowl",
-      "slot": "head",
-      "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 35.1
-    },
-    {
       "itemId": 28804,
       "name": "Collar of Cho'gall",
       "slot": "head",
@@ -4375,22 +4039,6 @@
       "curationHint": 0.31
     },
     {
-      "itemId": 22506,
-      "name": "Plagueheart Circlet",
-      "slot": "head",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.28
-    },
-    {
       "itemId": 32090,
       "name": "Cowl of Naaru Blessings",
       "slot": "head",
@@ -4405,70 +4053,6 @@
         }
       ],
       "curationHint": 0.28
-    },
-    {
-      "itemId": 22490,
-      "name": "Dreamwalker Headpiece",
-      "slot": "head",
-      "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.25
-    },
-    {
-      "itemId": 22074,
-      "name": "Deathmist Mask",
-      "slot": "head",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.24
-    },
-    {
-      "itemId": 22498,
-      "name": "Frostfire Circlet",
-      "slot": "head",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.22
-    },
-    {
-      "itemId": 22514,
-      "name": "Circlet of Faith",
-      "slot": "head",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.22
     },
     {
       "itemId": 29986,
@@ -4493,38 +4077,6 @@
       "name": "Deviate Growth Cap",
       "slot": "head",
       "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.16
-    },
-    {
-      "itemId": 22065,
-      "name": "Sorcerer's Crown",
-      "slot": "head",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.16
-    },
-    {
-      "itemId": 22080,
-      "name": "Virtuous Crown",
-      "slot": "head",
-      "armorType": 1,
       "handType": null,
       "quality": 4,
       "phase": 1,
@@ -4897,22 +4449,6 @@
       "curationHint": 0.33
     },
     {
-      "itemId": 22505,
-      "name": "Plagueheart Leggings",
-      "slot": "legs",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.3
-    },
-    {
       "itemId": 22700,
       "name": "Glacial Leggings",
       "slot": "legs",
@@ -4963,38 +4499,6 @@
         }
       ],
       "curationHint": 0.27
-    },
-    {
-      "itemId": 22497,
-      "name": "Frostfire Leggings",
-      "slot": "legs",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.25
-    },
-    {
-      "itemId": 22513,
-      "name": "Leggings of Faith",
-      "slot": "legs",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.25
     },
     {
       "itemId": 28591,
@@ -5057,22 +4561,6 @@
         }
       ],
       "curationHint": 0.23
-    },
-    {
-      "itemId": 22489,
-      "name": "Dreamwalker Legguards",
-      "slot": "legs",
-      "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.22
     },
     {
       "itemId": 19133,
@@ -6849,22 +6337,6 @@
       "curationHint": 0.27
     },
     {
-      "itemId": 22507,
-      "name": "Plagueheart Shoulderpads",
-      "slot": "shoulder",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.22
-    },
-    {
       "itemId": 28647,
       "name": "Forest Wind Shoulderpads",
       "slot": "shoulder",
@@ -6881,54 +6353,6 @@
         }
       ],
       "curationHint": 0.22
-    },
-    {
-      "itemId": 22491,
-      "name": "Dreamwalker Spaulders",
-      "slot": "shoulder",
-      "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.18
-    },
-    {
-      "itemId": 22499,
-      "name": "Frostfire Shoulderpads",
-      "slot": "shoulder",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.17
-    },
-    {
-      "itemId": 22515,
-      "name": "Shoulderpads of Faith",
-      "slot": "shoulder",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.17
     },
     {
       "itemId": 28612,
@@ -7003,22 +6427,6 @@
         "p1",
         "preraid"
       ]
-    },
-    {
-      "itemId": 38287,
-      "name": "Empty Mug of Direbrew",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 72.0
     },
     {
       "itemId": 30450,
@@ -7486,54 +6894,6 @@
       "curationHint": 0.0
     },
     {
-      "itemId": 38288,
-      "name": "Direbrew Hops",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 38289,
-      "name": "Coren's Lucky Coin",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 38290,
-      "name": "Dark Iron Smoking Pipe",
-      "slot": "trinket",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
       "itemId": 30106,
       "name": "Belt of One-Hundred Deaths",
       "slot": "waist",
@@ -7901,22 +7261,6 @@
       "curationHint": 0.24
     },
     {
-      "itemId": 22510,
-      "name": "Plagueheart Belt",
-      "slot": "waist",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.23
-    },
-    {
       "itemId": 28565,
       "name": "Nethershard Girdle",
       "slot": "waist",
@@ -7976,42 +7320,10 @@
       "curationHint": 0.21
     },
     {
-      "itemId": 22502,
-      "name": "Frostfire Belt",
-      "slot": "waist",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.19
-    },
-    {
       "itemId": 19134,
       "name": "Flayed Doomguard Belt",
       "slot": "waist",
       "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.18
-    },
-    {
-      "itemId": 22518,
-      "name": "Belt of Faith",
-      "slot": "waist",
-      "armorType": 1,
       "handType": null,
       "quality": 4,
       "phase": 1,
@@ -8042,22 +7354,6 @@
     {
       "itemId": 14553,
       "name": "Sash of Mercy",
-      "slot": "waist",
-      "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.14
-    },
-    {
-      "itemId": 22494,
-      "name": "Dreamwalker Girdle",
       "slot": "waist",
       "armorType": 2,
       "handType": null,
@@ -8332,22 +7628,6 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "Moroes",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 894.66
-    },
-    {
-      "itemId": 37597,
-      "name": "Direbrew's Shanker",
-      "slot": "weapon",
-      "armorType": null,
-      "handType": 2,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -10372,22 +9652,6 @@
       "curationHint": 0.24
     },
     {
-      "itemId": 22511,
-      "name": "Plagueheart Bindings",
-      "slot": "wrist",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.23
-    },
-    {
       "itemId": 28448,
       "name": "General's Wyrmhide Bracers",
       "slot": "wrist",
@@ -10540,38 +9804,6 @@
       "curationHint": 0.15
     },
     {
-      "itemId": 22495,
-      "name": "Dreamwalker Wristguards",
-      "slot": "wrist",
-      "armorType": 2,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.14
-    },
-    {
-      "itemId": 22503,
-      "name": "Frostfire Bindings",
-      "slot": "wrist",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.14
-    },
-    {
       "itemId": 29918,
       "name": "Mindstorm Wristbands",
       "slot": "wrist",
@@ -10592,22 +9824,6 @@
     {
       "itemId": 19135,
       "name": "Blacklight Bracer",
-      "slot": "wrist",
-      "armorType": 1,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.11
-    },
-    {
-      "itemId": 22519,
-      "name": "Bindings of Faith",
       "slot": "wrist",
       "armorType": 1,
       "handType": null,

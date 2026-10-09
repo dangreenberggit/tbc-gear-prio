@@ -3,7 +3,7 @@
  * (docs/plans/wowsims-tab/plan.md §8, §9 slice 2 "done when").
  *
  * The port copies packages/core's ranking engine into
- * vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/.
+ * vendor/tbc-new-fork/ui/features/upgrades/model/engine/.
  * This test drives BOTH copies — this repo's `rankUpgrades` and the fork's
  * ported one, loaded from its actual file path — with the same slamaltman
  * fixture gear and the same recorded sim observations, and asserts they
@@ -36,9 +36,10 @@
  * must skip with a clear message in that case, not fail confusingly.
  *
  * Design point owned here: importing the fork's engine also imports its
- * generated proto types (`ui/core/proto/*.ts`), which are themselves
- * gitignored INSIDE the fork's own repo (protoc output — confirmed via
- * `git check-ignore -v ui/core/proto/common.ts` in the clone, 2026-08-14).
+ * generated proto types (`ui/generated/proto/*.ts`), which are themselves
+ * gitignored INSIDE the fork's own repo (protoc output: the fork's
+ * `ui/generated/proto/.gitignore` ignores `*.ts`; confirm with
+ * `git -C vendor/tbc-new-fork check-ignore -v ui/generated/proto/common.ts`).
  * So "the fork is present" and "the fork's protos are generated" are two
  * independent conditions, and both gate this test the same way: skip, don't
  * fail. `describeOrSkip` below handles both — see its comment.
@@ -68,11 +69,8 @@ import { mapWclGearToSim, SIM_ORDER, type WclGearEntry } from "../src/slots.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const forkRoot = join(root, "vendor/tbc-new-fork");
-const forkEngineDir = join(
-  forkRoot,
-  "ui/core/components/individual_sim_ui/upgrades/engine"
-);
-const forkProtoDir = join(forkRoot, "ui/core/proto");
+const forkEngineDir = join(forkRoot, "ui/features/upgrades/model/engine");
+const forkProtoDir = join(forkRoot, "ui/generated/proto");
 
 const forkPresent = existsSync(forkEngineDir);
 // protoc output — see this file's top comment. Checking one generated file
@@ -785,7 +783,7 @@ async function loadForkEngine() {
   };
 
   vi.doMock(
-    pathToFileURL(join(forkRoot, "ui/core/proto_utils/database.ts")).href,
+    pathToFileURL(join(forkRoot, "ui/sim/proto/database.ts")).href,
     () => ({ Database: { getSync: () => fakeDatabase } })
   );
 
@@ -804,7 +802,7 @@ async function loadForkEngine() {
   // not modify and which stays covered by the fork's own eventual UI
   // testing (or lack of it — plan §8's "the fork has no TS test runner").
   vi.doMock(
-    pathToFileURL(join(forkRoot, "ui/core/proto_utils/utils.ts")).href,
+    pathToFileURL(join(forkRoot, "ui/sim/proto/items.ts")).href,
     () => ({
       enchantAppliesToItem: (
         enchant: { effectId: number },
@@ -995,18 +993,23 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
   }, 30000);
 });
 
-describe.skipIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
-  it.skip(
-    forkPresent
-      ? "skipped: vendor/tbc-new-fork is present but its protos are not generated " +
-          "(run protoc — see .scratch/handoffs/wowsims-tab/slice-1/HANDOFF.md's " +
-          "'Both proto paths' section) — this is expected in most checkouts, " +
-          "since vendor/ is gitignored and its build artifacts are gitignored again inside it"
-      : "skipped: vendor/tbc-new-fork is absent (vendor/ is gitignored — D1) " +
-          "— clone it and generate protos to run this test locally; CI does not " +
-          "have the fork either, by design (plan §1: nothing pushed, no PR)",
-    () => {
-      // Intentionally empty — the skip reason is the point.
-    }
-  );
-});
+// A plain `if`, not `describe.skipIf(canRunForkSide)`: vitest still collects
+// the tests of a skipped describe as "skipped", so the placeholder reached
+// run_verify's skip-reason list even on runs where the suite above passed.
+if (!canRunForkSide) {
+  describe("wowsims-fork-parity (E-W3)", () => {
+    it.skip(
+      forkPresent
+        ? "skipped: vendor/tbc-new-fork is present but its protos are not generated " +
+            "(ui/generated/proto/common.ts is missing; run `make -C vendor/tbc-new-fork proto`) " +
+            "— expected in a fresh checkout, since vendor/ is gitignored and the " +
+            "fork's generated protos are gitignored again inside it"
+        : "skipped: vendor/tbc-new-fork is absent (vendor/ is gitignored — D1) " +
+            "— clone it and generate protos to run this test locally; CI does not " +
+            "have the fork either, by design (plan §1: nothing pushed, no PR)",
+      () => {
+        // Intentionally empty — the skip reason is the point.
+      }
+    );
+  });
+}

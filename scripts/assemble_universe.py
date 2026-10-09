@@ -38,6 +38,9 @@ FACTION_IDS = ROOT / "data/faction_ids.json"
 # that script's docstring for what "stub-only" means and why it never
 # excludes a plain stat item.
 SIM_IMPLEMENTED_EFFECTS = ROOT / "data/sim-implemented-effects.json"
+# Sets only one class can obtain; the table's _comment gives each row's
+# evidence. See eligible_d7.
+CLASS_RESTRICTED_SETS = ROOT / "data/class-restricted-sets.json"
 
 RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
@@ -707,7 +710,7 @@ def _equip_eligibility() -> dict[str, frozenset[int]]:
     of drift in place.
 
     So the decision is borrowed instead of the data. The fork exporter at
-    ui/core/components/individual_sim_ui/upgrades/tools/export_equip_eligibility.mts
+    ui/features/upgrades/tools/export_equip_eligibility.mts
     runs the real canEquipItem over the fork's own db and writes this file;
     check_equip_eligibility.py re-runs it at the pin and diffs on every
     `pnpm verify`, so a fork-side rule change lands as a failed check rather
@@ -721,6 +724,18 @@ def _equip_eligibility() -> dict[str, frozenset[int]]:
 
 
 EQUIP_ELIGIBLE_BY_FORK_SPEC = _equip_eligibility()
+
+
+def _class_restricted_sets() -> dict[int, int]:
+    """setId -> the one class that can obtain the set's pieces."""
+    raw = load_json(CLASS_RESTRICTED_SETS)
+    assert isinstance(raw, dict)
+    sets = raw["sets"]
+    assert isinstance(sets, dict)
+    return {int(sid): int(row["classId"]) for sid, row in sets.items()}
+
+
+CLASS_BY_RESTRICTED_SET = _class_restricted_sets()
 
 
 SPEC_PROFILES: dict[str, SpecProfile] = {
@@ -1484,6 +1499,15 @@ def eligible_d7(it: dict, profile: SpecProfile) -> bool:
     if int(it["id"]) in profile.exclude_ids:
         return False
     if int(it["id"]) not in profile.equip_eligible_ids:
+        return False
+    # canEquipItem lets these through (db.json gives the Cryptstalker pieces no
+    # classAllowlist), so the class comes from data/class-restricted-sets.json:
+    # Wowhead's tag on the set for Tier 3, Wowhead's appearance set and the
+    # owner's confirmation for Dungeon Set 2. The owner's rule: another class's
+    # set piece is not a candidate (tickets 576, 579).
+    # scripts/check_class_restricted_sets.py holds the universes to it.
+    set_class = CLASS_BY_RESTRICTED_SET.get(int(it.get("setId") or 0))
+    if set_class is not None and set_class != profile.class_id:
         return False
     weapon_type = it.get("weaponType")
     if weapon_type and int(weapon_type) in profile.policy_excluded_weapon_types:

@@ -162,8 +162,9 @@ export type SpecEntry = {
    * Path segment of the spec's page on the public wowsims.com TBC site — note
    * `druid/feral` for cat and `priest/shadow` for the DPS priest, neither of
    * which matches this repo's `SpecId` spelling. These are the public routes,
-   * not the fork's `ui/` directory names: the fork ships `ui/druid/feralcat`,
-   * so deriving a path from the source tree would be wrong for cat.
+   * not the fork's `ui/` directory names: the fork ships
+   * `ui/specs/druid/feralcat`, so deriving a path from the source tree would
+   * be wrong for cat.
    */
   readonly sitePath: string;
   /** What the cap computation needs: which hit school, and its numbers. */
@@ -277,7 +278,7 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
      *
      * Arcane rather than Elemental Precision because every gear set this repo
      * vendors for mage is an Arcane set (`preBisArcane`/`p1Arcane`/`p2Arcane`) and
-     * the fork's default EP preset is `P1 - Arcane` (`ui/mage/dps/sim.tsx:96`).
+     * the fork's default EP preset is `P3 - Arcane` (`ui/specs/mage/dps/spec.ts:96`).
      * Elemental Precision exists at `sim/mage/talents.go:521-535` and is
      * deliberately bug-compatible — 2%/point for frost, 1%/point for fire — but a
      * per-spec entry cannot hold both, and choosing the one matching the shipped
@@ -463,7 +464,7 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
      * Masked to `WarlockAfflictionSpells` (`talents.go:82`), so a destruction
      * build gets no hit from it at all. Same limitation as balance's Balance of
      * Power; the fork's default EP preset is the Affli/Demo/Destro one
-     * (`ui/warlock/dps/sim.ts:60`), which is the build this credits. Flagged to
+     * (`ui/specs/warlock/dps/spec.ts:62`), which is the build this credits. Flagged to
      * the SME gate.
      */
     capProfile: {
@@ -492,7 +493,7 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
     /**
      * Precision, Fury tree (segment 1) index 16, 1% per point to 3
      * (`sim/warrior/talents_fury.go:320-325`). Fury is the fork's default warrior
-     * variant (`ui/warrior/dps/sim.ts:63` wires `P2_FURY_EP_PRESET`).
+     * variant (`ui/specs/warrior/dps/spec.ts:64` wires `P2_FURY_EP_PRESET`).
      */
     capProfile: {
       hitStat: Stat.StatMeleeHitRating,

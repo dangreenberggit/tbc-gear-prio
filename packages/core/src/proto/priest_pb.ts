@@ -12,7 +12,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file priest.proto.
  */
 export const file_priest: GenFile = /*@__PURE__*/
-  fileDesc("Cgxwcmllc3QucHJvdG8SBXByb3RvIrkMCg1Qcmllc3RUYWxlbnRzEhgKEHVuYnJlYWthYmxlX3dpbGwYASABKAUSGwoTd2FuZF9zcGVjaWFsaXphdGlvbhgCIAEoBRIWCg5zaWxlbnRfcmVzb2x2ZRgDIAEoBRIlCh1pbXByb3ZlZF9wb3dlcl93b3JkX2ZvcnRpdHVkZRgEIAEoBRIiChppbXByb3ZlZF9wb3dlcl93b3JkX3NoaWVsZBgFIAEoBRIRCgltYXJ0eXJkb20YBiABKAUSEgoKYWJzb2x1dGlvbhgHIAEoBRITCgtpbm5lcl9mb2N1cxgIIAEoCBISCgptZWRpdGF0aW9uGAkgASgFEhsKE2ltcHJvdmVkX2lubmVyX2ZpcmUYCiABKAUSFgoObWVudGFsX2FnaWxpdHkYCyABKAUSGgoSaW1wcm92ZWRfbWFuYV9idXJuGAwgASgFEhcKD21lbnRhbF9zdHJlbmd0aBgNIAEoBRIVCg1kaXZpbmVfc3Bpcml0GA4gASgIEh4KFmltcHJvdmVkX2RpdmluZV9zcGlyaXQYDyABKAUSFQoNZm9jdXNlZF9wb3dlchgQIAEoBRIVCg1mb3JjZV9vZl93aWxsGBEgASgFEhQKDGZvY3VzZWRfd2lsbBgSIAEoBRIWCg5wb3dlcl9pbmZ1c2lvbhgTIAEoCBIZChFyZWZsZWN0aXZlX3NoaWVsZBgUIAEoBRIVCg1lbmxpZ2h0ZW5tZW50GBUgASgFEhgKEHBhaW5fc3VwcHJlc3Npb24YFiABKAgSFQoNaGVhbGluZ19mb2N1cxgXIAEoBRIWCg5pbXByb3ZlZF9yZW5ldxgYIAEoBRIbChNob2x5X3NwZWNpYWxpemF0aW9uGBkgASgFEhUKDXNwZWxsX3dhcmRpbmcYGiABKAUSEwoLZGl2aW5lX2Z1cnkYGyABKAUSEQoJaG9seV9ub3ZhGBwgASgIEhgKEGJsZXNzZWRfcmVjb3ZlcnkYHSABKAUSEwoLaW5zcGlyYXRpb24YHiABKAUSEgoKaG9seV9yZWFjaBgfIAEoBRIYChBpbXByb3ZlZF9oZWFsaW5nGCAgASgFEhUKDXNlYXJpbmdfbGlnaHQYISABKAUSFwoPaGVhbGluZ19wcmF5ZXJzGCIgASgFEhwKFHNwaXJpdF9vZl9yZWRlbXB0aW9uGCMgASgIEhoKEnNwaXJpdHVhbF9ndWlkYW5jZRgkIAEoBRIWCg5zdXJnZV9vZl9saWdodBglIAEoBRIZChFzcGlyaXR1YWxfaGVhbGluZxgmIAEoBRIaChJob2x5X2NvbmNlbnRyYXRpb24YJyABKAUSEQoJbGlnaHR3ZWxsGCggASgIEhoKEmJsZXNzZWRfcmVzaWxpZW5jZRgpIAEoBRIZChFlbXBvd2VyZWRfaGVhbGluZxgqIAEoBRIZChFjaXJjbGVfb2ZfaGVhbGluZxgrIAEoCBISCgpzcGlyaXRfdGFwGCwgASgFEhAKCGJsYWNrb3V0GC0gASgFEhcKD3NoYWRvd19hZmZpbml0eRguIAEoBRIhChlpbXByb3ZlZF9zaGFkb3dfd29yZF9wYWluGC8gASgFEhQKDHNoYWRvd19mb2N1cxgwIAEoBRIfChdpbXByb3ZlZF9wc3ljaGljX3NjcmVhbRgxIAEoBRIbChNpbXByb3ZlZF9taW5kX2JsYXN0GDIgASgFEhEKCW1pbmRfZmxheRgzIAEoCBIVCg1pbXByb3ZlZF9mYWRlGDQgASgFEhQKDHNoYWRvd19yZWFjaBg1IAEoBRIWCg5zaGFkb3dfd2VhdmluZxg2IAEoBRIPCgdzaWxlbmNlGDcgASgIEhgKEHZhbXBpcmljX2VtYnJhY2UYOCABKAgSIQoZaW1wcm92ZWRfdmFtcGlyaWNfZW1icmFjZRg5IAEoBRIUCgxmb2N1c2VkX21pbmQYOiABKAUSGQoRc2hhZG93X3Jlc2lsaWVuY2UYOyABKAUSEAoIZGFya25lc3MYPCABKAUSEgoKc2hhZG93Zm9ybRg9IAEoCBIUCgxzaGFkb3dfcG93ZXIYPiABKAUSDgoGbWlzZXJ5GD8gASgFEhYKDnZhbXBpcmljX3RvdWNoGEAgASgIIpABCg1Qcmllc3RPcHRpb25zEikKBWFybW9yGAEgASgOMhoucHJvdG8uUHJpZXN0T3B0aW9ucy5Bcm1vchIXCg91c2Vfc2hhZG93ZmllbmQYAiABKAgSFgoOcHJlX3NoYWRvd2Zvcm0YAyABKAgiIwoFQXJtb3ISCwoHTm9Bcm1vchAAEg0KCUlubmVyRmlyZRABIqkBCgZQcmllc3QSJgoHb3B0aW9ucxgDIAEoCzIVLnByb3RvLlByaWVzdC5PcHRpb25zGgoKCFJvdGF0aW9uGmsKB09wdGlvbnMSKwoNY2xhc3Nfb3B0aW9ucxgBIAEoCzIULnByb3RvLlByaWVzdE9wdGlvbnMSMwoVcG93ZXJfaW5mdXNpb25fdGFyZ2V0GAIgASgLMhQucHJvdG8uVW5pdFJlZmVyZW5jZUIJWgcuL3Byb3RvYgZwcm90bzM", [file_common]);
+  fileDesc("Cgxwcmllc3QucHJvdG8SBXByb3RvIrkMCg1Qcmllc3RUYWxlbnRzEhgKEHVuYnJlYWthYmxlX3dpbGwYASABKAUSGwoTd2FuZF9zcGVjaWFsaXphdGlvbhgCIAEoBRIWCg5zaWxlbnRfcmVzb2x2ZRgDIAEoBRIlCh1pbXByb3ZlZF9wb3dlcl93b3JkX2ZvcnRpdHVkZRgEIAEoBRIiChppbXByb3ZlZF9wb3dlcl93b3JkX3NoaWVsZBgFIAEoBRIRCgltYXJ0eXJkb20YBiABKAUSEgoKYWJzb2x1dGlvbhgHIAEoBRITCgtpbm5lcl9mb2N1cxgIIAEoCBISCgptZWRpdGF0aW9uGAkgASgFEhsKE2ltcHJvdmVkX2lubmVyX2ZpcmUYCiABKAUSFgoObWVudGFsX2FnaWxpdHkYCyABKAUSGgoSaW1wcm92ZWRfbWFuYV9idXJuGAwgASgFEhcKD21lbnRhbF9zdHJlbmd0aBgNIAEoBRIVCg1kaXZpbmVfc3Bpcml0GA4gASgIEh4KFmltcHJvdmVkX2RpdmluZV9zcGlyaXQYDyABKAUSFQoNZm9jdXNlZF9wb3dlchgQIAEoBRIVCg1mb3JjZV9vZl93aWxsGBEgASgFEhQKDGZvY3VzZWRfd2lsbBgSIAEoBRIWCg5wb3dlcl9pbmZ1c2lvbhgTIAEoCBIZChFyZWZsZWN0aXZlX3NoaWVsZBgUIAEoBRIVCg1lbmxpZ2h0ZW5tZW50GBUgASgFEhgKEHBhaW5fc3VwcHJlc3Npb24YFiABKAgSFQoNaGVhbGluZ19mb2N1cxgXIAEoBRIWCg5pbXByb3ZlZF9yZW5ldxgYIAEoBRIbChNob2x5X3NwZWNpYWxpemF0aW9uGBkgASgFEhUKDXNwZWxsX3dhcmRpbmcYGiABKAUSEwoLZGl2aW5lX2Z1cnkYGyABKAUSEQoJaG9seV9ub3ZhGBwgASgIEhgKEGJsZXNzZWRfcmVjb3ZlcnkYHSABKAUSEwoLaW5zcGlyYXRpb24YHiABKAUSEgoKaG9seV9yZWFjaBgfIAEoBRIYChBpbXByb3ZlZF9oZWFsaW5nGCAgASgFEhUKDXNlYXJpbmdfbGlnaHQYISABKAUSFwoPaGVhbGluZ19wcmF5ZXJzGCIgASgFEhwKFHNwaXJpdF9vZl9yZWRlbXB0aW9uGCMgASgIEhoKEnNwaXJpdHVhbF9ndWlkYW5jZRgkIAEoBRIWCg5zdXJnZV9vZl9saWdodBglIAEoBRIZChFzcGlyaXR1YWxfaGVhbGluZxgmIAEoBRIaChJob2x5X2NvbmNlbnRyYXRpb24YJyABKAUSEQoJbGlnaHR3ZWxsGCggASgIEhoKEmJsZXNzZWRfcmVzaWxpZW5jZRgpIAEoBRIZChFlbXBvd2VyZWRfaGVhbGluZxgqIAEoBRIZChFjaXJjbGVfb2ZfaGVhbGluZxgrIAEoCBISCgpzcGlyaXRfdGFwGCwgASgFEhAKCGJsYWNrb3V0GC0gASgFEhcKD3NoYWRvd19hZmZpbml0eRguIAEoBRIhChlpbXByb3ZlZF9zaGFkb3dfd29yZF9wYWluGC8gASgFEhQKDHNoYWRvd19mb2N1cxgwIAEoBRIfChdpbXByb3ZlZF9wc3ljaGljX3NjcmVhbRgxIAEoBRIbChNpbXByb3ZlZF9taW5kX2JsYXN0GDIgASgFEhEKCW1pbmRfZmxheRgzIAEoCBIVCg1pbXByb3ZlZF9mYWRlGDQgASgFEhQKDHNoYWRvd19yZWFjaBg1IAEoBRIWCg5zaGFkb3dfd2VhdmluZxg2IAEoBRIPCgdzaWxlbmNlGDcgASgIEhgKEHZhbXBpcmljX2VtYnJhY2UYOCABKAgSIQoZaW1wcm92ZWRfdmFtcGlyaWNfZW1icmFjZRg5IAEoBRIUCgxmb2N1c2VkX21pbmQYOiABKAUSGQoRc2hhZG93X3Jlc2lsaWVuY2UYOyABKAUSEAoIZGFya25lc3MYPCABKAUSEgoKc2hhZG93Zm9ybRg9IAEoCBIUCgxzaGFkb3dfcG93ZXIYPiABKAUSDgoGbWlzZXJ5GD8gASgFEhYKDnZhbXBpcmljX3RvdWNoGEAgASgIIpABCg1Qcmllc3RPcHRpb25zEikKBWFybW9yGAEgASgOMhoucHJvdG8uUHJpZXN0T3B0aW9ucy5Bcm1vchIXCg91c2Vfc2hhZG93ZmllbmQYAiABKAgSFgoOcHJlX3NoYWRvd2Zvcm0YAyABKAgiIwoFQXJtb3ISCwoHTm9Bcm1vchAAEg0KCUlubmVyRmlyZRABIq8BCglEcHNQcmllc3QSKQoHb3B0aW9ucxgDIAEoCzIYLnByb3RvLkRwc1ByaWVzdC5PcHRpb25zGgoKCFJvdGF0aW9uGmsKB09wdGlvbnMSKwoNY2xhc3Nfb3B0aW9ucxgBIAEoCzIULnByb3RvLlByaWVzdE9wdGlvbnMSMwoVcG93ZXJfaW5mdXNpb25fdGFyZ2V0GAIgASgLMhQucHJvdG8uVW5pdFJlZmVyZW5jZSKAAQoMSGVhbGVyUHJpZXN0EiwKB29wdGlvbnMYAyABKAsyGy5wcm90by5IZWFsZXJQcmllc3QuT3B0aW9ucxoKCghSb3RhdGlvbho2CgdPcHRpb25zEisKDWNsYXNzX29wdGlvbnMYASABKAsyFC5wcm90by5Qcmllc3RPcHRpb25zQglaBy4vcHJvdG9iBnByb3RvMw", [file_common]);
 
 /**
  * DO NOT REMOVE THE COMMENTS
@@ -405,39 +405,39 @@ export const PriestOptions_ArmorSchema: GenEnum<PriestOptions_Armor> = /*@__PURE
   enumDesc(file_priest, 1, 0);
 
 /**
- * @generated from message proto.Priest
+ * @generated from message proto.DpsPriest
  */
-export type Priest = Message<"proto.Priest"> & {
+export type DpsPriest = Message<"proto.DpsPriest"> & {
   /**
-   * @generated from field: proto.Priest.Options options = 3;
+   * @generated from field: proto.DpsPriest.Options options = 3;
    */
-  options?: Priest_Options | undefined;
+  options?: DpsPriest_Options | undefined;
 };
 
 /**
- * Describes the message proto.Priest.
- * Use `create(PriestSchema)` to create a new message.
+ * Describes the message proto.DpsPriest.
+ * Use `create(DpsPriestSchema)` to create a new message.
  */
-export const PriestSchema: GenMessage<Priest> = /*@__PURE__*/
+export const DpsPriestSchema: GenMessage<DpsPriest> = /*@__PURE__*/
   messageDesc(file_priest, 2);
 
 /**
- * @generated from message proto.Priest.Rotation
+ * @generated from message proto.DpsPriest.Rotation
  */
-export type Priest_Rotation = Message<"proto.Priest.Rotation"> & {
+export type DpsPriest_Rotation = Message<"proto.DpsPriest.Rotation"> & {
 };
 
 /**
- * Describes the message proto.Priest.Rotation.
- * Use `create(Priest_RotationSchema)` to create a new message.
+ * Describes the message proto.DpsPriest.Rotation.
+ * Use `create(DpsPriest_RotationSchema)` to create a new message.
  */
-export const Priest_RotationSchema: GenMessage<Priest_Rotation> = /*@__PURE__*/
+export const DpsPriest_RotationSchema: GenMessage<DpsPriest_Rotation> = /*@__PURE__*/
   messageDesc(file_priest, 2, 0);
 
 /**
- * @generated from message proto.Priest.Options
+ * @generated from message proto.DpsPriest.Options
  */
-export type Priest_Options = Message<"proto.Priest.Options"> & {
+export type DpsPriest_Options = Message<"proto.DpsPriest.Options"> & {
   /**
    * @generated from field: proto.PriestOptions class_options = 1;
    */
@@ -450,9 +450,56 @@ export type Priest_Options = Message<"proto.Priest.Options"> & {
 };
 
 /**
- * Describes the message proto.Priest.Options.
- * Use `create(Priest_OptionsSchema)` to create a new message.
+ * Describes the message proto.DpsPriest.Options.
+ * Use `create(DpsPriest_OptionsSchema)` to create a new message.
  */
-export const Priest_OptionsSchema: GenMessage<Priest_Options> = /*@__PURE__*/
+export const DpsPriest_OptionsSchema: GenMessage<DpsPriest_Options> = /*@__PURE__*/
   messageDesc(file_priest, 2, 1);
+
+/**
+ * @generated from message proto.HealerPriest
+ */
+export type HealerPriest = Message<"proto.HealerPriest"> & {
+  /**
+   * @generated from field: proto.HealerPriest.Options options = 3;
+   */
+  options?: HealerPriest_Options | undefined;
+};
+
+/**
+ * Describes the message proto.HealerPriest.
+ * Use `create(HealerPriestSchema)` to create a new message.
+ */
+export const HealerPriestSchema: GenMessage<HealerPriest> = /*@__PURE__*/
+  messageDesc(file_priest, 3);
+
+/**
+ * @generated from message proto.HealerPriest.Rotation
+ */
+export type HealerPriest_Rotation = Message<"proto.HealerPriest.Rotation"> & {
+};
+
+/**
+ * Describes the message proto.HealerPriest.Rotation.
+ * Use `create(HealerPriest_RotationSchema)` to create a new message.
+ */
+export const HealerPriest_RotationSchema: GenMessage<HealerPriest_Rotation> = /*@__PURE__*/
+  messageDesc(file_priest, 3, 0);
+
+/**
+ * @generated from message proto.HealerPriest.Options
+ */
+export type HealerPriest_Options = Message<"proto.HealerPriest.Options"> & {
+  /**
+   * @generated from field: proto.PriestOptions class_options = 1;
+   */
+  classOptions?: PriestOptions | undefined;
+};
+
+/**
+ * Describes the message proto.HealerPriest.Options.
+ * Use `create(HealerPriest_OptionsSchema)` to create a new message.
+ */
+export const HealerPriest_OptionsSchema: GenMessage<HealerPriest_Options> = /*@__PURE__*/
+  messageDesc(file_priest, 3, 1);
 

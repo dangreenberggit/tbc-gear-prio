@@ -1,11 +1,16 @@
 /**
- * `RunStaleness` — when the Upgrades tab marks a shown result stale (ticket
- * 537). The tab reads gear and settings once, when a run starts, so a change
- * made while the run is in flight leaves the result measured on old inputs.
+ * When the Upgrades tab marks a shown result stale (tickets 537 and 560). The
+ * tab reads the page and its settings once, when a run starts, so a change made
+ * while the run is in flight leaves the result measured on old inputs.
  *
- * Each test drives the tracker the way `upgrades_tab.tsx` does: `runStarted`
- * when a run starts, `inputChanged` from every gear, talent and settings
- * listener, and `staleAtFinish` for the `stale` flag of the finished state.
+ * The React tab keeps no tracker object. A run records `inputsSignature` (built
+ * from `liveInputsKey` and the settings, `model/run_inputs.ts`) in its
+ * `measuredOn` when it starts; `selectSettledSignature` (`model/upgrades_store.ts`)
+ * reads it back once the run is done or stopped; and `useRunStale` calls the
+ * result stale when the signature built from the page now differs. These tests
+ * drive those pure pieces through the real `runReducer`, as the tab's store
+ * does. The hook itself is React and is tested in the fork
+ * (`hooks/useRunStale.test.tsx`).
  *
  * The fork is gitignored (`vendor/`), so the suite skips when it is absent.
  */
@@ -14,78 +19,154 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { forkPresent, forkUpgradesDir } from "./fork-engine-harness.js";
+import {
+  forkPresent,
+  forkRoot,
+  importForkUpgrades,
+  loadForkEngineEnvironment,
+} from "./fork-engine-harness.js";
 
-type State =
-  | { kind: "idle" }
-  | { kind: "running" }
-  | { kind: "done"; stale: boolean }
-  | { kind: "stopped"; stale: boolean };
+type RunSettings = { iterations: number };
+type MeasuredOn = { inputsSignature?: string };
+type RunState =
+  | { status: "idle" }
+  | { status: "running"; runId: number; measuredOn?: MeasuredOn }
+  | { status: "done"; runId: number; measuredOn?: MeasuredOn }
+  | { status: "stopped"; runId: number; measuredOn?: MeasuredOn }
+  | { status: "error"; runId: number; message: string };
+type RunAction =
+  | {
+      type: "started";
+      runId: number;
+      startedAt: number;
+      measuredOn?: MeasuredOn;
+    }
+  | { type: "finished"; runId: number; result: object }
+  | { type: "stopped"; runId: number; result: object };
 
-type RunStaleness = {
-  runStarted(): void;
-  inputChanged<S extends { readonly kind: string }>(state: S): S;
-  staleAtFinish(): boolean;
+type ProtoMessage = { create(init?: object): object };
+type LiveInputsSource = {
+  raid: { toProto(forExport?: boolean): object };
+  encounter: { toProto(): object };
+  getPhase(): number;
 };
 
-const stalenessModule = join(forkUpgradesDir, "run_staleness.ts");
+const SETTINGS: RunSettings = { iterations: 3000 };
+/** Not read by the reducer: a ranking's contents do not decide staleness. */
+const RESULT = { items: [], complete: true };
 
-describe.skipIf(!forkPresent)("RunStaleness", () => {
-  let RunStalenessCtor: new () => RunStaleness;
+const importProto = async <T>(file: string): Promise<T> =>
+  (await import(
+    pathToFileURL(join(forkRoot, "ui/generated/proto", file)).href
+  )) as T;
+
+describe.skipIf(!forkPresent)("Upgrades run staleness", () => {
+  let runReducer: (state: RunState, action: RunAction) => RunState;
+  let idle: RunState;
+  let settledSignature: (state: { run: RunState }) => string | undefined;
+  let signatureAtPhase: (phase: number) => string;
 
   beforeAll(async () => {
-    const mod = (await import(pathToFileURL(stalenessModule).href)) as {
-      RunStaleness: new () => RunStaleness;
-    };
-    RunStalenessCtor = mod.RunStaleness;
-  });
+    await loadForkEngineEnvironment();
+    const reducer = await importForkUpgrades<{
+      runReducer: typeof runReducer;
+      IDLE_RUN: RunState;
+    }>("run_reducer.ts");
+    runReducer = reducer.runReducer;
+    idle = reducer.IDLE_RUN;
+    settledSignature = (
+      await importForkUpgrades<{
+        selectSettledSignature: typeof settledSignature;
+      }>("upgrades_store.ts")
+    ).selectSettledSignature;
+
+    const { inputsSignature, liveInputsKey } = await importForkUpgrades<{
+      inputsSignature(input: {
+        liveKey: string;
+        settings: RunSettings;
+      }): string;
+      liveInputsKey(sim: LiveInputsSource): string;
+    }>("run_inputs.ts");
+    const { Raid } = await importProto<{ Raid: ProtoMessage }>("api.ts");
+    const { Encounter } = await importProto<{ Encounter: ProtoMessage }>(
+      "common.ts"
+    );
+    // The page as the run reads it. Only the phase differs between calls, so
+    // "an input changed" here is the phase selector moving.
+    signatureAtPhase = (phase) =>
+      inputsSignature({
+        liveKey: liveInputsKey({
+          raid: { toProto: () => Raid.create() },
+          encounter: { toProto: () => Encounter.create({ duration: 180 }) },
+          getPhase: () => phase,
+        }),
+        settings: SETTINGS,
+      });
+    // 30s, matching `testTimeout`, not the 10s default hookTimeout: loading
+    // db.json and the fork modules took 3.4-4.7s in review round 2 and can
+    // pass 10s under CPU contention (hypothesis, untested).
+  }, 30_000);
+
+  const start = (state: RunState, runId: number, signature: string) =>
+    runReducer(state, {
+      type: "started",
+      runId,
+      startedAt: 0,
+      measuredOn: { inputsSignature: signature },
+    });
+  const finish = (state: RunState, runId: number) =>
+    runReducer(state, { type: "finished", runId, result: RESULT });
+  const stop = (state: RunState, runId: number) =>
+    runReducer(state, { type: "stopped", runId, result: RESULT });
+  const settled = (run: RunState) => settledSignature({ run });
 
   it("marks a finished run stale when an input changed while it ran", () => {
-    const tracker = new RunStalenessCtor();
-    tracker.runStarted();
-    const running: State = { kind: "running" };
+    const atStart = signatureAtPhase(3);
+    const running = start(idle, 1, atStart);
+    // The phase moves while the run is in flight. The run keeps the inputs it
+    // started on, so the finished result is measured on phase 3.
+    const now = signatureAtPhase(4);
+    const done = finish(running, 1);
 
-    expect(tracker.inputChanged(running)).toEqual({ kind: "running" });
-    expect(tracker.staleAtFinish()).toBe(true);
+    expect(done.status).toBe("done");
+    expect(settled(done)).toBe(atStart);
+    expect(now).not.toBe(atStart);
   });
 
   it("leaves a finished run fresh when nothing changed while it ran", () => {
-    const tracker = new RunStalenessCtor();
-    tracker.runStarted();
+    const done = finish(start(idle, 1, signatureAtPhase(3)), 1);
 
-    expect(tracker.staleAtFinish()).toBe(false);
+    expect(settled(done)).toBe(signatureAtPhase(3));
   });
 
   it("does not carry a change during one run into the next run", () => {
-    const tracker = new RunStalenessCtor();
-    tracker.runStarted();
-    tracker.inputChanged<State>({ kind: "running" });
-    tracker.runStarted();
+    const first = start(idle, 1, signatureAtPhase(3));
+    const second = start(first, 2, signatureAtPhase(4));
 
-    expect(tracker.staleAtFinish()).toBe(false);
+    expect(settled(finish(second, 2))).toBe(signatureAtPhase(4));
   });
 
   it("marks a done result stale when an input changes after the run", () => {
-    const tracker = new RunStalenessCtor();
-    const done: State = { kind: "done", stale: false };
+    const done = finish(start(idle, 1, signatureAtPhase(3)), 1);
 
-    expect(tracker.inputChanged(done)).toEqual({ kind: "done", stale: true });
+    // A defined signature that differs from the page's: `undefined` would also
+    // differ, but the hook reads it as "nothing to compare", not stale.
+    expect(settled(done)).toBe(signatureAtPhase(3));
+    expect(signatureAtPhase(4)).not.toBe(signatureAtPhase(3));
   });
 
   it("marks a stopped result stale when an input changes after the stop", () => {
-    const tracker = new RunStalenessCtor();
-    const stopped: State = { kind: "stopped", stale: false };
+    const stopped = stop(start(idle, 1, signatureAtPhase(3)), 1);
 
-    expect(tracker.inputChanged(stopped)).toEqual({
-      kind: "stopped",
-      stale: true,
-    });
+    expect(stopped.status).toBe("stopped");
+    expect(settled(stopped)).toBe(signatureAtPhase(3));
+    expect(settled(stopped)).not.toBe(signatureAtPhase(4));
   });
 
-  it("does not change an idle state", () => {
-    const tracker = new RunStalenessCtor();
-    const idle: State = { kind: "idle" };
-
-    expect(tracker.inputChanged(idle)).toBe(idle);
+  it("never marks an idle state or a run in flight stale", () => {
+    // No settled signature means `useRunStale` has nothing to compare and
+    // returns false, whatever the page holds.
+    expect(settled(idle)).toBeUndefined();
+    expect(settled(start(idle, 1, signatureAtPhase(3)))).toBeUndefined();
   });
 });

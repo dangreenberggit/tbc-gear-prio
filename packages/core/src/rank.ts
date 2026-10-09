@@ -177,6 +177,11 @@ export type Progress =
    * only on the first emission of the stage, so a UI can size a skeleton
    * list once the cap has decided. A candidate can finish with no row, so
    * the count is an upper bound on the rows that arrive.
+   *
+   * The first total is a budget: it counts replicas for up to
+   * `PAIRED_REPLICATE_TOP_N` rows before the run knows how many rows clear
+   * the cutoff. The first `simming` after `ranking` repeats `done` with the
+   * exact total, and the run ends on `done === total` (ticket 566).
    */
   | {
       stage: "simming";
@@ -1119,7 +1124,8 @@ export async function rankUpgrades(
       (e, i) => i < cap || equippedIds.has(e.itemId)
     );
 
-    // Counted here, after the cap decides the full-iteration set.
+    // Counted here, after the cap decides the full-iteration set. A budget
+    // until `replicateTopItems` restates it with the rows it re-sims.
     const replicaSims = usesPairedReplication(seeds)
       ? (seeds.length - 1) *
         (1 + Math.min(PAIRED_REPLICATE_TOP_N, simCandidates.length))
@@ -1401,17 +1407,27 @@ export async function rankUpgrades(
     winningRequests: ReadonlyMap<number, RaidSimRequest>,
     baselineDps: number
   ): Promise<void> {
-    if (!usesPairedReplication(seeds)) return;
-
     // Screened and unsimmed rows are excluded before the slice, not caught by
     // the throw below: neither was ever simmed at full iterations, so neither
     // has a `winningRequests` entry to re-sim, and both sit in `ranked` with
     // `belowCutoff` false (ticket 156). Selecting on `!belowCutoff` alone let
     // the slice run past a short promoted set into them and throw on a row
     // that was never a replication candidate in the first place.
-    const top = ranked
-      .filter((item) => !item.belowCutoff && item.simmed !== false)
-      .slice(0, PAIRED_REPLICATE_TOP_N);
+    const top = usesPairedReplication(seeds)
+      ? ranked
+          .filter((item) => !item.belowCutoff && item.simmed !== false)
+          .slice(0, PAIRED_REPLICATE_TOP_N)
+      : [];
+    // The total sent so far budgeted re-sims for up to top-N rows; only now is
+    // the number of rows known, so the total is restated as the sims done
+    // plus the sims this function will run (ticket 566).
+    totalSimsForProgress =
+      simsDone + (top.length === 0 ? 0 : (seeds.length - 1) * (1 + top.length));
+    onProgress?.({
+      stage: "simming",
+      done: simsDone,
+      total: totalSimsForProgress,
+    });
     if (top.length === 0) return;
     // Baseline once per seed, shared by every replicated candidate under that
     // seed — the pairing, and also what keeps this 5×(8+1) sims rather than

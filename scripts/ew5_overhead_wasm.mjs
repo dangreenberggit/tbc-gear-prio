@@ -9,7 +9,7 @@
  * model M2 actually depends on.
  *
  * Run: npx tsx scripts/ew5_overhead_wasm.mjs
- *   (bare `node` fails: this file imports `vendor/tbc-new-fork/ui/core/proto/db.ts`,
+ *   (bare `node` fails: this file imports `vendor/tbc-new-fork/ui/generated/proto/db.ts`,
  *   a TypeScript source with no compiled .js sibling in this vendor tree, so
  *   the loader needs tsx's on-the-fly transform.)
  * Requires: vendor/tbc-new-fork/dist/tbc/lib.wasm (20MB build artifact,
@@ -97,7 +97,8 @@ async function buildDatabaseJson() {
   // (ERR_UNSUPPORTED_ESM_URL_SCHEME); pathToFileURL produces the file://
   // URL form the loader requires.
   const { SimDatabase } = await import(
-    pathToFileURL(resolve(ROOT, "vendor/tbc-new-fork/ui/core/proto/db.ts")).href
+    pathToFileURL(resolve(ROOT, "vendor/tbc-new-fork/ui/generated/proto/db.ts"))
+      .href
   );
   const raw = JSON.parse(readFileSync(DB_PATH, "utf8"));
   const parsed = SimDatabase.fromJson(raw, { ignoreUnknownFields: true });

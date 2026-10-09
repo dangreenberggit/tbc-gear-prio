@@ -1971,7 +1971,7 @@
                               "tag": -1
                             },
                             "targetSpellId": {
-                              "itemId": 38287
+                              "itemId": 281739
                             },
                             "offset": {
                               "variableRef": {
@@ -1983,7 +1983,7 @@
                         },
                         "castSpell": {
                           "spellId": {
-                            "itemId": 38287
+                            "itemId": 281739
                           }
                         }
                       }

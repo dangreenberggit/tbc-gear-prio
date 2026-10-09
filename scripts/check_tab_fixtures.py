@@ -15,11 +15,13 @@ Two kinds of problem, treated differently:
     in a layout fixture still lays out, and a blocking rule would force a
     ~5-minute re-record per fixture on every engine edit.
 
-The inputs are the fork paths that can change a Ranking: the engine
-(`upgrades/engine/**`, except `view.ts`, which only shapes a recorded Ranking
-for display, `PROVENANCE.md` and the engine's own test `fixtures/`), the
-adapters, the pool data, and `upgrades_tab.tsx` (its `run()` builds the
-engine's input). What this cannot see -- the Go sim / WASM, the item
+The inputs are the fork paths that can change a Ranking, all under
+`ui/features/upgrades/model/`: the engine (`engine/**`, except `view.ts`,
+which only shapes a recorded Ranking for display, and the engine's own
+test `fixtures/`), the adapters, the pool data, `run.ts`
+(it builds the engine's input, as the old tab's `run()` did) and
+`settings_pool.ts` (its `effectivePool` builds the pool `run.ts` hands the
+engine). What this cannot see -- the Go sim / WASM, the item
 database, the proto sources -- is named in the README.
 
 Skips with a note (exit 0) when the fork clone is absent, like the other
@@ -43,17 +45,17 @@ FORK_ROOT = ROOT / "vendor/tbc-new-fork"
 FIXTURE_DIR = ROOT / "data/tab-fixtures"
 SCHEMA_VERSION = 1
 
-_UPGRADES = "ui/core/components/individual_sim_ui/upgrades"
-ENGINE = f"{_UPGRADES}/engine"
+_MODEL = "ui/features/upgrades/model"
+ENGINE = f"{_MODEL}/engine"
 INPUT_PATHS = (
     ENGINE,
-    f"{_UPGRADES}/adapters",
-    f"{_UPGRADES}/data",
-    "ui/core/components/individual_sim_ui/upgrades_tab.tsx",
+    f"{_MODEL}/adapters",
+    f"{_MODEL}/data",
+    f"{_MODEL}/run.ts",
+    f"{_MODEL}/settings_pool.ts",
 )
 ENGINE_EXCLUDED = (
     f"{ENGINE}/view.ts",
-    f"{ENGINE}/PROVENANCE.md",
 )
 ENGINE_EXCLUDED_DIRS = (f"{ENGINE}/fixtures/",)
 

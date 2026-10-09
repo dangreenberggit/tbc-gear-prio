@@ -100,8 +100,8 @@ absorbs it silently.
 
 ## Source inventory
 
-- `vendor/wowsims/db.json` — 8257 items, sha256 `0ee6cc3abe86b50bd970e215985aed9fc747a8a7bde923337b1439c73bf0f563` per `data/wowsims.lock.json`
-- pinned from `assets/database/db.json` of upstream `wowsims/tbc-new` at `17a8fb28c5ad14b649acecdaacd488594048f467`, commit `17a8fb28c5ad14b649acecdaacd488594048f467`
+- `vendor/wowsims/db.json` — 8256 items, sha256 `6b708ebb19d9e45ea9554a69f8f0b3f9db4600c7c71ef65dd50b3db7655ada2a` per `data/wowsims.lock.json`
+- pinned from `assets/database/db.json` of upstream `wowsims/tbc-new` at `42c75dc9b6ef447202588250480a7d504182409a`, commit `42c75dc9b6ef447202588250480a7d504182409a`
 - `data/universes/feral-p3.json` — 364 entries
 - `data/sim-implemented-effects.json` — 451 stub-only item ids
 
@@ -121,10 +121,10 @@ python -c "import json;a=json.load(open('vendor/wowsims/db.json'))['items'];b=js
 ## Counts
 
 - local membership (U): 364
-- wowsims-primary membership (W): 1350
+- wowsims-primary membership (W): 1314
 - in both: 355
 - universe-only (U \ W): 9
-- wowsims-only (W \ U): 995
+- wowsims-only (W \ U): 959
 - phase-disagreements: 0
 - universe ids absent from the wowsims DB: 0
 - unexplained: 0
@@ -552,31 +552,11 @@ carry. Each row names the rule that explains the absence.
 | 21875 | Primal Mooncloth Robe | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 21888 | Gloves of the Immortal | 1 | e1 | drops only outside this phase's zones | — |
 | 21891 | Shard of the Fallen Star | 1 | c | stub-only sim effect | — |
-| 22003 | Darkmantle Boots | 1 | f | no recognized source route | — |
-| 22005 | Darkmantle Cap | 1 | f | no recognized source route | — |
-| 22009 | Darkmantle Tunic | 1 | f | no recognized source route | — |
-| 22064 | Sorcerer's Boots | 1 | f | no recognized source route | — |
-| 22065 | Sorcerer's Crown | 1 | f | no recognized source route | — |
-| 22069 | Sorcerer's Robes | 1 | f | no recognized source route | — |
-| 22074 | Deathmist Mask | 1 | f | no recognized source route | — |
-| 22075 | Deathmist Robe | 1 | f | no recognized source route | — |
-| 22076 | Deathmist Sandals | 1 | f | no recognized source route | — |
-| 22080 | Virtuous Crown | 1 | f | no recognized source route | — |
-| 22083 | Virtuous Robe | 1 | f | no recognized source route | — |
-| 22084 | Virtuous Sandals | 1 | f | no recognized source route | — |
 | 22107 | Feralheart Boots | 1 | f | no recognized source route | — |
 | 22109 | Feralheart Cowl | 1 | f | no recognized source route | — |
 | 22113 | Feralheart Vest | 1 | f | no recognized source route | — |
 | 22384 | Persuader | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 22399 | Idol of Health | 1 | c | stub-only sim effect | — |
-| 22476 | Bonescythe Breastplate | 1 | f | no recognized source route | — |
-| 22477 | Bonescythe Legplates | 1 | f | no recognized source route | — |
-| 22478 | Bonescythe Helmet | 1 | f | no recognized source route | — |
-| 22479 | Bonescythe Pauldrons | 1 | f | no recognized source route | — |
-| 22480 | Bonescythe Sabatons | 1 | f | no recognized source route | — |
-| 22481 | Bonescythe Gauntlets | 1 | f | no recognized source route | — |
-| 22482 | Bonescythe Waistguard | 1 | f | no recognized source route | — |
-| 22483 | Bonescythe Bracers | 1 | f | no recognized source route | — |
 | 22488 | Dreamwalker Tunic | 1 | f | no recognized source route | — |
 | 22489 | Dreamwalker Legguards | 1 | f | no recognized source route | — |
 | 22490 | Dreamwalker Headpiece | 1 | f | no recognized source route | — |
@@ -585,30 +565,6 @@ carry. Each row names the rule that explains the absence.
 | 22493 | Dreamwalker Handguards | 1 | f | no recognized source route | — |
 | 22494 | Dreamwalker Girdle | 1 | f | no recognized source route | — |
 | 22495 | Dreamwalker Wristguards | 1 | f | no recognized source route | — |
-| 22496 | Frostfire Robe | 1 | f | no recognized source route | — |
-| 22497 | Frostfire Leggings | 1 | f | no recognized source route | — |
-| 22498 | Frostfire Circlet | 1 | f | no recognized source route | — |
-| 22499 | Frostfire Shoulderpads | 1 | f | no recognized source route | — |
-| 22500 | Frostfire Sandals | 1 | f | no recognized source route | — |
-| 22501 | Frostfire Gloves | 1 | f | no recognized source route | — |
-| 22502 | Frostfire Belt | 1 | f | no recognized source route | — |
-| 22503 | Frostfire Bindings | 1 | f | no recognized source route | — |
-| 22504 | Plagueheart Robe | 1 | f | no recognized source route | — |
-| 22505 | Plagueheart Leggings | 1 | f | no recognized source route | — |
-| 22506 | Plagueheart Circlet | 1 | f | no recognized source route | — |
-| 22507 | Plagueheart Shoulderpads | 1 | f | no recognized source route | — |
-| 22508 | Plagueheart Sandals | 1 | f | no recognized source route | — |
-| 22509 | Plagueheart Gloves | 1 | f | no recognized source route | — |
-| 22510 | Plagueheart Belt | 1 | f | no recognized source route | — |
-| 22511 | Plagueheart Bindings | 1 | f | no recognized source route | — |
-| 22512 | Robe of Faith | 1 | f | no recognized source route | — |
-| 22513 | Leggings of Faith | 1 | f | no recognized source route | — |
-| 22514 | Circlet of Faith | 1 | f | no recognized source route | — |
-| 22515 | Shoulderpads of Faith | 1 | f | no recognized source route | — |
-| 22516 | Sandals of Faith | 1 | f | no recognized source route | — |
-| 22517 | Gloves of Faith | 1 | f | no recognized source route | — |
-| 22518 | Belt of Faith | 1 | f | no recognized source route | — |
-| 22519 | Bindings of Faith | 1 | f | no recognized source route | — |
 | 22652 | Glacial Vest | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 22654 | Glacial Gloves | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 22655 | Glacial Wrists | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
@@ -1096,6 +1052,7 @@ carry. Each row names the rule that explains the absence.
 | 33769 | Vengeful Gladiator's Wyrmhide Legguards | 3 | f | no recognized source route | — |
 | 33770 | Vengeful Gladiator's Wyrmhide Spaulders | 3 | f | no recognized source route | — |
 | 33771 | Vengeful Gladiator's Wyrmhide Tunic | 3 | f | no recognized source route | — |
+| 33832 | Battlemaster's Determination | 3 | f | no recognized source route | — |
 | 33841 | Vengeful Gladiator's Idol of Tenacity | 3 | c | stub-only sim effect | — |
 | 33853 | Vindicator's Band of Dominance | 3 | f | no recognized source route | — |
 | 33885 | Vindicator's Kodohide Belt | 3 | f | no recognized source route | — |
@@ -1122,19 +1079,19 @@ carry. Each row names the rule that explains the absence.
 | 33958 | The Horseman's Signet Ring | 1 | f | no recognized source route | — |
 | 33959 | Ring of Ghoulish Delight | 1 | f | no recognized source route | — |
 | 34033 | Vengeful Gladiator's Grimoire | 3 | f | no recognized source route | — |
+| 34049 | Battlemaster's Audacity | 3 | f | no recognized source route | — |
+| 34050 | Battlemaster's Perseverance | 3 | f | no recognized source route | — |
 | 34073 | The Horseman's Signet Ring | 1 | f | no recognized source route | — |
 | 34074 | Witches Band | 1 | f | no recognized source route | — |
 | 34075 | Ring of Ghoulish Delight | 1 | f | no recognized source route | — |
+| 34162 | Battlemaster's Depravity | 3 | f | no recognized source route | — |
+| 34163 | Battlemaster's Cruelty | 3 | f | no recognized source route | — |
 | 34540 | Vengeful Gladiator's Battle Staff | 3 | f | no recognized source route | — |
 | 34837 | The 2 Ring | 1 | f | no recognized source route | — |
 | 35317 | Vindicator's Pendant of Reprieve | 3 | f | no recognized source route | — |
 | 35319 | Vindicator's Pendant of Subjugation | 3 | f | no recognized source route | — |
 | 35320 | Vindicator's Band of Subjugation | 3 | f | no recognized source route | — |
-| 37597 | Direbrew's Shanker | 1 | f | no recognized source route | — |
-| 38287 | Empty Mug of Direbrew | 1 | f | no recognized source route | — |
-| 38288 | Direbrew Hops | 1 | f | no recognized source route | — |
-| 38289 | Coren's Lucky Coin | 1 | f | no recognized source route | — |
-| 38290 | Dark Iron Smoking Pipe | 1 | f | no recognized source route | — |
+| 35327 | Battlemaster's Alacrity | 3 | f | no recognized source route | — |
 | 278774 | Cloak of the Frigid Winds | 2 | f | no recognized source route | — |
 | 278819 | The Frost Lord's War Cloak | 2 | f | no recognized source route | — |
 | 278823 | Icebound Cloak | 2 | f | no recognized source route | — |
@@ -1144,6 +1101,13 @@ carry. Each row names the rule that explains the absence.
 | 278847 | Hailstone Pendant | 2 | f | no recognized source route | — |
 | 278953 | Frostscythe of Lord Ahune | 2 | f | no recognized source route | — |
 | 279240 | Shroud of Winter's Chill | 2 | f | no recognized source route | — |
+| 281735 | Dark Iron Smoking Pipe | 3 | f | no recognized source route | — |
+| 281739 | Empty Mug of Direbrew | 3 | f | no recognized source route | — |
+| 281743 | Coren's Lucky Coin | 3 | f | no recognized source route | — |
+| 281748 | Direbrew Hops | 3 | f | no recognized source route | — |
+| 281893 | Balebrew Charm | 3 | f | no recognized source route | — |
+| 281895 | Brightbrew Charm | 3 | f | no recognized source route | — |
+| 281903 | Direbrew's Shanker | 3 | f | no recognized source route | — |
 
 ### Category totals
 
@@ -1155,7 +1119,7 @@ carry. Each row names the rule that explains the absence.
 | c — stub-only sim effect | 67 |
 | e1 — drops only outside this phase's zones | 296 |
 | e2 — sourced, but by a route the local assembly did not admit | 97 |
-| f — no recognized source route | 535 |
+| f — no recognized source route | 499 |
 | g — unexplained | 0 |
 
 ## Universe-only items, classified

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Run the fork's per-ticket visual + a11y capture (test-review.mjs) on demand.
+"""Run the per-ticket visual + a11y capture (test-review.mjs) on demand.
 
 The layout gate (check_layout_gate.py) asserts fixed structural facts on every
-merge. This wrapper is different: it runs the fork's test-review.mjs against a
+merge. This wrapper is different: it runs test-review.mjs against a
 manifest the executor writes from a plan step's Visual acceptance block, so a
 `gate-visual` seat can judge the captured PNGs, facts and a11y against each
 ticket's acceptance sentence. It is invoked by hand inside stage-gate execution
 (`pnpm tab-review <manifest>`), never in CI and never by pnpm merge-to-dev.
 
 Reuses check_layout_gate's fork/dist/Chromium/Node-22 machinery rather than
-copying it: same FORK_ROOT, same _find_chromium, same _npm_command Node-22
+copying it: same FORK_ROOT, same _find_chromium, same _node_command Node-22
 selection, same TBC_A11Y_BASELINE wiring.
 
 Exit codes -- and why 2 is an error here, unlike the layout gate's skip:
@@ -42,11 +42,13 @@ from check_layout_gate import (  # noqa: E402
     DIST_WASM_CANDIDATES,
     FIXTURE_DIR,
     FORK_ROOT,
+    HARNESS_DIR,
+    ROOT,
     _find_chromium,
-    _npm_command,
+    _node_command,
 )
 
-REVIEW_TEST = FORK_ROOT / "test-review.mjs"
+REVIEW_TEST = HARNESS_DIR / "test-review.mjs"
 
 # The tagged verdict line test-review.mjs prints just before it exits, the
 # capture-side analogue of the layout gate's LAYOUT_GATE_VERDICT: outcome
@@ -88,8 +90,7 @@ def run(manifest: str, out: str | None) -> int:
         )
     if not REVIEW_TEST.is_file():
         return _error(
-            f"{REVIEW_TEST.relative_to(FORK_ROOT).as_posix()} is absent from the "
-            "fork -- the clone predates the review-capture script."
+            f"{REVIEW_TEST.relative_to(ROOT).as_posix()} is absent from this repo."
         )
     if not any(p.is_file() for p in DIST_WASM_CANDIDATES) or not DIST_ASSETS.is_dir():
         return _error(
@@ -103,8 +104,8 @@ def run(manifest: str, out: str | None) -> int:
             "Chromium and cannot run without one."
         )
 
-    cmd = _npm_command(
-        "test:review", ["--manifest", str(manifest_path), "--out", str(out_dir)]
+    cmd = _node_command(
+        REVIEW_TEST, ["--manifest", str(manifest_path), "--out", str(out_dir)]
     )
     if cmd is None:
         return _error(
@@ -121,13 +122,13 @@ def run(manifest: str, out: str | None) -> int:
     # Where a manifest entry's `"fixture": "<name>"` resolves (ticket 504).
     env["TBC_TAB_FIXTURE_DIR"] = str(FIXTURE_DIR)
 
-    print(f"tab-review: running `{' '.join(argv)}` in {FORK_ROOT} ({how})")
+    print(f"tab-review: running `{' '.join(argv)}` in {ROOT} ({how})")
     print("(builds the bundle, runs the manifest headless; ~2-3 min)")
     # Tee stdout so a long run shows progress while the verdict line is kept.
     stdout_lines: list[str] = []
     with subprocess.Popen(
         argv,
-        cwd=str(FORK_ROOT),
+        cwd=str(ROOT),
         env=env,
         stdout=subprocess.PIPE,
         text=True,

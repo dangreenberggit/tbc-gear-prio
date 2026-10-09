@@ -301,3 +301,15 @@ file contention, worker prompt. This file stays the chronological log.
 - 555 Chrome Energy Saver may freeze a hidden tab run after 5 min (Chrome 133+) (stage-gate 553-554 plan C19) 2026-10-05
 - 556 Silence check: a new request can extend a hung worker's limit, and five comments are wrong or unsourced (pre-merge review round 15, R15-A1, R15-A2, R15-D1 and others) 2026-10-05
 - 557 Silence-check limits are unmeasured for pet, totem and melee specs and on the desktop build (pre-merge review round 15, R15-D2, R15-D3, R15-P1) 2026-10-05
+- 567 Delete the dead bulk sim path from the Upgrades tab and its core tests (pre-merge review feat-upstream-react-port round 1, S8, A5) 2026-10-07
+- 568 Shrink the fork's edits to shared upstream files, and bring the ledger up to date (pre-merge review feat-upstream-react-port round 1, S1, S2, S6, S9, S12) 2026-10-07
+- 569 Upgrades tab: the Source cell lost the old tab's linked boss and zone (pre-merge review feat-upstream-react-port round 1, SP1) 2026-10-07
+- 570 The feral CLI skeleton's rotation differs from upstream's default APL at the engine pin (fix round B1 after the feat-upstream-react-port review, filed at the session's request) 2026-10-07
+- 571 Epic item names are below 4.5:1 contrast on the Upgrades tab (visual review of ticket 560 final round, F1) 2026-10-07
+- 573 The engine fixes are parked on a fork branch that is never merged (stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
+- 574 The worker silence check is deleted; bring it back later or never (stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
+- 575 Load the Upgrades tab's code and item data only when the tab is first opened (stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
+- 576 Candidate lists hold set pieces that belong to another class (stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
+- 577 Share the browser-driving helpers between the two tab harness scripts (pre-merge review feat-upstream-react-port round 1, S9, via ticket 568; stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
+- 578 100 of the tab's files fail wowsims' formatting check (stage-gate cleanup-upstream-footprint, Gate B row R4-1) 2026-10-08
+- 579 Can another class obtain a Dungeon Set 2 piece? (pre-merge review feat-upstream-react-port round 2, D4) 2026-10-08

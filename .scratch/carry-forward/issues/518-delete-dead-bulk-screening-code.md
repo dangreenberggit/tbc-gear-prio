@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner decision, 2026-09-25 (follow-up named by tickets 406 and 411)
 Blocks: none
@@ -47,3 +47,31 @@ not assume they still apply.
 
 feat/tab-signoff-followups merging to dev. The bulk code is in the same
 fork as that held work, so deleting it first would tangle the two.
+
+## Closing note (2026-10-07, branch `feat/upstream-react-port`)
+
+Done by ticket 567 (`.scratch/carry-forward/issues/567-delete-the-dead-bulk-sim-path.md`)
+on this branch line. The React port moved the tab from
+`ui/core/components/individual_sim_ui/upgrades/` to
+`ui/features/upgrades/model/`, and every part of the scope above is gone:
+
+- The four adapters, including the bulk part of `bulk_wasm_sim_runner.ts`:
+  deleted in fork `02cca7b70`.
+- `engine/bulk/partition.ts`: deleted in fork `095e0afa2`.
+- The bulk tools (`bulk-spike.mts`): not carried over to
+  `ui/features/upgrades/tools/` (that folder's `README.md:13`).
+- The core `bulk-*` suites: port `c17aa49b` deleted `bulk-boundary.test.ts`
+  and `bulk-screen-driver.test.ts`; port `fca228bc` deleted the other four
+  and renamed their helper to `packages/core/test/feral-rank-fixture.ts`,
+  which `fork-worker-silence.test.ts` still imports.
+- `upgrades_tab.tsx` does not exist in the React port, and
+  `git -C vendor/tbc-new-fork grep -n "BulkHttpSimRunner\|makeSimRunner" HEAD -- ui`
+  prints nothing.
+
+Checked at fork `b2851da58` on 2026-10-07: none of the old-tab paths this
+ticket names exists (`git -C vendor/tbc-new-fork cat-file -e HEAD:<path>`
+fails for each of the four adapters, `engine/bulk/partition.ts`,
+`upgrades_tab.tsx` and the whole `upgrades/` folder under
+`ui/core/components/individual_sim_ui/`), and
+`git -C vendor/tbc-new-fork ls-tree -r --name-only HEAD -- ui/features/upgrades | grep -i bulk`
+prints nothing. `git ls-files 'packages/core/test/bulk-*'` prints nothing.

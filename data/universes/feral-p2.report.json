@@ -14,8 +14,8 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 3028,
-  "excludedNoSource": 1296,
+  "d7EligibleTotal": 2967,
+  "excludedNoSource": 1236,
   "universeTotal": 227,
   "listOnlyMembership": 24,
   "perSlot": {
@@ -177,9 +177,9 @@
       },
       {
         "itemId": 38287,
-        "name": "Empty Mug of Direbrew",
-        "slot": "trinket",
-        "d7Eligible": true
+        "name": null,
+        "slot": null,
+        "d7Eligible": false
       }
     ]
   },

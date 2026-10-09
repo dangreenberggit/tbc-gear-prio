@@ -25,6 +25,8 @@
         "node",
         "node_modules/vite/bin/vite.js",
         "serve",
+        "--config",
+        "../../scripts/tab-harness/vite.config.mjs",
         "--port",
         "5173",
         "--strictPort"

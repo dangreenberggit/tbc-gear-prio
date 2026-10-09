@@ -6,13 +6,13 @@ it ranks from JSON bundled into its own dist (`upgrades/data/data.ts` static
 imports). Those bundled files are verbatim copies of artifacts this repo owns
 under `data/`, and nothing regenerates them, so they go stale the moment a
 universe is reassembled and nothing notices. That already happened: the
-2026-08-16 refresh recorded in the fork's `upgrades/data/PROVENANCE.md` fixed
+2026-08-16 refresh recorded in `docs/fork-provenance/data.md` fixed
 the data but not the mechanism, and ticket 211 was left open for the
 mechanism. This script is that mechanism.
 
 The file list is not written out here a second time: it is parsed from the
-mapping table in the fork's own `upgrades/data/PROVENANCE.md`, so a copy
-added to the tab without a PROVENANCE row shows up as an unchecked file
+mapping table in `docs/fork-provenance/data.md`, so a copy
+added to the tab without a data.md row shows up as an unchecked file
 rather than being silently skipped by a hardcoded list that nobody updated.
 
 Comparison is byte-for-byte, not `json.load` equality. The copies are
@@ -26,7 +26,9 @@ different bytes.
 Skips cleanly (exit 0, with a message) when `vendor/tbc-new-fork` is absent.
 The clone is gitignored and is NOT restored in CI, so absence is an ordinary
 state -- the same reasoning, and the same exit-0-with-a-message shape, as
-`scripts/check_engine_port_drift.py`.
+`scripts/check_engine_port_drift.py`. The record,
+`docs/fork-provenance/data.md`, is tracked in this repo, so a missing record
+is always an error (exit 2).
 
 Run via `pnpm verify` (`pnpm fork-universes:check`); refresh with
 `python scripts/sync_fork_universes.py --write`.
@@ -45,10 +47,12 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
-DATA_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades/data"
-PROVENANCE_MD = DATA_DIR / "PROVENANCE.md"
+DATA_DIR = FORK_ROOT / "ui/features/upgrades/model/data"
+# The record lives in this repo, not the fork (moved out of the fork's
+# model/data/ folder so the fork carries no tooling of ours).
+PROVENANCE_MD = ROOT / "docs/fork-provenance/data.md"
 
-# One row per copied file in PROVENANCE.md's mapping table, e.g.
+# One row per copied file in data.md's mapping table, e.g.
 # | `ret-p3.universe.json` | `data/universes/ret-p3.json` |
 ROW = re.compile(
     r"^\|\s*`([\w.-]+\.json)`\s*\|\s*`(data/[\w./-]+\.json)`\s*\|\s*$",
@@ -125,11 +129,12 @@ def main() -> int:
         return 0
     if not PROVENANCE_MD.is_file():
         print(
-            f"fork universes check: skipped -- {PROVENANCE_MD.relative_to(ROOT)} "
-            "does not exist. The fork clone is present but the tab's data "
-            "directory has not been written here yet."
+            f"fork universes check: {PROVENANCE_MD.relative_to(ROOT)} does not "
+            "exist. It is a tracked file in this repo, so it should never be "
+            "missing.",
+            file=sys.stderr,
         )
-        return 0
+        return 2
 
     mapping = parse_provenance(PROVENANCE_MD.read_text(encoding="utf-8"))
 
@@ -146,10 +151,10 @@ def main() -> int:
         for line in absent:
             print(f"  missing source: {line}", file=sys.stderr)
         print(
-            f"\n{len(absent)} of {len(mapping)} sources named by PROVENANCE.md "
+            f"\n{len(absent)} of {len(mapping)} sources named by data.md "
             "do not exist in this repo. Nothing was written -- refusing a "
             "partial refresh. Restore the missing sources, or fix the "
-            "PROVENANCE.md table if a file was renamed.",
+            "data.md table if a file was renamed.",
             file=sys.stderr,
         )
         return 1
@@ -176,7 +181,7 @@ def main() -> int:
                 (
                     copy_name,
                     source_rel,
-                    "the fork copy PROVENANCE.md names is not on disk",
+                    "the fork copy data.md names is not on disk",
                 )
             )
         else:
@@ -187,7 +192,7 @@ def main() -> int:
             print(f"  wrote: {line}")
         print(
             f"fork universes: {len(written)} refreshed, {len(same)} already "
-            f"matching, {len(mapping)} listed in PROVENANCE.md"
+            f"matching, {len(mapping)} listed in data.md"
         )
         return 0
 
@@ -200,7 +205,7 @@ def main() -> int:
 
     for line in missing_source:
         print(
-            f"  missing source: {line} (PROVENANCE.md names a file this repo "
+            f"  missing source: {line} (data.md names a file this repo "
             "does not have)",
             file=sys.stderr,
         )
@@ -213,8 +218,8 @@ def main() -> int:
         "\n"
         "    python scripts/sync_fork_universes.py --write\n"
         "\n"
-        "then record the refresh and its cause in the fork's "
-        "upgrades/data/PROVENANCE.md before committing the fork.",
+        "then record the refresh and its cause in "
+        "docs/fork-provenance/data.md before committing the fork.",
         file=sys.stderr,
     )
     return 1

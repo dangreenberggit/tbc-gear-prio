@@ -1,4 +1,6 @@
-// Open every recorded fixture's ?upgrades-fixture link on :5173 (ticket 520).
+// Open every recorded fixture's ?upgrades-fixture link on the fork dev server
+// (ticket 520). TBC_FORK_PORT picks the port (default 5173), so a second
+// checkout's fork can serve on its own port (ticket 558).
 import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -7,9 +9,12 @@ const ROOT = path.resolve(fileURLToPath(import.meta.url), "../../..");
 const FORK = path.join(ROOT, "vendor/tbc-new-fork");
 const FIXDIR = path.join(ROOT, "data/tab-fixtures");
 const OUT = path.join(ROOT, ".scratch/tab-fixtures-smoke");
-const BASE = "http://localhost:5173";
-const PROBE = `[document.documentElement.dataset.upgradesFixture, document.querySelectorAll('.upgrades-results-table tbody tr').length, document.querySelector('#upgrades-fixture-error')?.textContent]`;
-const H = await import(pathToFileURL(path.join(FORK, "test-tab-harness.mjs")));
+const PORT = process.env.TBC_FORK_PORT ?? "5173";
+const BASE = `http://localhost:${PORT}`;
+const PROBE = `[document.documentElement.dataset.upgradesFixture, document.querySelectorAll('[data-testid="upgrades-results-table"] tbody tr').length, document.querySelector('#upgrades-fixture-error')?.textContent]`;
+const H = await import(
+  pathToFileURL(path.join(ROOT, "scripts/tab-harness/test-tab-harness.mjs"))
+);
 const t0 = Date.now();
 const secs = (t) => ((Date.now() - t) / 1000).toFixed(1);
 const fail = (msg) => (console.log(`FAIL ${msg}`), process.exit(1));
@@ -20,14 +25,18 @@ const until = async (fn, ms, t = Date.now()) => {
 const up = () => fetch(`${BASE}/tbc/`).catch(() => null);
 let vite = null;
 if (!(await up())) {
-  const args = "node_modules/vite/bin/vite.js serve --port 5173 --strictPort";
+  // Our config wraps upstream's and adds the fixture plugin; cwd stays the
+  // fork because upstream's config resolves some paths against it.
+  const config = path.join(ROOT, "scripts/tab-harness/vite.config.mjs");
+  const args = ["node_modules/vite/bin/vite.js", "serve", "--config", config];
+  args.push("--port", PORT, "--strictPort");
   const opts = { cwd: FORK, stdio: "ignore" };
-  vite = spawn(process.execPath, args.split(" "), opts);
+  vite = spawn(process.execPath, args, opts);
   const kill = ["/PID", String(vite.pid), "/T", "/F"];
   process.on("exit", () =>
     process.platform === "win32" ? spawnSync("taskkill", kill) : vite.kill()
   );
-  if (!(await until(up, 60000))) fail("dev server: did not start on :5173");
+  if (!(await until(up, 60000))) fail(`dev server: did not start on :${PORT}`);
 }
 console.log(`dev server ${vite ? "started" : "reused"} in ${secs(t0)}s`);
 if (!(await fetch(`${BASE}/tbc/tab-fixtures/`)).ok)
