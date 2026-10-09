@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-565-upstream-sync-tanstack.md
 Blocks: none
@@ -42,3 +42,21 @@ theme files); `grep -n tanstack vendor/tbc-new-fork/package.json`.
   `LAYOUT_FILES`.
 - `testedTabHash` moves only through a green measured run, never
   `--update-baseline`.
+
+## Closing note (2026-10-09, stage 565-upstream-sync-tanstack, chunk RW2)
+
+`LAYOUT_FILES` in `scripts/check_layout_gate.py` now names the fork's
+`package.json`, `package-lock.json` and `ui/styles/theme/index.css`. The whole
+package files are hashed, not only the TanStack and Tailwind entries: any
+dependency bump then costs one measured run, the safe direction, and no parser
+of the lock file's format is needed. The comment above `LAYOUT_FILES` says so,
+and the "NOT covered: Tailwind" line is gone. The lock `_comment` that
+`write_baseline` writes lists the fork package files, all nine theme files and
+`rows.mjs` (review finding S4).
+
+`pnpm layout-gate:check` ran measured: pass, 0 failed, 0 axe failures, 36
+PASS lines, A1 rows 338 / measuredRows 330 (as at RW1), at fork `28ea7a36a`;
+`testedTabHash` moved `39cec6a5...` -> `c0578b4a...`, written by the gate
+(no `--update-baseline`). Log:
+`.scratch/stage-gate/565-upstream-sync-tanstack/parts/P2/rw2-layout-gate.log`
+(gitignored).
