@@ -106,7 +106,8 @@ before the `se.ts` and `rank.ts` hashes moved.
 Upstream deleted `ui/core` in its React rewrite, so the engine moved from
 `ui/core/components/individual_sim_ui/upgrades/engine/` (fork branch
 `feat/upgrades-tab` at `cb561067`) to this folder on `feat/upgrades-tab-react`,
-branched from upstream `42c75dc9`. Only import lines changed: relative imports
+branched from upstream `42c75dc9` (upstream `5262ff38` merged in on 2026-10-09;
+its two commits touch no engine file). Only import lines changed: relative imports
 lost their `.js` extension (upstream's `import/extensions` lint rule), and
 imports of upstream modules became alias paths (`@generated/proto/common`,
 `@sim/proto/database`, `@sim/proto/gems`, `@sim/proto/items`). The 28 rows whose
