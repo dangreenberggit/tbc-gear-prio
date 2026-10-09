@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-565-upstream-sync-tanstack.md
 Blocks: none
@@ -34,3 +34,21 @@ row's `data-item-id` is `100000 + Number(data-index)` (the test's rows set
 `itemId: 100_000 + index`), the assertion fails when `ResultRows` renders
 `rows[index + 1]` (a mutation run, recorded in the commit body), and the fork
 is re-pinned.
+
+## Closing note (2026-10-09, stage 565-upstream-sync-tanstack, chunk RW3)
+
+Fork `59c43ddb7` ("Check each virtual row shows its own ranked row"), pinned
+by this commit's `data/wowsims-fork.lock.json`. Both cases of
+`ResultRows.virtual.test.tsx` now compare each rendered row's
+`[data-index, data-item-id]` with `[i, ROWS[i].itemId]` (`100000 + i`), the
+second case after the scroll. A mutation run, not committed, made
+`ResultRows` render `rows[index + 1]` under `data-index={index}`: both cases
+failed on the new assertion, and the test at `28ea7a36a` passed the same
+mutation. Log:
+`.scratch/stage-gate/565-upstream-sync-tanstack/parts/P2/rw3-mutations.log`
+(gitignored). To re-run, change `const row = rows[index];` in
+`components/ResultsTable/ResultsTable.tsx` to
+`const row = rows[index + 1] ?? rows[index];` and run
+`npx vitest run ui/features/upgrades/components/ResultsTable/ResultRows.virtual.test.tsx`
+from the fork. Fork tab tests `npx vitest run upgrades`: 55 files, 414 tests,
+rc 0.
