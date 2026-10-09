@@ -541,9 +541,11 @@ pnpm fork-universes:check
 `scripts/assemble_universe.py` now drops a piece of a set listed in
 `data/class-restricted-sets.json` from every other class's universe. That
 table holds the nine Naxxramas Tier 3 sets (setIds 521 and 523-530), each
-with the one class Wowhead tags it with. The fork's `canEquipItem` had let
-them into other classes' pools. Dungeon Set 2 (511-519) is not listed:
-Wowhead tags it with an armor type and no class.
+with the one class Wowhead tags it with: the "Class:" line on the set's
+tooltip, since the pieces' own tooltips have no class line. The fork's
+`canEquipItem` had let them into other classes' pools. Dungeon Set 2
+(511-519) is not listed: Wowhead tags it with an armor type and no class.
+Whether another class can obtain those pieces is ticket 579.
 
 `python scripts/sync_fork_universes.py --write` reported **36 refreshed, 27
 already matching, 63 listed here**: the p2-p5 universes of balance, ele, enh,

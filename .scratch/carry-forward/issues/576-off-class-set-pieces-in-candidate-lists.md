@@ -69,12 +69,14 @@ passes after the re-pin, and this ticket records the measured counts.
 - **C20's count was wrong; the measured one is used.** Under the plan's table
   the count reproduces (1,724 rows in 36 of 44 lists). But Wowhead, the source
   the plan names, tags only the Naxxramas Tier 3 sets with a class. It tags
-  Dungeon Set 2 (511-519) with an armor type and no class, so any class that
-  wears that armor can equip those pieces
+  Dungeon Set 2 (511-519) with an armor type and no class
   (`https://nether.wowhead.com/tbc/tooltip/item-set/530` shows "Class:
-  Hunter"; `.../512` shows no class). By the owner's rule (gear the class
-  cannot equip), the session ruled at 2026-10-08T23:36Z to exclude Tier 3
-  only. Measured: **1,280 rows in 36 of 44 lists**, the same at p2-p5:
+  Hunter"; `.../512` shows no class). The tag is on the set only: the
+  pieces' own tooltips have no class line (`.../item/22436`). By the owner's
+  rule (another class's gear is "impossible" in a candidate list), the
+  session ruled at 2026-10-08T23:36Z to exclude Tier 3 only. Whether another
+  class can obtain a Dungeon Set 2 piece is ticket 579 (wording corrected by
+  review finding D4, `docs/reviews/feat-upstream-react-port.md`). Measured: **1,280 rows in 36 of 44 lists**, the same at p2-p5:
   warrior 64, hunter 48, ele 48, enh 48, balance 32, rogue 32, mage 16,
   shadow 16, warlock 16; ret and feral 0. The 444 Dungeon Set 2 rows stay.
 - **Fix.** `data/class-restricted-sets.json` lists the nine Tier 3 sets (521,

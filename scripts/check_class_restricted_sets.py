@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""Fail if a universe offers a class a set piece only another class can equip.
+"""Fail if a universe holds a piece of a set Wowhead tags with another class.
 
 `data/class-restricted-sets.json` lists the item sets Wowhead tags with one
-class. The fork's `canEquipItem` admitted their pieces to other classes' pools
-(the Cryptstalker pieces carry no `classAllowlist` in wowsims' db.json), so
-`data/equip-eligibility.json` alone does not keep them out;
+class (the "Class:" line on the set's tooltip; the pieces' own tooltips have
+no class line). The fork's `canEquipItem` admitted their pieces to other
+classes' pools (the Cryptstalker pieces carry no `classAllowlist` in wowsims'
+db.json), so `data/equip-eligibility.json` alone does not keep them out;
 `assemble_universe.py`'s `eligible_d7` does, and this is the check that it
 still does. The cause of the leak was not investigated, by the owner's
 instruction.
+
+The table is hand-written, so this also holds it to upstream's own data: in
+`vendor/wowsims/db.json` each listed set's ring is the one piece with a
+`classAllowlist`, and that list must be exactly the row's `classId`.
 
 Universe entries do not record a `setId`, so the item -> set join reads
 `vendor/wowsims/db.json`. That file is gitignored: when it is absent this
@@ -15,8 +20,8 @@ skips cleanly (exit 0, saying why), like the other vendor-gated checks.
 
 Run via `pnpm verify` (`pnpm class-restricted-sets:check`).
 
-Exit 0 ok (including "nothing to check"), 1 a leak or a malformed table,
-2 could not run.
+Exit 0 ok (including "nothing to check"), 1 a leak, a malformed table or a
+row db.json disagrees with, 2 could not run.
 """
 
 from __future__ import annotations
@@ -72,6 +77,30 @@ def load_table(path: Path) -> tuple[dict[int, int], list[str]]:
     return out, problems
 
 
+RING_TYPE = 11  # ItemType finger; see A.ITEM_TYPE_SLOT
+
+
+def allowlist_mismatches(set_class: dict[int, int], items: list[dict]) -> list[str]:
+    """Each listed set whose ring's classAllowlist is not exactly [classId]."""
+    problems: list[str] = []
+    for set_id, class_id in sorted(set_class.items()):
+        rings = [
+            it
+            for it in items
+            if it.get("setId") == set_id and it.get("type") == RING_TYPE
+        ]
+        if len(rings) != 1:
+            problems.append(f"set {set_id}: {len(rings)} rings in db.json, expected 1")
+            continue
+        allow = rings[0].get("classAllowlist")
+        if allow != [class_id]:
+            problems.append(
+                f"set {set_id}: classId {class_id}, but ring {rings[0]['id']} "
+                f"has classAllowlist {allow!r} in db.json"
+            )
+    return problems
+
+
 def find_leaks(
     set_class: dict[int, int], item_set: dict[int, int], universes: Path
 ) -> tuple[int, Counter[str]]:
@@ -106,6 +135,11 @@ def main() -> int:
     except (OSError, ValueError) as exc:
         print(f"class-restricted sets: could not read {A.DB}: {exc}")
         return 2
+    mismatches = allowlist_mismatches(set_class, db["items"])
+    if mismatches:
+        for p in mismatches:
+            print(f"class-restricted sets: {p}")
+        return 1
     item_set = {
         int(it["id"]): int(it["setId"]) for it in db["items"] if it.get("setId")
     }
@@ -124,8 +158,8 @@ def main() -> int:
             print(f"  {name}: {per_list[name]}")
         return 1
     print(
-        f"class-restricted sets: ok ({len(set_class)} sets, {lists} universes, "
-        f"0 off-class entries)"
+        f"class-restricted sets: ok ({len(set_class)} sets, each matching its "
+        f"ring's classAllowlist; {lists} universes, 0 off-class entries)"
     )
     return 0
 
