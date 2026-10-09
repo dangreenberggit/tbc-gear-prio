@@ -1,8 +1,8 @@
-Status: blocked
+Status: closed
 Type: task
 Origin: docs/reviews/feat-565-upstream-sync-tanstack.md
 Blocks: none
-Blocked by: owner ruling Q-565-sort-across-runs
+Blocked by: none
 Related: 565
 
 # A column sort on the Upgrades tab now survives a new run
@@ -41,3 +41,23 @@ path plus one test, then a fork re-pin).
 
 The owner has ruled. If the ruling is "reset", a fork test fails when the
 sort is not cleared at the start of a run, and the fork is re-pinned.
+
+## Closing note (2026-10-09, stage 565-upstream-sync-tanstack, chunk RW2)
+
+Orchestrator ruling: restore pre-branch behaviour; owner informed and may
+overrule (decision-log row 2026-10-09T19:11Z, ticket 582). The branch is a
+library migration, so the behaviour before it stands.
+
+Fork `28ea7a36a` clears the stored sort when a run starts: `dispatchRun` in
+`model/upgrades_store.ts` writes `sort: []` with the `started` run state, in
+one notification, and on no other action. A fixture load keeps the sort, as
+before the branch (`fixtureLoaded` went from done to done, so `ResultsPanes`
+stayed mounted). Tests in `model/upgrades_store.test.ts`: "opens a new run in
+the engine order, whatever the last result was sorted by" (failed before the
+fix) and "keeps the sort when a recorded ranking loads, since no run started"
+(fails when the reset runs on every action but `landed`).
+
+One difference remains, found by the RW2 React review (RW2-R4): before the
+branch a view toggle that left no rows also unmounted `ResultsPanes`
+(`UpgradesResults.tsx:51,57` at `1b28ad005`) and so reset the sort; the stored
+sort now survives that case. No change made.
