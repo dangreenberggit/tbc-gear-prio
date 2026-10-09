@@ -312,3 +312,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 576 Candidate lists hold set pieces that belong to another class (stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
 - 577 Share the browser-driving helpers between the two tab harness scripts (pre-merge review feat-upstream-react-port round 1, S9, via ticket 568; stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
 - 578 100 of the tab's files fail wowsims' formatting check (stage-gate cleanup-upstream-footprint, Gate B row R4-1) 2026-10-08
+- 579 Can another class obtain a Dungeon Set 2 piece? (pre-merge review feat-upstream-react-port round 2, D4) 2026-10-08

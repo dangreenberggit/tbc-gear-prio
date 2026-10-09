@@ -43,6 +43,10 @@ Also check `SimSignalManager.abortType`. It awaits each trigger while it iterate
 
 ## Also: terminate leaves in-flight sims unsettled (pre-merge review A4)
 
+**Superseded (pre-merge review round 2, A10).** Fork `9e4115c22` removed `terminate()` from `worker_pool.ts`, so the problem below no longer exists in that form. At fork `d983e0fb`, `dispose()` only aborts (`ui/features/upgrades/model/run_session.ts:119-121`) and the workers live for the page's life, so the aborted run finishes its step in flight and settles the store under its own `runId` (`:84-95`; the remounted session reads that `runId` at `:71-72`). The store no longer stays `running`. One small effect remains: after a remount mid-run, the new session's `controller` is null, so Stop does nothing until the aborted run finishes (`:99-101`). Panes stay mounted, so only a StrictMode remount in development reaches this (hypothesis, untested). A Stop that really aborts in-flight sims (this ticket) should also give a remounted session a way to stop the run it inherits.
+
+The original text, kept for the record:
+
 From `docs/reviews/feat-upstream-react-port.md`, round 1, A4. At fork `43e3963d`, `WorkerPool.terminate()` (`ui/sim/workers/worker_pool.ts`, a shared upstream file) ends the workers without rejecting the requests still waiting on them. `RunSession.dispose()` (`ui/features/upgrades/model/run_session.ts:119-123`) aborts, then terminates, so a sim in flight never settles and the store stays `running`. A remounted session reads that `runId` (`:72-73`) with a null `controller`, so `stop()` (`:100-101`) does nothing and the dialog's Stop button is dead. How a user reaches this is a hypothesis, untested: `SimTabs.tsx` mounts every pane with `keepMounted`, so a tab switch never unmounts the Upgrades tab. A real abort (this ticket) should settle every pending request on terminate, preferably in the fork's adapter rather than in the shared `worker_pool.ts` (owner: "keep a clean footprint in wowsims shared files").
 
 ## Done when

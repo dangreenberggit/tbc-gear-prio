@@ -1,4 +1,4 @@
-Status: wontfix
+Status: open
 Type: task
 Origin: docs/reviews/feat-upstream-react-port.md (fix round B1; not a review finding, filed at the session's request)
 Blocks: none
@@ -100,3 +100,11 @@ re-recorded with the old and new values written here.
 > 2026-10-07T07:55Z | ef13ce60-a835-4a9f-b024-892080124bda | row Q-570-feral-skeleton-apl | wontfix (session ruling) | the feral CLI skeleton is the owner's own export by design (build_feral_skeleton.py docstring; tickets 244, 250; check_raid_sim_skeleton.py gates it against that export); ret follows upstream and is current; CLI-only (ADR-0031); the owner said tuning rotations is not the job; the later agent closes 570 with this ruling | evidence: B1 report § Ticket 570
 
 The owner's words the ruling rests on, as quoted in `docs/reviews/feat-upstream-react-port.md`: "I'm just making sure this upgrades tab gets made. Our job is not to make a good player rotation. Stay on target". If the owner wants feral to follow upstream's default APL, option 2 above is the work.
+
+## Reopened (2026-10-08, pre-merge review round 2, SP5)
+
+The owner overruled the closing note's session ruling on 2026-10-08T15:31Z (`C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate/558-p3-settings-gates/decision-log.md:206`, gitignored, owner's checkout):
+
+> "\"Q-570-feral-skeleton-apl. The command-line harness keeps your own exported feral rotation, which is its documented design.\" this doesnt make any sense. i see no reason for this to exist as part of the upgrades tab code, it is a huge smell. our job is making an upgrades tab, not making a feral rotation (perhaps it existed somewhere for testing or in tbc gear prio as some default setting)"
+
+So the `wontfix` above no longer stands and the done line ("The owner has picked 1 or 2") is not met. The work is planned in `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate/570-feral-upstream-apl/` (`plan.md`, `investigation.md`, `decision-log.md`; gitignored, owner's checkout): build the command-line feral skeleton from wowsims' own default rotation and presets and delete the project's exported rotation. That plan is held until `feat/upstream-react-port` merges (`.scratch/handoffs/cleanup-upstream-footprint-HANDOFF.md`, "Ticket 570: the feral rotation", owner's checkout).
