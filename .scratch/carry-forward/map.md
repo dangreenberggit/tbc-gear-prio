@@ -314,3 +314,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 578 100 of the tab's files fail wowsims' formatting check (stage-gate cleanup-upstream-footprint, Gate B row R4-1) 2026-10-08
 - 579 Can another class obtain a Dungeon Set 2 piece? (pre-merge review feat-upstream-react-port round 2, D4) 2026-10-08
 - 580 The layout gate's digest does not cover z-index.css or rows.mjs (stage-gate 565-upstream-sync-tanstack, decision-log finding 2026-10-09T04:41Z) 2026-10-09
+- 581 The layout gate digest misses the fork package pins and theme/index.css (pre-merge review feat-565-upstream-sync-tanstack, A4 and S5) 2026-10-09
+- 582 A column sort on the Upgrades tab now survives a new run; owner ruling Q-565-sort-across-runs (pre-merge review feat-565-upstream-sync-tanstack, A2) 2026-10-09

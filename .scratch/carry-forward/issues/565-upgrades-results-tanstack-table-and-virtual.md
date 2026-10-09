@@ -43,3 +43,34 @@ Fork: `C:/Users/dgree/Code/lulz/tbc-gear-prio/vendor/tbc-new-fork`, branch `feat
 ## Closing note (2026-10-09, stage 565-upstream-sync-tanstack)
 
 Closed by the fork re-pin to `8c6a33f43` in `data/wowsims-fork.lock.json` (main commit "Pin the fork at 8c6a33f43 and close 565"). React reviews of both fork commits: `parts/P2/react-review-K3.md` (1 material + 2 minor, all fixed) and `parts/P2/react-review-K4.md` (1 material + 4 minor, 4 fixed, one kept with a reason), gitignored. Nothing is pushed: the fork lock's `pushed` stays false.
+
+## Addendum (2026-10-09, pre-merge review of feat/565-upstream-sync-tanstack)
+
+The closing note above names the fork pin before the last fork commit. The
+branch tip pins fork `eb0010112` "Fix the zustand and TanStack review
+findings" (main `5e61fe15`), which fixes the owner-requested library reviews
+(`parts/P2/review-zustand.md`, `parts/P2/review-tanstack-table.md`) and has
+its own React review ledger, `parts/P2/react-review-RW1.md` (0 blocking,
+0 material, 5 minor, all fixed); all gitignored. Corrections to the
+"Done when" lines:
+
+- The old `results_sort.test.ts` cases: one, "leaves its input alone", was
+  dropped in `eb0010112` (review finding T-7); TanStack copies its input
+  before sorting. `model/results_sort.test.ts` was deleted in `707456ecb`,
+  `model/results_sort.ts` in `8c6a33f43`.
+- Tab tests at `eb0010112`: 54 files, 410 tests, rc 0
+  (`node node_modules/vitest/vitest.mjs run upgrades`, `parts/P2/rw1-tab-tests.log`).
+- `eb0010112` sets `useFlushSync: false` on the row virtualiser. Measured in
+  headless Chrome on `ret-p3-p2` with
+  `parts/P2/rw1-measure-virtual.mjs` (results in
+  `parts/P2/rw1-virtual-measurements.md`): scrolling up no longer moves the
+  rows by 178-262 px (now about 1 px), and React's flushSync warning is gone;
+  the cost is that the first frame after a scroll can show 19-27 px of empty
+  spacer on a half-screen step, or the whole view after a jump, filled by the
+  next frame.
+- The live Stop check (`stop-565.log`) ran at `8c6a33f43`, before
+  `eb0010112` changed `ProvisionalResultsTable`; the pre-merge review asks
+  for a re-run at the tip.
+- The layout gate's `testedTabHash` is now `39cec6a50906...` (main
+  `6f9b2bf8`, ticket 580).
+- The sort now lives for the page's lifetime instead of one run: ticket 582.
