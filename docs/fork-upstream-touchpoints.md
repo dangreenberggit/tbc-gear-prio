@@ -31,45 +31,49 @@ next upstream merge and before opening any PR.
 
 All commands run from the main repo root against the fork clone at
 `vendor/tbc-new-fork` (gitignored; its own `.git`, branch
-`feat/upgrades-tab-react`). The fork commit is `9c367c242`, the commit
+`feat/upgrades-tab-react`). The fork commit is `1b28ad005`, the commit
 `data/wowsims-fork.lock.json` pins. Its upstream base is `42c75dc9`, the
 upstream commit `data/wowsims.lock.json` pins.
 
 ```
 # 42c75dc9 is an ancestor of the fork commit, and no merge sits between them,
-# so this diff holds only our changes (94 commits, measured 2026-10-08)
-git -C vendor/tbc-new-fork merge-base 42c75dc9 9c367c242   # -> 42c75dc9b6ef...
-git -C vendor/tbc-new-fork log --merges --oneline 42c75dc9..9c367c242   # prints nothing
+# so this diff holds only our changes (104 commits, measured 2026-10-09)
+git -C vendor/tbc-new-fork merge-base 42c75dc9 1b28ad005   # -> 42c75dc9b6ef...
+git -C vendor/tbc-new-fork log --merges --oneline 42c75dc9..1b28ad005   # prints nothing
 
 # the modified upstream files (1) and their line counts
-git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 42c75dc9 9c367c242 | wc -l
-git -C vendor/tbc-new-fork diff --numstat --diff-filter=M 42c75dc9 9c367c242
+git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 42c75dc9 1b28ad005 | wc -l
+git -C vendor/tbc-new-fork diff --numstat --diff-filter=M 42c75dc9 1b28ad005
 
-# the whole changed-file set by status: 241 A, 1 M, nothing else
-git -C vendor/tbc-new-fork diff --name-status 42c75dc9 9c367c242 | cut -f1 | sort | uniq -c
+# the whole changed-file set by status: 246 A, 1 M, nothing else
+git -C vendor/tbc-new-fork diff --name-status 42c75dc9 1b28ad005 | cut -f1 | sort | uniq -c
 ```
 
 ### How the count moved
 
-| Fork commit (base)                | Modified upstream files | Note                                                                                                                         |
-| --------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `bbad1b8a4` (base `ec5c5f2`)      | 13                      | An older version of this ledger, under the old `ui/core/...` paths.                                                          |
-| `cb561067` (base `17a8fb28`)      | 34                      | The old tab's last pin; this ledger was not refreshed for it.                                                                |
-| `43e3963d6` (base `42c75dc9`)     | 19                      | The React port before the pre-merge review's fix round.                                                                      |
-| `d52c8e91e` (base `42c75dc9`)     | 18                      | `sim/core/gem_test.go` back to upstream's text (fork `8937108b0`). The previous version of this ledger.                      |
-| `b2851da58` (base `42c75dc9`)     | 18                      | The pin before the cleanup.                                                                                                  |
-| `205975607` (base `42c75dc9`)     | 7                       | The 11 Go engine files back to upstream's text; the fixes parked (see "Parked").                                             |
-| `9e4115c22` (base `42c75dc9`)     | 6                       | `ui/sim/workers/worker_pool.ts` back to upstream's text; the silence check deleted (see "Deleted").                          |
-| `2c88a1192` (base `42c75dc9`)     | 4                       | The tab's strings moved to their own file; `translation.json` and `translation.schema.json` back to upstream's text.         |
-| `9bc7c3ac8` (base `42c75dc9`)     | 4                       | The fixture switch read from `import.meta.env` instead of a `vite.config.mts` define (the define goes with the next commit). |
-| `a59711d17` (base `42c75dc9`)     | 1                       | `vite.config.mts`, `package.json` and `package-lock.json` back to upstream's text; our test tooling moved to this repo.      |
-| **`9c367c242` (base `42c75dc9`)** | **1**                   | One comment in a tab file corrected; no upstream file touched.                                                               |
+| Fork commit (base)                | Modified upstream files | Note                                                                                                                                                 |
+| --------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bbad1b8a4` (base `ec5c5f2`)      | 13                      | An older version of this ledger, under the old `ui/core/...` paths.                                                                                  |
+| `cb561067` (base `17a8fb28`)      | 34                      | The old tab's last pin; this ledger was not refreshed for it.                                                                                        |
+| `43e3963d6` (base `42c75dc9`)     | 19                      | The React port before the pre-merge review's fix round.                                                                                              |
+| `d52c8e91e` (base `42c75dc9`)     | 18                      | `sim/core/gem_test.go` back to upstream's text (fork `8937108b0`). The previous version of this ledger.                                              |
+| `b2851da58` (base `42c75dc9`)     | 18                      | The pin before the cleanup.                                                                                                                          |
+| `205975607` (base `42c75dc9`)     | 7                       | The 11 Go engine files back to upstream's text; the fixes parked (see "Parked").                                                                     |
+| `9e4115c22` (base `42c75dc9`)     | 6                       | `ui/sim/workers/worker_pool.ts` back to upstream's text; the silence check deleted (see "Deleted").                                                  |
+| `2c88a1192` (base `42c75dc9`)     | 4                       | The tab's strings moved to their own file; `translation.json` and `translation.schema.json` back to upstream's text.                                 |
+| `9bc7c3ac8` (base `42c75dc9`)     | 4                       | The fixture switch read from `import.meta.env` instead of a `vite.config.mts` define (the define goes with the next commit).                         |
+| `a59711d17` (base `42c75dc9`)     | 1                       | `vite.config.mts`, `package.json` and `package-lock.json` back to upstream's text; our test tooling moved to this repo.                              |
+| `9c367c242` (base `42c75dc9`)     | 1                       | One comment in a tab file corrected; no upstream file touched.                                                                                       |
+| `c122cf73b` (base `42c75dc9`)     | 1                       | Other classes' Tier 3 pieces dropped from the bundled universes; no upstream file touched.                                                           |
+| `d983e0fbe` (base `42c75dc9`)     | 1                       | The tab's code loads the first time the tab is opened; no upstream file touched.                                                                     |
+| `5d048a089` (base `42c75dc9`)     | 1                       | Review round 2 fixes: an error boundary for a failed load, unused strings dropped, a shared test helper, a lazy-load test; no upstream file touched. |
+| **`1b28ad005` (base `42c75dc9`)** | **1**                   | Other classes' Dungeon Set 2 pieces dropped from the bundled universes; no upstream file touched.                                                    |
 
 Each row is the `--name-only --diff-filter=M` command above over that range.
 
 ## Category B — the one modified upstream file
 
-Counts are added/removed from `--numstat` over `42c75dc9..9c367c242`. Ticket
+Counts are added/removed from `--numstat` over `42c75dc9..1b28ad005`. Ticket
 numbers are this repo's (tbc-gear-prio) tickets.
 
 | #   | File                        | +/− | What the lines are                                                                                                                                                                                                                                                                                                                          | Why the tab needs it                                                             | Ticket |
@@ -103,7 +107,7 @@ file is formatted, from the fork root:
 ## Back to upstream's text
 
 The branch changed 19 upstream files at one time or another
-(`git -C vendor/tbc-new-fork log --format= --name-only 42c75dc9..9c367c242`,
+(`git -C vendor/tbc-new-fork log --format= --name-only 42c75dc9..1b28ad005`,
 keeping the paths that exist at `42c75dc9`). At the pin before the cleanup,
 `b2851da58`, 18 of them were modified, #1 among them
 (`git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 42c75dc9 b2851da58`);
@@ -112,7 +116,7 @@ Apart from #1 above, each of them is now byte-identical to `42c75dc9`:
 
 | File                                                                                                                                                                                                                                                                                                                   | What the branch had in it                                                                                                  | Where that went                                                                                                                                                                                          |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `assets/locales/en/translation.json`                                                                                                                                                                                                                                                                                   | The tab's strings, one `upgrades_tab` block.                                                                               | `assets/locales/en/upgrades.json`, namespace `upgrades` (fork `2c88a1192`). The loader names namespaces by file basename (`vite.config.mts:154`), so no loader change was needed.                        |
+| `assets/locales/en/translation.json`                                                                                                                                                                                                                                                                                   | The tab's strings, one `upgrades_tab` block.                                                                               | `assets/locales/en/upgrades.json`, namespace `upgrades` (fork `2c88a1192`). The loader names namespaces by file basename (`vite.config.mts:147`), so no loader change was needed.                        |
 | `schemas/translation.schema.json`                                                                                                                                                                                                                                                                                      | The schema entries for that block.                                                                                         | `schemas/upgrades.schema.json` (fork `2c88a1192`).                                                                                                                                                       |
 | `vite.config.mts`                                                                                                                                                                                                                                                                                                      | The `__TBC_TAB_FIXTURES__` define and the registration of our fixture plugin.                                              | The tab reads `import.meta.env.DEV \|\| import.meta.env.VITE_TBC_TAB_FIXTURES === '1'` (fork `9bc7c3ac8`). The plugin and a config file that wraps upstream's are in this repo (`scripts/tab-harness/`). |
 | `package.json`, `package-lock.json`                                                                                                                                                                                                                                                                                    | Three test script lines and `axe-core` as a devDependency.                                                                 | The scripts run by path from `scripts/tab-harness/`; `axe-core` is this repo's devDependency (fork `a59711d17`).                                                                                         |
@@ -142,17 +146,18 @@ run until the page reloads, as on every other wowsims page.
 
 ## Category A — new files outside the tab's folder
 
-241 files are new; 237 of them are under `ui/features/upgrades/`. The other 4:
+246 files are new; 241 of them are under `ui/features/upgrades/`. The other 5:
 
 ```
-git -C vendor/tbc-new-fork diff --name-only --diff-filter=A 42c75dc9 9c367c242 -- . ':!ui/features/upgrades'
+git -C vendor/tbc-new-fork diff --name-only --diff-filter=A 42c75dc9 1b28ad005 -- . ':!ui/features/upgrades'
 ```
 
-- **`ui/app/tabs/UpgradesTabBody.tsx`** and its test sit beside upstream's
+- **`ui/app/tabs/UpgradesTabBody.tsx`** and its two tests
+  (`UpgradesTabBody.test.tsx`, `UpgradesTabBody.load.test.tsx`) sit beside upstream's
   other tab bodies (`GearTabBody`, `SettingsTabBody` and the rest), which is
   that folder's convention; upstream keeps `RotationTabBody.test.tsx` there too.
 - **`assets/locales/en/upgrades.json`** cannot move: upstream's loader reads
-  `assets/locales` (`vite.config.mts:154`).
+  `assets/locales` (`vite.config.mts:147`).
 - **`schemas/upgrades.schema.json`** sits beside upstream's schemas so that
   upstream's `test-locales.mjs` pairs it with `upgrades.json` by name.
 
@@ -197,7 +202,7 @@ node --input-type=module -e "import path from 'node:path';import {createRequire}
 ```
 
 Validate both locale files against their schemas with Ajv directly instead. On
-fork `9c367c242` this prints `upgrades valid` and `translation valid`:
+fork `1b28ad005` this prints `upgrades valid` and `translation valid`:
 
 ```
 node --input-type=module -e "import path from 'node:path';import fs from 'node:fs';import {createRequire} from 'node:module';const f=path.resolve('vendor/tbc-new-fork');const A=createRequire(f+'/package.json')('ajv');const ajv=new (A.default??A)();for(const n of ['upgrades','translation']){const v=ajv.compile(JSON.parse(fs.readFileSync(path.join(f,'schemas',n+'.schema.json'),'utf8')));console.log(n,v(JSON.parse(fs.readFileSync(path.join(f,'assets/locales/en',n+'.json'),'utf8')))?'valid':ajv.errorsText(v.errors))}"
@@ -212,7 +217,7 @@ untested here.
 ticket numbers, so keep it that way. Re-run (prints nothing):
 
 ```
-git -C vendor/tbc-new-fork grep -n -iE "ticket [0-9]+" 9c367c242 -- $(git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 42c75dc9 9c367c242)
+git -C vendor/tbc-new-fork grep -n -iE "ticket [0-9]+" 1b28ad005 -- $(git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 42c75dc9 1b28ad005)
 ```
 
 ## Formatting
