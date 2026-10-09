@@ -55,7 +55,13 @@ before the branch (`fixtureLoaded` went from done to done, so `ResultsPanes`
 stayed mounted). Tests in `model/upgrades_store.test.ts`: "opens a new run in
 the engine order, whatever the last result was sorted by" (failed before the
 fix) and "keeps the sort when a recorded ranking loads, since no run started"
-(fails when the reset runs on every action but `landed`).
+(fails when the reset runs on every action but `landed`; a mutation run,
+not committed, logged in
+`.scratch/stage-gate/565-upstream-sync-tanstack/parts/P2/rw2-a1-mutations.log`
+lines 22-25, gitignored; to re-run, make `dispatchRun` write `sort: []` for
+every action type except `landed` and run
+`npx vitest run ui/features/upgrades/model/upgrades_store.test.ts` from the
+fork).
 
 One difference remains, found by the RW2 React review (RW2-R4): before the
 branch a view toggle that left no rows also unmounted `ResultsPanes`

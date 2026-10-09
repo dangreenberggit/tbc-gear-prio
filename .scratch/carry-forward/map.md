@@ -316,3 +316,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 580 The layout gate's digest does not cover z-index.css or rows.mjs (stage-gate 565-upstream-sync-tanstack, decision-log finding 2026-10-09T04:41Z) 2026-10-09
 - 581 The layout gate digest misses the fork package pins and theme/index.css (pre-merge review feat-565-upstream-sync-tanstack, A4 and S5) 2026-10-09
 - 582 A column sort on the Upgrades tab now survives a new run; owner ruling Q-565-sort-across-runs (pre-merge review feat-565-upstream-sync-tanstack, A2) 2026-10-09
+- 583 The virtual-rows test does not check that each data-index shows its own row (pre-merge review feat-565-upstream-sync-tanstack round 2, A8) 2026-10-09

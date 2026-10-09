@@ -1,6 +1,7 @@
 # Pre-merge review — feat/565-upstream-sync-tanstack
 
 Reviewed range: `170600866649f4105defcdc4f78790b8e63334ec..5e61fe15f9193cc5e1e7e83d3ce3b7aa25d86e14`
+Reviewed range: `5e61fe15f9193cc5e1e7e83d3ce3b7aa25d86e14..5dafd71815a8a74a56cf0dd81d33b2fd75b54de0`
 
 Fork code reviewed with it: `vendor/tbc-new-fork` branch `feat/upgrades-tab-react`, `1b28ad0051407cccbec6529c930d7d42456e52cc..eb001011204553de5bd9c50be5cfbc352f32290f` (the commit `dev` pins to the commit `data/wowsims-fork.lock.json` pins), limited to `ui/features/upgrades` and `ui/app/SimTabsSection.tsx`. Our fork commits are `707456ecb` (sort through TanStack Table), `8c6a33f43` (virtual rows) and `eb0010112` (library-review fixes). The merge `fedf78807` brings upstream wowsims `5262ff386` (v0.0.148); upstream's code was not reviewed, only whether ours breaks against it.
 
@@ -83,24 +84,106 @@ These findings need a code, data or doc change that the review may not make. Eac
 - **S12:** `ResultsPanes.tsx` builds the pane ids once and drops the unreachable fallback (with A1's fork commit).
 - **SP1:** re-run the live Stop check (`test-stop.mjs`, fresh WASM) at the final fork tip and record the numbers against `stop-565.log`.
 
+All eight landed in rework chunk RW2 and were checked in round 2 (Disposition below).
+
+## Round 2
+
+Range: main `5e61fe15..5dafd718` (`5addb813` harness selector and Stop-check read, `fd3ec703` layout-gate digest for ticket 581, `5dafd718` fork re-pin and ticket 582) and fork `eb0010112..28ea7a36a` (one commit, four files under `ui/features/upgrades/`: `ResultsPanes.tsx`, the new `ResultRows.virtual.test.tsx`, `upgrades_store.ts` and its test).
+
+Dispatch (round 2, 2026-10-09): `codex` is not on PATH, so four fresh `general-task` subagents on Opus (effort `high`) ran in one parallel batch: Adversarial, Domain, Standards and Spec. Each was told it writes nothing. Both trees were clean at dispatch apart from the untracked `.scratch/handoffs/` files. During the run the Adversarial axis's recursive `grep` over `node_modules/happy-dom` crashed and left an untracked `vendor/tbc-new-fork/grep.exe.stackdump` (12:57:02 -0700, shown by `git -C vendor/tbc-new-fork status --porcelain`); it is not branch content, and it was left in place because this review may not write to the fork.
+
+Checks run by the aggregator, at main `5dafd718` and fork `28ea7a36a`:
+
+- Fork tab tests: `corepack pnpm vitest run upgrades` from the fork, Node 22.17.1: rc=0, 55 files, 414 tests (`parts/P2/review-r2-tab-tests.log` in `.scratch/stage-gate/565-upstream-sync-tanstack/`, gitignored). Same counts as `rw2-tab-tests.log`.
+- `corepack pnpm verify`: rc=0, "gates: 1517 ran, 0 skipped"; "layout: skipped -- tab layout source unchanged since the last green run (digest c0578b4a515d...)" (`parts/P2/review-r2-verify.log`).
+- Wowsims-file rule: `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M 5262ff386bd171e6349d0f9cf00f4d762a6c9951 HEAD` prints only `6	0	ui/app/SimTabsSection.tsx`; the `--diff-filter=D` twin prints nothing (fork HEAD `28ea7a36a`).
+- Measured layout run for the digest change: `parts/P2/rw2-layout-gate.log` (12:41:58, after the fork commit at 12:38:47 -0700) ends `LAYOUT_GATE_VERDICT {"outcome":"measured","pass":true,"failed":0,"a11yFailed":0,...}` and "Advanced the baseline to c0578b4a515d...", the `testedTabHash` that `fd3ec703` commits. The Adversarial axis ran `python scripts/check_layout_gate.py --print-hash` and got the same digest.
+- SP1, the live Stop check at fork `28ea7a36a` against round 1's `stop-565.log` (fork `8c6a33f43`), both on ret paladin, Phase 2 preset, `--rows 5`:
+
+  |                          | `stop-565.log`                                                                                                             | `stop-rw2.log`            |
+  | ------------------------ | -------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+  | Verdict                  | pass, 5 of 5 checks                                                                                                        | pass, 5 of 5 checks       |
+  | Rows at Stop (non-owned) | 5 (5)                                                                                                                      | 5 (5)                     |
+  | Names at Stop            | Softstep Boots of Tracking, Madness of the Betrayer, Black Featherlight Boots, Halberd of Desolation, Romulo's Poison Vial | the same five, same order |
+  | Rows kept                | 9 = 3 in the Upgrades list + 6 below the cutoff                                                                            | 9 = 3 + 6                 |
+  | Baseline in the summary  | 2,082.7 DPS                                                                                                                | 2,082.7 DPS               |
+  | Stop to dialog closed    | 20,651 ms                                                                                                                  | 6,994 ms                  |
+  | Console errors           | none                                                                                                                       | none                      |
+
+  `stop-rw2.log` was written at 12:53:30, after `rw2-make-wasm.log` (12:52:29). The time from Stop to close is wall time on one machine and depends on the step in flight; the review does not read the difference as a change in the code.
+
+### Round 2 — Adversarial
+
+No blocking or medium finding. The claimed fixes hold: the new test fails for each of three edits to `data-row-count`/`data-index` (`parts/P2/rw2-a1-mutations.log:1-21`) and runs the real `useVirtualRows` (only `RowToggles` and `useActionId` are mocked); `readLanded` reads `count` and the rows from the same in-flight table and repeats the walk until the count holds; `'started'` is dispatched only at `run_session.ts:83` and `runReducer` returns a new object for it (`run_reducer.ts:88-89`), so the `next === run` early return never skips the reset; the `ResultsPanes.tsx` rewrite keeps the same panes, labels, badges, dimmed class, order, keys and group-closing rule; a missing digest file makes `check_layout_gate.py` exit 2 (`:735-747`).
+
+- **A7 (low).** `readLanded` (`scripts/tab-harness/test-stop.mjs:129-160`) delays the Stop click while it walks the rows: in `stop-rw2.log` the fifth row landed at 21,377 ms and the click came at 21,517 ms. On a run that ends inside that delay the check fails with an error ("no Cancel button…" or "no in-flight results table to read"); it cannot pass silently.
+- **A8 (low).** `ResultRows.virtual.test.tsx` never checks that the row with `data-index={i}` shows `rows[i]` (for example `data-item-id` equal to `100000 + i`). Today the index and the row come from one `index` (`ResultsTable.tsx` `rows[index]`, `position={index + 1}`), so the bug is not present.
+- **A9 (judgement; hypothesis, untested).** The digest hashes `package-lock.json`, not the installed `node_modules`, so a stale install after a lock change is not detected.
+
+### Round 2 — Domain
+
+**Domain: clean.** `git log 5e61fe15..5dafd718 -- data/wowsims.lock.json` is empty; `data/sim-implemented-effects.json` changes only `forkCommit`; no pool, universe or ported engine file is in either diff. An empty sort leaves the table in `applyView`'s order (`view.ts:745-772,804`): ΔDPS descending (ΔDPS plus set credit with Set potential on), ties by BiS-tag count, then `itemId`. The new test changes only `itemId` and `rank` of fixture rows and asserts no game value. The axis noted that the `dispatchRun` comment's "the engine's ΔDPS order" is loose with Set potential on (D1).
+
+### Round 2 — Standards
+
+No hard violation. S2, S3, S4, S9 and S12 are fixed; the axis re-ran every command in `docs/fork-upstream-touchpoints.md` at `28ea7a36a` and got its counts (merge-base `5262ff386bd1`, only merge `fedf78807`, 252 A and 1 M, `6 0 ui/app/SimTabsSection.tsx`, 5 new files outside the tab folder). All new subjects are 50 characters or fewer and no body line is over 72 (`git log --format=%s`, `%b | awk 'length>72'`, both repos). The fork commit touches only `ui/features/upgrades/` (`git -C vendor/tbc-new-fork show --stat 28ea7a36a`).
+
+- **S13 (minor, Durable claims).** "108 commits plus that merge" in `docs/fork-upstream-touchpoints.md` has no command in its block that produces it; `git -C vendor/tbc-new-fork rev-list --no-merges --count 5262ff38..28ea7a36a` gives 108.
+- **S14 (minor, Durable claims).** Ticket 582's closing note said the fixture-load test "fails when the reset runs on every action but `landed`" with no command; the mutation was never committed.
+- **S15 (judgement).** `fd3ec703` commits `testedTabHash c0578b4a…`, measured at fork `28ea7a36a`, while its fork lock still pins `eb0010112`; the pin moves in `5dafd718`. The tip is consistent.
+- **S16 (possible Mysterious Name).** `const run = (first, count) => …` in `ResultRows.virtual.test.tsx`; in this tab "run" means a sim run.
+- **S17 (possible Duplicated Code).** The block that opens the below-cutoff group is in both `run-tab-cdp.mjs:422-426` and `test-layout.mjs:116-120`.
+- **S18 (possible Repeated Switches).** `dispatchRun` branches on `action.type === 'started'` outside `runReducer`.
+
+### Round 2 — Spec
+
+All eight "Fix before merge" items and tickets 581 and 582 are implemented. S2 names the final fork commit `28ea7a36a` and its 252 A count, not `eb0010112` and 251 A as the item said; the counts were re-run at `28ea7a36a` and hold, and the change is logged as an adapt (`decision-log.md:124`, gitignored). The retry loop in A3's fix and the whole-ledger refresh in S2 go beyond the items' wording, both logged as adapts (`decision-log.md:124-125`).
+
+- **SP8 (records).** At dispatch the Disposition table had no `fixed` rows for the eight items and still deferred A2, A4 and S5 to tickets 581 and 582, both closed; the SP1 comparison was only in gitignored stage notes.
+- **SP9 (process).** Ticket 582's "Done when" is "The owner has ruled". It was closed on an orchestrator ruling ("owner informed and may overrule", decision-log row 2026-10-09T19:11Z, quoted in the ticket's closing note); no owner reply is recorded in the ticket.
+
+### Round 2 — Summary
+
+No blocking finding. Every round-1 item that needed a change is fixed at main `5dafd718` and fork `28ea7a36a`, the fork tests and `pnpm verify` pass, the measured layout run passed at the new digest, the live Stop check gives the same rows and baseline as round 1, and the fork still edits only the six approved lines of `ui/app/SimTabsSection.tsx`. One finding becomes a ticket: 583, a missing assertion in the new virtual-rows test (A8). Two record fixes are in this review's commit: the SP1 comparison table above (SP8) and a re-run pointer in ticket 582's note (S14). Ticket 582 was closed on the orchestrator's ruling, which the owner may overrule (SP9).
+
 ## Disposition
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                        |
-| --- | ----------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A2  | Adversarial | defer       | `.scratch/carry-forward/issues/582-upgrades-sort-survives-a-new-run.md` — blocked on owner ruling Q-565-sort-across-runs                                                                                             |
-| A4  | Adversarial | defer       | `.scratch/carry-forward/issues/581-layout-gate-digest-misses-package-pins-and-theme-index.md` — fork package pins                                                                                                    |
-| A5  | Adversarial | wontfix     | latent only: `dpsKey` and the row arrays change together today (`hooks/useResultsView.ts:38-46`)                                                                                                                     |
-| A6  | Adversarial | wontfix     | the test checks the store function's own contract (`setSort` with the same reference); harmless that TanStack never calls it that way                                                                                |
-| S1  | Standards   | wontfix     | one character over in an unpushed body line; rewriting seven commits for it costs more than it fixes                                                                                                                 |
-| S5  | Standards   | defer       | `.scratch/carry-forward/issues/581-layout-gate-digest-misses-package-pins-and-theme-index.md` — `theme/index.css`                                                                                                    |
-| S6  | Standards   | wontfix     | the figures, the script and the result file are now recorded in ticket 565's addendum (this review's commit); the script itself is gitignored, so the claim stays a pointer to a local measurement                   |
-| S7  | Standards   | wontfix     | git's default merge subject for an upstream merge                                                                                                                                                                    |
-| S8  | Standards   | wontfix     | `vi.mock` is hoisted per file; a shared factory module would save three lines per file and add an indirection                                                                                                        |
-| S10 | Standards   | wontfix     | not a middle man: the annotation widens the `as const` tuple to `readonly ResultsSortKey[]` for `.map` and `.includes`                                                                                               |
-| S11 | Standards   | wontfix     | `ResultsSort` mirrors TanStack's `SortingState` so `model/` imports no TanStack (library finding Z-3)                                                                                                                |
-| SP2 | Spec        | fixed       | this review's commit: ticket 565 addendum names `eb0010112`, 410 tests, the dropped T-7 case, the Stop-check gap and ticket 582                                                                                      |
-| SP3 | Spec        | wontfix     | the work meets the original wording (three React ledgers, measured layout run, desktop golden unchanged); the original text stays in history at `170600866649`                                                       |
-| SP4 | Spec        | wontfix     | ticket 580 fixed a real digest gap found during the run and was accepted at Gate C                                                                                                                                   |
-| SP5 | Spec        | wontfix     | one-line follow-on edits and a test file, accepted in the decision log (rows K3-11b, Gate C)                                                                                                                         |
-| SP6 | Spec        | wontfix     | trade-off judged acceptable: a 178-262 px upward jump is worse than a one-frame blank that the next frame fills; settled blank is 0 (`rw1-virtual-measurements.md:17`); no owner reply is recorded to the disclosure |
-| SP7 | Spec        | wontfix     | the comment states it; the harness runs only in Chromium; no drivable Firefox on this machine                                                                                                                        |
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                          |
+| --- | ----------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | fork `28ea7a36a` (pinned by `5dafd718`): `ResultRows.virtual.test.tsx` renders the real `useVirtualRows` and pins `data-row-count`, `data-index` and the spacer rows; fails for three mutations (`parts/P2/rw2-a1-mutations.log:1-21`) |
+| A2  | Adversarial | fixed       | superseded in round 2: ticket 582 closed; fork `28ea7a36a` (pinned by `5dafd718`) clears the sort when a run starts                                                                                                                    |
+| A3  | Adversarial | fixed       | `5addb813`: `test-stop.mjs` reads the landed rows through `collectRows` and compares that count                                                                                                                                        |
+| A4  | Adversarial | fixed       | superseded in round 2: ticket 581 closed; `fd3ec703` hashes the fork's `package.json` and `package-lock.json`                                                                                                                          |
+| A5  | Adversarial | wontfix     | latent only: `dpsKey` and the row arrays change together today (`hooks/useResultsView.ts:38-46`)                                                                                                                                       |
+| A6  | Adversarial | wontfix     | the test checks the store function's own contract (`setSort` with the same reference); harmless that TanStack never calls it that way                                                                                                  |
+| S1  | Standards   | wontfix     | one character over in an unpushed body line; rewriting seven commits for it costs more than it fixes                                                                                                                                   |
+| S2  | Standards   | fixed       | `5dafd718`: `docs/fork-upstream-touchpoints.md` names fork `28ea7a36a` (the final pin, not `eb0010112`) with 252 A and 1 M, counts re-run at `28ea7a36a` by the round-2 Standards axis                                                 |
+| S3  | Standards   | fixed       | `5dafd718`: the fork lock `_comment` says `results_sort.test.ts` was deleted in `707456ecb`                                                                                                                                            |
+| S4  | Standards   | fixed       | `fd3ec703`: `write_baseline` in `check_layout_gate.py` writes a lock `_comment` listing all nine theme files, the fork package files and `rows.mjs`                                                                                    |
+| S5  | Standards   | fixed       | superseded in round 2: ticket 581 closed; `fd3ec703` hashes `ui/styles/theme/index.css`                                                                                                                                                |
+| S6  | Standards   | wontfix     | the figures, the script and the result file are now recorded in ticket 565's addendum (this review's commit); the script itself is gitignored, so the claim stays a pointer to a local measurement                                     |
+| S7  | Standards   | wontfix     | git's default merge subject for an upstream merge                                                                                                                                                                                      |
+| S8  | Standards   | wontfix     | `vi.mock` is hoisted per file; a shared factory module would save three lines per file and add an indirection                                                                                                                          |
+| S9  | Standards   | fixed       | `5addb813`: the harness selects rows through `RESULT_ROW` from `rows.mjs`; `resultRowsSelector`, `resultRowSelector` and `rowCountExpression` deleted; measured layout run green (`parts/P2/rw2-layout-gate.log`)                      |
+| S10 | Standards   | wontfix     | not a middle man: the annotation widens the `as const` tuple to `readonly ResultsSortKey[]` for `.map` and `.includes`                                                                                                                 |
+| S11 | Standards   | wontfix     | `ResultsSort` mirrors TanStack's `SortingState` so `model/` imports no TanStack (library finding Z-3)                                                                                                                                  |
+| S12 | Standards   | fixed       | fork `28ea7a36a` (pinned by `5dafd718`): `ResultsPanes.tsx` builds one `contents` list; the unreachable fallback is gone                                                                                                               |
+| SP1 | Spec        | fixed       | Stop check re-run live at fork `28ea7a36a` after a WASM build: pass, same five rows at Stop, 9 kept, 2,082.7 DPS (`parts/P2/stop-rw2.log`); compared with `stop-565.log` in "Round 2" above (this review's commit)                     |
+| SP2 | Spec        | fixed       | this review's round-1 commit: ticket 565 addendum names `eb0010112`, 410 tests, the dropped T-7 case, the Stop-check gap and ticket 582                                                                                                |
+| SP3 | Spec        | wontfix     | the work meets the original wording (three React ledgers, measured layout run, desktop golden unchanged); the original text stays in history at `170600866649`                                                                         |
+| SP4 | Spec        | wontfix     | ticket 580 fixed a real digest gap found during the run and was accepted at Gate C                                                                                                                                                     |
+| SP5 | Spec        | wontfix     | one-line follow-on edits and a test file, accepted in the decision log (rows K3-11b, Gate C)                                                                                                                                           |
+| SP6 | Spec        | wontfix     | trade-off judged acceptable: a 178-262 px upward jump is worse than a one-frame blank that the next frame fills; settled blank is 0 (`rw1-virtual-measurements.md:17`); no owner reply is recorded to the disclosure                   |
+| SP7 | Spec        | wontfix     | the comment states it; the harness runs only in Chromium; no drivable Firefox on this machine                                                                                                                                          |
+| A7  | Adversarial | wontfix     | the delay (140 ms in `stop-rw2.log`) can only make the check fail with an error, never pass with a wrong count; reading every landed row is what A3 asked for                                                                          |
+| A8  | Adversarial | defer       | `.scratch/carry-forward/issues/583-virtual-rows-test-ties-index-to-row.md` — fork test change and re-pin; not a bug today                                                                                                              |
+| A9  | Adversarial | wontfix     | a lock change moves the digest and forces a measured run; whether `node_modules` matches the lock is the install step's job (`npm ci`), not the digest's; untested                                                                     |
+| D1  | Domain      | wontfix     | "ΔDPS order" in the `dispatchRun` comment is the ΔDPS column's own key, which includes set credit with Set potential on (`dpsSortKeyFor`, `results_view.ts:130`); the behaviour is `applyView`'s order                                 |
+| S13 | Standards   | wontfix     | the count is correct; the command that produces it, `git -C vendor/tbc-new-fork rev-list --no-merges --count 5262ff38..28ea7a36a` (108), is recorded here; add it at the ledger's next refresh                                         |
+| S14 | Standards   | fixed       | this review's commit: ticket 582's note names the mutation log and how to re-run the mutation                                                                                                                                          |
+| S15 | Standards   | wontfix     | intermediate commit only; at `fd3ec703` with fork `eb0010112` checked out the digest differs and the gate runs measured, the safe direction; the tip is consistent                                                                     |
+| S16 | Standards   | wontfix     | test-local helper in a 114-line file whose use (`run(0, n)` of indexes) is next to its doc comment                                                                                                                                     |
+| S17 | Standards   | wontfix     | the duplication predates this range; RW2 changed only the selector inside both copies                                                                                                                                                  |
+| S18 | Standards   | wontfix     | one check on one action type; the reducer owns run state and the store owns the sort, so the reset belongs in `dispatchRun`                                                                                                            |
+| SP8 | Spec        | fixed       | this review's commit: Disposition rows for every round-1 item, A2/A4/S5 moved to `fixed`, the SP1 comparison table                                                                                                                     |
+| SP9 | Spec        | wontfix     | the orchestrator's ruling stands as recorded (decision-log 2026-10-09T19:11Z: the branch is a library migration, so pre-branch behaviour); the owner may overrule, which reopens 582                                                   |
