@@ -79,3 +79,17 @@ The fork lock's `_comment` entry for `59c43ddb7` now says only what its
 test shows (a row in input order, no sort), and the `e417a504e` entry
 states what the virtual-rows, re-sort and landing tests cover, and that no
 test re-sorts while the real windowing is scrolled.
+
+## Comments
+
+### Pre-merge review round 4 (2026-10-09)
+
+Two sentences above claim more than the evidence shows. "descending, then
+ascending": `FOUR` already starts in descending Item order, so the first
+click moves no row and only the ascending click catches the comparator
+mutation (`rw4-mutations.log` run 1 fails on Cataclysm's Edge at the top).
+"every tab test at `59c43ddb7` passes it": run 2 used the `59c43ddb7`
+`ResultsTable.test.tsx` inside the RW4 tree, so the store file and its test
+were RW4's; neither renders a row, so the conclusion holds. The test change
+and the matching lock `_comment` correction are ticket 585 (review findings
+A11, A12, S21).

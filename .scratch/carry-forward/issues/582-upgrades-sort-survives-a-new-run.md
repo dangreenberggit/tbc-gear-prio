@@ -26,7 +26,8 @@ The stage 565 plan listed "resetting it on a new run" as out of scope
 (`.scratch/stage-gate/565-upstream-sync-tanstack/plan.md:238`, gitignored),
 and described the old lifetime as "that component's lifetime" without
 saying that the component unmounted on every run. The owner has not ruled
-on the change.
+on the change. (Superseded: the owner ruled on 2026-10-09; see "Owner
+ruling" under Comments.)
 
 Found by the pre-merge review's adversarial axis, finding A2; the old
 lifetime checked with `git -C vendor/tbc-new-fork show 1b28ad005:ui/features/upgrades/components/UpgradesResults/UpgradesResults.tsx`.
@@ -43,6 +44,9 @@ The owner has ruled. If the ruling is "reset", a fork test fails when the
 sort is not cleared at the start of a run, and the fork is re-pinned.
 
 ## Closing note (2026-10-09, stage 565-upstream-sync-tanstack, chunk RW2)
+
+(Superseded by the owner ruling under Comments: no action resets the sort
+at fork `e417a504e`.)
 
 Orchestrator ruling: restore pre-branch behaviour; owner informed and may
 overrule (decision-log row 2026-10-09T19:11Z, ticket 582). The branch is a
@@ -87,3 +91,12 @@ ui/features/upgrades/model/upgrades_store.test.ts` from the fork). The
 fixture-load test stays. The RW2-R4 difference above (a view toggle that
 left no rows used to reset the sort) no longer applies: no action resets
 the sort.
+
+### Pre-merge review round 4 (2026-10-09)
+
+No log records the red run of "keeps the sort the user chose when the next
+run starts and lands" against `59c43ddb7`; the decision log only states it
+(row 2026-10-09T21:43Z). The result follows from the `59c43ddb7` code, where
+`dispatchRun` wrote `sort: []` on `started`
+(`git -C vendor/tbc-new-fork show 59c43ddb7:ui/features/upgrades/model/upgrades_store.ts`),
+and the test reads the sort right after run 2 starts. Review finding S22.

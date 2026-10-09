@@ -318,3 +318,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 582 A column sort on the Upgrades tab now survives a new run; owner ruling Q-565-sort-across-runs (pre-merge review feat-565-upstream-sync-tanstack, A2) 2026-10-09
 - 583 The virtual-rows test does not check that each data-index shows its own row (pre-merge review feat-565-upstream-sync-tanstack round 2, A8) 2026-10-09
 - 584 No test checks a row's data-index and Rank after the table is re-sorted in place (pre-merge review feat-565-upstream-sync-tanstack round 3, A10 and S19) 2026-10-09
+- 585 The re-sort test's first click moves no row, and the lock note claims more than the tests show (pre-merge review feat-565-upstream-sync-tanstack round 4, A11, A12 and S21) 2026-10-09
