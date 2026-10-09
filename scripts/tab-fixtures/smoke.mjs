@@ -11,10 +11,12 @@ const FIXDIR = path.join(ROOT, "data/tab-fixtures");
 const OUT = path.join(ROOT, ".scratch/tab-fixtures-smoke");
 const PORT = process.env.TBC_FORK_PORT ?? "5173";
 const BASE = `http://localhost:${PORT}`;
-const PROBE = `[document.documentElement.dataset.upgradesFixture, document.querySelectorAll('[data-testid="upgrades-results-table"] tbody tr').length, document.querySelector('#upgrades-fixture-error')?.textContent]`;
 const H = await import(
   pathToFileURL(path.join(ROOT, "scripts/tab-harness/test-tab-harness.mjs"))
 );
+// The row count is the ranked rows summed over every table on the page, read
+// from each table's data-row-count: only the rows in view are rendered.
+const PROBE = `[document.documentElement.dataset.upgradesFixture, ${H.rowCountExpression}, document.querySelector('#upgrades-fixture-error')?.textContent]`;
 const t0 = Date.now();
 const secs = (t) => ((Date.now() - t) / 1000).toFixed(1);
 const fail = (msg) => (console.log(`FAIL ${msg}`), process.exit(1));

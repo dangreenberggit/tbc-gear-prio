@@ -14,6 +14,8 @@
 //   with its below-cutoff group open:
 //     (15) the open pane has result rows, so the checks below measured some
 //         (the fixture loader settles on a row anywhere on the page);
+//         only the rows in view are rendered (ticket 565), so the per-row
+//         checks read each table by scrolling through it (rows.mjs);
 //     (6) slot and ΔDPS figures on one line;
 //     (1) the page does not scroll sideways (a table scrolls inside its own
 //         box, and nothing positioned inside it escapes that box);
@@ -37,6 +39,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { ROW_HELPERS } from "./rows.mjs";
 import * as H from "./test-tab-harness.mjs";
 
 const WIDTHS = [375, 653, 768, 1280];
@@ -107,19 +110,36 @@ const preRunExpression = (width) => `(async () => {
 
 const postRunExpression = `(async () => {
 	${PAGE_HELPERS}
+	${ROW_HELPERS}
 	const pane = openPane();
 	if (!pane) return { error: 'no open results pane' };
 	const group = pane.querySelector('[data-testid="upgrades-below-cutoff"]');
 	if (group && !group.querySelector('[data-testid="upgrades-results-table"]')) {
 		group.querySelector('[data-testid="upgrades-below-cutoff-trigger"]')?.click();
-		await waitFor(() => group.querySelector('[data-testid="upgrades-results-table"] tbody tr'), 5000);
+		await waitFor(() => group.querySelector('[data-testid="upgrades-results-table"] [data-testid="upgrades-result-row"]'), 5000);
 		await sleep(200);
 	}
 	const multiLine = [], clipped = [], pastCell = [], figureOutside = [], midWord = [];
 	const tables = [...pane.querySelectorAll('[data-testid="upgrades-results-table"]')];
-	let rows = 0;
-	for (const tr of tables.flatMap(t => [...t.querySelectorAll('tbody tr')])) {
-		rows++;
+	const rows = paneRowCount(pane);
+	const charTop = (node, i) => { const r = document.createRange(); r.setStart(node, i); r.setEnd(node, i + 1); return Math.round(r.getBoundingClientRect().top); };
+	const isClipped = el => {
+		const style = getComputedStyle(el);
+		if (!shown(el) || style.clip !== 'auto' || style.position === 'absolute') return false;
+		return (style.overflowX === 'hidden' || style.overflowX === 'clip') && el.scrollWidth > el.clientWidth + TOL && !!el.textContent.trim();
+	};
+	const checkCell = cell => {
+		const c = cell.getBoundingClientRect();
+		for (const el of cell.querySelectorAll('*')) {
+			const r = el.getBoundingClientRect();
+			if (r.width > 1 && (r.right > c.right + TOL || r.left < c.left - TOL)) { pastCell.push(name(el)); break; }
+		}
+	};
+	const head = tables[0]?.querySelectorAll('thead th') ?? [];
+	const offsets = [...head].map(() => 0);
+	const groupTable = group?.querySelector('[data-testid="upgrades-results-table"]');
+	// Checks 6, 7, 12 and 14 and the A1 offsets measure each row while it is rendered.
+	const readRow = (tr, below) => {
 		const [, , slot, delta] = tr.children;
 		const figure = delta.querySelector(':scope > span')?.firstChild;
 		if (lineCount(slot) > 1) multiLine.push('slot: ' + slot.textContent);
@@ -129,36 +149,34 @@ const postRunExpression = `(async () => {
 			const f = range.getBoundingClientRect(), c = delta.getBoundingClientRect();
 			if (f.left < c.left - TOL || f.right > c.right + TOL) figureOutside.push(delta.textContent.trim());
 		}
-	}
-	const charTop = (node, i) => { const r = document.createRange(); r.setStart(node, i); r.setEnd(node, i + 1); return Math.round(r.getBoundingClientRect().top); };
-	for (const a of tables.flatMap(t => [...t.querySelectorAll('[data-testid="upgrades-item-name"]')])) {
-		const text = a.textContent, node = a.firstChild;
-		for (let i = 1; i < text.length; i++) {
-			if (charTop(node, i) <= charTop(node, i - 1)) continue;
-			if (text[i - 1] !== ' ' && text[i] !== ' ' && text[i - 1] !== '-') midWord.push(text.slice(0, i) + '|' + text.slice(i));
+		for (const a of tr.querySelectorAll('[data-testid="upgrades-item-name"]')) {
+			const text = a.textContent, node = a.firstChild;
+			for (let i = 1; i < text.length; i++) {
+				if (charTop(node, i) <= charTop(node, i - 1)) continue;
+				if (text[i - 1] !== ' ' && text[i] !== ' ' && text[i - 1] !== '-') midWord.push(text.slice(0, i) + '|' + text.slice(i));
+			}
 		}
-	}
-	for (const cell of tables.flatMap(t => [...t.querySelectorAll('td, th')])) {
-		const c = cell.getBoundingClientRect();
-		for (const el of cell.querySelectorAll('*')) {
-			const r = el.getBoundingClientRect();
-			if (r.width > 1 && (r.right > c.right + TOL || r.left < c.left - TOL)) { pastCell.push(name(el)); break; }
+		for (const td of tr.children) checkCell(td);
+		for (const el of tr.querySelectorAll('*')) if (isClipped(el)) clipped.push(name(el));
+		if (below) {
+			[...tr.children].forEach((td, i) => {
+				if (!head[i]) return;
+				const d = Math.round(td.getBoundingClientRect().left - head[i].getBoundingClientRect().left);
+				if (Math.abs(d) > Math.abs(offsets[i])) offsets[i] = d;
+			});
 		}
+		return true;
+	};
+	let groupRowsMeasured = 0;
+	for (const table of tables) {
+		const below = table === groupTable;
+		const read = await collectRows(table, tr => readRow(tr, below));
+		if (read.error) return { error: (below ? 'below-cutoff table: ' : 'shortlist table: ') + read.error };
+		if (below) groupRowsMeasured = read.rows.length;
 	}
+	for (const cell of tables.flatMap(t => [...t.querySelectorAll('thead th')])) checkCell(cell);
 	for (const el of root.querySelectorAll('*')) {
-		const style = getComputedStyle(el);
-		if (!shown(el) || style.clip !== 'auto' || style.position === 'absolute') continue;
-		if ((style.overflowX === 'hidden' || style.overflowX === 'clip') && el.scrollWidth > el.clientWidth + TOL && el.textContent.trim()) clipped.push(name(el));
-	}
-	const head = tables[0]?.querySelectorAll('thead th') ?? [];
-	const offsets = [...head].map(() => 0);
-	const groupTable = group?.querySelector('[data-testid="upgrades-results-table"]');
-	for (const tr of groupTable?.querySelectorAll('tbody tr') ?? []) {
-		[...tr.children].forEach((td, i) => {
-			if (!head[i]) return;
-			const d = Math.round(td.getBoundingClientRect().left - head[i].getBoundingClientRect().left);
-			if (Math.abs(d) > Math.abs(offsets[i])) offsets[i] = d;
-		});
+		if (!el.closest('[data-testid="upgrades-result-row"]') && isClipped(el)) clipped.push(name(el));
 	}
 	const left = byTestId('upgrades-tab-left').getBoundingClientRect();
 	const card = byTestId('upgrades-run-settings').getBoundingClientRect();
@@ -166,7 +184,7 @@ const postRunExpression = `(async () => {
 		pane: pane.id, rows, multiLine: multiLine.slice(0, 10), clipped: clipped.slice(0, 10), pastCell: pastCell.slice(0, 10),
 		figureOutside: figureOutside.slice(0, 10), midWord: midWord.slice(0, 10),
 		counts: [multiLine.length, clipped.length, pastCell.length, figureOutside.length, midWord.length],
-		a1: { measuredRows: groupTable ? groupTable.querySelectorAll('tbody tr').length : 0, offsets, maxAbs: Math.max(0, ...offsets.map(Math.abs)) },
+		a1: { measuredRows: groupRowsMeasured, offsets, maxAbs: Math.max(0, ...offsets.map(Math.abs)) },
 		columnGap: Math.round(card.left - left.right), cardBesideResults: card.top < left.bottom && card.left > left.left,
 		page: { scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth },
 	};

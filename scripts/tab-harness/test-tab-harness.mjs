@@ -19,6 +19,8 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { documentRowCountExpression } from "./rows.mjs";
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const FORK_ROOT = path.resolve(
   __dirname,
@@ -370,8 +372,10 @@ export async function evaluate(send, expression) {
 /** The Upgrades button in the sim tab strip (`ui/app/SimTabs.tsx`; `TabNav` gives each tab its id as testid). */
 export const upgradesTabButtonSelector =
   '[data-testid="sim-tabs"] [data-testid="upgrades-tab"]';
-export const resultRowsSelector =
-  '[data-testid="upgrades-results-table"] tbody tr';
+/** A results table's tbody, which carries the table's ranked row count (`data-row-count`; rows.mjs). */
+export const resultRowsSelector = '[data-testid="upgrades-result-rows"]';
+/** One rendered result row: only the rows in or near the view are rendered (ticket 565). */
+export const resultRowSelector = '[data-testid="upgrades-result-row"]';
 
 const WAIT_FOR = `const waitFor = async (fn, ms) => { const end = Date.now() + ms; while (Date.now() < end) { const v = fn(); if (v) return v; await new Promise(r => setTimeout(r, 100)); } return fn(); };`;
 const OPEN_TAB = `const navBtn = await waitFor(() => document.querySelector(${JSON.stringify(upgradesTabButtonSelector)}), 30000);
@@ -393,7 +397,8 @@ export function startRunExpression() {
 	})()`;
 }
 
-export const rowCountExpression = `document.querySelectorAll(${JSON.stringify(resultRowsSelector)}).length`;
+/** The ranked row count summed over every results table on the page, not the rows rendered. */
+export const rowCountExpression = documentRowCountExpression;
 
 // ---------------------------------------------------------------------------
 // Recorded fixtures (ticket 504): a finished Ranking recorded from a real run
@@ -425,9 +430,9 @@ export function loadFixtureExpression(fixtureJson) {
 	})()`;
 }
 
-// A fixture load is settled when the results table has rows. Never wait for
+// A fixture load is settled when a result row has rendered. Never wait for
 // "Took": no run happened, so the timing it shows is not a run's.
-export const fixtureSettledExpression = `(document.querySelectorAll(${JSON.stringify(resultRowsSelector)}).length >= 1)`;
+export const fixtureSettledExpression = `(document.querySelectorAll(${JSON.stringify(resultRowSelector)}).length >= 1)`;
 
 // Navigate `send`'s page to the fixture's spec, load it and wait until settled.
 // Returns { ok, rows, ms } or { error }.
