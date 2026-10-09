@@ -29,10 +29,9 @@ comes from `collectRows(table, readRow)`, which scrolls the page's scroll box
 table at a time because `data-index` starts at 0 in each table. Both are
 page-side source text (`ROW_HELPERS`) that a script puts inside its in-page
 expression, because the scripts drive the page with expression strings over
-CDP. `rows.mjs` is not in the layout gate's hashed file list
-(`ROOT_GATE_FILES` in `scripts/check_layout_gate.py`), so an edit to it does
-not mark the layout baseline stale: after editing it, run
-`pnpm layout-gate:check` by hand and read its verdict line.
+CDP. `rows.mjs` is in the layout gate's hashed file list
+(`ROOT_GATE_FILES` in `scripts/check_layout_gate.py`, ticket 580), so an edit
+to it marks the layout baseline stale and `pnpm layout-gate:check` re-measures.
 
 ## `run-tab-cdp.mjs`
 

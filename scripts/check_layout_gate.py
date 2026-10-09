@@ -169,6 +169,14 @@ LOCAL_ONLY_FILES = frozenset({"local.wcl-credentials.ts"})
 #     among them) resolves through.
 #   - ui/styles/theme/colors.css, vars.css -- the colour tokens the axe pass's
 #     contrast checks resolve through.
+#   - ui/styles/theme/specs.css -- each spec's `--color-primary`, which those
+#     contrast checks also resolve through (ticket 580).
+#   - ui/styles/theme/z-index.css -- the stacking order of popovers, dialogs and
+#     toasts over the table (ticket 580).
+#   - ui/styles/theme/effects.css -- radii, shadows and background images.
+#     Whether it changes what the gate measures is untested; it is hashed
+#     because `theme/index.css` imports it, so every theme file the tab loads is
+#     in the digest (ticket 580).
 #   - ui/ui-kit/TabPanelColumns/TabPanelColumns.css -- the two-column frame
 #     whose gap check 13 measures.
 #   - assets/locales/en/upgrades.json -- the accessible names the axe pass
@@ -189,9 +197,12 @@ LAYOUT_FILES = (
     "ui/app/SimTabsSection.tsx",
     "ui/styles/theme/breakpoints.css",
     "ui/styles/theme/colors.css",
+    "ui/styles/theme/effects.css",
     "ui/styles/theme/spacing.css",
+    "ui/styles/theme/specs.css",
     "ui/styles/theme/typography.css",
     "ui/styles/theme/vars.css",
+    "ui/styles/theme/z-index.css",
     "ui/ui-kit/TabPanelColumns/TabPanelColumns.css",
     "assets/locales/en/upgrades.json",
     "vite.config.mts",
@@ -209,9 +220,11 @@ MODULE_SUFFIXES = (".ts", ".tsx", ".css")
 # Files outside the fork source that decide what the gate measures, hashed by
 # ROOT-relative name (never through `_rel`, which is fork-relative). The
 # recorded tab fixtures (ticket 504) are what the fixture pass renders, and the
-# two harness files are the assertions themselves: editing either changes the
-# gate's verdict without touching a line of tab source.
+# harness files are the assertions themselves: editing one changes the gate's
+# verdict without touching a line of tab source. `rows.mjs` is the row reader
+# `test-layout.mjs` and `test-tab-harness.mjs` import (ticket 580).
 ROOT_GATE_FILES = (
+    "scripts/tab-harness/rows.mjs",
     "scripts/tab-harness/test-layout.mjs",
     "scripts/tab-harness/test-tab-harness.mjs",
     "scripts/tab-harness/test-review.mjs",
