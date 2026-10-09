@@ -67,3 +67,23 @@ One difference remains, found by the RW2 React review (RW2-R4): before the
 branch a view toggle that left no rows also unmounted `ResultsPanes`
 (`UpgradesResults.tsx:51,57` at `1b28ad005`) and so reset the sort; the stored
 sort now survives that case. No change made.
+
+## Comments
+
+### Owner ruling (2026-10-09, stage 565-upstream-sync-tanstack, chunk RW4)
+
+The owner overruled the RW2 closing note above, in these words:
+"I think the users sort preference on the tabs table can stay without
+resetting it." (decision-log row 2026-10-09T21:19Z, `note owner`).
+
+Closed again as: owner ruling: keep the sort across runs; RW4 removed the
+reset. Fork `e417a504e` takes the `sort: []` write out of `dispatchRun`
+(`model/upgrades_store.ts`), so the column sort the user chose stays for
+the page's lifetime: across a new run, a fixture load and a view toggle.
+The RW2 test "opens a new run in the engine order" is replaced by "keeps
+the sort the user chose when the next run starts and lands", which failed
+against `59c43ddb7` (`npx vitest run
+ui/features/upgrades/model/upgrades_store.test.ts` from the fork). The
+fixture-load test stays. The RW2-R4 difference above (a view toggle that
+left no rows used to reset the sort) no longer applies: no action resets
+the sort.
