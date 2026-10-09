@@ -121,10 +121,10 @@ python -c "import json;a=json.load(open('vendor/wowsims/db.json'))['items'];b=js
 ## Counts
 
 - local membership (U): 364
-- wowsims-primary membership (W): 1326
+- wowsims-primary membership (W): 1314
 - in both: 355
 - universe-only (U \ W): 9
-- wowsims-only (W \ U): 971
+- wowsims-only (W \ U): 959
 - phase-disagreements: 0
 - universe ids absent from the wowsims DB: 0
 - unexplained: 0
@@ -552,18 +552,6 @@ carry. Each row names the rule that explains the absence.
 | 21875 | Primal Mooncloth Robe | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 21888 | Gloves of the Immortal | 1 | e1 | drops only outside this phase's zones | — |
 | 21891 | Shard of the Fallen Star | 1 | c | stub-only sim effect | — |
-| 22003 | Darkmantle Boots | 1 | f | no recognized source route | — |
-| 22005 | Darkmantle Cap | 1 | f | no recognized source route | — |
-| 22009 | Darkmantle Tunic | 1 | f | no recognized source route | — |
-| 22064 | Sorcerer's Boots | 1 | f | no recognized source route | — |
-| 22065 | Sorcerer's Crown | 1 | f | no recognized source route | — |
-| 22069 | Sorcerer's Robes | 1 | f | no recognized source route | — |
-| 22074 | Deathmist Mask | 1 | f | no recognized source route | — |
-| 22075 | Deathmist Robe | 1 | f | no recognized source route | — |
-| 22076 | Deathmist Sandals | 1 | f | no recognized source route | — |
-| 22080 | Virtuous Crown | 1 | f | no recognized source route | — |
-| 22083 | Virtuous Robe | 1 | f | no recognized source route | — |
-| 22084 | Virtuous Sandals | 1 | f | no recognized source route | — |
 | 22107 | Feralheart Boots | 1 | f | no recognized source route | — |
 | 22109 | Feralheart Cowl | 1 | f | no recognized source route | — |
 | 22113 | Feralheart Vest | 1 | f | no recognized source route | — |
@@ -1131,7 +1119,7 @@ carry. Each row names the rule that explains the absence.
 | c — stub-only sim effect | 67 |
 | e1 — drops only outside this phase's zones | 296 |
 | e2 — sourced, but by a route the local assembly did not admit | 97 |
-| f — no recognized source route | 511 |
+| f — no recognized source route | 499 |
 | g — unexplained | 0 |
 
 ## Universe-only items, classified

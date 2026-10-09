@@ -121,10 +121,10 @@ python -c "import json;a=json.load(open('vendor/wowsims/db.json'))['items'];b=js
 ## Counts
 
 - local membership (U): 467
-- wowsims-primary membership (W): 1543
+- wowsims-primary membership (W): 1519
 - in both: 456
 - universe-only (U \ W): 11
-- wowsims-only (W \ U): 1087
+- wowsims-only (W \ U): 1063
 - phase-disagreements: 0
 - universe ids absent from the wowsims DB: 0
 - unexplained: 0
@@ -588,33 +588,9 @@ carry. Each row names the rule that explains the absence.
 | 21888 | Gloves of the Immortal | 1 | e1 | drops only outside this phase's zones | — |
 | 21889 | Gloves of the Redeemed Prophecy | 1 | e1 | drops only outside this phase's zones | — |
 | 21891 | Shard of the Fallen Star | 1 | c | stub-only sim effect | — |
-| 21995 | Boots of Heroism | 1 | f | no recognized source route | — |
-| 21997 | Breastplate of Heroism | 1 | f | no recognized source route | — |
-| 21999 | Helm of Heroism | 1 | f | no recognized source route | — |
-| 22003 | Darkmantle Boots | 1 | f | no recognized source route | — |
-| 22005 | Darkmantle Cap | 1 | f | no recognized source route | — |
-| 22009 | Darkmantle Tunic | 1 | f | no recognized source route | — |
-| 22013 | Beastmaster's Cap | 1 | c | stub-only sim effect | — |
-| 22060 | Beastmaster's Tunic | 1 | c | stub-only sim effect | — |
-| 22061 | Beastmaster's Boots | 1 | c | stub-only sim effect | — |
-| 22064 | Sorcerer's Boots | 1 | f | no recognized source route | — |
-| 22065 | Sorcerer's Crown | 1 | f | no recognized source route | — |
-| 22069 | Sorcerer's Robes | 1 | f | no recognized source route | — |
-| 22074 | Deathmist Mask | 1 | f | no recognized source route | — |
-| 22075 | Deathmist Robe | 1 | f | no recognized source route | — |
-| 22076 | Deathmist Sandals | 1 | f | no recognized source route | — |
-| 22080 | Virtuous Crown | 1 | f | no recognized source route | — |
-| 22083 | Virtuous Robe | 1 | f | no recognized source route | — |
-| 22084 | Virtuous Sandals | 1 | f | no recognized source route | — |
 | 22087 | Soulforge Boots | 1 | f | no recognized source route | — |
 | 22089 | Soulforge Breastplate | 1 | f | no recognized source route | — |
 | 22091 | Soulforge Helm | 1 | f | no recognized source route | — |
-| 22096 | Boots of The Five Thunders | 1 | f | no recognized source route | — |
-| 22097 | Coif of The Five Thunders | 1 | f | no recognized source route | — |
-| 22102 | Vest of The Five Thunders | 1 | f | no recognized source route | — |
-| 22107 | Feralheart Boots | 1 | f | no recognized source route | — |
-| 22109 | Feralheart Cowl | 1 | f | no recognized source route | — |
-| 22113 | Feralheart Vest | 1 | f | no recognized source route | — |
 | 22191 | Obsidian Mail Tunic | 1 | c | stub-only sim effect | — |
 | 22194 | Black Grasp of the Destroyer | 1 | c | stub-only sim effect | — |
 | 22196 | Thick Obsidian Breastplate | 1 | c | stub-only sim effect | — |
@@ -1244,10 +1220,10 @@ carry. Each row names the rule that explains the absence.
 | d — class allowlist excludes this spec's class | 0 |
 | a — per-spec weapon/hand/armor exclusion | 0 |
 | b — fails the eligible_d7 stat and slot screen | 0 |
-| c — stub-only sim effect | 82 |
+| c — stub-only sim effect | 79 |
 | e1 — drops only outside this phase's zones | 343 |
 | e2 — sourced, but by a route the local assembly did not admit | 161 |
-| f — no recognized source route | 501 |
+| f — no recognized source route | 480 |
 | g — unexplained | 0 |
 
 ## Universe-only items, classified

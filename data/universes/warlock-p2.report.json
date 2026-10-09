@@ -14,17 +14,17 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 2190,
-  "excludedNoSource": 522,
-  "universeTotal": 476,
+  "d7EligibleTotal": 2176,
+  "excludedNoSource": 514,
+  "universeTotal": 470,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 42,
-    "chest": 21,
-    "feet": 29,
+    "chest": 19,
+    "feet": 27,
     "finger": 81,
     "hands": 12,
-    "head": 20,
+    "head": 18,
     "legs": 21,
     "neck": 53,
     "ranged": 6,
@@ -37,20 +37,20 @@
   "sourceRecordAdds": {
     "atlasloot": 213,
     "curated": 6,
-    "db": 1569,
+    "db": 1563,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 19,
-    "dbPhase": 298,
+    "dbPhase": 292,
     "itemHasOrigin:atlasloot": 28,
     "itemHasOrigin:curated": 5,
-    "itemHasOrigin:db": 449,
+    "itemHasOrigin:db": 443,
     "itemHasOrigin:two-hop": 10,
     "zoneMatch": 159
   },
   "exclusivePrimaryOrigin": {
-    "db": 449,
+    "db": 443,
     "atlasloot-only": 12,
     "two-hop": 10,
     "other": 5
@@ -59,13 +59,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 476,
-    "casterOnlyReject": 308,
+    "total": 470,
+    "casterOnlyReject": 302,
     "epFloorReject": 5,
-    "combinedReject": 313,
+    "combinedReject": 307,
     "combinedKeep": 163,
-    "casterRejectPct": 64.7,
-    "combinedRejectPct": 65.8,
+    "casterRejectPct": 64.3,
+    "combinedRejectPct": 65.3,
     "applied": false
   },
   "wowheadListIds": 0,

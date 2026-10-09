@@ -19,17 +19,17 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 4304,
-  "excludedNoSource": 1009,
-  "universeTotal": 1067,
+  "d7EligibleTotal": 4248,
+  "excludedNoSource": 977,
+  "universeTotal": 1046,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 51,
-    "chest": 61,
-    "feet": 95,
+    "chest": 54,
+    "feet": 88,
     "finger": 109,
     "hands": 49,
-    "head": 63,
+    "head": 56,
     "legs": 77,
     "neck": 67,
     "ranged": 26,
@@ -42,21 +42,21 @@
   "sourceRecordAdds": {
     "atlasloot": 376,
     "curated": 7,
-    "db": 3170,
+    "db": 3146,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 15,
-    "dbPhase": 532,
+    "dbPhase": 511,
     "itemHasOrigin:atlasloot": 92,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 1011,
+    "itemHasOrigin:db": 990,
     "itemHasOrigin:two-hop": 15,
     "repFactionMatch": 34,
     "zoneMatch": 486
   },
   "exclusivePrimaryOrigin": {
-    "db": 1011,
+    "db": 990,
     "atlasloot-only": 38,
     "two-hop": 15,
     "other": 3
@@ -65,13 +65,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 1067,
-    "casterOnlyReject": 422,
+    "total": 1046,
+    "casterOnlyReject": 412,
     "epFloorReject": 0,
-    "combinedReject": 422,
-    "combinedKeep": 645,
-    "casterRejectPct": 39.6,
-    "combinedRejectPct": 39.6,
+    "combinedReject": 412,
+    "combinedKeep": 634,
+    "casterRejectPct": 39.4,
+    "combinedRejectPct": 39.4,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -312,18 +312,6 @@
     {
       "itemId": 21891,
       "name": "Shard of the Fallen Star"
-    },
-    {
-      "itemId": 22013,
-      "name": "Beastmaster's Cap"
-    },
-    {
-      "itemId": 22060,
-      "name": "Beastmaster's Tunic"
-    },
-    {
-      "itemId": 22061,
-      "name": "Beastmaster's Boots"
     },
     {
       "itemId": 22191,

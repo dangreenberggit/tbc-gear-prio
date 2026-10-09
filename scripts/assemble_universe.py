@@ -38,8 +38,8 @@ FACTION_IDS = ROOT / "data/faction_ids.json"
 # that script's docstring for what "stub-only" means and why it never
 # excludes a plain stat item.
 SIM_IMPLEMENTED_EFFECTS = ROOT / "data/sim-implemented-effects.json"
-# Sets Wowhead tags with one class (the set tooltip's "Class:" line). See
-# eligible_d7.
+# Sets only one class can obtain; the table's _comment gives each row's
+# evidence. See eligible_d7.
 CLASS_RESTRICTED_SETS = ROOT / "data/class-restricted-sets.json"
 
 RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
@@ -727,7 +727,7 @@ EQUIP_ELIGIBLE_BY_FORK_SPEC = _equip_eligibility()
 
 
 def _class_restricted_sets() -> dict[int, int]:
-    """setId -> the one class Wowhead tags the set with."""
+    """setId -> the one class that can obtain the set's pieces."""
     raw = load_json(CLASS_RESTRICTED_SETS)
     assert isinstance(raw, dict)
     sets = raw["sets"]
@@ -1501,9 +1501,10 @@ def eligible_d7(it: dict, profile: SpecProfile) -> bool:
     if int(it["id"]) not in profile.equip_eligible_ids:
         return False
     # canEquipItem lets these through (db.json gives the Cryptstalker pieces no
-    # classAllowlist), so the class comes from Wowhead's tag on the set; the
-    # pieces' own Wowhead tooltips have no class line. The owner's rule: another
-    # class's set piece is not a candidate (ticket 576).
+    # classAllowlist), so the class comes from data/class-restricted-sets.json:
+    # Wowhead's tag on the set for Tier 3, Wowhead's appearance set and the
+    # owner's confirmation for Dungeon Set 2. The owner's rule: another class's
+    # set piece is not a candidate (tickets 576, 579).
     # scripts/check_class_restricted_sets.py holds the universes to it.
     set_class = CLASS_BY_RESTRICTED_SET.get(int(it.get("setId") or 0))
     if set_class is not None and set_class != profile.class_id:

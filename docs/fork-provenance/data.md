@@ -545,7 +545,8 @@ with the one class Wowhead tags it with: the "Class:" line on the set's
 tooltip, since the pieces' own tooltips have no class line. The fork's
 `canEquipItem` had let them into other classes' pools. Dungeon Set 2
 (511-519) is not listed: Wowhead tags it with an armor type and no class.
-Whether another class can obtain those pieces is ticket 579.
+Ticket 579 asked whether another class can obtain those pieces; the next
+refresh records the answer.
 
 `python scripts/sync_fork_universes.py --write` reported **36 refreshed, 27
 already matching, 63 listed here**: the p2-p5 universes of balance, ele, enh,
@@ -555,6 +556,37 @@ balance 32, rogue 32, mage 16, shadow 16, warlock 16 (1,280 in all). No
 other entry and no header field changed. The ret and feral universes and
 all 19 EP-weight files are unchanged. `git diff --stat` and
 `git diff --stat --ignore-cr-at-eol` agree (36 files).
+
+No engine file changed: this touches only `ui/features/upgrades/model/data/`.
+
+Verify:
+
+```bash
+pnpm fork-universes:check
+pnpm class-restricted-sets:check
+```
+
+## Refresh, 2026-10-09 (other classes' Dungeon Set 2 pieces dropped, ticket 579)
+
+The owner confirmed that a class cannot obtain another class's Dungeon Set 2
+pieces ("I'm confirming it. Remove.", decision-log 2026-10-09), so
+`data/class-restricted-sets.json` now also lists setIds 511-519. Wowhead's
+TBC set tooltip gives those sets an armor type and no class, and
+`vendor/wowsims/db.json` gives their pieces no `classAllowlist`, so each row
+cites Wowhead's appearance-set page for the set, whose "Classes:" line names
+the class (for example `https://www.wowhead.com/classic/transmog-set=935`,
+Battlegear of Heroism, Warrior), and carries a `confirmed` note.
+`scripts/check_class_restricted_sets.py` counts these rows apart from the
+Tier 3 rows it holds to db.json's ring allowlists.
+
+`python scripts/sync_fork_universes.py --write` reported **36 refreshed, 27
+already matching, 63 listed here**: the p2-p5 universes of balance, ele, enh,
+hunter, mage, rogue, shadow, warlock and warrior. Each loses only entries,
+the same number at every phase: warrior 21, hunter 18, ele 15, enh 15,
+balance 12, rogue 12, mage 6, shadow 6, warlock 6 (444 in all). No other
+entry and no header field changed. The ret and feral universes and all 19
+EP-weight files are unchanged. `git diff --stat` and
+`git diff --stat --ignore-cr-at-eol` agree (36 files, 7,104 lines removed).
 
 No engine file changed: this touches only `ui/features/upgrades/model/data/`.
 
