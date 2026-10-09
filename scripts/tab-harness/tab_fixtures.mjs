@@ -39,8 +39,10 @@ export function tabFixtures(dir) {
 			return r.json();
 		});
 		payload.catch(() => {});
-		if (!(await until(() => typeof window.__upgradesFixture === 'function' && nav(), 120000))) throw new Error('the Upgrades tab did not load in 120 s');
+		if (!(await until(nav, 120000))) throw new Error('the Upgrades tab button did not appear in 120 s');
+		// Click first: the tab body, which installs the hook, loads only when the tab is first opened.
 		nav().click();
+		if (!(await until(() => typeof window.__upgradesFixture === 'function', 60000))) throw new Error('the Upgrades tab did not load in 60 s');
 		const res = await window.__upgradesFixture(await payload);
 		if (!res.ok) throw new Error('fixture rejected: ' + res.reason + (res.detail ? ' (' + res.detail + ')' : ''));
 		if (!(await until(() => ${fixtureSettledExpression}, 30000))) throw new Error('the table did not settle in 30 s');
