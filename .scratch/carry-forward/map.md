@@ -313,3 +313,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 577 Share the browser-driving helpers between the two tab harness scripts (pre-merge review feat-upstream-react-port round 1, S9, via ticket 568; stage-gate cleanup-upstream-footprint, step D3) 2026-10-08
 - 578 100 of the tab's files fail wowsims' formatting check (stage-gate cleanup-upstream-footprint, Gate B row R4-1) 2026-10-08
 - 579 Can another class obtain a Dungeon Set 2 piece? (pre-merge review feat-upstream-react-port round 2, D4) 2026-10-08
+- 580 The layout gate's digest does not cover z-index.css or rows.mjs (stage-gate 565-upstream-sync-tanstack, decision-log finding 2026-10-09T04:41Z) 2026-10-09
