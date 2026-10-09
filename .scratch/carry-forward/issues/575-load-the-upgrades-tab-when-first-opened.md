@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: stage-gate cleanup-upstream-footprint, plan revision 4, step D3 (work in chunk F), 2026-10-08 (`.scratch/stage-gate/cleanup-upstream-footprint/plan.md`; gitignored, owner's checkout)
 Blocks: none
@@ -48,3 +48,41 @@ A wowsims maintainer is unlikely to accept that weight on every visitor.
 The entry script no longer holds the tab's code (the `carryoverPolicy` count
 is 0), the fixtures still autoload on `:5173`, `pnpm tab-fixtures:smoke` and
 `pnpm verify` pass after the re-pin, and this ticket records the numbers.
+
+## Comments
+
+### 2026-10-08, cleanup stage cleanup-upstream-footprint, chunk F — closed
+
+- Fork `d983e0fbe` "Load the Upgrades tab when it is first opened":
+  `ui/app/tabs/UpgradesTabBody.tsx` is now a shell that watches its tab
+  panel's `hidden` attribute and lazily imports the body, which moved to
+  `ui/features/upgrades/app/UpgradesTabBodyInner.tsx`. No existing wowsims
+  file changed; `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M
+  42c75dc9 HEAD` still prints only `6 0 ui/app/SimTabsSection.tsx`. While
+  the body loads, the pane shows wowsims' own `Spinner`.
+- Sizes, production build from the fork root
+  (`node node_modules/vite/bin/vite.js build --outDir <dir> --emptyOutDir`,
+  the build command of `make dist/tbc/bundle/.dirstamp`), `gzip -9`:
+
+  | | before (`c122cf73b`) | after (`d983e0fbe`) |
+  | --- | --- | --- |
+  | spec entry script | 7,380,483 B, 1,048,766 B gzipped | 818,650 B, 227,264 B gzipped |
+  | entry plus its static imports | 9,039,888 B | 2,624,962 B |
+  | lazy chunk `UpgradesTabBodyInner-*.chunk.js` | none | 6,420,680 B, 774,177 B gzipped |
+  | `grep -o -F carryoverPolicy <entry> \| wc -l` | 44 | 0 |
+
+  After the change, `carryoverPolicy` and the tab's test ids
+  (`upgrades-run-button`, `upgrades-tab-root`) appear only in the lazy chunk.
+- On `:5173` (`WASM_WORKER=1`, feral page): before the first click the dev
+  server had transformed no module under `ui/features/upgrades/` (its
+  `vite:transform` log), so the run-staleness subscription in
+  `useRunStale.ts` had not started; the click loaded the body in about
+  1.5 s. A 200-iteration ranking ran to the end, Stop ended a second run,
+  and the result and settings were the same after switching to Gear and
+  back. `?upgrades-fixture=feral-p3-p2bis` autoloaded (16 rows).
+- Port `d0761630` re-pins and makes the fixture autoload script click the
+  tab before it waits for `window.__upgradesFixture`. `pnpm verify` rc 0
+  (1517 gates); `pnpm tab-fixtures:smoke` 5/5 ok; `pnpm layout-gate:check`
+  measured pass, 36 PASS, baseline advanced by the gate to `ed6d57fe8a95`.
+- The tab's text strings stay in the first download, because wowsims' i18n
+  loader loads every locale file at startup (`vite.config.mts`).
