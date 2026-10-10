@@ -185,6 +185,17 @@ def unexpected_ignored(porcelain_ignored: str) -> list[str]:
     ]
 
 
+def unknown_vendor_folders(names: list[str]) -> list[str]:
+    """Folders in a pair's vendor/ that pair setup did not put there.
+
+    `git status --ignored` reports vendor/ as one line, so the work check
+    cannot see a folder someone added (notes, a clone). Setup puts in the
+    fork worktree, atlasloot, wowsims and one wowsimcli-<tag>-<platform>.
+    """
+    known = {"tbc-new-fork", "atlasloot", "wowsims"}
+    return [n for n in names if n not in known and not n.startswith("wowsimcli-")]
+
+
 def other_worktrees_inside(root: str, own: list[str], entries: list[dict[str, str]]) -> list[str]:
     """Worktrees registered inside `root` besides the pair's own two.
 
@@ -526,10 +537,15 @@ def delete_folder(path: Path) -> None:
 
 def unsaved_work(repo: Path) -> str | None:
     """Why removing this checkout could lose work, or None."""
-    status = git(repo, "status", "--porcelain")
+    # --untracked-files=normal: a status.showUntrackedFiles=no in the repo
+    # config would otherwise hide untracked files from both calls.
+    status = git(repo, "status", "--porcelain", "--untracked-files=normal")
     if status:
         return f"{repo} has uncommitted changes; commit or stash them:\n{status}"
-    ignored = unexpected_ignored(git(repo, "status", "--porcelain", "--ignored"))
+    ignored = unexpected_ignored(git(repo, "status", "--porcelain", "--untracked-files=normal", "--ignored"))
+    vendor = repo / "vendor"
+    if vendor.is_dir():
+        ignored += [f"vendor/{n}/" for n in unknown_vendor_folders(sorted(p.name for p in vendor.iterdir()))]
     if ignored:
         return (
             f"{repo} has ignored files that pair setup did not write; move them out "

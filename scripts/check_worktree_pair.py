@@ -353,6 +353,8 @@ def check_run_logs_are_kept_without_overwriting() -> list[str]:
         (main / ".scratch" / "agent-runs" / "s1.pair-probe.jsonl").write_text(
             "earlier pair probe", encoding="utf-8"
         )
+        (pair / ".scratch" / "agent-runs" / "sub").mkdir()
+        (pair / ".scratch" / "agent-runs" / "sub" / "s3.jsonl").write_text("pair sub s3", encoding="utf-8")
         wp.keep_run_logs(pair, main)
         runs = main / ".scratch" / "agent-runs"
         want = {
@@ -360,21 +362,28 @@ def check_run_logs_are_kept_without_overwriting() -> list[str]:
             "s1.pair-probe.jsonl": "earlier pair probe",
             "s1.pair-probe-2.jsonl": "pair s1",
             "s2.jsonl": "pair s2",
+            "sub/s3.jsonl": "pair sub s3",
         }
-        got = {p.name: p.read_text(encoding="utf-8") for p in runs.iterdir()}
-        if got != want:
-            problems.append(f"main run logs after keep_run_logs: {got}, want {want}")
+
+        def listing() -> dict[str, str]:
+            return {
+                p.relative_to(runs).as_posix(): p.read_text(encoding="utf-8")
+                for p in runs.rglob("*")
+                if p.is_file()
+            }
+
+        if listing() != want:
+            problems.append(f"main run logs after keep_run_logs: {listing()}, want {want}")
         # A rerun after a refused unpair copies nothing twice.
         wp.keep_run_logs(pair, main)
-        if len(list(runs.iterdir())) != len(want):
-            problems.append(f"a second keep_run_logs added files: {sorted(p.name for p in runs.iterdir())}")
+        if listing() != want:
+            problems.append(f"a second keep_run_logs changed the logs: {sorted(listing())}")
     return problems
 
 
 def check_other_worktrees_inside_the_pair_are_found() -> list[str]:
-    """`git status --ignored` folds a pair's whole vendor/ into one line, so
-    a second fork worktree made inside it is invisible to the work check;
-    unpair finds it in `git worktree list` instead."""
+    """A second fork worktree under the pair's vendor/ is found; a sibling
+    pair whose name starts the same is not."""
     root = "C:/Users/dgree/Code/lulz/tbc-wt/tab-sort"
     entries = wp.parse_worktrees(
         f"""worktree {root}
@@ -395,6 +404,17 @@ HEAD 4
     want = [root + "/vendor/tbc-new-fork-b"]
     if got != want:
         return [f"other_worktrees_inside gave {got}, want {want}"]
+    return []
+
+
+def check_unknown_vendor_folders_are_found() -> list[str]:
+    """`git status --ignored` reports a pair's vendor/ as one line, so a folder
+    someone added there (notes, a clone) is invisible to it."""
+    names = ["atlasloot", "wowsims", "wowsimcli-5262ff38-win32-x64", "wowsimcli-v0.0.101-win32-x64",
+             "tbc-new-fork", "my-notes", "tbc-new-fork-b"]
+    got = wp.unknown_vendor_folders(names)
+    if got != ["my-notes", "tbc-new-fork-b"]:
+        return [f"unknown_vendor_folders gave {got}"]
     return []
 
 
@@ -428,6 +448,7 @@ CHECKS = (
     check_run_logs_are_kept_without_overwriting,
     check_other_worktrees_inside_the_pair_are_found,
     check_disposable_names_match_whole_paths,
+    check_unknown_vendor_folders_are_found,
 )
 
 

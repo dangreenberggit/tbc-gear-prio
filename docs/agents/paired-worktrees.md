@@ -101,9 +101,12 @@ pnpm wt:unpair <name>
 Run it from the main checkout or from another pair; it refuses to run from
 inside the pair it removes. Without `--force` it refuses when either worktree
 has uncommitted or untracked files, has ignored files that pair setup did not
-write (such as `.scratch/` stage records), or is detached at a commit no
-branch contains. It always refuses a locked worktree, before removing either
-half. Before removing anything it copies the pair's agent run logs
+write (such as `.scratch/` stage records, or a folder added under `vendor/`),
+or is detached at a commit no branch contains. Even with `--force`, it
+refuses a locked worktree and a pair with another worktree registered inside
+it (such as a second fork worktree under `vendor/`; remove that one first
+with `git worktree remove`), before removing either half. Before removing
+anything it copies the pair's agent run logs
 (`.scratch/agent-runs/`, written by the run-log hook) into the main
 checkout's.
 
@@ -120,7 +123,9 @@ would make any recursive delete remove the main checkout's files.
 
 ## Live test, 2026-10-10
 
-Run from the `feat/worktree-pair` pair on Node 22.17.1:
+Times and results below are from each command's console output; the logs
+were kept outside the repo. Run from the `feat/worktree-pair` pair on Node
+22.17.1:
 `pnpm wt:pair live-probe fix/585-resort-test-claims --fork-detached --build`.
 
 | Step                        | Time                                 |
@@ -137,8 +142,8 @@ Run from the `feat/worktree-pair` pair on Node 22.17.1:
 - **verify.** `pnpm verify` in the new pair gave rc 0, "gates: 1517 ran, 0
   skipped", in 185 s.
 - **unpair.** `wt:unpair` refused while the pair's fork held an untracked
-  file. Once the fork was clean it took 17 s: git left the main folder
-  ("Directory not empty"), the script deleted it, and neither `worktree list`
+  file. Once the fork was clean it took 17 s: git left the main folder on
+  disk ("Directory not empty"), the script deleted it, and neither `worktree list`
   named the pair.
 - **New and existing branches.**
   `pnpm wt:pair probe-b test/wt-pair-probe test/wt-pair-probe -b --new-fork-branch`
@@ -152,15 +157,15 @@ Run from the `feat/worktree-pair` pair on Node 22.17.1:
 - **After round-3 fixes (probe-d).** `--fork-detached` pair in 100 s;
   `pnpm verify` in it gave rc 0, "gates: 1517 ran, 0 skipped", in 205 s and
   left only ignored files that unpair counts as safe; `wt:unpair` without
-  `--force` then removed the pair in 18 s (git left the main folder, the
-  script deleted it). The run-log copy was not exercised live: no session ran
+  `--force` then removed the pair in 18 s (git left the main folder on disk,
+  and the script deleted it). The run-log copy was not exercised live: no session ran
   in the pair. `check_run_logs_are_kept_without_overwriting` tests it in a
   temp dir.
 - **After round-2 fixes (probe-c).** `--fork-detached` pair in 82 s. Unpair
   refused on an ignored `.scratch/dist/note.md`, then, with that file gone
   and `.claude/settings.local.json` present, removed the pair in 18 s. git
-  again left the main folder ("Directory not empty"), and the script deleted
-  it.
+  again left the main folder on disk ("Directory not empty"), and the script
+  deleted it.
 - **disk.** The same layout in a scratch test measured 404 MB for the main
   worktree without `vendor/` and 561 MB for the fork worktree.
 - **First-run fixes.** Two failures in the first runs were fixed in the
