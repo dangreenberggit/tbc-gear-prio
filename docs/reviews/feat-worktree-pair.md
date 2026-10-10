@@ -512,9 +512,10 @@ delete a backend binary built in the pair" fixed that.
 - **WK1 (minor)** The `known-traps.md` 5173/3333 paragraph needed the
   find-the-folder-first order, plus a long unwrapped line.
 - **WT1, WT2 (minor)** Ticket 593 placed its two paragraphs at the wrong
-  anchors. Checked: the AGENTS.md section ends with the paragraph that
-  starts "Every fork commit is a separate"; `agnostic.md`'s code block is at
-  lines 10-15.
+  anchors. Checked: the AGENTS.md section ends with the single paragraph at
+  `AGENTS.md:89`, whose last sentence starts "Every fork commit is a
+  separate" and which ends "can hit on any one of them." (corrected in the
+  re-check, T5); `agnostic.md`'s code block is at lines 10-15.
 - **WT4 (nit)** "both lines" should be "both paragraphs".
 - **WX1 (minor)** `agnostic.md` lines 14, 21, 31 and 46 use
   `${FEATURE}/${SLICE}`. Tested in a temp repo: with branch `feat`, `git
@@ -538,7 +539,7 @@ branch feat/slice` gave "fatal: cannot lock ref 'refs/heads/feat/slice':
 | WD11 | Writing-for-agents (doc)    | fixed       | name rule stated                                                                                                                   |
 | WD12 | Writing-for-agents (doc)    | fixed       | "Subagents" bullet, with the scratch-pair evidence                                                                                 |
 | WK1  | Writing-for-agents (doc)    | fixed       | reviewer's paragraph; "since paired worktrees" dropped; rewrapped                                                                  |
-| WT1  | Writing-for-agents (ticket) | fixed       | ticket 593 anchors the AGENTS.md paragraph after "Every fork commit is a separate", with the reviewer's text                       |
+| WT1  | Writing-for-agents (ticket) | fixed       | ticket 593 anchors the AGENTS.md paragraph after the paragraph that ends "can hit on any one of them.", with the reviewer's text   |
 | WT2  | Writing-for-agents (ticket) | fixed       | ticket 593 anchors the `agnostic.md` paragraph after the code block, with the reviewer's text; its "steps 2-4" still match the doc |
 | WT4  | Writing-for-agents (ticket) | fixed       | "both paragraphs"                                                                                                                  |
 | WX1  | Writing-for-agents (ticket) | defer       | `.scratch/carry-forward/issues/593-point-agents-at-paired-worktrees.md` — skill edit, needs owner approval                         |

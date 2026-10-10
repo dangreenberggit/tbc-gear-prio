@@ -21,7 +21,7 @@ AGENTS.md and skill files in chat and wait for approval). Proposed wording,
 not yet approved:
 
 AGENTS.md, "The forked tab repo": a new paragraph at the end of the section,
-after the paragraph that starts "Every fork commit is a separate":
+after the paragraph that ends "can hit on any one of them.":
 
 > **Two fork branches at once need a pair.** A session that needs a fork
 > branch other than the one the main checkout's clone has checked out, or
@@ -45,7 +45,8 @@ starts "Point the worker session at that worktree directory":
 > `docs/agents/paired-worktrees.md` "Land it on dev" steps 2-4 with
 > `${FEATURE}` in place of `dev`, so the slice's fork commits reach the
 > clone's branch and the lock names them. Remove the pair only with
-> `pnpm wt:unpair ${SLICE}`.
+> `pnpm wt:unpair ${SLICE}`, and after the merge delete its fork branch with
+> `git -C vendor/tbc-new-fork branch -d "${FEATURE}-${SLICE}"`.
 
 ## Related defect in the same file (X1)
 
@@ -55,8 +56,14 @@ always does there: a temp-repo test on 2026-10-10 (`git branch feat`, then
 `git branch feat/slice`) gave "fatal: cannot lock ref
 'refs/heads/feat/slice': 'refs/heads/feat' exists". `git branch feat-slice`
 succeeded. Proposed: use `${FEATURE}-${SLICE}` at all four lines, which is
-also the name the pointer above uses. This edits a skill file, so it needs
-the owner's approval too.
+also the name the pointer above uses. The four replacement lines:
+
+- line 14: `git worktree add "../$(basename "$(pwd)")-${SLICE}" -b "${FEATURE}-${SLICE}" "${BASE}"`
+- line 21: `` - Commit on `${FEATURE}-${SLICE}` only.``
+- line 31: `git merge --no-ff "${FEATURE}-${SLICE}" -m "Merge ${FEATURE}-${SLICE} into ${FEATURE}"`
+- line 46: `git branch -d "${FEATURE}-${SLICE}"   # after merge`
+
+This edits a skill file, so it needs the owner's approval too.
 
 ## Done when
 
