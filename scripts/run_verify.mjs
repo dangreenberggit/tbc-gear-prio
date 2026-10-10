@@ -8,7 +8,8 @@
  * / a "skipped" assertion) when it's absent. A CI run that tested none of the
  * ported engine emitted the same green tick as a full local run — nothing
  * counted the difference. This script is that count. Outside CI, an absent
- * fork is refused before any step runs (verify_fork_guard.mjs).
+ * fork is refused before any step runs, and any skip fails the run
+ * (verify_fork_guard.mjs).
  *
  * Deliberately step-generic: it reads the step list out of package.json's own
  * `verify` script rather than hardcoding which steps are fork-gated, and
@@ -33,7 +34,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { forkGuard } from "./verify_fork_guard.mjs";
+import { forkGuard, skipGuard } from "./verify_fork_guard.mjs";
 import {
   extractPythonSkips,
   extractVitestSkips,
@@ -212,6 +213,15 @@ async function main() {
           layout,
         })
     );
+
+    const skipFailure = skipGuard({
+      skipped: pythonSkips.length + vitestSkips.skipped,
+      env: process.env,
+    });
+    if (skipFailure) {
+      console.error(`\n${skipFailure}`);
+      process.exitCode = 1;
+    }
   } finally {
     if (!keepReport) rmSync(tmpDir, { recursive: true, force: true });
   }

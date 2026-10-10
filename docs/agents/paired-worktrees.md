@@ -37,9 +37,9 @@ it. The command prints a note when that is the case. See `known-traps.md`,
 
 ## Work in it
 
-- **Memory.** Open the session in the pair folder. Memory is kept per folder,
-  so that session starts with no memory notes (ticket 572). The owner's notes
-  are in
+- **Memory.** Memory is kept per folder, so a session opened in the pair
+  folder (needed only for the live tab) starts with no memory notes (ticket
+  572). The owner's notes are in
   `C:\Users\dgree\.claude\projects\C--Users-dgree-Code-lulz-tbc-gear-prio\memory\`.
 - **Subagents.** A subagent starts in the spawning session's folder, not the
   pair. Give it the pair's path and have it use `git -C <pair>` and
