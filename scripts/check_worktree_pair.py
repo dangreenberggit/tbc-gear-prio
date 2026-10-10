@@ -17,6 +17,7 @@ Exit 0 ok, 1 a check failed.
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -418,6 +419,43 @@ def check_unknown_vendor_folders_are_found() -> list[str]:
     return []
 
 
+def check_unsaved_work_on_a_real_repo() -> list[str]:
+    """unsaved_work, the gate before every delete, on a real git repo in a
+    temp dir: a folder added under the ignored vendor/ (A13) and an untracked
+    file hidden by status.showUntrackedFiles=no (A14) both count as work."""
+    problems = []
+    with tempfile.TemporaryDirectory() as td:
+        repo = Path(td, "pair")
+        repo.mkdir()
+
+        def git(*args: str) -> None:
+            subprocess.run(
+                ["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@t", *args],
+                capture_output=True,
+                check=True,
+            )
+
+        git("init", "-q")
+        (repo / ".gitignore").write_text("vendor/\n", encoding="utf-8")
+        git("add", ".gitignore")
+        git("commit", "-q", "-m", "init")
+        (repo / "vendor" / "wowsims").mkdir(parents=True)
+        if wp.unsaved_work(repo) is not None:
+            problems.append(f"a clean pair with a known vendor/ folder has no work: {wp.unsaved_work(repo)}")
+        (repo / "vendor" / "my-notes").mkdir()
+        (repo / "vendor" / "my-notes" / "plan.md").write_text("notes", encoding="utf-8")
+        found = wp.unsaved_work(repo) or ""
+        if "vendor/my-notes/" not in found:
+            problems.append(f"a folder added under vendor/ must count as work, got {found!r}")
+        shutil.rmtree(repo / "vendor" / "my-notes")
+        git("config", "status.showUntrackedFiles", "no")
+        (repo / "work.txt").write_text("work", encoding="utf-8")
+        found = wp.unsaved_work(repo) or ""
+        if "work.txt" not in found:
+            problems.append(f"showUntrackedFiles=no must not hide untracked work, got {found!r}")
+    return problems
+
+
 def check_disposable_names_match_whole_paths() -> list[str]:
     """A backup next to settings.local.json is the user's file, not Claude
     Code's."""
@@ -449,6 +487,7 @@ CHECKS = (
     check_other_worktrees_inside_the_pair_are_found,
     check_disposable_names_match_whole_paths,
     check_unknown_vendor_folders_are_found,
+    check_unsaved_work_on_a_real_repo,
 )
 
 
