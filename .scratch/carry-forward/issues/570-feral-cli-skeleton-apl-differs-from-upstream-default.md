@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: docs/reviews/feat-upstream-react-port.md (fix round B1; not a review finding, filed at the session's request)
 Blocks: none
@@ -108,3 +108,13 @@ The owner overruled the closing note's session ruling on 2026-10-08T15:31Z (`C:/
 > "\"Q-570-feral-skeleton-apl. The command-line harness keeps your own exported feral rotation, which is its documented design.\" this doesnt make any sense. i see no reason for this to exist as part of the upgrades tab code, it is a huge smell. our job is making an upgrades tab, not making a feral rotation (perhaps it existed somewhere for testing or in tbc gear prio as some default setting)"
 
 So the `wontfix` above no longer stands and the done line ("The owner has picked 1 or 2") is not met. The work is planned in `C:/Users/dgree/Code/lulz/tbc-gear-prio/.scratch/stage-gate/570-feral-upstream-apl/` (`plan.md`, `investigation.md`, `decision-log.md`; gitignored, owner's checkout): build the command-line feral skeleton from wowsims' own default rotation and presets and delete the project's exported rotation. That plan is held until `feat/upstream-react-port` merges (`.scratch/handoffs/cleanup-upstream-footprint-HANDOFF.md`, "Ticket 570: the feral rotation", owner's checkout).
+
+## Closed (2026-10-09): wontfix, owner ruling
+
+The owner, in the session of 2026-10-09, about this ticket:
+
+> "This concept is dumb. If we are simming on wowsims then the sim uses whatever settings a user has on wowsims."
+
+So the feral command-line skeleton is not rebuilt from upstream's default
+rotation, and the plan in `.scratch/stage-gate/570-feral-upstream-apl/`
+(gitignored) is not executed. The stage is closed on this ruling.

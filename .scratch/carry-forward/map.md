@@ -319,3 +319,8 @@ file contention, worker prompt. This file stays the chronological log.
 - 583 The virtual-rows test does not check that each data-index shows its own row (pre-merge review feat-565-upstream-sync-tanstack round 2, A8) 2026-10-09
 - 584 No test checks a row's data-index and Rank after the table is re-sorted in place (pre-merge review feat-565-upstream-sync-tanstack round 3, A10 and S19) 2026-10-09
 - 585 The re-sort test's first click moves no row, and the lock note claims more than the tests show (pre-merge review feat-565-upstream-sync-tanstack round 4, A11, A12 and S21) 2026-10-09
+- 586 Saved tab settings keep the dev link's candidate cap, whose control is hidden (pre-merge review feat-tab-settings-persist, A2, D1, SP3 and riders S2-S6, SP4) 2026-10-09
+- 587 Saved set selection misses a phase change made before the tab opens (pre-merge review feat-tab-settings-persist, A1, A3, A4, D2) 2026-10-09
+- 588 The export panel's token/gear choice does not survive a reload (pre-merge review feat-tab-settings-persist, SP1) 2026-10-09
+- 589 A phase change downloads the Upgrades tab's data on every spec page, opened or not (pre-merge review feat-tab-settings-persist round 2, A9, A10, SP5 and riders S8-S12) 2026-10-09
+- 590 Tighten the ticket-589 tests and two small leftovers (pre-merge review feat-tab-settings-persist round 3, A12, A13, S14, S15, S17, SP7) 2026-10-10
