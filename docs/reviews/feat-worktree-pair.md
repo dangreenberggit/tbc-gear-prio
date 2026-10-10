@@ -5,8 +5,8 @@ Reviewed range: `35aa31df85299aa9018f1272feda22024a799789..b7548e119dfff7a07e3fe
 Dispatch (round 1): four fresh Opus subagents (`general-task`, effort high)
 in one parallel batch: adversarial, domain, and the `code-review` skill's
 Standards and Spec agents. Each was told it writes nothing. `codex` is not on
-`PATH`. The fixes landed after dispatch in `4ad3361c`; round 2 chains from
-the recorded `<through-sha>` above.
+`PATH`. The fixes were committed after dispatch in `4ad3361c`; round 2
+chains from the recorded `<through-sha>` above.
 
 What the branch is: `pnpm wt:pair` / `pnpm wt:unpair`
 (`scripts/worktree_pair.py`), which make and remove a main-repo worktree with
@@ -106,3 +106,87 @@ owner's approval.
 | P2  | Spec        | fixed       | same fix as D1                                                                                                                                      |
 | P3  | Spec        | fixed       | probe-b live runs: `-b --new-fork-branch` (93 s), then existing branches (70 s); recorded in the doc                                                |
 | P4  | Spec        | wontfix     | each extra serves a spec item: `--base` gives `-b` a start point, the preflight stops a half-made pair on Node 20, the refusals protect work        |
+
+## Round 2
+
+Reviewed range: `b7548e119dfff7a07e3feb14f3ed881d8c9bbe25..b099ad717963e07d421252399d46fadda0c465b0`
+
+Dispatch: the same four axes, fresh Opus subagents, one parallel batch, each
+told it writes nothing. No focused check: round 1 had a `major` and two
+`medium` findings. Fixes were committed after dispatch in `7d95e795` and in
+the commit that records this round; round 3 chains from the
+`<through-sha>` above.
+
+### Adversarial (round 2)
+
+A1 and A3 are fixed in the code; A2 and A4 are fixed but each brought a new
+problem; A5 was partly fixed.
+
+- **A6 (medium)** Every session in a pair writes ignored files: the run-log
+  hook's `.scratch/agent-runs/` and Claude Code's
+  `.claude/settings.local.json`; `pnpm verify` writes `coverage/`. The new
+  ignored-file check refused all of them, and its "commit or stash" advice
+  cannot work for ignored files.
+- **A7 (minor)** A folder named `dist`, `vendor` or `node_modules` counted as
+  build output anywhere, so `.scratch/dist/` would be deleted unasked.
+- **A8 (minor)** Warnings were printed only after "pair ready", so a failed
+  run dropped them.
+- **A9 (minor)** `delete_folder` and the `remove()` path had no check; the
+  junction check ran only on Windows, and CI runs on Linux; a `mklink`
+  failure crashed the script instead of failing the check.
+
+### Domain (round 2)
+
+D1 and D2 are fixed for sessions in a pair.
+
+- **D3 (low)** `merge-to-dev --check-only` in the pair can rewrite
+  `data/wowsims-fork-layout.lock.json` and leave it uncommitted, which makes
+  the next unpair refuse.
+- **D4 (low)** `known-traps.md` still told a main-folder session that a busy
+  5173 serves its own checkout.
+- **D5 (nit)** The landing steps said nothing about `--fork-detached` pairs.
+- **D6 (nit)** The re-pin step did not mention the lock's `_comment` history.
+
+### Standards + Spec (round 2)
+
+**Standards**
+
+- **S10 (minor)** Banned words: "lands" in the doc, "carries" in a check
+  message.
+- **S11 (minor)** A comment called partly made-up porcelain "copied".
+- **S12 (minor)** Ticket 593 pointed at a chat report for its wording.
+- **S13 (minor)** "four live runs" could not be traced in the doc, and a
+  docstring pointed at the wrong place for the re-measure command.
+- **S14 (judgement)** The 5173 rule did not say how to check who started it.
+- **S15 (judgement)** `leftover_action` returns strings; the unlock hint was
+  written twice.
+
+**Spec**
+
+- **P5 (minor)** Nothing showed the rewritten doc sections had the
+  `writing-for-agents` review pass.
+- **P6 (nit)** Round-2 additions beyond the spec; the junction check writes
+  links in a temp dir on every `pnpm verify`.
+- **P7 (note)** The same gap as S12.
+
+## Disposition (round 2)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                |
+| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A6  | Adversarial | fixed       | run logs are copied to the main checkout first (`keep_run_logs`); `.scratch/agent-runs/`, `.claude/settings.local.json` and `coverage/` count as safe; message says "move them out"                          |
+| A7  | Adversarial | fixed       | build-output names count only at the top level or under `apps/*`, `packages/*`; anything else under `.scratch/` is work                                                                                      |
+| A8  | Adversarial | fixed       | warnings are printed in the failure path too                                                                                                                                                                 |
+| A9  | Adversarial | fixed       | `check_delete_guard_on_real_links` runs `delete_folder` on an escaping tree (refuses, keeps the outside file) and a clean tree (deletes); symlinks off Windows so CI runs it; link creation inside the `try` |
+| D3  | Domain      | fixed       | landing step 1 says to commit the layout lock                                                                                                                                                                |
+| D4  | Domain      | fixed       | `known-traps.md` sentence now applies to every checkout                                                                                                                                                      |
+| D5  | Domain      | fixed       | paragraph on `--fork-detached` pairs                                                                                                                                                                         |
+| D6  | Domain      | fixed       | step 4 names the `_comment` history and a dated line                                                                                                                                                         |
+| S10 | Standards   | fixed       | reworded                                                                                                                                                                                                     |
+| S11 | Standards   | fixed       | comment says which values are made up                                                                                                                                                                        |
+| S12 | Standards   | fixed       | ticket 593 quotes both proposed paragraphs                                                                                                                                                                   |
+| S13 | Standards   | fixed       | the doc lists the four live removals and the partly made pairs; docstring points at the comment above `PATH_LIMIT`                                                                                           |
+| S14 | Standards   | fixed       | the doc gives the PowerShell lookup, marked untested                                                                                                                                                         |
+| S15 | Standards   | fixed       | the unlock hint is now written once; the string results stay, as in S7                                                                                                                                       |
+| P5  | Spec        | fixed       | review pass done on the rewritten sections; recorded in the `7d95e795` message                                                                                                                               |
+| P6  | Spec        | wontfix     | each addition fixes a review finding; the temp-dir link check is the only test of the delete guard on real links, which no pure test can show                                                                |
+| P7  | Spec        | fixed       | same fix as S12                                                                                                                                                                                              |

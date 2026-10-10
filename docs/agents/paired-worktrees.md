@@ -148,6 +148,9 @@ Run from the `feat/worktree-pair` pair on Node 22.17.1:
   `.scratch/stage-gate/probe/brief.md`. With the main worktree locked by
   `git worktree lock`, it refused before running any removal, and the main
   folder was left intact.
+- **After round-2 fixes (probe-c).** `--fork-detached` pair in 82 s. Unpair
+  refused on an ignored `.scratch/dist/note.md`, then, with that file gone
+  and `.claude/settings.local.json` present, removed the pair in 18 s.
 - **disk.** The same layout in a scratch test measured 404 MB for the main
   worktree without `vendor/` and 561 MB for the fork worktree.
 - **First-run fixes.** Two failures in the first runs were fixed in the
