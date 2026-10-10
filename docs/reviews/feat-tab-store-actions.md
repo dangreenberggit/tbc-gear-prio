@@ -94,20 +94,20 @@ No blocking or medium findings. The refactor keeps every old state transition's 
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                                    |
 | --- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | defer       | `.scratch/carry-forward/issues/591-store-actions-review-leftovers.md` — the "notifies nobody" comment and test name overstate the rule                           |
-| A2  | Adversarial | defer       | `.scratch/carry-forward/issues/591-store-actions-review-leftovers.md` — `applyDefaults` store action has only test callers                                       |
-| A3  | Adversarial | defer       | `.scratch/carry-forward/issues/591-store-actions-review-leftovers.md` — duplicate and misnamed tests in `run_state.test.ts`                                      |
-| A4  | Adversarial | defer       | `.scratch/carry-forward/issues/591-store-actions-review-leftovers.md` — one `fork-run-staleness.test.ts` test passes by construction                             |
-| A5  | Adversarial | defer       | `.scratch/carry-forward/issues/591-store-actions-review-leftovers.md` — no positive control for the data-module mock                                             |
+| A1  | Adversarial | fixed       | fixed on feat/store-actions-followups: fork `218234677`, main `e5cd56a4`, ticket 591 closed — the "notifies nobody" comment and test name overstate the rule     |
+| A2  | Adversarial | fixed       | fixed on feat/store-actions-followups: fork `218234677`, main `e5cd56a4`, ticket 591 closed — `applyDefaults` store action has only test callers                 |
+| A3  | Adversarial | fixed       | fixed on feat/store-actions-followups: fork `218234677`, main `e5cd56a4`, ticket 591 closed — duplicate and misnamed tests in `run_state.test.ts`                |
+| A4  | Adversarial | fixed       | fixed on feat/store-actions-followups: fork `218234677`, main `e5cd56a4`, ticket 591 closed — one `fork-run-staleness.test.ts` test passes by construction       |
+| A5  | Adversarial | fixed       | fixed on feat/store-actions-followups: fork `218234677`, main `e5cd56a4`, ticket 591 closed — no positive control for the data-module mock                       |
 | A6  | Adversarial | wontfix     | a review row records the code at its round; `upgrades_store.ts:101-102` was right at `0ba3765ec`                                                                 |
 | A7  | Adversarial | wontfix     | checked: `runSettled` copies the outcome to move `runner` off it, as `settledAction` did; no consumer depends on result identity                                 |
-| S1  | Standards   | defer       | `.scratch/carry-forward/issues/591-store-actions-review-leftovers.md` — same as A2; rated low, the test-only path existed at `0ba3765ec`                         |
-| S2  | Standards   | defer       | `.scratch/carry-forward/issues/591-store-actions-review-leftovers.md` — duplicated destructure in `runSettled`                                                   |
-| S3  | Standards   | defer       | `.scratch/carry-forward/issues/591-store-actions-review-leftovers.md` — `isRecord` lives in the saved-settings module                                            |
-| S4  | Standards   | defer       | `.scratch/carry-forward/issues/591-store-actions-review-leftovers.md` — one long line, one unclear comment                                                       |
+| S1  | Standards   | fixed       | fixed on feat/store-actions-followups: fork `218234677`, main `e5cd56a4`, ticket 591 closed — same as A2; rated low, the test-only path existed at `0ba3765ec`   |
+| S2  | Standards   | fixed       | fixed on feat/store-actions-followups: fork `218234677`, main `e5cd56a4`, ticket 591 closed — duplicated destructure in `runSettled`                             |
+| S3  | Standards   | fixed       | fixed on feat/store-actions-followups: fork `218234677`, main `e5cd56a4`, ticket 591 closed — `isRecord` lives in the saved-settings module                      |
+| S4  | Standards   | fixed       | fixed on feat/store-actions-followups: fork `218234677`, main `e5cd56a4`, ticket 591 closed — one long line, one unclear comment                                 |
 | S5  | Standards   | fixed       | fixed in this review commit: the six 590 rows in `docs/reviews/feat-tab-settings-persist.md` now say what changed, which pin, and which commit closed ticket 590 |
 | S6  | Standards   | wontfix     | checked: the old lock `_comment` is an exact prefix of the new one; only `§` and `…` escapes became raw characters                                               |
 | S7  | Standards   | wontfix     | checked: the required `scope` replaces a string plus a defaults object, is documented, and cannot be derived inside the store                                    |
 | SP1 | Spec        | wontfix     | checked: `.scratch/tab-store-actions/review-fork-tests.log` (gitignored), 58 files, 458 tests pass, rc=0, Node 22.17.1                                           |
-| SP2 | Spec        | defer       | `.scratch/carry-forward/issues/591-store-actions-review-leftovers.md` — same as A2                                                                               |
+| SP2 | Spec        | fixed       | fixed on feat/store-actions-followups: fork `218234677`, main `e5cd56a4`, ticket 591 closed — same as A2                                                         |
 | SP3 | Spec        | fixed       | fixed in this review commit: same as S5                                                                                                                          |
