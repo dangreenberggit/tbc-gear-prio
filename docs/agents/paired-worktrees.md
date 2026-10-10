@@ -59,8 +59,10 @@ it. The command prints a note when that is the case. See `known-traps.md`,
   on 2026-10-10 it gave
   `C:\Users\dgree\Code\lulz\tbc-wt\worktree-pair\vendor\tbc-new-fork\wowsimtbc.exe`
   for a backend started in that pair). The vite command line holds only
-  relative paths and names no folder. If the servers belong to another
-  folder, the live tab is taken until that session stops them.
+  relative paths and names no folder, so if only 5173 is held, treat the live
+  tab as taken unless `preview_list` shows your session's vite. If the
+  servers belong to another folder, the live tab is taken until that session
+  stops them.
   `wowsims-fork-prod` (port 4180) always serves the main checkout's `dist/`.
 - **Layout gate and `pnpm tab-review`.** Each starts its own server on a free
   port from the pair's own `dist/`. Build `dist/` with `--build`, or later
@@ -72,8 +74,13 @@ it. The command prints a note when that is the case. See `known-traps.md`,
 ## Land it on dev
 
 The merge into `dev` runs from the main folder, and only when the owner asks
-(AGENTS.md "The loop", step 6). This section is a reading of
-`scripts/merge_to_dev.py`; no merge was run from a pair.
+(AGENTS.md "The loop", step 6). The two points below are a reading of
+`scripts/merge_to_dev.py`; no merge was run from a pair. The git sequence of
+steps 3 and 4 for two pairs that both re-pin (fork-side merge, the lock diff,
+`git merge dev`, the conflict, keeping `dev`'s `commit`, the re-pin, and the
+final clean merge into `dev`) ran in temp repos on 2026-10-10; see
+`docs/reviews/feat-worktree-pair.md`, R1. The `pnpm` commands in them did
+not run there.
 
 - **The checks run in a pair.** Steps 1–5 of `merge_to_dev.py` run in the
   checkout that runs the script, so `pnpm merge-to-dev --check-only` checks
@@ -97,15 +104,16 @@ The steps, each with the folder it runs in:
    branch merges into `dev`, so the fork commit the lock names holds every
    pair's fork work.
 4. **Main folder: check out, and re-pin when needed.** Run
-   `git checkout <main-branch>`. If `dev` already holds another pair's
-   re-pin, run `git merge dev` first: the lock's `commit` and `_comment`
-   conflict, because the repo has no merge driver for the lock. Resolve it by
-   taking the clone's HEAD as `commit` and keeping both `_comment` sentences.
-   If the clone's HEAD is not the lock's `commit` (step 3 made a merge
-   commit), read the lock's `_comment` history, set `commit` to the clone's
-   HEAD, append a dated sentence to `_comment`, run
-   `pnpm sim-implemented-effects:generate` and `pnpm verify`, and commit on
-   the branch.
+   `git checkout <main-branch>`. If
+   `git diff <main-branch>...dev -- data/wowsims-fork.lock.json` prints
+   anything, another pair re-pinned first: run `git merge dev`. The lock's
+   `commit` and `_comment` lines conflict (temp-repo test 2026-10-10,
+   `docs/reviews/feat-worktree-pair.md` WD7; the repo has no merge driver for
+   the lock). Keep `dev`'s `commit` and both `_comment` sentences, and commit
+   the merge. Then, if the clone's HEAD is not the lock's `commit`, read the
+   lock's `_comment` history, set `commit` to the clone's HEAD, append a
+   dated sentence to `_comment`, run `pnpm sim-implemented-effects:generate`
+   and `pnpm verify`, and commit on the branch.
 5. **Main folder: merge.** Run `pnpm merge-to-dev` once the owner asks.
    `merge_to_dev.py` refuses to run from `dev` (`:125-127`), so step 4's
    checkout is needed every time.
