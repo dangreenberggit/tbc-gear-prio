@@ -93,7 +93,7 @@ The Upgrades tab's real code lives in `vendor/tbc-new-fork`, a git repo with its
 - **Make it without asking the owner** (through a subagent, like any `pnpm` call): `pnpm wt:pair <name> <main-branch> <fork-branch>`. Add `-b` to create the main branch from `dev` and `--new-fork-branch` to create the fork branch at the lock's commit; a branch checked out in another folder cannot be used. Give the call a 600000 ms timeout. It is done when it prints `pair ready` with no `WARNING` line after it. The pair is at `<parent of the main checkout>/tbc-wt/<name>`.
 - **Subagents** start in your folder, not the pair. Give each one the pair's path, and have it use `git -C <pair>`, `pnpm -C <pair>` and absolute paths under the pair.
 - **The live tab** serves the fork of the folder whose session started it. To run it on a pair's code, tell the owner: "Start a new session on the folder `<pair path>`, with 'worktree' unchecked." That session starts with no memory notes.
-- **No fork here:** a checkout with no `vendor/tbc-new-fork` cannot do tab or fork work. Make a pair, or, as a worker, stop and report it to whoever sent you. `pnpm verify` refuses such a checkout; set `TBC_VERIFY_WITHOUT_FORK=1` only for work that never reads the fork.
+- **No fork here:** as a worker in a checkout with no `vendor/tbc-new-fork`, stop and report it to whoever sent you; otherwise make a pair. `pnpm verify` refuses such a checkout (plain-worktree steps: docs/agents/paired-worktrees.md).
 - **Merges into `dev`** run from the main folder after `pnpm wt:unpair <name>`. The merge steps, memory and the live tab: [`docs/agents/paired-worktrees.md`](docs/agents/paired-worktrees.md).
 
 ### Types from JSON

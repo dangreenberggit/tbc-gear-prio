@@ -116,7 +116,7 @@ owner in ticket 594.
 | P3  | Spec        | wontfix     | The exit-code and stderr checks catch a missing guard without `pnpm`; the removal runs failed on them                                                              |
 | W1  | Writing     | fixed       | 30751cdb: "fork edits happen only in a pair" and `git -C <pair>/vendor/tbc-new-fork ...`                                                                           |
 | W2  | Writing     | fixed       | 30751cdb: the Memory bullet says a pair session is needed only for the live tab                                                                                    |
-| W3  | Writing     | defer       | `.scratch/carry-forward/issues/594-merge-duplicate-sentence-in-pair-rule.md`                                                                                       |
+| W3  | Writing     | fixed       | superseded after round 4: the owner chose ticket 594's second text ("they sound fine", Q-594-wording); applied verbatim and the ticket closed                      |
 | W4  | Writing     | fixed       | 30751cdb: "set it the same way before `git push` or `pnpm merge-to-dev`, which run verify"                                                                         |
 | W5  | Writing     | fixed       | 30751cdb: the pair sentence opens step 1                                                                                                                           |
 | W6  | Writing     | wontfix     | The guide is where the refusal sends readers; the repeat is deliberate                                                                                             |
@@ -200,33 +200,33 @@ sentence, the AGENTS.md "fork edits happen only in a pair" clause.
 
 ## Disposition (round 2)
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                                                                         |
-| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A6  | Adversarial | fixed       | cdf11cef: `skipGuard` takes both counts; a unit test fails a vitest-only skip, and fails when `vitestSkips` is dropped from the sum                   |
-| A7  | Adversarial | fixed       | cdf11cef: an unreadable report counts as one skip with its reason; ticket 408 stays open for its other defects and the CI side                        |
-| A8  | Adversarial | fixed       | cdf11cef: W10's text; `wt:unpair` only "in a pair whose build did not finish"                                                                         |
-| A9  | Adversarial | fixed       | cdf11cef: "then in the pair's main-repo worktree bump"                                                                                                |
-| A10 | Adversarial | wontfix     | Not a defect: the hunt found no false failure                                                                                                         |
-| S7  | Standards   | fixed       | cdf11cef: `NEXT` is 595                                                                                                                               |
-| S8  | Standards   | fixed       | cdf11cef: ticket 594 is `blocked`, `Blocked by: none`                                                                                                 |
-| S9  | Standards   | wontfix     | The edits stay on the unmerged branch, and the hand-off lists each one for the owner's approval; any the owner rejects is reverted before a merge ask |
-| S10 | Standards   | fixed       | Round 2's `Reviewed range:` line is recorded under "Round 2"; round 3 records its own before dispatch                                                 |
-| S11 | Standards   | fixed       | cdf11cef: names the run and quotes its "vitest failures (16)" line                                                                                    |
-| S12 | Standards   | fixed       | cdf11cef: the refusal names both restores (W7); the AGENTS.md bullet is owner text and points at the guide; ticket 594 holds its rewording            |
-| S13 | Standards   | wontfix     | The commit exists; this review file decodes the IDs                                                                                                   |
-| S14 | Standards   | fixed       | cdf11cef: `isExempt`, `MARK_STEP`, `SKIPPING_STEP`                                                                                                    |
-| P4  | Spec        | fixed       | As S7                                                                                                                                                 |
-| P5  | Spec        | fixed       | As S8                                                                                                                                                 |
-| P6  | Spec        | fixed       | As A9                                                                                                                                                 |
-| P7  | Spec        | fixed       | As S11; atlasloot is kept because CI restores it too                                                                                                  |
-| P8  | Spec        | wontfix     | As S9                                                                                                                                                 |
-| P9  | Spec        | wontfix     | Not a defect: the pair runs reported 0 skipped                                                                                                        |
-| W7  | Writing     | fixed       | cdf11cef: the hint runs both restores before the opt-out                                                                                              |
-| W8  | Writing     | fixed       | As A9                                                                                                                                                 |
-| W9  | Writing     | fixed       | cdf11cef: "When your prompt gives a pair path, the pair is the shared checkout"                                                                       |
-| W10 | Writing     | fixed       | cdf11cef: the reviewer's text                                                                                                                         |
-| W11 | Writing     | fixed       | cdf11cef: the reviewer's text                                                                                                                         |
-| W12 | Writing     | defer       | `.scratch/carry-forward/issues/594-merge-duplicate-sentence-in-pair-rule.md` now lists both texts for the owner                                       |
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                 |
+| --- | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| A6  | Adversarial | fixed       | cdf11cef: `skipGuard` takes both counts; a unit test fails a vitest-only skip, and fails when `vitestSkips` is dropped from the sum           |
+| A7  | Adversarial | fixed       | cdf11cef: an unreadable report counts as one skip with its reason; ticket 408 stays open for its other defects and the CI side                |
+| A8  | Adversarial | fixed       | cdf11cef: W10's text; `wt:unpair` only "in a pair whose build did not finish"                                                                 |
+| A9  | Adversarial | fixed       | cdf11cef: "then in the pair's main-repo worktree bump"                                                                                        |
+| A10 | Adversarial | wontfix     | Not a defect: the hunt found no false failure                                                                                                 |
+| S7  | Standards   | fixed       | cdf11cef: `NEXT` is 595                                                                                                                       |
+| S8  | Standards   | fixed       | cdf11cef: ticket 594 is `blocked`, `Blocked by: none`                                                                                         |
+| S9  | Standards   | fixed       | superseded after round 4: the owner approved every post-approval edit ("they sound fine", Q-pair-rule-extra-edits)                            |
+| S10 | Standards   | fixed       | Round 2's `Reviewed range:` line is recorded under "Round 2"; round 3 records its own before dispatch                                         |
+| S11 | Standards   | fixed       | cdf11cef: names the run and quotes its "vitest failures (16)" line                                                                            |
+| S12 | Standards   | fixed       | cdf11cef: the refusal names both restores (W7); the AGENTS.md bullet is owner text and points at the guide; ticket 594 holds its rewording    |
+| S13 | Standards   | wontfix     | The commit exists; this review file decodes the IDs                                                                                           |
+| S14 | Standards   | fixed       | cdf11cef: `isExempt`, `MARK_STEP`, `SKIPPING_STEP`                                                                                            |
+| P4  | Spec        | fixed       | As S7                                                                                                                                         |
+| P5  | Spec        | fixed       | As S8                                                                                                                                         |
+| P6  | Spec        | fixed       | As A9                                                                                                                                         |
+| P7  | Spec        | fixed       | As S11; atlasloot is kept because CI restores it too                                                                                          |
+| P8  | Spec        | wontfix     | As S9                                                                                                                                         |
+| P9  | Spec        | wontfix     | Not a defect: the pair runs reported 0 skipped                                                                                                |
+| W7  | Writing     | fixed       | cdf11cef: the hint runs both restores before the opt-out                                                                                      |
+| W8  | Writing     | fixed       | As A9                                                                                                                                         |
+| W9  | Writing     | fixed       | cdf11cef: "When your prompt gives a pair path, the pair is the shared checkout"                                                               |
+| W10 | Writing     | fixed       | cdf11cef: the reviewer's text                                                                                                                 |
+| W11 | Writing     | fixed       | cdf11cef: the reviewer's text                                                                                                                 |
+| W12 | Writing     | fixed       | superseded after round 4: the owner chose ticket 594's second text ("they sound fine", Q-594-wording); applied verbatim and the ticket closed |
 
 ## Round 3
 
@@ -306,9 +306,9 @@ cdf11cef.
 | --- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | A11 | Adversarial | fixed       | 81fec876: a fake vitest in the wiring tests; "exits 1 when only a vitest test skips" fails with `vitestSkipCount: 0` at the call site                                  |
 | A12 | Adversarial | fixed       | 81fec876: an unreadable report fails the run everywhere, opt-out and CI included; its test fails with the `exitCode`/`return` removed. Ticket 408 notes defect 4 fixed |
-| A13 | Adversarial | defer       | `.scratch/carry-forward/issues/594-merge-duplicate-sentence-in-pair-rule.md` (the AGENTS.md bullet is owner text)                                                      |
+| A13 | Adversarial | fixed       | superseded after round 4: the owner chose ticket 594's second text ("they sound fine", Q-594-wording); applied verbatim and the ticket closed                          |
 | A14 | Adversarial | fixed       | 81fec876: ticket 594's "Done when" names both texts and the current bullet                                                                                             |
-| S15 | Standards   | wontfix     | As S9: the hand-off lists every agent-file edit made after the owner's approval, for the owner to accept or reject before a merge ask                                  |
+| S15 | Standards   | fixed       | superseded after round 4: the owner approved every post-approval edit ("they sound fine", Q-pair-rule-extra-edits)                                                     |
 | S16 | Standards   | wontfix     | The commit exists on the branch; rewriting it buys nothing                                                                                                             |
 | S17 | Standards   | fixed       | 81fec876: `agnostic.md:17` points at the guide's steps; S12's note was wrong, and A13 carries the AGENTS.md half                                                       |
 | S18 | Standards   | fixed       | 81fec876: `known-traps.md` names the `gates: N ran, 0 skipped` tail line; the cdf11cef body stays as written                                                           |
@@ -352,3 +352,17 @@ No findings.
 
 | ID  | Axis | Disposition | Ticket / note |
 | --- | ---- | ----------- | ------------- |
+
+## Owner rulings (after round 4)
+
+No review round ran after round 4, at the coordinating session's
+instruction. On 2026-10-10 the owner answered both open questions with
+"they sound fine":
+
+- **Q-pair-rule-extra-edits: approved.** Every edit to AGENTS.md, the
+  executor seat and the adapters made after the package approval stays, as
+  do `skipGuard` and the unreadable-report failure. Rows S9 and S15 are now
+  `fixed`.
+- **Q-594-wording: option 2.** The "No fork here" bullet was replaced with
+  ticket 594's second text, copied verbatim from the ticket (pure text, no
+  code), and ticket 594 is closed. Rows W3, W12 and A13 are now `fixed`.

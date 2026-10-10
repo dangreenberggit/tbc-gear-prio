@@ -1,4 +1,4 @@
-Status: blocked
+Status: closed
 Type: task
 Origin: docs/reviews/feat-pair-rule.md (round 1, W3; independent writing-for-agents review)
 Blocks: none
@@ -48,3 +48,17 @@ that guide records. The first text names the opt-out the same way.
 
 The owner picks the first text, the second text, or the current bullet; if
 a new text is picked, AGENTS.md has it and `pnpm verify` passes.
+
+## Closed 2026-10-10
+
+The owner chose the second text ("they sound fine", answering
+Q-594-wording, option 2, relayed by the coordinating session). AGENTS.md
+"Fork and tab edits run in a pair" now has it verbatim in place of the old
+"No fork here" bullet. AGENTS.md has no skill mirror, so no other copy
+changed. This also closes round-3 finding A13: the bullet no longer gives
+the opt-out without the restores; it points at the guide's steps.
+
+Verified by:
+`grep -c "plain-worktree steps: docs/agents/paired-worktrees.md" AGENTS.md`
+(1); `grep -c "only for work that never reads the fork" AGENTS.md` (1, the
+rule's first paragraph only); `pnpm verify` on the closing commit.
