@@ -191,9 +191,12 @@ no round 3.
 
 Skip round 2 when every commit since round 1's `<through-sha>` only
 changes whitespace or line wrapping, only changes this review file or
-tickets its Disposition rows link, applies a bookkeeping fix, or applies
-the code-quality pass. The agent that handles this review's findings
-decides, and writes the skip and the output of
+tickets its Disposition rows link, or applies a bookkeeping fix. The
+code-quality pass is not on this list: round 2 reads it. Do not skip
+round 2 while a finding that step 3 says is fixed in this branch has no
+fix commit; when such a finding cannot be fixed now, stop as the next
+paragraph says. The agent that handles this review's findings decides,
+and writes the skip and the output of
 `git log --oneline <through-sha>..HEAD` in `## Summary`.
 
 Stop, and do not fix and review again, when round 2 cannot run (one of
@@ -215,8 +218,8 @@ When round 2 is skipped, write these outcomes in round 1's
 `## Disposition` table, editing rows as `docs/agents/known-traps.md`,
 "Before writing a review Disposition table", says.
 
-- a "fixed before merge" finding: report it to the user as blocking the
-  merge;
+- a "fixed before merge" finding that is still open: stop as the "Stop"
+  paragraph above says, and report it to the user as blocking the merge;
 - a bookkeeping finding: `wontfix` with the reason, or `fixed` when the
   suggested text is applied;
 - every other open finding: a `defer` row and a ticket.
@@ -238,7 +241,8 @@ Sort each finding by what it does, whatever label the reviewer gave it:
 - **Code quality and style** (naming, structure, readability,
   duplication, comments): serious, and never dropped. Record each as a
   row under a `## Code quality` heading in this file. A code-quality row
-  never starts a round. Before round 2, the agent that handles this
+  never starts a round of its own; round 2, which checks round 1's fixes,
+  also reads the code-quality pass. Before round 2, the agent that handles this
   review's findings sends every `## Code quality` row to one fresh
   workhorse-lane agent, which fixes them all in one pass. The pass
   changes no behaviour, and `pnpm verify` passes after it. Each row then
@@ -258,7 +262,8 @@ becomes a ticket or a line for the user at the hand-off.
 
 **Agent files.** When findings ask for edits to agent files (`AGENTS.md`,
 `CLAUDE.md`, `.claude/**`, `.agents/**`), list them all for one approval
-by the user at the hand-off; do not ask once per round.
+by the user after round 1 and before any fix is made, so that the
+approved edits are fixes that round 2 checks; do not ask once per round.
 
 **Tickets are the source of truth for deferred work.** For every finding
 you would defer, create `.scratch/carry-forward/issues/<NN>-<slug>.md`
@@ -306,12 +311,13 @@ raised and then checked and found not to be a defect is a finding: dispose of
 it as `wontfix` with the reason. Append a one-liner
 to `.scratch/carry-forward/map.md` when filing tickets.
 
-After this step's tickets are committed, count the tickets this branch
-filed and closed, and write both numbers in `## Summary`. Filed is the
-number of `A` rows in
+When the review's last Disposition table is written and its tickets are
+committed (round 2's table, or round 1's when round 2 is skipped), count
+the tickets this branch filed and closed, and write both numbers in
+`## Summary`. Filed is the number of `A` rows in
 `git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`.
 Closed is
-`git diff dev...HEAD -- '.scratch/carry-forward/issues/*.md' | grep -cE '^\+(\*\*)?Status:(\*\*)? *(closed|resolved|wontfix)'`.
+`git diff dev...HEAD -- '.scratch/carry-forward/issues/*.md' | grep -cE '^\+\s*(\*\*)?Status:(\*\*)? *(\*\*)?(closed|resolved|wontfix)'`.
 When filed is higher than closed, say so in one sentence.
 
 ### 4. Prove the check (do not merge here)
