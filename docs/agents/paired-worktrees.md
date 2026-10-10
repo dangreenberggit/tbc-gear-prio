@@ -39,8 +39,10 @@ it. The command prints a note when that is the case. See `known-traps.md`,
 - **Live tab.** One session at a time runs it. In `.claude/launch.json`, vite
   is pinned to port 5173 with `--strictPort`, the backend to port 3333 with
   `autoPort: false`, and the http-server entry names the main checkout's fork
-  path. The layout gate and `pnpm tab-review` use no port: they serve the
-  pair's own `dist/` (`pnpm wt:pair ... --build`).
+  path. A vite already on 5173 may be serving another pair's fork, so use it
+  only when your own folder started it. The layout gate and
+  `pnpm tab-review` use no port: they serve the pair's own `dist/`
+  (`pnpm wt:pair ... --build`).
 
 ## Land it on dev
 
@@ -55,18 +57,27 @@ The merge into `dev` runs from the main folder, and only when the owner asks
   (`merge_to_dev.py:182`), and git checks a branch out in only one worktree.
   While the main folder is on `dev`, that checkout fails in a pair (untested).
 
-The steps:
+The steps, each with the folder it runs in:
 
-1. **Merge the fork side first.** Merge the pair's fork branch into the fork
-   lock's `branch` in the main clone. When two pairs both moved the lock's
-   `commit`, merging both main branches would conflict on that field.
-   Merging the fork side first gives one fork commit that holds both pairs'
-   work. Then re-pin the branch's lock to that commit (regenerate and
-   `pnpm verify`) before landing it.
-2. **Remove the pair.** Run `pnpm wt:unpair <name>`. The branches are kept.
-3. **Merge from the main folder.** In the main folder, `git checkout
-<main-branch>`, confirm that the fork clone's HEAD is the lock's `commit`,
-   then run `pnpm merge-to-dev`.
+1. **Pair folder: check.** Commit everything on both branches, then run
+   `pnpm merge-to-dev --check-only`.
+2. **Main folder: remove the pair.** Run `pnpm wt:unpair <name>`. Both
+   branches are kept, and git now lets the main folder check them out.
+3. **Main folder: merge the fork side.** Merge the pair's fork branch into
+   the branch the main clone has checked out (the fork lock's `branch`):
+   `git -C vendor/tbc-new-fork merge <fork-branch>`. Do this before the main
+   branch lands. When two pairs both moved the lock's `commit`, merging both
+   main branches into `dev` would conflict on that field. Merging the fork
+   side first gives one fork commit that holds both pairs' work.
+4. **Main folder: re-pin when needed.** Run `git checkout <main-branch>`. If
+   the clone's HEAD is not the lock's `commit` (step 3 made a merge commit),
+   set `commit` to the clone's HEAD, run
+   `pnpm sim-implemented-effects:generate` and `pnpm verify`, and commit on
+   the branch.
+5. **Main folder: merge.** Run `pnpm merge-to-dev` once the owner asks.
+
+Between step 3 and the merge, the fork gates exit 2 in the main folder while
+it is on `dev`, because `dev`'s lock still names the old fork commit.
 
 ## Remove it
 
@@ -76,16 +87,19 @@ pnpm wt:unpair <name>
 
 Run it from the main checkout or from another pair; it refuses to run from
 inside the pair it removes. Without `--force` it refuses when either worktree
-has uncommitted or untracked files, or is detached at a commit no branch
-contains.
+has uncommitted or untracked files, has ignored files that pair setup did not
+write (such as `.scratch/` stage records), or is detached at a commit no
+branch contains. It always refuses a locked worktree, before removing either
+half.
 
-Remove pairs only with `pnpm wt:unpair`. In all three live runs,
-`git worktree remove` dropped the main worktree's registration and then left
-its folder half-deleted ("Directory not empty"). In a scratch test at a
-deeper path it did the same to the fork folder ("Filename too long"). The
-script deletes what git leaves behind, but only after it checks that no link
-inside the pair points out of it. A junction into the main checkout would
-make any recursive delete remove the main checkout's files.
+Remove pairs only with `pnpm wt:unpair`. In every removal of a main worktree
+on 2026-10-10 (one scratch test and four live runs), `git worktree remove`
+dropped the registration and then left the folder half-deleted ("Directory
+not empty"). In the scratch test, at a deeper path, it did the same to the
+fork folder ("Filename too long"). The script deletes what git leaves behind
+only once git has dropped the registration, and only after it checks that no
+link inside the pair points out of it. A junction into the main checkout
+would make any recursive delete remove the main checkout's files.
 
 ## Live test, 2026-10-10
 
@@ -105,11 +119,19 @@ Run from the `feat/worktree-pair` pair on Node 22.17.1:
 
 - **verify.** `pnpm verify` in the new pair gave rc 0, "gates: 1517 ran, 0
   skipped", in 185 s.
-- **unpair refusals.** `wt:unpair` refused while the pair's fork held an
-  untracked file.
-- **unpair.** Once the fork was clean, `wt:unpair` took 17 s. git left the
-  main folder ("Directory not empty"), and the script deleted it. After that,
-  neither `worktree list` named the pair.
+- **unpair.** `wt:unpair` refused while the pair's fork held an untracked
+  file. Once the fork was clean it took 17 s: git left the main folder
+  ("Directory not empty"), the script deleted it, and neither `worktree list`
+  named the pair.
+- **New and existing branches.**
+  `pnpm wt:pair probe-b test/wt-pair-probe test/wt-pair-probe -b --new-fork-branch`
+  made both branches and the pair in 93 s, without `--build`. After an
+  unpair, the same command without the two flags reused the existing branches
+  in 70 s. Both test branches were then deleted with `git branch -d`.
+- **More unpair refusals.** In probe-b, unpair refused on an ignored
+  `.scratch/stage-gate/probe/brief.md`. With the main worktree locked by
+  `git worktree lock`, it refused before running any removal, and the main
+  folder was left intact.
 - **disk.** The same layout in a scratch test measured 404 MB for the main
   worktree without `vendor/` and 561 MB for the fork worktree.
 - **First-run fixes.** Two failures in the first runs were fixed in the

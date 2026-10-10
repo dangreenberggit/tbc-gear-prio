@@ -44,16 +44,19 @@ import sys
 import time
 from pathlib import Path
 
-NAME_RE = re.compile(r"[a-z0-9][a-z0-9-]{0,23}")
+# 23 characters: what the default pair root leaves under MAX_ROOT_LEN.
+NAME_RE = re.compile(r"[a-z0-9][a-z0-9-]{0,22}")
 
 # Windows' MAX_PATH is 260 including the terminating NUL. The deepest file a
-# pair holds was 183 characters below its root on 2026-10-10 (main
-# node_modules; the fork's node_modules reached 181). Past the limit,
+# pair holds was 196 characters below its root on 2026-10-10, in the main
+# worktree's node_modules (the fork's reached 181). Past the limit,
 # `git worktree remove` fails with "Filename too long" and leaves a
-# half-deleted folder, as it did in the live test. The margin allows for a
-# deeper dependency later.
+# half-deleted folder, as it did in a scratch test. The margin allows for a
+# deeper dependency later. Re-measure from a pair's root in Git Bash:
+#   find node_modules vendor/tbc-new-fork/node_modules -printf '%p\n' |
+#     awk '{ if (length($0) > m) m = length($0) } END { print m }'
 PATH_LIMIT = 259
-DEEPEST_BELOW_ROOT = 183
+DEEPEST_BELOW_ROOT = 196
 MARGIN = 7
 MAX_ROOT_LEN = PATH_LIMIT - 1 - DEEPEST_BELOW_ROOT - MARGIN
 
@@ -62,7 +65,7 @@ def name_problem(name: str) -> str | None:
     """Why `name` cannot name a pair folder, or None when it can."""
     if not NAME_RE.fullmatch(name):
         return (
-            f"pair name {name!r} must be 1-24 characters of a-z, 0-9 and '-', "
+            f"pair name {name!r} must be 1-23 characters of a-z, 0-9 and '-', "
             "starting with a letter or digit"
         )
     return None
@@ -110,10 +113,59 @@ def is_listed(path: str, entries: list[dict[str, str]]) -> bool:
     return any(same_path(path, e["worktree"]) for e in entries)
 
 
+def is_locked(path: str, entries: list[dict[str, str]]) -> bool:
+    return any(same_path(path, e["worktree"]) and "locked" in e for e in entries)
+
+
+def leftover_action(still_registered: bool, exists: bool) -> str:
+    """What unpair does with a folder after `git worktree remove` ran.
+
+    "refuse" while git still registers it: git refused before deleting
+    anything (a locked worktree, or files that appeared after the clean-tree
+    check), and deleting the folder would override that, `--force` or not.
+    "delete" once git has let go of a folder it left behind. Callers reach
+    this for an unregistered folder only after the --force check.
+    """
+    if not exists:
+        return "done"
+    if still_registered:
+        return "refuse"
+    return "delete"
+
+
+def is_inside(path: str, root: str) -> bool:
+    """True when `path` is `root` or a path below it."""
+    return (norm_path(path) + "\\").startswith(norm_path(root) + "\\")
+
+
 def links_outside(root: str, links: list[tuple[str, str]]) -> list[tuple[str, str]]:
     """The (link, target) pairs whose target is not inside `root`."""
-    base = norm_path(root) + "\\"
-    return [(link, target) for link, target in links if not norm_path(target).startswith(base)]
+    return [(link, target) for link, target in links if not is_inside(target, root)]
+
+
+# What a pair's installs and `make` write, all ignored and all regenerable.
+# Taken from `git status --porcelain --ignored` in both worktrees of a fresh
+# pair on 2026-10-10, plus the fork's .gitignore build entries.
+REGENERABLE_DIRS = {"node_modules", "dist", "dist-server", "binary_dist", "__pycache__", "vendor"}
+REGENERABLE_SUFFIXES = (".tsbuildinfo", ".pb.go", "_auto_gen.ts", ".results.tmp", ".stylelintcache")
+REGENERABLE_PREFIXES = ("ui/generated/",)
+
+
+def unexpected_ignored(porcelain_ignored: str) -> list[str]:
+    """Ignored paths from `git status --porcelain --ignored` that a pair's own
+    setup did not write. `git status --porcelain` alone never lists them, and
+    `.scratch/` (stage records) is one of them."""
+    found = []
+    for line in porcelain_ignored.splitlines():
+        if not line.startswith("!! "):
+            continue
+        path = line[3:]
+        if path.rstrip("/").rsplit("/", 1)[-1] in REGENERABLE_DIRS:
+            continue
+        if path.endswith(REGENERABLE_SUFFIXES) or path.startswith(REGENERABLE_PREFIXES):
+            continue
+        found.append(path)
+    return found
 
 
 def long_path(p: str) -> str:
@@ -166,8 +218,6 @@ def length_problem(target: str) -> str | None:
     return None
 
 
-# ---------------------------------------------------------------- IO below
-
 PAIR_DIR = "tbc-wt"
 FORK_REL = Path("vendor") / "tbc-new-fork"
 FORK_LOCK = "data/wowsims-fork.lock.json"
@@ -214,7 +264,9 @@ def find_checkouts() -> tuple[Path, Path]:
     common = git(Path(__file__).resolve().parent, "rev-parse", "--path-format=absolute", "--git-common-dir")
     main = main_from_common_dir(common)
     if main is None:
-        raise Refusal(f"git's common dir is {common}, not <main checkout>/.git; this script only knows that layout")
+        raise Refusal(
+            f"git's common dir is {common}, not <main checkout>/.git; this script only knows that layout"
+        )
     main_dir = Path(main)
     fork = main_dir / FORK_REL
     if not fork.is_dir():
@@ -252,8 +304,8 @@ def preflight_tools() -> None:
     version = subprocess.run(["node", "--version"], capture_output=True, text=True).stdout
     if not node_ok(version):
         raise Refusal(
-            f"node {version.strip() or '(none)'} is below 22.5; pin it first, e.g. in PowerShell: "
-            '$env:PATH = "C:\\Users\\dgree\\AppData\\Roaming\\fnm\\node-versions\\v22.17.1\\installation;" + $env:PATH'
+            f"node {version.strip() or '(none)'} is below 22.5; put Node 22 first on PATH "
+            '(docs/agents/known-traps.md, "Before running node / pnpm / test commands")'
         )
 
 
@@ -311,23 +363,25 @@ def pair(args: argparse.Namespace) -> int:
     if args.new_fork_branch and args.fork_detached:
         raise Refusal("--new-fork-branch needs a <fork-branch>, not --fork-detached")
 
-    for problem in (
-        free_branch_problem(main_dir, args.main_branch, args.b, "-b"),
-        None if args.fork_detached else free_branch_problem(fork, args.fork_branch, args.new_fork_branch, "--new-fork-branch"),
-    ):
-        if problem:
-            raise Refusal(problem)
+    problem = free_branch_problem(main_dir, args.main_branch, args.b, "-b")
+    if not problem and not args.fork_detached:
+        problem = free_branch_problem(fork, args.fork_branch, args.new_fork_branch, "--new-fork-branch")
+    if problem:
+        raise Refusal(problem)
     ref = args.base if args.b else args.main_branch
     if args.b and not git_ok(main_dir, "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}"):
         raise Refusal(f"--base {ref!r} is not a commit in {main_dir}")
     pin = json.loads(git(main_dir, "show", f"{ref}:{FORK_LOCK}"))["commit"]
     engine_tag = json.loads(git(main_dir, "show", f"{ref}:{ENGINE_LOCK}"))["tag"]
     if not git_ok(fork, "cat-file", "-e", f"{pin}^{{commit}}"):
-        raise Refusal(f"the fork lock on {ref} pins {pin}, which the fork clone does not have; fetch it first")
+        raise Refusal(
+            f"the fork lock on {ref} pins {pin}, which the fork clone does not have; fetch it first"
+        )
     preflight_tools()
     env = make_env()
 
     started = time.monotonic()
+    warnings: list[str] = []
     target.parent.mkdir(exist_ok=True)
     try:
         if args.b:
@@ -345,11 +399,20 @@ def pair(args: argparse.Namespace) -> int:
         for name in vendor_inputs(engine_tag, wowsimcli_platform()):
             src = main_dir / "vendor" / name
             if not src.is_dir():
-                say(f"WARNING: {src} is missing, not copied; restore it in the pair (pnpm sync:wowsims:restore, pnpm sync:atlasloot:restore, pnpm fetch:wowsimcli)")
+                warnings.append(
+                    f"{src} is missing and was not copied; restore it in the pair "
+                    "(pnpm sync:wowsims:restore, pnpm sync:atlasloot:restore or pnpm fetch:wowsimcli)"
+                )
                 continue
             shutil.copytree(src, target / "vendor" / name, symlinks=True)
             copied.append(name)
         say(f"copied into vendor/: {', '.join(copied) or 'nothing'}")
+        main_tag = json.loads((main_dir / ENGINE_LOCK).read_text(encoding="utf-8"))["tag"]
+        if main_tag != engine_tag:
+            warnings.append(
+                f"vendor/wowsims came from the main checkout, whose engine lock names {main_tag[:9]}, "
+                f"but {ref} names {engine_tag[:9]}; run pnpm sync:wowsims:restore in the pair"
+            )
 
         run([exe("corepack"), "pnpm", "-C", str(target), "install", "--frozen-lockfile"])
         run([exe("npm"), "--prefix", str(fork_target), "ci"])
@@ -375,6 +438,8 @@ def pair(args: argparse.Namespace) -> int:
             f"  note: the fork is at {fork_head[:9]} but {FORK_LOCK} pins {pin[:9]}; the fork gates "
             "exit 2 until the lock names the fork's HEAD (docs/agents/known-traps.md)"
         )
+    for warning in warnings:
+        say(f"  WARNING: {warning}")
     say(f"open a session in {target} (desktop app: pick that folder; terminal: run `claude` there)")
     say("that session starts with no memory notes: memory is kept per folder")
     say(f"remove the pair with: pnpm wt:unpair {args.name}")
@@ -431,6 +496,9 @@ def unsaved_work(repo: Path) -> str | None:
     status = git(repo, "status", "--porcelain")
     if status:
         return f"{repo} has uncommitted changes:\n{status}"
+    ignored = unexpected_ignored(git(repo, "status", "--porcelain", "--ignored"))
+    if ignored:
+        return f"{repo} has ignored files that pair setup did not write:\n" + "\n".join(ignored)
     if git(repo, "rev-parse", "--abbrev-ref", "HEAD") == "HEAD":
         if not git(repo, "branch", "--all", "--contains", "HEAD"):
             return f"{repo} is detached at a commit no branch contains; branch it first"
@@ -438,13 +506,21 @@ def unsaved_work(repo: Path) -> str | None:
 
 
 def remove(repo: Path, path: Path, listed: bool, force: bool) -> None:
+    git_said = ""
     if listed:
         cmd = ["git", "-C", str(repo), "worktree", "remove", *(["--force"] if force else []), str(path)]
         say("$ " + " ".join(cmd))
         r = subprocess.run(cmd, capture_output=True, text=True)
+        git_said = r.stderr.strip()
         if r.returncode != 0:
-            say(f"  git: {r.stderr.strip()}")
-    if path.exists():
+            say(f"  git: {git_said}")
+    action = leftover_action(is_listed(str(path), worktrees(repo)), path.exists())
+    if action == "refuse":
+        raise Refusal(
+            f"git kept {path} registered and refused to remove it ({git_said or 'no message'}). "
+            f"If it is locked, run `git -C {repo} worktree unlock {path}` after checking nothing uses it"
+        )
+    if action == "delete":
         delete_folder(path)
 
 
@@ -456,18 +532,28 @@ def unpair(args: argparse.Namespace) -> int:
     target = main_dir.parent / PAIR_DIR / args.name
     fork_target = target / FORK_REL
     for here in (Path.cwd(), Path(__file__).resolve()):
-        if (norm_path(str(here)) + "\\").startswith(norm_path(str(target)) + "\\"):
-            raise Refusal(f"this command is running from inside {target}; run it from the main checkout or another pair")
-    in_main = is_listed(str(target), worktrees(main_dir))
-    in_fork = is_listed(str(fork_target), worktrees(fork))
+        if is_inside(str(here), str(target)):
+            raise Refusal(
+                f"this command is running from inside {target}; run it from the main checkout or another pair"
+            )
+    main_list, fork_list = worktrees(main_dir), worktrees(fork)
+    in_main = is_listed(str(target), main_list)
+    in_fork = is_listed(str(fork_target), fork_list)
+    for path, entries, repo in ((target, main_list, main_dir), (fork_target, fork_list, fork)):
+        if is_locked(str(path), entries):
+            raise Refusal(
+                f"{path} is locked (git worktree list --porcelain shows why); "
+                f"run `git -C {repo} worktree unlock {path}` once nothing uses it"
+            )
     if not target.exists() and not in_main and not in_fork:
         say(f"nothing to remove: no folder {target} and no worktree registered there")
         return 0
-    if target.exists() and not in_main and not args.force:
-        raise Refusal(
-            f"{target} is not a worktree of {main_dir}. If it is what is left of a pair, "
-            f"rerun with --force to delete it"
-        )
+    for path, listed, repo in ((target, in_main, main_dir), (fork_target, in_fork, fork)):
+        if path.exists() and not listed and not args.force:
+            raise Refusal(
+                f"{path} is not a worktree of {repo}, so its work cannot be checked. "
+                "If it is what is left of a pair, rerun with --force to delete it"
+            )
     if not args.force:
         for repo, listed in ((fork_target, in_fork), (target, in_main)):
             if listed and repo.exists():

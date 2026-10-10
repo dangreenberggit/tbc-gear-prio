@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Pure-logic checks for scripts/worktree_pair.py: no git, no writes.
+"""Pure-logic checks for scripts/worktree_pair.py: no git, no writes outside
+a temp dir.
 
 Follows the check_lock_merge.py convention -- a standalone script of small
 checks, not a pytest suite (this repo has no pytest infra). The IO half of
@@ -13,7 +14,10 @@ Exit 0 ok, 1 a check failed.
 
 from __future__ import annotations
 
+import os
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -33,19 +37,22 @@ def check_name_refuses_paths_and_odd_characters() -> list[str]:
     """The name becomes a folder under the pair root, so a separator or `..`
     would place the pair somewhere else."""
     problems = []
-    for name in ("", "../x", "a/b", "a\\b", "Tab", "-x", "x y", "x" * 25):
+    for name in ("", "../x", "a/b", "a\\b", "Tab", "-x", "x y", "x" * 24):
         if wp.name_problem(name) is None:
             problems.append(f"name {name!r} must be refused")
     return problems
 
 
 def check_target_length_budget() -> list[str]:
-    """The deepest file a pair holds sits 183 characters below its root
-    (measured 2026-10-10), and git cannot delete past Windows' 260-character
-    limit. A root of 68 characters fits; 69 does not."""
+    """The deepest file a pair holds sits 196 characters below its root
+    (measured 2026-10-10 with the command at worktree_pair.MAX_ROOT_LEN), and
+    git cannot delete past Windows' 260-character limit. With the margin, a
+    root of 55 characters fits and 56 does not. The default root
+    C:\\Users\\dgree\\Code\\lulz\\tbc-wt\\ is 32 characters, which leaves 23
+    for the name: the name limit."""
     problems = []
-    fits = "C:\\" + "a" * 65
-    too_long = "C:\\" + "a" * 66
+    fits = "C:\\" + "a" * 52
+    too_long = "C:\\" + "a" * 53
     if wp.length_problem(fits) is not None:
         problems.append(f"a {len(fits)}-character root must fit")
     if wp.length_problem(too_long) is None:
@@ -53,7 +60,7 @@ def check_target_length_budget() -> list[str]:
     return problems
 
 
-# Shape of `git worktree list --porcelain` from git 2.42 on Windows: one
+# Copied from `git worktree list --porcelain` (git 2.42, Windows): one
 # block per worktree, blank-line separated, forward-slash paths.
 PORCELAIN = """worktree C:/Users/dgree/Code/lulz/tbc-gear-prio
 HEAD 35aa31df85299aa9018f1272feda22024a799789
@@ -88,6 +95,18 @@ def check_branch_holder_is_none_for_a_free_branch() -> list[str]:
     for branch in ("sort", "feat/upgrades-tab-react", "de"):
         if wp.branch_holder(branch, entries) is not None:
             problems.append(f"{branch!r} is held by no worktree")
+    return problems
+
+
+def check_is_locked_reads_the_locked_line() -> list[str]:
+    """Claude Code locks the worktrees it runs agents in; unpair checks this
+    before removing either half, so a lock never leaves a half-removed pair."""
+    entries = wp.parse_worktrees(PORCELAIN)
+    problems = []
+    if not wp.is_locked("C:\\Users\\dgree\\Code\\lulz\\tbc-wt\\other", entries):
+        problems.append("tbc-wt/other carries a locked line")
+    if wp.is_locked("C:/Users/dgree/Code/lulz/tbc-wt/tab-sort", entries):
+        problems.append("tbc-wt/tab-sort is not locked")
     return problems
 
 
@@ -176,6 +195,95 @@ def check_vendor_inputs_follow_the_engine_lock_tag() -> list[str]:
     return []
 
 
+def check_ignored_build_output_is_not_work() -> list[str]:
+    """`git status --porcelain --ignored` in a fresh pair (2026-10-10) lists
+    only installs and generated files; unpair may delete those freely."""
+    lines = """!! apps/web/dist-server/
+!! apps/web/node_modules/
+!! apps/web/tsconfig.tsbuildinfo
+!! node_modules/
+!! packages/core/dist/
+!! scripts/__pycache__/
+!! vendor/
+!! sim/core/proto/api.pb.go
+!! ui/generated/proto/api.ts
+!! ui/generated/proto/google/
+!! ui/sim/wasm/bulk_sim/constants_auto_gen.ts
+!! dist/
+!! binary_dist/
+!! .stylelintcache
+!! sim/rogue/TestRogue.results.tmp
+"""
+    got = wp.unexpected_ignored(lines)
+    if got:
+        return [f"build output must not count as work, got {got}"]
+    return []
+
+
+def check_ignored_work_is_reported() -> list[str]:
+    """`.scratch/` is ignored, and a session keeps stage records there; an
+    unpair that deletes it unasked loses them."""
+    lines = """!! node_modules/
+!! .scratch/stage-gate/x/
+!! .env
+!! ui/features/upgrades/adapters/local.wcl-credentials.ts
+"""
+    got = wp.unexpected_ignored(lines)
+    want = [".scratch/stage-gate/x/", ".env", "ui/features/upgrades/adapters/local.wcl-credentials.ts"]
+    if got != want:
+        return [f"unexpected_ignored gave {got}, want {want}"]
+    return []
+
+
+def check_leftover_is_deleted_only_once_git_let_go() -> list[str]:
+    """git refuses a locked worktree, or one that gained files, before it
+    deletes anything, and keeps the registration. Deleting the folder then
+    would override that refusal. A leftover that git has unregistered is what
+    the fallback exists for."""
+    problems = []
+    cases = (
+        # (still registered after git's attempt, folder exists) -> action
+        ((False, False), "done"),
+        ((False, True), "delete"),
+        ((True, True), "refuse"),
+        ((True, False), "done"),
+    )
+    for args, want in cases:
+        got = wp.leftover_action(*args)
+        if got != want:
+            problems.append(f"leftover_action{args} gave {got!r}, want {want!r}")
+    return problems
+
+
+def check_find_links_sees_real_junctions() -> list[str]:
+    """find_links reads real Windows junctions, one level deep and nested, and
+    links_outside keeps only the escaping one. Writes only to a temp dir."""
+    if os.name != "nt":
+        return []
+    with tempfile.TemporaryDirectory() as td:
+        root = os.path.join(td, "pair")
+        outside = os.path.join(td, "outside")
+        os.makedirs(os.path.join(root, "a", "b"))
+        os.makedirs(outside)
+        out_link = os.path.join(root, "a", "b", "out")
+        in_link = os.path.join(root, "in")
+        for link, target in ((out_link, outside), (in_link, os.path.join(root, "a"))):
+            subprocess.run(["cmd", "/c", "mklink", "/J", link, target], capture_output=True, check=True)
+        try:
+            links = wp.find_links(Path(root))
+            escaping = [wp.norm_path(link) for link, _ in wp.links_outside(root, links)]
+            problems = []
+            if len(links) != 2:
+                problems.append(f"find_links found {len(links)} links, want 2: {links}")
+            if escaping != [wp.norm_path(out_link)]:
+                problems.append(f"escaping links {escaping}, want only {out_link}")
+            return problems
+        finally:
+            # rmdir on a junction removes the link, never the target's files.
+            for link in (out_link, in_link):
+                subprocess.run(["cmd", "/c", "rmdir", link], capture_output=True)
+
+
 CHECKS = (
     check_name_accepts_a_short_slug,
     check_name_refuses_paths_and_odd_characters,
@@ -183,11 +291,16 @@ CHECKS = (
     check_branch_holder_names_the_worktree,
     check_branch_holder_is_none_for_a_free_branch,
     check_is_listed_ignores_slash_and_case_spelling,
+    check_is_locked_reads_the_locked_line,
     check_links_outside_finds_only_escaping_links,
     check_long_path_prefixes_once,
     check_node_version_floor,
     check_main_checkout_comes_from_the_common_dir,
     check_vendor_inputs_follow_the_engine_lock_tag,
+    check_ignored_build_output_is_not_work,
+    check_ignored_work_is_reported,
+    check_leftover_is_deleted_only_once_git_let_go,
+    check_find_links_sees_real_junctions,
 )
 
 

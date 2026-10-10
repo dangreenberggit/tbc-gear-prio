@@ -193,7 +193,9 @@ The two ports differ. **3333** must be exactly 3333 (the frontend
 hardcodes the proxy; the entry sets `autoPort: false`) — stop the stray
 process and start the managed `wowsims-backend` entry. **5173** held by
 another session's vite is serving this same checkout with HMR — use it;
-starting a second copy buys nothing. One HMR side-effect: an engine-file
+starting a second copy buys nothing. In a paired worktree it may be serving
+another pair's fork instead: use it only when your own folder started it
+(`docs/agents/paired-worktrees.md`). One HMR side-effect: an engine-file
 edit reloads the page, dropping in-page run state and sometimes the
 browser tab id — re-drive the page rather than debugging the "lost" run.
 
