@@ -9,8 +9,9 @@
  * reads it back once the run is done or stopped; and `useRunStale` calls the
  * result stale when the signature built from the page now differs. These tests
  * drive those pure pieces through the real `runStarted` and `runSettled`
- * (`model/run_state.ts`), which the tab's store actions call. The hook itself is React and is tested in the fork
- * (`hooks/useRunStale.test.tsx`).
+ * (`model/run_state.ts`), which the tab's store actions call, and the one that
+ * needs two runs in turn through the real store. The hook itself is React and
+ * is tested in the fork (`hooks/useRunStale.test.tsx`).
  *
  * The fork is gitignored (`vendor/`), so the suite skips when it is absent.
  */
@@ -35,6 +36,13 @@ type RunState =
   | { status: "stopped"; runId: number; measuredOn?: MeasuredOn }
   | { status: "error"; runId: number; message: string };
 type RunOutcome = { items: never[]; complete: boolean };
+type TabStore = {
+  getState(): {
+    run: RunState;
+    startRun(runId: number, startedAt: number, measuredOn?: MeasuredOn): void;
+    settleRun(runId: number, outcome: RunOutcome): void;
+  };
+};
 
 type ProtoMessage = { create(init?: object): object };
 type LiveInputsSource = {
@@ -44,7 +52,10 @@ type LiveInputsSource = {
 };
 
 const SETTINGS: RunSettings = { iterations: 3000 };
-/** Rankings whose contents nothing here reads: they do not decide staleness. `complete` picks done or stopped. */
+/**
+ * Rankings whose contents nothing here reads: they do not decide staleness.
+ * `complete` picks done or stopped.
+ */
 const FINISHED: RunOutcome = { items: [], complete: true };
 const PARTIAL: RunOutcome = { items: [], complete: false };
 
@@ -66,6 +77,7 @@ describe.skipIf(!forkPresent)("Upgrades run staleness", () => {
   ) => RunState;
   let idle: RunState;
   let settledSignature: (state: { run: RunState }) => string | undefined;
+  let createStore: (seed: { iterations: number }) => TabStore;
   let signatureAtPhase: (phase: number) => string;
 
   beforeAll(async () => {
@@ -78,11 +90,12 @@ describe.skipIf(!forkPresent)("Upgrades run staleness", () => {
     runStarted = runState.runStarted;
     runSettled = runState.runSettled;
     idle = runState.IDLE_RUN;
-    settledSignature = (
-      await importForkUpgrades<{
-        selectSettledSignature: typeof settledSignature;
-      }>("upgrades_store.ts")
-    ).selectSettledSignature;
+    const upgradesStore = await importForkUpgrades<{
+      selectSettledSignature: typeof settledSignature;
+      createUpgradesStore: typeof createStore;
+    }>("upgrades_store.ts");
+    settledSignature = upgradesStore.selectSettledSignature;
+    createStore = upgradesStore.createUpgradesStore;
 
     const { inputsSignature, liveInputsKey } = await importForkUpgrades<{
       inputsSignature(input: {
@@ -140,11 +153,19 @@ describe.skipIf(!forkPresent)("Upgrades run staleness", () => {
   });
 
   it("does not carry a change during one run into the next run", () => {
-    // Run 1 started at phase 3; run 2 replaces it at phase 4, and run 1's late result is dropped.
-    const second = start(2, signatureAtPhase(4));
+    // Run 1 starts at phase 3, the phase moves, and run 2 replaces run 1 at
+    // phase 4. Run 1's late result must not show as settled on run 2's inputs.
+    const store = createStore(SETTINGS);
+    store.getState().startRun(1, 0, { inputsSignature: signatureAtPhase(3) });
+    store.getState().startRun(2, 0, { inputsSignature: signatureAtPhase(4) });
 
-    expect(finish(second, 1)).toBe(second);
-    expect(settled(finish(second, 2))).toBe(signatureAtPhase(4));
+    store.getState().settleRun(1, FINISHED);
+    expect(store.getState().run).toMatchObject({ status: "running", runId: 2 });
+    expect(settledSignature(store.getState())).toBeUndefined();
+
+    store.getState().settleRun(2, FINISHED);
+    expect(store.getState().run).toMatchObject({ status: "done", runId: 2 });
+    expect(settledSignature(store.getState())).toBe(signatureAtPhase(4));
   });
 
   it("marks a done result stale when an input changes after the run", () => {
