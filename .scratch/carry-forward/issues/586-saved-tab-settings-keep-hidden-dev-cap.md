@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-tab-settings-persist.md
 Blocks: none
@@ -64,3 +64,36 @@ Found by three review axes at once: Adversarial A2, Domain D1, Spec SP3.
 - A live reload check on the dev server changes a selected set, one excluded
   source, iterations and the sort, reloads, and records that each came back,
   with the log path in the lock `_comment`.
+
+## Closing note (2026-10-09, feat/tab-settings-persist, review fix round)
+
+Fork `b2f9293a2` ("Fix saved tab settings: cap, phase, export"), pinned by
+this commit's `data/wowsims-fork.lock.json`.
+
+The cap is not saved at all, rather than restored only on a page with
+`?upgrades-dev`. `model/saved_settings.ts` drops `candidateCap` from the entry
+it writes and does not read it back, so an entry written by fork `56c87e6ed`
+that holds a cap restores none. The dev link still sets the cap for its own
+load. Restoring it only with `?upgrades-dev` would make the model read the dev
+flag, and the value would not survive anyway: every write on a plain page
+rewrites the whole entry. The cost: a cap typed into the picker on a dev page
+is gone after a reload unless the link names it.
+
+Test: `saved_settings.test.ts` "restores no cap: a page without the dev link
+runs uncapped whatever a dev page set" failed before the change ("expected 7
+to be undefined") and passes after (`npx vitest run
+ui/features/upgrades/model/saved_settings.test.ts` from the fork).
+
+Riders: S2, the `SettingsSeed` comment now says the saved entry and the dev
+link go over the seed. S3, "A run changes none of them". S4, the comparison
+with upstream's `ignoreUnknownFields` read is dropped from the `FIELD_CHECKS`
+comment, untested. S5, `saved_settings.test.ts` and `useUpgradesStore.test.ts`
+use the exported `memoryStorage` from `testing/fake_tab_host.ts`, which now
+takes initial entries and exposes them. S6, this branch's two lock `_comment`
+re-run commands now name `56c87e6ed` and `c7f739d06`, and the new entry names
+`b2f9293a2`; entries from earlier branches still say `HEAD`.
+
+SP4: live reload check on :5173 (ret page). Selected sets, an excluded
+source, iterations, prune, the column sort and the export choice came back
+after a reload; a `?upgrades-dev&cap=3` cap did not come back without the
+link. Log: `.scratch/tab-settings-persist/r2-live-reload.log` (gitignored).
