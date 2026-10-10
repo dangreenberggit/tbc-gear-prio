@@ -231,3 +231,94 @@ sentence, the AGENTS.md "fork edits happen only in a pair" clause.
 ## Round 3
 
 Reviewed range: `abedfe9cff2605a910ff8c3e07e6f280e607ca7d..05aced4c83e70d527434cf45027c540c59d37f85`
+
+Three axes and the writing check ran again (round 2 fixed `medium`
+findings S7, W7, so the focused check did not apply), as fresh
+`general-task` agents on Opus in parallel.
+
+### Adversarial (round 3)
+
+A7, A8, A9, S7, S8, S11, S14, W7, W9, W10 and W11 are fixed as their rows
+say.
+
+- **A11 (low)** The caller's vitest count (`run_verify.mjs:228`) had no
+  test: passing `0` left all 13 tests green (scratch-copy mutation).
+- **A12 (low)** An unreadable vitest report failed with the skip message,
+  whose opt-out hint then let the same run pass with no test evidence.
+- **A13 (low)** S12 was marked `fixed`, but the AGENTS.md "No fork here"
+  bullet still gives the opt-out without the two restores.
+- **A14 (nit)** Ticket 594's "Done when" still said "the text above" though
+  it holds two texts.
+
+### Domain (round 3)
+
+**Domain: clean.**
+
+### Standards (round 3)
+
+- **S15 (medium)** 30751cdb..cdf11cef edited AGENTS.md:89 and
+  `gate-executor.md` step 1 again before owner approval.
+- **S16 (low)** cdf11cef's subject is 52 characters (limit 50).
+- **S17 (low)** `agnostic.md:17` (and mirror) gave the opt-out without the
+  restores; S12's note claimed the AGENTS.md bullet links the guide, which
+  it does not.
+- **S18 (low)** Two claims named no re-runnable command: `known-traps.md`
+  "ran them all", and cdf11cef's body "failed 16 tests".
+- **S19 (minor)** `pythonSkips` / `vitestSkips` named an array and an object
+  at the call site and numbers in `skipGuard`.
+- **S20 (nit)** An unreadable report became a made-up `skipped: 1`.
+- **S21 (minor)** Round 2 had no Summary.
+
+### Spec (round 3)
+
+No fix missing or wrong; the owner-approved rule is unchanged.
+
+- **P10 (nit)** Round 1's range line moved to full SHAs; no finding asked.
+- **P11 (note)** Same as A11.
+- **P12 (note)** The unreadable-report path had no test.
+
+### Writing for agents (round 3)
+
+W7-W11 fixed; no banned words.
+
+- **W13 (low)** The refusal told every agent to make a pair; AGENTS.md:96
+  tells a worker to stop and report.
+- **W14 (low)** Same as A14.
+- **W15 (nit)** "Without them" in `paired-worktrees.md` could mean the
+  opt-out or the restores.
+- **W16 (nit)** "without it" in `known-traps.md` had no clear referent.
+
+### Summary (round 2 and round 3)
+
+Round 2 found the guard missed vitest-only skips and unreadable reports,
+that ticket 594 broke tracker rules, and that the opt-out advice left out
+the restores a plain worktree needs. Round 3 found the vitest path still
+untested at the call site and the unreadable-report path still passable
+under the opt-out. All are fixed in cdf11cef and 81fec876, except the
+AGENTS.md "No fork here" wording (ticket 594, owner's choice) and the
+agent-file edits made before owner approval (S9, S15), which the hand-off
+lists for the owner. `pnpm verify` in the pair: 1531 ran, 0 skipped at
+cdf11cef.
+
+## Disposition (round 3)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                          |
+| --- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A11 | Adversarial | fixed       | 81fec876: a fake vitest in the wiring tests; "exits 1 when only a vitest test skips" fails with `vitestSkipCount: 0` at the call site                                  |
+| A12 | Adversarial | fixed       | 81fec876: an unreadable report fails the run everywhere, opt-out and CI included; its test fails with the `exitCode`/`return` removed. Ticket 408 notes defect 4 fixed |
+| A13 | Adversarial | defer       | `.scratch/carry-forward/issues/594-merge-duplicate-sentence-in-pair-rule.md` (the AGENTS.md bullet is owner text)                                                      |
+| A14 | Adversarial | fixed       | 81fec876: ticket 594's "Done when" names both texts and the current bullet                                                                                             |
+| S15 | Standards   | wontfix     | As S9: the hand-off lists every agent-file edit made after the owner's approval, for the owner to accept or reject before a merge ask                                  |
+| S16 | Standards   | wontfix     | The commit exists on the branch; rewriting it buys nothing                                                                                                             |
+| S17 | Standards   | fixed       | 81fec876: `agnostic.md:17` points at the guide's steps; S12's note was wrong, and A13 carries the AGENTS.md half                                                       |
+| S18 | Standards   | fixed       | 81fec876: `known-traps.md` names the `gates: N ran, 0 skipped` tail line; the cdf11cef body stays as written                                                           |
+| S19 | Standards   | fixed       | 81fec876: `pythonSkipCount`, `vitestSkipCount`                                                                                                                         |
+| S20 | Standards   | fixed       | As A12: no made-up count                                                                                                                                               |
+| S21 | Standards   | fixed       | This section's Summary covers rounds 2 and 3                                                                                                                           |
+| P10 | Spec        | wontfix     | Full SHAs follow the skill's "resolved shas" rule                                                                                                                      |
+| P11 | Spec        | fixed       | As A11                                                                                                                                                                 |
+| P12 | Spec        | fixed       | As A12                                                                                                                                                                 |
+| W13 | Writing     | fixed       | 81fec876: "as a worker, stop and report this to whoever sent you; otherwise make a pair"                                                                               |
+| W14 | Writing     | fixed       | As A14                                                                                                                                                                 |
+| W15 | Writing     | fixed       | 81fec876: "Without the two restores"                                                                                                                                   |
+| W16 | Writing     | fixed       | 81fec876: names `TBC_VERIFY_WITHOUT_FORK=1`                                                                                                                            |
