@@ -466,3 +466,79 @@ from the `feat/worktree-pair` pair on Node 22.17.1.
 --launch=false --host=:3333`. `unsaved_work` then refused the pair's fork
   over `wowsimtbc.exe`, which commit "Let wt:unpair delete a backend binary
   built in the pair" fixed. The probe backend was stopped afterwards.
+
+## Independent writing-for-agents review
+
+Reviewed range: `c403fc9af97f037d1d476c2e3e7fdf08adac1024..e9e3da54b00fe19bf2b5c13e280724bf1b39ec91`
+
+An independent reviewer ran the `writing-for-agents` skill over the branch's
+docs at `e9e3da54` and sent findings through the coordinator. The implementer
+checked each against the code before applying it. IDs carry a `W` prefix so
+they do not collide with the axis IDs above. Testing WD3 also found that
+unpair refused a `wowsimtbc.exe` built in the pair. Commit "Let wt:unpair
+delete a backend binary built in the pair" fixed that.
+
+- **WD1 (minor)** "Done" must mean `pair ready` with no `WARNING` after it.
+  Checked: the warnings print after `pair ready` (`worktree_pair.py`, the
+  `for warning in warnings` loop after the summary lines).
+- **WD2 (minor)** The doc gave no runtime or timeout.
+- **WD3 (minor)** The vite command line has only relative paths
+  (`launch.json:26-29`), so it cannot name a folder. Tested on the backend
+  instead: see "Live tests", last bullet.
+- **WD4, WD5 (minor)** The Live tab bullet mixed the live servers with the
+  layout gate. Checked: `startServer` picks a free port
+  (`test-tab-harness.mjs:138-139`); `serveTab` reuses `TBC_FORK_PORT`
+  (`:178-187`); the layout gate skips without `dist/`
+  (`check_layout_gate.py:52`). The `wowsims-fork-prod` paths are absolute to
+  the main checkout (`launch.json:50-52`).
+- **WD6 (medium)** For a `--fork-detached` pair, "skip steps 3 and 4"
+  dropped the checkout of the main branch, and `merge_to_dev.py:125-127`
+  refuses to run from `dev`.
+- **WD7 (minor)** Two pairs that both re-pin conflict on the lock. Tested in
+  a temp repo: two branches each changed `commit` and `_comment`; the second
+  `git merge --no-ff` gave "CONFLICT (content): Merge conflict in lock.json"
+  (rc 1). `.gitattributes` defines no merge driver.
+- **WD8 (nit)** Step 3 did not check that the clone is on the lock's
+  `branch`.
+- **WD9 (minor)** "Remove it" did not list the refusal for an unregistered
+  folder (`unpair`, the loop over `(target, in_main)` and
+  `(fork_target, in_fork)`).
+- **WD10 (minor)** The Live test record did not belong in an agent doc.
+- **WD11 (nit)** The name rule was not stated.
+- **WD12 (minor)** Subagents start in the spawning session's folder.
+  Checked: in the scratch pair, `pnpm -C <pair> verify` failed on that pair's
+  missing `constants_auto_gen.ts`, which the main checkout's fork has, so it
+  checks the pair.
+- **WK1 (minor)** The `known-traps.md` 5173/3333 paragraph needed the
+  find-the-folder-first order, plus a long unwrapped line.
+- **WT1, WT2 (minor)** Ticket 593 placed its two paragraphs at the wrong
+  anchors. Checked: the AGENTS.md section ends with the paragraph that
+  starts "Every fork commit is a separate"; `agnostic.md`'s code block is at
+  lines 10-15.
+- **WT4 (nit)** "both lines" should be "both paragraphs".
+- **WX1 (minor)** `agnostic.md` lines 14, 21, 31 and 46 use
+  `${FEATURE}/${SLICE}`. Tested in a temp repo: with branch `feat`, `git
+branch feat/slice` gave "fatal: cannot lock ref 'refs/heads/feat/slice':
+  'refs/heads/feat' exists"; `feat-slice` worked.
+
+## Disposition (independent writing-for-agents review)
+
+| ID   | Axis                        | Disposition | Ticket / note                                                                                                                      |
+| ---- | --------------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| WD1  | Writing-for-agents (doc)    | fixed       | "Make one" says done is `pair ready` with no `WARNING` after it                                                                    |
+| WD2  | Writing-for-agents (doc)    | fixed       | runtime and the 600000 ms timeout stated                                                                                           |
+| WD3  | Writing-for-agents (doc)    | fixed       | backend `ExecutablePath` method, tested in the dev pair; vite named as relative-only                                               |
+| WD4  | Writing-for-agents (doc)    | fixed       | reviewer's Live tab text, with the tested path in place of "untested"                                                              |
+| WD5  | Writing-for-agents (doc)    | fixed       | reviewer's layout gate / `tab-review` bullet                                                                                       |
+| WD6  | Writing-for-agents (doc)    | fixed       | step 4 retitled "check out, and re-pin when needed"; the detached-pair skip covers step 3 and the re-pin only                      |
+| WD7  | Writing-for-agents (doc)    | fixed       | step 4 says to `git merge dev` first and how to resolve the lock conflict                                                          |
+| WD8  | Writing-for-agents (doc)    | fixed       | step 3 checks `branch --show-current` against the lock's `branch`                                                                  |
+| WD9  | Writing-for-agents (doc)    | fixed       | "Remove it" lists the unregistered-folder refusal                                                                                  |
+| WD10 | Writing-for-agents (doc)    | fixed       | Live test record moved to "Live tests" above; the doc keeps the timings and why `git worktree remove` alone is not used            |
+| WD11 | Writing-for-agents (doc)    | fixed       | name rule stated                                                                                                                   |
+| WD12 | Writing-for-agents (doc)    | fixed       | "Subagents" bullet, with the scratch-pair evidence                                                                                 |
+| WK1  | Writing-for-agents (doc)    | fixed       | reviewer's paragraph; "since paired worktrees" dropped; rewrapped                                                                  |
+| WT1  | Writing-for-agents (ticket) | fixed       | ticket 593 anchors the AGENTS.md paragraph after "Every fork commit is a separate", with the reviewer's text                       |
+| WT2  | Writing-for-agents (ticket) | fixed       | ticket 593 anchors the `agnostic.md` paragraph after the code block, with the reviewer's text; its "steps 2-4" still match the doc |
+| WT4  | Writing-for-agents (ticket) | fixed       | "both paragraphs"                                                                                                                  |
+| WX1  | Writing-for-agents (ticket) | defer       | `.scratch/carry-forward/issues/593-point-agents-at-paired-worktrees.md` — skill edit, needs owner approval                         |
