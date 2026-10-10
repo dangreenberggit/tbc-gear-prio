@@ -67,26 +67,99 @@ The feature does what was asked and follows upstream's own pattern for saved set
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                      |
 | --- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | defer       | `.scratch/carry-forward/issues/587-saved-sets-miss-phase-change-before-tab-opens.md` — phase change before the tab opens                                                                                                           |
-| A2  | Adversarial | defer       | `.scratch/carry-forward/issues/586-saved-tab-settings-keep-hidden-dev-cap.md` — same as D1; recommended fix on this branch                                                                                                         |
-| A3  | Adversarial | defer       | `.scratch/carry-forward/issues/587-saved-sets-miss-phase-change-before-tab-opens.md` — load-order hypothesis, untested                                                                                                             |
-| A4  | Adversarial | defer       | `.scratch/carry-forward/issues/587-saved-sets-miss-phase-change-before-tab-opens.md` — no reload-after-phase-change test                                                                                                           |
+| A1  | Adversarial | fixed       | fixed in fork `b2f9293a2` (pinned by `b390ebd5`): `model/phase_changes.ts` records phase changes from page start, the store replays them; ticket 587 closed in `a2c7d09c`; superseded in round 2                                   |
+| A2  | Adversarial | fixed       | fixed in fork `b2f9293a2` (pinned by `b390ebd5`): the cap is neither saved nor restored; ticket 586 closed in `a2c7d09c`; superseded in round 2                                                                                    |
+| A3  | Adversarial | fixed       | fixed in fork `b2f9293a2` (pinned by `b390ebd5`): a test showed the fault was real; the phase record now starts after `waitForInit`; ticket 587 closed in `a2c7d09c`; superseded in round 2                                        |
+| A4  | Adversarial | fixed       | fixed in fork `b2f9293a2` (pinned by `b390ebd5`): `useUpgradesStore.test.ts` (A4) reloads after a phase change; ticket 587 closed in `a2c7d09c`; superseded in round 2                                                             |
 | A5  | Adversarial | wontfix     | checked: out-of-range iterations and cap are rejected or fall back to the default (`saved_settings.ts` `isCount`, `run_reducer.ts:30`)                                                                                             |
 | A6  | Adversarial | wontfix     | checked: one ~200-byte write per user change, none per run; no debounce needed                                                                                                                                                     |
 | A7  | Adversarial | wontfix     | checked: sort columns always present, in-flight runs ignore the sort (`results_columns.ts:18`, `useResultsTable.ts:63`)                                                                                                            |
 | A8  | Adversarial | wontfix     | checked: `fakeTabHost` key and storage match the real host (`storage_keys.ts:12`); a new `sim` per test                                                                                                                            |
-| D1  | Domain      | defer       | `.scratch/carry-forward/issues/586-saved-tab-settings-keep-hidden-dev-cap.md` — saved dev cap, control hidden; recommended fix on this branch                                                                                      |
-| D2  | Domain      | defer       | `.scratch/carry-forward/issues/587-saved-sets-miss-phase-change-before-tab-opens.md` — stale source key counted in the summary                                                                                                     |
+| D1  | Domain      | fixed       | fixed in fork `b2f9293a2` (pinned by `b390ebd5`): same fix as A2; ticket 586 closed in `a2c7d09c`; superseded in round 2                                                                                                           |
+| D2  | Domain      | fixed       | fixed in fork `b2f9293a2` (pinned by `b390ebd5`): `dropUnofferedSources` after `waitForInit`; ticket 587 closed in `a2c7d09c`; superseded in round 2                                                                               |
 | D3  | Domain      | wontfix     | judged low: the excluded count shows under the Sources button at `xl` and above, behind the Settings button below it, and the eligible count always shows; owner may want it outside the collapsed panel                           |
 | D4  | Domain      | wontfix     | checked: the ticket 570 note states no game fact                                                                                                                                                                                   |
 | S1  | Standards   | wontfix     | fork `c7f739d06` subject is 54 characters; the commit is pinned by `acce6cb0` and named in `docs/fork-upstream-touchpoints.md`, so rewriting it means a re-pin for a cosmetic change                                               |
-| S2  | Standards   | defer       | `.scratch/carry-forward/issues/586-saved-tab-settings-keep-hidden-dev-cap.md` — rider: stale `SettingsSeed` comment                                                                                                                |
-| S3  | Standards   | defer       | `.scratch/carry-forward/issues/586-saved-tab-settings-keep-hidden-dev-cap.md` — rider: "neither" about three things                                                                                                                |
-| S4  | Standards   | defer       | `.scratch/carry-forward/issues/586-saved-tab-settings-keep-hidden-dev-cap.md` — rider: `ignoreUnknownFields` comparison untested                                                                                                   |
-| S5  | Standards   | defer       | `.scratch/carry-forward/issues/586-saved-tab-settings-keep-hidden-dev-cap.md` — rider: three storage fakes in tests                                                                                                                |
-| S6  | Standards   | defer       | `.scratch/carry-forward/issues/586-saved-tab-settings-keep-hidden-dev-cap.md` — rider: lock `_comment` re-run command names `HEAD`                                                                                                 |
+| S2  | Standards   | fixed       | fixed in fork `b2f9293a2`: `SettingsSeed` comment rewritten; ticket 586 closed in `a2c7d09c`; superseded in round 2                                                                                                                |
+| S3  | Standards   | fixed       | fixed in fork `b2f9293a2`: "A run changes none of them"; ticket 586 closed in `a2c7d09c`; superseded in round 2                                                                                                                    |
+| S4  | Standards   | fixed       | fixed in fork `b2f9293a2`: the `ignoreUnknownFields` comparison is removed; ticket 586 closed in `a2c7d09c`; superseded in round 2                                                                                                 |
+| S5  | Standards   | fixed       | fixed in fork `b2f9293a2`: tests use the exported `memoryStorage`; ticket 586 closed in `a2c7d09c`; superseded in round 2                                                                                                          |
+| S6  | Standards   | fixed       | fixed in `b390ebd5`: this branch's lock `_comment` entries name `56c87e6ed`, `c7f739d06` and `b2f9293a2`; older entries are row S13; ticket 586 closed in `a2c7d09c`; superseded in round 2                                        |
 | S7  | Standards   | wontfix     | `.scratch/tab-settings-persist/layout-gate-2.log` (gitignored) records `"outcome":"measured","pass":true` and "layout gate: PASSED. Advanced the baseline to cc08a5fccba8..."; the hash equals `check_layout_gate.py --print-hash` |
-| SP1 | Spec        | defer       | `.scratch/carry-forward/issues/588-export-flavour-not-saved.md` — export token/gear choice not saved                                                                                                                               |
+| SP1 | Spec        | fixed       | fixed in fork `b2f9293a2` (pinned by `b390ebd5`): `exportFlavour` saved in the version-1 entry; ticket 588 closed in `a2c7d09c`; superseded in round 2                                                                             |
 | SP2 | Spec        | wontfix     | the sort is a choice the user makes on the tab, so it fits "Tab settings"; the owner can overrule, and dropping it is one field                                                                                                    |
-| SP3 | Spec        | defer       | `.scratch/carry-forward/issues/586-saved-tab-settings-keep-hidden-dev-cap.md` — same as D1                                                                                                                                         |
-| SP4 | Spec        | defer       | `.scratch/carry-forward/issues/586-saved-tab-settings-keep-hidden-dev-cap.md` — live reload check of sets, sources, iterations and sort                                                                                            |
+| SP3 | Spec        | fixed       | fixed in fork `b2f9293a2` (pinned by `b390ebd5`): same fix as A2; ticket 586 closed in `a2c7d09c`; superseded in round 2                                                                                                           |
+| SP4 | Spec        | fixed       | fixed in `a2c7d09c`: `.scratch/tab-settings-persist/r2-live-reload.log` (gitignored) shows sets, a source, iterations, prune, sort and export choice back after reload; round-2 Spec axis checked each step; superseded in round 2 |
+
+# Round 2
+
+Reviewed range: `acce6cb00d867d3ec2bd962b95356b749a1f418f..a2c7d09cf5a59efef21152284f9397f264a0a864`
+
+Main commits: `7c0292c2` (the round-1 review file), `b390ebd5` (fork pin to `b2f9293a2`), `a2c7d09c` (tickets 586, 587 and 588 closed). The range starts at round 1's through-sha, so the review commit is inside it.
+
+Fork code reviewed with it: `vendor/tbc-new-fork` branch `feat/upgrades-tab-react`, `c7f739d0632831160197078349720259e27bc489..b2f9293a24ad55c82770b15ce2a782c31c5c5fcb`, one commit, "Fix saved tab settings: cap, phase, export". 19 files: 18 modified, one new (`ui/features/upgrades/model/phase_changes.ts`).
+
+Spec: tickets 586, 587 and 588 ("Done when" lines and closing notes), the round-1 rows that deferred to them, and two orchestrator checks for 587: the tab's lazy loading is not undone, and `UpgradesTabBody.tsx` and `phase_changes.ts` are our files.
+
+Dispatch (round 2, 2026-10-09): `codex` was not used; four fresh `general-task` subagents on Opus (effort `high`, the review lane) ran in one parallel batch: Adversarial, Domain, and the `code-review` skill's Standards and Spec sub-agents. Each was told it writes nothing and not to grep the fork's `node_modules` recursively. Both trees were clean at dispatch (`git status --porcelain`, main and fork).
+
+Runs by the aggregator, logs in `.scratch/tab-settings-persist/` (gitignored):
+
+- `review-r2-fork-tests.log`: `npx vitest run upgrades ui/app/tabs` from the fork on Node 22.17.1: 57 files, 448 tests pass, rc=0.
+- `review-r2-verify.log`: `corepack pnpm verify` in main: "gates: 1517 ran, 0 skipped", the layout gate skipped as unchanged since the last green run (digest `21a8f1685061…`), rc=0.
+
+Wowsims-file rule, run by the aggregator at fork HEAD `b2f9293a2`: `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M 5262ff386bd171e6349d0f9cf00f4d762a6c9951 HEAD` prints only `6	0	ui/app/SimTabsSection.tsx`; the `--diff-filter=D` twin prints nothing. `git -C vendor/tbc-new-fork cat-file -e 5262ff386:<path>` fails (rc=128) for `ui/app/tabs/UpgradesTabBody.tsx`, `ui/features/upgrades/model/phase_changes.ts` and both `UpgradesTabBody` tests, so none is a wowsims file. The Standards axis re-ran the same checks with the same result.
+
+## Adversarial (round 2)
+
+The five fix claims hold against the code. The axis ran `npx vitest run` on the 7 changed test files: 50 pass, rc=0.
+
+- **A9 (medium).** A phase change made on a page whose tab has not opened now downloads the tab's store chunk with all bundled item data. `UpgradesTabBody.tsx:17-21,56` imports `hooks/useUpgradesStore` on such a change; that reaches `follow_phase.ts` → `./data/data` (every spec's universe JSON) and `./run`. The chunk `dist/tbc/bundle/useUpgradesStore-S9N8_lXr.chunk.js` is 6,317,978 bytes (aggregator check: `ls -la`, built 17:20, after the fork commit at 17:16); the axis measured 756,579 bytes gzipped (unverified). Before round 2 this chunk was downloaded only when the tab opened. The 587 closing note does not mention the cost.
+- **A10 (low).** On a spec with no ranking data, `followPhase` returns before setting a follower (`follow_phase.ts:25`), so the first phase change downloads the chunk for nothing, and each later one appends to `missed` and re-runs the cached `import()` (`phase_changes.ts:30-34`).
+- **A11 (checked, clean).** `UpgradesTabBody.test.tsx:56-62` mocks `@sim/state/subscriptions`, so its tests cannot catch a load-order bug. `useUpgradesStore.test.ts` covers the A3 order with real subscriptions, and the real page follows that order (next paragraph).
+
+Clean checks: the eager static import keeps the first download lazy (`phase_changes.ts` imports a type from `@sim/sim` and `@sim/state/subscriptions`, both already loaded by the page, `individual_sim_ui.tsx:43`; `lazy_load.test.ts` enforces it). The A3 order is true on the real page: the constructor registers the `.then` that calls `loadSettings` (`individual_sim_ui.tsx:135-137`) before React renders the tab, `waitForInit` returns one promise (`sim.ts:224-225`), and `loadIndividualSettings` writes the phase synchronously (`persistence.ts:46-81`). A pending import that resolves after the store exists gets the cached store; StrictMode's second effect does nothing; a `waitForInit` that never resolves records nothing. `dropUnofferedSources` uses the restored phase and the same pool as the Sources dialog. `ExportPanel` renders only under the tab's provider. The A3 test fails against round-1 code (read, not run).
+
+## Domain (round 2)
+
+**Domain: clean.** The exclusion drop uses the same `poolFor(specId, sim.getPhase())` as the run (`model/run.ts:78-79,115`) after the restored phase, so it drops only keys that excluded nothing at that phase; Heroic and Badge buckets stay whenever the phase's pool holds them (`model/engine/view.ts:150-158`). The diff derives no phase or tier of its own. Not saving the cap agrees with ticket 466, and the harness sets its cap on every load (`scripts/tab-harness/run-tab-cdp.mjs:291-303`). The `token` export default agrees with ticket 126 and `docs/verification-log.md:1086-1091`.
+
+## Standards + Spec (round 2)
+
+### Standards
+
+Hard checks pass: the lock `commit` and `sim-implemented-effects.json` `forkCommit` both name `b2f9293a24ad…`; `python scripts/check_layout_gate.py --print-hash` equals `testedTabHash` `21a8f168…`; `docs/fork-upstream-touchpoints.md` re-runs as 113 commits, 256 A and 1 M, 251 under `ui/features/upgrades`; the three commit messages follow the seven rules (subjects 39, 30 and 42 characters); no path under `model/engine` changed; riders S2 to S6 are done. Low judgement calls:
+
+- **S8 (Duplicated Code).** `dropUnofferedSources` repeats the `scopeChanged` filter (`model/settings_reducer.ts`).
+- **S9 (Duplicated Code).** The zero-timer flush is written in four test files.
+- **S10 (Mysterious Name).** `unchanged` in `saved_settings.ts` covers three of the four saved fields.
+- **S11 (Speculative Generality).** `SettingsSeed.candidateCap` has no production caller now.
+- **S12.** The `upgrades_store.ts` comment on the `exportFlavour` default points at `ExportPanel` for a reason that file no longer gives.
+- **S13.** Lock `_comment` entries from earlier branches still use `HEAD` in their re-run commands.
+
+### Spec
+
+Every "Done when" line of 586, 587 and 588 has code and a test. Each closing-note claim that cites `r2-live-reload.log` is shown there step by step: sets, a source, iterations and prune (steps 2-3), the sort and the export choice (7-8), the cap not coming back (4-6), and phase 3→4→3 with the tab never opened resetting to `preset:3:P3` after reload (9).
+
+- **SP5 (medium).** Same as A9.
+- **SP6 (scope).** The `run_reducer.ts` and `settings_reducer.ts` header comments were reworded; no ticket asked for it.
+
+## Summary (round 2)
+
+The fixes for tickets 586, 587 and 588 work, and both test runs pass. One medium finding needs a code change: to save a phase change on a page where the tab never opens, the page now downloads the tab's 6.3 MB data chunk on the first phase change, on every spec page, including specs the tab has no data for (A9, A10, SP5; ticket 589, with the five low Standards findings as riders). Nothing is blocking. Under the orchestrator's rule, this round does not clear the branch for a merge ask until ticket 589 is fixed or the owner accepts the cost.
+
+## Disposition (round 2)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                          |
+| --- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A9  | Adversarial | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — a phase change downloads the tab's data chunk with the tab unopened                  |
+| A10 | Adversarial | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — no-data spec: wasted download, `missed` grows                                        |
+| A11 | Adversarial | wontfix     | checked: the mocked subscriptions hide no bug; `useUpgradesStore.test.ts` covers the A3 order with real ones and the page follows it (`individual_sim_ui.tsx:135-137`) |
+| S8  | Standards   | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — rider: duplicated source filter                                                      |
+| S9  | Standards   | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — rider: zero-timer flush in four test files                                           |
+| S10 | Standards   | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — rider: `unchanged` name                                                              |
+| S11 | Standards   | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — rider: unused `SettingsSeed.candidateCap`                                            |
+| S12 | Standards   | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — rider: stale comment pointer to `ExportPanel`                                        |
+| S13 | Standards   | wontfix     | older lock `_comment` entries are history entries from earlier branches; rewriting them would change what they recorded                                                |
+| SP5 | Spec        | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — same as A9                                                                           |
+| SP6 | Spec        | wontfix     | the header-comment rewording was requested by the orchestrator in the fix round and is declared in the lock `_comment`                                                 |
