@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-tab-store-actions.md
 Blocks: none
@@ -71,3 +71,45 @@ Each item above is changed or has a written reason to stay, the fork change
 is re-pinned (bump `data/wowsims-fork.lock.json`, then
 `pnpm sim-implemented-effects:generate`, then `pnpm verify`), and
 `npx vitest run upgrades ui/app/tabs` in the fork passes.
+
+## Closing note (2026-10-09, feat/store-actions-followups)
+
+Fork `218234677` ("Close store-actions review leftovers (591)") on
+`feat/upgrades-tab-react`, pinned by `f2f02f3a`; the main-repo test change is
+`e5cd56a4`.
+
+- **A1, option (a).** `withPrune`, `withCandidateCap`, `withIterations` and
+  `afterScopeChange` (`model/settings_state.ts`) return the state they were
+  given when nothing changes, so the store skips the write, notifies nobody and
+  the page saves nothing. The two toggles always change their list and are
+  unchanged. The `UpgradesActions` comment now names the cases. New tests in
+  `settings_state.test.ts`, `upgrades_store.test.ts` (no notification) and
+  `saved_settings.test.ts` (no `setItem` call) failed before the change (5
+  failed, 51 passed over those three files). Live on :5173: committing the
+  iterations field as `02000` over 2000 saved nothing; 2000 -> 1500 saved once
+  (`.scratch/store-actions-followups/live-a1-save-check.log`, gitignored).
+- **A2, S1, SP2.** The `applyDefaults` store action is removed. Its three test
+  callers now call `setPrune` with a scope, which applies the defaults the way
+  production does.
+- **A3.** The duplicate done/stopped pair in `run_state.test.ts` is gone. The
+  misnamed "starts a new run from a finished one" moved to
+  `upgrades_store.test.ts`, where it settles run 1 and then starts run 2.
+- **A4.** `packages/core/test/fork-run-staleness.test.ts` "does not carry a
+  change during one run into the next run" now starts run 1 at phase 3 and run
+  2 at phase 4 through the fork's real store, settles run 1 late, and checks run
+  2 is still in flight with no settled signature. With `isCurrentRun`'s run-id
+  check removed in the fork it fails (expected `done`, runId 1 to match
+  `running`, runId 2).
+- **A5.** The round-trip test asserts `loaded.data` is true after it imports the
+  data module. With the `vi.doMock` path pointed at a module that does not
+  exist, that test failed and both "downloads none" cases still passed.
+- **S2.** `runSettled` destructures the outcome once.
+- **S3.** `isRecord` moved to `ui/features/upgrades/utils/is_record.ts`, which
+  imports nothing; `lazy_load.test.ts` lists it as an eager file, and its check
+  that the tab body never reaches `model/data/data.ts` still passes.
+- **S4.** The 113-character comment line in the staleness test is wrapped (and
+  the 114-character `FINISHED` comment with it); the SourcesDialog harness
+  comment now says it stands in for the tab's settings.
+
+Re-run: `npx vitest run upgrades ui/app/tabs` from the fork at `218234677`
+(58 files, 461 tests pass; 458 at `bfde23961`).
