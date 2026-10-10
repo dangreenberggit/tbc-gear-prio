@@ -252,9 +252,19 @@ def check_ignored_work_is_reported() -> list[str]:
 !! .scratch/stage-gate/x/
 !! .env
 !! ui/features/upgrades/adapters/local.wcl-credentials.ts
+!! wowsimtbc-notes.md
+!! wowsimcli-scratch/
 """
     got = wp.unexpected_ignored(lines)
-    want = [".scratch/stage-gate/x/", ".env", "ui/features/upgrades/adapters/local.wcl-credentials.ts"]
+    want = [
+        ".scratch/stage-gate/x/",
+        ".env",
+        "ui/features/upgrades/adapters/local.wcl-credentials.ts",
+        # The fork ignores /wowsimtbc* and /wowsimcli*; only the built
+        # binaries themselves are safe to delete.
+        "wowsimtbc-notes.md",
+        "wowsimcli-scratch/",
+    ]
     if got != want:
         return [f"unexpected_ignored gave {got}, want {want}"]
     return []

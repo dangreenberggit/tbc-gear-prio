@@ -152,9 +152,7 @@ def links_outside(root: str, links: list[tuple[str, str]]) -> list[tuple[str, st
 # installs and builds put it.
 DISPOSABLE_DIRS = {"node_modules", "dist", "dist-server", "binary_dist", "__pycache__", "vendor", "coverage"}
 DISPOSABLE_SUFFIXES = (".tsbuildinfo", ".pb.go", "_auto_gen.ts", ".results.tmp", ".stylelintcache")
-# wowsimtbc*: the backend binary the launch.json `wowsims-backend` entry builds
-# in the fork root (fork .gitignore `/wowsimtbc*`); seen in a pair 2026-10-10.
-DISPOSABLE_PREFIXES = ("ui/generated/", "scripts/__pycache__/", "wowsimtbc", "wowsimcli")
+DISPOSABLE_PREFIXES = ("ui/generated/", "scripts/__pycache__/")
 PACKAGE_DIRS = ("apps", "packages")
 RUN_LOGS = ".scratch/agent-runs"
 # The run logs are copied to the main checkout before the pair is removed
@@ -162,7 +160,12 @@ RUN_LOGS = ".scratch/agent-runs"
 # approvals in settings.local.json (code.claude.com/docs/en/worktrees, "What
 # worktrees share with the main checkout"); other keys a user put there by
 # hand would be lost too (hypothesis, untested).
-DISPOSABLE_FILES = {".claude/settings.local.json"}
+# wowsimtbc.exe / wowsimtbc: the backend binary that launch.json's
+# `wowsims-backend` entry and the makefile's `devserver` target build in the
+# fork root (`go build -o wowsimtbc$(BIN_EXT)`); seen in a pair 2026-10-10.
+# Exact names, because the fork ignores all of `/wowsimtbc*`, so a prefix
+# match would also delete a user's `wowsimtbc-notes.md`.
+DISPOSABLE_FILES = {".claude/settings.local.json", "wowsimtbc.exe", "wowsimtbc"}
 
 
 def is_disposable(path: str) -> bool:
