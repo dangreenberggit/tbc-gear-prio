@@ -9,7 +9,9 @@ fork and that pair's lock. No script needs an edit.
 Edit the fork or check out a fork branch only in a pair, so the main
 checkout's clone stays on the fork lock's `branch` for step 3 below. Work
 that never reads the fork can use a plain worktree, and runs `pnpm verify`
-with `TBC_VERIFY_WITHOUT_FORK=1`.
+with `TBC_VERIFY_WITHOUT_FORK=1` after `pnpm run sync:wowsims:restore` and
+`pnpm run sync:atlasloot:restore`, as CI does. Without them, the tests that
+read `vendor/wowsims` fail (16 failed in a plain worktree on 2026-10-10).
 
 ## Make one
 
