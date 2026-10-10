@@ -405,3 +405,64 @@ No findings.
 Six rounds. Every finding is fixed or disposed of. One is deferred to ticket
 593 (AGENTS.md and skill pointers, which need the owner's approval). The
 last round found nothing.
+
+## Live tests
+
+Moved here from `docs/agents/paired-worktrees.md` (independent
+writing-for-agents review, D10). Times and results are from each command's
+console output; the logs were kept outside the repo. All runs 2026-10-10,
+from the `feat/worktree-pair` pair on Node 22.17.1.
+
+- **live-probe.**
+  `pnpm wt:pair live-probe fix/585-resort-test-claims --fork-detached --build`:
+  main worktree 3 s, fork worktree 2 s, `pnpm install` (warm store) 7 s,
+  `npm ci` 24 s, `make proto` 28 s, `make go-to-ts` 20 s, build 104 s; 188 s
+  in all (about 84 s without the build). `pnpm verify` in the pair gave rc 0,
+  "gates: 1517 ran, 0 skipped", in 185 s. `wt:unpair` refused while the
+  pair's fork held an untracked file. Once the fork was clean it took 17 s:
+  git left the main folder on disk ("Directory not empty"), the script
+  deleted it, and neither `worktree list` named the pair.
+- **probe-b (new and existing branches).**
+  `pnpm wt:pair probe-b test/wt-pair-probe test/wt-pair-probe -b --new-fork-branch`
+  made both branches and the pair in 93 s, without `--build`. After an
+  unpair, the same command without the two flags reused the existing branches
+  in 70 s. Both test branches were then deleted with `git branch -d`. Unpair
+  refused on an ignored `.scratch/stage-gate/probe/brief.md`. With the main
+  worktree locked by `git worktree lock`, it refused before running any
+  removal, and the main folder was left intact.
+- **probe-c (after round-2 fixes).** `--fork-detached` pair in 82 s. Unpair
+  refused on an ignored `.scratch/dist/note.md`, then, with that file gone
+  and `.claude/settings.local.json` present, removed the pair in 18 s. git
+  again left the main folder on disk ("Directory not empty"), and the script
+  deleted it.
+- **probe-d (after round-3 fixes).** `--fork-detached` pair in 100 s;
+  `pnpm verify` in it gave rc 0, "gates: 1517 ran, 0 skipped", in 205 s and
+  left only ignored files that unpair counts as safe; `wt:unpair` without
+  `--force` then removed the pair in 18 s (git left the main folder on disk,
+  and the script deleted it). The run-log copy was not exercised live: no
+  session ran in the pair. `check_run_logs_are_kept_without_overwriting`
+  tests it in a temp dir.
+- **Every main-worktree removal with `node_modules`** (one scratch test, six
+  live runs: two of live-probe, two of probe-b, one each of probe-c and
+  probe-d) left the folder half-deleted after git dropped the registration.
+  In the scratch test, at a deeper path, git did the same to the fork folder
+  ("Filename too long").
+- **Disk.** The same layout in a scratch test measured 404 MB for the main
+  worktree without `vendor/` and 561 MB for the fork worktree.
+- **First-run fixes.** Two failures in the first runs were fixed in the
+  script. Python found the sh `corepack` script that Windows cannot start
+  (`[WinError 193]`). Under pnpm, `make proto` lacked Git for Windows'
+  `usr/bin` tools (`FIND: Parameter format not correct`). `wt:unpair`
+  removed each partly made pair. The first had no `node_modules` yet, and git
+  removed it whole; the second, after `npm ci`, was the first live run git
+  left half-deleted.
+- **Backend in a pair (independent review, D3).** The launch.json
+  `wowsims-backend` command, run in the dev pair's fork, built `wowsimtbc.exe`
+  there and listened on 3333.
+  `(Get-CimInstance Win32_Process -Filter "ProcessId=<pid>").ExecutablePath`
+  gave
+  `C:\Users\dgree\Code\lulz\tbc-wt\worktree-pair\vendor\tbc-new-fork\wowsimtbc.exe`;
+  its `CommandLine` was the relative `.\wowsimtbc.exe --usefs=true
+--launch=false --host=:3333`. `unsaved_work` then refused the pair's fork
+  over `wowsimtbc.exe`, which commit "Let wt:unpair delete a backend binary
+  built in the pair" fixed. The probe backend was stopped afterwards.
