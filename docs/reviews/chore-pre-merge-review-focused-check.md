@@ -4,7 +4,7 @@ Reviewed range: `601c1cd35ffb65359240f532943a000748784412..91157d1c61a94f44b794c
 
 Dispatch: one Standards + Spec axis only, on a fresh `general-task` agent (`model: "opus"`, review lane), as the orchestrator's brief asked. `codex` is not on `PATH` (`command -v codex` rc=1). No Adversarial or Domain axis ran: the diff is two identical skill files with no code and no game data.
 
-The fixes for S1 to S5 are in `2bcedd200e63a10c1481cbadc40fe2261541cb68`, after this round's range. The same reviewer was asked to re-check that commit; that re-check is not a separate round.
+The fixes for S1 to S5 are in `2bcedd200e63a10c1481cbadc40fe2261541cb68`, after this round's range. The same reviewer was asked to re-check that commit; that re-check is not a separate round. It reported S1, S2, S3 and S5 resolved, S4 resolved as far as intended (term defined; step 3's template still records no fork range, which fails safe), and no new finding, from `git diff 91157d1c..2bcedd20`.
 
 ## Standards + Spec
 
