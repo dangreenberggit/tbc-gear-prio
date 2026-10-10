@@ -96,9 +96,9 @@ cheaper model for implementation correctness unless the user says so.
 A worker’s lane follows the **worker’s** job. A mechanical implementation
 slice is workhorse whether its manager is workhorse, review, or design.
 
-Name the model on every spawn, and give it an effort: on a harness where
-effort is not a spawn argument, pick an agent type whose definition sets
-it (Claude Code: see its section). The harness default is
+Name the model on every spawn, and give it an effort the way your
+harness section says (Claude Code: an agent type whose definition sets
+it). The harness default is
 **inherit**: an unnamed worker runs its parent’s model at its parent’s
 price, so a design-lane manager fanning out unnamed workers buys a fan-out of
 design-lane workers. Observed 2026-08-11: a Fable-low director fanned out five
@@ -185,11 +185,12 @@ Effort is `low` | `medium` | `high` | `xhigh` | `max` via `/effort`,
 agent definition's frontmatter. There is no `claude-opus-*-high` model
 slug — set the model **and** the effort.
 
-The Agent tool takes a `model` argument but no effort argument. A
-subagent's effort comes from its agent definition's frontmatter, or from
-the session when the definition sets none
-([sub-agents](https://code.claude.com/docs/en/sub-agents)). So spawn
-through an agent type that pins both:
+The Agent tool takes `model` and `effort` arguments; `effort` overrides
+the agent definition's frontmatter
+([sub-agents](https://code.claude.com/docs/en/sub-agents); the tool's
+own description says to pass it only when the user, CLAUDE.md or a
+skill asks). This repo sets effort through each agent type's
+frontmatter, so spawn through a type that pins both:
 
 | Agent type      | Model                          | Effort                       | Use for                                                                                                                |
 | --------------- | ------------------------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -211,9 +212,9 @@ expected: a session started before an agent file changed may hold the
 old check. A second `WRONG_MODEL` from the same job goes to the owner,
 not to another respawn: the check has rejected a correct Opus spawn
 before (ticket 252). Spawn these types in place of the built-in
-`Explore`, `general-purpose` and `Plan` types. You cannot set the
-built-ins' effort at the call site, and whether they pin an effort of
-their own is unverified. If the harness does not recognize one of these
+`Explore`, `general-purpose` and `Plan` types. This repo does not
+set the built-ins' effort, and whether they pin an effort of their own
+is unverified. If the harness does not recognize one of these
 types, restart the session rather than falling back to a built-in.
 
 > **Changed 2026-09-25.** Before this date the repo preferred Opus at effort

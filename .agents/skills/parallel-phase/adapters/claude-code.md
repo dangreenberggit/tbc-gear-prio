@@ -10,7 +10,7 @@ Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents
 - **Review:** Opus at effort `high` — pre-merge axes, adversarial and domain judgment. One spawn per review axis; never split one axis across N workers.
 - **Design:** Fable at effort `low` — planning and architecture (`gate-planner`, `design-task`). Never a worker.
 
-The agent type's frontmatter sets effort. The spawn and the prompt cannot. Workers are Opus, so size the round with model-policy § Budget the round before spawning. Name the model on every spawn: a session on Fable, the top price tier, makes an unnamed built-in subagent inherit Fable.
+The agent type's frontmatter sets effort. The prompt cannot set it, and the spawn's `effort` argument stays off unless the owner asks for a specific effort. Workers are Opus, so size the round with model-policy § Budget the round before spawning. Name the model on every spawn: a session on Fable, the top price tier, makes an unnamed built-in subagent inherit Fable.
 
 ## Isolate
 
