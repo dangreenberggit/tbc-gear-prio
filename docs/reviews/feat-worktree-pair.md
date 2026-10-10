@@ -342,3 +342,33 @@ skill's rubric:
 | S25 | Standards   | fixed       | the sentence now asks for the check first                                                        |
 | S26 | Standards   | fixed       | the check's docstring now states only what it asserts                                            |
 | P13 | Spec        | fixed       | same fix as S22                                                                                  |
+
+## Round 5
+
+Reviewed range: `6acfa308bda539de13e565bd28bdae789e2e21df..673ee7ea6bc182afcd825edda554c09908b2c1a3`
+
+## Focused check (round 5)
+
+One fresh Opus subagent (`general-task`), told it writes nothing. Fork
+range: none; `git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json`
+exits 0, so the branch never moves the fork pin.
+
+1. **Conditions 1-3: hold.** `08d006d3` names A13, A14, D10 and S23-S26, all
+   labelled `low`, `minor`, `nit` or `note`. `673ee7ea` changes only this
+   review file. Every changed code line is at a place A13 or A14 cites.
+2. **Changes match findings: hold.** One doc sentence ("Times and results
+   below are from each command's console output") is listed in the round-4
+   doc-review record. Docs are exempt from condition 2.
+3. **Tests assert their findings: partly.** S23's subfolder case fails if
+   the copy does not recurse. A13's check covered only the helper: F1.
+4. **Tests pass.** `python scripts/check_worktree_pair.py` gave 21 checks
+   ok, rc 0.
+
+- **F1 (low)** No check called `unsaved_work`, so removing A13's wiring would
+  leave every check green.
+
+## Disposition (round 5)
+
+| ID  | Axis          | Disposition | Ticket / note                                                                                                                                     |
+| --- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F1  | Focused check | fixed       | `check_unsaved_work_on_a_real_repo` (commit `972a92a1`) runs `unsaved_work` on a temp git repo; it fails with A13's wiring or A14's flag reverted |
