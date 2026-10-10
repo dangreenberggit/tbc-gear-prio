@@ -290,6 +290,104 @@ def check_leftover_is_deleted_only_once_git_let_go() -> list[str]:
     return problems
 
 
+def check_unregistered_folder_is_deleted_only_with_force_or_a_mark() -> list[str]:
+    """A folder at a pair path that git does not register holds work no check
+    can see, so unpair refuses it. An earlier unpair that ran its checks and
+    then failed half-way leaves a mark, and that mark lets a plain rerun
+    finish the job (2026-10-10: a locked tsc.exe stopped the fork's delete
+    after git had dropped its registration)."""
+    problems = []
+    for force, started, refused in ((False, False, True), (True, False, False), (False, True, False)):
+        got = wp.unregistered_problem("C:\\p\\vendor\\tbc-new-fork", "C:\\fork", force, started)
+        if (got is not None) != refused:
+            problems.append(f"unregistered_problem(force={force}, started={started}) gave {got!r}")
+    return problems
+
+
+def check_unpair_mark_round_trip() -> list[str]:
+    """The mark sits in the main checkout's .git, which removing the pair never
+    touches, and it is per name. Temp dir only."""
+    problems = []
+    with tempfile.TemporaryDirectory() as td:
+        main = Path(td, "main")
+        (main / ".git").mkdir(parents=True)
+        if wp.unpair_started(main, "probe"):
+            problems.append("no mark before mark_unpair_started")
+        wp.mark_unpair_started(main, "probe", Path(td, "tbc-wt", "probe"))
+        if not wp.unpair_started(main, "probe"):
+            problems.append("the mark must be found after mark_unpair_started")
+        if wp.unpair_started(main, "probe-2"):
+            problems.append("a mark for probe must not count for probe-2")
+        if not wp.is_inside(str(wp.unpair_mark(main, "probe")), str(main / ".git")):
+            problems.append(f"the mark must sit in .git, got {wp.unpair_mark(main, 'probe')}")
+        wp.clear_unpair_mark(main, "probe")
+        wp.clear_unpair_mark(main, "probe")
+        if wp.unpair_started(main, "probe"):
+            problems.append("clear_unpair_mark must remove the mark, and a second clear must not fail")
+    return problems
+
+
+def check_processes_using_the_pair_are_found() -> list[str]:
+    """A program inside the pair (tsc.exe under node_modules, the backend) or a
+    command line naming the pair can hold files there open, and Windows then
+    refuses the delete half-way. The unpair run itself and the shells that
+    started it are not counted. Rows are modelled on Get-CimInstance
+    Win32_Process; the pids are made up."""
+    root = "C:\\Users\\dgree\\Code\\lulz\\tbc-wt\\probe"
+    procs = [
+        {"ProcessId": 10, "ParentProcessId": 1, "Name": "tsc.exe",
+         "ExecutablePath": root + "\\vendor\\tbc-new-fork\\node_modules\\.bin\\tsc.exe", "CommandLine": "tsc -w"},
+        {"ProcessId": 11, "ParentProcessId": 1, "Name": "node.exe",
+         "ExecutablePath": "C:\\node\\node.exe", "CommandLine": "node c:/users/dgree/code/lulz/tbc-wt/probe/x.js"},
+        {"ProcessId": 12, "ParentProcessId": 1, "Name": "powershell.exe",
+         "ExecutablePath": "C:\\ps\\powershell.exe", "CommandLine": f'powershell -c "cd \'{root}\'"'},
+        {"ProcessId": 13, "ParentProcessId": 1, "Name": "node.exe",
+         "ExecutablePath": "C:\\node\\node.exe", "CommandLine": "node C:\\Users\\dgree\\Code\\lulz\\tbc-wt\\probe-2\\x.js"},
+        {"ProcessId": 14, "ParentProcessId": 1, "Name": "System", "ExecutablePath": None, "CommandLine": None},
+        {"ProcessId": 20, "ParentProcessId": 21, "Name": "python.exe",
+         "ExecutablePath": "C:\\py\\python.exe", "CommandLine": f"python worktree_pair.py unpair probe {root}"},
+        {"ProcessId": 21, "ParentProcessId": 22, "Name": "bash.exe",
+         "ExecutablePath": "C:\\git\\bash.exe", "CommandLine": f"bash -c 'ls {root}; pnpm wt:unpair probe'"},
+    ]
+    got = sorted(p["ProcessId"] for p in wp.processes_using(root, procs, 20))
+    if got != [10, 11, 12]:
+        return [f"processes_using gave pids {got}, want [10, 11, 12]"]
+    return []
+
+
+def check_locked_file_is_named_and_rerun_is_offered() -> list[str]:
+    """Windows will not delete a file another handle has open without delete
+    sharing, which is how Python opens files. delete_folder must name that
+    file and tell the user that rerunning unpair finishes the job; once the
+    handle is closed, it must delete the rest. Temp dir only; Windows only,
+    because other systems delete open files."""
+    if os.name != "nt":
+        return []
+    problems = []
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td, "probe")
+        (root / "node_modules" / "bin").mkdir(parents=True)
+        (root / "src").mkdir()
+        locked = root / "node_modules" / "bin" / "tsc.exe"
+        locked.write_text("x", encoding="utf-8")
+        (root / "src" / "free.txt").write_text("x", encoding="utf-8")
+        with open(locked, encoding="utf-8"):
+            try:
+                wp.delete_folder(root, "probe")
+                problems.append("delete_folder must refuse while a file is held open")
+            except wp.Refusal as exc:
+                msg = str(exc)
+                for want in (str(locked), "process", "pnpm wt:unpair probe"):
+                    if want not in msg:
+                        problems.append(f"the refusal must contain {want!r}, got {msg!r}")
+            if (root / "src").exists():
+                problems.append("files nothing holds must still be deleted")
+        wp.delete_folder(root, "probe")
+        if root.exists():
+            problems.append("delete_folder must finish once the handle is closed")
+    return problems
+
+
 def link_dir(link: str, target: str) -> None:
     """A junction on Windows (no admin right needed), a symlink elsewhere."""
     if os.name == "nt":
@@ -331,14 +429,14 @@ def check_delete_guard_on_real_links() -> list[str]:
             if escaping != [wp.norm_path(out_link)]:
                 problems.append(f"escaping links {escaping}, want only {out_link}")
             try:
-                wp.delete_folder(Path(root))
+                wp.delete_folder(Path(root), "probe")
                 problems.append("delete_folder must refuse a tree with a link out of it")
             except wp.Refusal:
                 pass
             if not (os.path.isdir(root) and os.path.isfile(keep)):
                 problems.append("a refused delete must leave the tree and the linked file")
             unlink_dir(out_link)
-            wp.delete_folder(Path(root))
+            wp.delete_folder(Path(root), "probe")
             if os.path.exists(root):
                 problems.append("delete_folder must delete a tree whose links stay inside it")
             if not os.path.isfile(keep):
@@ -499,6 +597,10 @@ CHECKS = (
     check_disposable_names_match_whole_paths,
     check_unknown_vendor_folders_are_found,
     check_unsaved_work_on_a_real_repo,
+    check_unregistered_folder_is_deleted_only_with_force_or_a_mark,
+    check_unpair_mark_round_trip,
+    check_processes_using_the_pair_are_found,
+    check_locked_file_is_named_and_rerun_is_offered,
 )
 
 
