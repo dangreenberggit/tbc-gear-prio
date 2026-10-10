@@ -75,6 +75,53 @@ def die(msg: str, code: int = 1) -> None:
     raise SystemExit(code)
 
 
+def parse_porcelain_z(text: str) -> list[tuple[str, str]]:
+    """`git status --porcelain -z` as (XY status, path) pairs.
+
+    A rename or copy entry is followed by a field holding its old path; that
+    path is returned as its own pair with the same status, since both paths
+    differ from HEAD.
+    """
+    fields = text.split("\0")
+    out: list[tuple[str, str]] = []
+    i = 0
+    while i < len(fields):
+        entry = fields[i]
+        i += 1
+        if len(entry) < 4:
+            continue
+        xy, path = entry[:2], entry[3:]
+        out.append((xy, path))
+        if "R" in xy or "C" in xy:
+            if i < len(fields) and fields[i]:
+                out.append((xy, fields[i]))
+            i += 1
+    return out
+
+
+def merge_blockers(entries: list[tuple[str, str]], touched: set[str]) -> list[str]:
+    """Why the main folder's dirty files stop a merge, one line per file.
+
+    A staged change blocks wherever it is: git merge refuses when the index
+    differs from HEAD. A modified or untracked file blocks only when the
+    merge writes that path. Ignored files never block. Paths compare
+    case-insensitively, because a Windows checkout treats them as one file.
+    """
+    touched_folded = {p.casefold() for p in touched}
+    out = []
+    for xy, path in entries:
+        if xy == "!!":
+            continue
+        if xy[0] not in " ?":
+            out.append(f"{path} (staged; the merge commit would record it)")
+        elif path.casefold() in touched_folded:
+            if xy == "??":
+                out.append(f"{path} (untracked, and the merge writes it)")
+            else:
+                out.append(f"{path} (modified, and the merge changes it)")
+    return out
+
+
 def _commit_layout_baseline(lock_path: Path, digest: str) -> None:
     """Commit a green-run layout-gate baseline advance onto the feature branch.
 
