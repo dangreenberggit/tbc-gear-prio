@@ -80,7 +80,7 @@ Two shells with different syntax — **Bash** (Git Bash, POSIX) and **PowerShell
 
 Windows-native binaries — `node`, `python` — read `C:/Users/...`, not Git Bash's `/c/Users/...`. Passing the Bash form yields paths like `C:\c\Users\...` and an ENOENT that looks like a missing file.
 
-Read a command's error text before forming a theory about it. Tool-manager errors in particular usually name their own fix, and pattern-matching past them costs more than reading them.
+Read a command's error text before forming a theory about it. Tool-manager errors in particular usually name their own fix, and pattern-matching past them costs more than reading them. On Claude Code, `Edit` and `Write` can refuse to change an existing file that this agent has not opened with `Read` in this run ("File has not been read yet"). `Read` the part you will change, then edit.
 
 **Before** a ported-engine-file edit, a scripted/generated file edit, moving the wowsims engine pin, filing a ticket, writing a review Disposition table, or starting the dev servers — or when a node/pnpm command fails strangely — read [`docs/agents/known-traps.md`](docs/agents/known-traps.md): the trap each of those actions arms, and the move that disarms it.
 
@@ -155,7 +155,7 @@ Everything else goes to a subagent: reading code or docs, running `pnpm` or any 
 
 Pick each subagent's model from your harness section of [`docs/agents/model-policy.md`](docs/agents/model-policy.md), and name the model on every spawn:
 
-- **Claude Code:** pick `simple-task`, `general-task`, `design-task` or a trial type (`modest-task`, `discrete-task`) from the agent-type table in model-policy § Claude Code, and run `pre-merge-review` on a `general-task`. When unsure, pick `general-task`. If the harness does not recognize one of these types, restart the session rather than falling back to a built-in type.
+- **Claude Code:** pick `simple-task`, `general-task`, `design-task` or a trial type (`modest-task`, `discrete-task`) from the agent-type table in model-policy § Claude Code, and run `pre-merge-review` on a `general-task`. When unsure, pick `general-task`. Spawn a trial type only for a job that model-policy § Trial types names for it, and run nothing on Haiku. The session sends every `modest-task` or `discrete-task` result to a `general-task` check before it relays or builds on that result; the check's prompt asks for a `TRIAL-REJECT <type>: <why>` line when the check rejects or corrects the result (model-policy § Trial types, "Measuring"). If the harness does not recognize one of these types, restart the session rather than falling back to a built-in type.
 - **Codex:** everything that is not review or design goes to subagents at the workhorse fill, mid tier at a lower reasoning effort. The owner wants these used freely. Review and design jobs go to subagents at the review and design fills.
 - **Cursor:** everything that is not review or design goes to subagents on the workhorse pin, Composer. Review and design jobs go to subagents at the review and design fills.
 
