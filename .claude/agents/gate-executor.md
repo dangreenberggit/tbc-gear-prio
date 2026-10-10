@@ -12,7 +12,12 @@ when reality disagrees with the plan is your job, not a failure.
 
 **First actions, before reading anything else:**
 
-1. Run `git log -1 --format=%H` and compare to the base SHA your prompt
+1. When your prompt gives a pair path, the pair is the shared checkout: run every
+   git and pnpm command, starting with the one below, with
+   `-C <pair path>` (fork commands: `-C <pair path>/vendor/tbc-new-fork`),
+   run scripts by their path under the pair, and read and edit files by
+   their absolute paths under the pair.
+   Run `git log -1 --format=%H` and compare to the base SHA your prompt
    names. Match → proceed. Mismatch in an isolated worktree (your prompt
    says which mode you are in) → `git checkout -b <branch from prompt> <SHA>`
    and record the correction for your report. Mismatch in the shared

@@ -6,9 +6,14 @@ it (`scripts/worktree_pair.py`). Every gate finds the fork as
 `<checkout>/vendor/tbc-new-fork`, so in a pair each gate reads that pair's
 fork and that pair's lock. No script needs an edit.
 
-Use a pair when a session works on a fork branch other than the one the main
-checkout's clone has checked out, or works on the fork while another session
-also does. Work that never reads the fork can use a plain worktree.
+Edit the fork or check out a fork branch only in a pair, so the main
+checkout's clone stays on the fork lock's `branch` for "Main folder: merge
+the fork side" below. Work
+that never reads the fork can use a plain worktree, and runs `pnpm verify`
+with `TBC_VERIFY_WITHOUT_FORK=1` after `pnpm run sync:wowsims:restore` and
+`pnpm run sync:atlasloot:restore`, as CI does. Without the two restores, the tests that
+read `vendor/wowsims` fail: on 2026-10-10, `pnpm verify` with the opt-out in
+a plain worktree with no `vendor/` reported "vitest failures (16)".
 
 ## Make one
 
@@ -36,9 +41,9 @@ it. The command prints a note when that is the case. See `known-traps.md`,
 
 ## Work in it
 
-- **Memory.** Open the session in the pair folder. Memory is kept per folder,
-  so that session starts with no memory notes (ticket 572). The owner's notes
-  are in
+- **Memory.** Memory is kept per folder, so a session opened in the pair
+  folder (needed only for the live tab) starts with no memory notes (ticket
+  572). The owner's notes are in
   `C:\Users\dgree\.claude\projects\C--Users-dgree-Code-lulz-tbc-gear-prio\memory\`.
 - **Subagents.** A subagent starts in the spawning session's folder, not the
   pair. Give it the pair's path and have it use `git -C <pair>` and

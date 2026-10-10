@@ -19,6 +19,7 @@ Cursor Task managers hit the background-then-end-turn fan-in loss described in S
 
 ## Isolate
 
+- **Fork work:** a slice that reads or edits the fork gets a pair from `pnpm wt:pair` ([agnostic.md](agnostic.md) "Isolate a worker"), opened as the worker's folder. The worktrees below have no `vendor/`, so use them only for slices that never read the fork.
 - **IDE / Agents Window:** start or move the worker into a **worktree** so it does not share the main checkout. Base from the feature branch.
 - **Slash commands:** `/worktree` for one isolated run; `/apply-worktree` only when bringing a result into the feature checkout (delegator/merger owns fan-in).
 - **Task / cloud:** `environment: "cloud"` for long workers (own VM + branch). Do not treat in-session `.cursor/agents` subagents as a fleet of N PR-producing workers — use worktrees or cloud for that.

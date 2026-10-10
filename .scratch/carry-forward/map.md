@@ -327,6 +327,8 @@ file contention, worker prompt. This file stays the chronological log.
 - 591 Small leftovers from the store-actions review: a too-broad no-op comment, a test-only store action, weak and duplicate tests (pre-merge review feat-tab-store-actions, A1-A5, S1-S4, SP2) 2026-10-10
 - 592 Two missing tests and three comment edits from the 591 follow-up review (pre-merge review feat-store-actions-followups, A1, A2, S1, S2, S5) 2026-10-10
 - 593 Point AGENTS.md and parallel-phase at paired worktrees, owner approval needed (pre-merge review feat-worktree-pair round 1, S4) 2026-10-10
+- 594 Merge the duplicate "never reads the fork" sentence in the AGENTS.md pair rule, owner approval needed (pre-merge review feat-pair-rule round 1, W3) 2026-10-10
 - 595 The pre-commit guard on merges into dev misses clean merges (pre-merge review feat-merge-to-dev-arg round 2, A13) 2026-10-10
 - 596 Automate the live tests of pnpm merge-to-dev <branch> (pre-merge review feat-merge-to-dev-arg round 2, A14, P7) 2026-10-10
 - 597 AGENTS.md still says pair merges need pnpm wt:unpair, owner approval needed (pre-merge review feat-merge-to-dev-arg round 2, X1) 2026-10-10
+- 598 The agnostic adapter points at "Land it on dev" steps that moved, owner approval needed (feat/pair-rule merge of dev) 2026-10-10
