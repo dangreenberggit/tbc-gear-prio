@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-565-upstream-sync-tanstack.md
 Blocks: none
@@ -52,3 +52,31 @@ standards finding S21.
   logged.
 - The next fork lock `_comment` entry corrects the three sentences above: the
   direction the test covers, what run 2 ran, and the one comparator tried.
+
+## Closing note (2026-10-09, fix/585-resort-test-claims)
+
+Fork `316326a95`, pinned by main `243329e7`. `FOUR` in
+`components/ResultsTable/ResultsTable.test.tsx` now starts as Torch of the
+Damned, Vengeful Gladiator's Greatsword, Cataclysm's Edge, Cursed Vision of
+Sargeras: neither Item order nor best first. The re-sort test's descending
+click and its ascending click each move every row.
+
+Mutation run, not committed: `ResultRow`'s `memo` given the comparator
+`(prev, next) => prev.row === next.row && prev.context === next.context &&
+prev.ref === next.ref`.
+
+- The re-sort test as committed fails at the first (descending) click's
+  check, `ResultsTable.test.tsx:165`: Vengeful Gladiator's Greatsword still
+  shows `data-index` 1 and Rank 2. The landing-row test also fails.
+- The re-sort test cut to one click, from a stored descending sort to
+  ascending, fails at that click's check: Cataclysm's Edge still shows
+  `data-index` 3 and Rank 4. The same cut test passes without the mutation.
+
+The mutation and the cut test were reverted; `npx vitest run upgrades
+ui/app/tabs` from the fork at `316326a95` passes (58 files, 463 tests).
+
+The fork lock `_comment` entry for `d1de72abc -> 316326a95` corrects the
+three sentences of the `e417a504e` entry: the direction that moved rows,
+what run 2 ran, and the one comparator tried. Ticket 584's round-4 comment
+already gave the run-2 caveat (A12); a note added there says both clicks
+now move rows.
