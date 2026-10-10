@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-store-actions-followups.md
 Blocks: none
@@ -59,3 +59,24 @@ re-pinned (`data/wowsims-fork.lock.json`, then
 `pnpm sim-implemented-effects:generate` and `pnpm verify`), and rows A1,
 A2, S1, S2 and S5 in `docs/reviews/feat-store-actions-followups.md` are
 set to `fixed` in the commit that closes this ticket.
+
+## Closing note (2026-10-09, feat/store-actions-followups)
+
+Fork `d1de72abc` ("Close store follow-up review leftovers (592)") on
+`feat/upgrades-tab-react`, pinned by `0e3c5967`. No production logic changed.
+
+- **A1.** `upgrades_store.test.ts` now checks that a fresh store's
+  `setPrune(false, scope)` stores the scope's defaults and notifies once. With
+  `changeInScope` changed to skip `appliedSettings` when the change returns its
+  input, that test failed and the other 462 passed; the change was reverted.
+- **A2.** `settings_state.test.ts` now checks that `afterScopeChange` clears
+  the sets when a set is selected and `defaultsFor` is undefined. With the
+  `state.selectedSetKeys.length === 0` condition dropped, that test failed and
+  the other 462 passed; the change was reverted.
+- **S1.** The restating line comment above `withPrune` is deleted.
+- **S2.** The `is_record.ts` docstring no longer lists its callers.
+- **S5.** Both `setPrune(true, scope)` calls carry a one-line comment saying
+  the write stores the scope's defaults.
+
+Re-run: `npx vitest run upgrades ui/app/tabs` from the fork at `d1de72abc`
+(58 files, 463 tests pass; 461 at `218234677`).
