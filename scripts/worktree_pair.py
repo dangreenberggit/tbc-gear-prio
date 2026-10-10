@@ -180,6 +180,14 @@ def processes_using(root: str, procs: list[dict], own_pid: int) -> list[dict]:
     return found
 
 
+def describe_processes(procs: list[dict]) -> str:
+    """One line per process: pid, program, command line."""
+    return "\n".join(
+        f"  pid {p['ProcessId']} {p.get('ExecutablePath') or p.get('Name')}: {p.get('CommandLine') or ''}"
+        for p in procs
+    )
+
+
 def is_inside(path: str, root: str) -> bool:
     """True when `path` is `root` or a path below it."""
     return (norm_path(path) + "\\").startswith(norm_path(root) + "\\")
@@ -797,10 +805,7 @@ def unpair(args: argparse.Namespace) -> int:
     procs = running_processes()
     busy = processes_using(str(target), procs, os.getpid()) if procs is not None else []
     if busy:
-        listed = "\n".join(
-            f"  pid {p['ProcessId']} {p.get('ExecutablePath') or p.get('Name')}: {p.get('CommandLine') or ''}"
-            for p in busy
-        )
+        shown = describe_processes(busy)
         if not args.force:
             raise Refusal(
                 f"these processes run from inside {target} or name it on their command line, so they "

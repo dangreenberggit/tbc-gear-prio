@@ -349,10 +349,16 @@ def check_processes_using_the_pair_are_found() -> list[str]:
         {"ProcessId": 21, "ParentProcessId": 22, "Name": "bash.exe",
          "ExecutablePath": "C:\\git\\bash.exe", "CommandLine": f"bash -c 'ls {root}; pnpm wt:unpair probe'"},
     ]
-    got = sorted(p["ProcessId"] for p in wp.processes_using(root, procs, 20))
+    problems = []
+    found = wp.processes_using(root, procs, 20)
+    got = sorted(p["ProcessId"] for p in found)
     if got != [10, 11, 12]:
-        return [f"processes_using gave pids {got}, want [10, 11, 12]"]
-    return []
+        problems.append(f"processes_using gave pids {got}, want [10, 11, 12]")
+    shown = wp.describe_processes(found + [procs[4]])
+    for want in ("pid 10 " + root + "\\vendor", "tsc -w", "pid 14 System"):
+        if want not in shown:
+            problems.append(f"describe_processes must show {want!r}, got {shown!r}")
+    return problems
 
 
 def check_locked_file_is_named_and_rerun_is_offered() -> list[str]:
