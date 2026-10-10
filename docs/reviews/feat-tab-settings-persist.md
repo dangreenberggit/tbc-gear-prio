@@ -150,16 +150,103 @@ The fixes for tickets 586, 587 and 588 work, and both test runs pass. One medium
 
 ## Disposition (round 2)
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                          |
-| --- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A9  | Adversarial | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — a phase change downloads the tab's data chunk with the tab unopened                  |
-| A10 | Adversarial | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — no-data spec: wasted download, `missed` grows                                        |
-| A11 | Adversarial | wontfix     | checked: the mocked subscriptions hide no bug; `useUpgradesStore.test.ts` covers the A3 order with real ones and the page follows it (`individual_sim_ui.tsx:135-137`) |
-| S8  | Standards   | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — rider: duplicated source filter                                                      |
-| S9  | Standards   | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — rider: zero-timer flush in four test files                                           |
-| S10 | Standards   | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — rider: `unchanged` name                                                              |
-| S11 | Standards   | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — rider: unused `SettingsSeed.candidateCap`                                            |
-| S12 | Standards   | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — rider: stale comment pointer to `ExportPanel`                                        |
-| S13 | Standards   | wontfix     | older lock `_comment` entries are history entries from earlier branches; rewriting them would change what they recorded                                                |
-| SP5 | Spec        | defer       | `.scratch/carry-forward/issues/589-phase-change-downloads-tab-data-unopened.md` — same as A9                                                                           |
-| SP6 | Spec        | wontfix     | the header-comment rewording was requested by the orchestrator in the fix round and is declared in the lock `_comment`                                                 |
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                  |
+| --- | ----------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A9  | Adversarial | fixed       | fixed in fork `0ba3765ec` (pinned by `8dde85fa`): a phase change with no store following edits the saved entry (`model/saved_entry.ts`), no `import()`; ticket 589 closed in `ec63f53b`; superseded in round 3 |
+| A10 | Adversarial | fixed       | fixed in fork `0ba3765ec` (pinned by `8dde85fa`): the `missed` list and the tab body's store import are gone; ticket 589 closed in `ec63f53b`; superseded in round 3                                           |
+| A11 | Adversarial | wontfix     | checked: the mocked subscriptions hide no bug; `useUpgradesStore.test.ts` covers the A3 order with real ones and the page follows it (`individual_sim_ui.tsx:135-137`)                                         |
+| S8  | Standards   | fixed       | fixed in fork `0ba3765ec` (pinned by `8dde85fa`): one `offeredExclusions` helper; ticket 589 closed in `ec63f53b`                                                                                              |
+| S9  | Standards   | fixed       | fixed in fork `0ba3765ec` (pinned by `8dde85fa`): one `settled()` in `testing/fake_tab_host.ts`; ticket 589 closed in `ec63f53b`                                                                               |
+| S10 | Standards   | fixed       | fixed in fork `0ba3765ec` (pinned by `8dde85fa`): one `SAVED_PARTS` check; ticket 589 closed in `ec63f53b`                                                                                                     |
+| S11 | Standards   | fixed       | fixed in fork `0ba3765ec` (pinned by `8dde85fa`): `SettingsSeed` takes only the iterations; ticket 589 closed in `ec63f53b`                                                                                    |
+| S12 | Standards   | fixed       | fixed in fork `0ba3765ec` (pinned by `8dde85fa`): the pointer to `ExportPanel` is removed; ticket 589 closed in `ec63f53b`                                                                                     |
+| S13 | Standards   | wontfix     | older lock `_comment` entries are history entries from earlier branches; rewriting them would change what they recorded                                                                                        |
+| SP5 | Spec        | fixed       | fixed in fork `0ba3765ec` (pinned by `8dde85fa`): same fix as A9; ticket 589 closed in `ec63f53b`; superseded in round 3                                                                                       |
+| SP6 | Spec        | wontfix     | the header-comment rewording was requested by the orchestrator in the fix round and is declared in the lock `_comment`                                                                                         |
+
+# Round 3
+
+Reviewed range: `a2c7d09cf5a59efef21152284f9397f264a0a864..ec63f53b26e6b7e9664dbd0aa6c2ad69a2295ead`
+
+Main commits: `8fbacd72` (the round-2 review file), `8dde85fa` (fork pin to `0ba3765ec`, regenerated effects file, layout baseline, touchpoints doc), `ec63f53b` (ticket 589 closed). The range starts at round 2's through-sha, so the round-2 review commit is inside it.
+
+Fork code reviewed with it: `vendor/tbc-new-fork` branch `feat/upgrades-tab-react`, `b2f9293a24ad55c82770b15ce2a782c31c5c5fcb..0ba3765ec69b2b26387f362bbed3f31b983319d7`, one commit, "Save phase resets without loading the tab's data". 19 files: 17 modified, two new (`ui/features/upgrades/model/saved_entry.ts`, `ui/app/tabs/UpgradesTabBody.unopened.test.tsx`).
+
+Spec: ticket 589 ("Done when", riders S8 to S12, closing note) and the round-2 rows that deferred to it; ticket 587's behaviour must hold.
+
+Dispatch (round 3, 2026-10-10): `codex` is not on PATH (`command -v codex`), so four fresh `general-task` subagents on Opus (effort `high`, the review lane) ran in one parallel batch: Adversarial, Domain, and the `code-review` skill's Standards and Spec sub-agents. Each was told it writes nothing and not to grep the fork's `node_modules` recursively. All four reported both trees clean.
+
+Runs by the aggregator, logs in `.scratch/tab-settings-persist/` (gitignored):
+
+- `review-r3-fork-tests.log`: `npx vitest run upgrades ui/app/tabs` from the fork on Node 22.17.1: 58 files, 456 tests pass, rc=0.
+- `review-r3-verify.log`: `corepack pnpm verify` in main: "gates: 1517 ran, 0 skipped", the layout gate skipped as unchanged since the last green run (digest `bd2857693cc6…`), rc=0.
+
+Wowsims-file rule, run by the aggregator at fork HEAD `0ba3765ec`: `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M 5262ff386bd171e6349d0f9cf00f4d762a6c9951 HEAD` prints only `6	0	ui/app/SimTabsSection.tsx`; the `--diff-filter=D` twin prints nothing. `git -C vendor/tbc-new-fork cat-file -e 5262ff386:<path>` fails (rc=128) for both new files and for `phase_changes.ts`, `UpgradesTabBody.tsx` and `lazy_load.test.ts`. So the 17 modified files are all files this repo added after `5262ff386`. The Standards axis re-ran the checks with the same result.
+
+Aggregator checks of the fix agent's claims:
+
+- `lazy_load.test.ts` walks static imports transitively (`staticallyReached`, lines 50-64), through the 8 `tsconfig.json` aliases and relative paths, and skips `import type`. A positive control (line 129) shows the walk reaches `model/data/data.ts` from the store, and line 124 requires the tab body to reach exactly the two eager files. Gaps: A13 and S17.
+- `r3-network.log`: on the protection paladin and retribution paladin pages, a phase select 3 to 4 to 3 with the tab closed printed `requests after the change (chunks/json): []` and `tab chunk fetched on the phase change: no`. The Spec axis read the driver script: it records every `Network.responseReceived` event and filters only when printing. Opening the tab fetched `UpgradesTab-BBr2TiNk.chunk.js` (6,358,112 bytes), on the retribution page only (SP8).
+- One chunk: `r3-build.log` lists `UpgradesTab-BBr2TiNk.chunk.js` (6,357.75 kB) and no `useUpgradesStore-*.chunk.js`.
+
+## Adversarial (round 3)
+
+The fix claims hold. `forgetSavedSets` checks the same version and record shape that `readSavedTab` reads, writes `selectedSetKeys: []` and drops `defaultsFor`, so `applyDefaults` applies the open phase's defaults. Both sides use `host.getStorageKey(UPGRADES_SETTINGS_STORAGE_KEY)` on `sim.env.storage` (`phase_changes.ts:33`, `useUpgradesStore.ts:43`). The store is opened and the follower set synchronously (`useUpgradesStore.ts:43-45`), with one watch per `Sim` (`phase_changes.ts:28`), so there is no race. A3 holds (`phase_changes.ts:35`). `normaliseCap` is still tested for 0 and -3 (`settings_reducer.test.ts:39-40`), no saved cap is read back, and the dev link rejects 0, so removing the seeded-cap test loses no coverage. The axis ran the new tests against `b2f9293a2` in a scratch copy: the four unopened tests and four `lazy_load` tests failed there.
+
+- **A12 (low, test theatre).** `UpgradesTabBody.unopened.test.tsx:12-16,58-67`: `loaded.data` is never reset between the two `it.each` cases. Against `b2f9293a2` the "spec with none" case failed only because the ret case loaded the data first; run alone, both cases fail by the 5 s timeout, not at the assertion.
+- **A13 (low).** `lazy_load.test.ts:115-117` checks `import()` only in the tab body. An `import()` of the store added to `phase_changes.ts` or `saved_entry.ts` passes every `lazy_load` test.
+- **A14 (low).** On a spec with no ranking data, with the tab open, `followPhase` sets no follower (`follow_phase.ts:26-27`), so each phase change still runs `forgetSavedSets` under the open store. The store's next save overwrites the entry, and such a spec has no default sets. No visible effect.
+- Behaviour change (a closed-tab round trip keeps an exclusion): rated acceptable. The kept exclusion is offered at the current phase, so the Sources count is correct (`settings_reducer.ts:64-72`, `follow_phase.ts:31`).
+
+## Domain (round 3)
+
+No blocking or medium finding. Keeping the exclusion is neutral to better for the user: it is a choice the user made, and on the way back the pool offers that source again. On open, the defaults come from the page's phase (`useUpgradesSettings.ts:44,61`). The diff states no phase or tier fact of its own.
+
+- **D-r3-1 (low).** The closing note's example ("offered at phase 3 but not at 4") cannot happen with the committed data: every universe is `carryoverPolicy: union`, and a script over `model/data/*-p*.universe.json` found no spec that loses a source key between consecutive phases (unverified by the aggregator). The real case runs the other way, for example Zul'Aman excluded at phase 4, then 4 to 3 to 4. The code comment in `saved_entry.ts` is general and correct.
+- **D-r3-2 (low).** The result now depends on whether the tab was open during the round trip. The closed path gives the better result for the user.
+
+## Standards + Spec (round 3)
+
+### Standards
+
+Hard checks pass: the lock `commit` and the effects file `forkCommit` both name `0ba3765ec69b…`, and the lock `_comment` has the 589 entry; `python scripts/check_layout_gate.py --print-hash` equals `testedTabHash` (`bd2857693cc6…`); `docs/fork-upstream-touchpoints.md` re-runs as 114 commits, 258 A and 1 M, 252 under `ui/features/upgrades`; no path under `model/engine` changed; the three commit subjects are 48, 37 and 16 characters and follow the seven rules; riders S8 to S12 are done (`git grep "setTimeout(resolve, 0)" -- ui` finds only the new helper and production `utils/fixture.ts:104`). Low findings:
+
+- **S14 (hard, Comment policy).** `model/run_session.test.ts:49` keeps a doc comment for the `settled` helper that moved away; it describes nothing now.
+- **S15 (Duplicated Code).** `isRecord` is defined in `saved_entry.ts:20`, `saved_settings.ts:27` and `utils/fixture.ts:60`.
+- **S16 (Duplicated Code).** `forgetSavedSets` repeats the `scopeChanged` reset on raw JSON; two tests repeat the storage key as a literal.
+- **S17 (Duplicated Code).** `lazy_load.test.ts:26-35` copies the 8 `tsconfig.json` aliases; a new alias would stop the walk without an error.
+- **S18 (Durable claims).** The network claims in the lock `_comment` and the 589 note cite only gitignored logs.
+
+### Spec
+
+Every "Done when" clause of 589 has code and a test, and each closing-note claim matches its log, with one exception (SP8). The 587 re-check in `r3-network.log` shows the round trip removing `defaultsFor` and the tab opening on `preset:3:P3`, also after a reload; the control opens with no sets.
+
+- **SP7 (low, scope).** The closed-tab round trip keeps an exclusion the middle phase does not offer. The ticket allowed it and the note discloses it, but no test pins the round trip.
+- **SP8 (low, evidence).** The note says opening the tab fetched the chunk; the log shows a tab open on the retribution page only.
+- **SP9 (low, hypothesis).** The always-downloaded `phase_changes-*.chunk.js` grew from 14.94 kB to 208.14 kB.
+- **SP10 (low).** Same as A14.
+
+Aggregator check of SP9: the round-2 build files are still in `vendor/tbc-new-fork/dist/tbc/bundle/`. The round-2 entry `spec_entry-KJu34KVZ.entry.js` statically imports both `useSavedGear-WAP4SqiR.chunk.js` (193,078 bytes) and `phase_changes-DWqGf3Tj.chunk.js` (14,940 bytes), 208,018 bytes together. The round-3 entry `spec_entry-41GBeQY9.entry.js` statically imports `phase_changes-D1Acr4tK.chunk.js` (208,146 bytes) and no `useSavedGear` chunk (`grep -o` on each entry file, `ls -la`). The bundler merged the two chunks; the first download did not grow.
+
+## Summary (round 3)
+
+Ticket 589 is fixed: with the tab closed, a phase change edits the saved entry and downloads nothing, on a spec with ranking data and on one without, and the 587 behaviour holds after a reload. Both test runs pass. Nothing is blocking or medium. The stated behaviour change is acceptable (Adversarial, Domain and Spec axes). Six low findings need small code changes in fork test files and comments (A12, A13, S14, S15, S17, SP7); they are in ticket 590. The two closing-note errors (SP8, D-r3-1) are corrected in ticket 589's comments.
+
+## Disposition (round 3)
+
+| ID     | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                |
+| ------ | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A12    | Adversarial | defer       | `.scratch/carry-forward/issues/590-unopened-tab-test-and-lazy-load-gaps.md` — the unopened test's two cases share a flag, and the old code fails them by timeout                                                                                             |
+| A13    | Adversarial | defer       | `.scratch/carry-forward/issues/590-unopened-tab-test-and-lazy-load-gaps.md` — `import()` is checked only in the tab body, not in the eager files                                                                                                             |
+| A14    | Adversarial | wontfix     | harmless: the open store's next save overwrites the entry, and a spec with no ranking data has no default sets (`upgrades_store.ts:101-102`)                                                                                                                 |
+| D-r3-1 | Domain      | fixed       | ticket 589 `## Comments` (this review commit) gives the real direction; the `saved_entry.ts` comment is general and correct                                                                                                                                  |
+| D-r3-2 | Domain      | wontfix     | accepted: the kept exclusion is offered at the current phase and is the user's choice; the Adversarial, Domain and Spec axes rate it acceptable; the owner can overrule                                                                                      |
+| S14    | Standards   | defer       | `.scratch/carry-forward/issues/590-unopened-tab-test-and-lazy-load-gaps.md` — orphan doc comment in `run_session.test.ts:49`                                                                                                                                 |
+| S15    | Standards   | defer       | `.scratch/carry-forward/issues/590-unopened-tab-test-and-lazy-load-gaps.md` — `isRecord` defined three times                                                                                                                                                 |
+| S16    | Standards   | wontfix     | `scopeChanged` needs the new phase's `validSourceKeys`, which come from the pool data the eager path must not load (ticket 589), so `forgetSavedSets` cannot dispatch it; the two fields it repeats are named in its comment; the key literals are test-only |
+| S17    | Standards   | defer       | `.scratch/carry-forward/issues/590-unopened-tab-test-and-lazy-load-gaps.md` — alias list copied from `tsconfig.json`                                                                                                                                         |
+| S18    | Standards   | wontfix     | the claims are logged observations of a live run; `lazy_load.test.ts` and `UpgradesTabBody.unopened.test.tsx` re-check the mechanism; earlier rounds cited gitignored live logs the same way                                                                 |
+| SP7    | Spec        | defer       | `.scratch/carry-forward/issues/590-unopened-tab-test-and-lazy-load-gaps.md` — no test pins the closed-tab round trip                                                                                                                                         |
+| SP8    | Spec        | fixed       | ticket 589 `## Comments` (this review commit) says the tab was opened on the retribution page only                                                                                                                                                           |
+| SP9    | Spec        | wontfix     | checked: both builds' spec entries statically import the chunk; round 2's `useSavedGear` (193,078 bytes) plus `phase_changes` (14,940) equal round 3's `phase_changes` (208,146) within 128 bytes                                                            |
+| SP10   | Spec        | wontfix     | same as A14                                                                                                                                                                                                                                                  |

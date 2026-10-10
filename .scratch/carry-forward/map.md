@@ -323,3 +323,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 587 Saved set selection misses a phase change made before the tab opens (pre-merge review feat-tab-settings-persist, A1, A3, A4, D2) 2026-10-09
 - 588 The export panel's token/gear choice does not survive a reload (pre-merge review feat-tab-settings-persist, SP1) 2026-10-09
 - 589 A phase change downloads the Upgrades tab's data on every spec page, opened or not (pre-merge review feat-tab-settings-persist round 2, A9, A10, SP5 and riders S8-S12) 2026-10-09
+- 590 Tighten the ticket-589 tests and two small leftovers (pre-merge review feat-tab-settings-persist round 3, A12, A13, S14, S15, S17, SP7) 2026-10-10

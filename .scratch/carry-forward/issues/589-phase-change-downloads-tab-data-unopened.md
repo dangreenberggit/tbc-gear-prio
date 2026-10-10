@@ -140,3 +140,20 @@ the `exportFlavour` default comment states its reason without the pointer.
 Gates at this pin: layout gate measured and passed
 (`.scratch/tab-settings-persist/r3-layout-gate.log`), desktop gate (a)-(h)
 passed with no golden update (`r3-desktop-gate.log`).
+
+## Comments
+
+### Pre-merge review round 3 (2026-10-10), two corrections to the closing note
+
+- The network check opened the tab only on the retribution paladin page.
+  `r3-network.log` shows "tab chunk fetched on open (control)" in the two
+  retribution re-checks and no tab open on the protection paladin page. The
+  sentence "Opening the tab then fetched that chunk" applies to retribution
+  only (round 3, SP8).
+- The example "after 3 to 4 to 3 ... an exclusion offered at phase 3 but not
+  at 4 stays" cannot happen with the committed data: the Domain axis found no
+  spec whose universe loses a source key from one phase to the next
+  (`carryoverPolicy: union`; a script over `model/data/*-p*.universe.json`,
+  unverified here). The real cases run the other way, for example Zul'Aman
+  excluded at phase 4, then 4 to 3 to 4 with the tab closed: the exclusion
+  stays. The behaviour the note describes is unchanged (round 3, D-r3-1).
