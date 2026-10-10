@@ -5,6 +5,8 @@ round 2, open findings are reported, not reviewed in a round 3.
 
 Reviewed range: `8ebd89e6f9013630fbab6d6fb7b6cccf3e97dc19..241f8e13011de8bf2ea91ebba92807873d221b6b`
 
+Reviewed range: `241f8e13011de8bf2ea91ebba92807873d221b6b..e7327e0cc56539041a91c55f64980103e7b74e99`
+
 Round 1 dispatch: no `codex` on PATH; four fresh `general-task` agents on
 Opus (adversarial, domain, standards, spec), each told it writes nothing.
 
@@ -92,7 +94,7 @@ below.
 | A6  | Adversarial | fixed       | "Live tests" below records the runs; the real-pair gate run is recorded there                                                                                                  |
 | A7  | Adversarial | fixed       | named `--check-only` prints blocking files as a note (T9)                                                                                                                      |
 | A8  | Adversarial | fixed       | a tree mismatch now exits 1                                                                                                                                                    |
-| D1  | Domain      | fixed       | doc step 2 ends on "clone HEAD is the pair lock's `commit`", else the older route                                                                                              |
+| D1  | Domain      | fixed       | doc step 2 now ends: "Done when `git -C vendor/tbc-new-fork rev-parse HEAD` prints the `commit` that the pair's `data/wowsims-fork.lock.json` names", else the older route     |
 | D2  | Domain      | fixed       | same fix as A4                                                                                                                                                                 |
 | D3  | Domain      | fixed       | same fix as A5                                                                                                                                                                 |
 | S1  | Standards   | fixed       | same fix as A6                                                                                                                                                                 |
@@ -107,6 +109,104 @@ below.
 | P5  | Spec        | wontfix     | the pair must stay fully clean because verify reads its working tree, where an untracked file can change the result; the no-argument path keeps today's rule unchanged         |
 | P6  | Spec        | wontfix     | accepted by the reviewer; the note is printed (T3)                                                                                                                             |
 
+## Adversarial (round 2)
+
+Every round-1 `fixed` row does what it claims, and every `wontfix` reason
+matches the code or the log. In a throwaway repo the reviewer reproduced
+the A1 race cases: an untracked file in the pair, a branch switch in the
+pair and an extra commit were refused; a commit holding only the layout
+lock was allowed and merged correctly (stub layout gate, no hooks).
+
+- **A9 (medium; reproduced)** A `git switch -c <new>` in the main folder
+  during the gates keeps HEAD's sha, so the merge went onto `<new>` and the
+  script printed `merged ... -> dev` with rc 0 while `dev` did not move.
+- **A10 (low)** `worktree_problem` did not check the pair's fork worktree,
+  which `vendor/` hides from the main tree's status; the fork gates read it.
+- **A11 (low)** The module doc's "161 s" had no source.
+- **A12 (note; reproduced)** `dev`'s `merge_to_dev.py` has no branch
+  argument, so this branch cannot merge itself by name; it takes the
+  no-argument route.
+- **A13 (note; reproduced, pre-existing)** A clean `git merge --no-ff` does
+  not run `pre-commit`, so the `TBC_ALLOW_DEV_MERGE` guard fires only after
+  a conflicted merge.
+- **A14 (minor)** The new git paths have no automated test.
+- **A15 (nit)** Refusals after the gates did not say the branch keeps the
+  merge of `dev`.
+
+## Domain (round 2)
+
+D1-D3 fixes are correct; still no game facts, data files, fork pin or
+ranking code in the diff.
+
+- **D4 (nit)** "Step 3 fails" when only `dev` re-pinned is not true with
+  `--no-verify`, since the fork gates run only inside verify.
+- **D5 (note)** That case is found only after a verify run of minutes; a
+  lock comparison before step 3 would find it in seconds.
+
+## Standards + Spec (round 2)
+
+### Standards
+
+S1 and S2 fixes hold; S3 holds in `merge_named`; S4 and S5 reasons are true.
+
+- **S6 (low)** `--expect-head` read HEAD with `run(...)` instead of
+  `rev_parse("HEAD")`.
+- **S7 (low)** Same as A11.
+- **S8 (minor)** `expect_head` depends on `check_only` in the `gate_argv`
+  call; acceptable.
+- **S9 (minor)** Disposition row D1 quoted text the doc does not contain.
+- **S10 (nit)** "including any merge of dev above" points at log output.
+- **S11 (note)** `refuse_blockers` takes a flag; fine at two call sites.
+
+### Spec
+
+P1, P2 and P4 are fixed; the P3, P5 and P6 reasons hold.
+
+- **P7 (low)** No verify run covered a merge result where `dev` had to be
+  merged into the branch first.
+- **P8 (low)** A branch checked out nowhere is refused, and a new fork pin
+  on `dev` still needs the older route; both are documented.
+- **P9 (nit)** The conflict message pointed fork-lock conflicts at the
+  paragraph about ordinary conflicts.
+- **P10 (nit)** Same as A11.
+
+### Session note
+
+- **X1 (note)** AGENTS.md "The forked tab repo" still says merges from a
+  pair run "after `pnpm wt:unpair`". AGENTS.md edits need owner approval.
+
+## Summary (round 2)
+
+One medium finding (A9), fixed in `4ce824c0`. Round 2 was the last round
+under the session cap, so the round-2 fixes below are covered by the live
+tests (T11-T13) and the `pnpm merge-to-dev --check-only` run, not by a
+review round.
+
+## Disposition (round 2)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                     |
+| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A9  | Adversarial | fixed       | after the gates: this folder must still be on `dev` at the same sha and `refs/heads/dev` unchanged; after the merge, `dev` must point at the new commit whose first parent is the old `dev` (T11) |
+| A10 | Adversarial | fixed       | `worktree_problem` also requires a clean `vendor/tbc-new-fork` when the worktree has one (T12)                                                                                                    |
+| A11 | Adversarial | fixed       | the number is gone; the doc names what `pnpm wt:pair` does instead                                                                                                                                |
+| A12 | Adversarial | wontfix     | expected: the branch argument exists only after this branch is on `dev`; the report gives the route for this first merge                                                                          |
+| A13 | Adversarial | defer       | `.scratch/carry-forward/issues/595-pre-commit-dev-merge-guard-misses-clean-merges.md`                                                                                                             |
+| A14 | Adversarial | defer       | `.scratch/carry-forward/issues/596-automate-merge-to-dev-named-branch-tests.md`                                                                                                                   |
+| A15 | Adversarial | fixed       | every refusal after the gates names the commits the branch keeps                                                                                                                                  |
+| D4  | Domain      | fixed       | step 3 now refuses before any merge when `dev`'s fork lock changed since the branch forked; the doc says so (T13)                                                                                 |
+| D5  | Domain      | fixed       | same change as D4                                                                                                                                                                                 |
+| S6  | Standards   | fixed       | uses `rev_parse("HEAD")`                                                                                                                                                                          |
+| S7  | Standards   | fixed       | same fix as A11                                                                                                                                                                                   |
+| S8  | Standards   | wontfix     | the reviewer judged it acceptable; `gate_argv` stays pure and tested                                                                                                                              |
+| S9  | Standards   | fixed       | row D1 now quotes the doc's words                                                                                                                                                                 |
+| S10 | Standards   | fixed       | message now says "including the merge of dev made in this run, if any"                                                                                                                            |
+| S11 | Standards   | wontfix     | the reviewer found it fine at two call sites                                                                                                                                                      |
+| P7  | Spec        | defer       | `.scratch/carry-forward/issues/596-automate-merge-to-dev-named-branch-tests.md`                                                                                                                   |
+| P8  | Spec        | wontfix     | both limits are deliberate and documented: the gates need the branch's own checkout, and a new fork pin needs the fork-side re-pin the older route does                                           |
+| P9  | Spec        | fixed       | the conflict message no longer names a paragraph; fork-lock cases are refused earlier with a pointer to "When dev has a new fork pin"                                                             |
+| P10 | Spec        | fixed       | same fix as A11                                                                                                                                                                                   |
+| X1  | Session     | defer       | `.scratch/carry-forward/issues/597-agents-md-pair-merge-line-is-stale.md` (blocked on owner approval)                                                                                             |
+
 ## Live tests
 
 Scratch clone, never the real `dev`, nothing pushed. Setup: `git clone -b
@@ -114,12 +214,14 @@ feat/merge-to-dev-arg <pair> C:\Users\dgree\AppData\Local\Temp\mtd\repo`,
 remove `origin`, create local `dev` at the clone's tip, then branches
 `feat/throwaway` (new file plus a `CONTEXT.md` line, with a review file),
 `feat/conflict` (rewrites `README.md` line 1), `feat/noarg`, `feat/norev`
-(no review file) and `feat/loose`; then one `dev` commit that rewrites
-`README.md` line 1 and adds a file; worktrees for throwaway, conflict and
-norev; `core.hooksPath .githooks`. Each case ran
+(no review file), `feat/race` (its own `merge_to_dev.py --gates-only` runs
+`git switch -c not-dev` in the clone's main folder, test-only) and
+`feat/loose`; then one `dev` commit that rewrites `README.md` line 1 and
+adds a file; worktrees for throwaway, conflict, norev and race;
+`core.hooksPath .githooks`. Each case ran
 `python <clone>/scripts/merge_to_dev.py <branch> --no-verify` from the
-clone on `dev` unless noted. Run on 2026-10-10 against `e2ae4954`; log
-copied to `C:\Users\dgree\AppData\Local\Temp\mtd-run2.log` (outside the
+clone on `dev` unless noted. Run on 2026-10-10 against `4ce824c0`; log
+copied to `C:\Users\dgree\AppData\Local\Temp\mtd-run3.log` (outside the
 repo).
 
 | Case  | What                                                                                      | Result                                                                                                                                                            |
@@ -132,16 +234,21 @@ repo).
 | T7    | branch `dev` already contains                                                             | refused, rc 1                                                                                                                                                     |
 | T8    | `--gates-only --expect-head 0000000000` in the worktree                                   | refused, rc 1                                                                                                                                                     |
 | T9    | `--check-only` with a dirty merged file                                                   | note lists the file, rc 0                                                                                                                                         |
-| T10   | gates fail (missing review) after `dev` was merged into the branch                        | message names the branch's new tip; `dev` unchanged, rc 1                                                                                                         |
+| T10   | gates fail (missing review) after `dev` was merged into the branch                        | message names the commits the branch keeps; `dev` unchanged, rc 1                                                                                                 |
+| T11   | the main folder switches to a new branch during the gates                                 | refused after the gates; `dev` unchanged, rc 1                                                                                                                    |
+| T12   | untracked file in the branch worktree's `vendor/tbc-new-fork` (a `git init` stand-in)     | refused, rc 1                                                                                                                                                     |
+| T13   | `dev` commits a change to `data/wowsims-fork.lock.json` after the branch forked           | refused before any merge; branch unchanged, rc 1                                                                                                                  |
 | T6    | no-argument run from a checkout of `feat/noarg`                                           | checks out `dev`, merges as before, rc 0                                                                                                                          |
 
 Gate run with verify in the real pair (`C:\Users\dgree\Code\lulz\tbc-wt\merge-arg`,
-Node 22.17.1): `python scripts/merge_to_dev.py --gates-only --expect-head c7d8f7bd134cc5349beb03032cb61d17d8277c44`
+Node 22.17.1), at the round-1 fixes:
+`python scripts/merge_to_dev.py --gates-only --expect-head c7d8f7bd134cc5349beb03032cb61d17d8277c44`
 exited 0 on 2026-10-10. Its output: `gates: 1519 ran, 0 skipped` (verify),
 `disposition rows: 22 parsed of 22`, `merge-ready: ok`, the layout gate
 skipped because the tab source was unchanged, then `gates: ok (not merging)`.
-The pair's tree stayed clean at `c7d8f7bd`.
+The pair's tree stayed clean at `c7d8f7bd`. `dev` was already in the
+branch, so this run did not cover a merge of `dev` first (ticket 596).
 
-Not run: the layout gate's lock-only commit allowance (the fork was absent
-in the clone, so the gate skipped), the race where the branch or the pair
-moves during the gates, and a merge into the real `dev`.
+Not run: the layout gate's lock-only commit allowance in a real pair (the
+round-2 adversarial reviewer ran it with a stub gate and no hooks), and a
+merge into the real `dev`.
