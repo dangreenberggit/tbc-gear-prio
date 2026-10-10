@@ -119,16 +119,16 @@ merged into the real `dev`.
 leaves the pair as it was, and stops. For an ordinary conflict, resolve it in
 the pair (`git -C <pair> merge dev`) and run step 3 again.
 
-**When `dev` has a new fork pin,** take the older route below. Step 3 fails
-in either of these cases:
+**When `dev` has a new fork pin,** take the older route below. Step 3
+refuses, before it merges anything, when `data/wowsims-fork.lock.json` on
+`dev` changed since the branch forked. Two reasons:
 
-- Both this pair and another one re-pinned: the lock's `commit` and
-  `_comment` lines conflict (temp-repo test 2026-10-10,
-  `docs/reviews/feat-worktree-pair.md` WD7; the repo has no merge driver for
-  the lock).
-- Only `dev` re-pinned: `git merge dev` succeeds, but the pair's fork
-  worktree stays on the old commit, so the fork gates fail in the pair's
-  verify (a reading of `scripts/_fork_gate.py`, untested).
+- When this pair re-pinned too, the lock's `commit` and `_comment` lines
+  conflict (temp-repo test 2026-10-10, `docs/reviews/feat-worktree-pair.md`
+  WD7; the repo has no merge driver for the lock).
+- When only `dev` re-pinned, `git merge dev` would succeed, but the pair's
+  fork worktree stays on the old commit, so the fork gates in the pair's
+  verify would fail (a reading of `scripts/_fork_gate.py`, untested).
 
 The older route's git steps ran in temp repos on 2026-10-10
 (`docs/reviews/feat-worktree-pair.md`, R1; the `pnpm` commands did not run

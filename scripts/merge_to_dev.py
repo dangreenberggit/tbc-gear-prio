@@ -23,7 +23,9 @@ checked out, such as the main folder while <branch> sits in a pair):
   1. Find the worktree that has <branch> checked out; it must be clean.
      Refuse a branch dev already contains.
   2. If dev has commits <branch> lacks, merge dev into <branch> in that
-     worktree (a conflict is aborted there and reported). After this, dev is
+     worktree (a conflict is aborted there and reported). Refuse instead
+     when dev's fork lock changed since <branch> forked: the worktree's fork
+     would no longer match the lock (docs/agents/paired-worktrees.md). After this, dev is
      an ancestor of <branch>, so the merge into dev produces exactly
      <branch>'s tree, and the gates below check the merge result. That merge
      commit stays on <branch> even when a later gate fails.
@@ -39,9 +41,9 @@ instead of refusing, and merges nothing.
 Why the gates run in the branch's worktree, not in a temporary worktree at
 the merge result: a plain `git worktree add` has no vendor/ fork, no
 node_modules and no wowsims copies, so verify cannot run there. Providing
-them is what `pnpm wt:pair` does, which took 161 s for one pair on
-2026-10-10. The branch's worktree already has them, and step 2 makes its
-tip's tree the merge result.
+them takes what `pnpm wt:pair` does: a fork worktree, an install and the
+fork's proto build. The branch's worktree already has them, and step 2
+makes its tip's tree the merge result.
 
 Does not push. Does not touch main.
 
@@ -70,6 +72,7 @@ import worktree_pair  # noqa: E402
 # pre-commit on `dev` refuses merge commits unless this is set (see .githooks/pre-commit).
 ALLOW_DEV_MERGE = "TBC_ALLOW_DEV_MERGE"
 LAYOUT_LOCK = "data/wowsims-fork-layout.lock.json"
+FORK_LOCK = "data/wowsims-fork.lock.json"
 
 
 def _resolve_cmd(cmd: list[str]) -> list[str]:
@@ -258,9 +261,17 @@ def refuse_blockers(blockers: list[str], check_only: bool = False) -> None:
 
 
 def worktree_problem(wt: Path, target: str, head: str) -> str | None:
-    """Why `wt` is not a clean checkout of `target` at `head`, or None."""
+    """Why `wt` is not a clean checkout of `target` at `head`, or None.
+
+    A pair's fork worktree sits under the gitignored vendor/, so the main
+    tree's status does not show its edits; the fork gates read it, so it
+    must be clean too.
+    """
     if git_out("status", "--porcelain", cwd=wt).strip():
         return f"{wt} has uncommitted or untracked files; commit them there first"
+    fork = wt / "vendor" / "tbc-new-fork"
+    if (fork / ".git").exists() and git_out("status", "--porcelain", cwd=fork).strip():
+        return f"{fork} has uncommitted or untracked files; commit them there first"
     if git_out("branch", "--show-current", cwd=wt).strip() != target:
         return f"{wt} no longer has {target} checked out"
     if rev_parse("HEAD", wt) != head:
@@ -305,6 +316,16 @@ def merge_named(args: argparse.Namespace) -> int:
     refuse_blockers(main_folder_blockers(dev_sha, tip), args.check_only)
 
     if not is_ancestor(dev_sha, tip):
+        base = git_out("merge-base", dev_sha, tip).strip()
+        if git_out("diff", "--name-only", base, dev_sha, "--", FORK_LOCK).strip():
+            msg = (
+                f"dev's {FORK_LOCK} changed since {target} forked, so the fork in {wt} "
+                "no longer matches dev's pin; see docs/agents/paired-worktrees.md, "
+                '"When dev has a new fork pin"'
+            )
+            if not args.check_only:
+                die(msg)
+            print(f"note: a real run refuses: {msg}")
         if args.check_only:
             print(
                 f"note: dev has commits {target} lacks, so this checks {target}'s tip, "
@@ -316,9 +337,7 @@ def merge_named(args: argparse.Namespace) -> int:
                 run(["git", "-C", str(wt), "merge", "--abort"])
                 die(
                     f"merging dev into {target} failed in {wt}, and was aborted. "
-                    f"Resolve it there (git -C {wt} merge dev) and run this again; when "
-                    "the fork lock conflicts, see docs/agents/paired-worktrees.md, "
-                    '"When git merge dev conflicts in the pair"'
+                    f"Resolve it there (git -C {wt} merge dev) and run this again"
                 )
             tip = rev_parse(branch_ref)
 
@@ -333,9 +352,9 @@ def merge_named(args: argparse.Namespace) -> int:
     )
     print("+", " ".join(argv))
     gates = subprocess.run(argv, cwd=wt)
+    kept = f"{target} keeps its commits up to {tip[:9]}, including the merge of dev made in this run, if any"
     if gates.returncode != 0:
-        kept = "" if args.check_only else f" {target} stays at {tip[:9]}, including any merge of dev above."
-        die(f"gates failed in {wt}.{kept}", gates.returncode)
+        die(f"gates failed in {wt}." + ("" if args.check_only else f" {kept}."), gates.returncode)
     if args.check_only:
         return 0
 
@@ -346,14 +365,18 @@ def merge_named(args: argparse.Namespace) -> int:
     if after != tip:
         changed = git_out("diff", "--name-only", tip, after).splitlines()
         if rev_parse(f"{after}^") != tip or changed != [LAYOUT_LOCK]:
-            die(f"{target} moved from {tip[:9]} to {after[:9]} while the gates ran; run this again")
+            die(f"{target} moved from {tip[:9]} to {after[:9]} while the gates ran; {kept}; run this again")
     # An edit or a branch switch in the worktree during the gates would mean
     # verify checked files that are not in `after`.
     problem = worktree_problem(wt, target, after)
     if problem:
-        die(f"after the gates: {problem}; run this again")
-    if rev_parse("HEAD") != dev_sha:
-        die("dev moved while the gates ran; run this again")
+        die(f"after the gates: {problem}; {kept}; run this again")
+    # A `git switch -c` here keeps HEAD's sha, so the branch name and the dev
+    # ref are both checked; the merge would otherwise go onto the new branch.
+    if check_merge_ready.branch_name() != "dev" or rev_parse("HEAD") != dev_sha:
+        die(f"this folder left dev, or dev moved, while the gates ran; {kept}; run this again")
+    if rev_parse("refs/heads/dev") != dev_sha:
+        die(f"dev moved while the gates ran; {kept}; run this again")
     refuse_blockers(main_folder_blockers(dev_sha, after))
 
     print("\n=== merge into dev ===")
@@ -370,6 +393,9 @@ def merge_named(args: argparse.Namespace) -> int:
         )
         return merge.returncode
 
+    new_dev = rev_parse("refs/heads/dev")
+    if new_dev != rev_parse("HEAD") or rev_parse(f"{new_dev}^1") != dev_sha:
+        die(f"the merge commit is not on dev on top of {dev_sha[:9]}; inspect `git log -3 --all --graph`")
     if rev_parse("HEAD^{tree}") != rev_parse(f"{after}^{{tree}}"):
         die(
             f"dev's new tree differs from {target}'s, which the gates checked; "
@@ -430,7 +456,7 @@ def main() -> int:
     if dirty.stdout.strip() and args.check_only:
         print("(working tree dirty — allowed for --check-only)")
     if args.expect_head:
-        head = run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+        head = rev_parse("HEAD")
         if head != args.expect_head:
             die(f"HEAD is {head[:9]}, not the {args.expect_head[:9]} the caller asked to check")
 
