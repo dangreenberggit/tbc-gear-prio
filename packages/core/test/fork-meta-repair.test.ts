@@ -494,7 +494,7 @@ async function rogueAtDeficit(e: Engine, target: number) {
   const gear = (
     JSON.parse(
       readFileSync(
-        join(forkRoot, "ui/rogue/dps/gear_sets/p2.gear.json"),
+        join(forkRoot, "ui/specs/rogue/dps/gear_sets/p2.gear.json"),
         "utf8"
       )
     ) as { items: Array<{ id?: number; gems?: number[] }> }
@@ -965,7 +965,11 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
       expect([name, deficits]).toEqual([name, O1_DEFICITS[name]]);
     }
     expect(measured).toBe(85);
-    expect(deficitOne).toBe(31);
+    // 31 named d = 1 repairs (ret-p3-p2's rows) plus 2 unnamed package
+    // repairs on feral-p3-th-hands-legs (584 piece 4, 640 piece 4). The
+    // ticket 560 re-record made the three feral files that predated ticket
+    // 511 (fork 2117d5271) step rankings, so their set packages are new jobs.
+    expect(deficitOne).toBe(33);
     console.log(
       `[535-O1] other package repairs: ${otherPackageRepairs.length === 0 ? "none" : otherPackageRepairs.join("; ")}`
     );

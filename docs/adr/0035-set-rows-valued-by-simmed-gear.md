@@ -376,6 +376,8 @@ scoring of the check characters.
   (C231). The known case is Cryptstalker Armor 530 on a non-hunter: every sim
   with 2 or more of its set-tagged pieces fails (ticket 532; cause a hypothesis,
   untested). Fixed by ticket 532 at fork `55c705173`.
+  That fix was returned to upstream's text at fork `205975607` and parked on
+  ticket 573; off-class Tier 3 pieces are now out of candidate lists (ticket 576).
 
 ### Checks on the shipped rule
 
@@ -621,6 +623,8 @@ Added since:
 - Item swap was tested with non-set items only (limit (l)).
 - Off-class Cryptstalker Armor sims fail, so those sets read "couldn't measure"
   (ticket 532). Fixed by ticket 532 at fork `55c705173`.
+  That fix was returned to upstream's text at fork `205975607` and parked on
+  ticket 573; off-class Tier 3 pieces are now out of candidate lists (ticket 576).
 - The tab's replicate seeds overlap (ticket 530). Fixed by ticket 530, fork
   `b1eb1de85`.
 - A step no longer lumps a set's gain with a broken set's loss. The owner asked

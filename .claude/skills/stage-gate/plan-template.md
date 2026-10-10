@@ -39,7 +39,7 @@ must close on recorded evidence: captures at fixed widths, axe results,
 measured facts, a pre-run state, or an independent `gate-visual` verdict.
 The block names the state (`pre-run` / `post-run`), widths, selectors to
 capture, interactions, facts to record, and the sentence; the manifest
-schema is in the header comment of `vendor/tbc-new-fork/test-review.mjs`.
+schema is in the header comment of `scripts/tab-harness/test-review.mjs`.
 
 ## Paths manifest
 

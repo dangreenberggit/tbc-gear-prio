@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-"""Re-hash the fork's ported engine files against engine/PROVENANCE.md.
+"""Re-hash the fork's ported engine files against docs/fork-provenance/engine.md.
 
 The wowsims-tab detour (docs/plans/wowsims-tab/plan.md) ports packages/core's
-ranking engine into vendor/tbc-new-fork/ui/core/components/individual_sim_ui/
-upgrades/engine/. E-W3 (the fixture-parity test,
-packages/core/test/wowsims-fork-parity.test.ts) is the only thing that proves
-the port still *behaves* like packages/core. Per plan §8's "E-W3 runs here,
-not in the fork" decision, E-W3 lives in this repo rather than travelling
-with the fork, so a fork-only edit to a ported file could change its
-behaviour with nothing inside the fork noticing.
+ranking engine into vendor/tbc-new-fork/ui/features/upgrades/model/engine/.
+E-W3 (the fixture-parity test, packages/core/test/wowsims-fork-parity.test.ts)
+is the only thing that proves the port still *behaves* like packages/core.
+Per plan §8's "E-W3 runs here, not in the fork" decision, E-W3 lives in this
+repo rather than travelling with the fork, so a fork-only edit to a ported
+file could change its behaviour with nothing inside the fork noticing.
 
 This script is the compensating control named there: it re-hashes every file
-PROVENANCE.md lists and fails loudly the moment a file's content no longer
+engine.md lists and fails loudly the moment a file's content no longer
 matches its recorded hash. Read that sentence carefully -- a hash match is
 NOT proof of correct behaviour. It only proves nobody has touched the file's
 bytes since the hash was recorded. Someone can still break the port while
@@ -20,19 +19,18 @@ never regenerated after the last real edit), and this script cannot see
 that. Only E-W3 tests behaviour; this only tests "did anything change
 without anyone re-running E-W3 and updating the table."
 
-Two failure modes this script distinguishes, matching PROVENANCE.md's job:
+Two failure modes this script distinguishes, matching engine.md's job:
 
   - A ported file's hash no longer matches the table -> the file was edited
-    (in the fork, or the table is stale) and PROVENANCE.md was not updated.
+    (in the fork, or the table is stale) and engine.md was not updated.
     This is the drift the whole mechanism exists to catch.
   - A file the table lists is missing from disk -> the port regressed or the
     table references a file that was since deleted/renamed.
 
 Skips cleanly (exit 0, explaining why) when vendor/tbc-new-fork is absent
-(gitignored -- plan D1) or PROVENANCE.md itself is missing, the same two
-independent conditions packages/core/test/wowsims-fork-parity.test.ts (E-W3)
-gates on. Absence is an ordinary state -- a fresh clone, or before slice 2
-ever ran -- not a failure.
+(gitignored -- plan D1): a fresh clone is an ordinary state, not a failure.
+The record itself, docs/fork-provenance/engine.md, is tracked in this repo,
+so a missing record is always an error (exit 2).
 
 Run via `pnpm verify` (`pnpm engine-port-drift:check`).
 
@@ -49,11 +47,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
-ENGINE_DIR = (
-    FORK_ROOT
-    / "ui/core/components/individual_sim_ui/upgrades/engine"
-)
-PROVENANCE_MD = ENGINE_DIR / "PROVENANCE.md"
+ENGINE_DIR = FORK_ROOT / "ui/features/upgrades/model/engine"
+# The record lives in this repo, not the fork (moved out of the fork's
+# engine/ folder so the fork carries no tooling of ours).
+PROVENANCE_MD = ROOT / "docs/fork-provenance/engine.md"
 
 # One row per ported file: `| `fork/relative/path.ts` | ... | ... | `<hash>` |`
 # Anchored on a leading backtick-quoted path ending in `.ts` and a trailing
@@ -193,11 +190,12 @@ def main() -> int:
         return 0
     if not PROVENANCE_MD.is_file():
         print(
-            f"engine port drift check: skipped -- {PROVENANCE_MD.relative_to(ROOT)} "
-            "does not exist. The fork clone is present but the engine has not "
-            "been ported here yet (or PROVENANCE.md was not written)."
+            f"engine port drift check: {PROVENANCE_MD.relative_to(ROOT)} does not "
+            "exist. It is a tracked file in this repo, so it should never be "
+            "missing.",
+            file=sys.stderr,
         )
-        return 0
+        return 2
 
     recorded = parse_provenance(PROVENANCE_MD.read_text(encoding="utf-8"))
 
@@ -217,7 +215,7 @@ def main() -> int:
     if not drifted and not missing and not union_problems:
         print(
             f"engine port drift check ok: {len(recorded)} ported files match "
-            "PROVENANCE.md; ItemSlot, ITEM_SOURCE_KINDS and SIM_ORDER match "
+            "engine.md; ItemSlot, ITEM_SOURCE_KINDS and SIM_ORDER match "
             "their sources member-for-member"
         )
         return 0
@@ -243,22 +241,22 @@ def main() -> int:
             return 1
 
     for rel_path in missing:
-        print(f"  missing: {rel_path} (listed in PROVENANCE.md, not found on disk)", file=sys.stderr)
+        print(f"  missing: {rel_path} (listed in engine.md, not found on disk)", file=sys.stderr)
     for rel_path, expected_hash, actual_hash in drifted:
         print(
             f"  drifted: {rel_path}\n"
-            f"    PROVENANCE.md hash: {expected_hash}\n"
+            f"    engine.md hash: {expected_hash}\n"
             f"    actual file hash:   {actual_hash}",
             file=sys.stderr,
         )
     print(
-        "\nengine/PROVENANCE.md is stale against the fork's ported files. This "
+        "\ndocs/fork-provenance/engine.md is stale against the fork's ported files. This "
         "means a ported file changed without E-W3 (packages/core/test/"
-        "wowsims-fork-parity.test.ts) being re-run and PROVENANCE.md's hash "
+        "wowsims-fork-parity.test.ts) being re-run and engine.md's hash "
         "being updated to match -- exactly the silent-drift scenario this "
         "check exists to catch. Re-run E-W3, confirm it still passes (or fix "
         "what broke), then recompute the sha256 for each changed file and "
-        "update its row in PROVENANCE.md.\n"
+        "update its row in engine.md.\n"
         "\n"
         "Reminder: a hash match proves nothing about behaviour by itself -- "
         "only E-W3 does. Do not update a hash without re-running E-W3 first.",

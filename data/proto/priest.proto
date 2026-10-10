@@ -90,12 +90,21 @@ message PriestOptions {
 }
 
 
-message Priest {
+message DpsPriest {
 	message Rotation {}
 
 	message Options {
 		PriestOptions class_options = 1;
 		UnitReference power_infusion_target = 2;
+	}
+	Options options = 3;
+}
+
+message HealerPriest {
+	message Rotation {}
+
+	message Options {
+		PriestOptions class_options = 1;
 	}
 	Options options = 3;
 }

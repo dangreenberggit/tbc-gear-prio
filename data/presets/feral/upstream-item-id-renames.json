@@ -1,0 +1,7 @@
+{
+  "_comment": "Item ids upstream re-issued under a new number. The owner's capture (owner-p2.settings-export.json) predates the re-issue and stays byte-identical as the record of what was played; build_feral_skeleton.py, check_raid_sim_skeleton.py and feral-preset.test.ts apply this table to every itemId in its rotation before building or comparing. Without it the engine at 42c75dc9 silently never casts the Mug: an APL castSpell on an id it does not register is dropped with rc=0 and no warning (ticket 558 P4, engine-delta.md C27).",
+  "source": "wowsims/tbc-new 42c75dc9: ui/specs/druid/feralcat/apls/default.apl.json casts the Empty Mug of Direbrew as 281739 where 17a8fb28 had 38287; sim/common/tbc/stat_bonus_cds_auto_gen.go registers NewSimpleStatActive(281739).",
+  "renames": {
+    "38287": 281739
+  }
+}

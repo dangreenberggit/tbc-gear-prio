@@ -41,16 +41,16 @@ The commit subject is 47 characters, imperative, no body, no attribution.
 
 The fix is correct. The stale source date was fixed on the branch in
 8f46bb07 (round 2 below). The stored-cost limitation in `report` is older
-than this branch and needs a design choice, so it is ticket 559.
+than this branch and needs a design choice, so it is ticket 594.
 
 ## Disposition
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                     |
 | --- | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | defer       | `.scratch/carry-forward/issues/559-run-log-report-keeps-stale-prices.md` — report sums stored costs, so old lines keep old prices |
+| A1  | Adversarial | defer       | `.scratch/carry-forward/issues/594-run-log-report-keeps-stale-prices.md` — report sums stored costs, so old lines keep old prices |
 | A2  | Adversarial | fixed       | source date changed to 2026-10-08 in 8f46bb07                                                                                     |
 | D1  | Domain      | fixed       | same as A2, 8f46bb07                                                                                                              |
-| D2  | Domain      | defer       | `.scratch/carry-forward/issues/559-run-log-report-keeps-stale-prices.md` — same root cause as A1                                  |
+| D2  | Domain      | defer       | `.scratch/carry-forward/issues/594-run-log-report-keeps-stale-prices.md` — same root cause as A1                                  |
 | S1  | Standards   | fixed       | same as A2, 8f46bb07                                                                                                              |
 
 ## Round 2 — source date (2026-10-08)

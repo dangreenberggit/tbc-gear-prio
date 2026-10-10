@@ -164,7 +164,9 @@ function Start-Frontend {
         # local .cmd shim is what actually resolves. `fnm exec` (not `fnm use`)
         # pins Node 22 for this one process regardless of ambient shell state,
         # since ambient fnm state has been observed not sticking for this shim.
-        & fnm exec --using=22 -- .\node_modules\.bin\vite.cmd --port $Port
+        # The config is ours: upstream's plus the fixture plugin.
+        $ViteConfig = Join-Path $RepoRoot 'scripts\tab-harness\vite.config.mjs'
+        & fnm exec --using=22 -- .\node_modules\.bin\vite.cmd --config $ViteConfig --port $Port
     }
     finally {
         Pop-Location

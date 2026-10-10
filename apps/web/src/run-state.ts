@@ -54,7 +54,7 @@ export function progressLabel(p: JobProgress): string {
  *
  * Deviation 4: `progress.total` counts sims (baseline + candidates + paired
  * replicas), not rows, so sizing the list from it would render the wrong
- * number and then shift. `rank.ts` emits `simming` from three sites and only
+ * number and then shift. `rank.ts` emits `simming` from four sites and only
  * the first carries `candidates`, so the trigger is "the field is defined",
  * not "the stage is simming".
  */

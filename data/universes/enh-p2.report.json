@@ -14,42 +14,42 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 3607,
-  "excludedNoSource": 893,
-  "universeTotal": 755,
+  "d7EligibleTotal": 3516,
+  "excludedNoSource": 873,
+  "universeTotal": 687,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 43,
-    "chest": 47,
-    "feet": 62,
+    "chest": 36,
+    "feet": 51,
     "finger": 82,
-    "hands": 39,
-    "head": 53,
-    "legs": 61,
+    "hands": 33,
+    "head": 42,
+    "legs": 55,
     "neck": 53,
-    "shoulder": 36,
-    "trinket": 32,
-    "waist": 45,
-    "weapon": 151,
-    "wrist": 51
+    "shoulder": 30,
+    "trinket": 28,
+    "waist": 39,
+    "weapon": 150,
+    "wrist": 45
   },
   "sourceRecordAdds": {
     "atlasloot": 306,
     "curated": 9,
-    "db": 2602,
+    "db": 2531,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 15,
-    "dbPhase": 491,
+    "dbPhase": 423,
     "itemHasOrigin:atlasloot": 45,
     "itemHasOrigin:curated": 7,
-    "itemHasOrigin:db": 722,
+    "itemHasOrigin:db": 654,
     "itemHasOrigin:two-hop": 10,
     "zoneMatch": 249
   },
   "exclusivePrimaryOrigin": {
-    "db": 722,
+    "db": 654,
     "atlasloot-only": 16,
     "two-hop": 10,
     "other": 7
@@ -58,13 +58,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 755,
-    "casterOnlyReject": 368,
-    "epFloorReject": 15,
-    "combinedReject": 383,
-    "combinedKeep": 372,
-    "casterRejectPct": 48.7,
-    "combinedRejectPct": 50.7,
+    "total": 687,
+    "casterOnlyReject": 327,
+    "epFloorReject": 14,
+    "combinedReject": 341,
+    "combinedKeep": 346,
+    "casterRejectPct": 47.6,
+    "combinedRejectPct": 49.6,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -273,18 +273,6 @@
     {
       "itemId": 21891,
       "name": "Shard of the Fallen Star"
-    },
-    {
-      "itemId": 22013,
-      "name": "Beastmaster's Cap"
-    },
-    {
-      "itemId": 22060,
-      "name": "Beastmaster's Tunic"
-    },
-    {
-      "itemId": 22061,
-      "name": "Beastmaster's Boots"
     },
     {
       "itemId": 22191,

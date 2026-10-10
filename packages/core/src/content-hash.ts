@@ -49,9 +49,9 @@ export function sha256Hex(text: string): string {
  * Without it a bug fix serves stale rankings forever, because none of the
  * other hashed inputs move when only our own arithmetic changes.
  */
-// 7: engine pin moved to feature/backend-reforge ec5c5f2 and the default
-// content tier followed it from Phase 2 to Phase 3 (ADR-0030).
-export const ENGINE_VERSION = 7;
+// 8: engine pin moved from 17a8fb28 to upstream master 42c75dc9; content
+// tier unchanged at Phase 3 (ticket 558 P4).
+export const ENGINE_VERSION = 8;
 
 export type HashedGearItem = {
   id: number;

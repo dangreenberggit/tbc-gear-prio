@@ -3,18 +3,18 @@
  * TypeScript, without executing it.
  *
  * ADR-0022. The values we need (raidBuffs / partyBuffs / individualBuffs /
- * debuffs) live in ui/<class>/<spec>/sim.ts as `RaidBuffs.create({...})` calls.
- * They are not JSON, so sync_wowsims.py can pin the file but cannot extract the
- * values; they are also not importable, because sim.ts pulls in the whole
- * upstream ui/ tree (widgets, SCSS, the works). So: parse with the TypeScript
- * compiler API and statically evaluate the literals.
+ * debuffs) live in ui/specs/<class>/<spec>/spec.ts as `RaidBuffs.create({...})`
+ * calls. They are not JSON, so sync_wowsims.py can pin the file but cannot
+ * extract the values; they are also not importable, because spec.ts pulls in
+ * the whole upstream ui/ tree (widgets, SCSS, the works). So: parse with the
+ * TypeScript compiler API and statically evaluate the literals.
  *
- * Two spread helpers from ui/core/proto_utils/utils.ts are resolved by reading
+ * Two spread helpers from ui/sim/proto/utils.ts are resolved by reading
  * that file the same way, rather than being hardcoded here:
  *   ...defaultRaidBuffMajorDamageCooldowns()      -> a flat object literal
  *   ...defaultExposeWeaknessSettings(Phase.PhaseN) -> a Map keyed by phase
  *   ...defaultExposeWeaknessSettings()             -> same map, keyed by
- *     CURRENT_PHASE from ui/core/constants/other.ts (also read statically,
+ *     CURRENT_PHASE from ui/sim/constants/other.ts (also read statically,
  *     never assumed)
  *
  * Enum members (TristateEffect.X, Drums.X) are emitted as the bare member name,
@@ -131,7 +131,7 @@ function findConst(source, name) {
  * Both are arrow functions. `defaultRaidBuffMajorDamageCooldowns` returns a
  * constructor call directly; `defaultExposeWeaknessSettings` indexes a
  * `new Map([[Phase.PhaseN, {...}], ...])` by its argument, defaulting to
- * CURRENT_PHASE when called with no argument (`ui/core/constants/other.ts`,
+ * CURRENT_PHASE when called with no argument (`ui/sim/constants/other.ts`,
  * itself a TRACKED vendored file, so this stays a static read rather than an
  * assumption).
  */

@@ -9,8 +9,8 @@ the sim's own gear picker refuses (ticket 301), so the committed file is only
 as trustworthy as the guarantee that it still matches the fork.
 
 This script is that guarantee. It runs the exporter
-(`ui/core/components/individual_sim_ui/upgrades/tools/export_equip_eligibility.mts`
-in the fork) and compares the result to the committed JSON. A fork-side change
+(`ui/features/upgrades/tools/export_equip_eligibility.mts` in the fork) and
+compares the result to the committed JSON. A fork-side change
 to `canEquipItem`, to `capabilities_auto_gen.ts`, or to `db.json` shows up here
 as a diff on the next `pnpm verify` rather than as a wrong pool listing.
 
@@ -51,7 +51,7 @@ from _fork_gate import ForkGateError, require_pinned_fork  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
-TOOLS_DIR = FORK_ROOT / "ui/core/components/individual_sim_ui/upgrades/tools"
+TOOLS_DIR = FORK_ROOT / "ui/features/upgrades/tools"
 EXPORTER = TOOLS_DIR / "export_equip_eligibility.mts"
 REGISTER = TOOLS_DIR / "register.mjs"
 TSX_LOADER = ROOT / "node_modules/tsx/dist/loader.mjs"
@@ -74,9 +74,12 @@ def run_exporter(out_path: Path) -> str | None:
         str(EXPORTER),
         str(out_path),
     ]
+    # cwd is the fork root because tsx resolves the fork's `@sim/...` and
+    # `@generated/...` imports from the tsconfig.json `paths` of its cwd; from
+    # this repo's root they fail with ERR_MODULE_NOT_FOUND (ticket 558 K1).
     try:
         result = subprocess.run(
-            cmd, capture_output=True, text=True, cwd=str(ROOT), check=False
+            cmd, capture_output=True, text=True, cwd=str(FORK_ROOT), check=False
         )
     except OSError as exc:
         return f"could not launch node: {exc}"

@@ -71,19 +71,21 @@ Scratch and tempdir writes need neither, and `"wb"` cannot take one.
 ## Before editing a ported engine file
 
 Applies to anything under the fork's
-`ui/core/components/individual_sim_ui/upgrades/engine/` (`rank.ts`,
+`ui/features/upgrades/model/engine/` (`rank.ts`,
 `view.ts`, and neighbours) — **including comment-only edits**.
 
-**Symptom when armed:** `pnpm verify` fails with "engine/PROVENANCE.md is
-stale against the fork's ported files".
+**Symptom when armed:** `pnpm verify` fails with
+"docs/fork-provenance/engine.md is stale against the fork's ported files".
 
 The full cycle, in order, every time:
 
 1. `npx vitest run packages/core/test/wowsims-fork-parity.test.ts` (E-W3)
    from the repo root — green before any hash moves.
-2. Update the file's row in the fork's `upgrades/engine/PROVENANCE.md`
-   with the new sha256 (Edit tool, not sed — see the trap above).
-3. Fork commit.
+2. Update the file's row in `docs/fork-provenance/engine.md` (in this
+   repo, not the fork) with the new sha256 (Edit tool, not sed — see the
+   trap above).
+3. Fork commit of the ported file. The record change is committed in this
+   repo with the re-pin.
 4. Re-pin: move `data/wowsims-fork.lock.json`'s `commit` to the new fork
    tip and run `pnpm sim-implemented-effects:generate` (the artifact
    embeds the pin).
@@ -187,13 +189,16 @@ swallowed into it).
 **Symptom when armed:** `preview_start` refuses because the port is held —
 3333 by a stray `wowsimtbc.exe`, or 5173 by another session's vite.
 
-The two ports differ. **3333** must be exactly 3333 (the frontend
-hardcodes the proxy; the entry sets `autoPort: false`) — stop the stray
-process and start the managed `wowsims-backend` entry. **5173** held by
-another session's vite is serving this same checkout with HMR — use it;
-starting a second copy buys nothing. One HMR side-effect: an engine-file
-edit reloads the page, dropping in-page run state and sometimes the
-browser tab id — re-drive the page rather than debugging the "lost" run.
+Each port's server builds and serves the fork of the folder that started it,
+so first find that folder (`docs/agents/paired-worktrees.md`, "Live tab").
+**3333** must be exactly 3333 (the frontend hardcodes the proxy; the entry
+sets `autoPort: false`): if the `wowsimtbc.exe` on it was built in your
+folder and none of your sessions manages it, stop it and start the managed
+`wowsims-backend` entry. **5173** held by your own folder's vite: use it with
+HMR; a second copy buys nothing. Either port held by another folder: the live
+tab is taken until that session stops its servers. One HMR side-effect: an
+engine-file edit reloads the page, dropping in-page run state and sometimes
+the browser tab id — re-drive the page rather than debugging the "lost" run.
 
 The layout gate (`pnpm layout-gate:check`) and `pnpm tab-review` need
 neither port: the harness serves its own built `dist/`. The layout gate runs
@@ -216,7 +221,7 @@ after `capture[0]` shows the tab's nav bar instead of its target, and
 
 `capture[0]` is clipped where it stands, so a hovered tooltip stays open
 for it. Each later capture goes through the scroll branch of `captureClip`
-in the fork's `test-review.mjs`, which offsets the clip by `window.scrollY`.
+in `scripts/tab-harness/test-review.mjs`, which offsets the clip by `window.scrollY`.
 Hypothesis, untested: the page scrolls an inner container, so
 `window.scrollY` stays 0 and the clip is taken at the top of the page. Make
 each element `capture[0]` of its own entry: one entry for the popover, one

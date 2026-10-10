@@ -247,6 +247,53 @@ def check_has_item_equipped_ignores_named_constants() -> list[str]:
     return problems
 
 
+# A trimmed stand-in for upstream's sim/common/tbc/items_weapons.go at fork
+# 43e3963d: the struct literal is the argument of a helper call, so its
+# `ItemID:` field sits on its own line after the opening brace. The commented
+# copy below it must not count (finding D1 of the feat/upstream-react-port
+# pre-merge review).
+WEAPON_PROC_HELPER_SNIPPET = """package tbc
+
+func init() {
+	// Despair
+	itemhelpers.CreateWeaponProcSpell(itemhelpers.WeaponProcSpell{
+		ItemID: 28573,
+		Name:   "Despair",
+		PPM:    1,
+	})
+
+	itemhelpers.CreateWeaponProcTrigger(itemhelpers.WeaponProcTrigger{
+		ItemID:             30090,
+		Name:               "Crystalforged War Axe",
+		Trigger:            core.ProcTrigger{ActionID: core.ActionID{ItemID: 99999}},
+	})
+
+	// itemhelpers.CreateWeaponProcAura(itemhelpers.WeaponProcAura{
+	//	ItemID: 32262,
+	// })
+}
+"""
+
+
+def check_item_id_field_on_its_own_line_counts() -> list[str]:
+    """`ItemID: <n>,` on the line after a helper call's opening brace is a
+    registration, the same as `{ItemID: <n>` on one line. Only line-start
+    fields count: an inline `core.ActionID{ItemID: <n>}` is not a site, and a
+    commented-out block is not active."""
+    problems: list[str] = []
+    with tempfile.TemporaryDirectory() as td:
+        tmp = Path(td)
+        weapons = _write(tmp, "items_weapons.go", WEAPON_PROC_HELPER_SNIPPET)
+        implemented = active_item_ids([weapons])
+        if implemented != {28573, 30090}:
+            problems.append(
+                "an `ItemID:` field on its own line inside an active helper-call "
+                "struct literal must count, and nothing else in the snippet may: "
+                f"expected [28573, 30090], got {sorted(implemented)}"
+            )
+    return problems
+
+
 CHECKS = (
     check_known_cases,
     check_libram_map_struct_literal_counts,
@@ -254,6 +301,7 @@ CHECKS = (
     check_stub_candidates_ignore_non_stub_files,
     check_has_item_equipped_counts_as_implemented,
     check_has_item_equipped_ignores_named_constants,
+    check_item_id_field_on_its_own_line_counts,
 )
 
 

@@ -35,14 +35,26 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 export const forkRoot = join(root, "vendor/tbc-new-fork");
-export const forkUpgradesDir = join(
-  forkRoot,
-  "ui/core/components/individual_sim_ui/upgrades"
-);
+// The engine, its adapters and its data, which the fork keeps under its
+// upgrades feature's DOM-free `model/` folder (ticket 558).
+export const forkUpgradesDir = join(forkRoot, "ui/features/upgrades/model");
 
+// The generated protos are gitignored in the fork; without them every engine
+// import fails, so a fork with no `make proto` run skips like an absent fork.
 export const forkPresent =
   existsSync(join(forkUpgradesDir, "engine/rank.ts")) &&
+  existsSync(join(forkRoot, "ui/generated/proto/common.ts")) &&
   existsSync(join(forkRoot, "assets/database/db.json"));
+
+if (
+  existsSync(join(forkUpgradesDir, "engine/rank.ts")) &&
+  !existsSync(join(forkRoot, "ui/generated/proto/common.ts"))
+) {
+  console.warn(
+    "fork engine tests skipped: vendor/tbc-new-fork has no generated protos; " +
+      "run `make proto` in the fork"
+  );
+}
 
 let loaded: Promise<void> | undefined;
 
@@ -105,7 +117,7 @@ export async function loadForkEngineEnvironment(): Promise<void> {
     // getter-only global, and assigning to it throws.
 
     const database = (await import(
-      pathToFileURL(join(forkRoot, "ui/core/proto_utils/database.ts")).href
+      pathToFileURL(join(forkRoot, "ui/sim/proto/database.ts")).href
     )) as { Database: { get(): Promise<unknown> } };
     await database.Database.get();
   })();

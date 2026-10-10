@@ -19,44 +19,44 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 4369,
-  "excludedNoSource": 1018,
-  "universeTotal": 1123,
+  "d7EligibleTotal": 4248,
+  "excludedNoSource": 977,
+  "universeTotal": 1046,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 51,
-    "chest": 69,
-    "feet": 103,
+    "chest": 54,
+    "feet": 88,
     "finger": 109,
-    "hands": 57,
-    "head": 71,
-    "legs": 85,
+    "hands": 49,
+    "head": 56,
+    "legs": 77,
     "neck": 67,
     "ranged": 26,
-    "shoulder": 54,
-    "trinket": 37,
-    "waist": 79,
+    "shoulder": 46,
+    "trinket": 45,
+    "waist": 71,
     "weapon": 227,
-    "wrist": 88
+    "wrist": 80
   },
   "sourceRecordAdds": {
     "atlasloot": 376,
     "curated": 7,
-    "db": 3226,
+    "db": 3146,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 15,
-    "dbPhase": 588,
+    "dbPhase": 511,
     "itemHasOrigin:atlasloot": 92,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 1067,
+    "itemHasOrigin:db": 990,
     "itemHasOrigin:two-hop": 15,
     "repFactionMatch": 34,
     "zoneMatch": 486
   },
   "exclusivePrimaryOrigin": {
-    "db": 1067,
+    "db": 990,
     "atlasloot-only": 38,
     "two-hop": 15,
     "other": 3
@@ -65,13 +65,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 1123,
-    "casterOnlyReject": 470,
+    "total": 1046,
+    "casterOnlyReject": 412,
     "epFloorReject": 0,
-    "combinedReject": 470,
-    "combinedKeep": 653,
-    "casterRejectPct": 41.9,
-    "combinedRejectPct": 41.9,
+    "combinedReject": 412,
+    "combinedKeep": 634,
+    "casterRejectPct": 39.4,
+    "combinedRejectPct": 39.4,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -312,18 +312,6 @@
     {
       "itemId": 21891,
       "name": "Shard of the Fallen Star"
-    },
-    {
-      "itemId": 22013,
-      "name": "Beastmaster's Cap"
-    },
-    {
-      "itemId": 22060,
-      "name": "Beastmaster's Tunic"
-    },
-    {
-      "itemId": 22061,
-      "name": "Beastmaster's Boots"
     },
     {
       "itemId": 22191,

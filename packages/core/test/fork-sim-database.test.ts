@@ -94,7 +94,7 @@ function playerOf(request: Json | RaidSimRequest): Json {
 /**
  * A committed skeleton as the page's own request would send it: the player's
  * database holds the rows for its named consumables. This is the step
- * `ui/core/sim.ts:290` runs on the page's request.
+ * `ui/sim/sim.ts:292` runs on the page's request.
  */
 function pageSkeleton(file: string, consumes?: Json): RaidSimRequest {
   const skeleton = readJson(file);
@@ -170,28 +170,30 @@ describe.skipIf(!forkPresent)(
     beforeAll(async () => {
       await loadForkEngineEnvironment();
       ({ Player: PlayerMsg } = (await import(
-        forkUrl("ui/core/proto/api.ts")
+        forkUrl("ui/generated/proto/api.ts")
       )) as {
         Player: ProtoMsg<PlayerProto>;
       });
       ({ SimDatabase: SimDatabaseMsg } = (await import(
-        forkUrl("ui/core/proto/db.ts")
+        forkUrl("ui/generated/proto/db.ts")
       )) as { SimDatabase: ProtoMsg<unknown> });
-      const common = (await import(forkUrl("ui/core/proto/common.ts"))) as {
+      const common = (await import(
+        forkUrl("ui/generated/proto/common.ts")
+      )) as {
         ItemSlot: { ItemSlotMainHand: number };
         ItemSpec: ProtoMsg<unknown>;
       };
       ItemSpecMsg = common.ItemSpec;
       ItemSlotMainHand = common.ItemSlot.ItemSlotMainHand;
-      const database = (await import(
-        forkUrl("ui/core/proto_utils/database.ts")
-      )) as { Database: { getSync: () => ForkDatabase } };
+      const database = (await import(forkUrl("ui/sim/proto/database.ts"))) as {
+        Database: { getSync: () => ForkDatabase };
+      };
       getDb = () => database.Database.getSync();
-      ({ ItemSwapGear } = (await import(
-        forkUrl("ui/core/proto_utils/gear.ts")
-      )) as { ItemSwapGear: typeof ItemSwapGear });
+      ({ ItemSwapGear } = (await import(forkUrl("ui/sim/proto/gear.ts"))) as {
+        ItemSwapGear: typeof ItemSwapGear;
+      });
       ({ extendPlayerProtoWithMissingEffects } = (await import(
-        forkUrl("ui/core/proto_utils/utils.ts")
+        forkUrl("ui/sim/proto/proto_migration.ts")
       )) as {
         extendPlayerProtoWithMissingEffects: typeof extendPlayerProtoWithMissingEffects;
       });

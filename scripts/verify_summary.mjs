@@ -48,8 +48,9 @@ export function extractVitestSkips(report) {
         skipped += 1;
         // vitest's JSON reporter carries no separate reason field for a
         // skipped assertion. This repo's convention (wowsims-fork-parity.
-        // test.ts) is a paired describe.skipIf whose body is a single it()
-        // that does nothing but name why — so the fullName IS the reason.
+        // test.ts) is a placeholder describe, registered only when the suite
+        // cannot run, whose body is a single it() that does nothing but name
+        // why — so the fullName IS the reason.
         reasons.push(assertion.fullName);
       } else {
         ran += 1;

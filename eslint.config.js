@@ -77,12 +77,18 @@ export default tseslint.config(
       // process's RSS on an interval while a sim runs. The WASM-runtime
       // sweep (ticket 203) additionally runs the Go wasm_exec.js shim and
       // the compiled sim module directly under Node, so it needs the Web
-      // platform globals that shim expects.
+      // platform globals that shim expects. The tab harness in
+      // scripts/tab-harness/ drives Chromium over Node 22's global WebSocket.
       globals: {
         process: "readonly",
         console: "readonly",
         setInterval: "readonly",
         clearInterval: "readonly",
+        setTimeout: "readonly",
+        clearTimeout: "readonly",
+        WebSocket: "readonly",
+        URL: "readonly",
+        Buffer: "readonly",
         performance: "readonly",
         WebAssembly: "readonly",
         TextDecoder: "readonly",

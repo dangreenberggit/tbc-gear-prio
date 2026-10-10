@@ -1,13 +1,28 @@
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
+// The fork's own path aliases, so a test here can import the ported engine
+// under `ui/features/upgrades/model/` and the upstream modules it reaches. The
+// source of truth is `UI_ALIASES` in vendor/tbc-new-fork/vite.config.mts (also
+// its tsconfig.json `paths`); add an entry here when upstream adds one there.
+const forkUi = (dir: string): string =>
+  fileURLToPath(new URL(`./vendor/tbc-new-fork/ui/${dir}`, import.meta.url));
+
 export default defineConfig({
   resolve: {
     alias: {
+      "@sim": forkUi("sim"),
+      "@generated": forkUi("generated"),
+      "@worker": forkUi("worker"),
+      "@ui-kit": forkUi("ui-kit"),
+      "@features": forkUi("features"),
+      "@app": forkUi("app"),
+      "@specs": forkUi("specs"),
+      "@i18n": forkUi("i18n"),
       // Not a file — the fork's Vite build materialises this specifier with
       // `vite-plugin-i18next-loader`, which vitest does not run. A test that
       // imports the fork's engine reaches it transitively (rank.ts -> items.ts
-      // -> proto_utils/database.ts -> i18n config) and the module graph dies
+      // -> ui/sim/proto/database.ts -> i18n config) and the module graph dies
       // before the test body. The stub is empty on purpose; see its own header.
       // Scoped to a specifier nothing outside the vendored fork imports.
       "virtual:i18next-loader": fileURLToPath(

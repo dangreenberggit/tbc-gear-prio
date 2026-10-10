@@ -1,0 +1,52 @@
+Status: closed
+Type: task
+Origin: docs/reviews/feat-upstream-react-port.md (pre-merge review round 1, S1, S2, the deferred parts of S6, S9 and S12)
+Blocks: none
+Blocked by: none
+Related: 558, 560
+
+# Shrink the fork's edits to shared upstream files, and bring the ledger up to date
+
+## Owner's rule this serves
+
+> keep a clean footprint in wowsims shared files if you use them
+
+## What is there today
+
+At fork `feat/upgrades-tab-react` `43e3963d` (on upstream `42c75dc9`), 19 files that upstream also has are modified: `git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 42c75dc9 43e3963d | wc -l`. The pre-merge review's footprint table (`docs/reviews/feat-upstream-react-port.md`, Standards) lists each one. Most Go edits are minimal carried fixes. These are not:
+
+1. **Locale strings (S1).** The tab's strings are appended to the shared `assets/locales/en/translation.json` (+158 lines) and `schemas/translation.schema.json` (+491/-1). The schema hunk also adds `"upgrades_tab"` to the top-level `required` array, so upstream's file fails its own validation without our block (`docs/fork-upstream-touchpoints.md` lines 240-245 already warned about this). The fork's loader is `i18nextLoader({ namespaceResolution: 'basename', paths: ['assets/locales'] })` (`vite.config.mts:154`), and `test-locales.mjs` pairs each `schemas/<name>.schema.json` with `<name>.json`. A separate `upgrades.json` + `upgrades.schema.json` pair may therefore need no shared-file edit (hypothesis, untested; every `i18n.t('upgrades_tab.…')` call would move to the new namespace, and `ui/i18n` tests must still pass).
+2. **`vite.config.mts` (S6).** The `__TBC_TAB_FIXTURES__` define and the hard-coded `../../data/tab-fixtures` path could move into the fork-only plugin `tools/vite/tab_fixtures.mts` through its `config()` hook (hypothesis, untested). The production check (the `dist` grep for the dev-only names) must still print nothing.
+3. **Root gate scripts and `package.json` (S6, S12).** `test-layout.mjs`, `test-review.mjs`, `test-stop.mjs` and `test-tab-harness.mjs` sit at the fork root, and `package.json` gains three script lines for them. `docs/fork-upstream-touchpoints.md` §4 says moving them under `ui/features/upgrades/tools/` removes the `package.json` lines. When they move, share the CDP helpers that `test-tab-harness.mjs` and `tools/run-tab-cdp.mjs` each define (`freePort`, `findChromium`, `launchChrome`, `cdp`, `evaluate`; S9). The main repo's `scripts/check_layout_gate.py`, `check_desktop_tab.py` and `tab-fixtures/*.mjs` name these paths and move with them.
+4. **The ledger (S2).** `docs/fork-upstream-touchpoints.md` is the owner's list of every upstream file the fork edits (its lines 7-11). It names 13 files under old `ui/core/...` paths; the old pin `cb561067` already had 34 modified (`git diff --name-only --diff-filter=M 17a8fb28 cb561067 | wc -l`), and this pin has 19 different ones. Rewrite it from the command above, after items 1-3 land.
+
+## Done when
+
+The command above lists only files the ledger names, each with a one-line reason; the locale and schema files are unmodified or the ledger says why they must be; the fork's `lint:js`, unit tests (including `ui/i18n`) and the layout gate pass; and the fork is re-pinned with `pnpm verify` rc=0.
+
+## Comments
+
+### 2026-10-07, round B2b (branch `feat/upstream-react-port`)
+
+- **Item 4 (S2) is done.** Port commit `5e71d6ee` rewrites `docs/fork-upstream-touchpoints.md` at fork `d52c8e91e` on upstream base `42c75dc9`. The count is now 18, not 19: `sim/core/gem_test.go` is back to upstream's text (fork `8937108b0`). Each file has its lines changed, its reason, its ticket and whether a tab-owned alternative exists, and the items 1-3 above are marked as this ticket's. Re-run: `git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 42c75dc9 d52c8e91e | wc -l`.
+- **Item 1, the `required` line, is done.** Fork `d52c8e91e` removes `"upgrades_tab"` from the top-level `required` array of `schemas/translation.schema.json`, so the schema no longer requires our block. The strings and the rest of the schema block are still in the shared files.
+- **Prerequisite for any locale-file move (item 1).** Upstream's `test-locales.mjs` builds its glob pattern with `path.join`, which gives backslashes on Windows, and `glob` reads a backslash as an escape. Measured on this repo's Windows machine only, at fork `d52c8e91e`: the pattern matched 0 files by default and 1 file with `windowsPathsNoEscape: true`. So "test-locales rc=0" on this machine proves nothing about the locale files. The re-pin round validated `translation.json` against the schema with Ajv instead. Re-run command: `docs/fork-upstream-touchpoints.md`, section "Before moving the strings". A move needs a locale check that matches files here first.
+- **The owner's choice is pending.** Q-568-option (when items 1-3 run, before or after the dev merge) and Q-568-keep-edits (the owner's OK for the upstream-file edits that remain) are both unanswered. Nothing here records an approval.
+
+### 2026-10-07, pre-merge cleanup round (branch `feat/upstream-react-port`)
+
+- **Two stale fork comments go into this ticket's next fork commit.** Both are prose only, so fixing them moves no PROVENANCE hash and needs no re-pin of its own.
+  - `ui/features/upgrades/tools/run-tab-cdp.mjs` still has a comment about "the screening path" first-row timing (claim C20). Ticket 567 deleted that path (fork `095e0afa2`).
+  - `ui/features/upgrades/model/engine/PROVENANCE.md` § "A CRLF trap in this clone" says the clone has `core.autocrlf=true` and that `set-value.ts`'s hash is the CRLF on-disk value. In the port worktree's fork clone, `git config core.autocrlf` prints `false`, `git ls-files --eol ui/features/upgrades/model/engine/set-value.ts` shows `i/lf w/lf`, and the LF file's `sha256sum` equals the recorded hash. The section is dated, so it describes an older clone state.
+
+### 2026-10-08, cleanup stage cleanup-upstream-footprint (branch `feat/upstream-react-port`) — closed
+
+The fork branch now changes one existing wowsims file, `ui/app/SimTabsSection.tsx` (6 added lines): `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M 42c75dc9 9c367c242` prints `6 0 ui/app/SimTabsSection.tsx` and nothing else. Port commit `057a8f24` pins fork `9c367c242`.
+
+- **Item 1 (S1), locale strings: done.** Fork `2c88a1192` moves the tab's strings to `assets/locales/en/upgrades.json` (namespace `upgrades`) with `schemas/upgrades.schema.json`, and returns `translation.json` and `translation.schema.json` to upstream's text. The Ajv check in `docs/fork-upstream-touchpoints.md` ("The locale check on Windows") prints `upgrades valid` and `translation valid`.
+- **Item 2 (S6), `vite.config.mts`: done.** Fork `9bc7c3ac8` reads the fixture switch as `import.meta.env.DEV || import.meta.env.VITE_TBC_TAB_FIXTURES === '1'`; fork `a59711d17` returns `vite.config.mts` to upstream's text. The fixture plugin and a config that wraps upstream's live in this repo's `scripts/tab-harness/` (port `152f591e`).
+- **Item 3 (S6, S12), root gate scripts and `package.json`: done, by a different move.** The owner chose to keep our dev tooling out of the fork ("Dev tooling: recommended", 2026-10-08), so the four `test-*.mjs` scripts and `run-tab-cdp.mjs` moved to this repo's `scripts/tab-harness/`, not under `ui/features/upgrades/` (fork `a59711d17`, port `152f591e`). `package.json` and `package-lock.json` are back to upstream's text; `axe-core` is this repo's devDependency. **The CDP-helper sharing (S9) moved to ticket 577.**
+- **Item 4 (S2), the ledger: done.** Port `0d6d2545` rewrites `docs/fork-upstream-touchpoints.md` at fork `9c367c242`: one modified upstream file with the owner's approval of its 6 lines, every other once-changed upstream file named as back to upstream's text, the parked engine fixes (ticket 573) and the deleted silence check (ticket 574).
+- **The two stale comments: done** during the move (port `152f591e`): the screening-path remark in `scripts/tab-harness/run-tab-cdp.mjs`, and the CRLF section of `docs/fork-provenance/engine.md`, rewritten from measurements on 2026-10-08.
+- **Owner decisions: settled.** Q-568-option: the owner said these moves are "obviously part of the cleanup" (2026-10-08). Q-568-keep-edits: the owner approved one edit, the 6 lines in `SimTabsSection.tsx` ("If this is normal for tabs on wowsims then this is the way to do it"); every other edit was removed instead.
+- **Done-when checks.** The fork's `oxlint` and type check pass; the fork's unit tests pass except `ui/no_class_hooks.test.ts`, which fails the same way on a clean `42c75dc9` (wowsims' own failure, not this branch's). `pnpm layout-gate:check` measured a pass (36 PASS, 0 FAIL) at fork `9c367c242`, and `pnpm verify` passed after the re-pin.
