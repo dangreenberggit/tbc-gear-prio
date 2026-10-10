@@ -221,6 +221,7 @@ def check_ignored_build_output_is_not_work() -> list[str]:
 !! coverage/
 !! .claude/settings.local.json
 !! .scratch/agent-runs/
+!! wowsimtbc.exe
 """
     got = wp.unexpected_ignored(lines)
     if got:

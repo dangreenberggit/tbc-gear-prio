@@ -152,7 +152,9 @@ def links_outside(root: str, links: list[tuple[str, str]]) -> list[tuple[str, st
 # installs and builds put it.
 DISPOSABLE_DIRS = {"node_modules", "dist", "dist-server", "binary_dist", "__pycache__", "vendor", "coverage"}
 DISPOSABLE_SUFFIXES = (".tsbuildinfo", ".pb.go", "_auto_gen.ts", ".results.tmp", ".stylelintcache")
-DISPOSABLE_PREFIXES = ("ui/generated/", "scripts/__pycache__/")
+# wowsimtbc*: the backend binary the launch.json `wowsims-backend` entry builds
+# in the fork root (fork .gitignore `/wowsimtbc*`); seen in a pair 2026-10-10.
+DISPOSABLE_PREFIXES = ("ui/generated/", "scripts/__pycache__/", "wowsimtbc", "wowsimcli")
 PACKAGE_DIRS = ("apps", "packages")
 RUN_LOGS = ".scratch/agent-runs"
 # The run logs are copied to the main checkout before the pair is removed
