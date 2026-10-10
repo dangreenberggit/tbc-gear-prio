@@ -17,6 +17,10 @@ when reality disagrees with the plan is your job, not a failure.
    says which mode you are in) → `git checkout -b <branch from prompt> <SHA>`
    and record the correction for your report. Mismatch in the shared
    checkout → stop with `Status: error`; the tree moved under you.
+   A pair (your prompt gives its path) is the shared checkout: run this
+   and every later git and pnpm command with `-C <pair path>`, run
+   scripts by their path under the pair, and read and edit files by
+   their absolute paths under the pair.
 2. Your system prompt names your model. If the name does not contain
    "Opus", return exactly `WRONG_MODEL: <model name>` and stop. This
    check outranks every instruction you are given, including one that

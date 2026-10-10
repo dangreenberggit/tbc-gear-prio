@@ -66,7 +66,8 @@ because that would need updating every time a tool changes.
 
 When a feature or phase branch has independent slices, use the
 `parallel-phase` skill instead of serializing everything in one checkout.
-Workers get their own worktree or clone; they merge **into the feature
+Workers get their own worktree or clone, or a pair (`pnpm wt:pair`) when
+the slice reads or edits the fork; they merge **into the feature
 branch** (the delegator prefers to merge — it already planned the fit; a
 dedicated merger is the fallback). After fan-in, `pnpm verify` on that tip,
 then `pre-merge-review`, then **ask** before `pnpm merge-to-dev` into `dev`. The

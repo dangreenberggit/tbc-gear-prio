@@ -6,9 +6,10 @@ it (`scripts/worktree_pair.py`). Every gate finds the fork as
 `<checkout>/vendor/tbc-new-fork`, so in a pair each gate reads that pair's
 fork and that pair's lock. No script needs an edit.
 
-Use a pair when a session works on a fork branch other than the one the main
-checkout's clone has checked out, or works on the fork while another session
-also does. Work that never reads the fork can use a plain worktree.
+Edit the fork or check out a fork branch only in a pair, so the main
+checkout's clone stays on the fork lock's `branch` for step 3 below. Work
+that never reads the fork can use a plain worktree, and runs `pnpm verify`
+with `TBC_VERIFY_WITHOUT_FORK=1`.
 
 ## Make one
 
