@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-worktree-pair.md (round 1, S4; independent writing-for-agents review, T1, T2, T4, X1)
 Blocks: none
@@ -72,3 +72,22 @@ This edits a skill file, so it needs the owner's approval too.
 - `grep -rn paired-worktrees AGENTS.md .claude/skills` finds both paragraphs.
 - `grep -n 'FEATURE}/\${SLICE}' .claude/skills/parallel-phase/adapters/agnostic.md`
   finds nothing.
+
+## Closing note (2026-10-10, feat/worktree-pair)
+
+The owner approved the three edits as written, including pointer 2's
+fork-branch-delete clause. The owner's words, replying to the request to
+approve: "sounds good". Commit `e1de0f5c` applies them verbatim: the pointer
+1 paragraph at the end of AGENTS.md "The forked tab repo", the pointer 2
+paragraph after the `git worktree add` block in `agnostic.md`, and
+`${FEATURE}-${SLICE}` on the four slice-branch lines (now lines 14, 23, 33
+and 48, because pointer 2 shifted them). `check_skill_mirrors.py` compares
+`.claude/skills` with `.agents/skills`, so the same edit went to
+`.agents/skills/parallel-phase/adapters/agnostic.md`.
+
+Verified by:
+`grep -rn paired-worktrees AGENTS.md .claude/skills` (AGENTS.md:91 and
+agnostic.md:17);
+`grep -n 'FEATURE}/\${SLICE}' .claude/skills/parallel-phase/adapters/agnostic.md`
+(no match, rc 1); `python scripts/check_skill_mirrors.py` ("skill mirrors
+match"); `pnpm verify` and `pnpm merge-ready` on the closing commit.

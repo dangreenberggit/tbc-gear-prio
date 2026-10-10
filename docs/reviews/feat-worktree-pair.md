@@ -96,7 +96,7 @@ owner's approval.
 | S1  | Standards   | fixed       | comment reworded                                                                                                                                    |
 | S2  | Standards   | fixed       | re-run command beside `DEEPEST_BELOW_ROOT`; measured value corrected from 183 to 196; run counts listed in the doc                                  |
 | S3  | Standards   | fixed       | every line over 110 characters wrapped                                                                                                              |
-| S4  | Standards   | defer       | `.scratch/carry-forward/issues/593-point-agents-at-paired-worktrees.md` — needs owner approval                                                      |
+| S4  | Standards   | fixed       | superseded: owner approved ticket 593 ("sounds good"); pointers added in `e1de0f5c`; ticket 593 closed                                              |
 | S5  | Standards   | fixed       | divider removed                                                                                                                                     |
 | S6  | Standards   | fixed       | `is_inside` used by both sites                                                                                                                      |
 | S7  | Standards   | wontfix     | the entries mirror git's porcelain fields, and the sentinel never leaves `find_links`; a type would add code without catching a bug                 |
@@ -542,7 +542,7 @@ branch feat/slice` gave "fatal: cannot lock ref 'refs/heads/feat/slice':
 | WT1  | Writing-for-agents (ticket) | fixed       | ticket 593 anchors the AGENTS.md paragraph after the paragraph that ends "can hit on any one of them.", with the reviewer's text   |
 | WT2  | Writing-for-agents (ticket) | fixed       | ticket 593 anchors the `agnostic.md` paragraph after the code block, with the reviewer's text; its "steps 2-4" still match the doc |
 | WT4  | Writing-for-agents (ticket) | fixed       | "both paragraphs"                                                                                                                  |
-| WX1  | Writing-for-agents (ticket) | defer       | `.scratch/carry-forward/issues/593-point-agents-at-paired-worktrees.md` — skill edit, needs owner approval                         |
+| WX1  | Writing-for-agents (ticket) | fixed       | superseded: owner approved the rename ("sounds good"); `${FEATURE}-${SLICE}` on all four lines in `e1de0f5c`; ticket 593 closed    |
 
 ## Independent writing-for-agents review: re-check
 
