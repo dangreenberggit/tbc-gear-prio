@@ -32,6 +32,8 @@
     "upstream-drift:warn": "python scripts/warn_upstream_drift.py",
     "fork:upstream-status": "python scripts/fork_upstream_status.py",
     "sync-wowsims:unit:check": "python scripts/check_sync_wowsims.py",
+    "wt:pair": "python scripts/worktree_pair.py pair",
+    "wt:unpair": "python scripts/worktree_pair.py unpair",
     "worktree-pair:unit:check": "python scripts/check_worktree_pair.py",
     "feral-skeleton-apl:check": "python scripts/check_build_feral_skeleton.py",
     "sync:atlasloot:restore": "python scripts/sync_atlasloot.py --restore",

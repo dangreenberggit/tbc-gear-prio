@@ -8,11 +8,41 @@ the main checkout, so only one fork branch could be worked on at a time. A
 pair puts a fork worktree at `<pair>/vendor/tbc-new-fork`; every gate then
 reads that pair's fork and that pair's lock, with no script edits. See
 docs/agents/paired-worktrees.md.
+
+    pnpm wt:pair <name> <main-branch> <fork-branch> [-b] [--base REF]
+                 [--new-fork-branch] [--build]
+    pnpm wt:pair <name> <main-branch> --fork-detached [-b] [--build]
+    pnpm wt:unpair <name> [--force]
+
+The pair goes to `<parent of the main checkout>/tbc-wt/<name>`: outside the
+repo, so the main checkout's git status, eslint and prettier never see it,
+and short, so its deepest file stays under Windows' path limit.
+
+`-b` creates <main-branch> from --base (default `dev`); without it the branch
+must already exist. `--new-fork-branch` creates <fork-branch> at the commit
+the pair's fork lock pins; without it the fork branch must already exist.
+`--fork-detached` checks the fork out at that commit with no branch, for
+main-only work.
+
+The main checkout and its fork clone are found from `git rev-parse
+--git-common-dir`, so the commands work the same when run from inside a
+pair. `vendor/` inputs are copied from the main checkout, never linked: a
+junction into the main checkout makes any recursive delete in the pair
+delete the main checkout's files (ticket 572).
 """
 
 from __future__ import annotations
 
+import argparse
+import json
+import os
+import platform
 import re
+import shutil
+import subprocess
+import sys
+import time
+from pathlib import Path
 
 NAME_RE = re.compile(r"[a-z0-9][a-z0-9-]{0,23}")
 
@@ -134,3 +164,352 @@ def length_problem(target: str) -> str | None:
             "characters below it and Windows paths stop at 260"
         )
     return None
+
+
+# ---------------------------------------------------------------- IO below
+
+PAIR_DIR = "tbc-wt"
+FORK_REL = Path("vendor") / "tbc-new-fork"
+FORK_LOCK = "data/wowsims-fork.lock.json"
+ENGINE_LOCK = "data/wowsims.lock.json"
+FILE_ATTRIBUTE_REPARSE_POINT = 0x400
+TOOLS = ("git", "node", "corepack", "npm", "make", "go", "protoc", "protoc-gen-go")
+
+
+class Refusal(Exception):
+    """A precondition or a step failed; the message says what to do."""
+
+
+def say(msg: str) -> None:
+    print(f"[wt] {msg}", flush=True)
+
+
+def run(cmd: list[str], env: dict[str, str] | None = None) -> None:
+    """Run one setup step with its output shown, and time it."""
+    say("$ " + " ".join(cmd))
+    started = time.monotonic()
+    rc = subprocess.run(cmd, env=env).returncode
+    say(f"  rc={rc} in {time.monotonic() - started:.0f}s")
+    if rc != 0:
+        raise Refusal(f"step failed (rc={rc}): {' '.join(cmd)}")
+
+
+def git(repo: Path | str, *args: str) -> str:
+    r = subprocess.run(["git", "-C", str(repo), *args], capture_output=True, text=True)
+    if r.returncode != 0:
+        raise Refusal(f"git -C {repo} {' '.join(args)} failed: {r.stderr.strip()}")
+    return r.stdout.strip()
+
+
+def git_ok(repo: Path | str, *args: str) -> bool:
+    return subprocess.run(["git", "-C", str(repo), *args], capture_output=True).returncode == 0
+
+
+def has_branch(repo: Path, branch: str) -> bool:
+    return git_ok(repo, "rev-parse", "--verify", "--quiet", f"refs/heads/{branch}")
+
+
+def find_checkouts() -> tuple[Path, Path]:
+    """The main checkout and its fork clone, wherever this script runs from."""
+    common = git(Path(__file__).resolve().parent, "rev-parse", "--path-format=absolute", "--git-common-dir")
+    main = main_from_common_dir(common)
+    if main is None:
+        raise Refusal(f"git's common dir is {common}, not <main checkout>/.git; this script only knows that layout")
+    main_dir = Path(main)
+    fork = main_dir / FORK_REL
+    if not fork.is_dir():
+        raise Refusal(f"no fork clone at {fork}; a pair's fork worktree is made from that clone")
+    fork_common = git(fork, "rev-parse", "--path-format=absolute", "--git-common-dir")
+    if not same_path(fork_common, str(fork / ".git")):
+        raise Refusal(
+            f"{fork} is not the fork clone itself (its git dir is {fork_common}); "
+            "the main checkout must hold the real clone"
+        )
+    return main_dir, fork
+
+
+def worktrees(repo: Path) -> list[dict[str, str]]:
+    return parse_worktrees(git(repo, "worktree", "list", "--porcelain"))
+
+
+def free_branch_problem(repo: Path, branch: str, new: bool, flag: str) -> str | None:
+    if new:
+        if has_branch(repo, branch):
+            return f"branch {branch!r} already exists in {repo}; drop {flag} to use it"
+        return None
+    if not has_branch(repo, branch):
+        return f"no local branch {branch!r} in {repo}; pass {flag} to create it"
+    holder = branch_holder(branch, worktrees(repo))
+    if holder is not None:
+        return f"branch {branch!r} is already checked out at {holder}; git allows one checkout per branch"
+    return None
+
+
+def preflight_tools() -> None:
+    missing = [t for t in TOOLS if shutil.which(t) is None]
+    if missing:
+        raise Refusal(f"not on PATH: {', '.join(missing)} (needed for install and make proto)")
+    version = subprocess.run(["node", "--version"], capture_output=True, text=True).stdout
+    if not node_ok(version):
+        raise Refusal(
+            f"node {version.strip() or '(none)'} is below 22.5; pin it first, e.g. in PowerShell: "
+            '$env:PATH = "C:\\Users\\dgree\\AppData\\Roaming\\fnm\\node-versions\\v22.17.1\\installation;" + $env:PATH'
+        )
+
+
+def exe(name: str) -> str:
+    """The runnable file for `name`.
+
+    Node's install dir holds both `corepack` (a sh script) and
+    `corepack.cmd`; Python 3.12's shutil.which can return the sh script,
+    which Windows cannot start ("[WinError 193] %1 is not a valid Win32
+    application", seen in the live test).
+    """
+    if os.name == "nt":
+        for ext in (".exe", ".cmd"):
+            found = shutil.which(name + ext)
+            if found:
+                return found
+    return shutil.which(name) or name
+
+
+def make_env() -> dict[str, str]:
+    """The environment the fork's makefile needs.
+
+    Its recipes call sh, uname, realpath and GNU find. A Git Bash shell has
+    them on PATH; PowerShell and cmd (which pnpm uses) do not, and Windows'
+    own find.exe answers "FIND: Parameter format not correct" (live test).
+    Git for Windows ships them in usr/bin, three levels above `git
+    --exec-path`.
+    """
+    env = dict(os.environ)
+    if os.name != "nt":
+        return env
+    usr_bin = Path(git(".", "--exec-path")).parents[2] / "usr" / "bin"
+    if not (usr_bin / "sh.exe").is_file():
+        raise Refusal(f"no sh.exe in {usr_bin}; make proto needs Git for Windows' usr/bin tools")
+    env["PATH"] = str(usr_bin) + os.pathsep + env.get("PATH", "")
+    return env
+
+
+def wowsimcli_platform() -> str:
+    """The suffix cli-wiring.ts resolveWowsimcli uses."""
+    return "win32-x64" if platform.system() == "Windows" else "linux-x64"
+
+
+def pair(args: argparse.Namespace) -> int:
+    main_dir, fork = find_checkouts()
+    target = main_dir.parent / PAIR_DIR / args.name
+    fork_target = target / FORK_REL
+    problem = name_problem(args.name) or length_problem(str(target))
+    if problem:
+        raise Refusal(problem)
+    if target.exists():
+        raise Refusal(f"{target} already exists; pick another name or run: pnpm wt:unpair {args.name}")
+    if args.fork_detached == bool(args.fork_branch):
+        raise Refusal("give exactly one of <fork-branch> or --fork-detached")
+    if args.new_fork_branch and args.fork_detached:
+        raise Refusal("--new-fork-branch needs a <fork-branch>, not --fork-detached")
+
+    for problem in (
+        free_branch_problem(main_dir, args.main_branch, args.b, "-b"),
+        None if args.fork_detached else free_branch_problem(fork, args.fork_branch, args.new_fork_branch, "--new-fork-branch"),
+    ):
+        if problem:
+            raise Refusal(problem)
+    ref = args.base if args.b else args.main_branch
+    if args.b and not git_ok(main_dir, "rev-parse", "--verify", "--quiet", f"{ref}^{{commit}}"):
+        raise Refusal(f"--base {ref!r} is not a commit in {main_dir}")
+    pin = json.loads(git(main_dir, "show", f"{ref}:{FORK_LOCK}"))["commit"]
+    engine_tag = json.loads(git(main_dir, "show", f"{ref}:{ENGINE_LOCK}"))["tag"]
+    if not git_ok(fork, "cat-file", "-e", f"{pin}^{{commit}}"):
+        raise Refusal(f"the fork lock on {ref} pins {pin}, which the fork clone does not have; fetch it first")
+    preflight_tools()
+    env = make_env()
+
+    started = time.monotonic()
+    target.parent.mkdir(exist_ok=True)
+    try:
+        if args.b:
+            run(["git", "-C", str(main_dir), "worktree", "add", "-b", args.main_branch, str(target), ref])
+        else:
+            run(["git", "-C", str(main_dir), "worktree", "add", str(target), args.main_branch])
+        if args.fork_detached:
+            run(["git", "-C", str(fork), "worktree", "add", "--detach", str(fork_target), pin])
+        elif args.new_fork_branch:
+            run(["git", "-C", str(fork), "worktree", "add", "-b", args.fork_branch, str(fork_target), pin])
+        else:
+            run(["git", "-C", str(fork), "worktree", "add", str(fork_target), args.fork_branch])
+
+        copied = []
+        for name in vendor_inputs(engine_tag, wowsimcli_platform()):
+            src = main_dir / "vendor" / name
+            if not src.is_dir():
+                say(f"WARNING: {src} is missing, not copied; restore it in the pair (pnpm sync:wowsims:restore, pnpm sync:atlasloot:restore, pnpm fetch:wowsimcli)")
+                continue
+            shutil.copytree(src, target / "vendor" / name, symlinks=True)
+            copied.append(name)
+        say(f"copied into vendor/: {', '.join(copied) or 'nothing'}")
+
+        run([exe("corepack"), "pnpm", "-C", str(target), "install", "--frozen-lockfile"])
+        run([exe("npm"), "--prefix", str(fork_target), "ci"])
+        make = exe("make")
+        run([make, "-C", str(fork_target), "proto"], env)
+        # Without the *_auto_gen.ts files the fork's whole-project tsc fails,
+        # and with it `pnpm fork-lint:check` (seen in the 2026-10-10 live test).
+        run([make, "-C", str(fork_target), "go-to-ts"], env)
+        if args.build:
+            run([make, "-C", str(fork_target), "dist/tbc/.dirstamp"], env)
+    except (Refusal, OSError) as exc:
+        say(f"FAILED: {exc}")
+        say(f"the pair is partly made at {target}; remove it with: pnpm wt:unpair {args.name} --force")
+        return 1
+
+    fork_head = git(fork_target, "rev-parse", "HEAD")
+    say(f"pair ready in {time.monotonic() - started:.0f}s")
+    say(f"  main  {target}  {args.main_branch} at {git(target, 'rev-parse', '--short', 'HEAD')}")
+    fork_ref = "detached" if args.fork_detached else args.fork_branch
+    say(f"  fork  {fork_target}  {fork_ref} at {fork_head[:9]}")
+    if fork_head != pin:
+        say(
+            f"  note: the fork is at {fork_head[:9]} but {FORK_LOCK} pins {pin[:9]}; the fork gates "
+            "exit 2 until the lock names the fork's HEAD (docs/agents/known-traps.md)"
+        )
+    say(f"open a session in {target} (desktop app: pick that folder; terminal: run `claude` there)")
+    say("that session starts with no memory notes: memory is kept per folder")
+    say(f"remove the pair with: pnpm wt:unpair {args.name}")
+    return 0
+
+
+def find_links(root: Path) -> list[tuple[str, str]]:
+    """Every symlink or junction under `root`, with its absolute target.
+
+    Does not descend into links, and walks the `\\\\?\\` form so a path past
+    260 characters is still read.
+    """
+    found: list[tuple[str, str]] = []
+    stack = [long_path(str(root)) if os.name == "nt" else str(root)]
+    while stack:
+        with os.scandir(stack.pop()) as entries:
+            for entry in entries:
+                attrs = getattr(entry.stat(follow_symlinks=False), "st_file_attributes", 0)
+                if entry.is_symlink() or attrs & FILE_ATTRIBUTE_REPARSE_POINT:
+                    try:
+                        target = os.readlink(entry.path)
+                    except OSError:
+                        target = "<unreadable>"
+                    if target != "<unreadable>" and not os.path.isabs(target.replace("\\\\?\\", "")):
+                        target = os.path.normpath(os.path.join(os.path.dirname(entry.path), target))
+                    found.append((entry.path, target))
+                elif entry.is_dir(follow_symlinks=False):
+                    stack.append(entry.path)
+    return found
+
+
+def delete_folder(path: Path) -> None:
+    """Delete what `git worktree remove` left behind, if nothing escapes.
+
+    git drops the registration first and then can fail on a path past 260
+    characters ("Filename too long") or with "Directory not empty", leaving a
+    half-deleted folder. Both happened in the 2026-10-10 live test.
+    """
+    escaping = links_outside(str(path), find_links(path))
+    if escaping:
+        listed = "; ".join(f"{link} -> {target}" for link, target in escaping)
+        raise Refusal(f"not deleting {path}: these links point outside it: {listed}")
+    say(f"git left {path} behind; deleting it (no link inside points outside it)")
+    if os.name == "nt":
+        subprocess.run(["cmd", "/c", "rmdir", "/s", "/q", long_path(str(path))])
+    else:
+        shutil.rmtree(path)
+    if path.exists():
+        raise Refusal(f"could not delete {path}")
+
+
+def unsaved_work(repo: Path) -> str | None:
+    """Why removing this checkout could lose work, or None."""
+    status = git(repo, "status", "--porcelain")
+    if status:
+        return f"{repo} has uncommitted changes:\n{status}"
+    if git(repo, "rev-parse", "--abbrev-ref", "HEAD") == "HEAD":
+        if not git(repo, "branch", "--all", "--contains", "HEAD"):
+            return f"{repo} is detached at a commit no branch contains; branch it first"
+    return None
+
+
+def remove(repo: Path, path: Path, listed: bool, force: bool) -> None:
+    if listed:
+        cmd = ["git", "-C", str(repo), "worktree", "remove", *(["--force"] if force else []), str(path)]
+        say("$ " + " ".join(cmd))
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode != 0:
+            say(f"  git: {r.stderr.strip()}")
+    if path.exists():
+        delete_folder(path)
+
+
+def unpair(args: argparse.Namespace) -> int:
+    main_dir, fork = find_checkouts()
+    problem = name_problem(args.name)
+    if problem:
+        raise Refusal(problem)
+    target = main_dir.parent / PAIR_DIR / args.name
+    fork_target = target / FORK_REL
+    for here in (Path.cwd(), Path(__file__).resolve()):
+        if (norm_path(str(here)) + "\\").startswith(norm_path(str(target)) + "\\"):
+            raise Refusal(f"this command is running from inside {target}; run it from the main checkout or another pair")
+    in_main = is_listed(str(target), worktrees(main_dir))
+    in_fork = is_listed(str(fork_target), worktrees(fork))
+    if not target.exists() and not in_main and not in_fork:
+        say(f"nothing to remove: no folder {target} and no worktree registered there")
+        return 0
+    if target.exists() and not in_main and not args.force:
+        raise Refusal(
+            f"{target} is not a worktree of {main_dir}. If it is what is left of a pair, "
+            f"rerun with --force to delete it"
+        )
+    if not args.force:
+        for repo, listed in ((fork_target, in_fork), (target, in_main)):
+            if listed and repo.exists():
+                problem = unsaved_work(repo)
+                if problem:
+                    raise Refusal(f"{problem}\ncommit or stash it, or rerun with --force to discard it")
+
+    remove(fork, fork_target, in_fork, args.force)
+    remove(main_dir, target, in_main, args.force)
+    git(fork, "worktree", "prune")
+    git(main_dir, "worktree", "prune")
+    if is_listed(str(target), worktrees(main_dir)) or is_listed(str(fork_target), worktrees(fork)):
+        raise Refusal("a worktree is still registered after removal; see `git worktree list` in both repos")
+    if target.exists():
+        raise Refusal(f"{target} still exists")
+    say(f"removed {args.name}: neither repo lists it, and {target} is gone")
+    say("branches are kept; delete them with git branch -d when merged")
+    return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(prog="worktree_pair.py", description=__doc__.split("\n\n")[0])
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    p = sub.add_parser("pair", help="make a main worktree with its own fork worktree")
+    p.add_argument("name")
+    p.add_argument("main_branch")
+    p.add_argument("fork_branch", nargs="?")
+    p.add_argument("-b", action="store_true", help="create <main-branch> from --base")
+    p.add_argument("--base", default="dev", help="start point for -b (default dev)")
+    p.add_argument("--new-fork-branch", action="store_true", help="create <fork-branch> at the lock's commit")
+    p.add_argument("--fork-detached", action="store_true", help="fork at the lock's commit, no branch")
+    p.add_argument("--build", action="store_true", help="also build the fork's dist/")
+    u = sub.add_parser("unpair", help="remove a pair made by `pair`")
+    u.add_argument("name")
+    u.add_argument("--force", action="store_true", help="discard uncommitted work; delete leftovers")
+    args = ap.parse_args(argv)
+    try:
+        return pair(args) if args.cmd == "pair" else unpair(args)
+    except Refusal as exc:
+        print(f"[wt] refused: {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
