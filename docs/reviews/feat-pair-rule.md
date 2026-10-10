@@ -1,6 +1,6 @@
 # Pre-merge review — feat/pair-rule
 
-Reviewed range: `8ebd89e6..b4392e63`
+Reviewed range: `8ebd89e6f9013630fbab6d6fb7b6cccf3e97dc19..b4392e63541a6ce659477472910fee403da6801f`
 
 Dispatch (round 1): `codex` is not on PATH (`which codex`), so every axis ran
 as a fresh `general-task` subagent on Opus (review lane), in parallel: the
@@ -120,3 +120,110 @@ owner in ticket 594.
 | W4  | Writing     | fixed       | 30751cdb: "set it the same way before `git push` or `pnpm merge-to-dev`, which run verify"                                                                         |
 | W5  | Writing     | fixed       | 30751cdb: the pair sentence opens step 1                                                                                                                           |
 | W6  | Writing     | wontfix     | The guide is where the refusal sends readers; the repeat is deliberate                                                                                             |
+
+## Round 2
+
+Reviewed range: `b4392e63541a6ce659477472910fee403da6801f..abedfe9cff2605a910ff8c3e07e6f280e607ca7d`
+
+Range `b4392e63..abedfe9c` (the round-1 fixes). The focused check did not
+apply: round 1 fixed findings labelled `medium` (A1, W1, W2), so condition 1
+fails and the three axes ran again, with the independent writing check, as
+fresh `general-task` agents on Opus in parallel.
+
+### Adversarial (round 2)
+
+No false failures: every python `skipped --` line means a missing vendor
+input, `warn_upstream_drift.py` prints `-- skipped` (not matched), and
+vitest 3.2.7 maps `it.todo` to `todo`, not skipped. The `skipGuard` wiring
+test fails with the call removed (scratch copy).
+
+- **A6 (low)** The vitest half of `skipGuard` had no test: removing
+  `+ vitestSkips.skipped` left all tests green. A half-built fork skips only
+  in vitest (`fork-engine-harness.ts:43-46`).
+- **A7 (low)** An unreadable vitest report left `skipped=0`, so a local run
+  passed on no evidence (ticket 408, defect 4).
+- **A8 (low)** The skip failure suggested `pnpm wt:unpair` even in the main
+  checkout, where a vitest skip names only the test.
+- **A9 (nit)** AGENTS.md:89 "then in the main repo bump" next to
+  `git -C <pair>/vendor/...`.
+- **A10 (note)** The false-failure hunt found nothing.
+
+### Domain (round 2)
+
+**Domain: clean.** No game-domain claim in the 11 changed files.
+
+### Standards (round 2)
+
+- **S7 (medium)** `.scratch/carry-forward/issues/NEXT` still read `594` after
+  ticket 594 was filed (docs/agents/issue-tracker.md "Allocating `<NN>`").
+- **S8 (low)** Ticket 594 was `open` with an owner wait in `Blocked by:`;
+  the tracker's word is `blocked`.
+- **S9 (medium)** 30751cdb edited AGENTS.md ("The forked tab repo"), the
+  claude-code adapter and `gate-executor.md` before owner approval
+  (AGENTS.md "Writing for agents").
+- **S10 (low)** The round-2 `Reviewed range:` line was not recorded before
+  dispatch.
+- **S11 (low)** "16 failed … on 2026-10-10" named no command.
+- **S12 (low)** The opt-out advice disagreed across three places: the guide
+  required the restores, the refusal and AGENTS.md did not.
+- **S13 (nit)** 30751cdb's body uses finding IDs.
+- **S14 (nit)** `exempt`, `MARK`, `SKIP` are terse names.
+
+### Spec (round 2)
+
+The owner-approved rule text is unchanged in this range.
+
+- **P4 (medium)** Same as S7.
+- **P5 (low)** Same as S8.
+- **P6 (nit)** Same as A9.
+- **P7 (low; justified)** The restore sentence matches CI
+  (`verify.yml:31,38`); it named no command for "16 failed".
+- **P8 (note)** Same as S9.
+- **P9 (note)** `skipGuard` is right only if a complete pair has zero skips;
+  not run by the reviewer. The author's runs at 30751cdb gave
+  `gates: 1530 ran, 0 skipped` in the pair.
+
+### Writing for agents (round 2)
+
+Clean: the adapter and mirror, the Memory bullet, the plain-worktree
+sentence, the AGENTS.md "fork edits happen only in a pair" clause.
+
+- **W7 (medium)** The refusal's opt-out hint left out the two restore
+  commands, so an agent following it hits 16 failures.
+- **W8 (low)** Same as A9.
+- **W9 (low)** `gate-executor.md` step 1 did not read as a condition.
+- **W10 (low)** The skip failure assumed a pair and had no done-when.
+- **W11 (low)** `known-traps.md:42-45` still told agents to run the fork
+  suites by hand and record the rc; verify now fails on any skip.
+- **W12 (nit)** Ticket 594's proposed text drops "never reads the fork" and
+  the restore steps.
+
+## Disposition (round 2)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                         |
+| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A6  | Adversarial | fixed       | cdf11cef: `skipGuard` takes both counts; a unit test fails a vitest-only skip, and fails when `vitestSkips` is dropped from the sum                   |
+| A7  | Adversarial | fixed       | cdf11cef: an unreadable report counts as one skip with its reason; ticket 408 stays open for its other defects and the CI side                        |
+| A8  | Adversarial | fixed       | cdf11cef: W10's text; `wt:unpair` only "in a pair whose build did not finish"                                                                         |
+| A9  | Adversarial | fixed       | cdf11cef: "then in the pair's main-repo worktree bump"                                                                                                |
+| A10 | Adversarial | wontfix     | Not a defect: the hunt found no false failure                                                                                                         |
+| S7  | Standards   | fixed       | cdf11cef: `NEXT` is 595                                                                                                                               |
+| S8  | Standards   | fixed       | cdf11cef: ticket 594 is `blocked`, `Blocked by: none`                                                                                                 |
+| S9  | Standards   | wontfix     | The edits stay on the unmerged branch, and the hand-off lists each one for the owner's approval; any the owner rejects is reverted before a merge ask |
+| S10 | Standards   | fixed       | Round 2's `Reviewed range:` line is recorded under "Round 2"; round 3 records its own before dispatch                                                 |
+| S11 | Standards   | fixed       | cdf11cef: names the run and quotes its "vitest failures (16)" line                                                                                    |
+| S12 | Standards   | fixed       | cdf11cef: the refusal names both restores (W7); the AGENTS.md bullet is owner text and points at the guide; ticket 594 holds its rewording            |
+| S13 | Standards   | wontfix     | The commit exists; this review file decodes the IDs                                                                                                   |
+| S14 | Standards   | fixed       | cdf11cef: `isExempt`, `MARK_STEP`, `SKIPPING_STEP`                                                                                                    |
+| P4  | Spec        | fixed       | As S7                                                                                                                                                 |
+| P5  | Spec        | fixed       | As S8                                                                                                                                                 |
+| P6  | Spec        | fixed       | As A9                                                                                                                                                 |
+| P7  | Spec        | fixed       | As S11; atlasloot is kept because CI restores it too                                                                                                  |
+| P8  | Spec        | wontfix     | As S9                                                                                                                                                 |
+| P9  | Spec        | wontfix     | Not a defect: the pair runs reported 0 skipped                                                                                                        |
+| W7  | Writing     | fixed       | cdf11cef: the hint runs both restores before the opt-out                                                                                              |
+| W8  | Writing     | fixed       | As A9                                                                                                                                                 |
+| W9  | Writing     | fixed       | cdf11cef: "When your prompt gives a pair path, the pair is the shared checkout"                                                                       |
+| W10 | Writing     | fixed       | cdf11cef: the reviewer's text                                                                                                                         |
+| W11 | Writing     | fixed       | cdf11cef: the reviewer's text                                                                                                                         |
+| W12 | Writing     | defer       | `.scratch/carry-forward/issues/594-merge-duplicate-sentence-in-pair-rule.md` now lists both texts for the owner                                       |
