@@ -117,8 +117,10 @@ merged into the real `dev`.
 
 **When `git merge dev` conflicts in the pair,** step 3 aborts that merge,
 leaves the pair as it was, and stops. For an ordinary conflict, resolve it in
-the pair (`git -C <pair> merge dev`) and run step 3 again. When `dev` has a
-new fork pin, take the older route below instead:
+the pair (`git -C <pair> merge dev`) and run step 3 again.
+
+**When `dev` has a new fork pin,** take the older route below. Step 3 fails
+in either of these cases:
 
 - Both this pair and another one re-pinned: the lock's `commit` and
   `_comment` lines conflict (temp-repo test 2026-10-10,
