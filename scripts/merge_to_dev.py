@@ -449,7 +449,9 @@ def main() -> int:
 
 if __name__ == "__main__":
     try:
-        sys.stdout.reconfigure(encoding="utf-8")
+        # Line buffering keeps this script's lines in order with the output of
+        # the gate run it starts, when stdout is a pipe or a log file.
+        sys.stdout.reconfigure(encoding="utf-8", line_buffering=True)
         sys.stderr.reconfigure(encoding="utf-8")
     except Exception:
         pass
