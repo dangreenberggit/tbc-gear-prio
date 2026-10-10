@@ -322,3 +322,33 @@ cdf11cef.
 | W14 | Writing     | fixed       | As A14                                                                                                                                                                 |
 | W15 | Writing     | fixed       | 81fec876: "Without the two restores"                                                                                                                                   |
 | W16 | Writing     | fixed       | 81fec876: names `TBC_VERIFY_WITHOUT_FORK=1`                                                                                                                            |
+
+## Focused check (round 4)
+
+Reviewed range: `05aced4c83e70d527434cf45027c540c59d37f85..2660ba16466a6b1db0450b539afe06084798a594`
+
+Fork range: none (`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json`
+exits 0, so the branch never moves the fork pin and condition 3 holds). One
+fresh `general-task` agent on Opus ran the four checks.
+
+1. **Conditions 1 to 3: pass.** 81fec876 names A11, A12, A14, S17, S18,
+   S19, W13, W14, W15 and W16 in its body, all labelled low, minor or nit;
+   2660ba16 changes only this file. Every changed code line is at a place
+   A11, A12, S19 or W13 cites.
+2. **Only what each finding asks: pass.**
+3. **Each new test asserts its finding: pass.** Both mutation runs
+   reproduced on a scratch copy: `vitestSkipCount: 0` failed only "exits 1
+   when only a vitest test skips"; removing the unreadable-report exit
+   failed only "exits 1 when vitest leaves no readable report, even under
+   the opt-out".
+4. **Touched tests pass: pass.** `vitest run
+scripts/verify_fork_guard.test.mjs scripts/verify_summary.test.mjs`: 29
+   of 29. The Linux `vitest` shim the wiring tests write has no known
+   reason to fail on ubuntu-latest (hypothesis, untested; no CI run seen).
+
+No findings.
+
+## Disposition (round 4)
+
+| ID  | Axis | Disposition | Ticket / note |
+| --- | ---- | ----------- | ------------- |
