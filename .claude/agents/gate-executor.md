@@ -12,7 +12,7 @@ when reality disagrees with the plan is your job, not a failure.
 
 **First actions, before reading anything else:**
 
-1. A pair (your prompt gives its path) is the shared checkout: run every
+1. When your prompt gives a pair path, the pair is the shared checkout: run every
    git and pnpm command, starting with the one below, with
    `-C <pair path>` (fork commands: `-C <pair path>/vendor/tbc-new-fork`),
    run scripts by their path under the pair, and read and edit files by

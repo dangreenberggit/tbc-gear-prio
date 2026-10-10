@@ -21,10 +21,10 @@
 
 export const OPT_OUT = "TBC_VERIFY_WITHOUT_FORK";
 
-const OPT_OUT_HINT = `  Work that never reads the fork: set ${OPT_OUT}=1 (Git Bash: \`${OPT_OUT}=1 pnpm verify\`; PowerShell: \`$env:${OPT_OUT}='1'; pnpm verify\`), and set it the same way before \`git push\` or \`pnpm merge-to-dev\`, which run verify.`;
+const OPT_OUT_HINT = `  Work that never reads the fork: run \`pnpm run sync:wowsims:restore\` and \`pnpm run sync:atlasloot:restore\`, then set ${OPT_OUT}=1 (Git Bash: \`${OPT_OUT}=1 pnpm verify\`; PowerShell: \`$env:${OPT_OUT}='1'; pnpm verify\`), and set it the same way before \`git push\` or \`pnpm merge-to-dev\`, which run verify.`;
 
 /** @param {Record<string, string | undefined>} env */
-function exempt(env) {
+function isExempt(env) {
   return env.GITHUB_ACTIONS === "true" || env[OPT_OUT] === "1";
 }
 
@@ -33,7 +33,7 @@ function exempt(env) {
  * @returns {string | null} the refusal to print, or null when verify may run
  */
 export function forkGuard({ forkPresent, env }) {
-  if (forkPresent || exempt(env)) {
+  if (forkPresent || isExempt(env)) {
     return null;
   }
   return [
@@ -44,17 +44,25 @@ export function forkGuard({ forkPresent, env }) {
 }
 
 /**
- * @param {{skipped: number, env: Record<string, string | undefined>}} input
- *   `skipped` counts every skipped gate and test in the run
+ * Both counts are taken here, not summed by the caller, so a unit test sees
+ * a vitest-only skip fail: that is the skip a half-built fork produces
+ * (packages/core/test/fork-engine-harness.ts).
+ *
+ * @param {{
+ *   pythonSkips: number,
+ *   vitestSkips: number,
+ *   env: Record<string, string | undefined>,
+ * }} input
  * @returns {string | null} the failure to print, or null when the run passes
  */
-export function skipGuard({ skipped, env }) {
-  if (skipped === 0 || exempt(env)) {
+export function skipGuard({ pythonSkips, vitestSkips, env }) {
+  const skipped = pythonSkips + vitestSkips;
+  if (skipped === 0 || isExempt(env)) {
     return null;
   }
   return [
     `verify: failed -- ${skipped} gate(s) or test(s) skipped (reasons above). Outside CI every gate must run; a skip means a missing vendor/ input, such as a fork that \`pnpm wt:pair\` did not finish building.`,
-    "  Restore what the skip reasons name, or remove the pair with `pnpm wt:unpair <name>` and make it again.",
+    "  Restore what the skip reasons name and run verify again until it reports no skips; in a pair whose build did not finish, run `pnpm wt:unpair <name>` and make it again.",
     OPT_OUT_HINT,
   ].join("\n");
 }

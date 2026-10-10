@@ -11,7 +11,8 @@ checkout's clone stays on the fork lock's `branch` for step 3 below. Work
 that never reads the fork can use a plain worktree, and runs `pnpm verify`
 with `TBC_VERIFY_WITHOUT_FORK=1` after `pnpm run sync:wowsims:restore` and
 `pnpm run sync:atlasloot:restore`, as CI does. Without them, the tests that
-read `vendor/wowsims` fail (16 failed in a plain worktree on 2026-10-10).
+read `vendor/wowsims` fail: on 2026-10-10, `pnpm verify` with the opt-out in
+a plain worktree with no `vendor/` reported "vitest failures (16)".
 
 ## Make one
 

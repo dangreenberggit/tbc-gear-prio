@@ -53,20 +53,25 @@ describe("forkGuard", () => {
 
 describe("skipGuard", () => {
   it("passes a local run with no skips", () => {
-    expect(skipGuard({ skipped: 0, env: {} })).toBeNull();
+    expect(skipGuard({ pythonSkips: 0, vitestSkips: 0, env: {} })).toBeNull();
   });
 
-  it("fails a local run with a skip and names pnpm wt:pair", () => {
-    const failure = skipGuard({ skipped: 2, env: {} });
+  it("fails a local run with a gate skip and names pnpm wt:pair", () => {
+    const failure = skipGuard({ pythonSkips: 2, vitestSkips: 0, env: {} });
     expect(failure).toContain("2 gate(s)");
     expect(failure).toContain("pnpm wt:pair");
   });
 
+  it("fails a local run whose only skips are vitest tests", () => {
+    expect(skipGuard({ pythonSkips: 0, vitestSkips: 1, env: {} })).toContain(
+      "1 gate(s)"
+    );
+  });
+
   it("lets GitHub Actions and the opt-out skip", () => {
-    expect(
-      skipGuard({ skipped: 3, env: { GITHUB_ACTIONS: "true" } })
-    ).toBeNull();
-    expect(skipGuard({ skipped: 3, env: { [OPT_OUT]: "1" } })).toBeNull();
+    const skips = { pythonSkips: 1, vitestSkips: 2 };
+    expect(skipGuard({ ...skips, env: { GITHUB_ACTIONS: "true" } })).toBeNull();
+    expect(skipGuard({ ...skips, env: { [OPT_OUT]: "1" } })).toBeNull();
   });
 });
 
@@ -107,20 +112,20 @@ function runDriver({ withFork, step, env: extraEnv = {} }) {
   }
 }
 
-const MARK = `node -e "require('fs').writeFileSync('step-ran.txt','')"`;
+const MARK_STEP = `node -e "require('fs').writeFileSync('step-ran.txt','')"`;
 // Split so pnpm's echo of the command line is not itself a skip line.
-const SKIP = `node -e "console.log('stub check: skip' + 'ped -- no input')"`;
+const SKIPPING_STEP = `node -e "console.log('stub check: skip' + 'ped -- no input')"`;
 
 describe("run_verify.mjs", () => {
   it("exits 1 naming pnpm wt:pair before any step runs when the fork is absent", () => {
-    const result = runDriver({ withFork: false, step: MARK });
+    const result = runDriver({ withFork: false, step: MARK_STEP });
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("pnpm wt:pair");
     expect(result.stepRan).toBe(false);
   });
 
   it("exits 1 when a gate skips although the fork folder is present", () => {
-    const result = runDriver({ withFork: true, step: SKIP });
+    const result = runDriver({ withFork: true, step: SKIPPING_STEP });
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("1 gate(s)");
   });
@@ -128,7 +133,7 @@ describe("run_verify.mjs", () => {
   it("passes a skipping gate under the opt-out", () => {
     const result = runDriver({
       withFork: true,
-      step: SKIP,
+      step: SKIPPING_STEP,
       env: { [OPT_OUT]: "1" },
     });
     expect(result.status).toBe(0);

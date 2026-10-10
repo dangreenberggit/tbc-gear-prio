@@ -173,6 +173,15 @@ async function main() {
           console.error(
             `run_verify.mjs: could not read vitest's JSON report at ${vitestJsonPath}: ${err}`
           );
+          // Unread, the report's skips are unknown; counting one keeps
+          // skipGuard from passing a local run on no evidence.
+          vitestSkips = {
+            ran: 0,
+            skipped: 1,
+            reasons: [
+              "vitest JSON report unreadable, so its skips are unknown",
+            ],
+          };
         }
         stepsRan += 1;
       } else {
@@ -215,7 +224,8 @@ async function main() {
     );
 
     const skipFailure = skipGuard({
-      skipped: pythonSkips.length + vitestSkips.skipped,
+      pythonSkips: pythonSkips.length,
+      vitestSkips: vitestSkips.skipped,
       env: process.env,
     });
     if (skipFailure) {

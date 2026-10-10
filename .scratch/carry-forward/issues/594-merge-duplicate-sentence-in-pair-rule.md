@@ -1,8 +1,8 @@
-Status: open
+Status: blocked
 Type: task
 Origin: docs/reviews/feat-pair-rule.md (round 1, W3; independent writing-for-agents review)
 Blocks: none
-Blocked by: owner approval of the new wording
+Blocked by: none
 Related: 593
 
 # Merge the duplicate "never reads the fork" sentence in the pair rule
@@ -25,6 +25,16 @@ fork here" bullet with:
 ```
 - **No fork here:** as a worker in a checkout with no `vendor/tbc-new-fork`, stop and report it to whoever sent you; otherwise make a pair. `pnpm verify` refuses such a checkout unless `TBC_VERIFY_WITHOUT_FORK=1`.
 ```
+
+A second reviewer (round 2, W12) noted that this text drops "never reads
+the fork" and the restore steps, and proposed instead:
+
+```
+- **No fork here:** as a worker in a checkout with no `vendor/tbc-new-fork`, stop and report it to whoever sent you; otherwise make a pair. `pnpm verify` refuses such a checkout (plain-worktree steps: docs/agents/paired-worktrees.md).
+```
+
+The status is `blocked` because only the owner can choose between the two
+texts or keep the current one.
 
 ## Done when
 
