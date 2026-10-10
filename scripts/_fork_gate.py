@@ -5,8 +5,10 @@ Four checks re-derive something from `vendor/tbc-new-fork` and compare it to a
 committed artifact. All four need the same three preconditions, and getting any
 of them subtly wrong turns a gate into decoration:
 
-1. **Vendor absent is not a failure.** `vendor/` is gitignored, so a fresh
-   clone and CI have no fork. Absence is an ordinary state.
+1. **Vendor absent is a skip here.** `vendor/` is gitignored, so CI has no
+   fork. Outside CI, `pnpm verify` refuses an absent fork unless
+   TBC_VERIFY_WITHOUT_FORK=1 (scripts/verify_fork_guard.mjs); each check
+   still skips cleanly and leaves that rule to the driver.
 2. **The pin must be readable.** A lockfile that is missing, malformed, or
    carries a non-string `commit` cannot be compared against.
 3. **Clone HEAD must equal the pin.** The committed artifact describes the

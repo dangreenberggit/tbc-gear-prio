@@ -236,6 +236,10 @@ not` list below.
    free (the seat's base-SHA assertion is what makes worktree mode safe on
    a feature branch). A plan with more than one chunk uses the shared
    checkout, so each chunk starts from the commits of the one before.
+   When AGENTS.md "Fork and tab edits run in a pair" applies, have a
+   subagent make the pair with `pnpm wt:pair`, use it as the shared
+   checkout for every chunk, pass its path, and run this step's git
+   checks with `git -C <pair>`; `isolation: worktree` has no fork.
    Append its final message to `execution-report.md` under the chunk id,
    and log the chunk id, its base SHA and the executor's agent id in
    `decision-log.md`. A fresh executor per chunk keeps each context small.

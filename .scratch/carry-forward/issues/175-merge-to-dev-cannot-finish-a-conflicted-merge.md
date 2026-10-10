@@ -45,3 +45,14 @@ The door script handles conflicts itself, by one of:
 Either way, the "escape hatch" line is removed from the docstring and the
 hook's message, and AGENTS.md § Gates needs no exception. Hypothesis:
 refuse-up-front is enough for this solo repo.
+
+## Comments
+
+2026-10-10, feat/merge-to-dev-arg: `pnpm merge-to-dev <branch>` (run from a
+folder on `dev`) merges `dev` into the branch in the branch's own worktree
+first, so any conflict happens and is resolved there, and the merge into
+`dev` cannot conflict (`dev` is then an ancestor of the branch; live tests
+T4 and T5 in `docs/reviews/feat-merge-to-dev-arg.md`). This covers the
+named path only. The no-argument path still merges onto `dev` directly, and
+the docstring and hook still name the escape hatch, so this ticket stays
+open.

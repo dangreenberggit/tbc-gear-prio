@@ -36,12 +36,11 @@ the PATH pin works in either shell.
 suites and `wowsims-fork-parity.test.ts` — is wrapped in
 `describe.skipIf(!forkPresent)` (the parity suite in
 `describe.runIf(canRunForkSide)`), and `vendor/` is gitignored, so CI
-collects them and skips them. A green CI run is no evidence for them. Run
-every one locally with the fork present, in Bash —
-`npx vitest run $(grep -l forkPresent packages/core/test/*.test.ts); echo rc=$?`
-— and record the command and its rc in the commit or ticket (ticket 478,
-item A5). The `grep` lists the suites at run time, so a new fork-gated
-suite joins the command without an edit here.
+collects them and skips them. A green CI run is no evidence for them.
+Locally, `pnpm verify` fails when any of them skips (`skipGuard`,
+`scripts/verify_fork_guard.mjs`) unless `TBC_VERIFY_WITHOUT_FORK=1`, so a
+green local verify without `TBC_VERIFY_WITHOUT_FORK=1` ran them all: its
+tail line reads `gates: N ran, 0 skipped` (ticket 478, item A5).
 
 ## Before any scripted or generated file edit
 

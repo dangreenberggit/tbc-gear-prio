@@ -77,13 +77,13 @@ justified.
 | P4  | stage-gate SKILL.md "rewrites `plan.md`" next to the targeted-Edit rule |
 
 No code-quality pass ran: every row asks for an agent-file edit, which waits
-for the owner's approval of ticket 595.
+for the owner's approval of ticket 600.
 
 ## Focused check (round 2)
 
 Dispatch (round 2): one fresh Opus subagent (`general-task`, effort high),
 in the foreground, told to spawn no subagents and write nothing. Main range
-`f9c415ef..5d2fb6ce`: `a4387e1a` (this file and ticket 595) and `5d2fb6ce`
+`f9c415ef..5d2fb6ce`: `a4387e1a` (this file and ticket 600) and `5d2fb6ce`
 (fixes for A3, A4, A6, approved by the owner on 2026-10-10: "do the 3 that
 work"). Fork range: none; `git diff --quiet dev...HEAD --
 data/wowsims-fork.lock.json` exits 0.
@@ -115,7 +115,7 @@ bookkeeping (R2-1, R2-2), so there is no further round and no fix. Which
 fix: `5d2fb6ce`. Likely cause (hypothesis, untested): the approved A4 text
 named only "fixed before merge" findings and the round 2 brief, and the
 fixer kept to it; R2-2 is a sentence the fix left unchanged. All three are
-items 1, 2 and 6 of ticket 595 for another session; R2-1 needs the owner's
+items 1, 2 and 6 of ticket 600 for another session; R2-1 needs the owner's
 ruling.
 
 ## Summary
@@ -124,32 +124,32 @@ Round 1 raised 17 findings. The owner approved fixes for three of them
 (A3, A4's skip path, A6; P1 and P2 duplicate A6 and A3), applied in
 `5d2fb6ce`. Round 2 confirmed A3 and A6 and found A4 incomplete (R2-1),
 plus R2-2 and R2-3, so the review stopped under its own "Round limit". All
-remaining findings are in ticket 595, written for a session that starts
+remaining findings are in ticket 600, written for a session that starts
 cold. P5 is `wontfix`.
 
-Tickets: filed 1 (595), closed 0 (`git diff --name-status dev...HEAD --
+Tickets: filed 1 (600), closed 0 (`git diff --name-status dev...HEAD --
 '.scratch/carry-forward/issues/*.md'` lists one `A` row; the closing-status
-grep counts 0). Filed is higher than closed because ticket 595 holds the
+grep counts 0). Filed is higher than closed because ticket 600 holds the
 owner-deferred findings.
 
 ## Disposition
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                 |
 | --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | defer       | `.scratch/carry-forward/issues/595-review-loop-rule-gaps.md` — item 3                                                                                                                                                         |
-| A2  | Adversarial | defer       | `.scratch/carry-forward/issues/595-review-loop-rule-gaps.md` — item 4                                                                                                                                                         |
-| A3  | Adversarial | fixed       | `5d2fb6ce`: the code-quality pass is off the round 2 skip list, and agent-file approval comes after round 1; superseded in round 2, which confirmed it; R2-2 (a sentence left unchanged) is ticket 595 item 2                 |
-| A4  | Adversarial | defer       | `.scratch/carry-forward/issues/595-review-loop-rule-gaps.md` — item 1 (R2-1); the skip path was fixed in `5d2fb6ce`, the round-2-passes path is open and needs the owner's ruling                                             |
-| A5  | Adversarial | defer       | `.scratch/carry-forward/issues/595-review-loop-rule-gaps.md` — item 5                                                                                                                                                         |
+| A1  | Adversarial | defer       | `.scratch/carry-forward/issues/600-review-loop-rule-gaps.md` — item 3                                                                                                                                                         |
+| A2  | Adversarial | defer       | `.scratch/carry-forward/issues/600-review-loop-rule-gaps.md` — item 4                                                                                                                                                         |
+| A3  | Adversarial | fixed       | `5d2fb6ce`: the code-quality pass is off the round 2 skip list, and agent-file approval comes after round 1; superseded in round 2, which confirmed it; R2-2 (a sentence left unchanged) is ticket 600 item 2                 |
+| A4  | Adversarial | defer       | `.scratch/carry-forward/issues/600-review-loop-rule-gaps.md` — item 1 (R2-1); the skip path was fixed in `5d2fb6ce`, the round-2-passes path is open and needs the owner's ruling                                             |
+| A5  | Adversarial | defer       | `.scratch/carry-forward/issues/600-review-loop-rule-gaps.md` — item 5                                                                                                                                                         |
 | A6  | Adversarial | fixed       | `5d2fb6ce`: new regex and later count; superseded in round 2, which matched 415 of 415 closing status lines                                                                                                                   |
-| S1  | Standards   | defer       | `.scratch/carry-forward/issues/595-review-loop-rule-gaps.md` — item 9                                                                                                                                                         |
-| S2  | Standards   | defer       | `.scratch/carry-forward/issues/595-review-loop-rule-gaps.md` — item 10                                                                                                                                                        |
-| S3  | Standards   | defer       | `.scratch/carry-forward/issues/595-review-loop-rule-gaps.md` — item 11                                                                                                                                                        |
-| S4  | Standards   | defer       | `.scratch/carry-forward/issues/595-review-loop-rule-gaps.md` — item 12                                                                                                                                                        |
-| S5  | Standards   | defer       | `.scratch/carry-forward/issues/595-review-loop-rule-gaps.md` — item 13                                                                                                                                                        |
-| S6  | Standards   | defer       | `.scratch/carry-forward/issues/595-review-loop-rule-gaps.md` — item 14                                                                                                                                                        |
+| S1  | Standards   | defer       | `.scratch/carry-forward/issues/600-review-loop-rule-gaps.md` — item 9                                                                                                                                                         |
+| S2  | Standards   | defer       | `.scratch/carry-forward/issues/600-review-loop-rule-gaps.md` — item 10                                                                                                                                                        |
+| S3  | Standards   | defer       | `.scratch/carry-forward/issues/600-review-loop-rule-gaps.md` — item 11                                                                                                                                                        |
+| S4  | Standards   | defer       | `.scratch/carry-forward/issues/600-review-loop-rule-gaps.md` — item 12                                                                                                                                                        |
+| S5  | Standards   | defer       | `.scratch/carry-forward/issues/600-review-loop-rule-gaps.md` — item 13                                                                                                                                                        |
+| S6  | Standards   | defer       | `.scratch/carry-forward/issues/600-review-loop-rule-gaps.md` — item 14                                                                                                                                                        |
 | P1  | Spec        | fixed       | `5d2fb6ce`: the count is taken after the last Disposition table; same fix as A6                                                                                                                                               |
 | P2  | Spec        | fixed       | Duplicate of A3, fixed in `5d2fb6ce`                                                                                                                                                                                          |
-| P3  | Spec        | defer       | `.scratch/carry-forward/issues/595-review-loop-rule-gaps.md` — item 7                                                                                                                                                         |
-| P4  | Spec        | defer       | `.scratch/carry-forward/issues/595-review-loop-rule-gaps.md` — item 8                                                                                                                                                         |
+| P3  | Spec        | defer       | `.scratch/carry-forward/issues/600-review-loop-rule-gaps.md` — item 7                                                                                                                                                         |
+| P4  | Spec        | defer       | `.scratch/carry-forward/issues/600-review-loop-rule-gaps.md` — item 8                                                                                                                                                         |
 | P5  | Spec        | wontfix     | Both additions ("unless the owner asks for a specific effort"; the `TRIAL-REJECT` line) came from the step-2 wording review (its items 12 and 9), which the coordinator told the branch to apply; both match existing sources |
