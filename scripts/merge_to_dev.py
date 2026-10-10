@@ -21,16 +21,27 @@ Steps (no branch argument, run from the branch's own checkout):
 Named branch (`pnpm merge-to-dev <branch>`, run from the folder that has dev
 checked out, such as the main folder while <branch> sits in a pair):
   1. Find the worktree that has <branch> checked out; it must be clean.
+     Refuse a branch dev already contains.
   2. If dev has commits <branch> lacks, merge dev into <branch> in that
      worktree (a conflict is aborted there and reported). After this, dev is
      an ancestor of <branch>, so the merge into dev produces exactly
-     <branch>'s tree, and the gates below check the merge result.
+     <branch>'s tree, and the gates below check the merge result. That merge
+     commit stays on <branch> even when a later gate fails.
   3. Steps 2-5 above run in that worktree, by its own copy of this script
      (`--gates-only`). They read its fork, lock, review file and tickets.
+     Afterwards the worktree must still be clean and at the checked tip.
   4. git merge --no-ff <branch's tip> here. Dirty files in this folder block
      only when the merge writes them, or when they are staged; the rest stay
      as they are.
-`--check-only` with a branch skips step 2 and merges nothing.
+`--check-only` with a branch skips step 2, reports blocking dirty files
+instead of refusing, and merges nothing.
+
+Why the gates run in the branch's worktree, not in a temporary worktree at
+the merge result: a plain `git worktree add` has no vendor/ fork, no
+node_modules and no wowsims copies, so verify cannot run there. Providing
+them is what `pnpm wt:pair` does, which took 161 s for one pair on
+2026-10-10. The branch's worktree already has them, and step 2 makes its
+tip's tree the merge result.
 
 Does not push. Does not touch main.
 
@@ -181,10 +192,18 @@ def named_mode_problem(current: str, target: str) -> str | None:
 
 
 def gate_argv(
-    python: str, script: str, *, check_only: bool, no_verify: bool, ack_open_blockers: bool
+    python: str,
+    script: str,
+    *,
+    check_only: bool,
+    no_verify: bool,
+    ack_open_blockers: bool,
+    expect_head: str | None,
 ) -> list[str]:
     """The command that runs steps 2-5 in the branch's own checkout."""
     argv = [python, script, "--check-only" if check_only else "--gates-only"]
+    if expect_head:
+        argv += ["--expect-head", expect_head]
     if no_verify:
         argv.append("--no-verify")
     if ack_open_blockers:
@@ -211,6 +230,10 @@ def is_ancestor(a: str, b: str) -> bool:
     return r.returncode == 0
 
 
+def rev_parse(ref: str, cwd: Path = ROOT) -> str:
+    return git_out("rev-parse", ref, cwd=cwd).strip()
+
+
 def main_folder_blockers(dev_sha: str, tip: str) -> list[str]:
     """Dirty files in this folder that stop merging `tip` into `dev_sha`.
 
@@ -224,12 +247,25 @@ def main_folder_blockers(dev_sha: str, tip: str) -> list[str]:
     return merge_blockers(parse_porcelain_z(status), touched)
 
 
-def refuse_blockers(blockers: list[str]) -> None:
-    if blockers:
-        die(
-            "dirty files in this folder block the merge — commit or stash these:\n  "
-            + "\n  ".join(blockers)
-        )
+def refuse_blockers(blockers: list[str], check_only: bool = False) -> None:
+    if not blockers:
+        return
+    listing = "\n  ".join(blockers)
+    if check_only:
+        print(f"note: a real run would refuse on these dirty files in this folder:\n  {listing}")
+        return
+    die(f"dirty files in this folder block the merge — commit or stash these:\n  {listing}")
+
+
+def worktree_problem(wt: Path, target: str, head: str) -> str | None:
+    """Why `wt` is not a clean checkout of `target` at `head`, or None."""
+    if git_out("status", "--porcelain", cwd=wt).strip():
+        return f"{wt} has uncommitted or untracked files; commit them there first"
+    if git_out("branch", "--show-current", cwd=wt).strip() != target:
+        return f"{wt} no longer has {target} checked out"
+    if rev_parse("HEAD", wt) != head:
+        return f"{wt} is not at {target}'s tip {head[:9]}"
+    return None
 
 
 def merge_named(args: argparse.Namespace) -> int:
@@ -240,29 +276,33 @@ def merge_named(args: argparse.Namespace) -> int:
         die(problem)
     if run(["git", "show-ref", "--verify", "--quiet", f"refs/heads/{target}"]).returncode != 0:
         die(f"no local branch {target!r}")
+    branch_ref = f"refs/heads/{target}"
 
     holder = worktree_pair.branch_holder(
         target, worktree_pair.parse_worktrees(git_out("worktree", "list", "--porcelain"))
     )
     if holder is None:
         die(
-            f"{target!r} is not checked out in any worktree. The gates run in the "
-            "branch's own checkout: check it out in a pair or worktree, or check it "
-            "out here and run pnpm merge-to-dev with no branch"
+            f"{target!r} is not checked out in any worktree (a worktree in the middle "
+            "of a rebase counts as detached). The gates run in the branch's own "
+            "checkout: check it out in a pair or worktree, or check it out here and "
+            "run pnpm merge-to-dev with no branch"
         )
     wt = Path(holder)
     script = wt / "scripts" / "merge_to_dev.py"
     if not script.is_file():
         die(f"{script} does not exist; is the worktree folder missing?")
-    if git_out("status", "--porcelain", cwd=wt).strip():
-        die(f"{wt} has uncommitted or untracked files; commit them there first")
+    dev_sha = rev_parse("HEAD")
+    tip = rev_parse(branch_ref)
+    problem = worktree_problem(wt, target, tip)
+    if problem:
+        die(problem)
+    if is_ancestor(tip, dev_sha):
+        die(f"dev already contains {target} ({tip[:9]}); there is nothing to merge")
     print(f"{target} is checked out at {wt}; the gates run there")
-
-    dev_sha = git_out("rev-parse", "HEAD").strip()
-    tip = git_out("rev-parse", f"refs/heads/{target}").strip()
     # Checked before the gates too, so a blocked merge fails in seconds, not
     # after a verify run of several minutes.
-    refuse_blockers(main_folder_blockers(dev_sha, tip))
+    refuse_blockers(main_folder_blockers(dev_sha, tip), args.check_only)
 
     if not is_ancestor(dev_sha, tip):
         if args.check_only:
@@ -276,9 +316,11 @@ def merge_named(args: argparse.Namespace) -> int:
                 run(["git", "-C", str(wt), "merge", "--abort"])
                 die(
                     f"merging dev into {target} failed in {wt}, and was aborted. "
-                    f"Resolve it there (git -C {wt} merge dev), then run this again"
+                    f"Resolve it there (git -C {wt} merge dev) and run this again; when "
+                    "the fork lock conflicts, see docs/agents/paired-worktrees.md, "
+                    '"When git merge dev conflicts in the pair"'
                 )
-            tip = git_out("rev-parse", f"refs/heads/{target}").strip()
+            tip = rev_parse(branch_ref)
 
     print(f"\n=== gates in {wt} ===")
     argv = gate_argv(
@@ -287,25 +329,30 @@ def merge_named(args: argparse.Namespace) -> int:
         check_only=args.check_only,
         no_verify=args.no_verify,
         ack_open_blockers=args.ack_open_blockers,
+        expect_head=None if args.check_only else tip,
     )
     print("+", " ".join(argv))
     gates = subprocess.run(argv, cwd=wt)
     if gates.returncode != 0:
-        die(f"gates failed in {wt}", gates.returncode)
+        kept = "" if args.check_only else f" {target} stays at {tip[:9]}, including any merge of dev above."
+        die(f"gates failed in {wt}.{kept}", gates.returncode)
     if args.check_only:
-        print("\ncheck-only: ok (not merging)")
         return 0
 
     # The gates checked `tip`. A green layout gate may add one commit holding
     # only its lock; any other movement means the checked tree is not the one
     # about to be merged.
-    after = git_out("rev-parse", f"refs/heads/{target}").strip()
+    after = rev_parse(branch_ref)
     if after != tip:
-        parent = git_out("rev-parse", f"{after}^").strip()
         changed = git_out("diff", "--name-only", tip, after).splitlines()
-        if parent != tip or changed != [LAYOUT_LOCK]:
+        if rev_parse(f"{after}^") != tip or changed != [LAYOUT_LOCK]:
             die(f"{target} moved from {tip[:9]} to {after[:9]} while the gates ran; run this again")
-    if git_out("rev-parse", "HEAD").strip() != dev_sha:
+    # An edit or a branch switch in the worktree during the gates would mean
+    # verify checked files that are not in `after`.
+    problem = worktree_problem(wt, target, after)
+    if problem:
+        die(f"after the gates: {problem}; run this again")
+    if rev_parse("HEAD") != dev_sha:
         die("dev moved while the gates ran; run this again")
     refuse_blockers(main_folder_blockers(dev_sha, after))
 
@@ -323,8 +370,11 @@ def merge_named(args: argparse.Namespace) -> int:
         )
         return merge.returncode
 
-    if git_out("rev-parse", "HEAD^{tree}").strip() != git_out("rev-parse", f"{after}^{{tree}}").strip():
-        print(f"WARNING: dev's new tree differs from {target}'s, which the gates checked", file=sys.stderr)
+    if rev_parse("HEAD^{tree}") != rev_parse(f"{after}^{{tree}}"):
+        die(
+            f"dev's new tree differs from {target}'s, which the gates checked; "
+            "the merge commit is made, so inspect it before pushing"
+        )
     print(f"\nmerged {target} -> dev; {target} is still checked out at {wt}")
     print("next: push dev when ready (`git push origin dev`); main stays gated")
     return 0
@@ -342,6 +392,7 @@ def main() -> int:
         action="store_true",
         help=argparse.SUPPRESS,
     )
+    ap.add_argument("--expect-head", help=argparse.SUPPRESS)
     ap.add_argument(
         "--ack-open-blockers",
         action="store_true",
@@ -378,6 +429,10 @@ def main() -> int:
         die("working tree not clean — commit or stash first")
     if dirty.stdout.strip() and args.check_only:
         print("(working tree dirty — allowed for --check-only)")
+    if args.expect_head:
+        head = run(["git", "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
+        if head != args.expect_head:
+            die(f"HEAD is {head[:9]}, not the {args.expect_head[:9]} the caller asked to check")
 
     if not args.no_verify:
         print("\n=== verify ===")

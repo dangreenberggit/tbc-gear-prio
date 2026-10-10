@@ -90,12 +90,17 @@ def check_named_merge_runs_only_on_dev() -> list[str]:
 
 def check_gate_run_keeps_every_flag() -> list[str]:
     """The branch's checkout runs the gates, so each flag the owner gave
-    must reach it; a real run asks for the gates without the merge."""
+    must reach it; a real run asks for the gates without the merge, at the
+    tip the caller will merge."""
     problems = []
-    real = m.gate_argv("py", "s.py", check_only=False, no_verify=True, ack_open_blockers=True)
-    if real != ["py", "s.py", "--gates-only", "--no-verify", "--ack-open-blockers"]:
+    real = m.gate_argv(
+        "py", "s.py", check_only=False, no_verify=True, ack_open_blockers=True, expect_head="abc123"
+    )
+    if real != ["py", "s.py", "--gates-only", "--expect-head", "abc123", "--no-verify", "--ack-open-blockers"]:
         problems.append(f"real run argv {real}")
-    check = m.gate_argv("py", "s.py", check_only=True, no_verify=False, ack_open_blockers=False)
+    check = m.gate_argv(
+        "py", "s.py", check_only=True, no_verify=False, ack_open_blockers=False, expect_head=None
+    )
     if check != ["py", "s.py", "--check-only"]:
         problems.append(f"check-only argv {check}")
     return problems
