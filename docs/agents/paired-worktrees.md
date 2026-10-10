@@ -109,8 +109,8 @@ checkout's.
 
 Remove pairs only with `pnpm wt:unpair`. On 2026-10-10, every removal of a
 main worktree that had `node_modules` installed left the folder
-half-deleted: one scratch test and five live runs (two of live-probe, two of
-probe-b, one of probe-c). In each, `git worktree remove` dropped the
+half-deleted: one scratch test and six live runs (two of live-probe, two of
+probe-b, one each of probe-c and probe-d). In each, `git worktree remove` dropped the
 registration and then failed with "Directory not empty". In the scratch
 test, at a deeper path, it did the same to the fork folder ("Filename too
 long"). The script deletes what git leaves behind
@@ -149,6 +149,13 @@ Run from the `feat/worktree-pair` pair on Node 22.17.1:
   `.scratch/stage-gate/probe/brief.md`. With the main worktree locked by
   `git worktree lock`, it refused before running any removal, and the main
   folder was left intact.
+- **After round-3 fixes (probe-d).** `--fork-detached` pair in 100 s;
+  `pnpm verify` in it gave rc 0, "gates: 1517 ran, 0 skipped", in 205 s and
+  left only ignored files that unpair counts as safe; `wt:unpair` without
+  `--force` then removed the pair in 18 s (git left the main folder, the
+  script deleted it). The run-log copy was not exercised live: no session ran
+  in the pair. `check_run_logs_are_kept_without_overwriting` tests it in a
+  temp dir.
 - **After round-2 fixes (probe-c).** `--fork-detached` pair in 82 s. Unpair
   refused on an ignored `.scratch/dist/note.md`, then, with that file gone
   and `.claude/settings.local.json` present, removed the pair in 18 s. git

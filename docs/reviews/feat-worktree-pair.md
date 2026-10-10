@@ -190,3 +190,84 @@ D1 and D2 are fixed for sessions in a pair.
 | P5  | Spec        | fixed       | review pass done on the rewritten sections; recorded in the `7d95e795` message                                                                                                                               |
 | P6  | Spec        | wontfix     | each addition fixes a review finding; the temp-dir link check is the only test of the delete guard on real links, which no pure test can show                                                                |
 | P7  | Spec        | fixed       | same fix as S12                                                                                                                                                                                              |
+
+## Round 3
+
+Reviewed range: `b099ad717963e07d421252399d46fadda0c465b0..0f4dcd9cdec2bb7587434552616586fae7936d31`
+
+Dispatch: the same four axes, fresh Opus subagents, one parallel batch, each
+told it writes nothing. No focused check: round 2 had a `medium` finding.
+Fixes were committed after dispatch in `a42228c2` and in the commit that
+records this round.
+
+### Adversarial (round 3)
+
+A6-A9 hold.
+
+- **A10 (minor)** `git status --ignored` folds a pair's `vendor/` into one
+  line, so a second fork worktree made inside the pair was invisible to the
+  work check and would be deleted by unpair without `--force`.
+- **A11 (minor)** `keep_run_logs` could overwrite its own fallback name on a
+  second collision.
+- **A12 (nit)** `.claude/settings.local.json.bak` counted as safe; run-log
+  subfolders were not copied; a broken lock file in `pair` skipped the
+  warnings and the partly-made message.
+
+### Domain (round 3)
+
+D3-D6 hold.
+
+- **D7 (low)** "every removal ... four live runs" left out probe-c.
+- **D8 (nit)** `_comment` is one string, so "a dated `_comment` line" was
+  wrong.
+- **D9 (nit)** The new `known-traps.md` sentence had no verb.
+
+### Standards + Spec (round 3)
+
+**Standards** (S10-S12, S14, S15 hold)
+
+- **S16 (minor)** "settings.local.json holds only permission approvals" had
+  no source.
+- **S17 (minor)** The `remove()` refusal blamed "the work check", which
+  `--force` skips.
+- **S18 (minor)** "or rerun with --force to discard it" began a new line with
+  an unclear "it".
+- **S19 (minor)** The same gap as A11, from the check's docstring.
+- **S20 (judgement)** `REGENERABLE_*` named files that cannot be
+  regenerated.
+- **S21 (judgement)** `.scratch/agent-runs` was written three times.
+- S13 was only partly fixed: the same gap as D7.
+
+**Spec** (P5-P7 hold apart from P11)
+
+- **P8 (minor)** No live run had exercised the round-3 unpair paths with a
+  `pnpm verify` before them.
+- **P9 (nit)** The same gap as D7.
+- **P10 (low)** Unpair writes into the main checkout and deletes
+  `settings.local.json`; the same claim as S16; a rerun could duplicate logs.
+- **P11 (low)** Ticket 593 quotes the proposed AGENTS.md and skill wording,
+  which the spec said to return in the report.
+- **P12 (nit)** A doc line held only the word "and", and the review pass
+  had no evidence beyond a commit message.
+
+## Disposition (round 3)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                       |
+| --- | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A10 | Adversarial | fixed       | `other_worktrees_inside` reads both repos' worktree lists; unpair refuses before removing anything                                                  |
+| A11 | Adversarial | fixed       | `keep_run_logs` counts up to a free name and skips a file already copied; the check covers a second collision and a rerun                           |
+| A12 | Adversarial | fixed       | `settings.local.json` matches the whole path; run-log subfolders are copied; the setup `except` also catches `ValueError` and `KeyError`            |
+| D7  | Domain      | fixed       | the doc counts six live runs and says what git did in probe-c and probe-d                                                                           |
+| D8  | Domain      | fixed       | "append a dated sentence to `_comment`"                                                                                                             |
+| D9  | Domain      | fixed       | sentence rewritten                                                                                                                                  |
+| S16 | Standards   | fixed       | comment cites code.claude.com/docs/en/worktrees and marks the other-keys case as a hypothesis                                                       |
+| S17 | Standards   | fixed       | message says the script deleted nothing and to fix what git's message names                                                                         |
+| S18 | Standards   | fixed       | "To remove the pair anyway and lose those files, rerun with --force."                                                                               |
+| S19 | Standards   | fixed       | same fix as A11                                                                                                                                     |
+| S20 | Standards   | fixed       | renamed `DISPOSABLE_*` / `is_disposable`                                                                                                            |
+| S21 | Standards   | fixed       | `RUN_LOGS` constant                                                                                                                                 |
+| P8  | Spec        | fixed       | probe-d: pair, `pnpm verify` (rc 0), then unpair without `--force`; the run-log copy is covered in a temp dir only, as the doc says                 |
+| P9  | Spec        | fixed       | same fix as D7                                                                                                                                      |
+| P10 | Spec        | wontfix     | copying the run logs keeps them, which is the hook's purpose; S16's claim is fixed; A11's fix removes the duplicates                                |
+| P11 | Spec        | wontfix     | the coordinator asked for the wording as proposals and named no file; the ticket marks it "not yet approved" and AGENTS.md and skills are untouched |
+| P12 | Spec        | fixed       | line rejoined; the doc had a second review pass                                                                                                     |
