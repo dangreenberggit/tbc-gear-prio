@@ -372,3 +372,36 @@ exits 0, so the branch never moves the fork pin.
 | ID  | Axis          | Disposition | Ticket / note                                                                                                                                     |
 | --- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | F1  | Focused check | fixed       | `check_unsaved_work_on_a_real_repo` (commit `972a92a1`) runs `unsaved_work` on a temp git repo; it fails with A13's wiring or A14's flag reverted |
+
+## Round 6
+
+Reviewed range: `673ee7ea6bc182afcd825edda554c09908b2c1a3..c403fc9af97f037d1d476c2e3e7fdf08adac1024`
+
+## Focused check (round 6)
+
+One fresh Opus subagent (`general-task`), told it writes nothing. Fork
+range: none (the fork lock is unchanged on the branch).
+
+1. **Conditions 1-3: hold.** `972a92a1` names F1 (`low`) and changes only
+   `scripts/check_worktree_pair.py`; `c403fc9a` changes only this file.
+2. **Changes match the finding: hold.** One import, one check, one `CHECKS`
+   entry.
+3. **The test asserts F1: holds.** With A13's wiring reverted by monkeypatch
+   the check prints "a folder added under vendor/ must count as work"; with
+   A14's flag filtered out it prints "showUntrackedFiles=no must not hide
+   untracked work".
+4. **Tests pass.** `python scripts/check_worktree_pair.py` gave 22 checks ok,
+   rc 0.
+
+No findings.
+
+## Disposition (round 6)
+
+| ID  | Axis | Disposition | Ticket / note |
+| --- | ---- | ----------- | ------------- |
+
+## Summary (final)
+
+Six rounds. Every finding is fixed or disposed of. One is deferred to ticket
+593 (AGENTS.md and skill pointers, which need the owner's approval). The
+last round found nothing.
