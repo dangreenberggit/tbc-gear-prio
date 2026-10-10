@@ -331,3 +331,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 595 The pre-commit guard on merges into dev misses clean merges (pre-merge review feat-merge-to-dev-arg round 2, A13) 2026-10-10
 - 596 Automate the live tests of pnpm merge-to-dev <branch> (pre-merge review feat-merge-to-dev-arg round 2, A14, P7) 2026-10-10
 - 597 AGENTS.md still says pair merges need pnpm wt:unpair, owner approval needed (pre-merge review feat-merge-to-dev-arg round 2, X1) 2026-10-10
+- 598 The agnostic adapter points at "Land it on dev" steps that moved, owner approval needed (feat/pair-rule merge of dev) 2026-10-10

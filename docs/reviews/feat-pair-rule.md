@@ -366,3 +366,21 @@ instruction. On 2026-10-10 the owner answered both open questions with
 - **Q-594-wording: option 2.** The "No fork here" bullet was replaced with
   ticket 594's second text, copied verbatim from the ticket (pure text, no
   code), and ticket 594 is closed. Rows W3, W12 and A13 are now `fixed`.
+
+## Merge of dev and ticket 597 (after round 4)
+
+No review round ran for this, on the coordinating session's instruction.
+
+- **`git merge dev`** (206db3eb, which added `pnpm merge-to-dev <branch>`)
+  made merge commit 2d7211b3. Two conflicts: `.scratch/carry-forward/issues/NEXT`
+  took `dev`'s 598, and `.scratch/carry-forward/map.md` kept both sides'
+  lines (594 here; 595-597 from `dev`). `docs/agents/paired-worktrees.md`
+  merged without a conflict; `dev`'s "Land it on dev" is kept as is. This
+  branch's plain-worktree paragraph now names the step "Main folder: merge
+  the fork side" in place of "step 3", which `dev` renumbered.
+- **Ticket 597.** The owner approved its wording ("sure, fine"). The
+  AGENTS.md **Merges into `dev`** bullet now has that text, and ticket 597
+  is closed.
+- **Ticket 598** is filed for a pointer in `agnostic.md:17`, which `dev`
+  also has, to "Land it on dev" steps that the rewrite moved; changing it is
+  a skill edit that needs the owner.
