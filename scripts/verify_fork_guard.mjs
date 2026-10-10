@@ -38,25 +38,25 @@ export function forkGuard({ forkPresent, env }) {
   }
   return [
     "verify: refused -- vendor/tbc-new-fork is absent, so every fork gate would skip and verify would pass without checking the Upgrades tab.",
-    "  Tab or fork work: make a pair with `pnpm wt:pair <name> <main-branch> <fork-branch>` (docs/agents/paired-worktrees.md).",
+    "  Tab or fork work: as a worker, stop and report this to whoever sent you; otherwise make a pair with `pnpm wt:pair <name> <main-branch> <fork-branch>` (docs/agents/paired-worktrees.md).",
     OPT_OUT_HINT,
   ].join("\n");
 }
 
 /**
- * Both counts are taken here, not summed by the caller, so a unit test sees
- * a vitest-only skip fail: that is the skip a half-built fork produces
- * (packages/core/test/fork-engine-harness.ts).
+ * A half-built fork skips only vitest suites
+ * (packages/core/test/fork-engine-harness.ts), so the vitest count is its
+ * own argument and has its own test.
  *
  * @param {{
- *   pythonSkips: number,
- *   vitestSkips: number,
+ *   pythonSkipCount: number,
+ *   vitestSkipCount: number,
  *   env: Record<string, string | undefined>,
  * }} input
  * @returns {string | null} the failure to print, or null when the run passes
  */
-export function skipGuard({ pythonSkips, vitestSkips, env }) {
-  const skipped = pythonSkips + vitestSkips;
+export function skipGuard({ pythonSkipCount, vitestSkipCount, env }) {
+  const skipped = pythonSkipCount + vitestSkipCount;
   if (skipped === 0 || isExempt(env)) {
     return null;
   }

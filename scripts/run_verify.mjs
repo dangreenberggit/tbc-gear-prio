@@ -170,18 +170,14 @@ async function main() {
           const report = JSON.parse(readFileSync(vitestJsonPath, "utf8"));
           vitestSkips = extractVitestSkips(report);
         } catch (err) {
+          // Without the report the run's test and skip counts are unknown,
+          // so it fails everywhere, opt-out and CI included (ticket 408,
+          // defect 4).
           console.error(
-            `run_verify.mjs: could not read vitest's JSON report at ${vitestJsonPath}: ${err}`
+            `run_verify.mjs: could not read vitest's JSON report at ${vitestJsonPath}: ${err}\nverify: failed -- the test and skip counts are unknown without it.`
           );
-          // Unread, the report's skips are unknown; counting one keeps
-          // skipGuard from passing a local run on no evidence.
-          vitestSkips = {
-            ran: 0,
-            skipped: 1,
-            reasons: [
-              "vitest JSON report unreadable, so its skips are unknown",
-            ],
-          };
+          process.exitCode = 1;
+          return;
         }
         stepsRan += 1;
       } else {
@@ -224,8 +220,8 @@ async function main() {
     );
 
     const skipFailure = skipGuard({
-      pythonSkips: pythonSkips.length,
-      vitestSkips: vitestSkips.skipped,
+      pythonSkipCount: pythonSkips.length,
+      vitestSkipCount: vitestSkips.skipped,
       env: process.env,
     });
     if (skipFailure) {

@@ -39,7 +39,8 @@ suites and `wowsims-fork-parity.test.ts` — is wrapped in
 collects them and skips them. A green CI run is no evidence for them.
 Locally, `pnpm verify` fails when any of them skips (`skipGuard`,
 `scripts/verify_fork_guard.mjs`) unless `TBC_VERIFY_WITHOUT_FORK=1`, so a
-green local verify without it ran them all (ticket 478, item A5).
+green local verify without `TBC_VERIFY_WITHOUT_FORK=1` ran them all: its
+tail line reads `gates: N ran, 0 skipped` (ticket 478, item A5).
 
 ## Before any scripted or generated file edit
 

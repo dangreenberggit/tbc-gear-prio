@@ -53,23 +53,29 @@ describe("forkGuard", () => {
 
 describe("skipGuard", () => {
   it("passes a local run with no skips", () => {
-    expect(skipGuard({ pythonSkips: 0, vitestSkips: 0, env: {} })).toBeNull();
+    expect(
+      skipGuard({ pythonSkipCount: 0, vitestSkipCount: 0, env: {} })
+    ).toBeNull();
   });
 
   it("fails a local run with a gate skip and names pnpm wt:pair", () => {
-    const failure = skipGuard({ pythonSkips: 2, vitestSkips: 0, env: {} });
+    const failure = skipGuard({
+      pythonSkipCount: 2,
+      vitestSkipCount: 0,
+      env: {},
+    });
     expect(failure).toContain("2 gate(s)");
     expect(failure).toContain("pnpm wt:pair");
   });
 
   it("fails a local run whose only skips are vitest tests", () => {
-    expect(skipGuard({ pythonSkips: 0, vitestSkips: 1, env: {} })).toContain(
-      "1 gate(s)"
-    );
+    expect(
+      skipGuard({ pythonSkipCount: 0, vitestSkipCount: 1, env: {} })
+    ).toContain("1 gate(s)");
   });
 
   it("lets GitHub Actions and the opt-out skip", () => {
-    const skips = { pythonSkips: 1, vitestSkips: 2 };
+    const skips = { pythonSkipCount: 1, vitestSkipCount: 2 };
     expect(skipGuard({ ...skips, env: { GITHUB_ACTIONS: "true" } })).toBeNull();
     expect(skipGuard({ ...skips, env: { [OPT_OUT]: "1" } })).toBeNull();
   });
@@ -77,7 +83,32 @@ describe("skipGuard", () => {
 
 // The unit tests above pass even if run_verify.mjs never calls the guards.
 // These run the real driver in a temp checkout with a stub step.
-function runDriver({ withFork, step, env: extraEnv = {} }) {
+// Stands in for vitest so the driver's `test` step runs without an install:
+// it writes a JSON report with one skipped test, or no report at all.
+const FAKE_VITEST = `import { writeFileSync } from "node:fs";
+const arg = process.argv.find((a) => a.startsWith("--outputFile="));
+if (process.env.FAKE_VITEST_MODE !== "no-report") {
+  writeFileSync(arg.slice("--outputFile=".length), JSON.stringify({
+    testResults: [{ name: "fake.test.ts", assertionResults: [
+      { status: "skipped", fullName: "fake suite needs the fork" },
+    ] }],
+  }));
+}
+`;
+
+function installFakeVitest(root) {
+  const bin = join(root, "node_modules", ".bin");
+  mkdirSync(bin, { recursive: true });
+  writeFileSync(join(bin, "fake-vitest.mjs"), FAKE_VITEST);
+  writeFileSync(join(bin, "vitest.cmd"), '@node "%~dp0fake-vitest.mjs" %*\r\n');
+  writeFileSync(
+    join(bin, "vitest"),
+    '#!/bin/sh\nexec node "$(dirname "$0")/fake-vitest.mjs" "$@"\n',
+    { mode: 0o755 }
+  );
+}
+
+function runDriver({ withFork, step, steps, env: extraEnv = {} }) {
   const root = mkdtempSync(join(tmpdir(), "tbc-fork-guard-"));
   try {
     mkdirSync(join(root, "scripts"));
@@ -90,11 +121,15 @@ function runDriver({ withFork, step, env: extraEnv = {} }) {
     }
     if (withFork)
       mkdirSync(join(root, "vendor", "tbc-new-fork"), { recursive: true });
+    if (steps === "test") installFakeVitest(root);
     writeFileSync(
       join(root, "package.json"),
       JSON.stringify({
         type: "module",
-        scripts: { "verify:steps": "pnpm run stub", stub: step },
+        scripts:
+          steps === "test"
+            ? { "verify:steps": "pnpm run test" }
+            : { "verify:steps": "pnpm run stub", stub: step },
       })
     );
     const env = { ...process.env, ...extraEnv };
@@ -128,6 +163,22 @@ describe("run_verify.mjs", () => {
     const result = runDriver({ withFork: true, step: SKIPPING_STEP });
     expect(result.status).toBe(1);
     expect(result.stderr).toContain("1 gate(s)");
+  });
+
+  it("exits 1 when only a vitest test skips", () => {
+    const result = runDriver({ withFork: true, steps: "test" });
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("1 gate(s)");
+  });
+
+  it("exits 1 when vitest leaves no readable report, even under the opt-out", () => {
+    const result = runDriver({
+      withFork: true,
+      steps: "test",
+      env: { [OPT_OUT]: "1", FAKE_VITEST_MODE: "no-report" },
+    });
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("could not read vitest's JSON report");
   });
 
   it("passes a skipping gate under the opt-out", () => {

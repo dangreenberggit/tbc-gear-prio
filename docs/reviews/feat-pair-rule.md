@@ -227,3 +227,7 @@ sentence, the AGENTS.md "fork edits happen only in a pair" clause.
 | W10 | Writing     | fixed       | cdf11cef: the reviewer's text                                                                                                                         |
 | W11 | Writing     | fixed       | cdf11cef: the reviewer's text                                                                                                                         |
 | W12 | Writing     | defer       | `.scratch/carry-forward/issues/594-merge-duplicate-sentence-in-pair-rule.md` now lists both texts for the owner                                       |
+
+## Round 3
+
+Reviewed range: `abedfe9cff2605a910ff8c3e07e6f280e607ca7d..05aced4c83e70d527434cf45027c540c59d37f85`
