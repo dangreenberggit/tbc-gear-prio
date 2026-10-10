@@ -91,13 +91,15 @@ tree is reported in the findings.
 #### Focused check (later rounds)
 
 Before dispatching a later round, test three conditions against
-`git log -p <through-sha>..HEAD`, the fork's
+`git log -p <from-sha>..<through-sha>` (this round's `Reviewed range:` line
+from step 1), the fork's
 `git -C vendor/tbc-new-fork log -p <fork-from>..HEAD` (`<fork-from>` is the
 end of the fork range the last round recorded), and this review file. When
 all three hold, run one focused check in place of the three axes. When any
 condition fails, or cannot be settled from those sources, run the three axes.
 When `git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json` exits 0, the
-branch never moves the fork pin: skip the fork log and condition 3.
+branch never moves the fork pin: skip the fork log and treat condition 3 as
+holding.
 
 1. Every commit, in both logs, is one of these:
    - a fix for findings that an earlier round in this file raised, named by
@@ -109,10 +111,11 @@ branch never moves the fork pin: skip the fork log and condition 3.
      other file it changes is under `data/` or `docs/`;
    - a commit that changes only this review file or tickets its Disposition
      rows link.
-2. Every changed line outside tests, comments and docs is at a place that a
-   fixed finding cites.
-3. The wowsims-file check that this review file records gives the same
-   output at the new fork tip.
+2. Every changed line outside tests, comments, docs and fork re-pin commits
+   is at a place that a fixed finding cites.
+3. The wowsims-file check that this review file records (the commands in
+   `docs/fork-upstream-touchpoints.md`) gives the same output at the new
+   fork tip.
 
 Dispatch one fresh agent on the review lane, picked by the "Try in order"
 list above. Give it the main range, the fork range, the findings and tickets
@@ -126,21 +129,22 @@ the commits fix, and these four checks:
 
 Tell the agent it writes nothing, and that it reports a finding only when a
 change is wrong, missing, or does something other than its finding asks.
-The check is done when the agent reports a result for all four checks. When
-check 1 fails, run the three axes on the same range. Keep the
-`## Focused check (round N)` section, and record in it that check 1 failed.
+The check is done when the agent reports a result for all four checks.
 
 The focused check is a round: step 1 has already written its
-`Reviewed range:` line. Add to the review file:
+`Reviewed range:` line. Add a `## Focused check (round N)` section to the
+review file with the fork range and the result of each of the four checks.
 
-- a `## Focused check (round N)` section with the fork range and the result
-  of each of the four checks;
-- a `## Disposition (round N)` table with one row per finding. Follow
-  `docs/agents/known-traps.md`, "Before writing a review Disposition table",
-  for an empty table and for rows of earlier rounds that this round closes.
+When check 1 passes, add a `## Disposition (round N)` table with one row per
+finding. Follow `docs/agents/known-traps.md`, "Before writing a review
+Disposition table", for an empty table and for rows of earlier rounds that
+this round closes. File the ticket for each `defer` row as step 3 says. Then
+continue at step 4.
 
-Then continue at step 4. When check 1 failed, continue at step 3 instead,
-with the three axes' findings.
+When check 1 fails, run the three axes on the same range. Keep the
+`## Focused check (round N)` section, and record in it that check 1 failed.
+Then continue at step 3 with the axes' findings and any findings from checks
+2 to 4. Step 3 writes this round's Disposition table.
 
 ### 3. Aggregate, file tickets, write the review
 
