@@ -543,3 +543,50 @@ branch feat/slice` gave "fatal: cannot lock ref 'refs/heads/feat/slice':
 | WT2  | Writing-for-agents (ticket) | fixed       | ticket 593 anchors the `agnostic.md` paragraph after the code block, with the reviewer's text; its "steps 2-4" still match the doc |
 | WT4  | Writing-for-agents (ticket) | fixed       | "both paragraphs"                                                                                                                  |
 | WX1  | Writing-for-agents (ticket) | defer       | `.scratch/carry-forward/issues/593-point-agents-at-paired-worktrees.md` — skill edit, needs owner approval                         |
+
+## Independent writing-for-agents review: re-check
+
+Reviewed range: `e9e3da54b00fe19bf2b5c13e280724bf1b39ec91..28456e257064043f35c37bb6849db7e3c50c9b51`
+
+The same reviewer re-checked tip `28456e25`. The implementer verified each
+finding before applying it.
+
+- **C1-C3 (medium)** Commit `4df7567d` matched `wowsimtbc` and `wowsimcli` as
+  prefixes. The fork ignores all of `/wowsimtbc*` and `/wowsimcli*` (fork
+  `.gitignore:15-16`). Checked: `is_disposable` returned True for
+  `wowsimtbc-notes.md`, `wowsimtbc-profile/` and `wowsimcli-scratch/`, so
+  unpair would delete such files unasked. Only the makefile's release
+  targets build `wowsimcli` (fork `makefile:170-182`); `devserver` builds
+  `wowsimtbc$(BIN_EXT)`.
+- **R1 (medium)** Step 4 resolved the lock conflict by taking the clone's
+  HEAD as `commit`, which made the re-pin condition after it false, so the
+  `_comment` sentence, `sim-implemented-effects:generate` and `verify` were
+  skipped. Tested the reviewer's replacement in temp repos:
+  1. A fork repo with branches `featA` and `featB` off `F0`, and a main repo
+     whose `dev` lock pins `F0`.
+  2. `pairA` re-pins to `A1`. Its fork side fast-forwards the clone to `A1`,
+     and it merges into `dev`.
+  3. `pairB` re-pins to `B1`. Its fork-side merge gives a merge commit (3
+     ids).
+  4. On `pairB`, `git diff pairB...dev -- lock.json` printed 12 lines, and
+     `git merge dev` gave rc 1 with `lock.json` unmerged.
+  5. Keeping `dev`'s `commit` (`A1`) and both comments, then committing,
+     left the clone's HEAD (the merge commit) different from the lock's
+     `commit`, so the re-pin condition came out true.
+  6. After the re-pin, `git merge --no-ff pairB` into `dev` gave rc 0 with
+     the merge commit pinned.
+- **R2 (minor)** With only 5173 held, the backend lookup finds nothing.
+- **T5 (nit)** "Every fork commit is a separate" starts the last sentence of
+  the one paragraph at `AGENTS.md:89`; that paragraph ends "can hit on any
+  one of them."
+
+## Disposition (independent writing-for-agents review: re-check)
+
+| ID  | Axis                        | Disposition | Ticket / note                                                                                                                                                                                                 |
+| --- | --------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| C1  | Writing-for-agents (script) | fixed       | `DISPOSABLE_PREFIXES` restored; `wowsimtbc.exe` and `wowsimtbc` are exact names in `DISPOSABLE_FILES`, with the reason in a comment                                                                           |
+| C2  | Writing-for-agents (script) | fixed       | `wowsimcli` dropped: no pair flow builds it                                                                                                                                                                   |
+| C3  | Writing-for-agents (script) | fixed       | checks keep `!! wowsimtbc.exe` as safe and assert `wowsimtbc-notes.md` and `wowsimcli-scratch/` are work; `unsaved_work` on the dev pair's fork with the real `wowsimtbc.exe` from the WD3 test returned None |
+| R1  | Writing-for-agents (doc)    | fixed       | reviewer's step 4, tested in temp repos as above; the section intro names what was tested and what was not                                                                                                    |
+| R2  | Writing-for-agents (doc)    | fixed       | sentence added to the Live tab bullet                                                                                                                                                                         |
+| T5  | Writing-for-agents (ticket) | fixed       | ticket 593 and the WT1 note anchor after the paragraph that ends "can hit on any one of them."; pointer 2 gained the fork-branch delete clause; the four X1 lines are in the ticket                           |
