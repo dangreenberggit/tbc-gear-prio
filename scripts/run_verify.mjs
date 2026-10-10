@@ -7,7 +7,8 @@
  * of verify's python steps and several vitest test files skip cleanly (exit 0
  * / a "skipped" assertion) when it's absent. A CI run that tested none of the
  * ported engine emitted the same green tick as a full local run — nothing
- * counted the difference. This script is that count.
+ * counted the difference. This script is that count. Outside CI, an absent
+ * fork is refused before any step runs (verify_fork_guard.mjs).
  *
  * Deliberately step-generic: it reads the step list out of package.json's own
  * `verify` script rather than hardcoding which steps are fork-gated, and
@@ -21,11 +22,18 @@
  */
 
 import { spawn } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  statSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { forkGuard } from "./verify_fork_guard.mjs";
 import {
   extractPythonSkips,
   extractVitestSkips,
@@ -103,6 +111,20 @@ function run(command, args, { stream = false } = {}) {
 }
 
 async function main() {
+  // Same test as the gates' `FORK_ROOT.is_dir()` (scripts/_fork_gate.py).
+  const refusal = forkGuard({
+    forkPresent:
+      statSync(join(ROOT, "vendor", "tbc-new-fork"), {
+        throwIfNoEntry: false,
+      })?.isDirectory() === true,
+    env: process.env,
+  });
+  if (refusal) {
+    console.error(refusal);
+    process.exitCode = 1;
+    return;
+  }
+
   const steps = verifySteps();
   const pythonSkips = [];
   let stepsRan = 0;
