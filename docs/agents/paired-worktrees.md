@@ -74,58 +74,83 @@ it. The command prints a note when that is the case. See `known-traps.md`,
 ## Land it on dev
 
 The merge into `dev` runs from the main folder, and only when the owner asks
-(AGENTS.md "The loop", step 6). The two points below are a reading of
-`scripts/merge_to_dev.py`; no merge was run from a pair. The git sequence of
-steps 3 and 4 for two pairs that both re-pin (fork-side merge, the lock diff,
-`git merge dev`, the conflict, keeping `dev`'s `commit`, the re-pin, and the
-final clean merge into `dev`) ran in temp repos on 2026-10-10; see
-`docs/reviews/feat-worktree-pair.md`, R1. The `pnpm` commands in them did
-not run there.
+(AGENTS.md "The loop", step 6). The pair stays in place.
 
-- **The checks run in a pair.** Steps 1–5 of `merge_to_dev.py` run in the
-  checkout that runs the script, so `pnpm merge-to-dev --check-only` checks
-  the pair (untested).
-- **The merge step fails in a pair.** Step 6 runs `git checkout dev`
-  (`merge_to_dev.py:182`), and git checks a branch out in only one worktree.
-  While the main folder is on `dev`, that checkout fails in a pair (untested).
+1. **Pair folder: commit.** Commit everything on both branches. Done when
+   `git -C <pair> status --porcelain` and
+   `git -C <pair>/vendor/tbc-new-fork status --porcelain` print nothing.
+2. **Main folder: merge the fork side.** Skip this when the pair has no fork
+   commits. Check that `git -C vendor/tbc-new-fork branch --show-current`
+   prints the fork lock's `branch`, then merge the pair's fork branch into
+   it: `git -C vendor/tbc-new-fork merge <fork-branch>`. Do this before the
+   main branch merges into `dev`, so the fork commit the lock names holds
+   every pair's fork work. A pair made with `--fork-detached` that has fork
+   commits puts them on a branch first
+   (`git -C <pair>/vendor/tbc-new-fork switch -c <branch>`). Done when
+   `git -C vendor/tbc-new-fork rev-parse HEAD` prints the `commit` that the
+   pair's `data/wowsims-fork.lock.json` names. When it prints another commit
+   (the merge was not a fast-forward), take the older route below.
+3. **Main folder, on `dev`: merge.** Run `pnpm merge-to-dev <main-branch>`.
+   Done when it prints `merged <main-branch> -> dev`. Add `--check-only` to
+   run the checks without merging. A green layout gate under `--check-only`
+   rewrites `data/wowsims-fork-layout.lock.json` in the pair without
+   committing it; commit that file there, or the real run refuses the pair.
 
-The steps, each with the folder it runs in:
+What step 3 does (full list: `scripts/merge_to_dev.py`, "Named branch"):
 
-1. **Pair folder: check.** Commit everything on both branches, then run
-   `pnpm merge-to-dev --check-only`. A green layout-gate run in it rewrites
-   `data/wowsims-fork-layout.lock.json` (check-only does not commit it):
-   commit that file too, or step 2 refuses.
-2. **Main folder: remove the pair.** Run `pnpm wt:unpair <name>`. Both
+- Verify, the review and ticket check, and the layout gate run in the pair,
+  so they read the pair's fork, lock, review file and tickets.
+- If `dev` has commits the branch lacks, it first runs `git merge dev` in
+  the pair. After that, `dev` is an ancestor of the branch, so the merge into
+  `dev` produces exactly the branch's tree: the checks ran on the tree that
+  `dev` gets. That merge commit stays on the branch even when a later check
+  fails.
+- In the main folder, dirty files block the merge only when the merge writes
+  them or when they are staged. Other dirty files, tracked or untracked,
+  stay as they are.
+- `--check-only` does not merge `dev` into the branch. When `dev` is ahead,
+  it checks the branch's tip and prints a note saying so.
+
+The live tests of step 3 and their commands are in
+`docs/reviews/feat-merge-to-dev-arg.md`, "Live tests". It has not yet
+merged into the real `dev`.
+
+**When `git merge dev` conflicts in the pair,** step 3 aborts that merge,
+leaves the pair as it was, and stops. For an ordinary conflict, resolve it in
+the pair (`git -C <pair> merge dev`) and run step 3 again.
+
+**When `dev` has a new fork pin,** take the older route below. Step 3
+refuses, before it merges anything, when `data/wowsims-fork.lock.json` on
+`dev` changed since the branch forked. Two reasons:
+
+- When this pair re-pinned too, the lock's `commit` and `_comment` lines
+  conflict (temp-repo test 2026-10-10, `docs/reviews/feat-worktree-pair.md`
+  WD7; the repo has no merge driver for the lock).
+- When only `dev` re-pinned, `git merge dev` would succeed, but the pair's
+  fork worktree stays on the old commit, so the fork gates in the pair's
+  verify would fail (a reading of `scripts/_fork_gate.py`, untested).
+
+The older route's git steps ran in temp repos on 2026-10-10
+(`docs/reviews/feat-worktree-pair.md`, R1; the `pnpm` commands did not run
+there):
+
+1. **Main folder: remove the pair.** Run `pnpm wt:unpair <name>`. Both
    branches are kept, and git now lets the main folder check them out.
-3. **Main folder: merge the fork side.** Check that
-   `git -C vendor/tbc-new-fork branch --show-current` prints the fork lock's
-   `branch`, then merge the pair's fork branch into it:
-   `git -C vendor/tbc-new-fork merge <fork-branch>`. Do this before the main
-   branch merges into `dev`, so the fork commit the lock names holds every
-   pair's fork work.
-4. **Main folder: check out, and re-pin when needed.** Run
-   `git checkout <main-branch>`. If
-   `git diff <main-branch>...dev -- data/wowsims-fork.lock.json` prints
-   anything, another pair re-pinned first: run `git merge dev`. The lock's
-   `commit` and `_comment` lines conflict (temp-repo test 2026-10-10,
-   `docs/reviews/feat-worktree-pair.md` WD7; the repo has no merge driver for
-   the lock). Keep `dev`'s `commit` and both `_comment` sentences, and commit
-   the merge. Then, if the clone's HEAD is not the lock's `commit`, read the
-   lock's `_comment` history, set `commit` to the clone's HEAD, append a
-   dated sentence to `_comment`, run `pnpm sim-implemented-effects:generate`
-   and `pnpm verify`, and commit on the branch.
-5. **Main folder: merge.** Run `pnpm merge-to-dev` once the owner asks.
-   `merge_to_dev.py` refuses to run from `dev` (`:125-127`), so step 4's
-   checkout is needed every time.
+2. **Main folder: merge the fork side**, as in step 2 above, if not done.
+3. **Main folder: check out and re-pin.** Run `git checkout <main-branch>`
+   and `git merge dev`. Keep `dev`'s `commit` and both `_comment` sentences,
+   and commit the merge. Then, if the clone's HEAD is not the lock's
+   `commit`, read the lock's `_comment` history, set `commit` to the clone's
+   HEAD, append a dated sentence to `_comment`, run
+   `pnpm sim-implemented-effects:generate` and `pnpm verify`, and commit on
+   the branch.
+4. **Main folder: merge.** Run `pnpm merge-to-dev` with no branch; it merges
+   the branch the folder has checked out.
 
-A pair made with `--fork-detached` has no fork branch. With no fork commits,
-skip step 3 and the re-pin in step 4, but still check out the main branch.
-With fork commits, put them on a branch
-(`git -C <pair>/vendor/tbc-new-fork switch -c <branch>`) before step 2;
-unpair refuses a detached commit that no branch contains.
-
-Between step 3 and the merge, the fork gates exit 2 in the main folder while
-it is on `dev`, because `dev`'s lock still names the old fork commit.
+Between the fork-side merge and the merge into `dev`, the fork gates exit 2
+in the main folder while it is on `dev`, because `dev`'s lock still names
+the old fork commit. Step 3 runs its checks in the pair, so this does not
+stop it (a reading of `merge_to_dev.py`, untested).
 
 ## Remove it
 
