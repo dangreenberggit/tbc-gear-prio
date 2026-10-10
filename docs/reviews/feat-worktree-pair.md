@@ -271,3 +271,74 @@ D3-D6 hold.
 | P10 | Spec        | wontfix     | copying the run logs keeps them, which is the hook's purpose; S16's claim is fixed; A11's fix removes the duplicates                                |
 | P11 | Spec        | wontfix     | the coordinator asked for the wording as proposals and named no file; the ticket marks it "not yet approved" and AGENTS.md and skills are untouched |
 | P12 | Spec        | fixed       | line rejoined; the doc had a second review pass                                                                                                     |
+
+## Round 4
+
+Reviewed range: `0f4dcd9cdec2bb7587434552616586fae7936d31..6acfa308bda539de13e565bd28bdae789e2e21df`
+
+Dispatch: the same four axes, fresh Opus subagents, one parallel batch, each
+told it writes nothing. No focused check: round 3 had two `judgement`
+labels. Fixes were committed after dispatch in `08d006d3` and in the commit
+that records this round. Every round-4 label is `low`, `minor`, `nit` or
+`note`.
+
+**Adversarial.** A10-A12 hold.
+
+- **A13 (low)** A folder added under the pair's `vendor/` was deleted without
+  `--force`: `git status --ignored` reports `vendor/` as one line.
+- **A14 (low)** A `status.showUntrackedFiles=no` setting would hide untracked
+  work from both status calls. Neither repo sets it today.
+
+**Domain.** D7-D9 hold.
+
+- **D10 (low)** "Remove it" did not mention the nested-worktree refusal.
+
+**Standards.** S16-S21 hold.
+
+- **S22 (low)** The P12 row named no evidence for the doc review pass.
+- **S23 (minor)** No check covered a run-log subfolder.
+- **S24 (nit)** "git left the main folder" could be misread.
+- **S25 (nit)** The `known-traps.md` sentence put the condition before the
+  check that decides it.
+- **S26 (note)** A check's docstring repeated its function's docstring.
+
+**Spec.** P8 and P9 hold.
+
+- **P13 (nit)** The same gap as S22.
+
+### Doc review (writing-for-agents), round 4
+
+A pass over `docs/agents/paired-worktrees.md` at `08d006d3` against the
+skill's rubric:
+
+- **Pointer.** The first two paragraphs say what a pair is and the one
+  branch that calls for it.
+- **Completion criteria.** "Make one" ends at `pair ready`. Each landing step
+  names its folder and the command that ends it. "Remove it" ends when
+  neither `worktree list` names the pair.
+- **Environment as source.** Flags are left to `--help`. The launch.json
+  ports are kept because they are the trap a reader cannot see from the
+  command.
+- **Duplication.** The 5173 rule is in `known-traps.md` and here.
+  `known-traps.md` points here for the check, so the method has one home.
+- **Negation.** The one prohibition, "Remove pairs only with
+  `pnpm wt:unpair`", is stated as the positive target.
+- **Edits made in this pass.** "Remove it" now names every refusal,
+  including the two that `--force` does not skip. "left the main folder" is
+  now "left the main folder on disk". The Live test section says where its
+  figures come from. The broken line in the 5173 bullet was rejoined (round
+  3).
+
+## Disposition (round 4)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                    |
+| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------ |
+| A13 | Adversarial | fixed       | `unknown_vendor_folders` lists `vendor/` children; unpair counts unknown ones as work            |
+| A14 | Adversarial | fixed       | both status calls pass `--untracked-files=normal`                                                |
+| D10 | Domain      | fixed       | "Remove it" names the nested-worktree and lock refusals and says `--force` does not skip them    |
+| S22 | Standards   | fixed       | the "Doc review (writing-for-agents), round 4" section above records what was checked and edited |
+| S23 | Standards   | fixed       | `check_run_logs_are_kept_without_overwriting` copies a file in a subfolder                       |
+| S24 | Standards   | fixed       | "left the main folder on disk"                                                                   |
+| S25 | Standards   | fixed       | the sentence now asks for the check first                                                        |
+| S26 | Standards   | fixed       | the check's docstring now states only what it asserts                                            |
+| P13 | Spec        | fixed       | same fix as S22                                                                                  |
