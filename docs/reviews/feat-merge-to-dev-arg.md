@@ -135,6 +135,13 @@ repo).
 | T10   | gates fail (missing review) after `dev` was merged into the branch                        | message names the branch's new tip; `dev` unchanged, rc 1                                                                                                         |
 | T6    | no-argument run from a checkout of `feat/noarg`                                           | checks out `dev`, merges as before, rc 0                                                                                                                          |
 
+Gate run with verify in the real pair (`C:\Users\dgree\Code\lulz\tbc-wt\merge-arg`,
+Node 22.17.1): `python scripts/merge_to_dev.py --gates-only --expect-head c7d8f7bd134cc5349beb03032cb61d17d8277c44`
+exited 0 on 2026-10-10. Its output: `gates: 1519 ran, 0 skipped` (verify),
+`disposition rows: 22 parsed of 22`, `merge-ready: ok`, the layout gate
+skipped because the tab source was unchanged, then `gates: ok (not merging)`.
+The pair's tree stayed clean at `c7d8f7bd`.
+
 Not run: the layout gate's lock-only commit allowance (the fork was absent
 in the clone, so the gate skipped), the race where the branch or the pair
 moves during the gates, and a merge into the real `dev`.
