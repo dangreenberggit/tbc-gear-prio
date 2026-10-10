@@ -350,13 +350,61 @@ def check_run_logs_are_kept_without_overwriting() -> list[str]:
         (pair / ".scratch" / "agent-runs" / "s1.jsonl").write_text("pair s1", encoding="utf-8")
         (pair / ".scratch" / "agent-runs" / "s2.jsonl").write_text("pair s2", encoding="utf-8")
         (main / ".scratch" / "agent-runs" / "s1.jsonl").write_text("main s1", encoding="utf-8")
+        (main / ".scratch" / "agent-runs" / "s1.pair-probe.jsonl").write_text(
+            "earlier pair probe", encoding="utf-8"
+        )
         wp.keep_run_logs(pair, main)
         runs = main / ".scratch" / "agent-runs"
-        want = {"s1.jsonl": "main s1", "s1.pair-probe.jsonl": "pair s1", "s2.jsonl": "pair s2"}
+        want = {
+            "s1.jsonl": "main s1",
+            "s1.pair-probe.jsonl": "earlier pair probe",
+            "s1.pair-probe-2.jsonl": "pair s1",
+            "s2.jsonl": "pair s2",
+        }
         got = {p.name: p.read_text(encoding="utf-8") for p in runs.iterdir()}
         if got != want:
             problems.append(f"main run logs after keep_run_logs: {got}, want {want}")
+        # A rerun after a refused unpair copies nothing twice.
+        wp.keep_run_logs(pair, main)
+        if len(list(runs.iterdir())) != len(want):
+            problems.append(f"a second keep_run_logs added files: {sorted(p.name for p in runs.iterdir())}")
     return problems
+
+
+def check_other_worktrees_inside_the_pair_are_found() -> list[str]:
+    """`git status --ignored` folds a pair's whole vendor/ into one line, so
+    a second fork worktree made inside it is invisible to the work check;
+    unpair finds it in `git worktree list` instead."""
+    root = "C:/Users/dgree/Code/lulz/tbc-wt/tab-sort"
+    entries = wp.parse_worktrees(
+        f"""worktree {root}
+HEAD 1
+
+worktree {root}/vendor/tbc-new-fork
+HEAD 2
+
+worktree {root}/vendor/tbc-new-fork-b
+HEAD 3
+branch refs/heads/w/b
+
+worktree C:/Users/dgree/Code/lulz/tbc-wt/tab-sort-2
+HEAD 4
+"""
+    )
+    got = wp.other_worktrees_inside(root, [root, root + "/vendor/tbc-new-fork"], entries)
+    want = [root + "/vendor/tbc-new-fork-b"]
+    if got != want:
+        return [f"other_worktrees_inside gave {got}, want {want}"]
+    return []
+
+
+def check_disposable_names_match_whole_paths() -> list[str]:
+    """A backup next to settings.local.json is the user's file, not Claude
+    Code's."""
+    got = wp.unexpected_ignored("!! .claude/settings.local.json.bak\n!! .claude/settings.local.json\n")
+    if got != [".claude/settings.local.json.bak"]:
+        return [f"unexpected_ignored gave {got}"]
+    return []
 
 
 CHECKS = (
@@ -378,6 +426,8 @@ CHECKS = (
     check_leftover_is_deleted_only_once_git_let_go,
     check_delete_guard_on_real_links,
     check_run_logs_are_kept_without_overwriting,
+    check_other_worktrees_inside_the_pair_are_found,
+    check_disposable_names_match_whole_paths,
 )
 
 

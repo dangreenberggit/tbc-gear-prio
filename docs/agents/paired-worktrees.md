@@ -45,8 +45,7 @@ it. The command prints a note when that is the case. See `known-traps.md`,
   `Get-NetTCPConnection -LocalPort 5173 -State Listen` for its
   `OwningProcess`, then that process's `CommandLine` from
   `Get-CimInstance Win32_Process -Filter "ProcessId=<pid>"`). The layout gate
-  and
-  `pnpm tab-review` use no port: they serve the pair's own `dist/`
+  and `pnpm tab-review` use no port: they serve the pair's own `dist/`
   (`pnpm wt:pair ... --build`).
 
 ## Land it on dev
@@ -79,9 +78,10 @@ The steps, each with the folder it runs in:
    work.
 4. **Main folder: re-pin when needed.** Run `git checkout <main-branch>`. If
    the clone's HEAD is not the lock's `commit` (step 3 made a merge commit),
-   read the lock's `_comment` history, set `commit` to the clone's HEAD with
-   a dated `_comment` line, run `pnpm sim-implemented-effects:generate` and
-   `pnpm verify`, and commit on the branch.
+   read the lock's `_comment` history, set `commit` to the clone's HEAD,
+   append a dated sentence to `_comment`, run
+   `pnpm sim-implemented-effects:generate` and `pnpm verify`, and commit on
+   the branch.
 5. **Main folder: merge.** Run `pnpm merge-to-dev` once the owner asks.
 
 A pair made with `--fork-detached` has no fork branch. With no fork commits,
@@ -109,10 +109,11 @@ checkout's.
 
 Remove pairs only with `pnpm wt:unpair`. On 2026-10-10, every removal of a
 main worktree that had `node_modules` installed left the folder
-half-deleted: one scratch test and four live runs (two of live-probe, two of
-probe-b). In each, `git worktree remove` dropped the registration and then
-failed with "Directory not empty". In the scratch test, at a deeper path, it did the same to the
-fork folder ("Filename too long"). The script deletes what git leaves behind
+half-deleted: one scratch test and five live runs (two of live-probe, two of
+probe-b, one of probe-c). In each, `git worktree remove` dropped the
+registration and then failed with "Directory not empty". In the scratch
+test, at a deeper path, it did the same to the fork folder ("Filename too
+long"). The script deletes what git leaves behind
 only once git has dropped the registration, and only after it checks that no
 link inside the pair points out of it. A junction into the main checkout
 would make any recursive delete remove the main checkout's files.
@@ -150,7 +151,9 @@ Run from the `feat/worktree-pair` pair on Node 22.17.1:
   folder was left intact.
 - **After round-2 fixes (probe-c).** `--fork-detached` pair in 82 s. Unpair
   refused on an ignored `.scratch/dist/note.md`, then, with that file gone
-  and `.claude/settings.local.json` present, removed the pair in 18 s.
+  and `.claude/settings.local.json` present, removed the pair in 18 s. git
+  again left the main folder ("Directory not empty"), and the script deleted
+  it.
 - **disk.** The same layout in a scratch test measured 404 MB for the main
   worktree without `vendor/` and 561 MB for the fork worktree.
 - **First-run fixes.** Two failures in the first runs were fixed in the

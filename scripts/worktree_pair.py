@@ -34,6 +34,7 @@ delete the main checkout's files (ticket 572).
 from __future__ import annotations
 
 import argparse
+import filecmp
 import json
 import os
 import platform
@@ -143,33 +144,34 @@ def links_outside(root: str, links: list[tuple[str, str]]) -> list[tuple[str, st
     return [(link, target) for link, target in links if not is_inside(target, root)]
 
 
-# What a pair's installs, builds and sessions write, all ignored and safe to
-# delete. Taken from `git status --porcelain --ignored` in both worktrees of a
-# fresh pair on 2026-10-10 and after `pnpm verify` ran in it, plus the fork's
-# .gitignore build entries. A folder name counts only at the top level or one
-# package down (apps/web/, packages/core/), where installs and builds put it.
-REGENERABLE_DIRS = {"node_modules", "dist", "dist-server", "binary_dist", "__pycache__", "vendor", "coverage"}
-REGENERABLE_SUFFIXES = (".tsbuildinfo", ".pb.go", "_auto_gen.ts", ".results.tmp", ".stylelintcache")
-# The run log is copied to the main checkout before the pair is removed
-# (keep_run_logs); settings.local.json holds only permission approvals.
-REGENERABLE_PREFIXES = (
-    "ui/generated/",
-    "scripts/__pycache__/",
-    ".scratch/agent-runs/",
-    ".claude/settings.local.json",
-)
+# What a pair's installs, builds and sessions write: ignored, and safe for
+# unpair to delete. Taken from `git status --porcelain --ignored` in both
+# worktrees of a fresh pair on 2026-10-10, the fork's .gitignore build
+# entries, and `coverage/` (vitest's report folder). A folder name counts only
+# at the top level or one package down (apps/web/, packages/core/), where
+# installs and builds put it.
+DISPOSABLE_DIRS = {"node_modules", "dist", "dist-server", "binary_dist", "__pycache__", "vendor", "coverage"}
+DISPOSABLE_SUFFIXES = (".tsbuildinfo", ".pb.go", "_auto_gen.ts", ".results.tmp", ".stylelintcache")
+DISPOSABLE_PREFIXES = ("ui/generated/", "scripts/__pycache__/")
 PACKAGE_DIRS = ("apps", "packages")
+RUN_LOGS = ".scratch/agent-runs"
+# The run logs are copied to the main checkout before the pair is removed
+# (keep_run_logs). Claude Code saves a worktree session's permission
+# approvals in settings.local.json (code.claude.com/docs/en/worktrees, "What
+# worktrees share with the main checkout"); other keys a user put there by
+# hand would be lost too (hypothesis, untested).
+DISPOSABLE_FILES = {".claude/settings.local.json"}
 
 
-def is_regenerable(path: str) -> bool:
-    if path.startswith(REGENERABLE_PREFIXES):
+def is_disposable(path: str) -> bool:
+    if path in DISPOSABLE_FILES or path.startswith(DISPOSABLE_PREFIXES + (RUN_LOGS + "/",)):
         return True
     if path.startswith(".scratch/"):
         return False
     parts = path.rstrip("/").split("/")
-    if parts[-1] in REGENERABLE_DIRS:
+    if parts[-1] in DISPOSABLE_DIRS:
         return len(parts) == 1 or (len(parts) == 3 and parts[0] in PACKAGE_DIRS)
-    return path.endswith(REGENERABLE_SUFFIXES)
+    return path.endswith(DISPOSABLE_SUFFIXES)
 
 
 def unexpected_ignored(porcelain_ignored: str) -> list[str]:
@@ -179,7 +181,21 @@ def unexpected_ignored(porcelain_ignored: str) -> list[str]:
     return [
         line[3:]
         for line in porcelain_ignored.splitlines()
-        if line.startswith("!! ") and not is_regenerable(line[3:])
+        if line.startswith("!! ") and not is_disposable(line[3:])
+    ]
+
+
+def other_worktrees_inside(root: str, own: list[str], entries: list[dict[str, str]]) -> list[str]:
+    """Worktrees registered inside `root` besides the pair's own two.
+
+    `git status --ignored` folds a pair's vendor/ into one line, so a second
+    fork worktree made in there is invisible to the work check, and removing
+    the pair would delete it.
+    """
+    return [
+        e["worktree"]
+        for e in entries
+        if is_inside(e["worktree"], root) and not any(same_path(e["worktree"], p) for p in own)
     ]
 
 
@@ -438,7 +454,7 @@ def pair(args: argparse.Namespace) -> int:
         run([make, "-C", str(fork_target), "go-to-ts"], env)
         if args.build:
             run([make, "-C", str(fork_target), "dist/tbc/.dirstamp"], env)
-    except (Refusal, OSError) as exc:
+    except (Refusal, OSError, ValueError, KeyError) as exc:
         for warning in warnings:
             say(f"WARNING: {warning}")
         say(f"FAILED: {exc}")
@@ -531,19 +547,26 @@ def keep_run_logs(pair_root: Path, main_dir: Path) -> None:
     .claude/hooks/log-agent-run.py writes them under the session's project
     folder, and for a session opened in a pair that is the pair.
     """
-    src = pair_root / ".scratch" / "agent-runs"
+    src = pair_root / RUN_LOGS
     if not src.is_dir():
         return
-    dst = main_dir / ".scratch" / "agent-runs"
-    dst.mkdir(parents=True, exist_ok=True)
-    for log in src.iterdir():
-        if not log.is_file():
-            continue
-        out = dst / log.name
-        if out.exists():
-            out = dst / f"{log.stem}.pair-{pair_root.name}{log.suffix}"
-        shutil.copy2(log, out)
-        say(f"kept run log {out}")
+    for log in sorted(p for p in src.rglob("*") if p.is_file()):
+        rel = log.relative_to(src)
+        folder = (main_dir / RUN_LOGS / rel).parent
+        folder.mkdir(parents=True, exist_ok=True)
+        candidates = [log.name] + [
+            f"{log.stem}.pair-{pair_root.name}{'' if n == 1 else f'-{n}'}{log.suffix}" for n in range(1, 100)
+        ]
+        for name in candidates:
+            out = folder / name
+            if not out.exists():
+                shutil.copy2(log, out)
+                say(f"kept run log {out}")
+                break
+            if filecmp.cmp(log, out, shallow=False):
+                break  # already copied by an earlier unpair of this pair
+        else:
+            raise Refusal(f"no free name for run log {log} in {folder}")
 
 
 def remove(repo: Path, path: Path, listed: bool, force: bool) -> None:
@@ -559,8 +582,7 @@ def remove(repo: Path, path: Path, listed: bool, force: bool) -> None:
     if action == "refuse":
         raise Refusal(
             f"git kept {path} registered and refused to remove it ({git_said or 'no message'}); "
-            "nothing in it was deleted. Something changed in it after the work check: "
-            "look, then rerun"
+            "this script deleted nothing in it. Fix what git's message names, then rerun"
         )
     if action == "delete":
         delete_folder(path)
@@ -590,6 +612,12 @@ def unpair(args: argparse.Namespace) -> int:
     if not target.exists() and not in_main and not in_fork:
         say(f"nothing to remove: no folder {target} and no worktree registered there")
         return 0
+    others = other_worktrees_inside(str(target), [str(target), str(fork_target)], main_list + fork_list)
+    if others:
+        raise Refusal(
+            f"other worktrees are registered inside {target}: {', '.join(others)}. "
+            "Removing the pair would delete them; remove them first with git worktree remove"
+        )
     for path, listed, repo in ((target, in_main, main_dir), (fork_target, in_fork, fork)):
         if path.exists() and not listed and not args.force:
             raise Refusal(
@@ -601,7 +629,9 @@ def unpair(args: argparse.Namespace) -> int:
             if listed and repo.exists():
                 problem = unsaved_work(repo)
                 if problem:
-                    raise Refusal(f"{problem}\nor rerun with --force to discard it")
+                    raise Refusal(
+                        f"{problem}\nTo remove the pair anyway and lose those files, rerun with --force."
+                    )
 
     if target.exists():
         keep_run_logs(target, main_dir)
