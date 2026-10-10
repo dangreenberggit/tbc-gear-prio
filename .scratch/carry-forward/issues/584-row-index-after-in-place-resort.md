@@ -93,3 +93,11 @@ mutation (`rw4-mutations.log` run 1 fails on Cataclysm's Edge at the top).
 were RW4's; neither renders a row, so the conclusion holds. The test change
 and the matching lock `_comment` correction are ticket 585 (review findings
 A11, A12, S21).
+
+### Ticket 585 (2026-10-09)
+
+From fork `316326a95` (pinned by main `243329e7`), `FOUR` starts in neither
+Item order, so the re-sort test's descending click and its ascending click
+each move every row, and the comparator mutation above fails at either
+click's check (ticket 585's closing note). "descending, then ascending" now
+holds for rows that move; at `e417a504e` only the ascending click moved a row.

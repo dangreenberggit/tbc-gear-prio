@@ -31,24 +31,24 @@ next upstream merge and before opening any PR.
 
 All commands run from the main repo root against the fork clone at
 `vendor/tbc-new-fork` (gitignored; its own `.git`, branch
-`feat/upgrades-tab-react`). The fork commit is `d1de72abc`, the commit
+`feat/upgrades-tab-react`). The fork commit is `316326a95`, the commit
 `data/wowsims-fork.lock.json` pins. Its upstream base is `5262ff38`, the
 upstream commit `data/wowsims.lock.json` pins.
 
 ```
 # 5262ff38 is an ancestor of the fork commit, and the only merge between them
 # is fedf78807 itself, whose second parent is 5262ff38, so this diff holds only
-# our changes (118 commits plus that merge, measured 2026-10-09 at d1de72abc)
-git -C vendor/tbc-new-fork rev-list --no-merges --count 5262ff38..d1de72abc   # -> 118
-git -C vendor/tbc-new-fork merge-base 5262ff38 d1de72abc   # -> 5262ff386bd1...
-git -C vendor/tbc-new-fork log --merges --oneline 5262ff38..d1de72abc   # prints only fedf78807
+# our changes (119 commits plus that merge, measured 2026-10-09 at 316326a95)
+git -C vendor/tbc-new-fork rev-list --no-merges --count 5262ff38..316326a95   # -> 119
+git -C vendor/tbc-new-fork merge-base 5262ff38 316326a95   # -> 5262ff386bd1...
+git -C vendor/tbc-new-fork log --merges --oneline 5262ff38..316326a95   # prints only fedf78807
 
 # the modified upstream files (1) and their line counts
-git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 5262ff38 d1de72abc | wc -l
-git -C vendor/tbc-new-fork diff --numstat --diff-filter=M 5262ff38 d1de72abc
+git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 5262ff38 316326a95 | wc -l
+git -C vendor/tbc-new-fork diff --numstat --diff-filter=M 5262ff38 316326a95
 
 # the whole changed-file set by status: 259 A, 1 M, nothing else
-git -C vendor/tbc-new-fork diff --name-status 5262ff38 d1de72abc | cut -f1 | sort | uniq -c
+git -C vendor/tbc-new-fork diff --name-status 5262ff38 316326a95 | cut -f1 | sort | uniq -c
 ```
 
 ### How the count moved
@@ -80,13 +80,14 @@ git -C vendor/tbc-new-fork diff --name-status 5262ff38 d1de72abc | cut -f1 | sor
 | `0ba3765ec` (base `5262ff38`)     | 1                       | 2026-10-09: ticket 589, a phase change saved without the tab's data, in tab files; no upstream file touched.                                                              |
 | `bfde23961` (base `5262ff38`)     | 1                       | 2026-10-09: the tab's actions moved into its zustand store, and ticket 590's test fixes, in tab files; no upstream file touched.                                          |
 | `218234677` (base `5262ff38`)     | 1                       | 2026-10-09: ticket 591, the store-actions review leftovers, in tab files; no upstream file touched.                                                                       |
-| **`d1de72abc` (base `5262ff38`)** | **1**                   | 2026-10-09: ticket 592, two tests and three comment edits, in tab files; no upstream file touched.                                                                        |
+| `d1de72abc` (base `5262ff38`)     | 1                       | 2026-10-09: ticket 592, two tests and three comment edits, in tab files; no upstream file touched.                                                                        |
+| **`316326a95` (base `5262ff38`)** | **1**                   | 2026-10-09: ticket 585, one tab test file; no upstream file touched.                                                                                                      |
 
 Each row is the `--name-only --diff-filter=M` command above over that range.
 
 ## Category B — the one modified upstream file
 
-Counts are added/removed from `--numstat` over `5262ff38..d1de72abc`. Ticket
+Counts are added/removed from `--numstat` over `5262ff38..316326a95`. Ticket
 numbers are this repo's (tbc-gear-prio) tickets.
 
 | #   | File                        | +/− | What the lines are                                                                                                                                                                                                                                                                                                                          | Why the tab needs it                                                             | Ticket |
@@ -120,7 +121,7 @@ file is formatted, from the fork root:
 ## Back to upstream's text
 
 The branch changed 19 upstream files at one time or another
-(`git -C vendor/tbc-new-fork log --format= --name-only 5262ff38..d1de72abc`,
+(`git -C vendor/tbc-new-fork log --format= --name-only 5262ff38..316326a95`,
 keeping the paths that exist at `5262ff38`). At the pin before the cleanup,
 `b2851da58`, 18 of them were modified, #1 among them
 (`git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 42c75dc9 b2851da58`);
@@ -162,7 +163,7 @@ run until the page reloads, as on every other wowsims page.
 259 files are new; 253 of them are under `ui/features/upgrades/`. The other 6:
 
 ```
-git -C vendor/tbc-new-fork diff --name-only --diff-filter=A 5262ff38 d1de72abc -- . ':!ui/features/upgrades'
+git -C vendor/tbc-new-fork diff --name-only --diff-filter=A 5262ff38 316326a95 -- . ':!ui/features/upgrades'
 ```
 
 - **`ui/app/tabs/UpgradesTabBody.tsx`** and its three tests
@@ -231,7 +232,7 @@ untested here.
 ticket numbers, so keep it that way. Re-run (prints nothing):
 
 ```
-git -C vendor/tbc-new-fork grep -n -iE "ticket [0-9]+" d1de72abc -- $(git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 5262ff38 d1de72abc)
+git -C vendor/tbc-new-fork grep -n -iE "ticket [0-9]+" 316326a95 -- $(git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 5262ff38 316326a95)
 ```
 
 ## Formatting
