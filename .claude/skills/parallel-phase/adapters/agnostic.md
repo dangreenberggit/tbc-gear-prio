@@ -11,14 +11,16 @@ FEATURE=$(git branch --show-current)
 SLICE=<slice-kebab>
 BASE=$(git rev-parse HEAD)
 git fetch origin 2>/dev/null || true
-git worktree add "../$(basename "$(pwd)")-${SLICE}" -b "${FEATURE}/${SLICE}" "${BASE}"
+git worktree add "../$(basename "$(pwd)")-${SLICE}" -b "${FEATURE}-${SLICE}" "${BASE}"
 ```
+
+If the slice reads or edits the fork (`vendor/tbc-new-fork`), make a pair instead of the plain worktree above: `pnpm wt:pair ${SLICE} "${FEATURE}-${SLICE}" "${FEATURE}-${SLICE}" -b --base "${BASE}" --new-fork-branch` (`${SLICE}` at most 23 characters). A plain worktree has no `vendor/`, so the fork gates skip and `pnpm verify` passes without checking the fork. The pair is installed when the command prints `pair ready`; its folder is on the `main` line of that output. Before the merge below, follow `docs/agents/paired-worktrees.md` "Land it on dev" steps 2-4 with `${FEATURE}` in place of `dev`, so the slice's fork commits reach the clone's branch and the lock names them. Remove the pair only with `pnpm wt:unpair ${SLICE}`, and after the merge delete its fork branch with `git -C vendor/tbc-new-fork branch -d "${FEATURE}-${SLICE}"`.
 
 Point the worker session at that worktree directory. Install deps in the worktree the same way the repo expects (`pnpm install`), or copy local env files if needed — do not symlink `node_modules` from the main tree. Tell the worker to assert `git log -1 --format=%H` equals `${BASE}` before doing anything else.
 
 ## Worker contract
 
-- Commit on `${FEATURE}/${SLICE}` only.
+- Commit on `${FEATURE}-${SLICE}` only.
 - End with the handoff template (`Status`, `Branch`, `Base`, what, verify).
 - Do not merge into `dev` / `main` or run `pnpm merge-to-dev`.
 
@@ -28,7 +30,7 @@ On the feature branch checkout:
 
 ```bash
 git checkout "${FEATURE}"
-git merge --no-ff "${FEATURE}/${SLICE}" -m "Merge ${FEATURE}/${SLICE} into ${FEATURE}"
+git merge --no-ff "${FEATURE}-${SLICE}" -m "Merge ${FEATURE}-${SLICE} into ${FEATURE}"
 ```
 
 Repeat per slice (or merge in dependency order). On conflict, apply the written conflict policy from the partition plan.
@@ -43,7 +45,7 @@ git worktree remove --force "../$(basename "$(pwd)")-${SLICE}"   # --force first
                                                                  # plain remove deregisters
                                                                  # but leaves files behind
 git worktree prune
-git branch -d "${FEATURE}/${SLICE}"   # after merge
+git branch -d "${FEATURE}-${SLICE}"   # after merge
 ```
 
 Then run once, after cleanup, on the fully integrated tip:
