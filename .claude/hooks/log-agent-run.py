@@ -38,7 +38,7 @@ MAX_TRANSCRIPT_BYTES = 64 * 1024 * 1024
 MAX_SCAN_SECONDS = 20
 
 # USD per million tokens: input, 5m cache write, 1h cache write, cache read, output.
-# Source: https://platform.claude.com/docs/en/about-claude/pricing (2026-10-01).
+# Source: https://platform.claude.com/docs/en/about-claude/pricing (2026-10-08).
 # Standard speed, global inference, no batch discount.
 PRICES = {
     "claude-fable-5-1": (10.0, 12.5, 20.0, 0.25, 50.0),
@@ -46,7 +46,7 @@ PRICES = {
     "claude-opus-5-5": (4.0, 5.0, 8.0, 0.20, 20.0),
     "claude-opus-5": (5.0, 6.25, 10.0, 0.50, 25.0),
     "claude-opus-4-8": (5.0, 6.25, 10.0, 0.50, 25.0),
-    "claude-sonnet-5-5": (2.0, 2.5, 4.0, 0.20, 10.0),
+    "claude-sonnet-5-5": (2.0, 2.5, 4.0, 0.10, 10.0),
     "claude-sonnet-5": (2.0, 2.5, 4.0, 0.20, 10.0),
     "claude-haiku-4-5": (1.0, 1.25, 2.0, 0.10, 5.0),
 }
