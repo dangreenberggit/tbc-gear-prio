@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-tab-settings-persist.md
 Blocks: none
@@ -51,3 +51,37 @@ Done when the six items above are done or each is closed here with a reason,
 `npx vitest run upgrades ui/app/tabs` passes in the fork, and the fork is
 re-pinned (`data/wowsims-fork.lock.json`, `pnpm sim-implemented-effects:generate`,
 `pnpm verify`).
+
+## Closing note (2026-10-09, feat/tab-store-actions)
+
+Fork `bfde23961` ("Tighten the lazy-load and unopened-tab tests"), on top of
+`8fe77ed76` (the tab's actions moved into its zustand store), pinned by `d40bd2fd`
+on `feat/tab-store-actions`.
+
+- **A12.** `UpgradesTabBody.unopened.test.tsx` calls `vi.resetModules()` and
+  registers the data mock again with `vi.doMock` before each case, and imports
+  the tab body and the page modules after that. A plain reset was not enough:
+  with the hoisted `vi.mock` and `vi.resetModules()`, the second case passed
+  against the regression below, because the mock's factory did not run again.
+  The cases that load or could load the data get a 30 s timeout, because the
+  data takes over 5 s to load cold. Red check: with the old code's phase-change
+  `import()` of the store put back in `UpgradesTabBody.tsx`, both cases fail
+  with "expected true to be false" when run together and when each runs alone
+  (`-t "spec with none"`), not by timeout.
+- **A13.** The eager-file test also requires `dynamicImports` of each
+  `EAGER_FILES` entry to be empty. Red check: an `import('./data/data')` added
+  to `model/phase_changes.ts` fails it.
+- **S14.** The orphan comment in `run_session.test.ts` is deleted.
+- **S15.** `isRecord` is exported once from `model/saved_entry.ts`;
+  `saved_settings.ts` and `utils/fixture.ts` import it.
+- **S17.** `lazy_load.test.ts` reads the aliases from the fork's
+  `tsconfig.json` `paths`, and a new test checks that `@features/` is among
+  them and that every alias names a directory that exists.
+- **SP7.** New test "keeps, through a phase round trip, an exclusion the middle
+  phase does not offer": a ret page at phase 4 with the tab closed, a saved
+  exclusion that the phase-4 pool offers and the phase-3 pool does not, phase
+  4 to 3 to 4; the saved entry keeps the exclusion and resets the sets. The
+  test finds the source key from the bundled pools, so the premise is checked.
+
+Re-run from the fork at `bfde23961`: `npx vitest run upgrades ui/app/tabs`
+(58 files, 458 tests pass).

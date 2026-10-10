@@ -1,7 +1,7 @@
 // The Upgrades tab's Stop check (ticket 560, G5): a live run is started on a
 // real page, Stop is pressed once a few rows have landed, and the tab must end
 // in the stopped state with those rows kept and no console error. Run it before
-// any fork commit that changes the run path (model/run.ts, model/run_reducer.ts,
+// any fork commit that changes the run path (model/run.ts, model/run_state.ts,
 // hooks/useUpgradesRun.ts, utils/select_run_fn.ts).
 //
 // It needs a running dev server with the WASM worker, which it does not start:

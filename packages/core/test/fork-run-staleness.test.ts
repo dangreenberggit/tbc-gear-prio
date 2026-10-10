@@ -8,8 +8,8 @@
  * `measuredOn` when it starts; `selectSettledSignature` (`model/upgrades_store.ts`)
  * reads it back once the run is done or stopped; and `useRunStale` calls the
  * result stale when the signature built from the page now differs. These tests
- * drive those pure pieces through the real `runReducer`, as the tab's store
- * does. The hook itself is React and is tested in the fork
+ * drive those pure pieces through the real `runStarted` and `runSettled`
+ * (`model/run_state.ts`), which the tab's store actions call. The hook itself is React and is tested in the fork
  * (`hooks/useRunStale.test.tsx`).
  *
  * The fork is gitignored (`vendor/`), so the suite skips when it is absent.
@@ -34,15 +34,7 @@ type RunState =
   | { status: "done"; runId: number; measuredOn?: MeasuredOn }
   | { status: "stopped"; runId: number; measuredOn?: MeasuredOn }
   | { status: "error"; runId: number; message: string };
-type RunAction =
-  | {
-      type: "started";
-      runId: number;
-      startedAt: number;
-      measuredOn?: MeasuredOn;
-    }
-  | { type: "finished"; runId: number; result: object }
-  | { type: "stopped"; runId: number; result: object };
+type RunOutcome = { items: never[]; complete: boolean };
 
 type ProtoMessage = { create(init?: object): object };
 type LiveInputsSource = {
@@ -52,8 +44,9 @@ type LiveInputsSource = {
 };
 
 const SETTINGS: RunSettings = { iterations: 3000 };
-/** Not read by the reducer: a ranking's contents do not decide staleness. */
-const RESULT = { items: [], complete: true };
+/** Rankings whose contents nothing here reads: they do not decide staleness. `complete` picks done or stopped. */
+const FINISHED: RunOutcome = { items: [], complete: true };
+const PARTIAL: RunOutcome = { items: [], complete: false };
 
 const importProto = async <T>(file: string): Promise<T> =>
   (await import(
@@ -61,19 +54,30 @@ const importProto = async <T>(file: string): Promise<T> =>
   )) as T;
 
 describe.skipIf(!forkPresent)("Upgrades run staleness", () => {
-  let runReducer: (state: RunState, action: RunAction) => RunState;
+  let runStarted: (
+    runId: number,
+    startedAt: number,
+    measuredOn?: MeasuredOn
+  ) => RunState;
+  let runSettled: (
+    state: RunState,
+    runId: number,
+    outcome: RunOutcome
+  ) => RunState;
   let idle: RunState;
   let settledSignature: (state: { run: RunState }) => string | undefined;
   let signatureAtPhase: (phase: number) => string;
 
   beforeAll(async () => {
     await loadForkEngineEnvironment();
-    const reducer = await importForkUpgrades<{
-      runReducer: typeof runReducer;
+    const runState = await importForkUpgrades<{
+      runStarted: typeof runStarted;
+      runSettled: typeof runSettled;
       IDLE_RUN: RunState;
-    }>("run_reducer.ts");
-    runReducer = reducer.runReducer;
-    idle = reducer.IDLE_RUN;
+    }>("run_state.ts");
+    runStarted = runState.runStarted;
+    runSettled = runState.runSettled;
+    idle = runState.IDLE_RUN;
     settledSignature = (
       await importForkUpgrades<{
         selectSettledSignature: typeof settledSignature;
@@ -107,22 +111,18 @@ describe.skipIf(!forkPresent)("Upgrades run staleness", () => {
     // pass 10s under CPU contention (hypothesis, untested).
   }, 30_000);
 
-  const start = (state: RunState, runId: number, signature: string) =>
-    runReducer(state, {
-      type: "started",
-      runId,
-      startedAt: 0,
-      measuredOn: { inputsSignature: signature },
-    });
+  // A new run reads nothing of the state before it, so it needs none.
+  const start = (runId: number, signature: string) =>
+    runStarted(runId, 0, { inputsSignature: signature });
   const finish = (state: RunState, runId: number) =>
-    runReducer(state, { type: "finished", runId, result: RESULT });
+    runSettled(state, runId, FINISHED);
   const stop = (state: RunState, runId: number) =>
-    runReducer(state, { type: "stopped", runId, result: RESULT });
+    runSettled(state, runId, PARTIAL);
   const settled = (run: RunState) => settledSignature({ run });
 
   it("marks a finished run stale when an input changed while it ran", () => {
     const atStart = signatureAtPhase(3);
-    const running = start(idle, 1, atStart);
+    const running = start(1, atStart);
     // The phase moves while the run is in flight. The run keeps the inputs it
     // started on, so the finished result is measured on phase 3.
     const now = signatureAtPhase(4);
@@ -134,20 +134,21 @@ describe.skipIf(!forkPresent)("Upgrades run staleness", () => {
   });
 
   it("leaves a finished run fresh when nothing changed while it ran", () => {
-    const done = finish(start(idle, 1, signatureAtPhase(3)), 1);
+    const done = finish(start(1, signatureAtPhase(3)), 1);
 
     expect(settled(done)).toBe(signatureAtPhase(3));
   });
 
   it("does not carry a change during one run into the next run", () => {
-    const first = start(idle, 1, signatureAtPhase(3));
-    const second = start(first, 2, signatureAtPhase(4));
+    // Run 1 started at phase 3; run 2 replaces it at phase 4, and run 1's late result is dropped.
+    const second = start(2, signatureAtPhase(4));
 
+    expect(finish(second, 1)).toBe(second);
     expect(settled(finish(second, 2))).toBe(signatureAtPhase(4));
   });
 
   it("marks a done result stale when an input changes after the run", () => {
-    const done = finish(start(idle, 1, signatureAtPhase(3)), 1);
+    const done = finish(start(1, signatureAtPhase(3)), 1);
 
     // A defined signature that differs from the page's: `undefined` would also
     // differ, but the hook reads it as "nothing to compare", not stale.
@@ -156,7 +157,7 @@ describe.skipIf(!forkPresent)("Upgrades run staleness", () => {
   });
 
   it("marks a stopped result stale when an input changes after the stop", () => {
-    const stopped = stop(start(idle, 1, signatureAtPhase(3)), 1);
+    const stopped = stop(start(1, signatureAtPhase(3)), 1);
 
     expect(stopped.status).toBe("stopped");
     expect(settled(stopped)).toBe(signatureAtPhase(3));
@@ -167,6 +168,6 @@ describe.skipIf(!forkPresent)("Upgrades run staleness", () => {
     // No settled signature means `useRunStale` has nothing to compare and
     // returns false, whatever the page holds.
     expect(settled(idle)).toBeUndefined();
-    expect(settled(start(idle, 1, signatureAtPhase(3)))).toBeUndefined();
+    expect(settled(start(1, signatureAtPhase(3)))).toBeUndefined();
   });
 });
