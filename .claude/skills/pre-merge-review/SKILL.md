@@ -80,10 +80,13 @@ Try in order:
 
 Run the **adversarial** and **domain** sub-agents with the briefs above.
 Invoke the **`code-review`** skill for the third axis — don't re-implement
-its Standards/Spec logic here.
+its Standards/Spec logic here. Skip the domain axis when the diff has no
+game-domain content; the agent that dispatches the axes decides, and
+records the skip and its reason in the review file's dispatch note.
 
-**Tell every axis it writes nothing**, and never ask one to leave
-`git status --porcelain` empty. That phrasing makes a reviewer responsible for
+**Tell every axis it writes nothing**, and that it reports no finding on
+this review file or on the tickets its Disposition rows link. Never ask
+an axis to leave `git status --porcelain` empty. That phrasing makes a reviewer responsible for
 tree state it does not own, and one duly "restored" a tree by reverting four
 files of live work (ticket 261). The constraint is *you write nothing*; a dirty
 tree is reported in the findings.
@@ -103,10 +106,8 @@ holding.
 
 1. Every commit, in both logs, is one of these:
    - a fix for findings that an earlier round in this file raised, named by
-     ID in the commit message or in the ticket it names. Each finding's
-     label is `low`, `minor`, `nit` or `note`. The label is the first word
-     in the parentheses after the finding's ID, as in `**A1 (low; …)**`.
-     Any other label, or no label, fails the condition.
+     ID in the commit message or in the ticket it names, whatever the
+     finding's label;
    - a fork re-pin: it changes `data/wowsims-fork.lock.json`, and every
      other file it changes is under `data/` or `docs/`;
    - a commit that changes only this review file or tickets its Disposition
@@ -146,7 +147,73 @@ When check 1 fails, run the three axes on the same range. Keep the
 Then continue at step 3 with the axes' findings and any findings from checks
 2 to 4. Step 3 writes this round's Disposition table.
 
+#### Round cap
+
+A round is one line of this file that starts with `Reviewed range:`. A
+branch gets at most two rounds after round 1, each run as "Focused check
+(later rounds)" says. A later round runs only when a commit since the last
+recorded `<through-sha>` does something other than these: change only
+whitespace or line wrapping; change only this review file or tickets its
+Disposition rows link; apply a bookkeeping fix; apply the code-quality
+pass (step 3). When no commit does, skip the round; the next round that
+runs still starts at that `<through-sha>`.
+
+After the second later round, stop. Give each open finding the outcome
+its effect bullet in step 3 gives when no round remains:
+
+- a "fixed before merge" finding: report it to the user as blocking the
+  merge;
+- a bookkeeping finding: `wontfix` with the reason;
+- a code-quality row: it waits for the code-quality pass;
+- every other open finding: a `defer` row and a ticket.
+
+Tell the user which tickets are open.
+
 ### 3. Aggregate, file tickets, write the review
+
+#### What a finding gets, by its effect (not its label)
+
+Sort each finding by what it does, whatever label the reviewer gave it:
+
+- **Fixed before merge:** data loss, or a silent wrong result: a check or
+  test that passes when it should fail, or an output that is wrong with
+  no error or warning.
+- **A loud failure or a visibly wrong result** that a user or agent would
+  hit: fixed in this branch when this round's reviewed range introduced
+  it; otherwise a `defer` row with a ticket.
+- **Code quality and style** (naming, structure, readability,
+  duplication, comments): serious, and never dropped. Record each as a
+  row under a `## Code quality` heading in this file. A code-quality row
+  never starts a round. After the last round and before the merge ask,
+  the agent that handles this review's findings sends every
+  `## Code quality` row to one fresh workhorse-lane agent, which fixes
+  them all in one pass. The pass changes no behaviour, and `pnpm verify`
+  passes after it. Each row then gets a Disposition row: `fixed`, or
+  `defer` with a ticket.
+- **Bookkeeping** (wording in this review file or in tickets, process
+  notes): `wontfix` with the reason, or the reviewer's suggested text
+  applied. Such a fix starts no round; the next round that runs for
+  another reason checks it.
+- **Any other finding** (a missing test, a gap against the spec, a
+  performance cost): as a loud failure — fixed when this round's reviewed
+  range introduced it, otherwise a `defer` row with a ticket.
+
+**Repeated code-quality findings stop the loop.** Count the later rounds
+that raise a code-quality finding on lines written by this branch's fix
+commits (commits made after round 1, the code-quality pass included).
+When the count reaches two, stop as **Round cap** says, and do not run
+the code-quality pass. Tell the user that another round will not make
+the writing agent produce good code; the user decides what happens next
+(a dedicated quality pass, or a different writer).
+
+**Fix scope.** The agent that dispatches a fix puts this sentence in the
+fixer's prompt: "Change only what the finding asks for; list any other
+change you think is needed in your final message." Each listed change
+becomes a ticket or a line for the user at the hand-off.
+
+**Agent files.** When findings ask for edits to agent files (`AGENTS.md`,
+`CLAUDE.md`, `.claude/**`, `.agents/**`), list them all for one approval
+by the user at the hand-off; do not ask once per round.
 
 **Tickets are the source of truth for deferred work.** For every finding
 you would defer, create `.scratch/carry-forward/issues/<NN>-<slug>.md`
@@ -194,6 +261,14 @@ raised and then checked and found not to be a defect is a finding: dispose of
 it as `wontfix` with the reason. Append a one-liner
 to `.scratch/carry-forward/map.md` when filing tickets.
 
+After this step's tickets are committed, count the tickets this branch
+filed and closed, and write both numbers in `## Summary`. Filed is the
+number of `A` rows in
+`git diff --name-status $(git merge-base dev HEAD)..HEAD -- '.scratch/carry-forward/issues/*.md'`.
+Closed is
+`git diff $(git merge-base dev HEAD)..HEAD -- '.scratch/carry-forward/issues/*.md' | grep -cE '^\+(\*\*)?Status:(\*\*)? *(closed|resolved|wontfix)'`.
+When filed is higher than closed, say so in one sentence.
+
 ### 4. Prove the check (do not merge here)
 
 ```bash
@@ -208,7 +283,8 @@ pnpm merge-to-dev --check-only --ack-open-blockers
 
 ### 5. Report — then stop
 
-Tell the user where the review file is, the summary, and that
+Tell the user where the review file is, the summary with its filed and
+closed ticket counts, and that
 `pnpm merge-to-dev --check-only` is green. **Stop there.** Do not run `pnpm merge-to-dev`,
 do not `git merge` into `dev`, and do not set `TBC_ALLOW_DEV_MERGE=1`
 unless the user has **explicitly asked to merge after seeing the review
