@@ -37,6 +37,11 @@ would be extracted as a skip reason and counted as a skip, even though it
 says the opposite. Confirmed by running the extractor against that string.
 
 **4. Reports success after failing to read vitest's report.**
+
+_Fixed on feat/pair-rule (review round 3, A12): an unreadable report now
+fails the run everywhere (`scripts/run_verify.mjs`, test "exits 1 when
+vitest leaves no readable report"). Defects 1-3 stay open._
+
 `scripts/run_verify.mjs`: the try/catch at `:140-147` parses vitest's JSON
 report and assigns `vitestSkips`; the default `vitestSkips = { ran: 0,
 skipped: 0, reasons: [] }` is set once at `:108`, before any step runs. If

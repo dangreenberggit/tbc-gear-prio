@@ -12,7 +12,7 @@ Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents
 
 ## Isolate
 
-- Give each worker its own **cwd** that is a git worktree (create with the agnostic `git worktree add` recipe).
+- Give each worker its own **cwd**: a pair for a slice that reads or edits the fork, a git worktree otherwise (both recipes are in [agnostic.md](agnostic.md) "Isolate a worker").
 - One Codex agent (or `codex exec` run) per slice; do not point two writers at the same worktree.
 - Pass the slice goal, `pathsAllowed` / `pathsForbidden`, acceptance, and the handoff template in the prompt — workers have no sibling channel.
 
