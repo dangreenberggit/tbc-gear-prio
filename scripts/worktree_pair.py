@@ -143,29 +143,44 @@ def links_outside(root: str, links: list[tuple[str, str]]) -> list[tuple[str, st
     return [(link, target) for link, target in links if not is_inside(target, root)]
 
 
-# What a pair's installs and `make` write, all ignored and all regenerable.
-# Taken from `git status --porcelain --ignored` in both worktrees of a fresh
-# pair on 2026-10-10, plus the fork's .gitignore build entries.
-REGENERABLE_DIRS = {"node_modules", "dist", "dist-server", "binary_dist", "__pycache__", "vendor"}
+# What a pair's installs, builds and sessions write, all ignored and safe to
+# delete. Taken from `git status --porcelain --ignored` in both worktrees of a
+# fresh pair on 2026-10-10 and after `pnpm verify` ran in it, plus the fork's
+# .gitignore build entries. A folder name counts only at the top level or one
+# package down (apps/web/, packages/core/), where installs and builds put it.
+REGENERABLE_DIRS = {"node_modules", "dist", "dist-server", "binary_dist", "__pycache__", "vendor", "coverage"}
 REGENERABLE_SUFFIXES = (".tsbuildinfo", ".pb.go", "_auto_gen.ts", ".results.tmp", ".stylelintcache")
-REGENERABLE_PREFIXES = ("ui/generated/",)
+# The run log is copied to the main checkout before the pair is removed
+# (keep_run_logs); settings.local.json holds only permission approvals.
+REGENERABLE_PREFIXES = (
+    "ui/generated/",
+    "scripts/__pycache__/",
+    ".scratch/agent-runs/",
+    ".claude/settings.local.json",
+)
+PACKAGE_DIRS = ("apps", "packages")
+
+
+def is_regenerable(path: str) -> bool:
+    if path.startswith(REGENERABLE_PREFIXES):
+        return True
+    if path.startswith(".scratch/"):
+        return False
+    parts = path.rstrip("/").split("/")
+    if parts[-1] in REGENERABLE_DIRS:
+        return len(parts) == 1 or (len(parts) == 3 and parts[0] in PACKAGE_DIRS)
+    return path.endswith(REGENERABLE_SUFFIXES)
 
 
 def unexpected_ignored(porcelain_ignored: str) -> list[str]:
     """Ignored paths from `git status --porcelain --ignored` that a pair's own
     setup did not write. `git status --porcelain` alone never lists them, and
     `.scratch/` (stage records) is one of them."""
-    found = []
-    for line in porcelain_ignored.splitlines():
-        if not line.startswith("!! "):
-            continue
-        path = line[3:]
-        if path.rstrip("/").rsplit("/", 1)[-1] in REGENERABLE_DIRS:
-            continue
-        if path.endswith(REGENERABLE_SUFFIXES) or path.startswith(REGENERABLE_PREFIXES):
-            continue
-        found.append(path)
-    return found
+    return [
+        line[3:]
+        for line in porcelain_ignored.splitlines()
+        if line.startswith("!! ") and not is_regenerable(line[3:])
+    ]
 
 
 def long_path(p: str) -> str:
@@ -424,6 +439,8 @@ def pair(args: argparse.Namespace) -> int:
         if args.build:
             run([make, "-C", str(fork_target), "dist/tbc/.dirstamp"], env)
     except (Refusal, OSError) as exc:
+        for warning in warnings:
+            say(f"WARNING: {warning}")
         say(f"FAILED: {exc}")
         say(f"the pair is partly made at {target}; remove it with: pnpm wt:unpair {args.name} --force")
         return 1
@@ -495,14 +512,38 @@ def unsaved_work(repo: Path) -> str | None:
     """Why removing this checkout could lose work, or None."""
     status = git(repo, "status", "--porcelain")
     if status:
-        return f"{repo} has uncommitted changes:\n{status}"
+        return f"{repo} has uncommitted changes; commit or stash them:\n{status}"
     ignored = unexpected_ignored(git(repo, "status", "--porcelain", "--ignored"))
     if ignored:
-        return f"{repo} has ignored files that pair setup did not write:\n" + "\n".join(ignored)
+        return (
+            f"{repo} has ignored files that pair setup did not write; move them out "
+            "(for example into the main checkout):\n" + "\n".join(ignored)
+        )
     if git(repo, "rev-parse", "--abbrev-ref", "HEAD") == "HEAD":
         if not git(repo, "branch", "--all", "--contains", "HEAD"):
             return f"{repo} is detached at a commit no branch contains; branch it first"
     return None
+
+
+def keep_run_logs(pair_root: Path, main_dir: Path) -> None:
+    """Copy the pair's agent run logs into the main checkout's.
+
+    .claude/hooks/log-agent-run.py writes them under the session's project
+    folder, and for a session opened in a pair that is the pair.
+    """
+    src = pair_root / ".scratch" / "agent-runs"
+    if not src.is_dir():
+        return
+    dst = main_dir / ".scratch" / "agent-runs"
+    dst.mkdir(parents=True, exist_ok=True)
+    for log in src.iterdir():
+        if not log.is_file():
+            continue
+        out = dst / log.name
+        if out.exists():
+            out = dst / f"{log.stem}.pair-{pair_root.name}{log.suffix}"
+        shutil.copy2(log, out)
+        say(f"kept run log {out}")
 
 
 def remove(repo: Path, path: Path, listed: bool, force: bool) -> None:
@@ -517,8 +558,9 @@ def remove(repo: Path, path: Path, listed: bool, force: bool) -> None:
     action = leftover_action(is_listed(str(path), worktrees(repo)), path.exists())
     if action == "refuse":
         raise Refusal(
-            f"git kept {path} registered and refused to remove it ({git_said or 'no message'}). "
-            f"If it is locked, run `git -C {repo} worktree unlock {path}` after checking nothing uses it"
+            f"git kept {path} registered and refused to remove it ({git_said or 'no message'}); "
+            "nothing in it was deleted. Something changed in it after the work check: "
+            "look, then rerun"
         )
     if action == "delete":
         delete_folder(path)
@@ -559,8 +601,10 @@ def unpair(args: argparse.Namespace) -> int:
             if listed and repo.exists():
                 problem = unsaved_work(repo)
                 if problem:
-                    raise Refusal(f"{problem}\ncommit or stash it, or rerun with --force to discard it")
+                    raise Refusal(f"{problem}\nor rerun with --force to discard it")
 
+    if target.exists():
+        keep_run_logs(target, main_dir)
     remove(fork, fork_target, in_fork, args.force)
     remove(main_dir, target, in_main, args.force)
     git(fork, "worktree", "prune")

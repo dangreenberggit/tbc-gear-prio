@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Pure-logic checks for scripts/worktree_pair.py: no git, no writes outside
+"""Checks for scripts/worktree_pair.py: no git, no writes outside
 a temp dir.
 
 Follows the check_lock_merge.py convention -- a standalone script of small
-checks, not a pytest suite (this repo has no pytest infra). The IO half of
-worktree_pair.py (git, installs, deletes) is tested by a live pair/unpair
-run, recorded in docs/agents/paired-worktrees.md.
+checks, not a pytest suite (this repo has no pytest infra). Most checks are
+pure; the delete guard and the run-log copy run on real files in a temp dir,
+because the guard's whole job is reading real links. The git and install
+half of worktree_pair.py is tested by live pair/unpair runs, recorded in
+docs/agents/paired-worktrees.md.
 
     python scripts/check_worktree_pair.py
 
@@ -45,7 +47,8 @@ def check_name_refuses_paths_and_odd_characters() -> list[str]:
 
 def check_target_length_budget() -> list[str]:
     """The deepest file a pair holds sits 196 characters below its root
-    (measured 2026-10-10 with the command at worktree_pair.MAX_ROOT_LEN), and
+    (measured 2026-10-10 with the command in the comment above
+    worktree_pair.PATH_LIMIT), and
     git cannot delete past Windows' 260-character limit. With the margin, a
     root of 55 characters fits and 56 does not. The default root
     C:\\Users\\dgree\\Code\\lulz\\tbc-wt\\ is 32 characters, which leaves 23
@@ -60,8 +63,9 @@ def check_target_length_budget() -> list[str]:
     return problems
 
 
-# Copied from `git worktree list --porcelain` (git 2.42, Windows): one
-# block per worktree, blank-line separated, forward-slash paths.
+# Modelled on `git worktree list --porcelain` (git 2.42, Windows): one block
+# per worktree, blank-line separated, forward-slash paths. The third block's
+# HEAD and pid are made up.
 PORCELAIN = """worktree C:/Users/dgree/Code/lulz/tbc-gear-prio
 HEAD 35aa31df85299aa9018f1272feda22024a799789
 branch refs/heads/dev
@@ -104,7 +108,7 @@ def check_is_locked_reads_the_locked_line() -> list[str]:
     entries = wp.parse_worktrees(PORCELAIN)
     problems = []
     if not wp.is_locked("C:\\Users\\dgree\\Code\\lulz\\tbc-wt\\other", entries):
-        problems.append("tbc-wt/other carries a locked line")
+        problems.append("tbc-wt/other has a locked line")
     if wp.is_locked("C:/Users/dgree/Code/lulz/tbc-wt/tab-sort", entries):
         problems.append("tbc-wt/tab-sort is not locked")
     return problems
@@ -213,10 +217,29 @@ def check_ignored_build_output_is_not_work() -> list[str]:
 !! binary_dist/
 !! .stylelintcache
 !! sim/rogue/TestRogue.results.tmp
+!! coverage/
+!! .claude/settings.local.json
+!! .scratch/agent-runs/
 """
     got = wp.unexpected_ignored(lines)
     if got:
         return [f"build output must not count as work, got {got}"]
+    return []
+
+
+def check_scratch_counts_as_work_whatever_its_folder_names() -> list[str]:
+    """A stage folder named `dist` or `vendor` is still a stage record: a
+    build-output name only counts where installs and builds put it. The run
+    log is the exception, because unpair copies it to the main checkout."""
+    lines = """!! .scratch/dist/
+!! .scratch/stage-gate/vendor/
+!! .scratch/agent-runs/
+!! docs/node_modules/
+"""
+    got = wp.unexpected_ignored(lines)
+    want = [".scratch/dist/", ".scratch/stage-gate/vendor/", "docs/node_modules/"]
+    if got != want:
+        return [f"unexpected_ignored gave {got}, want {want}"]
     return []
 
 
@@ -255,33 +278,85 @@ def check_leftover_is_deleted_only_once_git_let_go() -> list[str]:
     return problems
 
 
-def check_find_links_sees_real_junctions() -> list[str]:
-    """find_links reads real Windows junctions, one level deep and nested, and
-    links_outside keeps only the escaping one. Writes only to a temp dir."""
-    if os.name != "nt":
-        return []
+def link_dir(link: str, target: str) -> None:
+    """A junction on Windows (no admin right needed), a symlink elsewhere."""
+    if os.name == "nt":
+        subprocess.run(["cmd", "/c", "mklink", "/J", link, target], capture_output=True, check=True)
+    else:
+        os.symlink(target, link, target_is_directory=True)
+
+
+def unlink_dir(link: str) -> None:
+    """Remove the link itself; rmdir on a junction never touches its target."""
+    if os.name == "nt":
+        subprocess.run(["cmd", "/c", "rmdir", link], capture_output=True)
+    elif os.path.islink(link):
+        os.unlink(link)
+
+
+def check_delete_guard_on_real_links() -> list[str]:
+    """find_links reads real links, one level deep and nested; links_outside
+    keeps only the escaping one; delete_folder refuses that tree and leaves the
+    linked folder's file alone, then deletes the tree once the escaping link
+    is gone. Writes only to a temp dir."""
+    problems: list[str] = []
     with tempfile.TemporaryDirectory() as td:
         root = os.path.join(td, "pair")
         outside = os.path.join(td, "outside")
         os.makedirs(os.path.join(root, "a", "b"))
         os.makedirs(outside)
+        keep = os.path.join(outside, "keep.txt")
+        Path(keep).write_text("main checkout file", encoding="utf-8")
         out_link = os.path.join(root, "a", "b", "out")
         in_link = os.path.join(root, "in")
-        for link, target in ((out_link, outside), (in_link, os.path.join(root, "a"))):
-            subprocess.run(["cmd", "/c", "mklink", "/J", link, target], capture_output=True, check=True)
         try:
+            link_dir(out_link, outside)
+            link_dir(in_link, os.path.join(root, "a"))
             links = wp.find_links(Path(root))
             escaping = [wp.norm_path(link) for link, _ in wp.links_outside(root, links)]
-            problems = []
             if len(links) != 2:
                 problems.append(f"find_links found {len(links)} links, want 2: {links}")
             if escaping != [wp.norm_path(out_link)]:
                 problems.append(f"escaping links {escaping}, want only {out_link}")
-            return problems
+            try:
+                wp.delete_folder(Path(root))
+                problems.append("delete_folder must refuse a tree with a link out of it")
+            except wp.Refusal:
+                pass
+            if not (os.path.isdir(root) and os.path.isfile(keep)):
+                problems.append("a refused delete must leave the tree and the linked file")
+            unlink_dir(out_link)
+            wp.delete_folder(Path(root))
+            if os.path.exists(root):
+                problems.append("delete_folder must delete a tree whose links stay inside it")
+            if not os.path.isfile(keep):
+                problems.append("deleting the pair deleted a file outside it")
+        except (OSError, subprocess.CalledProcessError, wp.Refusal) as exc:
+            problems.append(f"delete guard check could not run: {exc!r}")
         finally:
-            # rmdir on a junction removes the link, never the target's files.
             for link in (out_link, in_link):
-                subprocess.run(["cmd", "/c", "rmdir", link], capture_output=True)
+                unlink_dir(link)
+    return problems
+
+
+def check_run_logs_are_kept_without_overwriting() -> list[str]:
+    """unpair copies a pair's run logs into the main checkout before deleting
+    the pair, and a name already there keeps its file. Temp dir only."""
+    problems = []
+    with tempfile.TemporaryDirectory() as td:
+        pair, main = Path(td, "probe"), Path(td, "main")
+        (pair / ".scratch" / "agent-runs").mkdir(parents=True)
+        (main / ".scratch" / "agent-runs").mkdir(parents=True)
+        (pair / ".scratch" / "agent-runs" / "s1.jsonl").write_text("pair s1", encoding="utf-8")
+        (pair / ".scratch" / "agent-runs" / "s2.jsonl").write_text("pair s2", encoding="utf-8")
+        (main / ".scratch" / "agent-runs" / "s1.jsonl").write_text("main s1", encoding="utf-8")
+        wp.keep_run_logs(pair, main)
+        runs = main / ".scratch" / "agent-runs"
+        want = {"s1.jsonl": "main s1", "s1.pair-probe.jsonl": "pair s1", "s2.jsonl": "pair s2"}
+        got = {p.name: p.read_text(encoding="utf-8") for p in runs.iterdir()}
+        if got != want:
+            problems.append(f"main run logs after keep_run_logs: {got}, want {want}")
+    return problems
 
 
 CHECKS = (
@@ -299,15 +374,17 @@ CHECKS = (
     check_vendor_inputs_follow_the_engine_lock_tag,
     check_ignored_build_output_is_not_work,
     check_ignored_work_is_reported,
+    check_scratch_counts_as_work_whatever_its_folder_names,
     check_leftover_is_deleted_only_once_git_let_go,
-    check_find_links_sees_real_junctions,
+    check_delete_guard_on_real_links,
+    check_run_logs_are_kept_without_overwriting,
 )
 
 
 def main() -> int:
     problems = [p for check in CHECKS for p in check()]
     if not problems:
-        print(f"worktree_pair.py pure logic ok ({len(CHECKS)} checks)")
+        print(f"worktree_pair.py checks ok ({len(CHECKS)} checks)")
         return 0
     for p in problems:
         print(f"  FAIL: {p}", file=sys.stderr)

@@ -17,14 +17,28 @@ that needs a second fork branch reaches the doc only if someone names it.
 ## What to add
 
 Owner-approved wording only (AGENTS.md "Writing for agents": propose edits to
-AGENTS.md and skill files in chat and wait for approval). The proposed lines
-are in the feat/worktree-pair implementer's report:
+AGENTS.md and skill files in chat and wait for approval). Proposed wording,
+not yet approved:
 
-- AGENTS.md, "The forked tab repo": one paragraph naming `pnpm wt:pair` and
-  the doc.
-- `.claude/skills/parallel-phase/adapters/agnostic.md`, after "Point the
-  worker session at that worktree directory": one paragraph saying a slice
-  that reads or edits the fork is made with `pnpm wt:pair`.
+AGENTS.md, "The forked tab repo", a new paragraph after the sentence that
+starts "Full sequence, including the PROVENANCE cycle":
+
+> **Two fork branches at once need a pair.** The clone in the main checkout
+> has one fork branch checked out. A session that needs another fork branch,
+> or works on the fork while another session does, runs
+> `pnpm wt:pair <name> <main-branch> <fork-branch>`: a main worktree with its
+> own fork worktree, where every gate reads that pair's fork and lock. Merges
+> into `dev` still run from the main folder. See
+> [`docs/agents/paired-worktrees.md`](docs/agents/paired-worktrees.md).
+
+`.claude/skills/parallel-phase/adapters/agnostic.md`, a new paragraph after
+the one that starts "Point the worker session at that worktree directory":
+
+> A slice that reads or edits the fork (`vendor/tbc-new-fork`) needs a pair
+> instead: `pnpm wt:pair <slice> ${FEATURE}/${SLICE} <fork-branch> -b --base ${BASE} --new-fork-branch`.
+> A plain `git worktree add` has no `vendor/`, so the fork gates skip or fail
+> there. Remove it with `pnpm wt:unpair <slice>`
+> (`docs/agents/paired-worktrees.md`).
 
 ## Done when
 
