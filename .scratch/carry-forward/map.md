@@ -325,3 +325,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 589 A phase change downloads the Upgrades tab's data on every spec page, opened or not (pre-merge review feat-tab-settings-persist round 2, A9, A10, SP5 and riders S8-S12) 2026-10-09
 - 590 Tighten the ticket-589 tests and two small leftovers (pre-merge review feat-tab-settings-persist round 3, A12, A13, S14, S15, S17, SP7) 2026-10-10
 - 591 Small leftovers from the store-actions review: a too-broad no-op comment, a test-only store action, weak and duplicate tests (pre-merge review feat-tab-store-actions, A1-A5, S1-S4, SP2) 2026-10-10
+- 592 Two missing tests and three comment edits from the 591 follow-up review (pre-merge review feat-store-actions-followups, A1, A2, S1, S2, S5) 2026-10-10
