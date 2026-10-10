@@ -78,7 +78,32 @@ def check_touched_paths_match_whatever_the_case() -> list[str]:
     return []
 
 
+def check_named_merge_runs_only_on_dev() -> list[str]:
+    problems = []
+    if m.named_mode_problem("dev", "feat/x") is not None:
+        problems.append(f"dev -> feat/x must be allowed: {m.named_mode_problem('dev', 'feat/x')}")
+    for current, target in (("feat/y", "feat/x"), ("main", "feat/x"), ("dev", "dev"), ("dev", "main")):
+        if m.named_mode_problem(current, target) is None:
+            problems.append(f"{current} -> {target} must be refused")
+    return problems
+
+
+def check_gate_run_keeps_every_flag() -> list[str]:
+    """The branch's checkout runs the gates, so each flag the owner gave
+    must reach it; a real run asks for the gates without the merge."""
+    problems = []
+    real = m.gate_argv("py", "s.py", check_only=False, no_verify=True, ack_open_blockers=True)
+    if real != ["py", "s.py", "--gates-only", "--no-verify", "--ack-open-blockers"]:
+        problems.append(f"real run argv {real}")
+    check = m.gate_argv("py", "s.py", check_only=True, no_verify=False, ack_open_blockers=False)
+    if check != ["py", "s.py", "--check-only"]:
+        problems.append(f"check-only argv {check}")
+    return problems
+
+
 CHECKS = (
+    check_named_merge_runs_only_on_dev,
+    check_gate_run_keeps_every_flag,
     check_porcelain_reads_paths_and_rename_sources,
     check_unrelated_dirty_files_do_not_block,
     check_dirty_file_the_merge_touches_blocks,
