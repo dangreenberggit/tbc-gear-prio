@@ -12,16 +12,30 @@ record why they are two pins. ADR-0036 lets them move separately:
   when the command-line tool needs a newer engine.
 
 Both procedures run in a pair (`docs/agents/paired-worktrees.md`).
-`pnpm wt:pair <name> <main-branch> <fork-branch> -b --new-fork-branch` makes
-the main branch from `dev` and the fork branch at the fork lock's `commit`.
-`<pair>` (written `<core>` in §0–§6) is the pair's folder, and `<fork>` is
-`<pair>/vendor/tbc-new-fork`. Every step runs against them; run each `pnpm`
-command as `pnpm -C <pair> …`. When the owner asks to merge, land the work by
-paired-worktrees.md "Land it on dev": the main folder merges `<fork-branch>`
-into the fork lock's `branch`, then runs `pnpm merge-to-dev <main-branch>`.
+`<main-folder>` is the main checkout's folder.
+`pnpm -C <main-folder> wt:pair <name> <main-branch> <fork-branch> -b --new-fork-branch`
+makes the main branch from `dev` and the fork branch at the fork lock's
+`commit`. `<pair>` is the pair's folder as an absolute `C:/Users/...` path
+(Windows `python` and `node` cannot read Git Bash's `/c/Users/...`), and
+`<fork>` is `<pair>/vendor/tbc-new-fork`.
 
-Throughout: use `git -C <abs path>`, never `cd X && git …` — fnm emits an error
-that breaks the chain. A pipe reports the **last** command's status, so append
+A subagent starts in the main folder, and Bash returns to it between calls.
+So every command below names its folder (`git -C`, `pnpm -C`, `npm --prefix`,
+`go -C`, `make -C`, or an absolute path) and runs the same from any folder.
+Run each one exactly as written. A bare `python scripts/<x>.py` or
+`pnpm <script>` reads and writes the main folder's files, not the pair's, and
+a `cd X && …` chain breaks on the error fnm prints.
+`pnpm -C <pair> exec python scripts/<x>.py …` runs a script in `<pair>` with
+flags that no `package.json` script passes.
+
+When the owner asks to merge, land the work by paired-worktrees.md "Land it on
+dev": the main folder merges `<fork-branch>` into the fork lock's `branch`,
+then runs `pnpm -C <main-folder> merge-to-dev <main-branch>`. A catch-up
+always re-pins the fork, so if `dev`'s fork lock moved after `<main-branch>`
+was made, that command refuses: take paired-worktrees.md's older route ("When
+`dev` has a new fork pin").
+
+A pipe reports the **last** command's status, so append
 `; echo "rc=${PIPESTATUS[0]}"` or redirect and inspect separately.
 
 ## Routine fork update (fork only)
@@ -38,7 +52,7 @@ that breaks the chain. A pipe reports the **last** command's status, so append
    on: stop here and plan that merge as its own piece of work.
 
 2. Record the unit-test result on the fork tip before merging
-   (`npm run test:unit` from `<fork>`), so step 4 has a baseline. Then merge
+   (`npm --prefix <fork> run test:unit`), so step 4 has a baseline. Then merge
    on the fork branch:
 
    ```bash
@@ -46,14 +60,16 @@ that breaks the chain. A pipe reports the **last** command's status, so append
    ```
 
    Resolve conflicts by the rules in §4. For `package-lock.json`, take
-   upstream's version and run `npm install` in `<fork>`.
+   upstream's version and run `npm --prefix <fork> install`.
 
 3. Regenerate the gitignored bindings: `make -C <fork> proto` and
    `make -C <fork> go-to-ts` (both ran on Windows at `42c75dc9`; ticket 558).
-4. Check the merged tree, from `<fork>`:
-   `node node_modules/typescript/bin/tsc --noEmit`, `npm run lint:js`,
-   `go test --tags=with_db ./sim/...` (`sim/web` always fails its setup: it
-   needs `binary_dist`), and `npm run test:unit`. Done when `tsc` and
+4. Check the merged tree:
+   `node <fork>/node_modules/typescript/bin/tsc --noEmit -p <fork>`,
+   `npm --prefix <fork> run lint:js`,
+   `go -C <fork> test --tags=with_db ./sim/...` (`sim/web` always fails its
+   setup: it needs `binary_dist`), and `npm --prefix <fork> run test:unit`.
+   Done when `tsc` and
    `lint:js` exit 0, `go test` fails only on `sim/web`, and every unit-test
    failure also failed in step 2's baseline; a new
    failure is a finding. A merge with no conflicts can still break the build,
@@ -93,12 +109,12 @@ for each port worktree that is open. Name each
 extra line's path and branch in your notes before you start.
 
 ```bash
-git -C <core> status --porcelain
+git -C <pair> status --porcelain
 git -C <fork> status --porcelain
 git -C <fork> rev-parse HEAD
 git -C <fork> ls-remote origin refs/heads/<branch from the fork lock>
 git -C <fork> worktree list
-python -c "import json;l=json.load(open('data/wowsims-fork.lock.json'));print(l['commit'],l['pushed'])"
+python -c "import json;l=json.load(open('<pair>/data/wowsims-fork.lock.json'));print(l['commit'],l['pushed'])"
 ```
 
 Read the `pushed` flag **before** you start and write it down. It flips to
@@ -119,16 +135,16 @@ anything conflicting outside it later is a stop-and-report.
 Measure which upstream files the fork has modified, and intersect:
 
 ```bash
-git -C <fork> diff --name-status <OLD_PIN> HEAD | grep '^M' | cut -f2 | sort > m.txt
-gh api "repos/wowsims/tbc-new/compare/<OLD_PIN>...master" --paginate --jq '.files[].filename' | sort > u.txt
-comm -12 m.txt u.txt
+git -C <fork> diff --name-status <OLD_PIN> HEAD | grep '^M' | cut -f2 | sort > <pair>/.scratch/m.txt
+gh api "repos/wowsims/tbc-new/compare/<OLD_PIN>...master" --paginate --jq '.files[].filename' | sort > <pair>/.scratch/u.txt
+comm -12 <pair>/.scratch/m.txt <pair>/.scratch/u.txt
 ```
 
 Prove the sha builds before pinning it (ADR-0030 §3). Run it **twice** and
 compare the hashes:
 
 ```bash
-python scripts/fetch_wowsimcli.py --commit <TARGET_SHA> --tag-dir <TARGET_SHA>
+pnpm -C <pair> fetch:wowsimcli --commit <TARGET_SHA> --tag-dir <TARGET_SHA>
 ```
 
 Two identical `sha256=` lines is the proof. `git -C <fork> worktree list` must
@@ -136,41 +152,45 @@ print the same lines afterwards as in §0.
 
 ### 2. Engine side
 
+Read `docs/agents/known-traps.md` § "Before moving the wowsims engine pin"
+first.
+
 ```bash
-python scripts/sync_wowsims.py --update --ref <TARGET_SHA>
-python scripts/sync_wowsims.py --unwatch-ref --ref <dead ref>
-python scripts/sync_wowsims.py --watch-ref --ref master
-python scripts/fetch_protos.py
-pnpm proto:generate
-pnpm data:items:generate
-python scripts/list_phase_pool.py
-pnpm sim-defaults:build
-python scripts/assemble_universe.py --spec <spec> --max-phase <N> --report data/universes/<spec>-p<N>.report.json
+pnpm -C <pair> sync:wowsims --ref <TARGET_SHA>
+pnpm -C <pair> exec python scripts/sync_wowsims.py --unwatch-ref --ref <dead ref>
+pnpm -C <pair> exec python scripts/sync_wowsims.py --watch-ref --ref master
+pnpm -C <pair> fetch:protos
+pnpm -C <pair> proto:generate
+pnpm -C <pair> data:items:generate
+python <pair>/scripts/list_phase_pool.py
+pnpm -C <pair> sim-defaults:build
+pnpm -C <pair> universe:assemble --spec <spec> --max-phase <N> --report data/universes/<spec>-p<N>.report.json
 ```
 
 The last one runs once per `(spec, phase)` pair present under `data/universes/`.
 
 **Pin a commit sha, never a branch name** — a slash in `lock["tag"]` nests the
 `vendor/wowsimcli-<tag>-<platform>` directory. The branch belongs in
-`watchedRefs`. `--update` carries `watchedRefs` forward unchanged, so move it
-explicitly; `--unwatch-ref` is how a deleted upstream branch leaves.
+`watchedRefs`. `sync:wowsims` runs `--update`, which carries `watchedRefs`
+forward unchanged, so move it explicitly; `--unwatch-ref` is how a deleted
+upstream branch leaves.
 
 **`pnpm verify` does not run `sync_wowsims.py --check`.** The verify chain ends at
 `upstream-drift:warn`, which exits 0 on every branch by design. Run the check by
 hand and paste the `in sync.` line into your report:
 
 ```bash
-python scripts/sync_wowsims.py --check
+pnpm -C <pair> sync:wowsims:check
 ```
 
 Acceptance — the lock must be purely generated, so running `--update` again
 changes nothing:
 
 ```bash
-python scripts/sync_wowsims.py --update --ref <TARGET_SHA>
-git -C <core> diff --exit-code data/wowsims.lock.json
-pnpm proto:generate
-git -C <core> diff --exit-code -- packages/core/src/proto data/proto
+pnpm -C <pair> sync:wowsims --ref <TARGET_SHA>
+git -C <pair> diff --exit-code data/wowsims.lock.json
+pnpm -C <pair> proto:generate
+git -C <pair> diff --exit-code -- packages/core/src/proto data/proto
 ```
 
 ### 3. Predict, then diff
@@ -185,8 +205,8 @@ tracks its own paths. And a generated file can flip line endings, which makes th
 whole file look changed:
 
 ```bash
-git -C <core> diff --stat
-git -C <core> diff --stat --ignore-cr-at-eol
+git -C <pair> diff --stat
+git -C <pair> diff --stat --ignore-cr-at-eol
 ```
 
 Identical output means no line-ending flip. If they differ, the files in the
@@ -199,7 +219,7 @@ Save the pre-merge lock **before** resolving, because `checkout --theirs`
 overwrites it and mid-merge the recovery path is not obvious:
 
 ```bash
-git -C <fork> show HEAD:package-lock.json > package-lock.pre-merge.json
+git -C <fork> show HEAD:package-lock.json > <pair>/.scratch/package-lock.pre-merge.json
 git -C <fork> merge --no-ff --no-commit <TARGET_SHA>
 git -C <fork> diff --name-only --diff-filter=U
 ```
@@ -209,7 +229,7 @@ reconcile:
 
 ```bash
 git -C <fork> checkout --theirs -- package-lock.json
-npm install
+npm --prefix <fork> install
 ```
 
 Resolving a conflict's _content_ does not clear git's index state — stage the
@@ -226,7 +246,7 @@ Locate code by pattern, never by a fixed line range: conflict markers shift ever
 line after the first hunk.
 
 ```bash
-grep -n '<pattern>' <file>
+grep -n '<pattern>' <fork>/<file>
 ```
 
 **The generated protobuf bindings are untracked and go stale across a pin move.**
@@ -247,9 +267,9 @@ subprocess.run(["protoc", "-I=./proto",
 Then verify the merged tree:
 
 ```bash
-go build ./sim/core/... ; go build ./sim/hunter/... ; go vet ./sim/hunter/
-pnpm fork-lint:check            # from <core>: oxlint over our fork paths, then the fork's tsc
-node scripts/tab-harness/test-layout.mjs   # from <core>
+go -C <fork> build ./sim/core/... ; go -C <fork> build ./sim/hunter/... ; go -C <fork> vet ./sim/hunter/
+pnpm -C <pair> fork-lint:check    # oxlint over our fork paths, then the fork's tsc
+node <pair>/scripts/tab-harness/test-layout.mjs
 ```
 
 `go build ./sim/...` cannot pass in this checkout: `sim/web/main.go` imports
@@ -260,11 +280,11 @@ assertion line, not just the rc.
 Refresh the bundled data the tab ranks from, then commit again:
 
 ```bash
-python scripts/sync_fork_universes.py --write
-python scripts/sync_fork_universes.py --check
+python <pair>/scripts/sync_fork_universes.py --write
+pnpm -C <pair> fork-universes:check
 ```
 
-Add a dated section to `docs/fork-provenance/data.md` (in this repo)
+Add a dated section to `<pair>/docs/fork-provenance/data.md`
 saying what moved and why. That script compares **raw bytes**, so a pure CRLF/LF difference reads
 exactly like a real drift — check with `--ignore-cr-at-eol` before writing a
 cause down.
@@ -282,12 +302,12 @@ git -C <fork> merge-base HEAD <TARGET_SHA>
 It must return `<TARGET_SHA>` itself. Then regenerate and check:
 
 ```bash
-pnpm sim-implemented-effects:generate
-pnpm equip-eligibility:check
-pnpm meta-conditions:check
-pnpm ep-presets:check
-pnpm fork-lint:check
-pnpm verify
+pnpm -C <pair> sim-implemented-effects:generate
+pnpm -C <pair> equip-eligibility:check
+pnpm -C <pair> meta-conditions:check
+pnpm -C <pair> ep-presets:check
+pnpm -C <pair> fork-lint:check
+pnpm -C <pair> verify
 ```
 
 The four `require_pinned_fork` gates exit 2 between the fork commit and this lock
@@ -303,7 +323,8 @@ generator produces.
 A recorded-fixture miss (`no recording for sim key`) is a **stop-and-report**, not
 a re-record.
 
-Before every fork re-pin, hand-run `pnpm desktop-gate:check` and paste its
+Before a fork re-pin that `dev` will receive (ADR-0036 Consequence 1), hand-run
+`pnpm -C <pair> desktop-gate:check` and paste its
 assertion lines (a)–(f) and (h) ((g) removed) into the commit body or the stage's `desktop-gate.md`. It
 proves the upgrades tab still runs on the packaged desktop binary over the HTTP
 transport and cannot pass on a page served by vite. It is deliberately **not** in
@@ -332,7 +353,7 @@ fresh clone obtains the binary and is its own decision.
 ### 7. Push and verify — the order
 
 No gate checks whether a fork commit was pushed. `git ls-remote` appears in no
-executable file and the `pushed` boolean has no code readers, so a core branch can
+executable file and the `pushed` boolean has no code readers, so a main branch can
 merge to `dev` while its pin names a fork commit that exists on one disk.
 ADR-0030 Consequence 4 accepts that risk; ticket 355 was filed when it bit.
 
@@ -343,12 +364,20 @@ ADR-0030 Consequence 4 accepts that risk; ticket 355 was filed when it bit.
 5. Review, then ask the owner before landing it by
    `docs/agents/paired-worktrees.md` "Land it on dev": the main folder merges
    `<fork-branch>` into the fork lock's `branch`, then runs
-   `pnpm merge-to-dev <main-branch>`.
+   `pnpm -C <main-folder> merge-to-dev <main-branch>`.
 6. Push the fork lock's `branch` — **owner-authorised, an explicit ask**.
 7. Verify with
-   `git -C vendor/tbc-new-fork ls-remote origin refs/heads/<branch from the fork lock>`
-   from the main folder, returning the same sha. **Do not trust the lockfile's
-   `pushed` flag.** Then set `pushed: true`.
+   `git -C <main-folder>/vendor/tbc-new-fork ls-remote origin refs/heads/<branch from the fork lock>`,
+   returning the same sha. **Do not trust the lockfile's `pushed` flag.** Then
+   set `pushed: true` in `<main-folder>/data/wowsims-fork.lock.json` and commit
+   it directly on `dev` in the main folder, as `64443dc4` ("Mark fork
+   316326a95 as pushed") did; `.githooks/pre-commit` allows a plain commit on
+   `dev`.
+
+The push comes after the merge into `dev` because, in a pair, the fork lock's
+`branch` gets the fork commit only at landing (paired-worktrees.md "Land it on
+dev", step 2). The unpushed window between steps 5 and 6 is the risk
+ADR-0030 Consequence 4 records.
 
 An executing agent reaches step 5 and **stops**, reporting the fork tip sha.
 `pushed` stays false until someone runs step 7, as it did after the 2026-09-14
