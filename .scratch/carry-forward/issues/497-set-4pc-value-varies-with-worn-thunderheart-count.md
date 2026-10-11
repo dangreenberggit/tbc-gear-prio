@@ -62,3 +62,12 @@ So on close to the same base gear, N4 reads +60.5, +19.9, and hidden
 is worn — the same shape as this ticket's existing worn-0-to-4 table, and
 consistent with the ticket's hypothesis that a Thunderheart-set break is
 leaking into the measurement.
+
+**2026-10-11 — on the finish list (Chunk 3b step 6 of
+`.scratch/plans/upgrades-tab-finish-line.md`, decided by the
+orchestrating session).** The set-bonus numbers must be checked before the
+tab counts as finished. The check is a live feral run on the current fork
+at 0, 1, 2, 3 and 4 worn Thunderheart pieces, read against this ticket's
+figures; it is run, not put to the owner as a question. It stays in
+Tab-blocking in `docs/upgrades-tab-scope.md` until that run is recorded
+here.

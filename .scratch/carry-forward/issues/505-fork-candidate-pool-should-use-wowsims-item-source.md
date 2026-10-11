@@ -45,3 +45,26 @@ otherwise.
 A plan that says where the tab's candidates come from, approved by the
 owner, and implemented with the universe-sync path removed or explicitly
 kept for a stated reason.
+
+## Comments
+
+**2026-10-11 — how the Chunk 3b direction relates to this ticket**
+(`.scratch/plans/upgrades-tab-finish-line.md`, step 6, Q-feral-p5). Asked
+about ticket 500's missing items with an option phrased as "take items from
+where wowsims gets items from", the owner replied: "'take items from where
+wowsims gets items from' This makes no sense. This is a wowsims tab. Why
+would it get items from anywhere else? Why would this fix anything if it's
+already being done?" The list builder already reads the wowsims item
+database (`vendor/wowsims/db.json`, pinned to upstream's
+`assets/database/db.json` by `data/wowsims.lock.json`); the gaps come from
+its membership rules (tier tokens, Sunmote upgrades, crafted patterns, and
+ret/feral's older rules). The owner then asked for "a programmatic way to
+check and add such items", which is now tickets 609–613 (Tab-blocking).
+
+Those tickets keep the assembled lists and fix their rules. This ticket's
+question (should the tab stop shipping its own list files and read
+wowsims' item data at run time) stays open and is not on the finish list:
+the re-asked question proposed keeping it out, and the owner's reply did
+not object (not an explicit ruling). Tickets 500 and 298 are no longer
+superseded by this ticket; 298 closed as superseded by 609, and 500 points
+at 609, 611 and 612.

@@ -44,3 +44,13 @@ or narrowing the Item column).
 - If the figure must be in view: a `pnpm tab-review` capture at 375 px
   where the first row's DPS cell lies inside the panel, with the table
   still scrolling sideways for the remaining columns.
+
+## Comments
+
+**2026-10-11 — owner ruling (Q-606-phone-dps, Chunk 3b step 6 of
+`.scratch/plans/upgrades-tab-finish-line.md`).** Asked "should the DPS
+number be visible on a phone without scrolling sideways?", the owner
+answered: "Yes". The first close condition is met by this ruling; the
+second (a 375 px capture with the first row's DPS cell inside the panel)
+is now the work. The ticket moves to Tab-blocking in
+`docs/upgrades-tab-scope.md`.

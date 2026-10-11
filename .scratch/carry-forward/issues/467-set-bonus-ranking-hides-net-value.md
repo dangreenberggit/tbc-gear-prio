@@ -195,3 +195,12 @@ B4 − 2·B2); (4) the SME's do-not-trust finding above.
   quoted in ticket 502's closing section. The final check for this ticket
   still waits for tickets 511 and 512 and the fixtures re-recorded after
   them. Status stays open.
+
+**2026-10-11 — on the finish list (Chunk 3b step 6 of
+`.scratch/plans/upgrades-tab-finish-line.md`, decided by the
+orchestrating session).** The set-bonus numbers must be checked before the
+tab counts as finished. The check is a live feral run on the current fork
+at 0, 1, 2, 3 and 4 worn Thunderheart pieces, read against this ticket's
+figures; it is run, not put to the owner as a question. It stays in
+Tab-blocking in `docs/upgrades-tab-scope.md` until that run is recorded
+here.

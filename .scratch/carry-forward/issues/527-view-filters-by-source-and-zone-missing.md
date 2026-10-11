@@ -212,3 +212,16 @@ Settle the design with the owner at the start of this ticket.
 - The boss sub-filter (ticket 277, blocked by 35).
 - More Gear-picker filters on the Sources popup (ticket 496).
 - Any change to what the pre-sim Sources popup does.
+
+## Comments
+
+**2026-10-11 — owner answer (Q-raid-filter, Chunk 3b step 6 of
+`.scratch/plans/upgrades-tab-finish-line.md`).** Asked whether the
+after-run raid/source filter must exist before the tab counts as finished,
+the owner answered: "Yes. It should probably be like the sources box but
+I'll wait for anymore detailed choice set that makes more sense before
+answering those". So the filter is on the finish list (Tab-blocking). The
+owner leans toward a control like the pre-run Sources box. The detailed
+design choices under "Proposed scope" are not decided; the owner wants a
+clearer set of choices before answering them, so close condition 1 still
+needs that set brought to the owner.

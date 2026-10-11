@@ -30,3 +30,24 @@ start at phase 2 on purpose. Nothing has checked that.
 2. If it is by design, say what a phase-1 run from the pre-raid preset
    should show instead, and note it on 512. If it is a gap,
    file the fix as its own ticket.
+
+## Comments
+
+**2026-10-11 — what "finished" needs from this ticket (Chunk 3b step 6
+of `.scratch/plans/upgrades-tab-finish-line.md`, decided by the
+orchestrating session).** A Phase 1 run today ends by saying nothing beat
+the player's gear ("No upgrades found", `empty_no_upgrades` in the fork's
+`assets/locales/en/upgrades.json:129`; which state shows it on a Phase 1
+run is from reading the code, untested on the React tab), which is false:
+nothing was compared. For the finished tab, that message is fixed: a Phase 1 run says
+plainly that the tab has no Phase 1 candidate list. A real Phase 1 list is
+not part of "finished". So this ticket closes when:
+
+1. Close condition 1 above is answered (why no phase-1 list exists).
+2. The tab no longer shows "No upgrades found" for a phase with no
+   candidate list; it says the phase has no list. A fork commit and
+   re-pin, `pnpm verify` rc=0, and a `pnpm tab-review` capture or a
+   by-hand Browser-pane check of a Phase 1 run.
+3. If close condition 1 finds the missing list is a gap rather than a
+   design choice, the real Phase 1 list is filed as its own ticket under
+   Tab-adjacent.
