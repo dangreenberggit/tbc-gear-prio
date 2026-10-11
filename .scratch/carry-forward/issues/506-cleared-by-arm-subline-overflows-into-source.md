@@ -54,4 +54,4 @@ the cell"), which reads every cell rather than one sub-line class.
 
 Verified by: tbc-new-fork@be3d703a1 (removes the note);
 `git -C vendor/tbc-new-fork grep -n "upgrades-cutoff-arm" -- ui` prints only
-the `ResultRow.test.tsx` assertion that no row carries it.
+the `ResultRow.test.tsx` assertion that no row shows it.
