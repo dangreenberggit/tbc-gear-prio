@@ -297,10 +297,41 @@ def check_unregistered_folder_is_deleted_only_with_force_or_a_mark() -> list[str
     finish the job (2026-10-10: a locked tsc.exe stopped the fork's delete
     after git had dropped its registration)."""
     problems = []
-    for force, started, refused in ((False, False, True), (True, False, False), (False, True, False)):
-        got = wp.unregistered_problem("C:\\p\\vendor\\tbc-new-fork", "C:\\fork", force, started)
+    # A folder with its own .git folder is a separate clone, never a worktree
+    # leftover, so a mark does not cover it (review A1).
+    cases = (
+        # (force, started, own_repo) -> refused
+        ((False, False, False), True),
+        ((True, False, False), False),
+        ((False, True, False), False),
+        ((False, True, True), True),
+        ((True, True, True), False),
+    )
+    for args, refused in cases:
+        got = wp.unregistered_problem("C:\\p\\vendor\\tbc-new-fork", "C:\\fork", *args)
         if (got is not None) != refused:
-            problems.append(f"unregistered_problem(force={force}, started={started}) gave {got!r}")
+            problems.append(f"unregistered_problem(force, started, own_repo={args}) gave {got!r}")
+    return problems
+
+
+def check_failed_unpair_keeps_its_mark_only_for_an_unregistered_half() -> list[str]:
+    """A run that git refused before deleting anything leaves both halves
+    registered, and its mark must go: a mark left behind would let a later
+    plain rerun delete an unregistered folder there unchecked (review A1). A
+    run that left a half git no longer registers keeps it, so the rerun can
+    finish."""
+    problems = []
+    cases = (
+        # [(exists, registered) for main, fork] -> keep
+        ([(True, True), (True, True)], False),
+        ([(True, True), (False, False)], False),
+        ([(True, True), (True, False)], True),
+        ([(True, False), (False, False)], True),
+        ([(False, False), (False, False)], False),
+    )
+    for halves, keep in cases:
+        if wp.mark_still_needed(halves) != keep:
+            problems.append(f"mark_still_needed({halves}) must be {keep}")
     return problems
 
 
@@ -313,9 +344,12 @@ def check_unpair_mark_round_trip() -> list[str]:
         (main / ".git").mkdir(parents=True)
         if wp.unpair_started(main, "probe"):
             problems.append("no mark before mark_unpair_started")
-        wp.mark_unpair_started(main, "probe", Path(td, "tbc-wt", "probe"))
+        wp.mark_unpair_started(main, "probe", Path(td, "tbc-wt", "probe"), force=True)
         if not wp.unpair_started(main, "probe"):
             problems.append("the mark must be found after mark_unpair_started")
+        text = wp.unpair_mark(main, "probe").read_text(encoding="utf-8")
+        if "skips the work checks" not in text or "passed" in text:
+            problems.append(f"a --force mark must not claim the work checks passed (review P5), got {text!r}")
         if wp.unpair_started(main, "probe-2"):
             problems.append("a mark for probe must not count for probe-2")
         if not wp.is_inside(str(wp.unpair_mark(main, "probe")), str(main / ".git")):
@@ -346,14 +380,27 @@ def check_processes_using_the_pair_are_found() -> list[str]:
         {"ProcessId": 14, "ParentProcessId": 1, "Name": "System", "ExecutablePath": None, "CommandLine": None},
         {"ProcessId": 20, "ParentProcessId": 21, "Name": "python.exe",
          "ExecutablePath": "C:\\py\\python.exe", "CommandLine": f"python worktree_pair.py unpair probe {root}"},
-        {"ProcessId": 21, "ParentProcessId": 22, "Name": "bash.exe",
+        {"ProcessId": 21, "ParentProcessId": 22, "Name": "bash.exe", "Created": 100,
          "ExecutablePath": "C:\\git\\bash.exe", "CommandLine": f"bash -c 'ls {root}; pnpm wt:unpair probe'"},
+        # Claude Code's Bash tool spells paths the Git Bash way (review A3).
+        {"ProcessId": 15, "ParentProcessId": 1, "Name": "bash.exe",
+         "ExecutablePath": "C:\\git\\bash.exe", "CommandLine": 'bash -c "cd /c/Users/dgree/Code/lulz/tbc-wt/probe && pnpm dev"'},
+        {"ProcessId": 16, "ParentProcessId": 1, "Name": "node.exe",
+         "ExecutablePath": "C:\\node\\node.exe", "CommandLine": "node C:\\\\Users\\\\dgree\\\\Code\\\\lulz\\\\tbc-wt\\\\probe\\\\x.js"},
+        # A /c/ inside a longer path is not a drive.
+        {"ProcessId": 17, "ParentProcessId": 1, "Name": "x.exe",
+         "ExecutablePath": "C:\\x.exe", "CommandLine": "x C:/a/c/Users/dgree/Code/lulz/tbc-wt/probe"},
+        # pid 22 exited and Windows reused its id for a holder made after
+        # bash (pid 21), so it is not a starter of this run (review A4).
+        {"ProcessId": 22, "ParentProcessId": 1, "Name": "tsc.exe", "Created": 200,
+         "ExecutablePath": root + "\\node_modules\\tsc.exe", "CommandLine": "tsc -w"},
     ]
+    procs[5]["Created"] = 150
     problems = []
     found = wp.processes_using(root, procs, 20)
     got = sorted(p["ProcessId"] for p in found)
-    if got != [10, 11, 12]:
-        problems.append(f"processes_using gave pids {got}, want [10, 11, 12]")
+    if got != [10, 11, 12, 15, 16, 22]:
+        problems.append(f"processes_using gave pids {got}, want [10, 11, 12, 15, 16, 22]")
     shown = wp.describe_processes(found + [procs[4]])
     for want in ("pid 10 " + root + "\\vendor", "tsc -w", "pid 14 System"):
         if want not in shown:
@@ -379,11 +426,11 @@ def check_locked_file_is_named_and_rerun_is_offered() -> list[str]:
         (root / "src" / "free.txt").write_text("x", encoding="utf-8")
         with open(locked, encoding="utf-8"):
             try:
-                wp.delete_folder(root, "probe")
+                wp.delete_folder(root, "pnpm wt:unpair probe")
                 problems.append("delete_folder must refuse while a file is held open")
             except wp.Refusal as exc:
                 msg = str(exc)
-                for want in (str(locked), "process", "pnpm wt:unpair probe"):
+                for want in (str(locked), "A process holds them open", "run `pnpm wt:unpair probe` again"):
                     if want not in msg:
                         problems.append(f"the refusal must contain {want!r}, got {msg!r}")
             if (root / "src").exists():
@@ -604,6 +651,7 @@ CHECKS = (
     check_unknown_vendor_folders_are_found,
     check_unsaved_work_on_a_real_repo,
     check_unregistered_folder_is_deleted_only_with_force_or_a_mark,
+    check_failed_unpair_keeps_its_mark_only_for_an_unregistered_half,
     check_unpair_mark_round_trip,
     check_processes_using_the_pair_are_found,
     check_locked_file_is_named_and_rerun_is_offered,
