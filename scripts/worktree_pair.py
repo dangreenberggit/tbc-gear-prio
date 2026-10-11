@@ -44,6 +44,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import TypedDict
 
 # 23 characters: what the default pair root leaves under MAX_ROOT_LEN.
 NAME_RE = re.compile(r"[a-z0-9][a-z0-9-]{0,22}")
@@ -176,7 +177,20 @@ def mark_still_needed(halves: list[tuple[bool, bool]]) -> bool:
 GIT_BASH_DRIVE = re.compile(r"(?<![\w:/\\])/([a-z])/")
 
 
-def processes_using(root: str, procs: list[dict], own_pid: int) -> list[dict]:
+class ProcessRow(TypedDict, total=False):
+    """A Get-CimInstance Win32_Process row as running_processes reads it.
+    Windows leaves some fields empty (System has no program path), so any
+    field may be missing or None."""
+
+    ProcessId: int
+    ParentProcessId: int
+    Name: str
+    ExecutablePath: str | None
+    CommandLine: str | None
+    Created: int | None
+
+
+def processes_using(root: str, procs: list[ProcessRow], own_pid: int) -> list[ProcessRow]:
     """The processes that may hold files under `root` open.
 
     `procs` are Get-CimInstance Win32_Process rows. A process counts when its
@@ -216,8 +230,10 @@ def processes_using(root: str, procs: list[dict], own_pid: int) -> list[dict]:
     return found
 
 
-def describe_processes(procs: list[dict]) -> str:
-    """One line per process: pid, program, command line."""
+def describe_processes(procs: list[ProcessRow]) -> str:
+    """Shows the name when the program path is empty, as it is for System
+    and, seen from a shell that is not elevated, for an elevated process
+    (hypothesis, untested)."""
     return "\n".join(
         f"  pid {p['ProcessId']} {p.get('ExecutablePath') or p.get('Name')}: {p.get('CommandLine') or ''}"
         for p in procs
@@ -614,9 +630,12 @@ def find_links(root: Path) -> list[tuple[str, str]]:
     return found
 
 
-def left_in(root: Path, limit: int = 5) -> list[str]:
-    """Up to `limit` files still under `root` after a failed delete; when no
-    file is left, the innermost folders instead.
+FILES_SHOWN = 5
+
+
+def files_still_under(root: Path) -> list[str]:
+    """Up to FILES_SHOWN files still under `root` after a failed delete; when
+    no file is left, the innermost folders instead.
 
     The delete goes on past what it cannot remove, so what is left is what
     something held: a file a process has open, or a folder that is some
@@ -629,9 +648,9 @@ def left_in(root: Path, limit: int = 5) -> list[str]:
         files += [os.path.join(folder, n) for n in names]
         if not subdirs:
             innermost.append(folder)
-        if len(files) >= limit:
+        if len(files) >= FILES_SHOWN:
             break
-    return [p.replace(LONG_PREFIX, "", 1) for p in (files or innermost)[:limit]]
+    return [p.replace(LONG_PREFIX, "", 1) for p in (files or innermost)[:FILES_SHOWN]]
 
 
 def delete_folder(path: Path, rerun: str) -> None:
@@ -651,19 +670,19 @@ def delete_folder(path: Path, rerun: str) -> None:
         r = subprocess.run(
             ["cmd", "/c", "rmdir", "/s", "/q", long_path(str(path))], capture_output=True, text=True, errors="replace"
         )
-        os_said = r.stderr.strip()
+        delete_error = r.stderr.strip()
     else:
         try:
             shutil.rmtree(path)
-            os_said = ""
+            delete_error = ""
         except OSError as exc:
-            os_said = str(exc)
+            delete_error = str(exc)
     if path.exists():
-        left = "\n  ".join(left_in(path))
-        first = os_said.splitlines()[0].replace(LONG_PREFIX, "") if os_said else ""
-        said = f"\nThe delete said: {first}" if first else ""
+        left = "\n  ".join(files_still_under(path))
+        first_error_line = delete_error.splitlines()[0].replace(LONG_PREFIX, "") if delete_error else ""
+        error_shown = f"\nThe delete said: {first_error_line}" if first_error_line else ""
         holders = "a dev server, tsc, an editor, or a terminal whose current folder is inside"
-        if "being used by another process" in os_said:
+        if "being used by another process" in delete_error:
             cause = f"A process holds them open: {holders}. Stop that process"
         else:
             cause = (
@@ -671,7 +690,7 @@ def delete_folder(path: Path, rerun: str) -> None:
                 f"({holders}), stop that process; otherwise fix the cause"
             )
         raise Refusal(
-            f"could not delete all of {path}. These are still there:\n  {left}{said}\n"
+            f"could not delete all of {path}. These are still there:\n  {left}{error_shown}\n"
             f"{cause}, then run `{rerun}` again; it finishes the removal."
         )
 
@@ -706,7 +725,7 @@ def clear_unpair_mark(main_dir: Path, name: str) -> None:
     unpair_mark(main_dir, name).unlink(missing_ok=True)
 
 
-def running_processes() -> list[dict] | None:
+def running_processes() -> list[ProcessRow] | None:
     """Every running process as a Win32_Process row, or None when they
     cannot be listed (not Windows, or the query failed)."""
     if os.name != "nt":
@@ -845,6 +864,7 @@ def unpair(args: argparse.Namespace) -> int:
                     raise Refusal(
                         f"{problem}\nTo remove the pair anyway and lose those files, rerun with --force."
                     )
+    rerun = f"pnpm wt:unpair {args.name}" + (" --force" if args.force else "")
     procs = running_processes()
     busy = processes_using(str(target), procs, os.getpid()) if procs is not None else []
     if busy:
@@ -853,7 +873,7 @@ def unpair(args: argparse.Namespace) -> int:
             raise Refusal(
                 f"these processes run from inside {target} or name it on their command line, so they "
                 f"may hold files there open and stop the removal part-way:\n{shown}\n"
-                f"Stop them, then rerun `pnpm wt:unpair {args.name}`. Nothing was removed. "
+                f"Stop them, then rerun `{rerun}`. Nothing was removed. "
                 "--force skips this check."
             )
         say(f"WARNING: --force given; removing although these processes may hold files open:\n{shown}")
@@ -861,7 +881,6 @@ def unpair(args: argparse.Namespace) -> int:
         say("could not list running processes; removing without checking for processes that use the pair")
 
     mark_unpair_started(main_dir, args.name, target, args.force)
-    rerun = f"pnpm wt:unpair {args.name}" + (" --force" if args.force else "")
     try:
         if target.exists():
             keep_run_logs(target, main_dir)
