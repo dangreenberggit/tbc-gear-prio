@@ -206,7 +206,9 @@ session decided this ticket is checked once on the React tab and closed,
 rather than held for an owner option choice: the React `DeltaCell.tsx:33-49`
 already puts the note on its own wrapping line. The Chunk 3b captures
 (fixtures `ret-p3-p2` and `feral-p3-th-hands-legs`) contain no "removes worn" note
-(no match in that capture set's JSON), so the check still needs an
+(`grep -rli 'removes worn\|upgrades-removed-items' --include='*.json'`
+over the main checkout's gitignored `.scratch/tab-scope-refresh/review/`
+finds no file; re-checked 2026-10-11), so the check still needs an
 enhancement (dual-wield) run with a two-hander row; close with that
 capture or a by-hand check in the Browser pane. Kept under Tab-adjacent in
 `docs/upgrades-tab-scope.md` until then.
