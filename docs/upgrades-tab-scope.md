@@ -104,9 +104,7 @@ The fix has landed and been read back; each row waits only on a recorded owner
 or SME ruling. Chunk 4 step 5 presents these once, in prose, with the analysis
 done.
 
-| Ticket                                                         | Repo | Transport | Why                                                                                                                  |
-| -------------------------------------------------------------- | ---- | --------- | -------------------------------------------------------------------------------------------------------------------- |
-| 311 — raw Go panic and stack trace rendered in the end-user UI | both | both      | The fix landed and the CDP readback shows no panic; the ticket closes on the owner accepting that readback as proof. |
+No ticket is in this bucket. The last one, 311, closed on 2026-10-11.
 
 ---
 
@@ -305,12 +303,13 @@ The placements a reviewer should scrutinize first:
    an explicit "stricter reading → blocking" note on 267. If the owner's real
    goal is "both front ends ship," these four move up.
 
-2. **The "Awaiting owner sign-off" bucket holds 311.** It has a committed
-   fix and an unrecorded owner judgment, so it is a decision owed, not code
-   owed. 313, 315 and 330 left it on 2026-10-11: the owner signed them off on
-   2026-09-18 (`4f1e99c5`) and they are now closed. 254 left it on 2026-10-11
-   too: a fresh SME read found no inconsistency at the cutoff, the owner
-   approved the close, and it is now closed.
+2. **The "Awaiting owner sign-off" bucket is empty.** 313, 315 and 330 left
+   it on 2026-10-11: the owner signed them off on 2026-09-18 (`4f1e99c5`)
+   and they are now closed. 254 left it on 2026-10-11 too: a fresh SME read
+   found no inconsistency at the cutoff, the owner approved the close, and
+   it is now closed. 311 left it on 2026-10-11: the owner said to close it
+   rather than be asked again, and it is now closed. Its check of the
+   unguarded hunter set bonuses filed 621 (Tab-adjacent).
 
 3. **331 vs 335 vs the set-bonus cluster.** 331 is a confirmed correctness bug
    but lives only in `weightedSetPotentialDps`, called only from the core report,

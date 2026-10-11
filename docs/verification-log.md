@@ -2616,11 +2616,20 @@ The engine lock's `commit` and the fork lock's `branchedFrom` are each a
 `python scripts/sync_wowsims.py --check` exits 0. Not yet recorded under this
 gate.
 
-### ☐ 6 — owner sign-off for the Awaiting bucket
+### ☑ 6 — owner sign-off for the Awaiting bucket
 
 Tickets 254 and 311 read `Status: closed`, each quoting the owner's ruling and
 carrying a `Verified by:` line, and the scope doc's
-`## Awaiting owner sign-off` bucket has no rows. Not yet met: 254 reads
-`Status: closed` on 2026-10-11 (the owner's approval and the SME read are in
-its closing note), but 311 still reads `Status: open` and keeps its row in the
-bucket.
+`## Awaiting owner sign-off` bucket has no rows.
+
+Met on 2026-10-11, on branch `feat/tab-stage-3t` in the commit that adds this
+entry (parent `cbd4869e`). 254's closing note quotes the owner's approval and
+the SME read. 311's closing note quotes the owner's instruction of 2026-10-11:
+"dont just tell me to close a ticket. thats idiotic. either do it or provide
+me with a real decision". Both carry a `Verified by:` line. Run from the repo
+root in Git Bash:
+
+- `for n in 254 311; do grep -m1 '^Status' .scratch/carry-forward/issues/$n-*.md; done`
+  → `Status: closed` twice.
+- `sed -n '/^## Awaiting owner sign-off/,/^## /p' docs/upgrades-tab-scope.md | grep -c '^| [0-9]'`
+  → 0.
