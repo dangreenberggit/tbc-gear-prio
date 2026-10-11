@@ -182,7 +182,7 @@ Three lanes, every harness, sorted by **kind of work, not model height**: **work
 4. When the branch looks done: run the `pre-merge-review` skill → `docs/reviews/<branch>.md` (commit it on the feature branch). Deferred findings become tickets under `.scratch/carry-forward/issues/` (linked from Disposition). `pnpm issues:open` lists them anytime. **Do not skip this** — `pnpm merge-to-dev` only checks that the review file exists; it does not run the review.
 5. Launch mini-loops for associated new tickets unless there's a valid reason to be defer them: delegate to a planner, then delegate the plan to an executor/orchestrator, then delegate to an independent reviewer.
 6. **Ask before merging to `dev` but only when the task and associated tickets are done.** Never `pnpm merge-to-dev`, never `git merge` into `dev`, and never set `TBC_ALLOW_DEV_MERGE=1`, unless the user has explicitly asked to merge **after** the review file is written and they have had a chance to see the summary (a combined “review and merge” request is **not** enough — finish the review, stop, wait for a separate merge ask). When they ask: `pnpm merge-to-dev` is the only supported door — verify → review/ticket check → `git merge --no-ff` into `dev`. On `phase-N/*`, open `Blocks: phase-N` tickets require `--ack-open-blockers` (or close/re-block them first).
-7. `main` only receives a merge from `dev` when a PLAN.md §14 phase gate is fully checked off in `docs/verification-log.md`.
+7. `main` only receives a merge from `dev` when a PLAN.md §14 gate (a phase or Stage 3T) is fully checked off in `docs/verification-log.md`.
 
 ### Gates
 
