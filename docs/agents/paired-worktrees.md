@@ -171,7 +171,13 @@ inside the pair it removes. Without `--force` it refuses when:
   `.scratch/` stage records or a folder added under `vendor/`;
 - either worktree is detached at a commit no branch contains;
 - a folder sits at the pair's main or fork path that git does not register
-  as a worktree (with `--force`, unpair deletes it as a leftover).
+  as a worktree, and either no earlier unpair of this pair started removing
+  it or the folder holds its own `.git` folder (a separate clone); with
+  `--force`, unpair deletes it as a leftover;
+- on Windows, a running process has its program inside the pair or names
+  the pair on its command line, in Windows or Git Bash (`/c/...`) spelling,
+  such as `tsc.exe` under `node_modules` or the backend `wowsimtbc.exe`. It
+  lists each one with its pid. With `--force`, it lists them and goes on.
 
 Even with `--force`, it refuses a locked worktree, and a pair with another
 worktree registered inside it (such as a second fork worktree under
@@ -185,6 +191,23 @@ drops the registration and then leaves a pair's main folder half-deleted
 ("Directory not empty", every live run on 2026-10-10). The script deletes
 what git leaves behind only once git has dropped the registration, and only
 after it checks that no link inside the pair points out of it.
+
+**When unpair stops part-way.** A file that some process holds open stops
+the delete, and git may already have dropped that half's registration. The
+process check above misses a process whose program is outside the pair and
+whose command line does not name it, such as a shell or vite started inside
+it. It probably also misses an elevated process when unpair runs in a shell
+that is not elevated (hypothesis, untested). Unpair then prints the files
+that are still there and the command to rerun, and stops. Stop the process
+that holds them, then run that command; it finishes the removal. It is
+`pnpm wt:unpair <name>`, with `--force` only when the stopped run had it.
+This works because unpair writes a mark, `.git/tbc-wt-unpair/<name>` in
+the main checkout, after its work checks pass (or `--force` skips them) and
+before it removes anything. It deletes the mark when the pair is gone, and
+when a run stops while git still registers every half that is left. A
+rerun deletes an unregistered folder at the pair's paths only while that
+mark exists. A half that git still registers gets the full work checks
+again.
 
 Live timings for one pair (2026-10-10, `--fork-detached --build`): main
 worktree 3 s, fork worktree 2 s, `pnpm install` 7 s with a warm store,

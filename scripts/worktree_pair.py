@@ -44,6 +44,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
+from typing import TypedDict
 
 # 23 characters: what the default pair root leaves under MAX_ROOT_LEN.
 NAME_RE = re.compile(r"[a-z0-9][a-z0-9-]{0,22}")
@@ -125,13 +126,118 @@ def leftover_action(still_registered: bool, exists: bool) -> str:
     anything (a locked worktree, or files that appeared after the clean-tree
     check), and deleting the folder would override that, `--force` or not.
     "delete" once git has let go of a folder it left behind. Callers reach
-    this for an unregistered folder only after the --force check.
+    this for an unregistered folder only after unregistered_problem allowed it.
     """
     if not exists:
         return "done"
     if still_registered:
         return "refuse"
     return "delete"
+
+
+def unregistered_problem(path: str, repo: str, force: bool, started: bool, own_repo: bool) -> str | None:
+    """Why unpair must not delete a folder at a pair path that git does not
+    register, or None when it may.
+
+    git checks no work in a folder it does not register. `started` means an
+    earlier unpair of this pair ran its work checks, wrote its mark, and then
+    stopped part-way after git had dropped a registration, as when a locked
+    file stops the delete. The folder is then what that run was removing, so
+    a rerun finishes it without --force. `own_repo` means the folder holds a
+    `.git` folder: a separate clone, never what is left of a worktree (a
+    worktree's `.git` is a file), so the mark does not cover it.
+    """
+    if force:
+        return None
+    if own_repo:
+        return (
+            f"{path} is not a worktree of {repo} but holds its own .git folder, so it is a separate "
+            "repository whose work cannot be checked. Move it away, or rerun with --force to delete it"
+        )
+    if started:
+        return None
+    return (
+        f"{path} is not a worktree of {repo}, and no earlier unpair of this pair started removing it, "
+        "so its work cannot be checked. If it is what is left of a pair, rerun with --force to delete it"
+    )
+
+
+def mark_still_needed(halves: list[tuple[bool, bool]]) -> bool:
+    """Whether a failed unpair keeps its mark, from (exists, registered) for
+    each half after the failure.
+
+    The mark lets a rerun delete a half that git no longer registers. When
+    every half that is still there is still registered, the rerun checks them
+    all again, so the mark is cleared: a mark left by a run that removed
+    nothing would let a later rerun delete an unregistered folder unchecked.
+    """
+    return any(exists and not registered for exists, registered in halves)
+
+
+GIT_BASH_DRIVE = re.compile(r"(?<![\w:/\\])/([a-z])/")
+
+
+class ProcessRow(TypedDict, total=False):
+    """A Get-CimInstance Win32_Process row as running_processes reads it.
+    Windows leaves some fields empty (System has no program path), so any
+    field may be missing or None."""
+
+    ProcessId: int
+    ParentProcessId: int
+    Name: str
+    ExecutablePath: str | None
+    CommandLine: str | None
+    Created: int | None
+
+
+def processes_using(root: str, procs: list[ProcessRow], own_pid: int) -> list[ProcessRow]:
+    """The processes that may hold files under `root` open.
+
+    `procs` are Get-CimInstance Win32_Process rows. A process counts when its
+    program sits under `root` (tsc.exe in node_modules, the backend) or its
+    command line names `root`, in Windows or Git Bash (`/c/...`) spelling.
+    This run and the processes that started it are left out: their command
+    lines may name the pair without using it. A parent counts as a starter
+    only when it was created before its child, because Windows reuses the id
+    of a process that has exited. Missed: a process whose current folder is
+    inside `root` and whose command line does not name it, a path in 8.3
+    short form, and, seen from a shell that is not elevated, an elevated
+    process, whose program and command line read as empty (hypothesis,
+    untested). The rerun after a failed delete covers what is missed.
+    """
+    by_pid = {p["ProcessId"]: p for p in procs}
+    own: set[int] = set()
+    pid: int | None = own_pid
+    while pid is not None and pid not in own:
+        own.add(pid)
+        child = by_pid.get(pid)
+        parent_pid = child.get("ParentProcessId") if child else None
+        parent = by_pid.get(parent_pid)
+        if parent and parent.get("Created") is not None and child.get("Created") is not None:
+            if parent["Created"] > child["Created"]:
+                break
+        pid = parent_pid
+    names_root = re.compile(re.escape(norm_path(root)) + r"(?=[\\\"'\s]|$)")
+    found = []
+    for p in procs:
+        if p["ProcessId"] in own:
+            continue
+        exe_path = p.get("ExecutablePath") or ""
+        cmd = GIT_BASH_DRIVE.sub(r"\1:/", (p.get("CommandLine") or "").lower())
+        cmd = re.sub(r"\\+", r"\\", cmd.replace("/", "\\"))
+        if (exe_path and is_inside(exe_path, root)) or names_root.search(cmd):
+            found.append(p)
+    return found
+
+
+def describe_processes(procs: list[ProcessRow]) -> str:
+    """Shows the name when the program path is empty, as it is for System
+    and, seen from a shell that is not elevated, for an elevated process
+    (hypothesis, untested)."""
+    return "\n".join(
+        f"  pid {p['ProcessId']} {p.get('ExecutablePath') or p.get('Name')}: {p.get('CommandLine') or ''}"
+        for p in procs
+    )
 
 
 def is_inside(path: str, root: str) -> bool:
@@ -215,6 +321,9 @@ def other_worktrees_inside(root: str, own: list[str], entries: list[dict[str, st
     ]
 
 
+LONG_PREFIX = "\\\\?\\"
+
+
 def long_path(p: str) -> str:
     """`p` with the `\\\\?\\` prefix that lifts Windows' 260-character limit.
 
@@ -222,7 +331,7 @@ def long_path(p: str) -> str:
     backslashes first.
     """
     p = p.replace("/", "\\")
-    return p if p.startswith("\\\\?\\") else "\\\\?\\" + p
+    return p if p.startswith(LONG_PREFIX) else LONG_PREFIX + p
 
 
 def node_ok(version_text: str) -> bool:
@@ -426,6 +535,7 @@ def pair(args: argparse.Namespace) -> int:
         )
     preflight_tools()
     env = make_env()
+    clear_unpair_mark(main_dir, args.name)
 
     started = time.monotonic()
     warnings: list[str] = []
@@ -520,24 +630,124 @@ def find_links(root: Path) -> list[tuple[str, str]]:
     return found
 
 
-def delete_folder(path: Path) -> None:
+FILES_SHOWN = 5
+
+
+def files_still_under(root: Path) -> list[str]:
+    """Up to FILES_SHOWN files still under `root` after a failed delete; when
+    no file is left, the innermost folders instead.
+
+    The delete goes on past what it cannot remove, so what is left is what
+    something held: a file a process has open, or a folder that is some
+    process's current folder.
+    """
+    files: list[str] = []
+    innermost: list[str] = []
+    top = long_path(str(root)) if os.name == "nt" else str(root)
+    for folder, subdirs, names in os.walk(top):
+        files += [os.path.join(folder, n) for n in names]
+        if not subdirs:
+            innermost.append(folder)
+        if len(files) >= FILES_SHOWN:
+            break
+    return [p.replace(LONG_PREFIX, "", 1) for p in (files or innermost)[:FILES_SHOWN]]
+
+
+def delete_folder(path: Path, rerun: str) -> None:
     """Delete what `git worktree remove` left behind, if nothing escapes.
 
     git drops the registration first and then can fail on a path past 260
-    characters ("Filename too long") or with "Directory not empty", leaving a
-    half-deleted folder. Both happened in the 2026-10-10 live test.
+    characters ("Filename too long"), with "Directory not empty", or on a
+    file a process holds open ("Invalid argument"), leaving a half-deleted
+    folder. All three happened on 2026-10-10.
     """
     escaping = links_outside(str(path), find_links(path))
     if escaping:
         listed = "; ".join(f"{link} -> {target}" for link, target in escaping)
         raise Refusal(f"not deleting {path}: these links point outside it: {listed}")
-    say(f"git left {path} behind; deleting it (no link inside points outside it)")
+    say(f"deleting what git left of {path} (no link inside points outside it)")
     if os.name == "nt":
-        subprocess.run(["cmd", "/c", "rmdir", "/s", "/q", long_path(str(path))])
+        r = subprocess.run(
+            ["cmd", "/c", "rmdir", "/s", "/q", long_path(str(path))], capture_output=True, text=True, errors="replace"
+        )
+        delete_error = r.stderr.strip()
     else:
-        shutil.rmtree(path)
+        try:
+            shutil.rmtree(path)
+            delete_error = ""
+        except OSError as exc:
+            delete_error = str(exc)
     if path.exists():
-        raise Refusal(f"could not delete {path}")
+        left = "\n  ".join(files_still_under(path))
+        first_error_line = delete_error.splitlines()[0].replace(LONG_PREFIX, "") if delete_error else ""
+        error_shown = f"\nThe delete said: {first_error_line}" if first_error_line else ""
+        holders = "a dev server, tsc, an editor, or a terminal whose current folder is inside"
+        if "being used by another process" in delete_error:
+            cause = f"A process holds them open: {holders}. Stop that process"
+        else:
+            cause = (
+                "The line above gives the reason. If a process holds them open "
+                f"({holders}), stop that process; otherwise fix the cause"
+            )
+        raise Refusal(
+            f"could not delete all of {path}. These are still there:\n  {left}{error_shown}\n"
+            f"{cause}, then run `{rerun}` again; it finishes the removal."
+        )
+
+
+UNPAIR_MARKS = "tbc-wt-unpair"
+
+
+def unpair_mark(main_dir: Path, name: str) -> Path:
+    """Where unpair records that it started removing pair `name`.
+
+    In the main checkout's .git, so removing the pair never deletes it, and
+    no git command reads it.
+    """
+    return main_dir / ".git" / UNPAIR_MARKS / name
+
+
+def mark_unpair_started(main_dir: Path, name: str, target: Path, force: bool) -> None:
+    mark = unpair_mark(main_dir, name)
+    mark.parent.mkdir(exist_ok=True)
+    checks = "with --force, which skips the work checks" if force else "after its work checks passed"
+    mark.write_text(
+        f"unpair of {target} started removing it at {time.strftime('%Y-%m-%dT%H:%M:%S')}, {checks}\n",
+        encoding="utf-8",
+    )
+
+
+def unpair_started(main_dir: Path, name: str) -> bool:
+    return unpair_mark(main_dir, name).is_file()
+
+
+def clear_unpair_mark(main_dir: Path, name: str) -> None:
+    unpair_mark(main_dir, name).unlink(missing_ok=True)
+
+
+def running_processes() -> list[ProcessRow] | None:
+    """Every running process as a Win32_Process row, or None when they
+    cannot be listed (not Windows, or the query failed)."""
+    if os.name != "nt":
+        return None
+    query = (
+        "[Console]::OutputEncoding = [Text.Encoding]::UTF8; "
+        "@(Get-CimInstance Win32_Process | "
+        "Select-Object ProcessId,ParentProcessId,Name,ExecutablePath,CommandLine,"
+        "@{n='Created';e={if ($_.CreationDate) { $_.CreationDate.ToFileTimeUtc() }}}) | ConvertTo-Json -Compress"
+    )
+    try:
+        r = subprocess.run(
+            ["powershell", "-NoProfile", "-NonInteractive", "-Command", query],
+            capture_output=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=120,
+        )
+        rows = json.loads(r.stdout) if r.returncode == 0 else None
+    except (OSError, subprocess.TimeoutExpired, ValueError):
+        return None
+    return rows if isinstance(rows, list) else None
 
 
 def unsaved_work(repo: Path) -> str | None:
@@ -590,7 +800,7 @@ def keep_run_logs(pair_root: Path, main_dir: Path) -> None:
             raise Refusal(f"no free name for run log {log} in {folder}")
 
 
-def remove(repo: Path, path: Path, listed: bool, force: bool) -> None:
+def remove(repo: Path, path: Path, listed: bool, force: bool, rerun: str) -> None:
     git_said = ""
     if listed:
         cmd = ["git", "-C", str(repo), "worktree", "remove", *(["--force"] if force else []), str(path)]
@@ -606,7 +816,7 @@ def remove(repo: Path, path: Path, listed: bool, force: bool) -> None:
             "this script deleted nothing in it. Fix what git's message names, then rerun"
         )
     if action == "delete":
-        delete_folder(path)
+        delete_folder(path, rerun)
 
 
 def unpair(args: argparse.Namespace) -> int:
@@ -631,6 +841,7 @@ def unpair(args: argparse.Namespace) -> int:
                 f"run `git -C {repo} worktree unlock {path}` once nothing uses it"
             )
     if not target.exists() and not in_main and not in_fork:
+        clear_unpair_mark(main_dir, args.name)
         say(f"nothing to remove: no folder {target} and no worktree registered there")
         return 0
     others = other_worktrees_inside(str(target), [str(target), str(fork_target)], main_list + fork_list)
@@ -639,12 +850,12 @@ def unpair(args: argparse.Namespace) -> int:
             f"other worktrees are registered inside {target}: {', '.join(others)}. "
             "Removing the pair would delete them; remove them first with git worktree remove"
         )
+    started = unpair_started(main_dir, args.name)
     for path, listed, repo in ((target, in_main, main_dir), (fork_target, in_fork, fork)):
-        if path.exists() and not listed and not args.force:
-            raise Refusal(
-                f"{path} is not a worktree of {repo}, so its work cannot be checked. "
-                "If it is what is left of a pair, rerun with --force to delete it"
-            )
+        if path.exists() and not listed:
+            problem = unregistered_problem(str(path), str(repo), args.force, started, (path / ".git").is_dir())
+            if problem:
+                raise Refusal(problem)
     if not args.force:
         for repo, listed in ((fork_target, in_fork), (target, in_main)):
             if listed and repo.exists():
@@ -653,17 +864,43 @@ def unpair(args: argparse.Namespace) -> int:
                     raise Refusal(
                         f"{problem}\nTo remove the pair anyway and lose those files, rerun with --force."
                     )
+    rerun = f"pnpm wt:unpair {args.name}" + (" --force" if args.force else "")
+    procs = running_processes()
+    busy = processes_using(str(target), procs, os.getpid()) if procs is not None else []
+    if busy:
+        shown = describe_processes(busy)
+        if not args.force:
+            raise Refusal(
+                f"these processes run from inside {target} or name it on their command line, so they "
+                f"may hold files there open and stop the removal part-way:\n{shown}\n"
+                f"Stop them, then rerun `{rerun}`. Nothing was removed. "
+                "--force skips this check."
+            )
+        say(f"WARNING: --force given; removing although these processes may hold files open:\n{shown}")
+    elif procs is None and os.name == "nt":
+        say("could not list running processes; removing without checking for processes that use the pair")
 
-    if target.exists():
-        keep_run_logs(target, main_dir)
-    remove(fork, fork_target, in_fork, args.force)
-    remove(main_dir, target, in_main, args.force)
+    mark_unpair_started(main_dir, args.name, target, args.force)
+    try:
+        if target.exists():
+            keep_run_logs(target, main_dir)
+        remove(fork, fork_target, in_fork, args.force, rerun)
+        remove(main_dir, target, in_main, args.force, rerun)
+    except Refusal:
+        halves = [
+            (target.exists(), is_listed(str(target), worktrees(main_dir))),
+            (fork_target.exists(), is_listed(str(fork_target), worktrees(fork))),
+        ]
+        if not mark_still_needed(halves):
+            clear_unpair_mark(main_dir, args.name)
+        raise
     git(fork, "worktree", "prune")
     git(main_dir, "worktree", "prune")
     if is_listed(str(target), worktrees(main_dir)) or is_listed(str(fork_target), worktrees(fork)):
         raise Refusal("a worktree is still registered after removal; see `git worktree list` in both repos")
     if target.exists():
         raise Refusal(f"{target} still exists")
+    clear_unpair_mark(main_dir, args.name)
     say(f"removed {args.name}: neither repo lists it, and {target} is gone")
     say("branches are kept; delete them with git branch -d when merged")
     return 0

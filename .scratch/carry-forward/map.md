@@ -334,3 +334,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 598 The agnostic adapter points at "Land it on dev" steps that moved, owner approval needed (feat/pair-rule merge of dev) 2026-10-10
 - 599 Run-log report keeps the price each line was written with, so a price fix misses old lines (pre-merge review fix/hook-sonnet-cache-price, A1, D2) 2026-10-08; WONTFIX 2026-10-10 by the owner: discussing it costs more than it would save
 - 600 Gaps in the new review-loop rules, one owner approval for 14 agent-file edits (pre-merge review feat-review-loop-fixes round 1, A1-A6, S1-S6, P1-P4) 2026-10-10
+- 601 Unpair passes the rerun hint through remove() into delete_folder() (pre-merge review fix/unpair-rerun, S6) 2026-10-10
+- 602 Gaps in how unpair clears its mark after a failed run (pre-merge review fix/unpair-rerun round 2, R1-R5, R7) 2026-10-10
