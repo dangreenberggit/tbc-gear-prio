@@ -42,7 +42,7 @@ run.
 ## Comments
 
 **2026-10-11 — the estimator refit is due now, whether or not the throttle
-lands (Chunk 3b of `.scratch/plans/upgrades-tab-finish-line.md`).** The
+is built (Chunk 3b of `.scratch/plans/upgrades-tab-finish-line.md`).** The
 estimator constants were fitted on the pre-React tab, and their comment says
 they "must be refitted if that rebuild changes" (`model/run_progress.ts:36-46`
 at fork `316326a95`, which still names `upgrades_tab.tsx`, `landedRowsTable`).

@@ -60,7 +60,9 @@ from a row's own bonus line. Confirm or refute before acting.
 
 ## 2026-10-11 — closed: the disputed strings are gone
 
-Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`, checked on 2026-10-11 at fork `316326a95` (= the fork lock). The React tab's set-bonus text comes from the `set_bonus.*` keys in
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`,
+checked on 2026-10-11 at fork `316326a95` (= the fork lock). The React
+tab's set-bonus text comes from the `set_bonus.*` keys in
 `assets/locales/en/upgrades.json`; none of the disputed keys or strings
 remain. The owner approved the string that shipped on 2026-09-18 (ticket 330's
 sign-off section; 330 is now `Status: closed`). That string is gone too;

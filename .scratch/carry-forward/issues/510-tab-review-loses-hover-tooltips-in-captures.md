@@ -54,7 +54,9 @@ between hover and capture.
 
 ## 2026-10-11 — closed: tippy is gone and the harness clips in place after a hover
 
-Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`, checked at fork `316326a95` (= the fork lock) on 2026-10-11 by reading code; no gate or capture was run for this close.
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`,
+checked at fork `316326a95` (= the fork lock) on 2026-10-11 by reading
+code; no gate or capture was run for this close.
 
 - `grep -rln -i tippy vendor/tbc-new-fork/ui/features/upgrades` and
   `grep -n -i tippy scripts/tab-harness/*.mjs` print nothing.

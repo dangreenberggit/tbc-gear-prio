@@ -61,7 +61,9 @@ Two independent reasons, both in `.scratch/handoffs/visual-review-round-2c.md`:
 
 ## 2026-10-11 — closed: the field has an accessible name
 
-Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`, checked at fork `316326a95` (= the fork lock) on 2026-10-11 by reading code; no gate or capture was run for this close.
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`,
+checked at fork `316326a95` (= the fork lock) on 2026-10-11 by reading
+code; no gate or capture was run for this close.
 
 1. `ui/features/upgrades/components/ExportPanel/ExportPanel.tsx:47` renders
    `<TextArea readOnly ... aria-label={i18n.t('upgrades_tab.export.title', ...)}>`;

@@ -26,7 +26,7 @@ fallback `top`; at 768 it opened above).
 The React component asks for `side="right"` (`SetBonusPopover.tsx:24`) and
 sets no fallback. The ui-kit `Popover` it wraps exposes `side`, `align` and
 `sideOffset` but no fallback side (`ui/ui-kit/Popover/Popover.tsx:27-29`).
-When the right side does not fit, the popover lands on the left. Measured
+When the right side does not fit, the popover opens on the left. Measured
 on the fixture `feral-p3-th-hands-legs`, row 31042 (the figure "+100.4"):
 
 | Width | Popover x (`facts.json` `313-tip` `tipRect`) | Where the figure is |

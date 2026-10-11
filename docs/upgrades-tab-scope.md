@@ -168,7 +168,7 @@ done.
 | 563 — Stop could abort the sims already running                                               | both (fork `model/engine/rank.ts` + core twin)                                 | both      | The owner accepted today's graceful Stop "for now" (ruling Q-559-stop-abort); a real abort makes Stop faster, and the tab does not need it.                                                                                                                                                                                                                                                                                             |
 | 574 — no worker silence check: a stuck sim worker hangs the run until reload                  | fork (upstream `ui/sim/workers/worker_pool.ts`)                                | both      | The check was deleted; a stuck worker hangs the run as on every other wowsims page, and Stop still works. Owner: "later/never".                                                                                                                                                                                                                                                                                                         |
 | 426 — an item from several sources stays in the pool if any source is ticked                  | fork (`model/settings_pool.ts`)                                                | both      | The keep-if-any-source-ticked rule is unchanged in React (`settings_pool.ts:146-152`) and stated only in a code comment; the choice is still open.                                                                                                                                                                                                                                                                                      |
-| 418 — per-profession filter for Bind-on-Pickup crafted upgrades                               | fork (UI) + core (universe data)                                               | both      | Not built; the ticket calls it a post-finish nice-to-have. Universes carry `profession` but no binding field.                                                                                                                                                                                                                                                                                                                           |
+| 418 — per-profession filter for Bind-on-Pickup crafted upgrades                               | fork (UI) + core (universe data)                                               | both      | Not built; the ticket calls it a post-finish nice-to-have. Universes have a `profession` field but no binding field.                                                                                                                                                                                                                                                                                                                    |
 | 496 — more Gear-picker filters on the tab's own source filters                                | fork                                                                           | both      | Feature request the owner marked low priority, "for much later".                                                                                                                                                                                                                                                                                                                                                                        |
 | 571 — epic item names are below 4.5:1 contrast on the tab                                     | fork (upstream `ui/styles/theme/colors.css`)                                   | both      | The tab uses the site-wide `--color-quality-epic`; the whole site has the same contrast. Accessibility polish.                                                                                                                                                                                                                                                                                                                          |
 | 404 — paired replication is a global top 8, not per slot                                      | both (twin: `model/engine/se.ts`, `rank.ts`)                                   | both      | Precision gain for close per-slot calls (same family as 105 and 291); its done-when allows concluding the gap is not worth closing.                                                                                                                                                                                                                                                                                                     |
@@ -252,7 +252,7 @@ done.
 | 405 — fork comments argue superseded positions at length                                      | fork                                                           | n/a       | The named example is gone; long comment blocks remain under `ui/features/upgrades/`. Comment edits only.                                                                                                                                                     |
 | 408 — verify-gate ran/skipped counter miscounts                                               | tooling (`scripts/run_verify.mjs`, `verify_summary.mjs`)       | n/a       | A printed summary only; no gate verdict reads it.                                                                                                                                                                                                            |
 | 414 — comment follow-ups in generator and shipped report strings                              | core (`scripts/`, `rank-report.ts`)                            | n/a       | Core HTML report and a generator; the tab reads neither.                                                                                                                                                                                                     |
-| 503 — agent status updates to the owner are hard to read                                      | tooling (process)                                              | n/a       | Process ticket; its rules appear to have landed in the global "Chat responses" rule (unverified whether the owner approved them).                                                                                                                            |
+| 503 — agent status updates to the owner are hard to read                                      | tooling (process)                                              | n/a       | Process ticket; its rules appear to have been added to the global "Chat responses" rule (unverified whether the owner approved them).                                                                                                                        |
 | 508 — no UI design skill for tooltip and table work                                           | tooling (skill)                                                | n/a       | Process work; both tickets it blocked (494, 501) are closed.                                                                                                                                                                                                 |
 | 600 — gaps in the new pre-merge review-loop rules                                             | tooling (skills, agent docs)                                   | n/a       | Process; the skill edits need owner approval.                                                                                                                                                                                                                |
 | 598 — parallel-phase agnostic adapter points at renumbered steps                              | tooling (skill)                                                | n/a       | Process; the skill edit needs owner approval.                                                                                                                                                                                                                |
@@ -298,7 +298,7 @@ The placements a reviewer should scrutinize first:
    goal is "both front ends ship," these four move up.
 
 2. **The "Awaiting owner sign-off" bucket holds 254 and 311.** Each has a
-   landed fix and an unrecorded owner or SME judgment, so it is a decision
+   committed fix and an unrecorded owner or SME judgment, so it is a decision
    owed, not code owed. 313, 315 and 330 left it on 2026-10-11: the owner
    signed them off on 2026-09-18 (`4f1e99c5`) and they are now closed.
 
@@ -306,11 +306,13 @@ The placements a reviewer should scrutinize first:
    but lives only in `weightedSetPotentialDps`, called only from the core report,
    not ported into the fork twin and never read by the tab → Out-of-scope for
    the tab. 336 is the live tab-surface half of the same story (a reachable 4pc
-   was never disclosed) → blocking; on the React tab the popover shows it
-   once the user ticks "Set potential", which starts unticked, so 336 stays
-   blocking until the default view and its sub-noise case are checked. The line: a wrong number or an owner-reported
-   broken control on the tab is blocking; a wrong number on a core-only report
-   path the tab never reads is out-of-scope.
+   was never disclosed) → blocking, because the React tab shows that
+   disclosure only after the user ticks "Set potential", which starts
+   unticked (the re-check is in ticket 336's 2026-10-11 comment). 336 stays
+   blocking until the default view and its sub-noise case are checked. The
+   line: a wrong number or an owner-reported broken control on the tab is
+   blocking; a wrong number on a core-only report path the tab never reads
+   is out-of-scope.
 
 4. **259 (feral Idol missing) → Tab-adjacent, not blocking.** A feral tab user
    genuinely sees only the worn idol in the ranged slot. Kept adjacent because
@@ -333,12 +335,11 @@ The placements a reviewer should scrutinize first:
 
 7. **376 → Out-of-scope, and 364/366 → adjacent, though all three are
    engine or server code.** 376 was Tab-blocking on the belief that the
-   `routes.ts` allow-list gates which specs the tab can request. Re-checked
-   on 2026-10-11 against the React tab, it does not: the tab never calls the
-   standalone server (`utils/fixture.ts:109-112` is its only `fetch`) and
-   maps all 11 DPS specs itself (`model/run.ts:43-55`). 364 (a feral
-   paw-imbue bonus) and 366 (a panic on an unknown item id) are real
-   defects in fork engine code the tab runs. The first comes from upstream
+   `routes.ts` allow-list gates which specs the tab can request. It does
+   not, because the React tab never calls that server and picks its spec
+   from the page (the re-check is in ticket 376's 2026-10-11 comment).
+   364 (a feral paw-imbue bonus) and 366 (a panic on an unknown item id)
+   are real defects in fork engine code the tab runs. The first comes from upstream
    (ticket 364, § provenance: upstream), and the tab sims as upstream does,
    the same rule that keeps 548 and 573 adjacent. The second needs a
    malformed request to fire. A reviewer who treats any panic path as blocking pulls 366 up

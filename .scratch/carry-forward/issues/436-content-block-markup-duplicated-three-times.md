@@ -41,8 +41,11 @@ behaviour issue, fork-lint clean). A tidy-up that removes the 3× repetition.
 
 ## 2026-10-11 — closed: the tab uses the native ContentBlock
 
-Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`: the ticket names pre-React code, checked against the React tab at fork `316326a95` (= `data/wowsims-fork.lock.json` `commit`) on 2026-10-11. No block header is hand-written; `ExportPanel.tsx:3` imports
-`ContentBlock` from `@ui-kit/ContentBlock`.
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`:
+the ticket names pre-React code, checked against the React tab at fork
+`316326a95` (= `data/wowsims-fork.lock.json` `commit`) on 2026-10-11. No
+block header is hand-written; `ExportPanel.tsx:3` imports `ContentBlock`
+from `@ui-kit/ContentBlock`.
 
 Verified by:
 

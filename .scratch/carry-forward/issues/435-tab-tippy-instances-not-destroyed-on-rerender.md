@@ -47,8 +47,11 @@ matches the codebase's cleanup discipline.
 
 ## 2026-10-11 — closed: the React tab does not use tippy
 
-Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`: the ticket names pre-React code, checked against the React tab at fork `316326a95` (= `data/wowsims-fork.lock.json` `commit`) on 2026-10-11. `upgrades_tab.tsx` is gone; the tab's tooltips are React
-components, removed when they unmount.
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`:
+the ticket names pre-React code, checked against the React tab at fork
+`316326a95` (= `data/wowsims-fork.lock.json` `commit`) on 2026-10-11.
+`upgrades_tab.tsx` is gone; the tab's tooltips are React components,
+removed when they unmount.
 
 Verified by:
 

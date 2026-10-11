@@ -41,7 +41,10 @@ the BiS-gap sub-assertion.
 
 ## 2026-10-11 — closed: the assertion no longer exists
 
-Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`: the ticket names pre-React code, checked against the React tab at fork `316326a95` (= `data/wowsims-fork.lock.json` `commit`) on 2026-10-11. The layout gate moved from the fork's `test-layout.mjs` to
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`:
+the ticket names pre-React code, checked against the React tab at fork
+`316326a95` (= `data/wowsims-fork.lock.json` `commit`) on 2026-10-11. The
+layout gate moved from the fork's `test-layout.mjs` to
 `scripts/tab-harness/test-layout.mjs` (ticket 560), and the BiS-gap assertion
 did not move with it, so it cannot pass vacuously.
 
