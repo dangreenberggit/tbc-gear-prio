@@ -6,7 +6,7 @@
 import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { cutoffForSpec } from "./cutoff.js";
+import { CUTOFF } from "./cutoff.js";
 import {
   defaultMaxPhase,
   loadOfflineInputs,
@@ -310,7 +310,7 @@ export async function main(argv = process.argv.slice(2)): Promise<number> {
 
   const raidNote = args.raid ? ` raid=${args.raid}` : "";
   console.log(
-    `rank ${args.character}@${args.realm}-${args.region} (offline) maxPhase=${args.maxPhase} universe=${pool.length}${raidNote} cutoff=${cutoffForSpec(args.spec).absDps} DPS / ${cutoffForSpec(args.spec).pct}%`
+    `rank ${args.character}@${args.realm}-${args.region} (offline) maxPhase=${args.maxPhase} universe=${pool.length}${raidNote} cutoff=${CUTOFF.absDps} DPS`
   );
 
   // One time source for the run: the store's job rows, the engine and the

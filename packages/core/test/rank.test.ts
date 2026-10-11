@@ -233,8 +233,8 @@ function candidateEquipmentForTest(
 }
 
 describe("CUTOFF", () => {
-  it("pins the five-seed derived constant", () => {
-    expect(CUTOFF).toEqual({ absDps: 3.4, pct: 0.15 });
+  it("pins the owner's flat 3 DPS bar (ADR-0037)", () => {
+    expect(CUTOFF).toEqual({ absDps: 3 });
   });
 });
 

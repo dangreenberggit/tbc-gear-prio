@@ -7,7 +7,6 @@
  * assets, open in any browser.
  */
 
-import { cutoffAdmittingArm } from "./cutoff.js";
 import {
   fightProvenanceLines,
   hitCapBanner,
@@ -514,19 +513,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
           const weightedCls = deltaClsFor(weighted);
           const fullCls = deltaClsFor(full);
           const pkgCls = deltaClsFor(pkg);
-          // Ticket 254: the cutoff is an OR (abs OR pct). A row above the cutoff
-          // whose absolute DPS is below `absDps` was admitted by the %-arm
-          // alone; without saying so, it reads as if it broke the absolute rule
-          // (an SME flagged exactly this). Mark only that case — the arm is
-          // "pct" iff the abs arm failed but the pct arm cleared it.
-          const pctArmOnly =
-            !item.belowCutoff &&
-            cutoffAdmittingArm(item.deltaDps, item.deltaPct, ranking.cutoff) ===
-              "pct";
-          const pctMarker = pctArmOnly
-            ? ` <span class="cutoff-arm" title="Above the cutoff via the percentage arm (${fmtDelta(ranking.cutoff.pct)}%): its absolute DPS is below the ${ranking.cutoff.absDps} DPS threshold.">cleared by %-arm</span>`
-            : "";
-          return `<article class="${cls}" data-item-id="${item.itemId}" data-sources="${esc(sourceKeysOf(item).join(SOURCE_KEY_SEP))}" data-delta="${item.deltaDps}" data-weighted="${weighted}" data-full="${full}" data-package="${pkg}"${pctArmOnly ? ` data-cutoff-arm="pct"` : ""}>
+          return `<article class="${cls}" data-item-id="${item.itemId}" data-sources="${esc(sourceKeysOf(item).join(SOURCE_KEY_SEP))}" data-delta="${item.deltaDps}" data-weighted="${weighted}" data-full="${full}" data-package="${pkg}">
   <div class="lead">${rank}${choice}</div>
   <div class="body">
     <a class="name" href="${wowheadUrl(item.itemId)}" target="_blank" rel="noreferrer">${esc(item.name)}</a>
@@ -544,7 +531,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     <div class="${weightedCls} delta-weighted">${fmtDelta(weighted)} <span class="unit">DPS</span></div>
     <div class="${fullCls} delta-full">${fmtDelta(full)} <span class="unit">DPS</span></div>
     <div class="${pkgCls} delta-package">${fmtDelta(pkg)} <span class="unit">DPS</span></div>
-    <div class="pct">${fmtDelta(item.deltaPct)}%${pctMarker}</div>
+    <div class="pct">${fmtDelta(item.deltaPct)}%</div>
   </div>
 </article>`;
         })
@@ -993,7 +980,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
     <p class="lede">
       Offline rank for <strong>${esc(meta.character)}</strong> on
       ${esc(meta.realm)}-${esc(meta.region)} · ${esc(meta.spec)} · max phase ${meta.maxPhase}.
-      Cutoff ${ranking.cutoff.absDps} DPS / ${ranking.cutoff.pct}%.
+      Cutoff ${ranking.cutoff.absDps} DPS.
       ${poolScopeNote(meta)}
     </p>
 

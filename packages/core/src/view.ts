@@ -298,7 +298,7 @@ function assignTieGroups(
  * selects rows and never moves the bar.
  *
  * Under `withSetPotential` the **bar is still the ranking's own absolute
- * cutoff** (per-spec since issue #1 step 0, carried on the `Ranking`);
+ * cutoff** (one flat bar since ADR-0037, carried on the `Ranking`);
  * what changes is the quantity measured against it, from `deltaDps` to the
  * effective value the toggle exists to display. Carrying the default verdict
  * here would have the shortlist hide exactly the rows the toggle reveals: a
@@ -310,18 +310,12 @@ function assignTieGroups(
 function belowCutoffUnderView(
   item: RankedItem,
   withSetPotential: boolean,
-  baselineDps: number,
   cutoff: Cutoff
 ): boolean {
   if (!withSetPotential) return item.belowCutoff;
   const prospective = rankableSetPotential(item, setBonusNoiseFloorDps(cutoff));
   if (prospective === 0) return item.belowCutoff;
-  const effectiveDps = item.deltaDps + prospective;
-  // Percentage arm scaled off the same baseline `rank.ts` used for `deltaPct`,
-  // so both arms of the cutoff see the effective value.
-  const effectivePct =
-    baselineDps === 0 ? item.deltaPct : (effectiveDps / baselineDps) * 100;
-  return !meetsCutoff(effectiveDps, effectivePct, cutoff);
+  return !meetsCutoff(item.deltaDps + prospective, cutoff);
 }
 
 /**
@@ -330,11 +324,11 @@ function belowCutoffUnderView(
  * the fact, so it contributes nothing here — it is still disclosed on the row
  * and in the Set potential panel (ticket 90).
  *
- * A figure at or below the per-spec noise floor (`setBonusNoiseFloorDps` of the
- * ranking's own `Cutoff`, ≈4.81 ret / ≈5.09 feral) is noise around a true zero,
+ * A figure at or below the noise floor (`setBonusNoiseFloorDps` of the
+ * ranking's own `Cutoff`, ≈4.24 for every spec) is noise around a true zero,
  * so it also contributes nothing: it must not move the sort key or the cutoff
  * verdict. The floor arrives as a parameter — the caller derives it from the
- * frozen per-spec cutoff — so this predicate stays ignorant of the `Cutoff`
+ * frozen cutoff — so this predicate stays ignorant of the `Cutoff`
  * type. The comparison is strict (`>`), matching the display gate's strict
  * `> setBonusNoiseFloorDps(cutoff)` on the same frozen cutoff so a boundary
  * value behaves identically in both layers — no row sorts on a bonus the
@@ -396,7 +390,6 @@ export function applyView(r: Ranking, v: ViewOptions = {}): ViewResult {
       belowCutoffInView: belowCutoffUnderView(
         item,
         v.withSetPotential ?? false,
-        r.baseline.dps,
         r.cutoff
       ),
     }));

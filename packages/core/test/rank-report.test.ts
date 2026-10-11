@@ -175,6 +175,12 @@ describe("rank-report", () => {
     expect(pvpShortlist).toContain("Vengeful Gladiator's Bonegrinder");
   });
 
+  it("states the cutoff as one flat 3 DPS bar (ADR-0037)", () => {
+    const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
+    expect(html).toContain("Cutoff 3 DPS.");
+    expect(html).not.toMatch(/Cutoff [\d.]+ DPS \//);
+  });
+
   it("includes stdev noise disclaimer when baseline stdev is positive", () => {
     const html = renderRankHtml(rankingWithPvpWeaponAboveCutoff(), meta());
     expect(html).toContain(
@@ -683,10 +689,15 @@ describe("rank-report", () => {
     // `rankingWithPvpWeaponAboveCutoff` builds one head row and one pvp weapon
     // row, so the formatter returns `[]`, `.map().join("")` is `""`, and no
     // `removed-items` markup can render here.
+    // Repinned for ADR-0037's flat 3 DPS cutoff: the lede reads "Cutoff 3
+    // DPS." where it read "Cutoff 3.4 DPS / 0.15%.", -10 chars. Verified by
+    // replacing that one string back in the new document: it hashes to the
+    // previous pin (fef43fd6…, 32575). No row in this fixture carried the
+    // removed "cleared by %-arm" marker.
     expect({ digest, length: html.length }).toEqual({
       digest:
-        "fef43fd6189eebcc05ea549c99a3599eae9c2dd08e6d4da48085da433b98b44b",
-      length: 32575,
+        "34ee818eaeda8e4acc65def4a82cf3a056a591dea3eb33841c3aa257c9c6802c",
+      length: 32565,
     });
   });
 });

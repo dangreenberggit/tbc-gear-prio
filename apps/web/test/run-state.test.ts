@@ -144,7 +144,7 @@ describe("mergeRows", () => {
 function ranking(items: RankedItem[]): Ranking {
   return {
     contentHash: "hash",
-    cutoff: { absDps: 10, pct: 0.5 },
+    cutoff: { absDps: 10 },
     fight: { reportCode: "AbC", fightId: 3, route: "ranked" },
     baseline: { dps: 1000, stdev: 5, metaAdjusted: false },
     assumptions: {

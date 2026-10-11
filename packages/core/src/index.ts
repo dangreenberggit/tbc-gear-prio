@@ -1,11 +1,5 @@
 // Public surface of @tbc-gear-prio/core (PLAN.md §4).
-export {
-  CUTOFF,
-  CUTOFF_FERAL,
-  cutoffForSpec,
-  meetsCutoff,
-  type Cutoff,
-} from "./cutoff.js";
+export { CUTOFF, meetsCutoff, type Cutoff } from "./cutoff.js";
 export {
   SPEC_IDS,
   SPEC_REGISTRY,
