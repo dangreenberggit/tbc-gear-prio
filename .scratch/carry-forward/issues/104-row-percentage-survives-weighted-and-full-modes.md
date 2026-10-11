@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Verified by: `corepack pnpm -s exec vitest run packages/core/test/rank-report.test.ts -t "hides the row's own percentage under every credited mode"` (1 passed) on tbc-gear-prio@fbb66956; fix in tbc-gear-prio@d40a560a
 Type: display defect
 Origin: noticed while closing 103, 2026-08-10 — the same defect `5b7ee96` fixed for `package` mode
 Blocks: none
@@ -50,3 +51,17 @@ The golden document was repinned, and the repin was **checked rather than
 assumed** — `renderRankHtml`'s output grew by exactly the 186 characters the CSS
 edit adds (26065 → 26251), and `rank-report-css.ts` is the only source file in
 the diff, so the whole delta is inside `<style>` and no markup moved.
+
+## Status flipped, 2026-10-11
+
+The fix landed in `d40a560a`, the same commit that filed this ticket, but
+the `Status:` line stayed `open`. Re-checked on `fbb66956`: the rule in
+"Fix" is at `packages/core/src/rank-report-css.ts:524`, and the test at
+`packages/core/test/rank-report.test.ts:1815-1820` passes (command on the
+`Verified by:` line). The fork tab renders no percentage and has no weighted
+or full mode (`grep -rn deltaPct` over the tab's `components`, `hooks`,
+`utils` and `model` outside `model/engine` finds only the cutoff-rule test in
+`DeltaCell.tsx:29`), so there is no twin to fix.
+
+One side effect is tracked elsewhere: the "cleared by %-arm" note sits inside
+`.pct`, so this rule hides it in the three credited views (ticket 617).
