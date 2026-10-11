@@ -11,19 +11,25 @@ record why they are two pins. ADR-0036 lets them move separately:
 - **Moving the engine version (both pins)**, §0–§7: the full procedure, run
   when the command-line tool needs a newer engine.
 
+Both procedures run in a pair (`docs/agents/paired-worktrees.md`).
+`pnpm wt:pair <name> <main-branch> <fork-branch> -b --new-fork-branch` makes
+the main branch from `dev` and the fork branch at the fork lock's `commit`.
+`<pair>` (written `<core>` in §0–§6) is the pair's folder, and `<fork>` is
+`<pair>/vendor/tbc-new-fork`. Every step runs against them; run each `pnpm`
+command as `pnpm -C <pair> …`. When the owner asks to merge, land the work by
+paired-worktrees.md "Land it on dev": the main folder merges `<fork-branch>`
+into the fork lock's `branch`, then runs `pnpm merge-to-dev <main-branch>`.
+
 Throughout: use `git -C <abs path>`, never `cd X && git …` — fnm emits an error
 that breaks the chain. A pipe reports the **last** command's status, so append
 `; echo "rc=${PIPESTATUS[0]}"` or redirect and inspect separately.
 
 ## Routine fork update (fork only)
 
-`<fork>` is the fork checkout whose branch the fork lock names (`branch` in
-`data/wowsims-fork.lock.json`). Every step runs against that checkout.
-
 1. See how far behind the fork is and what a merge would conflict on:
 
    ```bash
-   pnpm fork:upstream-status
+   pnpm -C <pair> fork:upstream-status
    ```
 
    It fetches `upstream/master`, then prints the commits behind and the
@@ -53,15 +59,15 @@ that breaks the chain. A pipe reports the **last** command's status, so append
    failure is a finding. A merge with no conflicts can still break the build,
    because upstream renames APIs our feature folder calls.
 5. Commit the merge in the fork.
-6. Re-pin in this repo: set the fork lock's `commit` to the fork tip and
+6. Re-pin in `<pair>`: set its fork lock's `commit` to the fork tip and
    `branchedFrom` to the upstream commit you merged, with a dated `_comment`
    line. Then run:
 
    ```bash
-   pnpm sim-implemented-effects:generate
-   pnpm equip-eligibility:check
-   pnpm fork-universes:check
-   pnpm verify
+   pnpm -C <pair> sim-implemented-effects:generate
+   pnpm -C <pair> equip-eligibility:check
+   pnpm -C <pair> fork-universes:check
+   pnpm -C <pair> verify
    ```
 
 7. Run the desktop gate (§5, last paragraphs) only when `dev` will receive this
@@ -82,7 +88,8 @@ Every command below was run on 2026-09-14 moving both pins from `ec5c5f2` to
 
 Both trees clean, the fork lock naming the clone's actual HEAD, the expected
 worktree registrations, and a known `pushed` flag. `git -C <fork> worktree list`
-prints one line, or one more for each port worktree that is open. Name each
+prints one line for the main checkout's clone, one for each pair, and one more
+for each port worktree that is open. Name each
 extra line's path and branch in your notes before you start.
 
 ```bash
@@ -329,15 +336,20 @@ executable file and the `pushed` boolean has no code readers, so a core branch c
 merge to `dev` while its pin names a fork commit that exists on one disk.
 ADR-0030 Consequence 4 accepts that risk; ticket 355 was filed when it bit.
 
-1. Fork commit in `vendor/tbc-new-fork/`.
-2. Push the fork branch — **owner-authorised, an explicit ask**.
-3. Verify with `git -C <fork> ls-remote origin refs/heads/<branch from the fork lock>`
-   returning the same sha. **Do not trust the lockfile's `pushed` flag.**
-4. Re-pin `data/wowsims-fork.lock.json`; set `pushed`.
-5. Regenerate the pin-derived artifacts.
-6. `pnpm verify` in the core repo.
-7. Review, then ask the owner before `pnpm merge-to-dev`.
+1. Fork commit in `<fork>` (the pair's fork).
+2. Re-pin the pair's `data/wowsims-fork.lock.json`, with `pushed: false`.
+3. Regenerate the pin-derived artifacts.
+4. `pnpm -C <pair> verify`.
+5. Review, then ask the owner before landing it by
+   `docs/agents/paired-worktrees.md` "Land it on dev": the main folder merges
+   `<fork-branch>` into the fork lock's `branch`, then runs
+   `pnpm merge-to-dev <main-branch>`.
+6. Push the fork lock's `branch` — **owner-authorised, an explicit ask**.
+7. Verify with
+   `git -C vendor/tbc-new-fork ls-remote origin refs/heads/<branch from the fork lock>`
+   from the main folder, returning the same sha. **Do not trust the lockfile's
+   `pushed` flag.** Then set `pushed: true`.
 
-An executing agent reaches step 2 and **stops**, reporting the tip sha ready to
-push. Steps 4–6 can be done ahead of the push with `pushed: false`, which is what
-the 2026-09-14 pass did; the flag then stays false until someone runs step 3.
+An executing agent reaches step 5 and **stops**, reporting the fork tip sha.
+`pushed` stays false until someone runs step 7, as it did after the 2026-09-14
+pass.
