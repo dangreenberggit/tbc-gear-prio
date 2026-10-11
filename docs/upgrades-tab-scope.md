@@ -290,8 +290,8 @@ STALE names a row whose ticket is not open.
 The placements a reviewer should scrutinize first:
 
 1. **The whole "going-live-on-GearSource" flag → Out-of-scope (267, 271, 31,
-   32; 268 was in this group and is now closed).** **ADR-0027** makes the tab primary and states ticket 267 is "not
-   on the critical path" because the tab reads gear off the page. I resolved the
+   32; 268 was in this group and is now closed).** **ADR-0027** makes the
+   tab primary and states ticket 267 is "not on the critical path" because the tab reads gear off the page. I resolved the
    inclusive-vs-strict ambiguity by categorizing under the tab's plan (slices
    1–6 + §12 surface) and parking the live-WCL/deploy tickets Out-of-scope with
    an explicit "stricter reading → blocking" note on 267. If the owner's real
@@ -339,11 +339,11 @@ The placements a reviewer should scrutinize first:
    not, because the React tab never calls that server and picks its spec
    from the page (the re-check is in ticket 376's 2026-10-11 comment).
    364 (a feral paw-imbue bonus) and 366 (a panic on an unknown item id)
-   are real defects in fork engine code the tab runs. The first comes from upstream
-   (ticket 364, § provenance: upstream), and the tab sims as upstream does,
-   the same rule that keeps 548 and 573 adjacent. The second needs a
-   malformed request to fire. A reviewer who treats any panic path as blocking pulls 366 up
-   to join the 311 family.
+   are real defects in fork engine code the tab runs. The first comes from
+   upstream (ticket 364, § provenance: upstream), and the tab sims as
+   upstream does, the same rule that keeps 548 and 573 adjacent. The second
+   needs a malformed request to fire. A reviewer who treats any panic path
+   as blocking pulls 366 up to join the 311 family.
 
 8. **The 2026-10-11 refresh (Chunk 3b of
    `.scratch/plans/upgrades-tab-finish-line.md`), under the owner's DPS-only
