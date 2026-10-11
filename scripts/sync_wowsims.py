@@ -601,7 +601,7 @@ def do_check():
 
     if vendor_is_empty():
         print(f"  {VENDOR}/ is empty or missing -- the source isn't here.", file=sys.stderr)
-        print("  run: python scripts/sync_wowsims.py --restore", file=sys.stderr)
+        print(f"  run: pnpm -C {here()} sync:wowsims:restore", file=sys.stderr)
         return 2
 
     tag, sha = latest_tag()
@@ -707,6 +707,15 @@ def do_check():
     return 1
 
 
+def here():
+    """The folder whose lock this run reads, for a command the user can paste.
+
+    LOCKFILE and VENDOR are relative to the working directory, not to this
+    file, so the folder to name is the working directory.
+    """
+    return os.getcwd().replace(os.sep, "/")
+
+
 def do_watch_ref(ref):
     """Add or refresh the single entry in lock["watchedRefs"]. Does not fetch
     files or touch vendor/ -- a watched ref is tracked for drift, not built from.
@@ -723,8 +732,8 @@ def do_watch_ref(ref):
     if existing:
         print(f"  already watching {', '.join(existing)}; watchedRefs holds one ref",
               file=sys.stderr)
-        print(f"  run: python scripts/sync_wowsims.py --unwatch-ref {existing[0]}",
-              file=sys.stderr)
+        print(f"  run: pnpm -C {here()} exec python scripts/sync_wowsims.py "
+              f"--unwatch-ref --ref {existing[0]}", file=sys.stderr)
         return 2
     sha = ref_sha(ref)
     if not sha:

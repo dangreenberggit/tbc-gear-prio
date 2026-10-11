@@ -216,10 +216,10 @@ def main() -> int:
         "their data/ sources. The tab ranks from the bundled copy, so the page "
         "serves a pool this repo no longer produces. Refresh with:\n"
         "\n"
-        "    python scripts/sync_fork_universes.py --write\n"
+        f"    python {ROOT.as_posix()}/scripts/sync_fork_universes.py --write\n"
         "\n"
         "then record the refresh and its cause in "
-        "docs/fork-provenance/data.md before committing the fork.",
+        f"{ROOT.as_posix()}/docs/fork-provenance/data.md before committing the fork.",
         file=sys.stderr,
     )
     return 1
