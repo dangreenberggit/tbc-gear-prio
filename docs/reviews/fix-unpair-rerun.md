@@ -7,6 +7,8 @@ as merged to `dev` at 005fa7c6) is also two rounds.
 
 Reviewed range: `05955d62268a45984a4e2032cadc6529f5f2ab3e..ff02939ecf98989cf0717e3d94091b00c9782ba8`
 
+Reviewed range: `ff02939ecf98989cf0717e3d94091b00c9782ba8..bc5d3d087433ecea668bba005a8dbd06ed63c0ce`
+
 Dispatch (round 1): `codex` is not on `PATH` (`which codex`), so each axis
 ran as a fresh `general-task` agent on Opus (review lane). Round 1 ran on
 the skill text from before `dev` 005fa7c6 with all axes, domain included.
