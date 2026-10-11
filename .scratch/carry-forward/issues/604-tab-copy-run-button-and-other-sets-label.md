@@ -1,7 +1,7 @@
 Status: open
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b
 Type: bug
-Origin: Chunk 3b step 7 regression check (commit c5741e2c), findings F1 and the ticket-438 closing note
+Origin: Chunk 3b step 7 regression check (commit c5741e2c) and the ticket-438 closing note
 Blocks: none
 Blocked by: none
 Related: 438 (closed design exploration), 448 (closed; built the disclosure)
@@ -23,8 +23,9 @@ same thing as the body's first sentence, so the two lines repeat each
 other.
 
 Seen in the capture `312-settings-pre-run-1280-0.png` (main checkout,
-gitignored, `.scratch/tab-scope-refresh/review/`; rebuild with
-`pnpm tab-review` and that folder's `manifest.json`).
+gitignored, `.scratch/tab-scope-refresh/review/`; that folder's
+`manifest.json` is gitignored too, so a re-check from another checkout
+needs a new `pnpm tab-review` manifest).
 
 ## 2. The Sim-sets disclosure is not worded as the owner's pick
 

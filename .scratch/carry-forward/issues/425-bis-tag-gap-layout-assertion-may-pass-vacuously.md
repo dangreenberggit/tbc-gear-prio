@@ -53,3 +53,5 @@ grep -c badgeGaps scripts/tab-harness/test-layout.mjs     # 0
 ```
 
 Not checked here: whether any gate now checks the BiS badge spacing at all.
+The Chunk 3b step 7 check found that none does; that gap is ticket 603
+(`.scratch/carry-forward/issues/603-no-gate-checks-bis-badge-spacing.md`).

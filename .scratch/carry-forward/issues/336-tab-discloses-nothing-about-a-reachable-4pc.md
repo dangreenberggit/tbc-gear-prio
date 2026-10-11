@@ -45,18 +45,30 @@ any packages[]-driven rendering).
 
 **2026-10-11 — re-checked on the React tab (Chunk 3b of
 `.scratch/plans/upgrades-tab-finish-line.md`).** The disclosure this ticket
-asks for now renders. After a run, the "Set potential" view toggle is on by
-default (`model/results_view.ts:93`), and the set-bonus popover lists each
-reachable bonus with its partner pieces and DPS. The Chunk 3b capture on the
-fixture `feral-p3-th-hands-legs`, row 31042 (Thunderheart Chestguard), shows
-at all four widths:
+asks for renders only when the user ticks "Set potential". After a run the
+tab offers that view toggle (`offeredToggles`, `model/results_view.ts:93`),
+but it starts unticked: the store's view state starts from
+`NO_VIEW_TOGGLES` (`model/upgrades_store.ts:120`), which sets
+`withSetPotential: false` (`model/results_view.ts:80`), and the popover
+adds the set-potential lines only when the toggle is on
+(`model/set_bonus_tip.ts:187`, `:197`). With the toggle ticked, the
+popover lists each reachable bonus with its partner pieces and DPS. The
+Chunk 3b capture ticked it first (its `313-tip` entry clicks the unticked
+box) and then showed, on the fixture `feral-p3-th-hands-legs`, row 31042
+(Thunderheart Chestguard), at all four widths:
 "Item stats +26.3 / Set potential / Thunderheart Pauldrons (4pc) +74.1 /
 Total +100.4" (`facts.json`, key `313-tip`, in the main checkout's
-gitignored `.scratch/tab-scope-refresh/review/`; rebuild with
-`pnpm tab-review` and that folder's `manifest.json`). The figure comes from
-`setContext.futureBonuses` (`model/engine/view.ts:5-20`), not
-`packages[]`, after the 467/511 set-credit redesign.
+gitignored `.scratch/tab-scope-refresh/review/`; that folder's
+`manifest.json` is gitignored too, so a re-check needs a new
+`pnpm tab-review` manifest entry that ticks the toggle and hovers that
+row). The figure comes from `setContext.futureBonuses`
+(`model/engine/view.ts:5-20`), not `packages[]`, after the 467/511
+set-credit redesign.
 
-Not checked, and still needed to close: the sub-noise case in § What would
-close this (a ret fixture whose 4pc is below the noise floor must not show
-as a real figure), and a DOM readback of it at desktop and mobile widths.
+Not checked, and still needed to close: whether the default view (toggle
+unticked) tells the user a 4pc is reachable at all; the sub-noise case in
+§ What would close this (a ret fixture whose 4pc is below the noise floor
+must not show as a real figure); and a DOM readback of both at desktop
+and mobile widths. Corrected 2026-10-11 by the pre-merge review of
+`feat/tab-scope-refresh` (finding A1): the first version of this comment
+said the toggle was on by default.

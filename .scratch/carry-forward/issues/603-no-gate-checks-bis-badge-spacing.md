@@ -27,7 +27,9 @@ The React tab's unit test `components/ResultsTable/ItemNameCell.test.tsx`
 checks which badges a row shows, not where they sit.
 
 The Chunk 3b captures (main checkout, gitignored,
-`.scratch/tab-scope-refresh/review/310-post-run-375-0.png`) show the badges
+`.scratch/tab-scope-refresh/review/310-post-run-375-0.png`; the manifest
+that made them is gitignored too, so another checkout cannot rebuild
+them) show the badges
 below the name with a visible gap today, so this is a coverage gap, not a
 known defect.
 

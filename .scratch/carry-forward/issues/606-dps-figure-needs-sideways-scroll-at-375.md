@@ -1,7 +1,7 @@
 Status: open
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b
 Type: task
-Origin: Chunk 3b step 7 regression check (commit c5741e2c), finding F4
+Origin: Chunk 3b step 7 regression check (commit c5741e2c)
 Blocks: none
 Blocked by: none
 Related: 310 (closed; owner signed off the sideways-scrolling table), 327 (closed; slot column)
@@ -19,8 +19,9 @@ user sees Rank, Item and Slot, and must scroll sideways to read any
 figure.
 
 Evidence, Chunk 3b capture set (main checkout, gitignored,
-`.scratch/tab-scope-refresh/review/`; rebuild with `pnpm tab-review` and
-that folder's `manifest.json`), fixture `ret-p3-p2`, fork `316326a95`:
+`.scratch/tab-scope-refresh/review/`; that folder's `manifest.json` is
+gitignored too, so a re-check from another checkout needs a new
+`pnpm tab-review` manifest), fixture `ret-p3-p2`, fork `316326a95`:
 
 - `facts.json` `310` at 375: `scrollerClientWidth` 361,
   `scrollerScrollWidth` 602, `scrollerRect.right` 368.

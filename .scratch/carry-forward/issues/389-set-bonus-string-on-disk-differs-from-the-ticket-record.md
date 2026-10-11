@@ -48,16 +48,24 @@ from a row's own bonus line. Confirm or refute before acting.
 
 ## Acceptance
 
-- [x] 330's recorded string and the string in `translation.json` agree
-- [x] The owner has seen the string they are signing off on
-- [x] `package_disclosure` confirmed distinct from `prospective`, or filed
+- [ ] 330's recorded string and the string in `translation.json` agree —
+      moot, not met: both strings are gone (see the closing note)
+- [ ] The owner has seen the string they are signing off on — moot, not
+      met: the owner approved a string the React tab no longer shows; the
+      tab now shows `tip_bonus`, `{{set}} {{threshold}}pc
+      ({{have}}/{{threshold}})` (`assets/locales/en/upgrades.json:79`);
+      this ticket does not record whether the owner approved that string
+- [ ] `package_disclosure` confirmed distinct from `prospective`, or filed —
+      moot: neither key exists any more
 
 ## 2026-10-11 — closed: the disputed strings are gone
 
 Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`, checked on 2026-10-11 at fork `316326a95` (= the fork lock). The React tab's set-bonus text comes from the `set_bonus.*` keys in
 `assets/locales/en/upgrades.json`; none of the disputed keys or strings
 remain. The owner approved the string that shipped on 2026-09-18 (ticket 330's
-sign-off section; 330 is now `Status: closed`).
+sign-off section; 330 is now `Status: closed`). That string is gone too;
+the boxes above are left unticked and marked moot (pre-merge review of
+`feat/tab-scope-refresh`, finding A6).
 
 Verified by (from the repo root):
 

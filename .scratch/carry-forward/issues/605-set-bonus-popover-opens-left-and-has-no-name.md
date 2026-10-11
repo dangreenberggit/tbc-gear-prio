@@ -1,7 +1,7 @@
 Status: open
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b
 Type: bug
-Origin: Chunk 3b step 7 regression check (commit c5741e2c), findings F2 and F3
+Origin: Chunk 3b step 7 regression check (commit c5741e2c)
 Blocks: none
 Blocked by: none
 Related: 495 (closed; owner ruling on where the popover opens), 571 (tab accessibility, contrast only)
@@ -12,8 +12,9 @@ Both items are in one component, `SetBonusPopover`
 (`vendor/tbc-new-fork/ui/features/upgrades/components/SetBonusPopover/SetBonusPopover.tsx`,
 fork `316326a95`). The evidence is the Chunk 3b capture set in the main
 checkout (gitignored): `.scratch/tab-scope-refresh/review/`, files
-`facts.json`, `a11y.json` and the `313-*`, `315-*`, `330-*` PNGs. Rebuild it
-with `pnpm tab-review` and that folder's `manifest.json`.
+`facts.json`, `a11y.json` and the `313-*`, `315-*`, `330-*` PNGs. That
+folder's `manifest.json` is gitignored too, so a re-check from another
+checkout needs a new `pnpm tab-review` manifest.
 
 ## 1. Below 1280 px it opens to the left, over the row's own cells
 
@@ -63,3 +64,10 @@ positioner can fall back to `top` without a ui-kit change is untested.
 - axe reports no `aria-dialog-name` on any tip capture.
 - A `pnpm tab-review` run with the 313/315/330 tip entries at the four
   widths, judged against the two sentences above.
+- The React layout gate (`scripts/tab-harness/test-layout.mjs`) asserts
+  where the popover opens at 768, 653 and 375, as the pre-React gate's
+  assertion (15) did ("opened top as expected", ticket 495). Today it has
+  no popover assertion: `grep -n -i 'placement\|popover'
+  scripts/tab-harness/test-layout.mjs` finds none. Added 2026-10-11 by the
+  pre-merge review of `feat/tab-scope-refresh` (finding A3), so the
+  placement cannot regress again unseen.

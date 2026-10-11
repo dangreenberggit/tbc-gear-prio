@@ -1,7 +1,7 @@
 Status: open
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b
 Type: task
-Origin: Chunk 3b step 7 regression check (commit c5741e2c), findings F5 and F6
+Origin: Chunk 3b step 7 regression check (commit c5741e2c)
 Blocks: none
 Blocked by: none
 Related: 328 (closed; view toggles), 310 (closed; table layout)
@@ -9,8 +9,9 @@ Related: 328 (closed; view toggles), 310 (closed; table layout)
 # Line wrapping in the view toggles and the Source column
 
 Two wrapping issues seen in the Chunk 3b capture set (main checkout,
-gitignored, `.scratch/tab-scope-refresh/review/`; rebuild with
-`pnpm tab-review` and that folder's `manifest.json`), fork `316326a95`.
+gitignored, `.scratch/tab-scope-refresh/review/`; that folder's
+`manifest.json` is gitignored too, so a re-check from another checkout
+needs a new `pnpm tab-review` manifest), fork `316326a95`.
 Both are layout polish; nothing is hidden or overlapped.
 
 ## 1. At 375 px "BiS only" wraps under the "View options" legend

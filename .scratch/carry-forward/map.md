@@ -337,7 +337,8 @@ file contention, worker prompt. This file stays the chronological log.
 - 601 Unpair passes the rerun hint through remove() into delete_folder() (pre-merge review fix/unpair-rerun, S6) 2026-10-10
 - 602 Gaps in how unpair clears its mark after a failed run (pre-merge review fix/unpair-rerun round 2, R1-R5, R7) 2026-10-10
 - 603 No gate checks the BiS badge spacing any more (Chunk 3b step 7 regression check, follow-up to 425's closing note) 2026-10-11
-- 604 Two tab strings are wrong: "Press Run" and "Other sets (n)" (Chunk 3b step 7 regression check, F1 and the 438 closing note) 2026-10-11
-- 605 The set-bonus popover opens over its own row below 1280 px, and has no accessible name (Chunk 3b step 7 regression check, F2, F3) 2026-10-11
-- 606 At 375 px the DPS figure is outside the table panel (Chunk 3b step 7 regression check, F4) 2026-10-11
-- 607 Line wrapping in the view toggles and the Source column (Chunk 3b step 7 regression check, F5, F6) 2026-10-11
+- 604 Two tab strings are wrong: "Press Run" and "Other sets (n)" (Chunk 3b step 7 regression check and the 438 closing note) 2026-10-11
+- 605 The set-bonus popover opens over its own row below 1280 px, and has no accessible name (Chunk 3b step 7 regression check) 2026-10-11
+- 606 At 375 px the DPS figure is outside the table panel (Chunk 3b step 7 regression check) 2026-10-11
+- 607 Line wrapping in the view toggles and the Source column (Chunk 3b step 7 regression check) 2026-10-11
+- 608 `pnpm tab-review`: later captures in a hovered `pane: false` entry may clip the nav bar (pre-merge review feat/tab-scope-refresh, A7; left without a ticket when 510 closed) 2026-10-11

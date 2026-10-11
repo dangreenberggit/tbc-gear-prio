@@ -119,3 +119,6 @@ grep -n sets_other_phases vendor/tbc-new-fork/assets/locales/en/upgrades.json   
 
 The disclosure reads "Other sets (n)"; the owner's pick was worded "Other
 phases (n)". Not judged here whether that wording difference matters.
+Ticket 604 tracks it
+(`.scratch/carry-forward/issues/604-tab-copy-run-button-and-other-sets-label.md`,
+item 2).
