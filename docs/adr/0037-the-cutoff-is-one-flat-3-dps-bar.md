@@ -64,6 +64,18 @@ So:
 - **Which rows clear the cutoff changes**, and so does which rows paired
   replication spends its budget on (ADR-0021). Core `ENGINE_VERSION` moves
   to 9 so a cached ranking does not serve the old verdicts (ADR-0020).
+- **The fork's `ENGINE_VERSION` stays 6.** The tab's ranking cache is a
+  `MemoryStore` built once per mounted tab and kept only in memory
+  (`vendor/tbc-new-fork/ui/features/upgrades/model/run.ts:66`, kept by
+  `model/run_session.ts:87`). The tab's only `localStorage` writes hold its
+  settings, sort, view and export choice, never a ranking
+  (`model/saved_settings.ts:111`, `model/saved_entry.ts:38`). So no ranking
+  judged under the old bar can reach a page that runs the new code, and the
+  fork has no cached verdict to invalidate. These lines were read at fork
+  commit `c4696b09`. The fork comment at `model/engine/content-hash.ts:49-53`
+  says the value is "PORTED unchanged" from core; that is wrong, and ticket
+  `.scratch/carry-forward/issues/622-fork-port-comments-and-dead-arm-test.md`
+  tracks it.
 - **Recorded outputs were re-judged or re-recorded.** The core synthetic
   roster fixture's above-cutoff sets were re-judged by replaying their
   committed observations; the tab fixtures and the desktop-gate golden were
