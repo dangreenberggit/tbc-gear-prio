@@ -1,3 +1,5 @@
+> **2026-10-10:** revision 2 of `.scratch/plans/upgrades-tab-finish-line.md` is now the plan in charge for the Upgrades tab. Read its § Where we are first; this file is history.
+
 # Handoff — upgrades-tab finish line
 
 Rewritten 2026-09-14 by the orchestrating session, after Chunk 1 merged.
