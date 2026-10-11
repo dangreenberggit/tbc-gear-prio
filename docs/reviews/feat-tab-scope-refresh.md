@@ -280,3 +280,65 @@ Findings:
 | R2-1 | Focused check | fixed       | 336 comment, row 336 and judgment call 3: "unticked unless the page restores a saved choice" |
 | R2-2 | Focused check | fixed       | 608 title says "may show"; first paragraph in the past tense, citing 536's clips             |
 | R2-3 | Focused check | fixed       | each citation now names step 6 of the gitignored plan                                        |
+
+## Round 3 (owner answers)
+
+Scope: f5fe9085..f15b4447 (`0dffe6f4`, `6b1509af`, `f15b4447`), checked
+against the session's record of the owner's Chunk 3b step 6 answers (a
+gitignored scratchpad file, `chunk3b-owner-answers.md`).
+
+What was checked:
+
+1. **Owner quotes: pass.** Every `Owner:` line in the bodies of
+   `6b1509af` and `f15b4447` matches the answers file word for word,
+   including the owner's spelling. The quotes in tickets 336, 500, 505,
+   527, 606, 609–613 and in the scope doc match too.
+2. **Sources: pass, after R3-1 to R3-4.** Re-read at the pair's fork
+   `316326a95` and this branch: `set_bonus_tip.ts:187`, `:197`, `:227`;
+   `set_bonus_tip.test.ts:88-99`; `proposal-cases.md:14`;
+   `owner-quotes-upgrades-tab-closeout.md:44`; locale
+   `upgrades.json:129`; `DeltaCell.tsx:33-49`; `ViewToggles.tsx:44-56`;
+   `PhaseSelector.tsx:7`; `assemble_universe.py:216-229`, `:541`,
+   `:593-597`, `:817`, `:855`, `:1862-1870`, `:2381-2385`, `:2633`,
+   `:2661-2663`, `:2693-2730`; `feral-tokens.json:12`;
+   `balance-tokens.json:147-173`; `parse_atlasloot.py:161-162`;
+   `pool-hardening.test.ts:1052-1064`; `list_phase_pool.py:547` and
+   `MAX_PHASE = 3`. All match. By script: `feral-p5.json` has 481 entries
+   and none of the five ids; `vendor/wowsims/db.json` has 34444, 34556 and
+   34573 at phase 5 with `setId` 676 and no `sources`, 34397 at phase 5
+   with no `sources`, and none of tokens 34852, 34855, 34858;
+   `raid-recipes.json` has 146 entries; `ret-sunmote-upgrades.json` has 3.
+   Counting phase-5 `setId` items in each `data/universes/*-p5.json`
+   gives 0 for feral and 3 or more for each other spec. The prototype
+   counts (82, 27, 294, 117, 195/195) are labelled as prototype results in
+   each ticket; their scripts are still in the session scratchpad.
+3. **Scope doc: pass.** The Tab-blocking bucket holds 336, 527, 467, 497,
+   609–613, 500, 515, 606, 605 and 604, as the answers file sets out; 505,
+   525, 291, 292 and 398 are Tab-adjacent, 376 is Out-of-scope, and 298
+   has no row. Both § Maintenance loops print nothing (160 open tickets).
+4. **Banner commit: pass.** `git show --stat 0dffe6f4` lists only
+   `.scratch/handoffs/upgrades-tab-finish-line-HANDOFF.md`.
+
+Findings:
+
+- **R3-1 (owner vs agent).** `docs/plans/wowsims-tab/plan.md` said the
+  three later items were dropped as the "owner answer Q-later-items". The
+  owner answered; the drop was the session's decision.
+- **R3-2 (owner vs agent).** Scope row 505 said "Not part of finished"
+  with no decider; ticket 505 says the owner did not object, which is not
+  an explicit ruling.
+- **R3-3 (owner vs agent).** Judgment call 8 put 613 under the owner's
+  "programmatic way" quote; 613 comes from the owner's "Yes" to
+  Q-ret-feral-route.
+- **R3-4 (source).** Ticket 525 said the captures had "no match in that
+  capture set's JSON" without naming the folder or command; scope row 525
+  read "checked once and closed" for an open ticket.
+
+## Disposition (round 3)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                        |
+| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------ |
+| R3-1 | Focused check | fixed       | `e430ebf1`: "Dropped ... by the orchestrating session, after the owner's answer"     |
+| R3-2 | Focused check | fixed       | `e430ebf1`: row 505 says the session decided and the owner's silence is not a ruling |
+| R3-3 | Focused check | fixed       | `e430ebf1`: 609–612 from the quote; 613 from the owner's "Yes"                       |
+| R3-4 | Focused check | fixed       | `e430ebf1`: 525 names the folder and the grep; row says "to be checked once"         |
