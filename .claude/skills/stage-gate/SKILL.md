@@ -202,8 +202,10 @@ not` list below.
      respawn `gate-planner` with brief + plan + review for a revision,
      then `gate-reviewer` on the changed claims only. **One revision
      round is the norm.** Loop back again only while a `blocking` finding
-     still stands after the revision; a third disagreement goes to the
-     user with the contradiction stated, not resolved.
+     still stands after the revision. When a `blocking` finding still
+     stands after the second loop-back, the session stops and gives the
+     user the open findings, with any contradiction between seats stated,
+     not resolved.
    - On a split run, when a `blocking` or `material` finding has
      `Where: decomposition`, the round's revision is one `gate-planner`
      (`model: "fable"`) with `plan-review.md` and `re-split: review`. It
