@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: pre-merge-review standards axis (round 2), feat/tab-signoff-followups, 2026-09-18
 Blocks: none
@@ -38,3 +38,15 @@ helper both new wraps (and possibly `resultsBlock`) call.
 
 Minor, deferred from the round-2 pre-merge review (not merge-blocking — no
 behaviour issue, fork-lint clean). A tidy-up that removes the 3× repetition.
+
+## 2026-10-11 — closed: the tab uses the native ContentBlock
+
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`: the ticket names pre-React code, checked against the React tab at fork `316326a95` (= `data/wowsims-fork.lock.json` `commit`) on 2026-10-11. No block header is hand-written; `ExportPanel.tsx:3` imports
+`ContentBlock` from `@ui-kit/ContentBlock`.
+
+Verified by:
+
+```
+grep -rl content-block-header vendor/tbc-new-fork/ui/features/upgrades | wc -l   # 0
+find vendor/tbc-new-fork/ui -name '*upgrades_tab*' | wc -l                       # 0
+```

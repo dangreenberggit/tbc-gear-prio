@@ -1,4 +1,4 @@
-Status: claimed
+Status: closed
 Type: design
 Origin: owner viewing session, 2026-09-19 (re-raise of an earlier ask never actually explored)
 Blocks: none
@@ -100,3 +100,22 @@ tab-finish-arc split (see `.scratch/stage-gate/tab-finish-arc/plan.md`):
 - Q1 (Sources filter): owner chose the native "Sources…" popup idiom.
 No 438 code was written here (that is Session 3, under the `gate-visual` seat
 that Session 2 builds). This ticket is claimed pending that implementation.
+
+## 2026-10-11 — closed: the exploration is done and both picks shipped
+
+This ticket was the design exploration (§ What would close this). The owner
+picked both options (§ Claimed), and the React tab ships both. Closed by Chunk
+3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`, checked at fork
+`316326a95` on 2026-10-11.
+
+Verified by:
+
+```
+ls vendor/tbc-new-fork/ui/features/upgrades/components/SourcesDialog/SourcesDialog.tsx
+grep -n sources_button vendor/tbc-new-fork/assets/locales/en/upgrades.json      # 14: "Select item sources"
+grep -n 'export function splitSetChips' vendor/tbc-new-fork/ui/features/upgrades/model/settings_pool.ts   # 133
+grep -n sets_other_phases vendor/tbc-new-fork/assets/locales/en/upgrades.json   # 21: "Other sets ({{n}})"
+```
+
+The disclosure reads "Other sets (n)"; the owner's pick was worded "Other
+phases (n)". Not judged here whether that wording difference matters.

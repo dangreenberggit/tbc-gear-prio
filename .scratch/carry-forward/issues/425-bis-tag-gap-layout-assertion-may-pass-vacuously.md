@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: pre-merge-review adversarial axis, feat/tab-signoff-followups, 2026-09-18
 Blocks: none
@@ -38,3 +38,18 @@ assertion), and the fixture/run the gate drives.
 Minor, deferred from the pre-merge review (not merge-blocking). The 423 alignment
 assertions themselves read real computed values and are non-vacuous; this is only
 the BiS-gap sub-assertion.
+
+## 2026-10-11 — closed: the assertion no longer exists
+
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`: the ticket names pre-React code, checked against the React tab at fork `316326a95` (= `data/wowsims-fork.lock.json` `commit`) on 2026-10-11. The layout gate moved from the fork's `test-layout.mjs` to
+`scripts/tab-harness/test-layout.mjs` (ticket 560), and the BiS-gap assertion
+did not move with it, so it cannot pass vacuously.
+
+Verified by:
+
+```
+ls vendor/tbc-new-fork/test-layout.mjs                    # No such file or directory
+grep -c badgeGaps scripts/tab-harness/test-layout.mjs     # 0
+```
+
+Not checked here: whether any gate now checks the BiS badge spacing at all.
