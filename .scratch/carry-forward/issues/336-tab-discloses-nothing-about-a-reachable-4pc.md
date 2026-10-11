@@ -40,3 +40,23 @@ any packages[]-driven rendering).
   (tickets 313/315/90); a sub-noise 4pc is not shown as a real figure.
 - Verified by DOM readback on a fixture where the 4pc is large (Thunderheart
   +64) and one where it is sub-noise (ret), desktop and mobile.
+
+## Comments
+
+**2026-10-11 — re-checked on the React tab (Chunk 3b of
+`.scratch/plans/upgrades-tab-finish-line.md`).** The disclosure this ticket
+asks for now renders. After a run, the "Set potential" view toggle is on by
+default (`model/results_view.ts:93`), and the set-bonus popover lists each
+reachable bonus with its partner pieces and DPS. The Chunk 3b capture on the
+fixture `feral-p3-th-hands-legs`, row 31042 (Thunderheart Chestguard), shows
+at all four widths:
+"Item stats +26.3 / Set potential / Thunderheart Pauldrons (4pc) +74.1 /
+Total +100.4" (`facts.json`, key `313-tip`, in the main checkout's
+gitignored `.scratch/tab-scope-refresh/review/`; rebuild with
+`pnpm tab-review` and that folder's `manifest.json`). The figure comes from
+`setContext.futureBonuses` (`model/engine/view.ts:5-20`), not
+`packages[]`, after the 467/511 set-credit redesign.
+
+Not checked, and still needed to close: the sub-noise case in § What would
+close this (a ret fixture whose 4pc is below the noise floor must not show
+as a real figure), and a DOM readback of it at desktop and mobile widths.

@@ -45,3 +45,15 @@ uses, is an open design question.
 Fold into whatever registry lands from the `spec-registry` stage
 (`.scratch/stage-gate/spec-registry/`) if that registry gives both a single
 source to derive from. Deliberately out of scope for that branch.
+
+## Comments
+
+**2026-10-11 — does not gate the Upgrades tab (Chunk 3b of
+`.scratch/plans/upgrades-tab-finish-line.md`).** `apps/web/server/routes.ts`
+is the standalone web shell's server. The React tab never calls it: its only
+`fetch` is the dev-server fixture route (`ui/features/upgrades/utils/fixture.ts:109-112`
+at fork `316326a95`). The tab picks its spec from the page through
+`SPEC_ID_BY_PROTO_SPEC`, which maps all 11 DPS specs
+(`ui/features/upgrades/model/run.ts:43-55`). Both lists named here are still
+ret/feral-only (`routes.ts:35`, `cli.ts:169`), so the ticket stays open for
+the shell and the CLI; the scope doc now lists it as Out-of-scope.
