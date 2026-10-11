@@ -589,6 +589,13 @@ a normal feature branch gated by `pnpm verify`.
    **PR checklist** — rebase onto `master`, re-verify every pin-scoped fact,
    iteration caps to upstream's web limits, credential story, upstream code
    style + review.
+   *Dropped 2026-10-11 by the orchestrating session, after the owner's
+   answer to Q-later-items (Chunk 3b of
+   `.scratch/plans/upgrades-tab-finish-line.md`):* the IndexedDB cache (the
+   tab matches the site, which saves inputs and never results; fork
+   `ui/features/upgrades/model/saved_settings.ts:85-86`);
+   character-first WCL discovery (not this tab; ticket 267 keeps it for the
+   standalone page); the reconciliation (no effect on the tab).
 
 ---
 

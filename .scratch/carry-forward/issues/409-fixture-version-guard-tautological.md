@@ -1,6 +1,6 @@
 # 409 — a fixture test's version guard became tautological (adversarial A3, material)
 
-Status: open
+Status: closed
 Type: bug
 Origin: pre-merge review of feat/desktop-transport-gate, round 3 (2026-09-16)
 Blocks: —
@@ -63,3 +63,19 @@ rather than fold into 390.
 After pinning `RECORDED_SIM_VERSION` to a literal, bump a local copy of
 `CURRENT_API_VERSION` and confirm the assertion at
 `bulk-screen-http-fixture.test.ts:172` now fails, then revert the bump.
+
+## 2026-10-11 — closed: the test file was deleted
+
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`,
+checked on 2026-10-11.
+
+Verified by:
+
+```
+ls packages/core/test/bulk-screen-http-fixture.test.ts
+# No such file or directory
+git log --diff-filter=D -1 --format='%h %ad %s' --date=short -- packages/core/test/bulk-screen-http-fixture.test.ts
+# fca228bc 2026-10-07 Delete the bulk suites and re-pin to 095e0afa2
+grep -rn RECORDED_SIM_VERSION packages/core | wc -l
+# 0
+```

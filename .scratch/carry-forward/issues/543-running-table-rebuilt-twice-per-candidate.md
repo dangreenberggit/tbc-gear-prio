@@ -38,3 +38,18 @@ run.
   sim server's busy cores per window.
 - Ticket 542's estimator constants (`slowdown`, `kappa`, `psi` in
   `run_progress.ts`) are refitted, because they model this rebuild cost.
+
+## Comments
+
+**2026-10-11 — the estimator refit is due now, whether or not the throttle
+is built (Chunk 3b of `.scratch/plans/upgrades-tab-finish-line.md`).** The
+estimator constants were fitted on the pre-React tab, and their comment says
+they "must be refitted if that rebuild changes" (`model/run_progress.ts:36-46`
+at fork `316326a95`, which still names `upgrades_tab.tsx`, `landedRowsTable`).
+The React port already changed the rebuild: progress ticks no longer
+re-render the table (`model/progress_channel.ts`), though each landed row
+copies the row array (`model/run_state.ts:103-104`) and re-sorts and rebuilds
+every row (`components/ResultsTable/ResultsTable.tsx:48-51`). Whether
+the constants are now wrong is untested. Re-measure a full feral run on the
+React tab, as in § Done when, and refit `slowdown`, `kappa` and `psi` from
+it, even if the rebuild itself is left alone.

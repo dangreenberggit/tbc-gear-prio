@@ -1,4 +1,5 @@
 Status: open
+Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (DPS spec list) — rule 1 of § How plans nest
 Type: epic
 Severity: major (product-scope gap: the tool is meant to support all DPS specs; ret+feralcat were only initial-dev test specs)
 Origin: owner directive, 2026-09-19 (raised during the tab-438 arc human review)

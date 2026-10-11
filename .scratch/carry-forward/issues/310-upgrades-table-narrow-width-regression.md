@@ -1,4 +1,4 @@
-Status: resolved
+Status: closed
 Type: investigation
 Origin: Chrome visual pass of the Upgrades tab, 2026-08-27 (branch `feat/upgrades-dedup-wowsims`, fork `342f6a74`)
 Blocks: none

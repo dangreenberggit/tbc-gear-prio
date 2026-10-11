@@ -304,7 +304,7 @@ transport and cannot pass on a page served by vite. It is deliberately **not** i
 nothing else catches a re-pin that breaks the embedded transport. A red gate
 blocks the re-pin.
 
-Check (h) compares the run against `data/desktop-gate/golden-ret-p5-cap40.json`;
+Check (h) compares the run against `data/desktop-gate/golden-ret-p4-cap40.json`;
 a re-pin that changes the tab's output regenerates it with `--update-golden` and
 explains the diff in the commit body.
 

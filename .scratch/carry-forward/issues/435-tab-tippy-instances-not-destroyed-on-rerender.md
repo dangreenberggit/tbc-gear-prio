@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: pre-merge-review adversarial axis (round 2), feat/tab-signoff-followups, 2026-09-18
 Blocks: none
@@ -44,3 +44,18 @@ rebuild paths). Note the mid-run high-churn path is already safe: it passes
 Minor, deferred from the round-2 pre-merge review (not merge-blocking — bounded
 by GC, pre-existing pattern). Worth fixing with the other tippy usages so the tab
 matches the codebase's cleanup discipline.
+
+## 2026-10-11 — closed: the React tab does not use tippy
+
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`:
+the ticket names pre-React code, checked against the React tab at fork
+`316326a95` (= `data/wowsims-fork.lock.json` `commit`) on 2026-10-11.
+`upgrades_tab.tsx` is gone; the tab's tooltips are React components,
+removed when they unmount.
+
+Verified by:
+
+```
+grep -rli tippy vendor/tbc-new-fork/ui/features/upgrades | wc -l     # 0
+find vendor/tbc-new-fork/ui -name '*upgrades_tab*' | wc -l           # 0
+```

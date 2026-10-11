@@ -1,9 +1,8 @@
-Status: blocked
+Status: closed
 Type: task
 Origin: owner request, 2026-10-07T01:32Z (`.scratch/stage-gate/558-p3-settings-gates/decision-log.md`, line 103, gitignored, owner's checkout)
 Blocks: none
 Blocked by: none
-Priority: BLOCKING — the owner rules on Q-session-layout before the next orchestration session opens
 Related: 558, 560, 564, 565
 
 # READ FIRST: session and checkout layout (Q-session-layout)
@@ -83,3 +82,37 @@ Where the work stands, from the owner's checkout `.scratch/stage-gate/`:
 - **P3 (ticket 560) is finished.** Final Gate C passed and 560 closed (`558-p3-settings-gates/decision-log.md:163`). The branch is merge-ready by the gate: `pnpm merge-to-dev --check-only` rc=0 at `ddfb3116`; `7966f7ca` adds a ticket note only (`:205`).
 - **The hand-back is the next step**, before the merge ask. The session has put Q-568-option, Q-568-keep-edits and Q-handback to the owner, then the merge (`:205`). Option C is that hand-back plus a reference copy, so answer Q-session-layout together with Q-handback.
 - **Ticket 564 is closed** and ticket 565 (TanStack table and virtual rows) was filed from it (`564-tab-state-zustand/decision-log.md:83-84`). 565 is open; the owner wants it run in its own session (`558-p3-settings-gates/decision-log.md:202`). That session opens wherever this ticket's answer says.
+
+## 2026-10-11 — closed: the switch happened; no reference copy wanted
+
+The owner's answer, 2026-10-10, given to option C's reference copy:
+"No, I don't need pre react code."
+
+The layout today: the main folder is on `dev` and contains the React port
+(merge `17060086`); `vendor/tbc-new-fork` is on `feat/upgrades-tab-react` at
+`316326a95`, equal to the fork lock; `tbc-gear-prio-wt-react-port` is not a git
+worktree (no `.git`, absent from `git worktree list`); the old branch's
+generated files and the WCL credentials file are in
+`C:/Users/dgree/Code/lulz/_moved-aside/`
+(`.scratch/handoffs/react-zustand-tanstack-next-HANDOFF.md:21`). So the switch
+that options A–C described has happened, and no reference copy is wanted.
+Closed by Chunk 3b step 2b of `.scratch/plans/upgrades-tab-finish-line.md`.
+
+Verified by (2026-10-11):
+
+```
+git -C <main> rev-parse --abbrev-ref HEAD --short HEAD
+# dev / c4b81946
+git -C <main> merge-base --is-ancestor 17060086 dev; echo rc=$?
+# rc=0
+git -C <fork> branch --show-current; git -C <fork> rev-parse --short HEAD
+# feat/upgrades-tab-react / 316326a95
+grep -n '"commit"' data/wowsims-fork.lock.json
+# 5: "commit": "316326a95928bb441a94db1c21d1501b3b0c0726"
+ls -d C:/Users/dgree/Code/lulz/tbc-gear-prio-wt-react-port/.git
+# No such file or directory
+git -C <main> worktree list | grep -c react-port
+# 0
+ls C:/Users/dgree/Code/lulz/_moved-aside/
+# local.wcl-credentials.ts  tbc-new-fork-old-branch/
+```

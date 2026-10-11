@@ -1,4 +1,4 @@
-Status: resolved
+Status: closed
 Type: feature
 Origin: Owner request, 2026-08-27, during the toolbar redesign review
 Blocks: none

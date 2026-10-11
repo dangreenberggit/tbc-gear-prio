@@ -2,7 +2,7 @@ Status: open
 Type: feature
 Origin: owner request, 2026-09-18 (viewing the running tab)
 Blocks: none
-Blocked by: 417 (needs the Crafted content checkbox to hang off of)
+Blocked by: none (417 closed; its Crafted checkbox is in the React Sources dialog)
 Priority: post-finish nice-to-have ("nice-to-heavy") — NOT a condition of the tab being finished
 
 # Per-profession filter for Bind-on-Pickup crafted upgrades
@@ -62,3 +62,17 @@ pattern does not make the item obtainable; having the profession does.
 Depends on 417 landing first (the Crafted checkbox is the anchor). New request
 from the owner's sign-off pass; tracked as a follow-up feature, not part of the
 Chunk 3 tab-surface set.
+
+## Comments
+
+**2026-10-11 — unblocked.** Ticket 417 is closed, so `Blocked by:` is now
+`none`. In the React tab the anchor is the "Crafted" checkbox in the Sources
+dialog (`ui/features/upgrades/components/SourcesDialog/`); crafted items are
+filed under the source key `Crafted` (`model/settings_pool.test.ts:98-99`).
+The `upgrades_tab.tsx` path under "Where" above is pre-React. Checked at fork
+`316326a95`:
+
+```
+grep -m1 '^Status' .scratch/carry-forward/issues/417-*.md          # Status: closed
+grep -n '"crafted"' vendor/tbc-new-fork/assets/locales/en/upgrades.json   # 29: "crafted": "Crafted"
+```

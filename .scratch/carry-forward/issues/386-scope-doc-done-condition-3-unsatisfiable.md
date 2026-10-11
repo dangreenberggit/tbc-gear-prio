@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Origin: pre-merge review of `feat/tab-scope-truth` (domain axis, finding 1)
 Blocks: none
 
@@ -50,7 +50,27 @@ condition describes the intended end state correctly.
 
 ## Acceptance
 
-- [ ] After Chunk 1: `python scripts/sync_wowsims.py --check; echo rc=$?` → rc=0
-- [ ] Both locks name a sha for which
+- [x] After Chunk 1: `python scripts/sync_wowsims.py --check; echo rc=$?` → rc=0
+- [x] Both locks name a sha for which
       `git -C vendor/tbc-new-fork merge-base --is-ancestor 3163bcf <sha>` → rc=0
-- [ ] Condition 3 left unchanged, or reworded with the reason recorded here
+- [x] Condition 3 left unchanged, or reworded with the reason recorded here
+
+## 2026-10-11 — closed: condition 3 holds as written
+
+Chunk 1 moved both pins onto upstream `master` after the reforge merge and
+fixed 354, so the premise above (pins at `ec5c5f2`, `--check` failing) no
+longer holds. Condition 3 is unchanged. Closed by Chunk 3b step 1 of
+`.scratch/plans/upgrades-tab-finish-line.md`.
+
+Verified by (2026-10-11, at `dev` `c4b81946`, fork `316326a95`):
+
+```
+python scripts/sync_wowsims.py --check; echo rc=$?
+# pinned 5262ff386bd1, upstream v0.0.148 (5262ff386bd1) ... "in sync." rc=0
+git -C vendor/tbc-new-fork merge-base --is-ancestor 3163bcf HEAD; echo rc=$?
+# rc=0 (fork HEAD 316326a95 = data/wowsims-fork.lock.json "commit")
+grep -n branchedFrom data/wowsims-fork.lock.json
+# 6: "branchedFrom": "5262ff386bd171e6349d0f9cf00f4d762a6c9951"
+git -C vendor/tbc-new-fork merge-base --is-ancestor 3163bcf 5262ff386bd171e6349d0f9cf00f4d762a6c9951; echo rc=$?
+# rc=0; `git -C vendor/tbc-new-fork branch -r --contains 5262ff386bd1` lists upstream/master
+```

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: latent defect
 Origin: pre-merge review of `feat/upgrades-ui-pass`, adversarial F1 + domain note, 2026-08-23
 Blocks: none
@@ -47,3 +47,25 @@ visible-iff-done invariant for the two view toggles is asserted (a dev-mode
 assertion in the visibility refresh, or a comment at both read sites naming
 the invariant and where it is enforced). Re-check:
 `grep -n "classList.contains('d-none')" vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`.
+
+## 2026-10-11 — closed: both couplings are gone in the React tab
+
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`,
+checked at fork `316326a95` (= the fork lock) on 2026-10-11. `upgrades_tab.tsx`
+is gone, and so is `ToggleControl`.
+
+1. `pruneEffective` is now a pure function of store state
+   (`ui/features/upgrades/model/settings_state.ts:98`,
+   `state.prune && state.selectedSetKeys.length > 0`); it reads no DOM class.
+2. The view toggles are store values (`ViewToggles`,
+   `model/results_view.ts:78`), and `resultsViewFor` applies them only in the
+   `done` case (`model/results_view.ts:113-116`), so the visible-iff-done
+   reasoning is now the code's own switch.
+
+Verified by (from the fork root):
+
+```
+find ui -name '*upgrades_tab*' | wc -l                                         # 0
+grep -rn "d-none\|ToggleControl" ui/features/upgrades | wc -l                  # 0
+grep -n 'export const pruneEffective' ui/features/upgrades/model/settings_state.ts   # 98
+```
