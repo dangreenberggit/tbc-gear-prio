@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/handoffs/visual-review-round-2c.md, hover-capture note
 Blocks: none
@@ -51,3 +51,17 @@ between hover and capture.
    `hover:` interaction in its manifest produces a capture that actually
    shows `[data-tippy-root]` content, not a zero-size-selector error in
    `index.json`. Record the command and its exit code.
+
+## 2026-10-11 — closed: tippy is gone and the harness clips in place after a hover
+
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`, checked at fork `316326a95` (= the fork lock) on 2026-10-11 by reading code; no gate or capture was run for this close.
+
+- `grep -rln -i tippy vendor/tbc-new-fork/ui/features/upgrades` and
+  `grep -n -i tippy scripts/tab-harness/*.mjs` print nothing.
+- `scripts/tab-harness/test-review.mjs:189-190`: the first capture after a
+  hover is clipped where the target already is, "because a scroll moves the
+  page under the pointer and closes the popup".
+
+Still open elsewhere: later captures after a hover in a `pane: false` entry
+clip the nav bar (`docs/agents/known-traps.md`, "Before writing a `pnpm
+tab-review` manifest").

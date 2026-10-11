@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/handoffs/visual-review-round-2c.md, finding A4
 Blocks: none
@@ -58,3 +58,18 @@ Two independent reasons, both in `.scratch/handoffs/visual-review-round-2c.md`:
 3. Confirm with a real `pnpm tab-review` (or equivalent axe) run against the
    `feral-p3-p2bis` (or `ret-p3-p2`) fixture showing zero `label` violations
    under `.upgrades-export-area`, and record the command and its exit code.
+
+## 2026-10-11 — closed: the field has an accessible name
+
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`, checked at fork `316326a95` (= the fork lock) on 2026-10-11 by reading code; no gate or capture was run for this close.
+
+1. `ui/features/upgrades/components/ExportPanel/ExportPanel.tsx:47` renders
+   `<TextArea readOnly ... aria-label={i18n.t('upgrades_tab.export.title', ...)}>`;
+   `TextArea` passes its props to the `<textarea>`
+   (`ui/ui-kit/FormControl/TextArea.tsx:8`).
+2. The React layout gate runs axe once on the recorded fixture at 653 px
+   (`scripts/tab-harness/test-layout.mjs`, header and the `POST_RUN_AXE_WIDTH`
+   audit), and `data/wowsims-fork-a11y-baseline.json` excuses no `label` rule
+   (`grep -c '"label"'` → 0).
+
+Not run: an axe confirmation run on the export field.
