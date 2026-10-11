@@ -28,11 +28,11 @@ Run each one exactly as written. A bare `python scripts/<x>.py` or
 `pnpm <script>` reads and writes the main folder's files, not the pair's, and
 a `cd X && …` chain breaks on the error fnm prints.
 `pnpm -C <pair> exec python scripts/<x>.py …` runs a script in `<pair>` with
-flags that no `package.json` script passes. Run the `make -C <fork> …`
-commands in Git Bash: the fork's makefile calls `sh` and GNU `find`
+flags that no `package.json` script passes. Run every `make -C` command in
+this guide in Git Bash: the fork's makefile calls `sh` and GNU `find`
 (`scripts/worktree_pair.py` `make_env`).
 
-Both procedures land on `dev` by §7 step 5, only when the owner asks.
+Both procedures merge into `dev` at §7 step 5, and only when the owner asks.
 
 A pipe reports the **last** command's status, so append
 `; echo "rc=${PIPESTATUS[0]}"` or redirect and inspect separately.
@@ -144,7 +144,8 @@ anything conflicting outside it later is a stop-and-report.
 
 `<OLD_PIN>` is the fork lock's `branchedFrom`: the last upstream commit the
 fork merged. Check that `git -C <fork> merge-base HEAD <TARGET_SHA>` prints
-it. Then list the upstream files the fork has modified since `<OLD_PIN>`, the
+it. If it prints another commit, stop and report: the lock's `branchedFrom` is
+wrong. Then list the upstream files the fork has modified since `<OLD_PIN>`, the
 files upstream changed between `<OLD_PIN>` and `<TARGET_SHA>`, and the files
 on both lists:
 
@@ -269,6 +270,8 @@ git -C <fork> add <resolved paths>
 git -C <fork> diff --name-only --diff-filter=U
 git -C <fork> commit -F <message file>
 ```
+
+Write the message file outside `<pair>`.
 
 After the merge commit, delete the scratch files. `pnpm wt:unpair` refuses a
 pair that holds ignored `.scratch/` files (`scripts/worktree_pair.py`,
@@ -413,10 +416,11 @@ ADR-0030 Consequence 4 accepts that risk; ticket 355 was filed when it bit.
    after `<main-branch>` was made, that command refuses: take
    paired-worktrees.md's older route ("When `dev` has a new fork pin").
 
-   Landing leaves the main folder's gitignored generated files stale. Refresh
-   them with the steps `pnpm wt:pair` runs for a new pair
-   (`scripts/worktree_pair.py`): after `merge-to-dev`, or on the older route
-   before its `pnpm verify`:
+   The merge leaves the main folder's gitignored generated files stale.
+   Refresh them with these commands; the first three are the steps
+   `pnpm wt:pair` runs in a new pair (`scripts/worktree_pair.py`, `pair`). Run
+   them after `merge-to-dev`, or on the older route before its `pnpm verify`.
+   Done when each exits 0.
 
    ```bash
    make -C <main-folder>/vendor/tbc-new-fork proto

@@ -81,15 +81,15 @@ The full cycle, in order, every time:
 1. `pnpm -C <repo> exec vitest run packages/core/test/wowsims-fork-parity.test.ts`
    (E-W3), where `<repo>` is the main checkout or the pair you are editing —
    green before any hash moves.
-2. Update the file's row in `docs/fork-provenance/engine.md` (in this
-   repo, not the fork) with the new sha256 (Edit tool, not sed — see the
-   trap above).
+2. Update the file's row in `<repo>/docs/fork-provenance/engine.md` (in
+   this repo, not the fork) with the new sha256 (Edit tool, not sed — see
+   the trap above).
 3. Fork commit of the ported file. The record change is committed in this
    repo with the re-pin.
-4. Re-pin: move `data/wowsims-fork.lock.json`'s `commit` to the new fork
-   tip and run `pnpm sim-implemented-effects:generate` (the artifact
-   embeds the pin).
-5. `pnpm verify`.
+4. Re-pin: move `<repo>/data/wowsims-fork.lock.json`'s `commit` to the new
+   fork tip and run `pnpm -C <repo> sim-implemented-effects:generate` (the
+   artifact embeds the pin).
+5. `pnpm -C <repo> verify`.
 
 A fork commit that touches nothing ported still needs steps 3–5.
 
@@ -113,8 +113,8 @@ moves (ADR-0030).
 run, both from upstream's `CURRENT_PHASE`, so a tier move lands in the pin
 commit whether or not you meant it to. Let both fields stand as the generator
 wrote them, and put the deliberate half of the bump — `ENGINE_VERSION`, the
-docs — in its own commit. The acceptance check is
-`git add data/wowsims.lock.json`, then `--update --ref <sha>` again, then
+docs — in its own commit. The acceptance check is: stage the lock with
+`git -C <repo> add data/wowsims.lock.json`, then `--update --ref <sha>` again, then
 `git diff --exit-code` on the lock: it holds only while the file is purely
 generated. The `git add` comes first because `git diff` compares the working
 tree with the index: unstaged, the first run's own changes show as a

@@ -31,7 +31,9 @@ state -- the same reasoning, and the same exit-0-with-a-message shape, as
 is always an error (exit 2).
 
 Run via `pnpm verify` (`pnpm fork-universes:check`); refresh with
-`python scripts/sync_fork_universes.py --write`.
+`python <repo>/scripts/sync_fork_universes.py --write`, where `<repo>` is the
+checkout whose fork copies you are refreshing (ROOT comes from this file's
+location, so the working directory does not matter).
 
 Exit 0 ok (including "nothing to check"), 1 drifted, 2 could not parse.
 """
@@ -216,7 +218,7 @@ def main() -> int:
         "their data/ sources. The tab ranks from the bundled copy, so the page "
         "serves a pool this repo no longer produces. Refresh with:\n"
         "\n"
-        f"    python {ROOT.as_posix()}/scripts/sync_fork_universes.py --write\n"
+        f"    python \"{ROOT.as_posix()}/scripts/sync_fork_universes.py\" --write\n"
         "\n"
         "then record the refresh and its cause in "
         f"{ROOT.as_posix()}/docs/fork-provenance/data.md before committing the fork.",

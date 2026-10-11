@@ -558,9 +558,9 @@ def pair(args: argparse.Namespace) -> int:
             if not src.is_dir():
                 warnings.append(
                     f"{src} is missing and was not copied; restore it in the pair "
-                    f"(pnpm -C {target.as_posix()} sync:wowsims:restore, "
-                    f"pnpm -C {target.as_posix()} sync:atlasloot:restore or "
-                    f"pnpm -C {target.as_posix()} fetch:wowsimcli)"
+                    f"(pnpm -C \"{target.as_posix()}\" sync:wowsims:restore, "
+                    f"pnpm -C \"{target.as_posix()}\" sync:atlasloot:restore or "
+                    f"pnpm -C \"{target.as_posix()}\" fetch:wowsimcli)"
                 )
                 continue
             shutil.copytree(src, target / "vendor" / name, symlinks=True)
@@ -570,7 +570,7 @@ def pair(args: argparse.Namespace) -> int:
         if main_tag != engine_tag:
             warnings.append(
                 f"vendor/wowsims came from the main checkout, whose engine lock names {main_tag[:9]}, "
-                f"but {ref} names {engine_tag[:9]}; run pnpm -C {target.as_posix()} sync:wowsims:restore"
+                f"but {ref} names {engine_tag[:9]}; run pnpm -C \"{target.as_posix()}\" sync:wowsims:restore"
             )
 
         run([exe("corepack"), "pnpm", "-C", str(target), "install", "--frozen-lockfile"])
@@ -588,7 +588,7 @@ def pair(args: argparse.Namespace) -> int:
         say(f"FAILED: {exc}")
         say(
             f"the pair is partly made at {target}; remove it with: "
-            f"pnpm -C {main_dir.as_posix()} wt:unpair {args.name} --force"
+            f"pnpm -C \"{main_dir.as_posix()}\" wt:unpair {args.name} --force"
         )
         return 1
 
@@ -606,7 +606,7 @@ def pair(args: argparse.Namespace) -> int:
         say(f"  WARNING: {warning}")
     say(f"open a session in {target} (desktop app: pick that folder; terminal: run `claude` there)")
     say("that session starts with no memory notes: memory is kept per folder")
-    say(f"remove the pair with: pnpm -C {main_dir.as_posix()} wt:unpair {args.name}")
+    say(f"remove the pair with: pnpm -C \"{main_dir.as_posix()}\" wt:unpair {args.name}")
     return 0
 
 

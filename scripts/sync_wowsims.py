@@ -601,7 +601,7 @@ def do_check():
 
     if vendor_is_empty():
         print(f"  {VENDOR}/ is empty or missing -- the source isn't here.", file=sys.stderr)
-        print(f"  run: pnpm -C {here()} sync:wowsims:restore", file=sys.stderr)
+        print(f"  run: pnpm -C \"{here()}\" sync:wowsims:restore", file=sys.stderr)
         return 2
 
     tag, sha = latest_tag()
@@ -732,7 +732,7 @@ def do_watch_ref(ref):
     if existing:
         print(f"  already watching {', '.join(existing)}; watchedRefs holds one ref",
               file=sys.stderr)
-        print(f"  run: pnpm -C {here()} exec python scripts/sync_wowsims.py "
+        print(f"  run: pnpm -C \"{here()}\" exec python scripts/sync_wowsims.py "
               f"--unwatch-ref --ref {existing[0]}", file=sys.stderr)
         return 2
     sha = ref_sha(ref)
