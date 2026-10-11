@@ -34,8 +34,9 @@ edit from the one proposed below. Owner ruling, 2026-10-10: "this at least
 should be brought up for user/ my permission on the session level, i have
 to allow it and it probably must be recorded or something. but it should
 probablyyyyy block a merge?" SKILL.md step 3 now says a loud failure or
-visibly wrong result this branch introduced blocks the merge, and becomes a
-`defer` row only with the owner's permission quoted in the row. The outcome
+visibly wrong result this branch introduced, or any other finding it
+introduced, blocks the merge, and becomes a `defer` row only with the
+owner's permission quoted in the row. The outcome
 list after "When round 2 passes or is skipped" and the step 5 report list
 such a finding as blocking. The proposed text below was not applied.
 

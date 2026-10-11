@@ -332,5 +332,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 596 Automate the live tests of pnpm merge-to-dev <branch> (pre-merge review feat-merge-to-dev-arg round 2, A14, P7) 2026-10-10
 - 597 AGENTS.md still says pair merges need pnpm wt:unpair, owner approval needed (pre-merge review feat-merge-to-dev-arg round 2, X1) 2026-10-10
 - 598 The agnostic adapter points at "Land it on dev" steps that moved, owner approval needed (feat/pair-rule merge of dev) 2026-10-10
-- 599 Run-log report keeps the price each line was written with, so a price fix misses old lines (pre-merge review fix/hook-sonnet-cache-price, A1, D2) 2026-10-08; WONTFIX 2026-10-10 by the owner, the cost of the fix is more than it saves
+- 599 Run-log report keeps the price each line was written with, so a price fix misses old lines (pre-merge review fix/hook-sonnet-cache-price, A1, D2) 2026-10-08; WONTFIX 2026-10-10 by the owner: discussing it costs more than it would save
 - 600 Gaps in the new review-loop rules, one owner approval for 14 agent-file edits (pre-merge review feat-review-loop-fixes round 1, A1-A6, S1-S6, P1-P4) 2026-10-10
