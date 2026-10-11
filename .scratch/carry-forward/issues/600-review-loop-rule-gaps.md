@@ -29,6 +29,17 @@ Short names below: "SKILL.md" is `.claude/skills/pre-merge-review/SKILL.md`.
 
 ### 1. R2-1 (silent wrong result; needs an owner ruling) — A4 is fixed only on the skip path
 
+**Fixed 2026-10-10** on branch `fix/loud-failure-blocks`, by a different
+edit from the one proposed below. Owner ruling, 2026-10-10: "this at least
+should be brought up for user/ my permission on the session level, i have
+to allow it and it probably must be recorded or something. but it should
+probablyyyyy block a merge?" SKILL.md step 3 now says a loud failure or
+visibly wrong result this branch introduced, or any other finding it
+introduced, blocks the merge, and becomes a `defer` row only with the
+owner's permission quoted in the row. The outcome
+list after "When round 2 passes or is skipped" and the step 5 report list
+such a finding as blocking. The proposed text below was not applied.
+
 - **Where:** SKILL.md:221-225 (the outcome list after "When round 2 passes
   or is skipped") and SKILL.md:154-155 (what the round 2 agent is given).
 - **What is wrong:** step 3 says a loud failure, or any other finding,

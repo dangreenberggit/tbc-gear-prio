@@ -172,7 +172,8 @@ review file with the fork range and the result of each of the four checks.
 
 When all four checks pass and the agent reports no finding other than
 bookkeeping (step 3), add a `## Disposition (round 2)` table with one row
-per finding. Follow `docs/agents/known-traps.md`, "Before writing a review
+per finding, except a finding that blocks the merge: it gets its row only
+as the outcome list in "Round limit" says. Follow `docs/agents/known-traps.md`, "Before writing a review
 Disposition table", for an empty table and for rows of earlier rounds that
 this round closes. File the ticket for each `defer` row as step 3 says. Then
 continue at step 4.
@@ -193,7 +194,7 @@ Skip round 2 when every commit since round 1's `<through-sha>` only
 changes whitespace or line wrapping, only changes this review file or
 tickets its Disposition rows link, or applies a bookkeeping fix. The
 code-quality pass is not on this list: round 2 reads it. Do not skip
-round 2 while a finding that step 3 says is fixed in this branch has no
+round 2 while a "fixed before merge" finding (step 3) has no
 fix commit; when such a finding cannot be fixed now, stop as the next
 paragraph says. The agent that handles this review's findings decides,
 and writes the skip and the output of
@@ -220,6 +221,11 @@ When round 2 is skipped, write these outcomes in round 1's
 
 - a "fixed before merge" finding that is still open: stop as the "Stop"
   paragraph above says, and report it to the user as blocking the merge;
+- a finding that step 3 says blocks the merge, still open, that the owner
+  has not allowed to be deferred: write no Disposition row for it yet;
+  list it in `## Summary` as blocking the merge and report it as step 5
+  says. When the owner allows the deferral, add its `defer` row with the
+  quote, the date and a ticket;
 - a bookkeeping finding: `wontfix` with the reason, or `fixed` when the
   suggested text is applied;
 - every other open finding: a `defer` row and a ticket.
@@ -236,8 +242,11 @@ Sort each finding by what it does, whatever label the reviewer gave it:
   test that passes when it should fail, or an output that is wrong with
   no error or warning.
 - **A loud failure or a visibly wrong result** that a user or agent would
-  hit: fixed in this branch when this branch introduced it; otherwise a
-  `defer` row with a ticket.
+  hit: when this branch introduced it, it blocks the merge until this
+  branch fixes it. It becomes a `defer` row with a ticket only when the
+  owner allows that in the session, and the row then quotes the owner's
+  words and gives the date. One from before this branch is a `defer` row
+  with a ticket.
 - **Code quality and style** (naming, structure, readability,
   duplication, comments): serious, and never dropped. Record each as a
   row under a `## Code quality` heading in this file. A code-quality row
@@ -252,8 +261,9 @@ Sort each finding by what it does, whatever label the reviewer gave it:
   applied. Such a fix starts no round; round 2 checks it when round 2
   runs for another reason.
 - **Any other finding** (a missing test, a gap against the spec, a
-  performance cost): as a loud failure — fixed when this branch
-  introduced it, otherwise a `defer` row with a ticket.
+  performance cost): the same as a loud failure above. When this branch
+  introduced it, it blocks the merge unless the owner allows a `defer`
+  row as above; otherwise it is a `defer` row with a ticket.
 
 **Fix scope.** The agent that dispatches a fix puts this sentence in the
 fixer's prompt: "Change only what the finding asks for; list any other
@@ -336,7 +346,10 @@ pnpm merge-to-dev --check-only --ack-open-blockers
 
 Tell the user where the review file is, the summary with its filed and
 closed ticket counts, and that
-`pnpm merge-to-dev --check-only` is green. **Stop there.** Do not run `pnpm merge-to-dev`,
+`pnpm merge-to-dev --check-only` is green. List as blocking the merge
+every finding that step 3 says blocks it and that the owner has not
+allowed to be deferred, and ask the owner to allow the deferral or
+to have it fixed. **Stop there.** Do not run `pnpm merge-to-dev`,
 do not `git merge` into `dev`, and do not set `TBC_ALLOW_DEV_MERGE=1`
 unless the user has **explicitly asked to merge after seeing the review
 summary**. “Review and land” / “the branch looks done” / “commit this” /

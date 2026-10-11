@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: pre-merge review of fix/hook-sonnet-cache-price, finding A1 (also D2), 2026-10-08
 Blocks: none
@@ -38,3 +38,10 @@ Nothing reports the mismatch: `report` prints the old totals as if current.
 
 `report` either prices from current `PRICES` or says plainly that it does
 not.
+
+## Resolution
+
+Closed `wontfix` 2026-10-10 by the owner: "fix the stupid sonnet price or
+dump it, youre spending more money talking abotu it then it will ever
+save". Lines logged before the price fix keep their old cost; `report` is
+unchanged.
