@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Origin: closing ticket 388 during the `feat/tab-scope-truth` review follow-up
 Blocks: none
 
@@ -48,6 +48,21 @@ from a row's own bonus line. Confirm or refute before acting.
 
 ## Acceptance
 
-- [ ] 330's recorded string and the string in `translation.json` agree
-- [ ] The owner has seen the string they are signing off on
-- [ ] `package_disclosure` confirmed distinct from `prospective`, or filed
+- [x] 330's recorded string and the string in `translation.json` agree
+- [x] The owner has seen the string they are signing off on
+- [x] `package_disclosure` confirmed distinct from `prospective`, or filed
+
+## 2026-10-11 — closed: the disputed strings are gone
+
+Closed by Chunk 3b step 3 of `.scratch/plans/upgrades-tab-finish-line.md`, checked on 2026-10-11 at fork `316326a95` (= the fork lock). The React tab's set-bonus text comes from the `set_bonus.*` keys in
+`assets/locales/en/upgrades.json`; none of the disputed keys or strings
+remain. The owner approved the string that shipped on 2026-09-18 (ticket 330's
+sign-off section; 330 is now `Status: closed`).
+
+Verified by (from the repo root):
+
+```
+F=vendor/tbc-new-fork
+for p in 'toward {{set}}' 'package_disclosure' '"prospective"' '{{worn}}'; do echo "$p: $(grep -rlF "$p" $F/assets/locales/en/ $F/ui/features/upgrades | wc -l)"; done
+# 0 files for each
+```
