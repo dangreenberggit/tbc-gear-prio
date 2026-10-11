@@ -172,7 +172,8 @@ review file with the fork range and the result of each of the four checks.
 
 When all four checks pass and the agent reports no finding other than
 bookkeeping (step 3), add a `## Disposition (round 2)` table with one row
-per finding. Follow `docs/agents/known-traps.md`, "Before writing a review
+per finding, except a finding that blocks the merge: it gets its row only
+as the outcome list in "Round limit" says. Follow `docs/agents/known-traps.md`, "Before writing a review
 Disposition table", for an empty table and for rows of earlier rounds that
 this round closes. File the ticket for each `defer` row as step 3 says. Then
 continue at step 4.

@@ -68,9 +68,18 @@ Findings:
 - **R2-2 (bookkeeping):** the ticket 600 note widening; the text is correct
   and follows from A1.
 
-R2-1 is not bookkeeping, so the review stops here as "Round limit" says:
-step 4 is not run as part of this review, and the user decides what
-happens next.
+R2-1 is not bookkeeping, so the review stopped here as "Round limit" says,
+and the user decided what happens next.
+
+## Disposition (round 2)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                             |
+| ---- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| R2-1 | Focused check | fixed       | the reviewer's suggested text applied to SKILL.md:173-175 with the owner's go on 2026-10-10, relayed by the coordinator; no further round |
+| R2-2 | Focused check | wontfix     | bookkeeping: the ticket 600 note follows from A1 and is correct                                                                           |
+
+The owner also confirmed on 2026-10-10, relayed by the coordinator, that A1
+stays: missing tests and spec gaps a branch introduces also block the merge.
 
 ## Summary
 
