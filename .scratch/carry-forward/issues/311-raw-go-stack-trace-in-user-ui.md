@@ -141,10 +141,16 @@ separable and can be fixed independently:
 
 ## 2026-08-29 — panic guard landed (both halves now addressed)
 
-**Presentation half (already landed, verified C5):** `firstLineOf` is applied in
-`upgrades_tab.tsx` (defined ~line 268, used ~line 2206) — the tab no longer
-renders the untrimmed `{s.detail}` the ticket observed. Verified by
-`grep -n "firstLineOf" vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades_tab.tsx`.
+**Presentation half (already landed, verified C5):** `firstLineOf` was applied in
+the pre-React `upgrades_tab.tsx` (defined ~line 268, used ~line 2206) — that tab
+no longer rendered the untrimmed `{s.detail}` the ticket observed.
+
+_Corrected 2026-10-11:_ the React tab replaced that file, and it has no
+`firstLineOf`. Its equivalent is `substitutionText` (fork
+`ui/features/upgrades/utils/format.ts:84`, built on `substitutionFirstLine` in
+`model/assumptions.ts:54`), which `components/SubstitutionsList/SubstitutionsList.tsx:23`
+renders. Verify with
+`grep -n "substitutionText" vendor/tbc-new-fork/ui/features/upgrades/utils/format.ts vendor/tbc-new-fork/ui/features/upgrades/components/SubstitutionsList/SubstitutionsList.tsx`.
 
 **The panic (fork commit `c4d1cb661`):** converted all ten
 `agent.(HunterAgent).GetHunter()` assertions in
@@ -154,6 +160,23 @@ renders the untrimmed `{s.detail}` the ticket observed. Verified by
 callbacks get the same guard as defense-in-depth (0 hits in the ret pool today
 per §B, but future-proofed). Item 30892 is still registered; the guard makes the
 effect a no-op for a non-hunter agent instead of panicking.
+
+_Corrected 2026-10-11:_ the paragraph above describes `c4d1cb661`, which is not
+an ancestor of fork HEAD 316326a95
+(`git -C vendor/tbc-new-fork merge-base --is-ancestor c4d1cb661 HEAD` exits 1).
+The guard at fork HEAD is upstream's: `hunterFromAgent`
+(`sim/hunter/item_sets.go:184-193`), from upstream commit `183f08018`
+(2026-09-06); `git -C vendor/tbc-new-fork diff upstream/master HEAD -- sim/hunter/item_sets.go`
+prints nothing. It guards three `NewItemEffect` callbacks: Thori'dal (`:197`),
+Beast-tamer's Shoulders 30892 (`:256-260`) and Black Bow of the Betrayer
+(`:269`). Seven `agent.(HunterAgent).GetHunter()` assertions have no guard:
+`:25` and `:63` (Cryptstalker), `:96` (Beast Lord), `:138` (Rift Stalker),
+`:171` (Gronnstalker's), `:295` (Ashtongue Talisman of Swiftness) and `:328`
+(Talon of Al'ar). Our own set-bonus guards (`2bc0660c5`, ticket 532) were
+removed by `205975607` ("Return the engine files to upstream's text",
+2026-10-08), which parks them on fork branch
+`fix/engine-item-swap-and-off-class-guards` at `fa57ef5b7`. Whether a
+non-hunter can equip any of the seven is unverified.
 
 Verified: `go build ./sim/...` exit 0, `go vet ./sim/hunter/` exit 0, `gofmt -l`
 clean. The package's `TestHunter` is pre-broken on a stale `assets/database/db.bin`
@@ -191,3 +214,12 @@ pool; other specs' pools stay `hypothesis, untested`. Upstream candidate, not
 sent this run.
 
 ## Comments
+
+### 2026-10-11 — re-check on the React tab
+
+Fork 316326a95, full-pool ret phase 3, no candidate cap, 3000 iterations,
+94.4 s run: no panic text, no dropped-candidates list, and Beast-tamer's
+Shoulders (30892) ranked as row 119 at −30.9 DPS. Screenshot:
+`.scratch/stage-gate/311-react-readback/below-cutoff-beast-tamer-row119.jpg`
+(gitignored; present only on the machine that ran it). The ticket still
+waits on the owner's sign-off.
