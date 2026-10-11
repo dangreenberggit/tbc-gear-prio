@@ -147,7 +147,57 @@ now ticket 601. Commits before round 2, from `git log --oneline --first-parent f
 f7570bc8 (merge of `dev` 005fa7c6, ordered by the session; `git show --cc
 f7570bc8` has no conflict hunks), 7d98e832, 84ebc0e7.
 
-ROUND2_SUMMARY
+Round 2 (focused check over `ff02939e..bc5d3d08`) passed all four checks
+and reported findings R1-R8 (see `## Focused check (round 2)`). Under the
+round cap and the skill's "Round limit", the review stops here: no further
+fix and no third round. R1-R5 and R7 are open in ticket 602; R6 and R8 are
+bookkeeping. `pnpm merge-to-dev --check-only` (step 4) was not run, as the
+"Round limit" stop says. `pnpm verify` passed at 84ebc0e7 (the last code
+commit; later commits change only this file and tickets).
+
+Tickets: filed 2 (601, 602), closed 0. More were filed than closed because
+round 2's findings were left open under the cap.
+
+## Focused check (round 2)
+
+Fork range: none; `git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json`
+exits 0. One fresh `general-task` agent on Opus ran it.
+
+1. **Conditions 1-3: pass.** 7d98e832 names A1-A7, P4, P5; 84ebc0e7 names
+   S4-S9; bc5d3d08 is the review file and tickets. The `dev` merge f7570bc8
+   is not on condition 1's list; the reviewer confirmed it adds only `dev`'s
+   content (`git show --cc` has no hunks; every file `dev` changed equals
+   005fa7c6). No fork pin move.
+2. **Changes only what each finding asks: pass.**
+3. **Each new test asserts its finding: pass.** In a scratch copy, undoing
+   each fix made its check fail, except two lines with no check (R1, R5).
+4. **Tests pass: pass.** `python scripts/check_worktree_pair.py`: 27 checks
+   ok.
+
+Findings:
+
+- **R1 (minor)** No check covers the mark-clearing lines in `unpair`'s
+  `except Refusal` block; replacing them with `pass` keeps all 27 checks
+  green.
+- **R2 (low)** Only `Refusal` is caught, so an `OSError` in
+  `keep_run_logs` or a Ctrl-C leaves the mark with both halves registered;
+  the doc says the mark is deleted in that case. Hypothesis, untested.
+- **R3 (low)** `worktrees()` in the `except` block can raise its own
+  `Refusal` and hide the original message. Hypothesis, untested.
+- **R4 (nit)** "The line above gives the reason" with no such line when the
+  delete printed nothing.
+- **R5 (nit)** No check covers the A2 `--force` suffix or the A6 non-lock
+  branch.
+- **R6 (nit)** 84ebc0e7's subject names S6, which it did not change.
+- **R7 (nit)** A test sets `Created` by list position; one call passes a
+  pair name as the rerun command.
+- **R8 (note)** bc5d3d08 also changes `NEXT` and `map.md`, which
+  `docs/agents/issue-tracker.md` requires with a new ticket.
+
+Outcome: the review stops at the round cap with these findings open (ticket
+602 for R1-R5 and R7). No `## Disposition (round 2)` table is written,
+because "Round limit" writes one only when round 2 reports no finding
+other than bookkeeping.
 
 ## Disposition
 
