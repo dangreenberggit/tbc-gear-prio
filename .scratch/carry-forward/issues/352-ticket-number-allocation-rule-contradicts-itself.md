@@ -75,3 +75,16 @@ Surfaced by the Standards axis of the `feat/342-learn-from-upstream` review. Tha
 branch filed 350 and 351 using `NEXT` as the allocator and the directory as a
 cross-check — the conjunction above — so no collision occurred, but only because
 the executor happened to do both. Pre-existing; not caused by that branch.
+
+## Comments
+
+### 2026-10-11 — known-traps.md now agrees with issue-tracker.md
+
+`docs/agents/known-traps.md` "Before filing a ticket" now takes the number
+from `NEXT`, checks the directory for a file with that number first, and
+on a hit takes the lowest unused number above it, bumps `NEXT`, and asks
+the agent to report that `NEXT` was behind. No script or hook enforces
+either rule (`grep -rn "NEXT" scripts/*.py scripts/*.mjs .githooks/` finds
+no reader of the file). Still open: the first acceptance box (one
+procedure, stated once, in `issue-tracker.md`) and the owner's approval of
+the wording.

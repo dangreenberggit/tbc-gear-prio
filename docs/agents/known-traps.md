@@ -136,10 +136,13 @@ codegen drift and a broken extractor exactly this way.
 **Symptom when armed:** two open tickets share a number (`pnpm
 issues:open` lists two "284"s).
 
-`.scratch/carry-forward/issues/NEXT` has been stale before, so the
-directory listing is the authority: list the directory for the number you
-are about to use, then file, then write the next free number back to
-`NEXT`. A ticket born from a review also gets its map.md line.
+Take the number from `.scratch/carry-forward/issues/NEXT`, as
+`docs/agents/issue-tracker.md` ("Allocating `<NN>`") says. `NEXT` has been
+stale before, so first check that no file uses that number
+(`ls .scratch/carry-forward/issues/ | grep '^<NN>-'`); if one does, take the
+lowest number above it that no file uses, write that number plus one to
+`NEXT`, and say in your report that `NEXT` was behind. A ticket born from a
+review also gets its map.md line.
 
 ## Before writing a review Disposition table
 
