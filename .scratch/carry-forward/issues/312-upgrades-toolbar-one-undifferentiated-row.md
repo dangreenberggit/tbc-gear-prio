@@ -1,4 +1,4 @@
-Status: resolved
+Status: closed
 Type: design
 Origin: Owner review of the running tab, 2026-08-27 (branch `feat/upgrades-dedup-wowsims`, fork `342f6a74`)
 Blocks: none

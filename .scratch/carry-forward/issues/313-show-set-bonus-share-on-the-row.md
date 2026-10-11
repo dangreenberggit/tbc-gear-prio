@@ -1,4 +1,4 @@
-Status: resolved
+Status: closed
 Type: task
 Origin: Owner review of the running tab, 2026-08-27
 Blocks: none

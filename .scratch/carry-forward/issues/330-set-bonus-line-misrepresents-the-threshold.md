@@ -1,4 +1,4 @@
-Status: resolved
+Status: closed
 Type: bug
 Origin: owner report, 2026-08-28 (relates to tickets 313, 315)
 Blocks: none

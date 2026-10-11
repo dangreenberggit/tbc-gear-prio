@@ -1,4 +1,4 @@
-Status: resolved
+Status: closed
 Type: bug
 Origin: stage-gate `upgrades-ui-rebuild`, slice 4 execution, 2026-08-27
 Blocks: none
