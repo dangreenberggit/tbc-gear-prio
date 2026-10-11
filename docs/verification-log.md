@@ -2620,5 +2620,7 @@ gate.
 
 Tickets 254 and 311 read `Status: closed`, each quoting the owner's ruling and
 carrying a `Verified by:` line, and the scope doc's
-`## Awaiting owner sign-off` bucket has no rows. Not yet met: both read
-`Status: open` on 2026-10-11.
+`## Awaiting owner sign-off` bucket has no rows. Not yet met: 254 reads
+`Status: closed` on 2026-10-11 (the owner's approval and the SME read are in
+its closing note), but 311 still reads `Status: open` and keeps its row in the
+bucket.

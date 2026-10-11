@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: presentation (cutoff rule is an OR and reads as an inconsistency)
 Origin: `gate-sme` seat 1, 2026-08-21; handoff at
   `.scratch/handoffs/sme-rank-judgment-stage2-close-shortlists.md`
@@ -34,7 +34,7 @@ membership is inside the measurement error either way (ticket 236 territory).
 ## Acceptance
 
 - [x] A reader can tell from the report which cutoff arm admitted a boundary row.
-- [ ] A fresh SME read of a shortlist containing such a row does not flag it as an
+- [x] A fresh SME read of a shortlist containing such a row does not flag it as an
       inconsistency.
 
 ## 2026-08-29 — resolved (report + tab annotation; owner/SME sign-off pending)
@@ -64,3 +64,33 @@ second box is a fresh-SME judgment and stays for owner/SME sign-off. The tab
 marker's visual polish (placement, styling) is deferred to the styling wave per
 the stage-gate F7 disposition; its content (which arm) is the correctness fix
 landed here.
+
+## 2026-10-11 — closed (owner approval; fresh SME read clean)
+
+The owner approved the close in chat on 2026-10-11, asked "may I close ticket
+254?": "Ok yes I guess".
+
+Second acceptance box: on 2026-10-11 a reviewer that was not given this ticket
+read the live tab capture `.scratch/rank-reports/sme-254-tab-boundary.png`
+(ret, baseline 2082.7 DPS, fork `316326a95`) and the report
+`.scratch/rank-reports/sme-254-slamaltman.html`. The capture shows Midnight
+Chestguard +3.3 and Softstep Boots of Tracking +3.2 marked "by % rule" above
+the line and Helm of the Illidari Shatterer +2.9 first below it. The reviewer
+found no inconsistency at the shortlist boundary; verdict trust-with-caveats.
+
+Caveat: while looking up the cutoff rule, the reviewer read a code comment in
+the fork's `cutoff.ts` that names ticket 254. It opened no ticket, but the read
+was not fully blind to this ticket's subject.
+
+Follow-ups: 615–618, filed in `fbb66956` from the same SME reads.
+
+Verified by:
+- `.scratch/rank-reports/sme-254-tab-boundary.png` and
+  `.scratch/rank-reports/sme-254-slamaltman.html` (gitignored; the SME inputs)
+- `tbc-new-fork@316326a95` (the fork commit the capture ran on)
+- On the committed fixture, the two percentage-admitted rows and the first row
+  below the cutoff:
+  `python -c "import json;r=json.load(open('data/tab-fixtures/ret-p3-p2.json'))['ranking'];c=r['cutoff'];it=r['items'];print(c,round(r['baseline']['dps'],1));[print('pct-arm',i['rank'],i['name'],round(i['deltaDps'],2)) for i in it if not i['belowCutoff'] and i['deltaDps']<c['absDps']];b=next(i for i in it if i['belowCutoff']);print('first below',b['name'],round(b['deltaDps'],2))"`
+  → `{'absDps': 3.4, 'pct': 0.15} 2082.7`, `pct-arm 17 Midnight Chestguard 3.3`,
+  `pct-arm 18 Softstep Boots of Tracking 3.24`,
+  `first below Helm of the Illidari Shatterer 2.91`.
