@@ -44,8 +44,8 @@ Gate A violation, a review (`plan-review.md`) with findings marked
 `Where: decomposition`, or the user's ruling on a deferral. Start from
 `plan.md`. Keep it, defer chunks, or bring a deferred part back, only as
 far as the reason requires; on a review, also address its other
-findings as in a revision round. Rewrite `plan.md` unless you keep it
-as it is. When you defer or bring back a chunk or part, also write
+findings as in a revision round. Change `plan.md` as § When you write
+files here says, unless you keep it as it is. When you defer or bring back a chunk or part, also write
 `decomposition.md` (with `DECISION: partial` when none exists) and the
 ticket drafts. A part you bring back moves from the Deferred table to
 the Parts table, and its `ticket.md` is deleted. When a part you bring
@@ -83,10 +83,13 @@ stage learned that its planner needs.
 This section applies whenever this document has you write files; on
 one-plan it does not apply. Write only the files this document assigns
 you, each once per spawn or per message you answer, as your last
-action. List under "Open questions" only what the user must answer;
-decide every other conflict yourself. When you receive the user's
-answers, decide every question still open yourself, rewrite your files
-whole, and return a new digest with no Open questions. Your final
+action. Decide every change first. A new file is one `Write`. To change
+an existing file, make all its targeted `Edit` calls in one message, or
+one `Write` of the whole file when most of it changes. List under "Open
+questions" only what the user must answer; decide every other conflict
+yourself. When you receive the user's answers, decide every question
+still open yourself, change your files the same way, and return a new
+digest with no Open questions. Your final
 message is a digest of at most 40 lines. As the first planner of a
 split, its first line is the `DECISION:` line; in every other case it
 starts with the plan file's line count and its number of execution
