@@ -11,10 +11,13 @@ because that would need updating every time a tool changes.
 
 ## Branch model
 
-- **`main`** — gated state. Receives a merge only when a PLAN.md §14 phase
-  gate is fully checked off in [`docs/verification-log.md`](verification-log.md),
-  tagged `phase-1`, `phase-2`, etc. Direct commits are refused by
-  `.githooks/pre-commit`.
+- **`main`** — gated state. Receives a merge only when a PLAN.md §14 gate
+  (phase or Stage 3T) is fully checked off in
+  [`docs/verification-log.md`](verification-log.md), tagged `phase-1`,
+  `phase-2`, etc., or `tab-1` for Stage 3T. Direct commits are refused by
+  `.githooks/pre-commit`. The gate rule itself is a convention that a reader
+  checks, not a hook: no hook reads PLAN.md or the verification log
+  (`grep -c 'PLAN.md\|verification-log' .githooks/pre-commit` → 0).
 - **`dev`** — integration branch. Takes direct commits for small workflow/doc
   changes; feature work branches off it.
 - **`feat/<slug>`** (or `phase-N/<slug>` for PLAN.md phase work) — one
@@ -60,7 +63,8 @@ because that would need updating every time a tool changes.
    `--ack-open-blockers` (or close / re-block them first). Check without
    merging: `pnpm merge-to-dev --check-only` (or `pnpm merge-ready`).
 
-6. When a phase gate closes, merge `dev` → `main` and tag it.
+6. When a gate (phase or Stage 3T) closes, merge `dev` → `main` and tag it
+   (`phase-N`, or `tab-1` for Stage 3T).
 
 ### Parallel fan-out (optional)
 
