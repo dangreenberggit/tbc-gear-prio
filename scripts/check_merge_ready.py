@@ -15,6 +15,10 @@ Phase-N branches: open tickets with `Blocks: phase-N` are listed. Merging
 requires an explicit `--ack-open-blockers` (conscious opt-in), not a fake
 "path mentioned in the review" check. Fix or re-block the ticket for real.
 
+Every branch: a carry-forward ticket that this branch flips to `closed` or
+`resolved` must have a `Verified by:` line after its Status line, or the
+check fails (docs/agents/issue-tracker.md, "Closing a ticket").
+
 Every branch: open tickets that name a source file this branch actually
 changed are listed as "possibly relevant". This is the answer to tickets
 piling up beside a merge instead of being addressed in it. `Blocks: phase-N`
@@ -96,6 +100,15 @@ STATUS_RE = re.compile(r"(?im)^\s*\*{0,2}Status:\*{0,2}\s*(\S+)")
 # merge-veto power lives in `Blocks:`, not in the status word.
 OPEN_STATUSES = ("open", "claimed", "blocked")
 KNOWN_STATUSES = ("open", "claimed", "blocked", "closed", "resolved", "wontfix")
+# A ticket flipped to one of these on a branch must say how the close was
+# checked (docs/agents/issue-tracker.md, "Closing a ticket"). `wontfix` is
+# left out: it records a decision not to act, which has nothing to verify.
+CLOSED_STATUSES = ("closed", "resolved")
+# The value may sit on the line itself or below it -- tickets 409 and 425 put
+# a command block, after a blank line, under a bare `Verified by:`. A label
+# followed only by blank lines, a heading or the end of the file names no
+# evidence, so it does not count.
+VERIFIED_BY_RE = re.compile(r"(?im)^[ \t]*\*{0,2}Verified by:\*{0,2}\s*[^\s#*]")
 
 # The whole accepted disposition vocabulary. Three words, and there is no
 # fourth: a Disposition row disposes of a *finding* -- fixed it, ticketed it,
@@ -325,6 +338,24 @@ def read_status(path: Path | None = None, path_text: str | None = None) -> str |
     return m.group(1).lower().strip("*_`") if m else None
 
 
+def closed_without_verification(old_text: str | None, new_text: str) -> bool:
+    """True when a ticket flips to closed/resolved with no `Verified by:` line
+    after its Status line. Pure -- no git, no IO.
+
+    `old_text` is the ticket at the merge base, or None when the branch adds
+    it. Only the flip is judged: a ticket already closed at the base predates
+    the rule, and failing every branch over it would make the gate noise.
+    """
+    new_status = read_status(path_text=new_text)
+    if new_status not in CLOSED_STATUSES:
+        return False
+    if old_text is not None and read_status(path_text=old_text) in CLOSED_STATUSES:
+        return False
+    status_m = STATUS_RE.search(new_text)
+    assert status_m is not None  # new_status was read from this match
+    return not VERIFIED_BY_RE.search(new_text, status_m.end())
+
+
 def unparseable_status_tickets() -> list[tuple[Path, str]]:
     """Tickets whose status cannot be read, or reads as something unknown.
 
@@ -507,6 +538,66 @@ def changed_files_vs_integration(
     return {ln.strip() for ln in diff.stdout.splitlines() if ln.strip()}, None
 
 
+def tickets_closed_without_verification(branch: str) -> tuple[list[str], str | None]:
+    """Carry-forward tickets this branch flips to closed/resolved with no
+    `Verified by:` line. Returns (repo-relative paths, reason not checked).
+
+    The new side is the working tree, as every other ticket scan here reads
+    it, so an uncommitted or untracked ticket counts: `--check-only` should
+    see what the author is about to commit. The old side is the merge base
+    with dev; a ticket absent there is new on this branch.
+    """
+    if not branch:
+        return [], "no current branch (detached HEAD?)"
+    if branch == INTEGRATION_BRANCH:
+        return [], f"already on {INTEGRATION_BRANCH}"
+    try:
+        base = subprocess.run(
+            ["git", "merge-base", INTEGRATION_BRANCH, branch],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+        )
+    except OSError as exc:
+        return [], f"could not run git: {exc}"
+    if base.returncode != 0 or not base.stdout.strip():
+        return [], f"no merge base between {INTEGRATION_BRANCH} and {branch}"
+    base_sha = base.stdout.strip()
+    carry_rel = CARRY.relative_to(ROOT).as_posix()
+
+    names: set[str] = set()
+    for argv in (
+        ["git", "diff", "--name-only", base_sha, "--", carry_rel],
+        ["git", "ls-files", "--others", "--exclude-standard", "--", carry_rel],
+    ):
+        out = subprocess.run(argv, cwd=ROOT, capture_output=True, text=True)
+        if out.returncode != 0:
+            return [], f"{' '.join(argv[:2])} failed: {out.stderr.strip()}"
+        names.update(ln.strip() for ln in out.stdout.splitlines() if ln.strip())
+
+    flagged = []
+    for rel in sorted(names):
+        # Same set iter_issue_files() scans: top-level .md files only.
+        if not rel.endswith(".md") or Path(rel).parent.as_posix() != carry_rel:
+            continue
+        path = ROOT / rel
+        if not path.is_file():
+            continue  # deleted on the branch
+        old = subprocess.run(
+            ["git", "show", f"{base_sha}:{rel}"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+        )
+        old_text = old.stdout if old.returncode == 0 else None
+        new_text = path.read_text(encoding="utf-8", errors="replace")
+        if closed_without_verification(old_text, new_text):
+            flagged.append(rel)
+    return flagged, None
+
+
 def relevant_open_tickets(
     changed_files: set[str],
 ) -> list[tuple[Path, str, list[str]]]:
@@ -660,6 +751,20 @@ def check(
             rel = path.relative_to(ROOT).as_posix()
             print(f"  - {rel} — {why}")
             errors.append(f"{rel}: {why} (a ticket the gate cannot read cannot block a merge)")
+
+    closed_bare, why_not_closed = tickets_closed_without_verification(branch)
+    if why_not_closed:
+        print(f"\nticket-closing check skipped: {why_not_closed}")
+    elif closed_bare:
+        print("\ntickets closed on this branch with no Verified by: line:")
+        for rel in closed_bare:
+            print(f"  - {rel}")
+            errors.append(
+                f"{rel}: Status flipped to closed/resolved with no `Verified by:` "
+                f"line after it (docs/agents/issue-tracker.md)"
+            )
+    else:
+        print("\nno ticket closed on this branch without a Verified by: line")
 
     phase_m = PHASE_BRANCH_RE.match(branch)
     if phase_m:
@@ -1194,7 +1299,55 @@ def check_duplicate_unparsed_lines_get_distinct_numbers() -> list[str]:
     return [] if lines == [5, 7] else [f"duplicate unparsed: lines {lines}, want [5, 7]"]
 
 
+def check_closing_without_verified_by_is_flagged() -> list[str]:
+    """A ticket flipped to closed on the branch needs a `Verified by:` line
+    after its Status line (docs/agents/issue-tracker.md)."""
+    old = "Status: open\nType: bug\n\n# t\n"
+    bare = "Status: closed\nType: bug\n\n# t\n"
+    verified = "Status: closed\nVerified by: `git log -1 abc1234`\nType: bug\n\n# t\n"
+    problems = []
+    if not closed_without_verification(old, bare):
+        problems.append("open -> closed with no Verified by: line must be flagged")
+    if closed_without_verification(old, verified):
+        problems.append("open -> closed with a Verified by: line must pass")
+    return problems
+
+
+def check_closing_rule_edges() -> list[str]:
+    """Which flips count, and what counts as a `Verified by:` line."""
+    open_t = "Status: open\n\n# t\n"
+    cases = [
+        # (old, new, want flagged, label)
+        (None, "Status: closed\n\n# t\n", True, "a ticket added closed"),
+        (open_t, "Status: resolved\n\n# t\n", True, "open -> resolved"),
+        (open_t, "Status: wontfix\n\n# t\n", False, "open -> wontfix"),
+        ("Status: closed\n\n# t\n", "Status: closed\n\n# t\nedit\n", False,
+         "a ticket already closed at the base"),
+        (open_t, "Verified by: x\nStatus: closed\n\n# t\n", True,
+         "Verified by: above the Status line"),
+        (open_t, "Status: closed\n\n# t\n\nVerified by:\n", True,
+         "an empty Verified by: at the end of the file"),
+        (open_t, "Status: closed\nVerified by:   \n\n# t\n", True,
+         "a Verified by: line holding only spaces, then a blank line"),
+        (open_t, "Status: closed\n\n## Closed\n\nVerified by:\n`pnpm verify` -> 0\n",
+         False, "a Verified by: whose value is on the next line"),
+        (open_t, "Status: closed\n\nVerified by:\n\n```\nls x\n```\n", False,
+         "a Verified by: with a blank line before its code block (ticket 409)"),
+        (open_t, "**Status:** closed\n**Verified by:** `abc1234`\n", False,
+         "the bold form"),
+        (open_t, "**Status:** closed\n**Verified by:**\n\n# t\n", True,
+         "an empty bold Verified by:"),
+    ]
+    problems = []
+    for old, new, want, label in cases:
+        if closed_without_verification(old, new) != want:
+            problems.append(f"{label}: flagged should be {want}")
+    return problems
+
+
 CHECKS = (
+    check_closing_without_verified_by_is_flagged,
+    check_closing_rule_edges,
     check_extracts_common_paths,
     check_extracts_all_source_extensions,
     check_ignores_prose_and_bare_filenames,

@@ -63,6 +63,21 @@ Blocked by: none
   sizes it. Write it when you file the ticket; a review that defers a finding
   into a component that is not built yet must fill it in.
 
+#### Closing a ticket
+
+A `Status: closed` or `Status: resolved` line is followed, later in the file,
+by a `Verified by:` line that names the evidence for the close: a command a
+reader can re-run, `<repo>@<sha>` (for example `tbc-gear-prio@592afc2c` or
+`tbc-new-fork@f17b77db7`), or a review file under `docs/reviews/`. The value
+goes on the same line or below it; a bare label with nothing under it does
+not count. Put it directly under the header lines or in the closing note.
+
+`scripts/check_merge_ready.py` enforces this for every ticket the branch flips
+to `closed` or `resolved`, including a ticket the branch adds already closed:
+`pnpm merge-ready` and `pnpm merge-to-dev` fail on one that lacks the line. A
+ticket that was already closed at the merge base with `dev` is not checked.
+`wontfix` needs no line, because it records a decision not to act.
+
 The review’s Disposition table **links** tickets for `defer` rows; it does
 not replace them. List open ones anytime: `pnpm issues:open`.
 

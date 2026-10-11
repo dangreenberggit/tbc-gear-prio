@@ -3,6 +3,11 @@ Type: enhancement
 Origin: pre-merge review round 5, Adversarial finding A1, 2026-08-28
 Blocks: none
 Blocked by: none
+Verified by: tbc-gear-prio@43f7a8c6 (merge of `feat/layout-gate-merge-to-dev`
+into `dev`, 2026-08-31; it contains the round-2 fixes, tbc-gear-prio@592afc2c);
+review `docs/reviews/feat-layout-gate-merge-to-dev.md`. Still wired on `dev`
+2026-10-11: `grep -n 'check_layout_gate' scripts/merge_to_dev.py` → `:68`
+(import) and the call in `main()`.
 
 ## Investigated 2026-08-30 (bucket-2 pass) — the constraint decides against CI wiring; left open for an owner placement ruling
 
