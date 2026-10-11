@@ -2576,3 +2576,49 @@ because with `forms.go:52` unchanged a dagger candidate rewritten to 29453 loses
 a paw bonus blunt candidates keep. The `disclosure.ts` note that over-asserted
 "deltas survive" is corrected in both engine copies regardless, with a test that
 pins the new wording.
+
+## Stage 3T — Upgrades tab (DPS specs)
+
+The six boxes of PLAN.md §14 Stage 3T, opened 2026-10-11 with none met. Each
+box below names the check from PLAN.md. When a box is met, mark it ☑ here and
+record what was run, on which commit, and what came back. When every box is ☑,
+`dev` may merge to `main` with the tag `tab-1` (`docs/workflow.md` § Branch
+model).
+
+### ☐ 1 — the scope doc is current
+
+The MISSING and STALE loops in `docs/upgrades-tab-scope.md` § Maintenance
+print nothing. Not yet recorded under this gate.
+
+### ☐ 2 — no tab-blocking ticket is open
+
+`sed -n '/^## Tab-blocking/,/^## /p' docs/upgrades-tab-scope.md | grep -c '^| [0-9]'`
+→ 0. On 2026-10-11 (`dev` at `64443dc4`) it printed 14.
+
+### ☐ 3 — a web run completes on the DPS-spec fixtures
+
+For each DPS spec with a committed golden under `data/desktop-gate/` (today
+only ret, `golden-ret-p4-cap40.json`): serve `vendor/tbc-new-fork/dist` with
+`http-server` and run `node scripts/tab-harness/run-tab-cdp.mjs` against it, as
+PLAN.md gives the command. Record the readback's `runner` and `rowCount` here;
+the readback file under `.scratch/stage-3t/` is gitignored. Not yet run.
+
+### ☐ 4 — the desktop transport passes on the shipped fork commit
+
+`corepack pnpm desktop-gate:check; echo rc=$?` → 0, with the fork's HEAD equal
+to the `commit` in `data/wowsims-fork.lock.json`. Not yet recorded under this
+gate.
+
+### ☐ 5 — both pins sit on upstream `master`
+
+The engine lock's `commit` and the fork lock's `branchedFrom` are each a
+`master` commit at or after `3163bcfaf791ed9818463e07fa6ba438c0099d6e`, and
+`python scripts/sync_wowsims.py --check` exits 0. Not yet recorded under this
+gate.
+
+### ☐ 6 — owner sign-off for the Awaiting bucket
+
+Tickets 254 and 311 read `Status: closed`, each quoting the owner's ruling and
+carrying a `Verified by:` line, and the scope doc's
+`## Awaiting owner sign-off` bucket has no rows. Not yet met: both read
+`Status: open` on 2026-10-11.
