@@ -16,11 +16,16 @@
  * from the run it is checking: that asserts a computation equals itself.
  * So the truth here is external on both counts:
  *
- *   - **It came from the real binary, not a replay.**
- *     `scripts/record_synthetic_fixtures.mjs` ran `rankUpgrades` against the
- *     pinned wowsimcli and wrote `aboveCutoffCount` and
- *     `aboveCutoffItemIds` into the committed fixture. Nothing in this file
- *     can recompute those; it can only agree or disagree with them.
+ *   - **The observations came from the real binary; the sets were
+ *     re-judged under ADR-0037.** `scripts/record_synthetic_fixtures.mjs`
+ *     ran `rankUpgrades` against the wowsimcli pinned at the time and wrote
+ *     each candidate's recorded observations, `aboveCutoffCount` and
+ *     `aboveCutoffItemIds` into the committed fixture. When ADR-0037 made
+ *     the cutoff one flat 3 DPS bar, commit b12d8ff3 re-judged the two
+ *     above-cutoff fields from those recorded observations under the new
+ *     bar, because the fixture's binary is no longer the pinned one; the
+ *     observations were not changed. Nothing in this file can recompute
+ *     those fields; it can only agree or disagree with them.
  *
  *   - **The replay cannot screen even if someone reintroduced screening.**
  *     `RecordedSimRunner` throws on any (seed, iterations) pair absent from
