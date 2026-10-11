@@ -228,6 +228,6 @@ numbers come out wrong.
 1. Do the work on `phase-N/<slug>` branches off `dev`.
 2. Check off PLAN.md §14's gate items as they're actually verified — with
    evidence, in `docs/verification-log.md`, not just checked.
-3. Once every item for that phase is checked, merge `dev` → `main`,
-   `git tag phase-N`.
+3. Once every item for that gate is checked, merge `dev` → `main` and tag
+   it: `git tag phase-N` (`tab-1` for Stage 3T).
 4. The next phase doesn't start until that tag exists.
