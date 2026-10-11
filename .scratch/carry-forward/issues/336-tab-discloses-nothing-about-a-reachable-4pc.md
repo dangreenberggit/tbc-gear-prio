@@ -47,9 +47,12 @@ any packages[]-driven rendering).
 `.scratch/plans/upgrades-tab-finish-line.md`).** The disclosure this ticket
 asks for renders only when the user ticks "Set potential". After a run the
 tab offers that view toggle (`offeredToggles`, `model/results_view.ts:93`),
-but it starts unticked: the store's view state starts from
-`NO_VIEW_TOGGLES` (`model/upgrades_store.ts:120`), which sets
-`withSetPotential: false` (`model/results_view.ts:80`), and the popover
+but it starts unticked unless the page restores a saved choice: the
+store's view state is `{ ...NO_VIEW_TOGGLES, ...restored.view }`
+(`model/upgrades_store.ts:120`), `NO_VIEW_TOGGLES` sets
+`withSetPotential: false` (`model/results_view.ts:80`), and the page saves
+the toggles with its settings (`model/upgrades_store.ts:51-54`), so a
+user who ticked it once sees it ticked on later visits. The popover
 adds the set-potential lines only when the toggle is on
 (`model/set_bonus_tip.ts:187`, `:197`). With the toggle ticked, the
 popover lists each reachable bonus with its partner pieces and DPS. The

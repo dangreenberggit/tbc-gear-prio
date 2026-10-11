@@ -195,6 +195,15 @@ step-6 owner questions (Q-blocking-list, Q-push, Q-later-items,
 Q-react-review), which include the 376 move and the 291/292/298
 placements, and the handoff-banner commit the plan puts first.
 
+Round 2 (focused check) passed all four checks and found three
+bookkeeping items, R2-1 to R2-3, fixed with the reviewer's suggested text.
+R2-1 corrects A1's fix: the toggle starts unticked only when the page has
+no saved choice, because the page saves the view toggles.
+
+Tickets: this branch filed 6 (603–608) and closed 19
+(`git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'
+| grep -c '^A'` → 6; the `Status:` count in the skill's step 3 → 19).
+
 ## Disposition
 
 | ID  | Axis         | Disposition | Ticket / note                                                                                                                                                                      |
@@ -228,3 +237,46 @@ placements, and the handoff-banner commit the plan puts first.
 | Q1  | Code quality | fixed       | `c11dca91`                                                                                                                                                                         |
 | Q2  | Code quality | fixed       | `c11dca91`                                                                                                                                                                         |
 | Q3  | Code quality | fixed       | `c11dca91`                                                                                                                                                                         |
+
+## Focused check (round 2)
+
+Fork range: none (`git diff --quiet dev...HEAD --
+data/wowsims-fork.lock.json` → 0). One fresh `general-task` agent on Opus,
+told it writes nothing, checked `d9222628..5320a823` plus `5fcea898`
+(review file only).
+
+1. **Conditions: pass.** `f9011f63` names its finding IDs in its body,
+   `c11dca91` is the Q1–Q3 pass, `5320a823` changes no word (`git diff
+--word-diff=porcelain c11dca91 5320a823 | grep -E '^[-+][^-+]'` → nothing),
+   `5fcea898` changes only this file. No path outside `.scratch/` and
+   `docs/` changed. The fork pin did not move.
+2. **Only what the findings ask: pass.** Every hunk maps to a finding; the
+   rest of the table diff is Prettier re-padding.
+3. **Each fix does what its finding asks: pass**, apart from R2-1 and R2-2.
+   The cited fork lines for A1, A3, A7, D1, D3, D4, D5 and D6 were re-read
+   at fork `316326a95` and match.
+4. **Touched checks pass.** Both Maintenance loops print nothing (156 open
+   tickets, 156 rows); `NEXT` is 609; one `608-*` file; `map.md` has its
+   line. `python scripts/check_merge_ready.py --review
+docs/reviews/feat-tab-scope-refresh.md --branch feat/tab-scope-refresh`
+   → "merge-ready: ok" (rc 0).
+
+Findings:
+
+- **R2-1 (bookkeeping).** A1's fix said the toggle starts unticked. The
+  store is `{ ...NO_VIEW_TOGGLES, ...restored.view }`
+  (`model/upgrades_store.ts:120`) and the page saves the toggles with its
+  settings (`:51-54`), so it starts unticked only with no saved choice.
+- **R2-2 (bookkeeping).** Ticket 608's title and first paragraph stated
+  the defect as true today, while its body says that is untested.
+- **R2-3 (bookkeeping).** Rows 291, 292, 298 and judgment call 8 cite
+  "Q-blocking-list", which only the gitignored plan defines, without
+  saying so.
+
+## Disposition (round 2)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                |
+| ---- | ------------- | ----------- | -------------------------------------------------------------------------------------------- |
+| R2-1 | Focused check | fixed       | 336 comment, row 336 and judgment call 3: "unticked unless the page restores a saved choice" |
+| R2-2 | Focused check | fixed       | 608 title says "may show"; first paragraph in the past tense, citing 536's clips             |
+| R2-3 | Focused check | fixed       | each citation now names step 6 of the gitignored plan                                        |

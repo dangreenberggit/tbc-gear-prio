@@ -6,13 +6,14 @@ Blocks: none
 Blocked by: none
 Related: 510 (closed; named this defect as "still open elsewhere"), 536 (closed; where it was first seen)
 
-# `pnpm tab-review`: captures after the first in a hovered `pane: false` entry show the nav bar
+# `pnpm tab-review`: captures after the first in a hovered `pane: false` entry may show the nav bar
 
-In a `pnpm tab-review` manifest entry with `pane: false` and a hover, every
-clip after `capture[0]` shows the tab's nav bar instead of its target, and
-`index.json` reports no error. So the capture is wrong and nothing says so.
-`docs/agents/known-traps.md`, "Before writing a `pnpm tab-review` manifest",
-records it from ticket 536's row clips (`*-1.png`).
+When ticket 536's row clips were taken (`*-1.png`), in a `pnpm tab-review`
+manifest entry with `pane: false` and a hover, every clip after
+`capture[0]` showed the tab's nav bar instead of its target, and
+`index.json` reported no error. So the capture was wrong and nothing said
+so. `docs/agents/known-traps.md`, "Before writing a `pnpm tab-review`
+manifest", records it.
 
 The trap entry blames the scroll branch of `captureClip`, which offset the
 clip by `window.scrollY`. That code is gone: `grep -n 'captureClip\|scrollY'
