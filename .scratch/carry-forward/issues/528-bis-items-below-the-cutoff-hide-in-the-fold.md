@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Tab-blocking
 Type: feature (owner ruled option A on 2026-10-11)
 Origin: owner, 2026-09-30, in chat (relayed verbatim by the orchestrating session), about the third Cherryboom enhancement run
@@ -174,7 +174,7 @@ it in this sim. The tab already says so by where it puts the row.
 
 - [x] The owner rules. Done 2026-10-11: option A (see the note at the
       bottom of this file).
-- [ ] A BiS-list row below the cutoff appears in the main table, sorted by
+- [x] A BiS-list row below the cutoff appears in the main table, sorted by
       its gain, marked as not an upgrade; slot counts and the ThatsMyBis
       export count only rows that meet the cutoff; unit tests cover both.
 
@@ -214,3 +214,21 @@ Implementation runs later, together with ticket 614 in one fork branch,
 after the flat-cutoff work (ticket 615, branch `feat/flat-cutoff`) is merged.
 Both tickets change the same fork file,
 `ui/features/upgrades/model/results_view.ts`.
+
+## 2026-10-11 — closed
+
+Verified by: tbc-new-fork@72de95a28 ("Show BiS rows below the cutoff in the
+main table (528)"), inside fork `176268e7c`, which
+`data/wowsims-fork.lock.json` names on `feat/bis-rows`; review
+`docs/reviews/feat-bis-rows.md`. The tests are the four cases in the
+"BiS-list rows below the cutoff" block of
+`ui/features/upgrades/model/results_view.test.ts`: main table in gain order
+marked as not upgrades, left out of the slot counts and the export's
+shortlist, owned rows kept out, and the same rule under BiS only and Set
+potential.
+
+Re-run from the pair's fork folder, `vendor/tbc-new-fork`:
+`node node_modules/vitest/vitest.mjs run ui/features/upgrades/model/results_view.test.ts ui/features/upgrades/components/ResultsPanes/ResultsPanes.test.tsx`
+(2 files, 39 tests passed on 2026-10-11 at fork `176268e7c`). The root
+`pnpm verify` does not run these tests: `vitest.config.ts` excludes
+`vendor/`.
