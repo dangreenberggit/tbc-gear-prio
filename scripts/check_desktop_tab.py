@@ -34,7 +34,8 @@ Modes:
   (default)         build (make wowsimtbc) unless --no-build, start the packaged
                     binary on :3333, run the byte check + the harness at
                     --candidates (default 40), assert (a)-(f) and (h). --full uncaps and
-                    skips (h) (no golden for an uncapped run).
+                    skips (h) (no golden for an uncapped run). A byte mismatch
+                    fails the gate.
   --serve-args S    extra flags for the server (e.g. "--usefs=true --wasm=true"
                     for the N1 negative).
   --update-golden   after (a)-(f) pass, rewrite the committed golden readback for
@@ -564,6 +565,12 @@ def bytes_check(origin: str) -> int:
     return 0
 
 
+def gate_passed(bytes_rc: int, gate_ok: bool, golden_rc: int) -> bool:
+    # A mismatch means the harness ran a bundle that is not the committed
+    # dist, so (a)-(h) passing says nothing about the fork commit (ticket 627).
+    return bytes_rc == 0 and gate_ok and golden_rc == 0
+
+
 # --- assertions -------------------------------------------------------------
 
 def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool, dict]:
@@ -700,7 +707,10 @@ def main() -> int:
         if golden_rc == 2:
             print(f"{CHECK_NAME}: could not run (h).")
             return 2
-        overall = gate_ok and golden_rc == 0
+        if brc == 1:
+            print("  (bytes) FAIL: the served bundle differs from dist/tbc; "
+                  "the mismatch list is printed above.")
+        overall = gate_passed(brc, gate_ok, golden_rc)
         print(f"{CHECK_NAME}: {'PASS' if overall else 'FAIL'}.")
         return 0 if overall else 1
     finally:

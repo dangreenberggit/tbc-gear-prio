@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Stage 3T box 4 (Tab-adjacent)
 Type: task
 Origin: docs/reviews/docs-stage-3t-boxes.md (finding R8)
@@ -34,3 +34,18 @@ Re-run to see the code path:
 Done when: the gate fails (rc 1) on a byte mismatch, or the script and PLAN.md
 say in one sentence why a mismatch is information only, and a test covers
 whichever is chosen.
+
+## Comments
+
+2026-10-12 — closed. The byte check now feeds the verdict:
+`gate_passed()` in `scripts/check_desktop_tab.py` requires the byte check's
+rc to be 0 as well as (a)-(f) and (h), and a mismatch prints
+`(bytes) FAIL: the served bundle differs from dist/tbc` before
+`desktop-gate: FAIL.` (rc 1). `scripts/check_desktop_tab_verdict.py`
+(`pnpm desktop-gate:unit:check`, in `pnpm verify`) covers the verdict, and
+fails on the old logic for the mismatch case. A full gate run on fork
+176268e7c after the change printed `140 files compared, 0 mismatches` and
+`desktop-gate: PASS.` with rc 0.
+
+Verified by: `python scripts/check_desktop_tab_verdict.py` and
+`corepack pnpm desktop-gate:check; echo rc=$?` (rc 0, PASS on fork 176268e7c)
