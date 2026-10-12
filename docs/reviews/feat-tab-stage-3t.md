@@ -231,6 +231,10 @@ R1 and R2 are findings other than bookkeeping, so the review stops here
 
 ## Summary
 
+Later on 2026-10-11, R1–R3 were fixed on this branch and ticket 624 closed;
+see "Ticket 624 fixed before merge" below. The rest of this summary is as
+written at round 2.
+
 **The review stopped at round 2, and the merge is blocked.** Round 2's
 four checks passed, but it found that the A1 and A2 fixes are incomplete:
 the `Verified by:` check still passes an empty label above some header
@@ -251,12 +255,72 @@ Ticket counts, from the commands in the skill's step 3: filed 9 (614–621
 and 624), closed 5 (104, 254, 311 and 359 closed; 305 wontfix). The branch
 filed more tickets than it closed.
 
+## Ticket 624 fixed before merge (2026-10-11)
+
+The session chose to fix ticket 624 (R1–R3) on this branch before the
+merge. The owner's instruction on process work is to fail loud and not
+loop; the fix is small, and without it the check passes tickets it should
+stop. There was no third review round.
+
+What changed: a `Verified by:` value now counts only when it holds one of
+the three forms `docs/agents/issue-tracker.md` names: a command in
+backticks or a code block, `<repo>@<sha>`, or a `docs/reviews/` file. A
+command that is only a placeholder word or punctuation does not count. The
+value is the rest of the label's line and the lines below it up to a blank
+line or a heading, or, when the label's line is empty, the next paragraph
+or code block. Lines before the file's first blank line are headers and
+never part of a value, so the key list is gone. Commits: `8167d62e`
+(header lines by position), `a15a4eb1` (the evidence rule and the
+issue-tracker.md wording), `320b4c69` (624 closed).
+
+Probe results, `closed_without_verification` at `40f42c26` → now, each a
+case in `check_closing_rule_edges` (`python scripts/check_merge_ready.py
+--self-test` → 36 checks ok):
+
+- R1, an empty label above `Severity:`, `Branch:`, `Progress:` or
+  `Note:`: passed → flagged (all four).
+- R2, an empty code block, a block holding only a blank line, a block
+  holding only `TODO`, `---`, an em dash, `(none)`, `` `(none)` ``:
+  passed → flagged (all seven).
+- R3, an empty label with the value on the next line starting
+  `#409's command`, `Verified:` or `Resolution:`: flagged → passes (all
+  three).
+- Rule change: prose with none of the three forms below a label (for
+  example "The tab rendered it.") passed → flagged.
+
+Closed-ticket scan: every `closed` or `resolved` ticket on `dev`
+(`64443dc4`) and on this branch, judged as if flipped from open, before
+and after the change. Newly passing: none. Newly flagged: ticket 315 only,
+on both refs. Its one `Verified by:` value is an owner observation in
+prose ("owner observation on the live tab, 2026-09-18"). 315 was closed
+before the rule existed, so the gate does not judge it.
+
+Gate runs at `a15a4eb1`, Node v22.17.1, with an untracked throwaway ticket
+`.scratch/carry-forward/issues/9999-closing-rule-probe.md` (deleted after
+the second run), command
+`corepack pnpm -s merge-ready --review docs/reviews/feat-tab-stage-3t.md`:
+
+1. An empty `Verified by:` directly above `Severity: major` → rc 1:
+
+   ```
+   FAIL: .scratch/carry-forward/issues/9999-closing-rule-probe.md: Status flipped to closed/resolved with no `Verified by:` line after it naming a command in backticks, <repo>@<sha> or a docs/reviews/ file (docs/agents/issue-tracker.md)
+   ```
+
+2. The label holds
+   ``Verified by: `python scripts/check_merge_ready.py --self-test` (rc 0)``
+   → rc 0:
+
+   ```
+   no ticket closed on this branch without Verified by: evidence
+   merge-ready: ok
+   ```
+
 ## Disposition
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                 |
 | --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | fixed       | `fa0900ff`, in part: round 2's R1 found keys it misses (ticket 624)                                                                                                           |
-| A2  | Adversarial | fixed       | `fa0900ff`, in part: round 2's R2 (ticket 624)                                                                                                                                |
+| A1  | Adversarial | fixed       | `fa0900ff` in part; completed by R1's fix (`8167d62e`, ticket 624)                                                                                                            |
+| A2  | Adversarial | fixed       | `fa0900ff` in part; completed by R2's fix (`a15a4eb1`, ticket 624)                                                                                                            |
 | A3  | Adversarial | fixed       | `fa0900ff`: `--branch X` from another checkout reads X's tip                                                                                                                  |
 | A4  | Adversarial | fixed       | `3b18b3a2`: 359 and 104 evidence text corrected                                                                                                                               |
 | A5  | Adversarial | fixed       | `fa0900ff`: `check_closing_rule_reads_git` self-test on a throwaway repo                                                                                                      |
@@ -277,3 +341,6 @@ filed more tickets than it closed.
 | P3  | Spec        | fixed       | same defect as S1, `fa0900ff`                                                                                                                                                 |
 | P4  | Spec        | wontfix     | the plan file is gitignored and owned by the coordinating session; reported to it to update                                                                                   |
 | P5  | Spec        | wontfix     | same file as P4; reported to the coordinator to list under "Unlisted work"                                                                                                    |
+| R1  | Round 2     | fixed       | `8167d62e`: header lines found by position, not a key list; ticket 624 closed in `320b4c69`                                                                                   |
+| R2  | Round 2     | fixed       | `a15a4eb1`: a value must name a command, `<repo>@<sha>` or a `docs/reviews/` file; ticket 624                                                                                 |
+| R3  | Round 2     | fixed       | `8167d62e`: heading test is `^#{1,6}` plus a space; a `Key:` line below the header block can be a value; ticket 624                                                           |
