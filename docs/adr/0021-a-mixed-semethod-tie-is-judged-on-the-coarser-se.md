@@ -1,6 +1,6 @@
 # ADR-0021 — A mixed-`seMethod` tie is judged on the coarser SE, and the cutoff stays independent-scaled
 
-**Status:** accepted
+**Status:** accepted; amended 2026-10-11 by [ADR-0037](0037-the-cutoff-is-one-flat-3-dps-bar.md) (the cutoff is a flat 3 DPS bar, no longer `max(3.0, 2 × mean reported SE)`)
 **Date:** 2026-08-08
 **Relates to:** PLAN.md §10 (statistical methodology), ADR-0020 (the cutoff is absolute)
 **Tickets:** `.scratch/phase-2/issues/08-tie-groups-mix-two-se-scales.md`

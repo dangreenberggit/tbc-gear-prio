@@ -46,10 +46,10 @@ const BIN = join(
 const SWEEP = [100, 300, 1000, 3000, 5000];
 const SEED = 42;
 // F10 / plan §3.2: fixed cutoff for both specs for the go/no-go, not each
-// spec's own cutoffForSpec() value — feral's own cutoff is {absDps:3.6,
-// pct:0.15} (packages/core/src/cutoff.ts:27), different from the {3.4,0.15}
-// this plan specifies. Both numbers are reported in the output; the go/no-go
-// uses the plan's {3.4, 0.15} as instructed.
+// spec's own value under the per-spec rule that ADR-0037 replaced — feral's
+// own cutoff under that rule was {absDps:3.6, pct:0.15}, different from the
+// {3.4,0.15} this plan specifies. Both numbers are reported in the output;
+// the go/no-go uses the plan's {3.4, 0.15} as instructed.
 const CUTOFF = { absDps: 3.4, pct: 0.15 };
 
 function readJson(path) {

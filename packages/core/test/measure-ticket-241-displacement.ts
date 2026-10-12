@@ -88,7 +88,11 @@ import {
   FERAL_P3_SYNTHETIC_ROW,
   type PresetGearFile,
 } from "../src/fixtures/synthetic-offline.js";
-import { CUTOFF_FERAL } from "../src/cutoff.js";
+
+// The bar this measurement was taken against. ADR-0037 replaced it with a
+// flat 3 DPS bar; the old value stays here so the measurement re-runs as it
+// was recorded.
+const CUTOFF_FERAL = { absDps: 3.6, pct: 0.15 } as const;
 
 /**
  * Positions in an item's `stats` array in `data/items/index.json`, indexed by

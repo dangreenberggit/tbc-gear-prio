@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: measurement
 Origin: stage-gate feature upgrades-all-dps-specs, step 4, 2026-08-25
 Blocks: none
@@ -46,3 +46,14 @@ For each of the nine, follow the method ret and feral already used:
 
 Every `SpecId` in `CUTOFF_BY_SPEC` names a constant derived from its own
 spread, and no entry carries the `untested` comment.
+
+## Closed 2026-10-11: wontfix, superseded by ADR-0037
+
+The owner ruled on 2026-10-11 that the cutoff is one flat 3 DPS bar for
+every spec ("Just do 3 DPS then fuck it"; "It was more about simming noise
+anyway probably, the methods of getting rid of it were arbitrary"), recorded
+in `docs/adr/0037-the-cutoff-is-one-flat-3-dps-bar.md`. No spec has a
+measured bar any more, so a per-spec spread has nothing to feed:
+`CUTOFF_BY_SPEC`, `CUTOFF_FERAL` and the `untested` comments are gone
+(tbc-gear-prio branch `feat/flat-cutoff`, fork commit be3d703a1). Sim noise
+itself stays with ticket 105.

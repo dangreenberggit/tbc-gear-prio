@@ -12,6 +12,16 @@ stage-gate plans `round-2/plan.md` and `round-2b/plan.md` (under
 `.scratch/stage-gate/upgrades-tab-closeout/`). They are copied here so that
 a fresh clone can check them.
 
+These derivations were written under the gate before
+[ADR-0037](adr/0037-the-cutoff-is-one-flat-3-dps-bar.md), so where they
+give the feral gate as `max(√2 · 3.6, 2 · se) = 5.09`, the engine gate is
+now `max(√2 · 3, 2 · se)` ≈ 4.24 for every spec. The text below is not
+rewritten for the new gate. The fixture tests in
+`packages/core/test/fork-set-net.test.ts` pass at the new gate: on
+2026-10-11, with the fork at `c4696b09`,
+`corepack pnpm exec vitest run packages/core/test/fork-set-net.test.ts`
+reported 95 tests passed.
+
 The suite is fork-gated and CI skips it (`docs/agents/known-traps.md`). To
 run it locally with the fork clone present:
 

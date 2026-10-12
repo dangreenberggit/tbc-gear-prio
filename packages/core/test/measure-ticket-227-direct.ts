@@ -31,9 +31,18 @@ import {
   simDirect,
   type RowCapture,
 } from "./direct-sim-support.js";
-import { CUTOFF_FERAL, meetsCutoff } from "../src/cutoff.js";
 import { loadJson } from "./measure-support.js";
 import type { RankedItem } from "../src/rank.js";
+
+// The bar this measurement was taken against. ADR-0037 replaced it with a
+// flat 3 DPS bar; the old value stays here so the measurement re-runs as it
+// was recorded.
+const CUTOFF_FERAL = { absDps: 3.6, pct: 0.15 } as const;
+const meetsCutoff = (
+  deltaDps: number,
+  deltaPct: number,
+  cutoff: typeof CUTOFF_FERAL
+): boolean => deltaDps >= cutoff.absDps || deltaPct >= cutoff.pct;
 
 /** The ten ids ticket 227 lists, in the order the ticket's table gives them. */
 const HEALER_IDS = [

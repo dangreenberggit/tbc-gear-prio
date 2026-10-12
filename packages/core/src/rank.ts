@@ -27,7 +27,7 @@ import {
   statDeltaBetween,
   type CapState,
 } from "./caps.js";
-import { cutoffForSpec, meetsCutoff, type Cutoff } from "./cutoff.js";
+import { CUTOFF, meetsCutoff, type Cutoff } from "./cutoff.js";
 import { skeletonPresetIdFor } from "./spec-registry.js";
 import {
   buildStandingAssumptions,
@@ -583,7 +583,7 @@ export async function rankUpgrades(
   onProgress?: (p: Progress) => void
 ): Promise<Ranking | PartialRanking> {
   onProgress?.({ stage: "resolving" });
-  const cutoff = cutoffForSpec(input.spec);
+  const cutoff = CUTOFF;
   const fights = await deps.gear.findFights(input.character, input.spec);
   const maybeResolved = resolveFight(fights, input.fight);
   if (!maybeResolved) {
@@ -1072,7 +1072,7 @@ export async function rankUpgrades(
 
       const deltaPct =
         baselineDps === 0 ? 0 : (best.deltaDps / baselineDps) * 100;
-      const belowCutoff = !meetsCutoff(best.deltaDps, deltaPct, cutoff);
+      const belowCutoff = !meetsCutoff(best.deltaDps, cutoff);
       const item: RankedItem = {
         rank: null,
         itemId: entry.itemId,
@@ -1465,7 +1465,7 @@ export async function rankUpgrades(
       // Re-evaluated against the mean rather than left at the first seed's
       // verdict: a row whose replicated estimate crosses the cutoff must not
       // keep a `belowCutoff` computed from a number no longer reported.
-      item.belowCutoff = !meetsCutoff(item.deltaDps, item.deltaPct, cutoff);
+      item.belowCutoff = !meetsCutoff(item.deltaDps, cutoff);
     }
   }
 

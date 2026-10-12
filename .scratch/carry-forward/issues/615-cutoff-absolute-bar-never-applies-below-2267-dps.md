@@ -1,9 +1,9 @@
-Status: blocked
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent; owner ruling Q-cutoff-bar)
 Type: task
 Origin: SME reads of ticket 254 output (live tab capture .scratch/rank-reports/sme-254-tab-boundary.png on fork 316326a95; report .scratch/rank-reports/sme-254-slamaltman.html from .scratch/rank-reports/stage2-close-slamaltman.json), triaged 2026-10-11
 Blocks: none
-Blocked by: owner ruling Q-cutoff-bar (which bar decides a row's place)
+Blocked by: none
 Related: 225 (closed; measured this on feral without a ruling), 254
 
 # The 3.4 DPS cutoff never applies to ret below about 2267 DPS
@@ -62,8 +62,34 @@ of the two, or the OR as it is now with the outputs stating it.
 
 ## Acceptance
 
-- [ ] The owner's ruling is recorded in this ticket, with the date and the
+- [x] The owner's ruling is recorded in this ticket, with the date and the
       owner's words.
-- [ ] Then either `meetsCutoff` (core and fork twin) implements the ruling,
+- [x] Then either `meetsCutoff` (core and fork twin) implements the ruling,
       or every output (report lede, CLI header, tab tooltip) states the bar
       it actually applied, in DPS, for the run's baseline.
+
+## Ruling (Q-cutoff-bar), 2026-10-11
+
+Asked to choose between keeping "3.4 DPS or 0.15%, whichever is lower" and
+requiring at least 3.4 DPS, the owner replied "Just do 3 DPS then fuck it", and then
+"It was more about simming noise anyway probably, the methods of getting rid of it were arbitrary". Recorded in `docs/adr/0037-the-cutoff-is-one-flat-3-dps-bar.md`.
+
+## Closed 2026-10-11
+
+`meetsCutoff` (core `packages/core/src/cutoff.ts` and the fork twin
+`ui/features/upgrades/model/engine/cutoff.ts`) now reads only the DPS change
+against one bar, `CUTOFF = { absDps: 3 }`, for every spec. The percentage
+rule and feral's 3.6 bar are removed. The CLI header prints `cutoff=3 DPS`,
+the report lede "Cutoff 3 DPS.", and the tab's below-cutoff group "N item(s)
+below the 3 DPS cutoff". On the re-recorded `data/tab-fixtures/ret-p3-p2.json`
+(baseline 2082.71 DPS), Midnight Chestguard (+3.30) and Softstep Boots of
+Tracking (+3.24) stay above the cutoff, now by the 3 DPS bar; 18 rows are
+above it before and after.
+
+Verified by: tbc-gear-prio@b12d8ff3 (core), tbc-gear-prio@bacd1dae
+(`ENGINE_VERSION` 9), tbc-new-fork@be3d703a1 and tbc-new-fork@c4696b091 (tab),
+tbc-gear-prio@77f37c83 (re-pin), tbc-gear-prio@a6a3c516 (fixtures),
+tbc-gear-prio@9739b0d1 (desktop gate). Re-run:
+`npx vitest run packages/core/test/cutoff.test.ts` (4 pass), and
+`grep -c pct packages/core/src/cutoff.ts vendor/tbc-new-fork/ui/features/upgrades/model/engine/cutoff.ts`
+prints 0 for each file.

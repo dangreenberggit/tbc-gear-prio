@@ -50,7 +50,6 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { orderCandidatesByEp } from "../src/candidate-order.js";
-import { CUTOFF, CUTOFF_FERAL } from "../src/cutoff.js";
 import {
   FERAL_SYNTHETIC_FIGHT,
   FERAL_SYNTHETIC_REF,
@@ -77,6 +76,12 @@ import { MemoryStore } from "../src/seams/store.js";
 import { SIM_ORDER } from "../src/slots.js";
 import { epScore } from "../src/stats.js";
 import type { ContentPhase, SpecId } from "../src/types.js";
+
+// The bar this measurement was taken against. ADR-0037 replaced it with a
+// flat 3 DPS bar; the old value stays here so the measurement re-runs as it
+// was recorded.
+const CUTOFF = { absDps: 3.4, pct: 0.15 } as const;
+const CUTOFF_FERAL = { absDps: 3.6, pct: 0.15 } as const;
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 

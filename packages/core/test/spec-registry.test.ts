@@ -20,7 +20,6 @@ import { capProfileFor } from "../src/cap-profile.js";
 const SPEC_ENTRY_KEYS: ReadonlyArray<keyof SpecEntry> = [
   "capProfile",
   "className",
-  "cutoff",
   "preferredMetas",
   "sitePath",
   "treeIndex",

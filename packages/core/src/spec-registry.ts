@@ -56,7 +56,6 @@ import { Stat } from "./stats.js";
 // different modules.
 export { SPEC_IDS, type SpecId } from "./spec-ids.generated.js";
 import type { CapProfile } from "./cap-profile.js";
-import type { Cutoff } from "./cutoff.js";
 
 /**
  * ui/core/constants/mechanics.ts @ wowsims/tbc-new
@@ -91,30 +90,6 @@ export const PHYSICAL_HIT_CAP_PERCENT = 9;
  * and this table is per-spec.
  */
 export const SPELL_HIT_CAP_PERCENT = 16;
-
-/**
- * Cutoff derived from the Stage 1 five-seed spread experiment
- * (docs/five-seed-spread.json, PLAN.md §10): max(3.0, 2× mean reported SE 1.678).
- *
- * That 1.678 is an `independent` SE, and it stays one now that paired
- * replication ships — the bar is intentionally on the coarse scale rather than
- * an oversight (ADR-0021). The cutoff runs *before* replication and selects
- * which rows get replicated, so deriving it from paired SEs would be circular;
- * and it asks whether a delta is distinguishable from zero at the precision the
- * whole pool was ranked at, which is the independent one.
- */
-export const CUTOFF: Cutoff = { absDps: 3.4, pct: 0.15 };
-
-/**
- * Feral cutoff derived from its own five-seed spread
- * (docs/five-seed-spread-feral.json, issue #1 README step 0), following the
- * same method as ret's above: max(3.0, 2× mean reported SE 1.774) → 3.6.
- * Feral's rotation is noisier than ret's (mean reported SE 1.774 vs ret's
- * 1.678 at the same 5000 iterations, same fixture-derivation method), so
- * applying ret's 3.4 cutoff to feral would under-count noise as a real
- * upgrade. `CUTOFF` above is intentionally left unchanged; this is additive.
- */
-export const CUTOFF_FERAL: Cutoff = { absDps: 3.6, pct: 0.15 };
 
 /**
  * Stat EP cannot rank meta gems: their headline effects are not stats. Nine of
@@ -169,8 +144,6 @@ export type SpecEntry = {
   readonly sitePath: string;
   /** What the cap computation needs: which hit school, and its numbers. */
   readonly capProfile: CapProfile;
-  /** The noise floor below which a delta is indistinguishable from zero. */
-  readonly cutoff: Cutoff;
   /** Which meta gem to seat on a candidate, read from upstream's presets. */
   readonly preferredMetas: readonly number[];
 };
@@ -204,7 +177,6 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
         maxPoints: 2,
       },
     },
-    cutoff: CUTOFF,
     // Chaotic Skyfire Diamond — the caster crit meta.
     // ui/druid/balance/gear_sets/p5.gear.json, head 34403.
     preferredMetas: [34220],
@@ -224,7 +196,6 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
       ratingPerPercent: PHYSICAL_HIT_RATING_PER_HIT_PERCENT,
       trackExpertise: true,
     },
-    cutoff: CUTOFF_FERAL,
     preferredMetas: PREFERRED_META_IDS,
   },
 
@@ -261,7 +232,6 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
         maxPoints: 3,
       },
     },
-    cutoff: CUTOFF,
     // Relentless Earthstorm Diamond — the same melee meta ret and feral use.
     // ui/hunter/dps/gear_sets/phase_4/bm/2h_6p.gear.json, head 32235.
     preferredMetas: PREFERRED_META_IDS,
@@ -298,7 +268,6 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
         maxPoints: 5,
       },
     },
-    cutoff: CUTOFF,
     // ui/mage/dps/gear_sets/p2Arcane.gear.json, head 30206.
     preferredMetas: [34220],
   },
@@ -332,7 +301,6 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
         maxPoints: 3,
       },
     },
-    cutoff: CUTOFF,
     preferredMetas: PREFERRED_META_IDS,
   },
 
@@ -357,7 +325,6 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
         maxPoints: 5,
       },
     },
-    cutoff: CUTOFF,
     // Mystical Skyfire Diamond. Shadow is the one caster here not on 34220:
     // ui/priest/dps/gear_sets/p3.gear.json, head 31064, seats 25893.
     preferredMetas: [25893],
@@ -386,7 +353,6 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
         maxPoints: 5,
       },
     },
-    cutoff: CUTOFF,
     // ui/rogue/dps/gear_sets/p3.gear.json, head 32235.
     preferredMetas: PREFERRED_META_IDS,
   },
@@ -414,7 +380,6 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
         maxPoints: 3,
       },
     },
-    cutoff: CUTOFF,
     // ui/shaman/elemental/gear_sets/p5.gear.json, head 34332 (meta second).
     preferredMetas: [34220],
   },
@@ -447,7 +412,6 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
         maxPoints: 3,
       },
     },
-    cutoff: CUTOFF,
     // ui/shaman/enhancement/gear_sets/p5.gear.json, head 34333 (meta second).
     preferredMetas: PREFERRED_META_IDS,
   },
@@ -480,7 +444,6 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
         maxPoints: 5,
       },
     },
-    cutoff: CUTOFF,
     // ui/warlock/dps/gear_sets/swp.gear.json, head 34340.
     preferredMetas: [34220],
   },
@@ -508,7 +471,6 @@ export const SPEC_REGISTRY: Readonly<Record<SpecId, SpecEntry>> = {
         maxPoints: 3,
       },
     },
-    cutoff: CUTOFF,
     // ui/warrior/dps/gear_sets/p5_fury.gear.json, head 34333 (meta second);
     // p5_arms.gear.json seats the same one.
     preferredMetas: PREFERRED_META_IDS,

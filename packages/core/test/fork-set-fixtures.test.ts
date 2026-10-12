@@ -76,7 +76,7 @@ type SetBonus = {
   unmeasured?: string;
   selfConfound?: { threshold: number; dps?: number };
 };
-type Cutoff = { absDps: number; pct: number };
+type Cutoff = { absDps: number };
 type Ranking = {
   cutoff: Cutoff;
   baseline: { dps: number };

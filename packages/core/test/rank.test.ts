@@ -233,8 +233,8 @@ function candidateEquipmentForTest(
 }
 
 describe("CUTOFF", () => {
-  it("pins the five-seed derived constant", () => {
-    expect(CUTOFF).toEqual({ absDps: 3.4, pct: 0.15 });
+  it("pins the owner's flat 3 DPS bar (ADR-0037)", () => {
+    expect(CUTOFF).toEqual({ absDps: 3 });
   });
 });
 
@@ -2298,7 +2298,7 @@ describe("rankUpgrades paired-replicate SE", () => {
       const seed = opts.seed;
       this.calls.push({ neckId, seed });
       const base = BASELINE_BY_SEED[seed] ?? 2000;
-      // Every pool candidate must clear the cutoff (3.4 DPS), because
+      // Every pool candidate must clear the cutoff (3 DPS), because
       // replication is spent on the top of the *shortlist* — a pool of
       // below-cutoff rows would correctly get no replication at all and the
       // top-8 boundary would go untested. Descending by id so the ordering is
@@ -2526,7 +2526,7 @@ describe("rankUpgrades paired-replicate SE", () => {
         opts: SimRunOpts
       ): Promise<SimObservation> {
         await super.run(req, opts);
-        // Every candidate lands 1 DPS up — under the 3.4 cutoff.
+        // Every candidate lands 1 DPS up — under the 3 DPS cutoff.
         const neckId = neckIdOf(req);
         const base = BASELINE_BY_SEED[opts.seed] ?? 2000;
         const isCandidate =
@@ -2575,8 +2575,8 @@ describe("rankUpgrades paired-replicate SE", () => {
     // the neck pool (see `neckPool`/`SeedAwareSimRunner`) gains 17-25 DPS at
     // every seed, so 29381 needs a seed-11 gain above the pool's floor (17) to
     // land in the replicated top 8 at all; 26 clears both that floor and
-    // CUTOFF.absDps (3.4), so this item starts life above cutoff. The other
-    // four seeds draw a small gain whose 5-seed mean falls back under 3.4 —
+    // CUTOFF.absDps (3), so this item starts life above cutoff. The other
+    // four seeds draw a small gain whose 5-seed mean falls back under 3 —
     // this is the row ticket 39 asks for, one that crosses the cutoff
     // *because of* replication rather than agreeing with it by construction.
     const SEED11_GAIN = 26;

@@ -1,6 +1,6 @@
 # ADR-0020 — The cutoff is absolute; a filter never moves the bar
 
-**Status:** accepted
+**Status:** accepted; amended 2026-10-11 by [ADR-0037](0037-the-cutoff-is-one-flat-3-dps-bar.md) (the `CUTOFF` value at fact 1 and the `max(3.0, 2 × mean reported SE 1.678)` derivation under "It would also promote noise" are replaced by a flat 3 DPS bar)
 **Date:** 2026-08-06
 **Amends:** PLAN.md §12 (the "filter first, then apply the cutoff within the
 filtered view" bullet)

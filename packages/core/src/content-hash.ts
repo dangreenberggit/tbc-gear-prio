@@ -51,7 +51,10 @@ export function sha256Hex(text: string): string {
  */
 // 8: engine pin moved from 17a8fb28 to upstream master 42c75dc9; content
 // tier unchanged at Phase 3 (ticket 558 P4).
-export const ENGINE_VERSION = 8;
+// 9: the cutoff became one flat 3 DPS bar (ADR-0037). The cutoff is not a
+// hashed input, so this bump is what keeps a cached ranking from serving the
+// old 3.4/3.6-or-0.15% verdicts (ADR-0020).
+export const ENGINE_VERSION = 9;
 
 export type HashedGearItem = {
   id: number;

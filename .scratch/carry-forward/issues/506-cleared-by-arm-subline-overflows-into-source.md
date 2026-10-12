@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: stage-gate upgrades-tab-closeout round 2c, Step 8 (2026-09-24)
 Blocks: none
@@ -42,3 +42,16 @@ reached the fixture pass unseen.
    regression in either sub-line is caught by a real gate run.
 3. Fork commit, re-pin, `pnpm verify` rc=0, and a real layout gate run
    confirming `failed:0` at all four widths on the fixtures above.
+
+## Closed 2026-10-11
+
+The note this ticket is about no longer exists. ADR-0037 (owner ruling
+2026-10-11) removed the percentage rule, and with it the tab's "by % rule"
+note (`DeltaCell.tsx`) and the report's "cleared by %-arm" note, so item 1
+has nothing to fit. Item 2 is covered by layout check (7) in
+`scripts/tab-harness/test-layout.mjs` (line 22: "nothing in a table cell past
+the cell"), which reads every cell rather than one sub-line class.
+
+Verified by: tbc-new-fork@be3d703a1 (removes the note);
+`git -C vendor/tbc-new-fork grep -n "upgrades-cutoff-arm" -- ui` prints only
+the `ResultRow.test.tsx` assertion that no row shows it.

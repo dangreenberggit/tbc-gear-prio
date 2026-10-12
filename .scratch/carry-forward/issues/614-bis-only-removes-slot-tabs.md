@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Tab-blocking
 Type: bug
 Origin: code read of fork 316326a95, `ui/features/upgrades/model/results_view.ts` `slotTabs` / `bisOnlyView` (`bisOnlyView` added in fork `fac043c21`), 2026-10-11
@@ -47,8 +47,25 @@ never calls `slotTabs` under BiS only.
 
 ## Acceptance
 
-- [ ] With BiS only ticked, every slot tab that is present with it unticked
+- [x] With BiS only ticked, every slot tab that is present with it unticked
       is still present.
-- [ ] A slot with no BiS-list row shows a dimmed tab with a "0" badge and an
+- [x] A slot with no BiS-list row shows a dimmed tab with a "0" badge and an
       empty pane.
-- [ ] A unit test on the BiS-only view asserts both points above.
+- [x] A unit test on the BiS-only view asserts both points above.
+
+## 2026-10-11 — closed
+
+Verified by: tbc-new-fork@22e7a8e71 ("Keep every slot tab under BiS only
+(614)"), inside fork `176268e7c`, which `data/wowsims-fork.lock.json` names
+on `feat/bis-rows`; review `docs/reviews/feat-bis-rows.md`. The tests are
+"with BiS only, keeps every slot tab and counts only the BiS-list rows above
+the cutoff" in `ui/features/upgrades/model/results_view.test.ts` and "under
+BiS only keeps every slot tab, and dims a slot with no BiS-list row at (0)
+over an empty pane" in
+`ui/features/upgrades/components/ResultsPanes/ResultsPanes.test.tsx`.
+
+Re-run from the pair's fork folder, `vendor/tbc-new-fork`:
+`node node_modules/vitest/vitest.mjs run ui/features/upgrades/model/results_view.test.ts ui/features/upgrades/components/ResultsPanes/ResultsPanes.test.tsx`
+(2 files, 39 tests passed on 2026-10-11 at fork `176268e7c`). The root
+`pnpm verify` does not run these tests: `vitest.config.ts` excludes
+`vendor/`.

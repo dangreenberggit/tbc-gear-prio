@@ -409,8 +409,10 @@ const pollDone = (ms, trace) => `(async () => {
 	return {done:false, timeout:true, status:statusText(), tail};
 })()`;
 
-// Reads the Upgrades list pane, which holds every row: its shortlist, then the
+// Reads the Upgrades list pane, which holds every row: its main table, then the
 // below-cutoff group, opened first because its table mounts only when open.
+// A BiS-list row that misses the cutoff sits in the main table (ticket 528) with
+// data-not-upgrade="true", so a row's place alone does not say which side it is on.
 // Only the rows in view are rendered, so each table is read by scrolling
 // through it (rows.mjs collectRows). Cells are read by position: rank, item,
 // slot, ΔDPS, source.
@@ -431,7 +433,7 @@ const readResults = `(async () => {
 	const rows = [];
 	const aboveCutoffItems = [];
 	for (const table of pane.querySelectorAll('[data-testid="upgrades-results-table"]')) {
-		const below = group !== null && group.contains(table);
+		const inGroup = group !== null && group.contains(table);
 		const read = await collectRows(table, tr => {
 			const tds = Array.from(tr.querySelectorAll('td'));
 			if (tds.length < 5) return null;
@@ -442,14 +444,14 @@ const readResults = `(async () => {
 				slot: text(2),
 				dps: number(text(3).split('\\n')[0]),
 				source: text(4),
-				belowCutoff: below,
+				belowCutoff: inGroup || tr.getAttribute('data-not-upgrade') === 'true',
 			};
 		});
-		if (read.error) return {error: (below ? 'below-cutoff table: ' : 'shortlist table: ') + read.error};
+		if (read.error) return {error: (inGroup ? 'below-cutoff table: ' : 'main table: ') + read.error};
 		for (const row of read.rows) {
 			if (!row) continue;
 			rows.push(row);
-			if (!below) aboveCutoffItems.push(row.item);
+			if (!row.belowCutoff) aboveCutoffItems.push(row.item);
 		}
 	}
 	const root = document.querySelector('[data-testid="upgrades-tab-root"]');
