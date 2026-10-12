@@ -9,7 +9,11 @@ Verified by: tbc-new-fork@6d0f15a88 (all three fixed in one commit; the
   dead test is deleted), pinned by `data/wowsims-fork.lock.json` at
   08afcdcce on `feat/bis-rows`; re-run with
   `git -C vendor/tbc-new-fork grep -n -e upgrades-cutoff-arm -e "PORTED verbatim" -e "PORTED unchanged" -- ui/features/upgrades/model/engine/cutoff.ts ui/features/upgrades/model/engine/content-hash.ts ui/features/upgrades/components`
-  (prints nothing) and `pnpm verify`.
+  (prints nothing) and `pnpm verify`. The file header of `content-hash.ts`
+  still said "ported unchanged" in lower case, which that grep misses;
+  tbc-new-fork@3393bcb19 fixed it (docs/reviews/feat-bis-rows.md, S7),
+  pinned at 176268e7c: `git -C vendor/tbc-new-fork grep -n -i "ENGINE_VERSION. are ported"
+  -- ui/features/upgrades/model/engine/content-hash.ts` prints nothing.
 
 # Two fork comments misstate their port, and one tab test cannot fail
 
