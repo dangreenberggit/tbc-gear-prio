@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: investigation
 Origin: Chrome visual pass of the Upgrades tab, 2026-08-27 (branch `feat/upgrades-dedup-wowsims`, fork `342f6a74`)
 Blocks: none
@@ -223,3 +223,36 @@ Shoulders (30892) ranked as row 119 at −30.9 DPS. Screenshot:
 `.scratch/stage-gate/311-react-readback/below-cutoff-beast-tamer-row119.jpg`
 (gitignored; present only on the machine that ran it). The ticket still
 waits on the owner's sign-off.
+
+### 2026-10-11 — closed
+
+Closed on the owner's instruction of 2026-10-11, given when asked again
+to approve this close: "dont just tell me to close a ticket. thats
+idiotic. either do it or provide me with a real decision". The evidence
+is the React-tab readback in the comment above: no panic text, no
+dropped-candidates list, and Beast-tamer's Shoulders (30892) ranked as
+row 119.
+
+Verified by: tbc-new-fork@316326a95 (full-pool ret phase 3 run on the
+React tab, no candidate cap, 3000 iterations; screenshot
+`.scratch/stage-gate/311-react-readback/below-cutoff-beast-tamer-row119.jpg`,
+gitignored)
+
+**The seven unguarded assertions.** The 2026-08-29 note left open
+whether a non-hunter can equip any of them. Checked against
+`vendor/tbc-new-fork/assets/database/db.json`, the fork's `canEquipItem`
+(`ui/sim/proto/items.ts:41-45`, which refuses an item for a class only
+through `classAllowlist`) and `data/equip-eligibility.json`:
+
+- Rift Stalker Armor 2pc (`:138`, pieces 30139-30143), Gronnstalker's
+  Armor 2pc (`:171`, 31001, 31003-31006, 34443, 34549, 34570), Ashtongue
+  Talisman of Swiftness (`:295`, 32487) and Talon of Al'ar (`:328`,
+  30448): every item has `classAllowlist: [3]` (hunter), and
+  `data/equip-eligibility.json` lists them for the Hunter spec only. A
+  non-hunter cannot equip them.
+- Cryptstalker Armor 4pc and 6pc (`:25`, `:63`, pieces 22436-22443) and
+  Beast Lord Armor 4pc (`:96`, 27474, 27801, 27874, 28228, 28275): no
+  piece has a `classAllowlist`, and the eligibility export lists them
+  for every warrior, paladin and shaman spec. The tab never offers them
+  to a non-hunter as candidates, but a player who already wears 4 pieces
+  reaches the unguarded code. Filed as ticket 621.

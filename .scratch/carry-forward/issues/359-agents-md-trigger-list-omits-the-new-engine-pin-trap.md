@@ -1,5 +1,5 @@
 Status: closed
-Verified by: tbc-gear-prio@7430c9e5; `grep -n "moving the wowsims engine pin" AGENTS.md` prints line 85
+Verified by: tbc-gear-prio@7430c9e5; `grep -n "moving the wowsims engine pin" AGENTS.md` prints line 87 at `7430c9e5`, and lines 85, 89 and 91 at the tip of `feat/tab-stage-3t`
 Type: task
 Origin: docs/reviews/feat-wowsims-reforge-catchup.md (Spec axis, S7)
 Blocks: none
@@ -47,8 +47,9 @@ Proposed wording, for approval:
 
 ## Acceptance
 
-- [ ] Wording approved in chat, per `AGENTS.md`.
-- [ ] `AGENTS.md:87` names the engine-pin action, so every section of
+- [ ] Wording approved in chat, per `AGENTS.md`. Not met: no record of an
+      owner approval was found (see "Closed 2026-10-11").
+- [x] `AGENTS.md:87` names the engine-pin action, so every section of
       `known-traps.md` is reachable from the trigger list.
 
 ## Closed 2026-10-11

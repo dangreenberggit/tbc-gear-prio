@@ -34,13 +34,20 @@ to `rowSourceLabel` → `sourceLabel` (`ui/features/upgrades/utils/format.ts:68-
 which prints only the zone, or else the kind's label. For the Greatsword,
 upstream's PvP branch knows only the season names Wrathful to Cataclysmic
 (`ui/sim/proto/items.ts:83-89`), so "Vengeful" gets no season and also falls
-back.
+back. The same holds for "Merciless" rows (2 in `ret-p3-p2.json`) and plain
+"Gladiator's" rows (Gladiator's Maul in the feral fixtures).
 
-The row itself carries more than is printed (fixture `ret-p3-p2.json`):
+The row itself holds more than is printed (fixture `ret-p3-p2.json`):
 
 - 30993: `kind: token`, `zone`, `boss: "The Illidari Council"`, `token`.
 - 29300: `kind: rep`, `faction: "The Scale of the Sands"`, `standing: "Revered"`.
 - 33688: `kind: pvp`, `via: "arena"`.
+
+Check `via` before the tab prints it: it is parsed from Wowhead prose
+(`scripts/assemble_universe.py:2072`), and it disagrees within one family.
+Vindicator's Scaled Bracers (33910) has `via: arena` in `ret-p3-p2.json`,
+while its siblings 33879, 33880, 33881 and 33893 have `honor` in
+`feral-p3-p2bis.json`. Which value is right in game: hypothesis, untested.
 
 The token source type has no difficulty field
 (`ui/features/upgrades/model/engine/pool.ts:58`), so the "(N)" for a token

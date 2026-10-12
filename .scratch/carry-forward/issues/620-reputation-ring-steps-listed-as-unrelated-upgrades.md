@@ -28,7 +28,8 @@ Revered steps of four rings whose Exalted steps have their own names:
 29294-29297 (Band of the Eternal Defender), 29298-29301 (Champion),
 29302-29305 (Sage), 29306-29309 (Restorer). The grouping by contiguous id
 block is read from the ids and Exalted names; hypothesis, untested against a
-quest-chain source.
+quest-chain source. Order the steps by `source.standing`, not by item id: in
+the Restorer chain 29307 is Friendly and 29306 is Honored (both fixtures).
 
 ## Cause
 

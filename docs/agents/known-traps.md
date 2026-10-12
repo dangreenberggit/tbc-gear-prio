@@ -78,53 +78,62 @@ Applies to anything under the fork's
 
 The full cycle, in order, every time:
 
-1. `npx vitest run packages/core/test/wowsims-fork-parity.test.ts` (E-W3)
-   from the repo root — green before any hash moves.
-2. Update the file's row in `docs/fork-provenance/engine.md` (in this
-   repo, not the fork) with the new sha256 (Edit tool, not sed — see the
-   trap above).
+1. `pnpm -C <repo> exec vitest run packages/core/test/wowsims-fork-parity.test.ts`
+   (E-W3), where `<repo>` is the main checkout or the pair you are editing —
+   green before any hash moves.
+2. Update the file's row in `<repo>/docs/fork-provenance/engine.md` (in
+   this repo, not the fork) with the new sha256 (Edit tool, not sed — see
+   the trap above).
 3. Fork commit of the ported file. The record change is committed in this
    repo with the re-pin.
-4. Re-pin: move `data/wowsims-fork.lock.json`'s `commit` to the new fork
-   tip and run `pnpm sim-implemented-effects:generate` (the artifact
-   embeds the pin).
-5. `pnpm verify`.
+4. Re-pin: move `<repo>/data/wowsims-fork.lock.json`'s `commit` to the new
+   fork tip and run `pnpm -C <repo> sim-implemented-effects:generate` (the
+   artifact embeds the pin).
+5. `pnpm -C <repo> verify`.
 
 A fork commit that touches nothing ported still needs steps 3–5.
 
 ## Before moving the wowsims engine pin
 
 **Symptom when armed:** `pnpm fetch:wowsimcli` 404s, or writes into a nested
-`vendor/wowsimcli-feature/backend-reforge-.../`; or three fork gates exit 2
+`vendor/wowsimcli-feature/backend-reforge-.../`; or four fork gates exit 2
 with "clone HEAD is X but lock pins Y"; or a regen moves a file nobody
 predicted and it gets committed as though it were expected.
 
+`<repo>` below is the main checkout or the pair you are moving the pin in, as
+an absolute `C:/Users/...` path. Every command names that folder: a bare
+`python scripts/<x>.py` or `git diff` acts on whatever folder the shell is in,
+which for a subagent is usually the main checkout, not the pair.
+
 Pin a **commit sha, not a branch name**:
-`python scripts/sync_wowsims.py --update --ref <sha>`. A branch name contains a
-`/`, and both `fetch_wowsimcli.py` and `cli-wiring.ts` build
-`vendor/wowsimcli-<tag>-<platform>` from the raw `tag`, so a slash nests the
-directory. The branch belongs in `watchedRefs`, via a separate
-`--watch-ref --ref <branch>` — `--update` carries the old `watchedRefs`
-forward unchanged, so skipping it leaves the watched entry stale while the pin
-moves (ADR-0030).
+`pnpm -C <repo> exec python scripts/sync_wowsims.py --update --ref <sha>`. A
+branch name contains a `/`, and both `fetch_wowsimcli.py` and `cli-wiring.ts`
+build `vendor/wowsimcli-<tag>-<platform>` from the raw `tag`, so a slash nests
+the directory. The branch belongs in `watchedRefs`, via a separate
+`pnpm -C <repo> exec python scripts/sync_wowsims.py --watch-ref --ref <branch>`
+— `--update` carries the old `watchedRefs` forward unchanged, so skipping it
+leaves the watched entry stale while the pin moves (ADR-0030).
 
 `--update --ref` writes `currentPhase` **and** `defaultMaxPhase` in the same
 run, both from upstream's `CURRENT_PHASE`, so a tier move lands in the pin
 commit whether or not you meant it to. Let both fields stand as the generator
 wrote them, and put the deliberate half of the bump — `ENGINE_VERSION`, the
-docs — in its own commit. The acceptance check is
-`--update --ref <sha>` again, then `git diff --exit-code` on the lock: it holds
-only while the file is purely generated. Nothing in `pnpm verify` reads either
-field, so a hand edit there is invisible to every gate.
+docs — in its own commit. The acceptance check is: stage the lock with
+`git -C <repo> add data/wowsims.lock.json`, then `--update --ref <sha>` again, then
+`git -C <repo> diff --exit-code data/wowsims.lock.json`: it holds only while the file is purely
+generated. The `git add` comes first because `git diff` compares the working
+tree with the index: unstaged, the first run's own changes show as a
+difference. Nothing in `pnpm verify` reads either field, so a hand edit there
+is invisible to every gate.
 
 For a sha pin `fetch_wowsimcli.py` **builds from source** — it needs `go`,
 `protoc` and `protoc-gen-go` on PATH, and it hard-fails without them where it
 used to download a zip. CI never runs it, so CI will not tell you.
 
-The fork gates (`equip-eligibility`, `ep-presets`, `meta-conditions`) exit 2
-until `data/wowsims-fork.lock.json` names the clone's actual HEAD. Between a
-fork commit and that lock edit they are red **by design** — read the message
-before chasing it.
+The fork gates (`equip-eligibility`, `ep-presets`, `meta-conditions`,
+`fork-lint`) exit 2 until `<repo>/data/wowsims-fork.lock.json` names the clone's
+actual HEAD. Between a fork commit and that lock edit they are red **by
+design** — read the message before chasing it.
 
 Predict the regen list before running anything, then diff (`data-pipeline-work`
 rule 2). Every unpredicted path is a finding to explain, not to absorb: the pin

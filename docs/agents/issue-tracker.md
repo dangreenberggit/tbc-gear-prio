@@ -68,15 +68,26 @@ Blocked by: none
 A `Status: closed` or `Status: resolved` line is followed, later in the file,
 by a `Verified by:` line that names the evidence for the close: a command a
 reader can re-run, `<repo>@<sha>` (for example `tbc-gear-prio@592afc2c` or
-`tbc-new-fork@f17b77db7`), or a review file under `docs/reviews/`. The value
-goes on the same line or below it; a bare label with nothing under it does
-not count. Put it directly under the header lines or in the closing note.
+`tbc-new-fork@f17b77db7`), or a review file under `docs/reviews/`. Write the
+command in backticks or in a code block. Prose alone does not count: an owner
+observation counts when it names the `<repo>@<sha>` the owner looked at. Put
+the line directly under the header lines or in the closing note.
 
-`scripts/check_merge_ready.py` enforces this for every ticket the branch flips
-to `closed` or `resolved`, including a ticket the branch adds already closed:
-`pnpm merge-ready` and `pnpm merge-to-dev` fail on one that lacks the line. A
-ticket that was already closed at the merge base with `dev` is not checked.
-`wontfix` needs no line, because it records a decision not to act.
+The value is the rest of the label's line and the lines below it, up to a
+blank line or a heading. When the label's line is empty, the value is the next
+paragraph or code block below it. A code block runs to its closing fence. The
+header lines (the lines before the file's first blank line) are never part of
+the value, so an empty label in the header block has no value.
+
+`scripts/check_merge_ready.py` checks every ticket the branch flips to
+`closed` or `resolved`, including a ticket the branch adds already closed:
+`pnpm merge-ready` and `pnpm merge-to-dev` fail on one with no `Verified by:`
+line after the Status line whose value holds at least one of the three forms.
+A command that is only a placeholder such as `TODO`, `none` or `n/a`, or only
+punctuation, does not count. The script cannot tell whether the value names
+real evidence; the reviewer judges that. A ticket that was already closed at
+the merge base with `dev` is not checked. `wontfix` needs no line, because it
+records a decision not to act.
 
 The review’s Disposition table **links** tickets for `defer` rows; it does
 not replace them. List open ones anytime: `pnpm issues:open`.

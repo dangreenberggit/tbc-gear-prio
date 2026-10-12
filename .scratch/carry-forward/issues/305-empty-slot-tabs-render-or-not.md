@@ -1,4 +1,4 @@
-Status: blocked
+Status: wontfix
 Type: task
 Origin: ticket 304 execution, owner questions deferred at the Step 3a design gate, 2026-08-27
 Blocks: none
@@ -58,7 +58,7 @@ tabs appear, not the page's geometry.
 
 ## Acceptance
 
-- [ ] Owner rules between the two options.
+- [x] Owner rules between the two options.
 - [ ] If all 17 render: the recorded design comment in `renderSubTabs()` is
       updated to say why, not left contradicting the code.
 - [ ] Strip height stays constant across idle / running / done (it already
@@ -68,3 +68,22 @@ tabs appear, not the page's geometry.
       invocations; the `.bin/` shims fail with an fnm error).
 
 ## Comments
+
+## 2026-10-11 — wontfix (owner ruling: keep current behaviour)
+
+The owner was asked in chat on 2026-10-11: "Q-305: should a slot with no
+items at all still get a tab? … Option 1: always show every slot … Option 2:
+no change. … Recommendation: 2." The owner answered: "2 is fine".
+
+Behaviour kept, as in the React tab at fork `316326a95`
+(`ui/features/upgrades/model/results_view.ts:31-43`,
+`ui/features/upgrades/components/ResultsPanes/ResultsPanes.tsx:73-74`):
+
+- A slot with at least one candidate gets a tab. When every row in it is
+  below the cutoff, the tab stays, dimmed, with a count of 0.
+- A slot with no candidates gets no tab.
+
+The other acceptance boxes applied only to option 1, so they do not apply.
+
+Ticket 614 (ticking "BiS only" removes slot tabs instead of showing them at
+0) is a separate bug and stays open. This ruling does not change it.

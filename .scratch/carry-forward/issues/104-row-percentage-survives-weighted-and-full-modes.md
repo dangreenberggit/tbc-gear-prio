@@ -60,8 +60,8 @@ the `Status:` line stayed `open`. Re-checked on `fbb66956`: the rule in
 `packages/core/test/rank-report.test.ts:1815-1820` passes (command on the
 `Verified by:` line). The fork tab renders no percentage and has no weighted
 or full mode (`grep -rn deltaPct` over the tab's `components`, `hooks`,
-`utils` and `model` outside `model/engine` finds only the cutoff-rule test in
-`DeltaCell.tsx:29`), so there is no twin to fix.
+`utils` and `model` outside `model/engine` finds, outside test files, only
+the cutoff-rule test in `DeltaCell.tsx:29`), so there is no twin to fix.
 
 One side effect is tracked elsewhere: the "cleared by %-arm" note sits inside
 `.pct`, so this rule hides it in the three credited views (ticket 617).
