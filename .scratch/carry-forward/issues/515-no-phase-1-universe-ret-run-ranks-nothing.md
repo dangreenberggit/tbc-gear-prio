@@ -51,3 +51,31 @@ not part of "finished". So this ticket closes when:
 3. If close condition 1 finds the missing list is a gap rather than a
    design choice, the real Phase 1 list is filed as its own ticket under
    Tab-adjacent.
+
+**2026-10-12 — close condition 1 answered (stage `tab-small-fixes`, plan
+step 7).** The missing Phase 1 list is by design.
+`packages/core/test/pool-file.test.ts:41-42` says: "Stage 1 is
+deliberately out of scope: assemble_universe.py only accepts --max-phase
+2..5, because the Wowhead list phases start at "p1-p2"". The script
+enforces it: `scripts/assemble_universe.py:3003` declares `--max-phase`
+with `choices=[2, 3, 4, 5]`. Stage `tab-item-lists` records the same
+(`.scratch/stage-gate/tab-item-lists/plan.md`, claim C22). Conclusion: by
+design; the finished tab says the phase has no list (fork commit
+`af93190ba`, "Say when a phase has no candidate list"); no Phase 1 list
+is filed. Ticket 512 is closed, so no note goes there.
+
+**2026-10-12T18:46Z — live Phase 1 check passed (stage `tab-small-fixes`,
+plan step 6; close condition 2's by-hand check).** Fork
+`tbc-new-fork@af93190ba`, dev servers started from the pair
+`tbc-wt/tab-small-fixes` (vite `:5173`, backend `:3333`), Browser pane on
+`http://localhost:5173/tbc/paladin/retribution/`. Loaded the Gear tab's
+Phase 1 "Pre-raid" gear set, set the Upgrades tab's phase to Phase 1 (the
+run card read "0 eligible items"), clicked Simulate. The run ended
+`done`, not `error`. The left column's text read: "Your current gear:
+1,838.4 DPS. Took 0.9s." then "No candidate list for Phase 1" and "The
+tab has no candidate list for Phase 1, so nothing was compared. Pick
+Phase 2 or later and simulate again." It did not say "No upgrades
+found". Judged against the sentence "the status line says the run
+finished; the results area says the tab has no candidate list for Phase
+1; it does not say No upgrades found": pass. The ticket stays open until
+the re-pin and `pnpm verify` (plan step 16).
