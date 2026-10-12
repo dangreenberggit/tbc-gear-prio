@@ -27,18 +27,29 @@ CASES = [
     ((0, True, 1), False),
 ]
 
+# (bytes_rc, gate_ok) -> may --update-golden write?
+GOLDEN_CASES = [
+    ((0, True), True),
+    ((1, True), False),  # a golden from a bundle that is not dist
+    ((0, False), False),
+]
+
 
 def main() -> int:
     problems = [
         f"gate_passed{args} gave {got}, want {want}"
         for args, want in CASES
         if (got := g.gate_passed(*args)) != want
+    ] + [
+        f"golden_refusal{args} gave {got!r}, want a refusal: {not want}"
+        for args, want in GOLDEN_CASES
+        if ((got := g.golden_refusal(*args)) is None) != want
     ]
     for p in problems:
         print(f"  FAIL: {p}", file=sys.stderr)
     if problems:
         return 1
-    print(f"check_desktop_tab_verdict.py ok ({len(CASES)} cases)")
+    print(f"check_desktop_tab_verdict.py ok ({len(CASES) + len(GOLDEN_CASES)} cases)")
     return 0
 
 
