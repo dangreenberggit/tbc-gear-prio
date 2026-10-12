@@ -16,8 +16,9 @@ requires an explicit `--ack-open-blockers` (conscious opt-in), not a fake
 "path mentioned in the review" check. Fix or re-block the ticket for real.
 
 Every branch: a carry-forward ticket that this branch flips to `closed` or
-`resolved` must have a `Verified by:` line after its Status line, or the
-check fails (docs/agents/issue-tracker.md, "Closing a ticket").
+`resolved` must have a `Verified by:` line after its Status line that names a
+command, `<repo>@<sha>` or a `docs/reviews/` file, or the check fails
+(docs/agents/issue-tracker.md, "Closing a ticket").
 
 Every branch: open tickets that name a source file this branch actually
 changed are listed as "possibly relevant". This is the answer to tickets
@@ -104,18 +105,18 @@ KNOWN_STATUSES = ("open", "claimed", "blocked", "closed", "resolved", "wontfix")
 # checked (docs/agents/issue-tracker.md, "Closing a ticket"). `wontfix` is
 # left out: it records a decision not to act, which has nothing to verify.
 CLOSED_STATUSES = ("closed", "resolved")
-# The value may sit on the line itself or below it -- tickets 409 and 425 put
-# a command block, after a blank line, under a bare `Verified by:`. A label
-# followed only by blank lines, a heading, another header line or the end of
-# the file names no evidence, so it does not count: tickets 104 and 359 put
-# the label in the header block, directly above `Type:`, where an empty one
-# would otherwise borrow the next header as its value.
+# The value may sit on the label's line or below it -- tickets 409 and 425 put
+# a command block, after a blank line, under a bare `Verified by:`. It counts
+# only when it names evidence in one of the three accepted forms, so the check
+# needs no list of ways to be empty (ticket 624 found that list leaking twice).
 VERIFIED_BY_RE = re.compile(r"(?im)^[ \t]*\*{0,2}Verified by:\*{0,2}[ \t]*(.*)$")
 MARKDOWN_HEADING_RE = re.compile(r"^#{1,6}(\s|$)")
-# A value that only promises evidence names none.
-VERIFIED_BY_PLACEHOLDERS = frozenset(
-    {"todo", "tbd", "none", "n/a", "na", "-", "--", "?", "...", "…", "pending"}
-)
+REPO_AT_SHA_RE = re.compile(r"\b[A-Za-z0-9][\w.-]*@[0-9a-f]{7,40}\b")
+REVIEW_FILE_RE = re.compile(r"\bdocs/reviews/[\w.-]+\.md\b")
+CODE_SPAN_RE = re.compile(r"`([^`\n]+)`")
+# Backticks around a placeholder do not make it a command.
+VERIFIED_BY_PLACEHOLDERS = frozenset({"todo", "tbd", "none", "n/a", "na", "pending"})
+PLACEHOLDER_STRIP = " \t\r\n`*_-–—()[]<>.…?"
 
 # The whole accepted disposition vocabulary. Three words, and there is no
 # fourth: a Disposition row disposes of a *finding* -- fixed it, ticketed it,
@@ -361,22 +362,40 @@ def closed_without_verification(old_text: str | None, new_text: str) -> bool:
     status_m = STATUS_RE.search(new_text)
     assert status_m is not None  # new_status was read from this match
     return not any(
-        _verified_by_value(new_text, m) is not None
+        _names_evidence(_verified_by_lines(new_text, m))
         for m in VERIFIED_BY_RE.finditer(new_text, status_m.end())
     )
 
 
-def _verified_by_value(text: str, label: re.Match[str]) -> str | None:
-    """The evidence a `Verified by:` label names, or None when it names none:
-    nothing on its line and, below it, only blank lines and then a heading, a
-    ticket header line or the end of the file; or a placeholder word."""
-    value = "\n".join(_verified_by_lines(text, label)).strip()
-    if value.startswith("```"):
-        return value  # a command block (ticket 409)
-    norm = value.strip("`*_ ").rstrip(".").casefold()
-    if not norm or norm in VERIFIED_BY_PLACEHOLDERS:
-        return None
-    return value
+def _names_evidence(value: list[str]) -> bool:
+    """True when a `Verified by:` value holds a command (text in backticks or
+    a code block), `<repo>@<sha>`, or a review file under `docs/reviews/`. A
+    command that is only a placeholder word or punctuation does not count."""
+    prose: list[str] = []
+    commands: list[str] = []
+    block: list[str] | None = None
+    for line in value:
+        if line.startswith("```"):
+            if block is None:
+                block = []
+                continue
+            commands.append("\n".join(block))
+            block = None
+        elif block is not None:
+            block.append(line)
+        else:
+            prose.append(line)
+    if block is not None:
+        commands.append("\n".join(block))  # a fence the value never closed
+    text = "\n".join(prose)
+    commands += CODE_SPAN_RE.findall(text)
+    if REPO_AT_SHA_RE.search(text) or REVIEW_FILE_RE.search(text):
+        return True
+    for command in commands:
+        word = command.strip(PLACEHOLDER_STRIP).casefold()
+        if word and word not in VERIFIED_BY_PLACEHOLDERS:
+            return True
+    return False
 
 
 def _verified_by_lines(text: str, label: re.Match[str]) -> list[str]:
@@ -834,15 +853,16 @@ def check(
     if why_not_closed:
         print(f"\nticket-closing check skipped: {why_not_closed}")
     elif closed_bare:
-        print("\ntickets closed on this branch with no Verified by: line:")
+        print("\ntickets closed on this branch with no Verified by: evidence:")
         for rel in closed_bare:
             print(f"  - {rel}")
             errors.append(
                 f"{rel}: Status flipped to closed/resolved with no `Verified by:` "
-                f"line after it (docs/agents/issue-tracker.md)"
+                f"line after it naming a command in backticks, <repo>@<sha> or a "
+                f"docs/reviews/ file (docs/agents/issue-tracker.md)"
             )
     else:
-        print("\nno ticket closed on this branch without a Verified by: line")
+        print("\nno ticket closed on this branch without Verified by: evidence")
 
     phase_m = PHASE_BRANCH_RE.match(branch)
     if phase_m:
@@ -1431,15 +1451,47 @@ def check_closing_rule_edges() -> list[str]:
          "an empty Verified by: above Progress: (624 R1)"),
         (open_t, "Status: closed\nVerified by:\nNote: see the review\n", True,
          "an empty Verified by: above Note: (624 R1)"),
+        # Ticket 624 R2: a value counts only when it names evidence in one of
+        # the three forms (docs/agents/issue-tracker.md, "Closing a ticket").
+        (open_t, "Status: closed\n\nVerified by:\n\n```\n```\n", True,
+         "an empty code block (624 R2)"),
+        (open_t, "Status: closed\n\nVerified by:\n\n```sh\n\n```\n", True,
+         "a code block holding only a blank line (624 R2)"),
+        (open_t, "Status: closed\n\nVerified by:\n\n```\nTODO\n```\n", True,
+         "a code block holding only TODO (624 R2)"),
+        (open_t, "Status: closed\nVerified by: ---\n", True, "a lone --- (624 R2)"),
+        (open_t, "Status: closed\nVerified by: —\n", True, "a lone em dash (624 R2)"),
+        (open_t, "Status: closed\nVerified by: (none)\n", True, "(none) (624 R2)"),
+        (open_t, "Status: closed\nVerified by: `(none)`\n", True,
+         "(none) in backticks (624 R2)"),
+        # Ticket 624 R3: below the header block, a `Key:` line or a line that
+        # starts with `#` but is no heading can be the value.
+        (open_t, "Status: closed\n\nVerified by:\n#409's command `ls x` -> 0\n", False,
+         "a value line starting with # that is no heading (624 R3)"),
+        (open_t, "Status: closed\n\nVerified by:\nVerified: `pnpm verify` -> 0\n", False,
+         "a value line starting with Verified: (624 R3)"),
+        (open_t, "Status: closed\n\nVerified by:\nResolution: tbc-gear-prio@abc1234\n",
+         False, "a value line starting with Resolution: (624 R3)"),
+        (open_t, "Status: closed\n\nVerified by:\n#### Notes\n`ls x`\n", True,
+         "a heading below an empty label ends it"),
         (open_t, "Status: closed\nVerified by: TODO\n", True, "a TODO placeholder"),
         (open_t, "Status: closed\nVerified by: n/a\n", True, "an n/a placeholder"),
         (open_t, "Status: closed\nVerified by: `none`\n", True, "a none placeholder"),
         (open_t, "Status: closed\nVerified by:\nType: bug\n\nVerified by: `abc1234`\n",
          False, "an empty label, then a filled one further down"),
-        # The check proves a value is present; whether prose is evidence is
-        # the reviewer's call (docs/agents/issue-tracker.md, "Closing a ticket").
-        (open_t, "Status: closed\nVerified by:\n\nThe tab rendered it.\n", False,
-         "prose below the label"),
+        # Prose alone names none of the three forms (ticket 624); whether a
+        # value in one of them is real evidence is the reviewer's call.
+        (open_t, "Status: closed\nVerified by:\n\nThe tab rendered it.\n", True,
+         "prose below the label, with no command, repo@sha or review file"),
+        (open_t, "Status: closed\nVerified by: owner, on tbc-new-fork@316326a95\n",
+         False, "<repo>@<sha> in prose"),
+        (open_t, "Status: closed\nVerified by: review docs/reviews/feat-x.md\n",
+         False, "a docs/reviews/ path in prose"),
+        (open_t, "Status: closed\n\nVerified by: owner observation; string read\n"
+         "at `vendor/x/translation.json:893`.\n", False,
+         "a command on the line after a filled label (ticket 330)"),
+        (open_t, "Status: closed\n\nVerified by: owner observation\n\n`ls x`\n", True,
+         "a command after a blank line below a filled label is not its value"),
     ]
     problems = []
     for old, new, want, label in cases:
