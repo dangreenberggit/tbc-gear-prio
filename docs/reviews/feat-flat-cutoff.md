@@ -184,3 +184,75 @@ differs from the committed `experiments/m1-5-ep-recall.json` for reasons
 unrelated to the cutoff (ret `poolSize` 246 committed, 294 now), so the
 run cannot confirm or refute the fix; the output was restored with
 `git checkout -- experiments`.
+
+## Focused check (round 2)
+
+Reviewed range: `7403b856..d233520c`
+
+Fork range: `c4696b091..c4696b091` (no fork commit since round 1).
+
+One fresh `general-task` (Opus) agent ran the four checks. It wrote nothing.
+
+1. **Conditions: pass.** Every commit in `7403b856..d233520c` names its
+   finding IDs, or (`d233520c`) changes only this file, tickets 622 and 623,
+   `NEXT` and `map.md`. The only non-comment code change is
+   `scripts/m1_5_recall.mjs` (A5). The wowsims-file check gives the same
+   output as round 1: `ui/app/SimTabsSection.tsx` 6/0; 259 A, 1 M.
+2. **Each fix does what its finding asks, and is correct: pass.** A5's
+   `meetsPre0037Cutoff` is the same test as `fe4d1696`'s `meetsCutoff`, and
+   the script's `deltaPct` is a percent, as old core `rank.ts:1073` computed
+   it. A1's header matches `b12d8ff3` (every changed fixture line is an
+   `aboveCutoff*` field). P1's fork citations say what ADR-0037 claims. D1's
+   status lines point at text that exists. S1's commands run from the pair
+   root and print empty lists with the value counts the tickets state.
+3. **New tests: none.** One test removed (A2).
+4. **Touched tests pass:** `cutoff`, `full-sweep-recall`, `rank`, `view`,
+   `store`, `store-contract` — 6 files, 186 tests, rc 0.
+
+Bookkeeping only: **B1** commit `74c3200b` names "P1, D1" but not P2 (a
+duplicate of D1); **B2** D3, S2 and A8 had no disposition yet.
+
+## Disposition (round 2)
+
+| ID  | Axis          | Disposition | Ticket / note                                                                                                                  |
+| --- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| A1  | Adversarial   | fixed       | `6b4b0be4` — header says the observations are from the binary and the sets were re-judged under ADR-0037                       |
+| A2  | Adversarial   | fixed       | `6b4b0be4` — test deleted; comment points at the full-sweep-recall ret 29997 row                                               |
+| A3  | Adversarial   | fixed       | `6b4b0be4` — the named old-bar test comments, and the ones the fixer found, corrected; no assertion changed                    |
+| A4  | Adversarial   | defer       | `.scratch/carry-forward/issues/622-fork-port-comments-and-dead-arm-test.md` — fork comment, needs a re-pin                     |
+| A5  | Adversarial   | fixed       | `eaa1b7cb` — the script keeps its own copy of the pre-0037 rule                                                                |
+| A6  | Adversarial   | defer       | `.scratch/carry-forward/issues/622-fork-port-comments-and-dead-arm-test.md` — fork test, needs a re-pin                        |
+| A7  | Adversarial   | fixed       | `eaa1b7cb` — comment says the per-spec rule was replaced by ADR-0037                                                           |
+| A8  | Adversarial   | wontfix     | Dev server only: a user gets new code only with a page reload, which makes a new store, and no ranking is saved to the browser |
+| D1  | Domain        | fixed       | `74c3200b` — ADR-0020 and ADR-0035 status lines amended by ADR-0037; note in `set-bonus-fixture-derivations.md`                |
+| D2  | Domain        | defer       | `.scratch/carry-forward/issues/623-set-floor-root-two-on-two-sim-differences.md` — before this branch; fork code               |
+| D3  | Domain        | wontfix     | `docs/pipeline-demo.html` is labelled a frozen snapshot of one P3 run; new numbers would make it false                         |
+| S1  | Standards     | fixed       | `d72e52df` — tickets 617 and 618 give a re-runnable scan and its result                                                        |
+| S2  | Standards     | wontfix     | Shortening a 51-character subject means rewriting every later commit, including the fork re-pin                                |
+| S3  | Standards     | fixed       | `d72e52df` — "carries" changed to "shows"                                                                                      |
+| S4  | Standards     | defer       | `.scratch/carry-forward/issues/622-fork-port-comments-and-dead-arm-test.md` — fork comment, needs a re-pin                     |
+| P1  | Spec          | fixed       | `74c3200b` — ADR-0037 records why the fork's `ENGINE_VERSION` stays 6                                                          |
+| P2  | Spec          | fixed       | `74c3200b` — same change as D1                                                                                                 |
+| P3  | Spec          | fixed       | `6b4b0be4` — store test payloads now `{ absDps: 3 }`                                                                           |
+| B1  | Focused check | wontfix     | P2 duplicates D1, which the message names; amending history is not worth it                                                    |
+| B2  | Focused check | fixed       | This table gives D3, S2 and A8 their rows                                                                                      |
+
+## Summary
+
+The flat 3 DPS cutoff matches the owner's ruling in core and in the fork's
+tab, and no correctness bug was found in product code. One silent wrong
+result was fixed: `scripts/m1_5_recall.mjs` still passed three arguments to
+`meetsCutoff` and would have reported every row below the cutoff
+(`eaa1b7cb`). Leaving the fork's `ENGINE_VERSION` at 6 is correct, and
+ADR-0037 now says why. No existing upstream wowsims file changed. Generated
+artifacts pass their check modes, the re-judged synthetic roster sets are
+reproduced by an independent replay, and the √2 × 3 floor's arithmetic is
+right. Round 2 passed with bookkeeping only. Three fork findings (A4, A6, S4)
+are deferred to ticket 622 because they need a fork commit and re-pin. A
+behaviour that predates this branch (D2) is deferred to ticket 623. No
+finding blocks the merge.
+
+Tickets: over this branch's own range (`fe4d1696..HEAD`) it filed 2 (622, 623) and closed 3 (291 wontfix, 506 and 615 closed). The skill's
+`dev...HEAD` count is 9 filed and 6 closed, because that range also holds
+`feat/tab-stage-3t`'s work from before `fe4d1696`; there filed is higher than
+closed, all of it from that other branch's range.
