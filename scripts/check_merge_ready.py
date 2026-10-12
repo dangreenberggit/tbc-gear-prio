@@ -111,11 +111,7 @@ CLOSED_STATUSES = ("closed", "resolved")
 # the label in the header block, directly above `Type:`, where an empty one
 # would otherwise borrow the next header as its value.
 VERIFIED_BY_RE = re.compile(r"(?im)^[ \t]*\*{0,2}Verified by:\*{0,2}[ \t]*(.*)$")
-TICKET_HEADER_RE = re.compile(
-    r"(?i)^\*{0,2}(status|type|origin|blocks|blocked by|serves|related|"
-    r"relates to|owner|priority|group|formerly|closed|resolved|resolution|"
-    r"verified by|verified):"
-)
+MARKDOWN_HEADING_RE = re.compile(r"^#{1,6}(\s|$)")
 # A value that only promises evidence names none.
 VERIFIED_BY_PLACEHOLDERS = frozenset(
     {"todo", "tbd", "none", "n/a", "na", "-", "--", "?", "...", "…", "pending"}
@@ -374,22 +370,45 @@ def _verified_by_value(text: str, label: re.Match[str]) -> str | None:
     """The evidence a `Verified by:` label names, or None when it names none:
     nothing on its line and, below it, only blank lines and then a heading, a
     ticket header line or the end of the file; or a placeholder word."""
-    value = label.group(1).strip(" \t\r*")
-    if not value:
-        for line in text[label.end() :].splitlines():
-            s = line.strip()
-            if not s:
-                continue
-            if s.startswith("#") or TICKET_HEADER_RE.match(s):
-                return None
-            value = s
-            break
+    value = "\n".join(_verified_by_lines(text, label)).strip()
     if value.startswith("```"):
         return value  # a command block (ticket 409)
     norm = value.strip("`*_ ").rstrip(".").casefold()
     if not norm or norm in VERIFIED_BY_PLACEHOLDERS:
         return None
     return value
+
+
+def _verified_by_lines(text: str, label: re.Match[str]) -> list[str]:
+    """The text a `Verified by:` label holds: the rest of its own line, then
+    the lines below it up to a blank line or a heading. When its own line is
+    empty, blank lines before the first line below are skipped. A code block
+    is read to its closing fence, blank lines and all. A header line -- any
+    line before the file's first blank line -- is never part of the value."""
+    lines = [line.rstrip("\r") for line in text.split("\n")]
+    blanks = [i for i, line in enumerate(lines) if not line.strip()]
+    header_end = blanks[0] if blanks else len(lines)
+    rest = label.group(1).strip(" \t\r*")
+    out = [rest] if rest else []
+    i = text.count("\n", 0, label.start()) + 1
+    if not rest:
+        while i < len(lines) and not lines[i].strip():
+            i += 1
+    if i < header_end:
+        return out  # the lines below are other headers, with their own values
+    while i < len(lines):
+        s = lines[i].strip()
+        if not s or MARKDOWN_HEADING_RE.match(s):
+            break
+        out.append(s)
+        i += 1
+        if s.startswith("```"):
+            while i < len(lines):
+                out.append(lines[i].strip())
+                i += 1
+                if out[-1].startswith("```"):
+                    break
+    return out
 
 
 def unparseable_status_tickets() -> list[tuple[Path, str]]:
@@ -1402,6 +1421,16 @@ def check_closing_rule_edges() -> list[str]:
          "an empty Verified by: above a header line, CRLF"),
         (open_t, "**Status:** closed\n**Verified by:**\n**Type:** bug\n", True,
          "an empty bold Verified by: above a bold header line"),
+        # Ticket 624 R1: any line in the header block is a header, whatever
+        # its key -- tickets use keys no fixed list kept up with.
+        (open_t, "Status: closed\nVerified by:\nSeverity: major\n", True,
+         "an empty Verified by: above Severity: (624 R1)"),
+        (open_t, "Status: closed\nVerified by:\nBranch: feat/x\n\n# t\n", True,
+         "an empty Verified by: above Branch: (624 R1)"),
+        (open_t, "Status: closed\nVerified by:\nProgress: 3 of 4 done\n", True,
+         "an empty Verified by: above Progress: (624 R1)"),
+        (open_t, "Status: closed\nVerified by:\nNote: see the review\n", True,
+         "an empty Verified by: above Note: (624 R1)"),
         (open_t, "Status: closed\nVerified by: TODO\n", True, "a TODO placeholder"),
         (open_t, "Status: closed\nVerified by: n/a\n", True, "an n/a placeholder"),
         (open_t, "Status: closed\nVerified by: `none`\n", True, "a none placeholder"),
