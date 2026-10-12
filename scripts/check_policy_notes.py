@@ -61,7 +61,6 @@ def check_note_published_for_each_policy_kind() -> list[str]:
             gear_sets=[],
             wowhead_dir=None,
             two_hop=None,
-            sunmote_upgrades=None,
             class_id=2,
             policy_exclusion_note=marker,
             **kwargs,
@@ -84,7 +83,6 @@ def check_no_policy_without_a_note() -> list[str]:
             gear_sets=[],
             wowhead_dir=None,
             two_hop=None,
-            sunmote_upgrades=None,
             class_id=2,
             policy_two_hand_only=True,
         )

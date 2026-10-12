@@ -43,6 +43,7 @@ SIM_IMPLEMENTED_EFFECTS = ROOT / "data/sim-implemented-effects.json"
 CLASS_RESTRICTED_SETS = ROOT / "data/class-restricted-sets.json"
 
 RAID_RECIPES = ROOT / "data/two-hop/raid-recipes.json"
+SUNMOTE_PAIRS = ROOT / "data/two-hop/sunmote-pairs.json"
 DEFAULT_OUT_DIR = ROOT / "data/universes"
 COMMON_PROTO = ROOT / "data/proto/common.proto"
 UI_PROTO = ROOT / "data/proto/ui.proto"
@@ -218,7 +219,6 @@ class SpecProfile:
         gear_sets: list[Path],
         wowhead_dir: Path | None,
         two_hop: Path | None,
-        sunmote_upgrades: Path | None,
         class_id: int,
         policy_excluded_weapon_types: frozenset[int] = frozenset(),
         policy_two_hand_only: bool = False,
@@ -244,7 +244,6 @@ class SpecProfile:
         # and shows up in a diff.
         self.wowhead_dir = wowhead_dir
         self.two_hop = two_hop
-        self.sunmote_upgrades = sunmote_upgrades
         self.class_id = class_id
         # Which item ids this spec can physically equip, per the fork's own
         # canEquipItem. Armor types, weapon types, one-hand/two-hand rules and
@@ -443,10 +442,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         ],
         wowhead_dir=ROOT / "data/wowhead-lists/ret",
         two_hop=ROOT / "data/two-hop/ret-tokens.json",
-        # Kept out of two_hop because that file is the tier *set* map and
-        # pool-hardening.test.ts pins it against wowsims db setIds; Sunmote
-        # upgrades are raid drops exchanged at a vendor, not set pieces.
-        sunmote_upgrades=ROOT / "data/two-hop/ret-sunmote-upgrades.json",
         class_id=CLASS_PALADIN,
         # Retribution is a two-hander spec. The sim is right that a paladin can
         # hold a one-hander, a shield or an off-hand -- and that is a fact about
@@ -497,8 +492,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         ],
         wowhead_dir=ROOT / "data/wowhead-lists/feral",
         two_hop=ROOT / "data/two-hop/feral-tokens.json",
-        # No feral Sunmote map collected yet.
-        sunmote_upgrades=None,
         class_id=CLASS_DRUID,
         # Polearms: the sim says a druid can hold one, and it is right. This is
         # a pool call on top of that, ruled by the SME gate for this branch --
@@ -539,8 +532,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # SME gate F3: rating-gated arena gear is out of a PvE pool.
         exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/balance-tokens.json",
-        # No Sunmote map collected for this spec.
-        sunmote_upgrades=None,
         class_id=CLASS_DRUID,
     ),
     "hunter": SpecProfile(
@@ -590,8 +581,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # SME gate F3: rating-gated arena gear is out of a PvE pool.
         exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/hunter-tokens.json",
-        # No Sunmote map collected for this spec.
-        sunmote_upgrades=None,
         class_id=CLASS_HUNTER,
     ),
     "mage": SpecProfile(
@@ -616,8 +605,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # SME gate F3: rating-gated arena gear is out of a PvE pool.
         exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/mage-tokens.json",
-        # No Sunmote map collected for this spec.
-        sunmote_upgrades=None,
         class_id=CLASS_MAGE,
     ),
     "shadow": SpecProfile(
@@ -638,8 +625,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # SME gate F3: rating-gated arena gear is out of a PvE pool.
         exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/shadow-tokens.json",
-        # No Sunmote map collected for this spec.
-        sunmote_upgrades=None,
         class_id=CLASS_PRIEST,
     ),
     "rogue": SpecProfile(
@@ -660,8 +645,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # SME gate F3: rating-gated arena gear is out of a PvE pool.
         exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/rogue-tokens.json",
-        # No Sunmote map collected for this spec.
-        sunmote_upgrades=None,
         class_id=CLASS_ROGUE,
     ),
     "ele": SpecProfile(
@@ -687,8 +670,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # SME gate F3: rating-gated arena gear is out of a PvE pool.
         exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/ele-tokens.json",
-        # No Sunmote map collected for this spec.
-        sunmote_upgrades=None,
         class_id=CLASS_SHAMAN,
     ),
     "enh": SpecProfile(
@@ -712,8 +693,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # SME gate F3: rating-gated arena gear is out of a PvE pool.
         exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/enh-tokens.json",
-        # No Sunmote map collected for this spec.
-        sunmote_upgrades=None,
         class_id=CLASS_SHAMAN,
     ),
     "warlock": SpecProfile(
@@ -743,8 +722,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # SME gate F3: rating-gated arena gear is out of a PvE pool.
         exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/warlock-tokens.json",
-        # No Sunmote map collected for this spec.
-        sunmote_upgrades=None,
         class_id=CLASS_WARLOCK,
     ),
     "warrior": SpecProfile(
@@ -775,8 +752,6 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # SME gate F3: rating-gated arena gear is out of a PvE pool.
         exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/warrior-tokens.json",
-        # No Sunmote map collected for this spec.
-        sunmote_upgrades=None,
         class_id=CLASS_WARRIOR,
     ),
 }
@@ -1457,6 +1432,46 @@ def rep_source(faction: str, standing: str) -> dict:
     return out
 
 
+def item_ilvl(item: dict) -> int | None:
+    ilvl = ((item.get("scalingOptions") or {}).get("0") or {}).get("ilvl")
+    return int(ilvl) if ilvl is not None else None
+
+
+def sunmote_upgrade_pairs(
+    sunmote_pairs: object, db_by_id: dict[int, dict], *, report: bool = False
+) -> list[dict]:
+    """The `sunmote-pairs.json` pairs that are Sunmote upgrades.
+
+    AtlasLoot comments the Sunmote result under its base row; the head rows
+    that invert the item level are not upgrades (ticket 612). A pair is kept
+    when both items are in db.json, share a slot, are both phase 5, and the
+    upgrade's item level is not below the base's. Most kept pairs have equal
+    item levels (159 -> 159), so the rule rejects only an inversion.
+    """
+    kept: list[dict] = []
+    pairs = sunmote_pairs.get("pairs") if isinstance(sunmote_pairs, dict) else None
+    for pair in pairs or []:
+        base = db_by_id.get(int(pair["baseId"]))
+        upgrade = db_by_id.get(int(pair["upgradeId"]))
+        reason = None
+        if base is None or upgrade is None:
+            reason = "not in db.json"
+        elif base.get("type") != upgrade.get("type"):
+            reason = "different slot"
+        elif base.get("phase") != 5 or upgrade.get("phase") != 5:
+            reason = "not phase 5"
+        elif (item_ilvl(upgrade) or 0) < (item_ilvl(base) or 0):
+            reason = f"ilvl {item_ilvl(base)} -> {item_ilvl(upgrade)}"
+        if reason is None:
+            kept.append({"baseId": int(pair["baseId"]), "upgradeId": int(pair["upgradeId"])})
+        elif report:
+            print(
+                f"  sunmote: rejected {pair['baseId']} -> {pair['upgradeId']} ({reason})",
+                file=sys.stderr,
+            )
+    return kept
+
+
 def map_db_source(
     raw: object,
     *,
@@ -1953,11 +1968,13 @@ def assemble(
         for e in (two_hop.get("entries") or [])
         if isinstance(e, dict)
     )
-    sunmote = (
-        load_json(profile.sunmote_upgrades)
-        if profile.sunmote_upgrades and profile.sunmote_upgrades.is_file()
-        else {}
-    )
+    if not SUNMOTE_PAIRS.is_file():
+        print(
+            f"missing {SUNMOTE_PAIRS} — run python scripts/parse_atlasloot.py",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+    sunmote_pairs = load_json(SUNMOTE_PAIRS)
     raid_recipes = load_json(RAID_RECIPES) if RAID_RECIPES.is_file() else {}
 
     # A recipe can drop in several zones (the SSC/TK belt patterns drop in
@@ -2153,20 +2170,25 @@ def assemble(
             token_src["tokenId"] = int(entry["tokenId"])
         add_source(piece_id, token_src, "two-hop")
 
-    # Sunmote upgrades. Same `token` shape -- the piece is obtained from a
-    # named raid boss via an intermediary -- with the base item named as the
-    # token, since that is what the player actually trades in.
-    for entry in (sunmote.get("entries") or []) if isinstance(sunmote, dict) else []:
-        if not isinstance(entry, dict):
+    # Sunmote upgrades, for every spec. Same `token` shape -- the piece is
+    # obtained from a named raid boss via an intermediary -- with the base item
+    # named as the token, since that is what the player actually trades in.
+    # Zone and boss are db.json's own attribution for the base item.
+    for pair in sunmote_upgrade_pairs(sunmote_pairs, db_by_id, report=True):
+        base = db_by_id[pair["baseId"]]
+        base_src = map_db_source(
+            base.get("sources"), zones_by_id=zones_by_id, npcs_by_id=npcs_by_id
+        )
+        if not base_src or base_src.get("kind") != "raid":
             continue
         sunmote_src: dict = {
             "kind": "token",
-            "zone": entry["zone"],
-            "token": f"Sunmote + {entry['baseName']}",
+            "zone": base_src["zone"],
+            "token": f"Sunmote + {base['name']}",
         }
-        if entry.get("boss"):
-            sunmote_src["boss"] = entry["boss"]
-        add_source(int(entry["pieceId"]), sunmote_src, "sunmote")
+        if base_src.get("boss"):
+            sunmote_src["boss"] = base_src["boss"]
+        add_source(pair["upgradeId"], sunmote_src, "sunmote")
 
     # wowhead lists for this maxPhase
     #

@@ -15,7 +15,7 @@
   ],
   "phaseRepFactions": [],
   "d7EligibleTotal": 3495,
-  "excludedNoSource": 872,
+  "excludedNoSource": 856,
   "universeTotal": 675,
   "listOnlyMembership": 0,
   "perSlot": {
@@ -35,8 +35,9 @@
   },
   "sourceRecordAdds": {
     "atlasloot": 303,
-    "curated": 7,
+    "curated": 6,
     "db": 2513,
+    "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {

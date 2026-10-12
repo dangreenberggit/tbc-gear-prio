@@ -44,26 +44,28 @@
   },
   "sourceRecordAdds": {
     "atlasloot": 255,
-    "curated": 7,
-    "db": 2202,
+    "curated": 5,
+    "db": 2191,
+    "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
-    "curated": 19,
-    "dbPhase": 534,
+    "curated": 17,
+    "dbPhase": 523,
     "heroicMatch": 11,
     "itemHasOrigin:atlasloot": 85,
-    "itemHasOrigin:curated": 7,
-    "itemHasOrigin:db": 942,
+    "itemHasOrigin:curated": 5,
+    "itemHasOrigin:db": 931,
+    "itemHasOrigin:sunmote": 13,
     "itemHasOrigin:two-hop": 18,
     "repFactionMatch": 33,
-    "zoneMatch": 402
+    "zoneMatch": 415
   },
   "exclusivePrimaryOrigin": {
-    "db": 942,
+    "db": 931,
     "atlasloot-only": 32,
-    "two-hop": 18,
-    "other": 7
+    "other": 18,
+    "two-hop": 18
   },
   "tierPiecesExpected": 18,
   "tierPiecesPresent": 18,
