@@ -437,13 +437,15 @@ const readResults = `(async () => {
 		const read = await collectRows(table, tr => {
 			const tds = Array.from(tr.querySelectorAll('td'));
 			if (tds.length < 5) return null;
-			const text = i => (tds[i]?.innerText ?? '').trim();
+			// DPS by test id and Slot as the cell after it: the column order changed once (ticket 606).
+			const delta = tr.querySelector('[data-testid="upgrades-delta-cell"]');
+			const text = td => (td?.innerText ?? '').trim();
 			return {
-				rank: text(0),
-				item: text(1).split('\\n')[0].trim(),
-				slot: text(2),
-				dps: number(text(3).split('\\n')[0]),
-				source: text(4),
+				rank: text(tds[0]),
+				item: text(tds[1]).split('\\n')[0].trim(),
+				slot: text(delta?.nextElementSibling),
+				dps: number(text(delta).split('\\n')[0]),
+				source: text(tds[4]),
 				belowCutoff: inGroup || tr.getAttribute('data-not-upgrade') === 'true',
 			};
 		});
