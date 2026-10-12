@@ -2,7 +2,8 @@
 """The committed AtlasLoot parse must reproduce from the vendored Lua.
 
 `data/atlasloot_sources.json`, `data/two-hop/raid-recipes.json` and
-`data/faction_ids.json` are generated output committed to the tree, while their
+`data/faction_ids.json` (and `data/two-hop/sunmote-pairs.json`, ticket 612) are
+generated output committed to the tree, while their
 source (`vendor/atlasloot/`) is gitignored. The tier-token maps
 (`data/two-hop/tier-sets.json` and the eleven `<spec>-tokens.json`) are checked
 the same way, by re-running `scripts/generate_tier_tokens.py` (ticket 609). Nothing else re-derives them, so
@@ -46,6 +47,7 @@ OUTPUTS = {
     ROOT / "data/atlasloot_sources.json": "--out",
     ROOT / "data/two-hop/raid-recipes.json": "--recipes-out",
     ROOT / "data/faction_ids.json": "--factions-out",
+    ROOT / "data/two-hop/sunmote-pairs.json": "--sunmote-out",
 }
 
 TOKEN_SPECS = (

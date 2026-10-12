@@ -1,0 +1,121 @@
+{
+  "kind": "sunmote-pair-map",
+  "generatedBy": "scripts/parse_atlasloot.py",
+  "notes": [
+    "Each pair is a commented-out row in AtlasLoot's Sunwell Plateau table (`upgradeId`) and the live row directly above it (`baseId`). These are all such rows with id >= 34000; scripts/assemble_universe.py decides which pairs are Sunmote upgrades (ticket 612)."
+  ],
+  "pairs": [
+    {
+      "baseId": 34170,
+      "upgradeId": 34386
+    },
+    {
+      "baseId": 34169,
+      "upgradeId": 34384
+    },
+    {
+      "baseId": 34167,
+      "upgradeId": 34382
+    },
+    {
+      "baseId": 34180,
+      "upgradeId": 34381
+    },
+    {
+      "baseId": 34188,
+      "upgradeId": 34385
+    },
+    {
+      "baseId": 34186,
+      "upgradeId": 34383
+    },
+    {
+      "baseId": 34202,
+      "upgradeId": 34393
+    },
+    {
+      "baseId": 34209,
+      "upgradeId": 34391
+    },
+    {
+      "baseId": 34195,
+      "upgradeId": 34392
+    },
+    {
+      "baseId": 34208,
+      "upgradeId": 34390
+    },
+    {
+      "baseId": 34192,
+      "upgradeId": 34388
+    },
+    {
+      "baseId": 34193,
+      "upgradeId": 34389
+    },
+    {
+      "baseId": 34233,
+      "upgradeId": 34399
+    },
+    {
+      "baseId": 34212,
+      "upgradeId": 34398
+    },
+    {
+      "baseId": 34211,
+      "upgradeId": 34397
+    },
+    {
+      "baseId": 34234,
+      "upgradeId": 34408
+    },
+    {
+      "baseId": 34229,
+      "upgradeId": 34396
+    },
+    {
+      "baseId": 34215,
+      "upgradeId": 34394
+    },
+    {
+      "baseId": 34216,
+      "upgradeId": 34395
+    },
+    {
+      "baseId": 34339,
+      "upgradeId": 34405
+    },
+    {
+      "baseId": 34342,
+      "upgradeId": 34406
+    },
+    {
+      "baseId": 34244,
+      "upgradeId": 34404
+    },
+    {
+      "baseId": 34245,
+      "upgradeId": 34403
+    },
+    {
+      "baseId": 34332,
+      "upgradeId": 34402
+    },
+    {
+      "baseId": 34243,
+      "upgradeId": 34401
+    },
+    {
+      "baseId": 34345,
+      "upgradeId": 34400
+    },
+    {
+      "baseId": 34351,
+      "upgradeId": 34407
+    },
+    {
+      "baseId": 34350,
+      "upgradeId": 34409
+    }
+  ]
+}
