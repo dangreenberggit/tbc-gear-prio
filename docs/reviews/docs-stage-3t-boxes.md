@@ -132,4 +132,50 @@ No finding blocks the merge.
 | R5  | Adversarial | fixed       | `eee1133d`: "Node 22 ... exact version was not logged"                                                            |
 | R6  | Adversarial | fixed       | `eee1133d`: "check (g) was removed with ticket 567"                                                               |
 | R7  | Adversarial | fixed       | `eee1133d`: "main-repo commit"                                                                                    |
-| R8  | Adversarial | defer       | `.scratch/carry-forward/issues/627-desktop-gate-passes-with-byte-mismatches.md`                                   |
+| R8  | Adversarial | fixed       | `dd331b83`, `d21aed6d`: ticket 627 closed on this branch; see the addendum                                        |
+
+## Addendum: 956363e5..d21aed6d
+
+Two commits came after this review: `dd331b83` makes a byte mismatch fail
+the desktop gate and closes ticket 627 (R8), and `d21aed6d` makes
+`--update-golden` refuse to write on a byte mismatch. One reviewer read
+`git diff 956363e5..d21aed6d` against the four questions the session asked.
+
+**Verdict logic, by byte-check rc.** `bytes_check` returns only 0, 1 or 2
+(`scripts/check_desktop_tab.py`, `def bytes_check`). rc 2 returns 2 before
+the harness runs, as before. rc 1 runs the harness, then `gate_passed`
+gives FAIL (rc 1) and `golden_refusal` refuses the write. rc 0 gives the
+old verdict, `gate_ok and golden_rc == 0`. Any other value fails both,
+because both test `!= 0`. The rest of the normal path (harness, (a)-(f),
+(h)) is unchanged. `python scripts/check_desktop_tab_verdict.py` passes (7
+cases). With the old verdict or the old golden rule patched in, it fails
+on `(1, True, 0)` and `(1, True)`.
+
+**Pattern.** `check_desktop_tab_verdict.py` copies `check_merge_to_dev.py`:
+a standalone script, `sys.path` insert, exit 0 or 1, wired as
+`desktop-gate:unit:check` at the end of `verify:steps`. Importing
+`check_desktop_tab` runs only constant assignments, so the check needs no
+fork, build or Chrome.
+
+**Ticket 627 and the scope doc.** The close has `Verified by:` with two
+commands in backticks (`docs/agents/issue-tracker.md` § Closing a ticket),
+and the Tab-adjacent row for 627 is gone from `docs/upgrades-tab-scope.md`
+in the same commit (§ Maintenance). The "PASS on fork 176268e7c" run is not
+on disk as a log; `.scratch/desktop-gate/last-run.json` (11:33, between the
+review and `dd331b83`) shows a finished 40-candidate run with 39 rows and
+no panic, which agrees with it.
+
+**Comments** explain why, apart from A3.
+
+Ticket 407 (`--full --update-golden` writes a golden nothing reads) stays
+open. Its second fix option, a refusal, would now go in `golden_refusal`;
+the ticket leaves the choice of fix open, so this addendum does not make it.
+
+## Disposition (addendum)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                     |
+| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| A1  | Standards   | fixed       | R8 was `defer` to 627, now closed, so `merge-ready` failed on R8 (a defer ticket must be open). R8 is now `fixed` |
+| A2  | Adversarial | fixed       | The `(bytes) FAIL` line tested `brc == 1` while the verdict tests `!= 0`; it now tests `!= 0`                     |
+| A3  | Standards   | fixed       | `gate_passed` comment said "the committed dist"; `dist/tbc` is a build output, not committed. Reworded            |
+| A4  | Adversarial | fixed       | A mismatch plus "could not run (h)" returned 2 without the `(bytes) FAIL` line; the line now prints before that   |
