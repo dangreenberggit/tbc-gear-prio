@@ -106,9 +106,20 @@ KNOWN_STATUSES = ("open", "claimed", "blocked", "closed", "resolved", "wontfix")
 CLOSED_STATUSES = ("closed", "resolved")
 # The value may sit on the line itself or below it -- tickets 409 and 425 put
 # a command block, after a blank line, under a bare `Verified by:`. A label
-# followed only by blank lines, a heading or the end of the file names no
-# evidence, so it does not count.
-VERIFIED_BY_RE = re.compile(r"(?im)^[ \t]*\*{0,2}Verified by:\*{0,2}\s*[^\s#*]")
+# followed only by blank lines, a heading, another header line or the end of
+# the file names no evidence, so it does not count: tickets 104 and 359 put
+# the label in the header block, directly above `Type:`, where an empty one
+# would otherwise borrow the next header as its value.
+VERIFIED_BY_RE = re.compile(r"(?im)^[ \t]*\*{0,2}Verified by:\*{0,2}[ \t]*(.*)$")
+TICKET_HEADER_RE = re.compile(
+    r"(?i)^\*{0,2}(status|type|origin|blocks|blocked by|serves|related|"
+    r"relates to|owner|priority|group|formerly|closed|resolved|resolution|"
+    r"verified by|verified):"
+)
+# A value that only promises evidence names none.
+VERIFIED_BY_PLACEHOLDERS = frozenset(
+    {"todo", "tbd", "none", "n/a", "na", "-", "--", "?", "...", "…", "pending"}
+)
 
 # The whole accepted disposition vocabulary. Three words, and there is no
 # fourth: a Disposition row disposes of a *finding* -- fixed it, ticketed it,
@@ -353,7 +364,32 @@ def closed_without_verification(old_text: str | None, new_text: str) -> bool:
         return False
     status_m = STATUS_RE.search(new_text)
     assert status_m is not None  # new_status was read from this match
-    return not VERIFIED_BY_RE.search(new_text, status_m.end())
+    return not any(
+        _verified_by_value(new_text, m) is not None
+        for m in VERIFIED_BY_RE.finditer(new_text, status_m.end())
+    )
+
+
+def _verified_by_value(text: str, label: re.Match[str]) -> str | None:
+    """The evidence a `Verified by:` label names, or None when it names none:
+    nothing on its line and, below it, only blank lines and then a heading, a
+    ticket header line or the end of the file; or a placeholder word."""
+    value = label.group(1).strip(" \t\r*")
+    if not value:
+        for line in text[label.end() :].splitlines():
+            s = line.strip()
+            if not s:
+                continue
+            if s.startswith("#") or TICKET_HEADER_RE.match(s):
+                return None
+            value = s
+            break
+    if value.startswith("```"):
+        return value  # a command block (ticket 409)
+    norm = value.strip("`*_ ").rstrip(".").casefold()
+    if not norm or norm in VERIFIED_BY_PLACEHOLDERS:
+        return None
+    return value
 
 
 def unparseable_status_tickets() -> list[tuple[Path, str]]:
@@ -538,14 +574,31 @@ def changed_files_vs_integration(
     return {ln.strip() for ln in diff.stdout.splitlines() if ln.strip()}, None
 
 
-def tickets_closed_without_verification(branch: str) -> tuple[list[str], str | None]:
+def _git_show(root: Path, ref: str, rel: str) -> str | None:
+    out = subprocess.run(
+        ["git", "show", f"{ref}:{rel}"],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    return out.stdout if out.returncode == 0 else None
+
+
+def tickets_closed_without_verification(
+    branch: str, root: Path = ROOT
+) -> tuple[list[str], str | None]:
     """Carry-forward tickets this branch flips to closed/resolved with no
     `Verified by:` line. Returns (repo-relative paths, reason not checked).
 
-    The new side is the working tree, as every other ticket scan here reads
-    it, so an uncommitted or untracked ticket counts: `--check-only` should
-    see what the author is about to commit. The old side is the merge base
-    with dev; a ticket absent there is new on this branch.
+    When `branch` is the checked-out branch, the new side is the working
+    tree, as every other ticket scan here reads it, so an uncommitted or
+    untracked ticket counts: `--check-only` should see what the author is
+    about to commit. For any other branch (`--branch X` from another
+    checkout) the new side is that branch's tip, since the working tree
+    holds some other branch's tickets. The old side is the merge base with
+    dev; a ticket absent there is new on this branch.
     """
     if not branch:
         return [], "no current branch (detached HEAD?)"
@@ -554,7 +607,7 @@ def tickets_closed_without_verification(branch: str) -> tuple[list[str], str | N
     try:
         base = subprocess.run(
             ["git", "merge-base", INTEGRATION_BRANCH, branch],
-            cwd=ROOT,
+            cwd=root,
             capture_output=True,
             text=True,
         )
@@ -564,13 +617,21 @@ def tickets_closed_without_verification(branch: str) -> tuple[list[str], str | N
         return [], f"no merge base between {INTEGRATION_BRANCH} and {branch}"
     base_sha = base.stdout.strip()
     carry_rel = CARRY.relative_to(ROOT).as_posix()
+    current = subprocess.run(
+        ["git", "branch", "--show-current"], cwd=root, capture_output=True, text=True
+    ).stdout.strip()
+    from_tree = branch == current
 
+    if from_tree:
+        listings = (
+            ["git", "diff", "--name-only", base_sha, "--", carry_rel],
+            ["git", "ls-files", "--others", "--exclude-standard", "--", carry_rel],
+        )
+    else:
+        listings = (["git", "diff", "--name-only", base_sha, branch, "--", carry_rel],)
     names: set[str] = set()
-    for argv in (
-        ["git", "diff", "--name-only", base_sha, "--", carry_rel],
-        ["git", "ls-files", "--others", "--exclude-standard", "--", carry_rel],
-    ):
-        out = subprocess.run(argv, cwd=ROOT, capture_output=True, text=True)
+    for argv in listings:
+        out = subprocess.run(argv, cwd=root, capture_output=True, text=True)
         if out.returncode != 0:
             return [], f"{' '.join(argv[:2])} failed: {out.stderr.strip()}"
         names.update(ln.strip() for ln in out.stdout.splitlines() if ln.strip())
@@ -580,20 +641,18 @@ def tickets_closed_without_verification(branch: str) -> tuple[list[str], str | N
         # Same set iter_issue_files() scans: top-level .md files only.
         if not rel.endswith(".md") or Path(rel).parent.as_posix() != carry_rel:
             continue
-        path = ROOT / rel
-        if not path.is_file():
+        if from_tree:
+            path = root / rel
+            new_text = (
+                path.read_text(encoding="utf-8", errors="replace")
+                if path.is_file()
+                else None
+            )
+        else:
+            new_text = _git_show(root, branch, rel)
+        if new_text is None:
             continue  # deleted on the branch
-        old = subprocess.run(
-            ["git", "show", f"{base_sha}:{rel}"],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-        )
-        old_text = old.stdout if old.returncode == 0 else None
-        new_text = path.read_text(encoding="utf-8", errors="replace")
-        if closed_without_verification(old_text, new_text):
+        if closed_without_verification(_git_show(root, base_sha, rel), new_text):
             flagged.append(rel)
     return flagged, None
 
@@ -1337,6 +1396,21 @@ def check_closing_rule_edges() -> list[str]:
          "the bold form"),
         (open_t, "**Status:** closed\n**Verified by:**\n\n# t\n", True,
          "an empty bold Verified by:"),
+        (open_t, "Status: closed\nVerified by:\nType: bug\n", True,
+         "an empty Verified by: directly above a header line"),
+        (open_t, "Status: closed\r\nVerified by:\r\nType: bug\r\n", True,
+         "an empty Verified by: above a header line, CRLF"),
+        (open_t, "**Status:** closed\n**Verified by:**\n**Type:** bug\n", True,
+         "an empty bold Verified by: above a bold header line"),
+        (open_t, "Status: closed\nVerified by: TODO\n", True, "a TODO placeholder"),
+        (open_t, "Status: closed\nVerified by: n/a\n", True, "an n/a placeholder"),
+        (open_t, "Status: closed\nVerified by: `none`\n", True, "a none placeholder"),
+        (open_t, "Status: closed\nVerified by:\nType: bug\n\nVerified by: `abc1234`\n",
+         False, "an empty label, then a filled one further down"),
+        # The check proves a value is present; whether prose is evidence is
+        # the reviewer's call (docs/agents/issue-tracker.md, "Closing a ticket").
+        (open_t, "Status: closed\nVerified by:\n\nThe tab rendered it.\n", False,
+         "prose below the label"),
     ]
     problems = []
     for old, new, want, label in cases:
@@ -1345,9 +1419,68 @@ def check_closing_rule_edges() -> list[str]:
     return problems
 
 
+def check_closing_rule_reads_git() -> list[str]:
+    """The git side of the closing rule, on a throwaway repo: committed,
+    uncommitted and untracked closes are judged; a subfolder is ignored; and
+    `--branch X` from another checkout reads X's tip, not the working tree."""
+    import tempfile
+
+    carry_rel = CARRY.relative_to(ROOT).as_posix()
+    bare = "Status: closed\n\n# t\n"
+    good = "Status: closed\nVerified by: `pnpm verify`\n\n# t\n"
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        root = Path(tmp)
+        hooks = root / "no-hooks"
+        hooks.mkdir()
+
+        def git(*argv: str) -> None:
+            subprocess.run(
+                ["git", "-c", f"core.hooksPath={hooks.as_posix()}",
+                 "-c", "user.name=t", "-c", "user.email=t@t",
+                 "-c", "commit.gpgsign=false", *argv],
+                cwd=root, check=True, capture_output=True,
+            )
+
+        def put(name: str, text: str) -> None:
+            p = root / carry_rel / name
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(text, encoding="utf-8", newline="")
+
+        try:
+            git("init", "-q", "-b", INTEGRATION_BRANCH)
+            for name in ("1-a.md", "2-b.md", "4-d.md", "sub/5-e.md"):
+                put(name, "Status: open\n\n# t\n")
+            git("add", "-A")
+            git("commit", "-q", "-m", "base")
+            git("checkout", "-q", "-b", "feat")
+            put("1-a.md", bare)
+            put("4-d.md", good)
+            put("sub/5-e.md", bare)
+            git("add", "-A")
+            git("commit", "-q", "-m", "close")
+            put("2-b.md", "Status: closed\r\nVerified by:\r\nType: bug\r\n")
+            put("3-c.md", bare)
+        except (OSError, subprocess.CalledProcessError) as exc:
+            return [f"closing rule git test could not build its repo: {exc}"]
+
+        want = [f"{carry_rel}/{n}" for n in ("1-a.md", "2-b.md", "3-c.md")]
+        problems = []
+        got, why = tickets_closed_without_verification("feat", root)
+        if why or got != want:
+            problems.append(f"working tree: got {got} ({why}), want {want}")
+        git("add", "-A")
+        git("commit", "-q", "-m", "rest")
+        git("checkout", "-q", INTEGRATION_BRANCH)
+        got, why = tickets_closed_without_verification("feat", root)
+        if why or got != want:
+            problems.append(f"--branch from another checkout: got {got} ({why}), want {want}")
+        return problems
+
+
 CHECKS = (
     check_closing_without_verified_by_is_flagged,
     check_closing_rule_edges,
+    check_closing_rule_reads_git,
     check_extracts_common_paths,
     check_extracts_all_source_extensions,
     check_ignores_prose_and_bare_filenames,

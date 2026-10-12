@@ -72,9 +72,14 @@ reader can re-run, `<repo>@<sha>` (for example `tbc-gear-prio@592afc2c` or
 goes on the same line or below it; a bare label with nothing under it does
 not count. Put it directly under the header lines or in the closing note.
 
-`scripts/check_merge_ready.py` enforces this for every ticket the branch flips
-to `closed` or `resolved`, including a ticket the branch adds already closed:
-`pnpm merge-ready` and `pnpm merge-to-dev` fail on one that lacks the line. A
+`scripts/check_merge_ready.py` checks every ticket the branch flips to
+`closed` or `resolved`, including a ticket the branch adds already closed:
+`pnpm merge-ready` and `pnpm merge-to-dev` fail on one with no `Verified by:`
+line after the Status line, or whose label has no value. A label has no value
+when nothing follows it on its line and the next non-blank line is a heading,
+another header line such as `Type:`, or the end of the file, or when the value
+is a placeholder such as `TODO` or `n/a`. The script cannot tell whether the
+value names real evidence; the reviewer judges that. A
 ticket that was already closed at the merge base with `dev` is not checked.
 `wontfix` needs no line, because it records a decision not to act.
 
