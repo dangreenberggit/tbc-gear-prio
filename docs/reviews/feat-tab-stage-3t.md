@@ -2,6 +2,8 @@
 
 Reviewed range: `64443dc44f89b8b917ae64ba6714e7108cdc44ec..1c003bdf7fdb56ce6f56fff18410926f6c9d78f4`
 
+Reviewed range: `1c003bdf7fdb56ce6f56fff18410926f6c9d78f4..80a2a8a4b0bc94ead24a00b40187a6be81846b46`
+
 Dispatch (round 1): `codex` is not on `PATH` (`command -v codex` → rc 1).
 Three fresh `general-task` agents on Opus (adversarial, domain, and
 Standards + Spec through the `code-review` skill, which ran its own two
@@ -182,20 +184,79 @@ the second run). Command both times:
    merge-ready: ok
    ```
 
+## Focused check (round 2)
+
+Range `1c003bdf..80a2a8a4`; no fork range (`git diff --quiet dev...HEAD --
+data/wowsims-fork.lock.json` → 0). One fresh `general-task` agent on Opus,
+told it writes nothing.
+
+1. **Conditions hold — pass.** Every commit names the round-1 findings it
+   fixes (`fa0900ff` A1 A2 A3 A5 S1 P3, `bdb77463` S2, `3b18b3a2` A4
+   D1–D5 P2 S7, `73d5a8e7` S3 S4, `5dbdab4a` S7) or changes only this
+   file (`80a2a8a4`); every changed code line is at a cited place; the fork
+   pin does not move.
+2. **Each diff changes only what its finding asks — pass.**
+3. **Each new test asserts its finding — pass.** The agent ran the new
+   edge cases against `1c003bdf`'s `closed_without_verification`: the A1
+   and A2 cases fail there and pass now. It ran
+   `check_closing_rule_reads_git` with the old git function swapped in: the
+   old one missed the CRLF ticket (A1) and returned `[]` for `--branch`
+   from another checkout (A3).
+4. **The touched tests pass — pass.** `python
+scripts/check_merge_ready.py --self-test` → 36 checks ok; no closed
+   ticket on `dev` (18) or on this branch (25) with a label after its
+   Status line is flagged by the new rule.
+
+Findings in the lines the fixes wrote:
+
+- **R1 (silent wrong result; A1 fixed in part).** `TICKET_HEADER_RE` is a
+  fixed key list. An empty `Verified by:` directly above `Severity:`,
+  `Branch:`, `Progress:` or `Note:` (keys this repo's tickets use) still
+  passes. Confirmed: `closed_without_verification('Status: open\n',
+'Status: closed\nVerified by:\nSeverity: major\n')` → `False`.
+- **R2 (silent wrong result; A2 fixed in part).** An empty fenced code
+  block, `---` or `(none)` still counts as a value. Confirmed for the empty
+  block and `---` (→ `False`).
+- **R3 (loud).** A genuine next-line value starting with `#` (`#409's
+command …`) or a listed key (`Resolution: …`) is rejected.
+- **R4 (bookkeeping).** Ticket 359's `Verified by:` paired `7430c9e5` with
+  line 85; at that commit the line is 87. Applied: the line now gives 87
+  at `7430c9e5` and 85, 89 and 91 at this branch's tip.
+- **R5 (not a defect).** The tree held this file's uncommitted round-2
+  `Reviewed range:` line, written before dispatch as the skill says.
+
+R1 and R2 are findings other than bookkeeping, so the review stops here
+("Round limit"): no `## Disposition (round 2)` table, and step 4
+(`pnpm merge-to-dev --check-only`) was not run.
+
 ## Summary
 
-Round 1 found no blocking defect. Its one silent wrong result (A1: an
-empty `Verified by:` passed the new check) and every other round-1
-finding are fixed on this branch, apart from S5 (deferred to open ticket
-352), S6 (a made commit) and P4–P5 (the gitignored plan file). Round 2
-(focused check) is below.
+**The review stopped at round 2, and the merge is blocked.** Round 2's
+four checks passed, but it found that the A1 and A2 fixes are incomplete:
+the `Verified by:` check still passes an empty label above some header
+keys (R1) and an empty code block or a lone dash (R2). Both are a check
+that passes when it should fail, so under "Round limit" in the
+`pre-merge-review` skill they block the merge and there is no third
+round. They have no Disposition row: the owner has not allowed a
+deferral. R1–R3 are recorded in open ticket
+`.scratch/carry-forward/issues/624-verified-by-check-still-passes-some-empty-values.md`;
+the owner decides how they are fixed (for example a dedicated pass by a
+different writer). R4 (bookkeeping) was applied.
+
+Round 1's other findings are fixed on this branch, apart from S5
+(deferred to open ticket 352), S6 (a made commit) and P4–P5 (the
+gitignored plan file, reported to the coordinator).
+
+Ticket counts, from the commands in the skill's step 3: filed 9 (614–621
+and 624), closed 5 (104, 254, 311 and 359 closed; 305 wontfix). The branch
+filed more tickets than it closed.
 
 ## Disposition
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                 |
 | --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | fixed       | `fa0900ff`: an empty label no longer borrows the next line; self-test cases added                                                                                             |
-| A2  | Adversarial | fixed       | `fa0900ff`: placeholder values rejected                                                                                                                                       |
+| A1  | Adversarial | fixed       | `fa0900ff`, in part: round 2's R1 found keys it misses (ticket 624)                                                                                                           |
+| A2  | Adversarial | fixed       | `fa0900ff`, in part: round 2's R2 (ticket 624)                                                                                                                                |
 | A3  | Adversarial | fixed       | `fa0900ff`: `--branch X` from another checkout reads X's tip                                                                                                                  |
 | A4  | Adversarial | fixed       | `3b18b3a2`: 359 and 104 evidence text corrected                                                                                                                               |
 | A5  | Adversarial | fixed       | `fa0900ff`: `check_closing_rule_reads_git` self-test on a throwaway repo                                                                                                      |

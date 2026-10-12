@@ -1,5 +1,5 @@
 Status: closed
-Verified by: tbc-gear-prio@7430c9e5; `grep -n "moving the wowsims engine pin" AGENTS.md` prints line 85 (lines 89 and 91 also match since this branch)
+Verified by: tbc-gear-prio@7430c9e5; `grep -n "moving the wowsims engine pin" AGENTS.md` prints line 87 at `7430c9e5`, and lines 85, 89 and 91 at the tip of `feat/tab-stage-3t`
 Type: task
 Origin: docs/reviews/feat-wowsims-reforge-catchup.md (Spec axis, S7)
 Blocks: none
