@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Verified by: `python scripts/check_merge_ready.py --self-test` (36 checks ok) at tbc-gear-prio@a15a4eb1; fix in tbc-gear-prio@8167d62e and tbc-gear-prio@a15a4eb1
 Type: bug
 Origin: docs/reviews/feat-tab-stage-3t.md
 Blocks: none
@@ -60,3 +61,21 @@ example `#409's command …`) or with a listed key (`Verified: …`,
 Each probe above gives the right answer, each has a self-test case in
 `check_closing_rule_edges`, and `python scripts/check_merge_ready.py
 --self-test` passes.
+
+## Resolution (2026-10-11)
+
+Fixed with a different rule from the suggestion above. A value now counts
+only when it holds one of the three forms `docs/agents/issue-tracker.md`
+names: a command in backticks or a code block, `<repo>@<sha>`, or a
+`docs/reviews/` file. A command that is only a placeholder word or
+punctuation does not count. The value is read by position: any line before
+the file's first blank line is a header and never part of a value, so no
+key list is needed (R1). An empty code block, `---`, an em dash and
+`(none)` name none of the forms (R2). A heading is `^#{1,6}` followed by a
+space or the line end, and a `Key:` line below the header block can be a
+value (R3). Each probe is a case in `check_closing_rule_edges`.
+
+Prose alone is now rejected. Of the closed tickets on `dev` and on this
+branch, only 315 is newly flagged: its one `Verified by:` value is an owner
+observation in prose. 315 was closed before the rule, so the gate does not
+judge it.
