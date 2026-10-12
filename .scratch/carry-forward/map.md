@@ -342,3 +342,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 606 At 375 px the DPS figure is outside the table panel (Chunk 3b step 7 regression check) 2026-10-11
 - 607 Line wrapping in the view toggles and the Source column (Chunk 3b step 7 regression check) 2026-10-11
 - 608 `pnpm tab-review`: later captures in a hovered `pane: false` entry may clip the nav bar (pre-merge review feat/tab-scope-refresh, A7; left without a ticket when 510 closed) 2026-10-11
+- 624 The `Verified by:` check still passes some empty values (pre-merge review feat/tab-stage-3t, round 2 R1-R3) 2026-10-11

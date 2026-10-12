@@ -14,6 +14,12 @@ setters, and that a programmatic write now shows through instead of leaving a
 stale display). No longer half-wired. Verified during this bucket-2 pass by
 `npm run type-check` in vendor/tbc-new-fork (tsc --noEmit, EXIT=0). No new code
 change needed; closing as resolved-upstream-of-this-pass.
+Verified by: tbc-new-fork@ea65fbfc2 (fork branch `feat/upgrades-tab`, the
+pre-React UI):
+`git -C vendor/tbc-new-fork show ea65fbfc2:ui/core/components/individual_sim_ui/upgrades_tab.tsx | grep -n 'settingsChangedEmitter.emit'`
+→ `:863`, `:879`, `:894` (re-run 2026-10-11). The React port replaced this
+file; whether the React settings controls need the same re-sync was not
+checked.
 
 # Upgrades tab's settings emitter is wired but never emitted
 

@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Verified by: tbc-gear-prio@7430c9e5; `grep -n "moving the wowsims engine pin" AGENTS.md` prints line 87 at `7430c9e5`, and lines 85, 89 and 91 at the tip of `feat/tab-stage-3t`
 Type: task
 Origin: docs/reviews/feat-wowsims-reforge-catchup.md (Spec axis, S7)
 Blocks: none
@@ -46,6 +47,19 @@ Proposed wording, for approval:
 
 ## Acceptance
 
-- [ ] Wording approved in chat, per `AGENTS.md`.
-- [ ] `AGENTS.md:87` names the engine-pin action, so every section of
+- [ ] Wording approved in chat, per `AGENTS.md`. Not met: no record of an
+      owner approval was found (see "Closed 2026-10-11").
+- [x] `AGENTS.md:87` names the engine-pin action, so every section of
       `known-traps.md` is reachable from the trigger list.
+
+## Closed 2026-10-11
+
+The fix is in `AGENTS.md:85`: the known-traps trigger list names "moving the
+wowsims engine pin". Commit `7430c9e5` (2026-09-10) added it, and
+`git merge-base --is-ancestor 7430c9e5 dev` exits 0. The line has stood in
+`AGENTS.md` since that date.
+
+The first acceptance box is not met as written: the body of `7430c9e5`
+records a review against the `writing-for-agents` skill by a fresh-context
+agent, but no owner approval of the wording. The ticket is closed because
+the line is in `AGENTS.md`; no record of an owner approval was found.

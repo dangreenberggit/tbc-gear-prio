@@ -1,15 +1,16 @@
-Status: blocked
-Type: possibility (the owner has not decided to do it)
+Status: open
+Serves: .scratch/plans/upgrades-tab-finish-line.md, Tab-blocking
+Type: feature (owner ruled option A on 2026-10-11)
 Origin: owner, 2026-09-30, in chat (relayed verbatim by the orchestrating session), about the third Cherryboom enhancement run
 Blocks: none
 Blocked by: none
-Related: 525, 527, 305, 309, 430, 312
+Related: 525, 527, 305, 309, 430, 312, 614, 615
 
 # A BiS item that does not clear the cutoff is hidden in the closed fold
 
-`blocked` because the owner has not decided whether to do this at all.
-Only the owner can move it. When work starts, the owner picks the design;
-the options below are options, not a plan.
+The owner ruled on 2026-10-11: option A, with the details in
+"2026-10-11 — owner ruling: option A" at the bottom of this file. The
+options below are kept as the record of what was asked.
 
 ## The owner's words
 
@@ -100,7 +101,10 @@ only; no setting changed and no sim started.
   It sorts before the shortlist split (`view.ts:470-475`), so it would not
   pull a folded row into the main table either.
 
-## Options (not decided)
+## Options as filed on 2026-09-30 (option A chosen on 2026-10-11)
+
+The 2026-10-11 chat question used its own letters for its options B to D.
+Its option A is the same as option A here.
 
 Each is a fork change plus a re-pin; follow AGENTS.md, "The forked tab
 repo". Counts below are from the live page above.
@@ -166,30 +170,47 @@ it in this sim. The tab already says so by where it puts the row.
   sort tickets about the row cells and table shape, not about which rows
   are shown.
 
-## What would close this
+## Acceptance
 
-1. The owner's decision: do it or not, and if so which option. Recorded
-   here. Option E closes the ticket `wontfix`.
-2. For A to D: the fork change, the re-pin and `pnpm verify` with rc=0.
-3. Visual acceptance, judged by `gate-visual`. Written for A, B and C;
-   rewrite it for D.
+- [x] The owner rules. Done 2026-10-11: option A (see the note at the
+      bottom of this file).
+- [ ] A BiS-list row below the cutoff appears in the main table, sorted by
+      its gain, marked as not an upgrade; slot counts and the ThatsMyBis
+      export count only rows that meet the cutoff; unit tests cover both.
 
-   > On a settled ranking from a recorded fixture, at 1280 and 375 px,
-   > with no disclosure opened by the capture, every item that carries a
-   > BiS badge in the ranking is shown by name with its signed DPS figure
-   > in the shopping list, and the rows above it that clear the cutoff are
-   > in the same order as in a capture taken before the change.
-
-   Capture it with `pnpm tab-review`. The recorded fixtures have BiS rows
-   below the cutoff: `feral-p3-nordrassil4.json` has 7 non-owned rows
-   with a `BiS` tag and `belowCutoff: true`, including Choker of Endless
-   Nightmares at -9.8 (read on 2026-09-30 with a Python walk over the
-   fixture's rows). That is the engine's field; with set potential on the
-   view can differ (`view.ts:188-205`), so check the capture's own fold
-   (untested).
+The cutoff is becoming a flat 3 DPS bar (ticket 615, branch
+`feat/flat-cutoff`, in progress), so "below the cutoff" here means below
+that bar once it is merged.
 
 ## Out of scope
 
 - Why Cursed Vision sims at -18.3 for this character. If the owner doubts
   the number, that is an SME check (`sme-rank-review`), not this ticket.
 - The pre-sim "Sim only selected set items" prune.
+
+## Comments
+
+## 2026-10-11 — owner ruling: option A
+
+The owner was asked in chat on 2026-10-11: "Q-528: how should the tab show
+BiS items that do not beat your gear?" Option A read: "put BiS items in the
+main table anyway. You see them without a click. But the table would no
+longer mean 'these beat your gear', so the slot counts and the ThatsMyBis
+export would start including items that are not upgrades." The other
+options were B (a small open group under the table), C (name the BiS count
+in the closed group's title; recommended) and D (no change). The owner
+answered: "A".
+
+The session then decided the details and stated them to the owner, who did
+not object:
+
+- A BiS item that misses the cutoff goes into the main table, sorted by its
+  gain like any other row.
+- The row has a short mark saying it is not an upgrade.
+- The slot counts and the ThatsMyBis export keep counting only real
+  upgrades (rows that meet the cutoff).
+
+Implementation runs later, together with ticket 614 in one fork branch,
+after the flat-cutoff work (ticket 615, branch `feat/flat-cutoff`) is merged.
+Both tickets change the same fork file,
+`ui/features/upgrades/model/results_view.ts`.

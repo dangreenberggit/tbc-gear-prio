@@ -14,6 +14,12 @@ Type: refactor
 Origin: Gate C (upgrades-css-controls-copy stage-gate) + round-6 pre-merge review (spec axis), 2026-08-29; feat/upgrades-dedup-wowsims
 Blocks: none
 Blocked by: none
+Verified by: tbc-new-fork@f17b77db7 (fork branch `feat/upgrades-tab`, the
+pre-React UI), pinned by tbc-gear-prio@2c14735d:
+`git -C vendor/tbc-new-fork show f17b77db7:ui/core/components/individual_sim_ui/upgrades_tab.tsx | grep -n 'new BooleanPicker'`
+→ `:168` (the ViewToggle wrapper) and `:853`. The React tab that replaced this
+file also uses the native picker: `grep -n BooleanPicker vendor/tbc-new-fork/ui/features/upgrades/components/ViewToggles/ViewToggles.tsx`
+→ `:2`, `:20` (`layout: 'inline'`), checked 2026-10-11 at fork `316326a95`.
 
 # Adopt the native BooleanPicker idiom for the two Upgrades view checkboxes
 

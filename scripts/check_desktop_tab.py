@@ -27,8 +27,8 @@ and a comparison of the run's ranking output against a committed golden readback
 above-cutoff set. See `data/desktop-gate/README.md`.
 
 **Not in `pnpm verify`** (the brief's C23): this needs go, make and Chrome, and
-CI has none. Run it by hand before every fork re-pin
-(`docs/agents/upstream-catch-up.md` § 5).
+CI has none. Run it by hand before a fork re-pin that `dev` will receive
+(ADR-0036 Consequence 1; `docs/agents/upstream-catch-up.md` § 5).
 
 Modes:
   (default)         build (make wowsimtbc) unless --no-build, start the packaged
