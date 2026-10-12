@@ -243,3 +243,80 @@ file is absent at `upstream/master`.
 Reviewed range: `9b059b58..1519317d`
 
 Fork range: `08afcdcce..176268e7c`.
+
+One fresh `general-task` agent on Opus (review lane) ran the check. Its
+result for each check:
+
+1. **Pass.** Every commit in both ranges is a fix named by finding ID
+   (`46d382c5`, `49836e4e5`, `3393bcb19`), the code-quality pass with its row
+   IDs (`4a392741`, `fd362cf6b`, `176268e7c`), a re-pin that changes only two
+   files under `data/` (`72b13908`; `git diff --word-diff` shows
+   `sim-implemented-effects.json` changes only `forkCommit`), or a commit to
+   this file and tickets only (`19c2e9f1`, `1519317d`). Every changed code
+   line is at a place a fixed finding cites. The wowsims-file check gives the
+   same output at `176268e7c`, and all 9 paths changed in
+   `08afcdcce..176268e7c` are absent at `upstream/master`.
+2. **Pass.** Each diff does what its finding asks and nothing more. No script
+   reads the renamed `shortlistRows` key or the old "shortlist table" text.
+   S5's count of 7 is right (`git diff --name-only 72de95a28 08afcdcce` lists
+   9 files, 2 under `model/engine`).
+3. **Pass.** The Ajv command prints `upgrades valid` and `translation valid`;
+   run against the `08afcdcce` schema it gives S1's 4 errors. Ticket 622's new
+   grep prints nothing at `176268e7c` and matches line 14 at `08afcdcce`. A1
+   has no automated test; the harness is a string evaluated in a live page
+   over CDP, and the fix has not been run against a live page (unverified).
+4. **Pass.** Fork `vitest run ui/features/upgrades`: 54 files, 451 tests;
+   `check_engine_port_drift.py` ok; `node --check` on the three harness files;
+   the lock is valid JSON and its `commit` equals the fork HEAD `176268e7c`.
+   Both working trees clean.
+
+No finding, bookkeeping or otherwise.
+
+## Disposition (round 2)
+
+| ID  | Axis         | Disposition | Ticket / note                                                                                                                                  |
+| --- | ------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial  | fixed       | `46d382c5` — `readResults` reads `data-not-upgrade`; not yet run against a live page                                                           |
+| A2  | Adversarial  | fixed       | `4a392741` — as CQ4                                                                                                                            |
+| D1  | Domain       | wontfix     | Session decision 2026-10-11: the owner's ruled option calls these rows "items that are not upgrades", and ADR-0037's cutoff defines an upgrade |
+| D2  | Domain       | defer       | `.scratch/carry-forward/issues/625-bis-only-worn-bis-slot-says-widen-filter.md` — before this branch (same text at fork `c4696b091`)           |
+| D3  | Domain       | wontfix     | "(0)" and the dimming both mean "no upgrade in this slot", which is true; the listed row carries its own "(Not an upgrade)" mark               |
+| D4  | Domain       | fixed       | fork `176268e7c` — as CQ3                                                                                                                      |
+| S1  | Standards    | fixed       | fork `49836e4e5` — schema matches the strings; Ajv prints `upgrades valid`                                                                     |
+| S2  | Standards    | fixed       | fork `fd362cf6b` — as CQ1                                                                                                                      |
+| S3  | Standards    | fixed       | `46d382c5` — provenance row records `ENGINE_VERSION` 6 against core's 9                                                                        |
+| S4  | Standards    | fixed       | fork `fd362cf6b` — as CQ2                                                                                                                      |
+| S5  | Standards    | fixed       | `72b13908` — the new lock `_comment` entry corrects the count to 7                                                                             |
+| S6  | Standards    | defer       | `.scratch/carry-forward/issues/626-verify-skips-tab-locale-schema.md` — a missing gate, before this branch                                     |
+| S7  | Standards    | fixed       | fork `3393bcb19`; ticket 622 records it (`1519317d`)                                                                                           |
+| CQ1 | Code quality | fixed       | fork `fd362cf6b`                                                                                                                               |
+| CQ2 | Code quality | fixed       | fork `fd362cf6b` — one `rows: PaneRows` prop                                                                                                   |
+| CQ3 | Code quality | fixed       | fork `176268e7c` — a made-up Lightbringer Battlegear chest, id 900001                                                                          |
+| CQ4 | Code quality | fixed       | `4a392741`                                                                                                                                     |
+| CQ5 | Code quality | fixed       | fork `176268e7c`                                                                                                                               |
+
+## Summary
+
+The branch builds the owner's ruling on 528 (option A) and ticket 614 as
+set, and the fork code is correct: marked BiS-list rows reach neither the
+slot counts nor the ThatsMyBis export, no row is listed twice, and Set
+potential uses effective DPS for both the cutoff and the sort. No existing
+upstream wowsims file changed beyond the approved `ui/app/SimTabsSection.tsx`
+6/0, the PROVENANCE hashes match, and the `oxfmt` failure on the two ported
+engine files predates the branch.
+
+Round 1 found one silent wrong result, in a main-repo harness this branch did
+not update (A1: marked rows reported above the cutoff to the desktop gate),
+and one broken contract (S1: the locale schema). Both are fixed, with the
+smaller findings and the code-quality rows. Round 2 passed with no finding.
+D1 and D3 are `wontfix`; D2 and S6 predate the branch and are deferred to
+tickets 625 and 626. No finding blocks the merge.
+
+`feat/bis-rows` merges to `dev` as one branch with `feat/flat-cutoff` and
+`feat/tab-stage-3t`, so the schema errors on `feat/flat-cutoff`'s own tip
+never reach `dev` (session note, 2026-10-11).
+
+Tickets: the skill's commands over `dev...HEAD` give 11 filed and 7 closed,
+counting the two branches this one stacks on. This branch's own range
+(`git diff --name-status 367b23ef HEAD`) filed 2 (625, 626) and closed 1
+(622). Filed is higher than closed on both counts.
