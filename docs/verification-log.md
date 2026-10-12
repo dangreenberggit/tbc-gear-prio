@@ -2630,8 +2630,8 @@ the readback file under `.scratch/stage-3t/` is gitignored.
 
 Met on 2026-10-12, 18:04:46Z–18:08:26Z UTC, on fork `176268e7c`. The pair's
 `vendor/tbc-new-fork/dist`, built at fork `176268e7c` (`lib.wasm.gz` by the
-pair's `--build`, the JS bundles again by the box 4 run), was served with `http-server ... -p 8099 -a 127.0.0.1 -c-1`. PLAN.md's
-harness command, with `--origin http://127.0.0.1:8099` and the readback
+pair's `--build`, the JS bundles again by the box 4 run), was served with
+`http-server ... -p 8099 -a 127.0.0.1 -c-1`. PLAN.md's harness command, with `--origin http://127.0.0.1:8099` and the readback
 written to `.scratch/stage-3t/readback-wasm-ret-p4-cap40-2026-10-12.json`
 (not PLAN's `--out` path, which holds an earlier run from 2026-10-12T03:16Z),
 exited 0 and printed:
@@ -2653,7 +2653,8 @@ Met on 2026-10-12, 18:00:53Z–18:02:34Z UTC. The fork's HEAD and the lock's
 `commit` were both `176268e7c1acb552c3c9cba9337eb29b181f080e`.
 `python scripts/check_desktop_tab.py` (what `desktop-gate:check` runs) printed
 `desktop-gate: PASS.` and `rc=0`, with checks (a) to (f) and (h) passing
-(check (g) was removed with ticket 567); (h) compares the rows, `aboveCutoffItems` and `baselineDps` with
+(check (g) was removed with ticket 567); (h) compares the rows,
+`aboveCutoffItems` and `baselineDps` with
 `data/desktop-gate/golden-ret-p4-cap40.json`. Log:
 `.scratch/stage-3t/box4-desktop-gate-176268e7c-2026-10-12.log`.
 
