@@ -505,6 +505,10 @@ def wowsimcli_platform() -> str:
     return "win32-x64" if platform.system() == "Windows" else "linux-x64"
 
 
+def pnpm_in(folder: Path) -> str:
+    return f'pnpm -C "{folder.as_posix()}"'
+
+
 def pair(args: argparse.Namespace) -> int:
     main_dir, fork = find_checkouts()
     target = main_dir.parent / PAIR_DIR / args.name
@@ -515,7 +519,7 @@ def pair(args: argparse.Namespace) -> int:
     if target.exists():
         raise Refusal(
             f"{target} already exists; pick another name or run: "
-            f"pnpm -C \"{main_dir.as_posix()}\" wt:unpair {args.name}"
+            f"{pnpm_in(main_dir)} wt:unpair {args.name}"
         )
     if args.fork_detached == bool(args.fork_branch):
         raise Refusal("give exactly one of <fork-branch> or --fork-detached")
@@ -561,9 +565,9 @@ def pair(args: argparse.Namespace) -> int:
             if not src.is_dir():
                 warnings.append(
                     f"{src} is missing and was not copied; restore it in the pair "
-                    f"(pnpm -C \"{target.as_posix()}\" sync:wowsims:restore, "
-                    f"pnpm -C \"{target.as_posix()}\" sync:atlasloot:restore or "
-                    f"pnpm -C \"{target.as_posix()}\" fetch:wowsimcli)"
+                    f"({pnpm_in(target)} sync:wowsims:restore, "
+                    f"{pnpm_in(target)} sync:atlasloot:restore or "
+                    f"{pnpm_in(target)} fetch:wowsimcli)"
                 )
                 continue
             shutil.copytree(src, target / "vendor" / name, symlinks=True)
@@ -573,7 +577,7 @@ def pair(args: argparse.Namespace) -> int:
         if main_tag != engine_tag:
             warnings.append(
                 f"vendor/wowsims came from the main checkout, whose engine lock names {main_tag[:9]}, "
-                f"but {ref} names {engine_tag[:9]}; run pnpm -C \"{target.as_posix()}\" sync:wowsims:restore"
+                f"but {ref} names {engine_tag[:9]}; run {pnpm_in(target)} sync:wowsims:restore"
             )
 
         run([exe("corepack"), "pnpm", "-C", str(target), "install", "--frozen-lockfile"])
@@ -591,7 +595,7 @@ def pair(args: argparse.Namespace) -> int:
         say(f"FAILED: {exc}")
         say(
             f"the pair is partly made at {target}; remove it with: "
-            f"pnpm -C \"{main_dir.as_posix()}\" wt:unpair {args.name} --force"
+            f"{pnpm_in(main_dir)} wt:unpair {args.name} --force"
         )
         return 1
 
@@ -609,7 +613,7 @@ def pair(args: argparse.Namespace) -> int:
         say(f"  WARNING: {warning}")
     say(f"open a session in {target} (desktop app: pick that folder; terminal: run `claude` there)")
     say("that session starts with no memory notes: memory is kept per folder")
-    say(f"remove the pair with: pnpm -C \"{main_dir.as_posix()}\" wt:unpair {args.name}")
+    say(f"remove the pair with: {pnpm_in(main_dir)} wt:unpair {args.name}")
     return 0
 
 

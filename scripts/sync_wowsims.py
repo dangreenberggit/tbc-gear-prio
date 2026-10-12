@@ -532,9 +532,9 @@ def do_update(tag, ref=None):
         print(f"\n  *** CONTENT TIER CHANGED: {prev.get('currentPhase')} -> {current_phase} ***")
         print("  The default max phase moves with it. Required follow-up:")
         print("    1. regenerate the db-derived artifacts:")
-        print(f"       pnpm -C \"{here()}\" data:items:generate")
-        print(f"       pnpm -C \"{here()}\" exec python scripts/list_phase_pool.py")
-        print(f"       pnpm -C \"{here()}\" sim-defaults:build")
+        print(f"       pnpm -C \"{cwd_posix()}\" data:items:generate")
+        print(f"       pnpm -C \"{cwd_posix()}\" exec python scripts/list_phase_pool.py")
+        print(f"       pnpm -C \"{cwd_posix()}\" sim-defaults:build")
         print("    2. regenerate data/universes/<spec>-p<N>.json for every spec and")
         print("       phase (scripts/assemble_universe.py) -- these replaced the old")
         print("       hand-curated data/pools/<spec>.json (ADR-0028)")
@@ -603,7 +603,7 @@ def do_check():
 
     if vendor_is_empty():
         print(f"  {VENDOR}/ is empty or missing -- the source isn't here.", file=sys.stderr)
-        print(f"  run: pnpm -C \"{here()}\" sync:wowsims:restore", file=sys.stderr)
+        print(f"  run: pnpm -C \"{cwd_posix()}\" sync:wowsims:restore", file=sys.stderr)
         return 2
 
     tag, sha = latest_tag()
@@ -709,7 +709,7 @@ def do_check():
     return 1
 
 
-def here():
+def cwd_posix():
     """The folder whose lock this run reads, for a command the user can paste.
 
     LOCKFILE and VENDOR are relative to the working directory, not to this
@@ -734,7 +734,7 @@ def do_watch_ref(ref):
     if existing:
         print(f"  already watching {', '.join(existing)}; watchedRefs holds one ref",
               file=sys.stderr)
-        print(f"  run: pnpm -C \"{here()}\" exec python scripts/sync_wowsims.py "
+        print(f"  run: pnpm -C \"{cwd_posix()}\" exec python scripts/sync_wowsims.py "
               f"--unwatch-ref --ref {existing[0]}", file=sys.stderr)
         return 2
     sha = ref_sha(ref)
