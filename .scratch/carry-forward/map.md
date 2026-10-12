@@ -344,3 +344,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 608 `pnpm tab-review`: later captures in a hovered `pane: false` entry may clip the nav bar (pre-merge review feat/tab-scope-refresh, A7; left without a ticket when 510 closed) 2026-10-11
 - 622 Two fork comments misstate their port, and one tab test cannot fail (pre-merge review feat/flat-cutoff, A4 A6 S4) 2026-10-11
 - 623 The √2 set-bonus floor is also applied to single two-sim differences (pre-merge review feat/flat-cutoff, D2) 2026-10-11
+- 625 Under BiS only, a slot whose BiS-list item is worn tells the player to widen the filter (pre-merge review feat/bis-rows, D2) 2026-10-11
+- 626 `pnpm verify` does not check the tab's locale strings against their schema (pre-merge review feat/bis-rows, S6) 2026-10-11
