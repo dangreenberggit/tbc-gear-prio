@@ -180,7 +180,7 @@ it in this sim. The tab already says so by where it puts the row.
 
 The cutoff is becoming a flat 3 DPS bar (ticket 615, branch
 `feat/flat-cutoff`, in progress), so "below the cutoff" here means below
-that bar once it lands.
+that bar once it is merged.
 
 ## Out of scope
 
@@ -206,11 +206,11 @@ not object:
 
 - A BiS item that misses the cutoff goes into the main table, sorted by its
   gain like any other row.
-- The row carries a short mark saying it is not an upgrade.
+- The row has a short mark saying it is not an upgrade.
 - The slot counts and the ThatsMyBis export keep counting only real
   upgrades (rows that meet the cutoff).
 
 Implementation runs later, together with ticket 614 in one fork branch,
-after the flat-cutoff work (ticket 615, branch `feat/flat-cutoff`) lands.
+after the flat-cutoff work (ticket 615, branch `feat/flat-cutoff`) is merged.
 Both tickets change the same fork file,
 `ui/features/upgrades/model/results_view.ts`.
