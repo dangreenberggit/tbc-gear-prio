@@ -193,9 +193,53 @@ unchanged", which contradicts the constant's own comment that 622 fixed. The
 
 ## Code quality
 
-| ID  | From | What                                                                                                                                       |
-| --- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| CQ1 | S2   | Bring the four header comments in line with 614 and 528 (`results_view.ts:3`, `ResultsPanes.tsx:22`, `ExportPanel.tsx:14`, `export.ts:4`). |
-| CQ2 | S4   | Pass `paneRows`'s result to `ResultsPane` as one value.                                                                                    |
-| CQ3 | D4   | Give the Set potential test a tier item that can count toward the set.                                                                     |
-| CQ4 | A2   | Rename `shortlist` in `test-stop.mjs:180-194` and the "shortlist table" error text in `test-layout.mjs:174` to "main table".               |
+| ID  | From    | What                                                                                                                                       |
+| --- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| CQ1 | S2      | Bring the four header comments in line with 614 and 528 (`results_view.ts:3`, `ResultsPanes.tsx:22`, `ExportPanel.tsx:14`, `export.ts:4`). |
+| CQ2 | S4      | Pass `paneRows`'s result to `ResultsPane` as one value.                                                                                    |
+| CQ3 | D4      | Give the Set potential test a tier item that can count toward the set.                                                                     |
+| CQ4 | A2      | Rename `shortlist` in `test-stop.mjs:180-194` and the "shortlist table" error text in `test-layout.mjs:174` to "main table".               |
+| CQ5 | CQ pass | Rename three `ResultsPane.test.tsx` test names that call the main table "shortlist" (raised by the code-quality pass).                     |
+
+## Fixes (round 1)
+
+Main repo:
+
+- `46d382c5` — A1: `readResults` sets `belowCutoff` from the group or from
+  `data-not-upgrade="true"`, and only rows that meet the cutoff go into
+  `aboveCutoffItems`. S3 and S7: the `content-hash.ts` provenance row records
+  `ENGINE_VERSION` 6 against core's 9, with the new sha.
+- `19c2e9f1` — this file's round 1, tickets 625 and 626.
+- `4a392741` — CQ4 (`shortlistRows` renamed `mainTableRows`; no checker
+  reads it: `grep -rn shortlistRows` over the repo's scripts finds only
+  `test-stop.mjs`).
+- `72b13908` — fork re-pin to `176268e7c`, with
+  `pnpm sim-implemented-effects:generate`. The new lock `_comment` entry also
+  corrects the `08afcdcce` entry's file count (S5).
+- `1519317d` — ticket 622's `Verified by:` records the S7 fix.
+
+Fork `vendor/tbc-new-fork`:
+
+- `49836e4e5` — S1: the schema lists the three new strings and drops the
+  `cutoff` block. The Ajv command in `docs/fork-upstream-touchpoints.md`
+  prints `upgrades valid` and `translation valid`.
+- `3393bcb19` — S7: the header no longer calls `ENGINE_VERSION` ported
+  unchanged. `python scripts/check_engine_port_drift.py` passes.
+- `fd362cf6b` — CQ1, CQ2 (one `rows: PaneRows` prop).
+- `176268e7c` — CQ3 (a made-up Lightbringer Battlegear chest, id 900001,
+  absent from the fork's `assets/database/db.json`), CQ5.
+
+Checks after the fixes: fork `vitest run ui/features/upgrades` 54 files, 451
+tests pass; `oxlint --deny-warnings`, `tsc --noEmit` and `oxfmt --check` on
+the changed fork files pass (the code-quality agent's runs). `pnpm verify` at
+`72b13908`: rc 0, "gates: 1524 ran, 0 skipped". The wowsims-file check at
+`176268e7c`: `git diff --numstat --diff-filter=M 5262ff386bd1 176268e7c`
+outside the tab folder, its locale file and its schema prints only
+`ui/app/SimTabsSection.tsx` 6/0; `--diff-filter=D` prints nothing; the schema
+file is absent at `upstream/master`.
+
+## Focused check (round 2)
+
+Reviewed range: `9b059b58..1519317d`
+
+Fork range: `08afcdcce..176268e7c`.
