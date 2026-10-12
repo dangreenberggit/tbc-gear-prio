@@ -1,10 +1,15 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
 Type: task
 Origin: docs/reviews/feat-flat-cutoff.md (findings A4, A6, S4)
 Blocks: none
 Blocked by: none
 Related: 615
+Verified by: tbc-new-fork@6d0f15a88 (all three fixed in one commit; the
+  dead test is deleted), pinned by `data/wowsims-fork.lock.json` at
+  08afcdcce on `feat/bis-rows`; re-run with
+  `git -C vendor/tbc-new-fork grep -n -e upgrades-cutoff-arm -e "PORTED verbatim" -e "PORTED unchanged" -- ui/features/upgrades/model/engine/cutoff.ts ui/features/upgrades/model/engine/content-hash.ts ui/features/upgrades/components`
+  (prints nothing) and `pnpm verify`.
 
 # Two fork comments misstate their port, and one tab test cannot fail
 
