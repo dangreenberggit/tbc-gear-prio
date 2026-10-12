@@ -33,10 +33,10 @@ describe("MemoryStore", () => {
     });
     const updated = await store.job.update(created.id, {
       status: "done",
-      result: { cutoff: { absDps: 3.4, pct: 0.15 } },
+      result: { cutoff: { absDps: 3 } },
     });
     expect(updated?.status).toBe("done");
-    expect(updated?.result).toEqual({ cutoff: { absDps: 3.4, pct: 0.15 } });
+    expect(updated?.result).toEqual({ cutoff: { absDps: 3 } });
     expect(await store.job.read(created.id)).toEqual(updated);
   });
 });

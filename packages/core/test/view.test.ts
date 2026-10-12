@@ -98,7 +98,7 @@ describe("applyView", () => {
 
   describe("filter composes before the cutoff (§12)", () => {
     it("keeps a small gain visible when it is the best in the filtered raid", () => {
-      // 2 DPS is below the 3.4 absolute cutoff globally, and it is still below
+      // 2 DPS is below the 3 DPS absolute cutoff globally, and it is still below
       // it inside the filter — what must not happen is the row disappearing.
       const small = item({
         itemId: 2,
@@ -632,7 +632,7 @@ describe("applyView", () => {
      * *set*, which this is not).
      */
     it("uses the same absolute cutoff, not a relative one", () => {
-      // Under both arms: 2.0 DPS < 3.4, and 2.0/2000 = 0.1% < 0.15%.
+      // 2.0 DPS is under the flat 3 DPS bar.
       const r = ranking([
         item({
           itemId: 4,

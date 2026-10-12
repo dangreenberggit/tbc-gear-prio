@@ -17,9 +17,18 @@ apply. One rounding case is left.
 `fmtDelta` prints 2 decimals (`packages/core/src/rank-report.ts`, `fmtDelta`).
 A row whose ΔDPS is from +2.995 to +2.9999 is below the cutoff, so it is
 muted (`row muted`), but it prints "+3.00" while the lede says "Cutoff 3
-DPS.". No row is in that range on `.scratch/rank-reports/stage2-close-slamaltman.json`
-or on the five `data/tab-fixtures/*.json` rankings (scan of `deltaDps` in
-[2.995, 3.0), 2026-10-11), so the case is latent.
+DPS.". No `deltaDps` value is in that range in
+`.scratch/rank-reports/stage2-close-slamaltman.json` or in the five
+`data/tab-fixtures/*.json` rankings, so the case is latent. The scan reads
+every `deltaDps` key at any depth in each file. Run from the repo root:
+
+```sh
+python -c "import json,glob;w=lambda o:[v for k,x in o.items() for v in ([x] if k=='deltaDps' and isinstance(x,(int,float)) else w(x))] if isinstance(o,dict) else [v for x in o for v in w(x)] if isinstance(o,list) else [];[print(f,len(d:=w(json.load(open(f,encoding='utf8')))),[x for x in d if 2.995<=x<3]) for f in ['.scratch/rank-reports/stage2-close-slamaltman.json']+sorted(glob.glob('data/tab-fixtures/*.json'))]"
+```
+
+On 2026-10-11 (branch `feat/flat-cutoff`, after commit 7403b856) it printed
+an empty list for each file: 482 values in the slamaltman report, and 224,
+369, 367, 363 and 467 in the five tab fixtures.
 
 ## Acceptance
 

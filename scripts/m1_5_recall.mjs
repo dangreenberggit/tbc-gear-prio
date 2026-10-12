@@ -31,7 +31,6 @@ import {
   filterPoolByPhase,
 } from "../packages/core/src/pool.js";
 import { mapWclGearToSim } from "../packages/core/src/slots.js";
-import { meetsCutoff } from "../packages/core/src/cutoff.js";
 
 const ROOT = resolve(fileURLToPath(import.meta.url), "../..");
 
@@ -53,12 +52,19 @@ function loggedGearFromRaw(rawPath, playerName) {
 }
 
 // F10 / plan §3.2's fixed cutoff, used for both specs "for consistency with
-// §3.2" per this task's instructions. Feral's own cutoffForSpec() value
-// ({absDps: 3.6, pct: 0.15}, packages/core/src/cutoff.ts:27) is reported
+// §3.2" per this task's instructions. Feral's own cutoff under the per-spec
+// rule that ADR-0037 replaced ({absDps: 3.6, pct: 0.15}) is reported
 // separately below (task instruction: "report if that choice changes any
 // conclusion").
 const CUTOFF_F10 = { absDps: 3.4, pct: 0.15 };
 const CUTOFF_FERAL_OWN = { absDps: 3.6, pct: 0.15 };
+
+// Core's cutoff became one flat DPS bar in ADR-0037; this script measures the
+// rule from before that change, so it keeps its own copy of the old two-arm
+// test. `deltaPct` is in percent (0.15 means 0.15%), as core computed it.
+function meetsPre0037Cutoff(deltaDps, deltaPct, cutoff) {
+  return deltaDps >= cutoff.absDps || deltaPct >= cutoff.pct;
+}
 
 const FIXTURES = {
   ret: {
@@ -127,7 +133,7 @@ function analyzeFixture(name, cfg, ew5) {
           deltaDps,
           deltaPct,
           owned: owned.has(e.itemId),
-          aboveCutoff: meetsCutoff(deltaDps, deltaPct, cutoff),
+          aboveCutoff: meetsPre0037Cutoff(deltaDps, deltaPct, cutoff),
           orderingRank: rankById.get(e.itemId) ?? null,
         };
       })
@@ -179,9 +185,9 @@ eligible pool, and reads the measured 5,000-iteration \`deltaDps\` per
 candidate from \`experiments/e-w5-rank.json\` (committed by slice B, produced
 by \`npx tsx scripts/ew5_rank.mjs\`) rather than re-simming. Cutoff \`{absDps:
 3.4, pct: 0.15}\` (F10) is used for both specs, matching §3.2; feral's own
-\`cutoffForSpec()\` value (\`{absDps: 3.6, pct: 0.15}\`,
-\`packages/core/src/cutoff.ts:27\`) is reported separately per fixture to
-show whether it changes the conclusion.
+cutoff under the per-spec rule that ADR-0037 replaced (\`{absDps: 3.6, pct:
+0.15}\`) is reported separately per fixture to show whether it changes the
+conclusion.
 
 **Seed provenance (inherited from section 3.2):** those deltas come from runs with
 \`seeds: [42]\` — a single seed, which disables paired replication, so each row
@@ -209,7 +215,7 @@ the numbers it cites.
     md += renderCutoffSection(r.f10);
 
     if (r.ownCutoff) {
-      md += `### Feral's own cutoff {absDps: 3.6, pct: 0.15} (\`cutoffForSpec('feral')\`)\n\n`;
+      md += `### Feral's own cutoff {absDps: 3.6, pct: 0.15} (pre-ADR-0037 per-spec rule)\n\n`;
       md += renderCutoffSection(r.ownCutoff);
     }
   }

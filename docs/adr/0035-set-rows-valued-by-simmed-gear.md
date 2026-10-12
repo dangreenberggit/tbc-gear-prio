@@ -1,6 +1,6 @@
 # ADR-0035 — Set rows are valued by a sim of gear the player could wear
 
-**Status:** accepted; amended 2026-10-03 by ticket 535
+**Status:** accepted; amended 2026-10-03 by ticket 535; amended 2026-10-11 by [ADR-0037](0037-the-cutoff-is-one-flat-3-dps-bar.md) (the floor in "The rule for one row" is now √2 × 3 ≈ 4.24 for every spec, not 5.09 feral and 4.81 other specs)
 **Date:** 2026-10-02
 **Related:** [`ADR-0034`](0034-set-bonus-row-values-are-not-additive.md) (superseded in part here: the walk (R1) and the rule for when a row equals the measured swap, for a step ranking); tickets `.scratch/carry-forward/issues/511-ret-set-credit-counts-bonuses-with-no-ret-dps.md`, `512-set-breaks-model-only-six-tier-sets.md`, `514-set-bonus-value-carries-gear-dependent-residue.md`, `490-commit-break-assumes-top-package-over-charges-other-sets.md` (owner-quote correction), `523-moving-a-worn-set-to-other-slots-cannot-be-shown.md`, `530-tab-replicate-seeds-overlap.md`, `532-off-class-cryptstalker-sims-fail.md`; fork engine files `partner-choice.ts`, `set-screen.ts`, `set-less-copies.ts`, `rank.ts`, `view.ts` under `vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/`; fixtures in `packages/core/test/fork-set-net.test.ts`, derived in `docs/set-bonus-fixture-derivations.md`; stage-gate `511-512-set-credit`
 
