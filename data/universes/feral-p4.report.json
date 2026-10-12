@@ -21,7 +21,7 @@
     1012
   ],
   "d7EligibleTotal": 2967,
-  "excludedNoSource": 1228,
+  "excludedNoSource": 1225,
   "universeTotal": 408,
   "listOnlyMembership": 35,
   "perSlot": {
@@ -44,7 +44,7 @@
     "atlasloot": 251,
     "curated": 3,
     "db": 1622,
-    "two-hop": 15,
+    "two-hop": 18,
     "wowhead": 27
   },
   "membershipByOrigin": {
@@ -65,8 +65,8 @@
     "other": 3,
     "two-hop": 15
   },
-  "tierPiecesExpected": 10,
-  "tierPiecesPresent": 10,
+  "tierPiecesExpected": 15,
+  "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
     "total": 408,
