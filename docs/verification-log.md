@@ -2585,20 +2585,23 @@ record what was run, on which commit, and what came back. When every box is ☑,
 `dev` may merge to `main` with the tag `tab-1` (`docs/workflow.md` § Branch
 model).
 
-Boxes 1, 3, 4 and 5 were checked on 2026-10-12 on main commit `34fe4ac6`
+Boxes 1, 3, 4 and 5 were checked on 2026-10-12 on main-repo commit `34fe4ac6`
 (the `dev` tip then) with fork commit
 `176268e7c1acb552c3c9cba9337eb29b181f080e`, the `commit` in
-`data/wowsims-fork.lock.json`. The checks ran in Git Bash with Node 22.17.1,
-from the root of a pair made by `pnpm wt:pair stage-3t-boxes
+`data/wowsims-fork.lock.json`. The checks ran in Git Bash with Node 22 (the
+desktop gate refuses older Node; the exact version was not logged), from the
+root of a pair made by `pnpm wt:pair stage-3t-boxes
 docs/stage-3t-boxes wt/stage-3t-boxes -b --new-fork-branch --build`
 (`docs/agents/paired-worktrees.md`): branch `docs/stage-3t-boxes` at
 `34fe4ac6`, its fork worktree on `wt/stage-3t-boxes` at `176268e7c`. The logs
 are under `.scratch/stage-3t/` in the main checkout, which is gitignored, so
 the lines that matter are quoted below.
 
-Boxes 3 and 4 hold only for fork `176268e7c`. The Tab-blocking work (box 2)
-will re-pin the fork, and each re-pin needs boxes 3 and 4 run again on the new
-fork commit, with a new entry here.
+Boxes 3 and 4 hold only for fork `176268e7c`, and box 1 only for the tickets
+as they stood at `34fe4ac6`. The Tab-blocking work (box 2) is expected to
+re-pin the fork and will close tickets. So before the `main` merge, boxes 1, 3
+and 4 run again on the final commits, with a new entry here. Box 5 runs again
+if either pin moves.
 
 ### ☑ 1 — the scope doc is current
 
@@ -2606,8 +2609,9 @@ The MISSING and STALE loops in `docs/upgrades-tab-scope.md` § Maintenance
 print nothing.
 
 Met on 2026-10-12, 18:00:25Z–18:00:43Z UTC, on `34fe4ac6`. The two loops,
-run exactly as § Maintenance gives them, printed nothing. `corepack pnpm -s
-issues:open` exited 0 and listed 161 open tickets. Log:
+with `python scripts/check_merge_ready.py --list-only` (what `pnpm
+issues:open` runs, `package.json`) in place of `corepack pnpm -s issues:open`,
+printed nothing. The script exited 0 and listed 161 open tickets. Log:
 `.scratch/stage-3t/box1-scope-loops-2026-10-12.log`.
 
 ### ☐ 2 — no tab-blocking ticket is open
@@ -2625,10 +2629,11 @@ PLAN.md gives the command. Record the readback's `runner` and `rowCount` here;
 the readback file under `.scratch/stage-3t/` is gitignored.
 
 Met on 2026-10-12, 18:04:46Z–18:08:26Z UTC, on fork `176268e7c`. The pair's
-`vendor/tbc-new-fork/dist`, which the box 4 run had just rebuilt from that
-commit, was served with `http-server ... -p 8099 -a 127.0.0.1 -c-1`. PLAN.md's
+`vendor/tbc-new-fork/dist`, built at fork `176268e7c` (`lib.wasm.gz` by the
+pair's `--build`, the JS bundles again by the box 4 run), was served with `http-server ... -p 8099 -a 127.0.0.1 -c-1`. PLAN.md's
 harness command, with `--origin http://127.0.0.1:8099` and the readback
-written to `.scratch/stage-3t/readback-wasm-ret-p4-cap40-2026-10-12.json`,
+written to `.scratch/stage-3t/readback-wasm-ret-p4-cap40-2026-10-12.json`
+(not PLAN's `--out` path, which holds an earlier run from 2026-10-12T03:16Z),
 exited 0 and printed:
 
 ```
@@ -2645,9 +2650,10 @@ The readback has `runner` `WorkerPoolSimRunner`, `rowCount` 39 (39 expected,
 to the `commit` in `data/wowsims-fork.lock.json`.
 
 Met on 2026-10-12, 18:00:53Z–18:02:34Z UTC. The fork's HEAD and the lock's
-`commit` were both `176268e7c1acb552c3c9cba9337eb29b181f080e`. The command
-printed `desktop-gate: PASS.` and `rc=0`, with checks (a) to (f) and (h)
-passing; (h) compares the rows, `aboveCutoffItems` and `baselineDps` with
+`commit` were both `176268e7c1acb552c3c9cba9337eb29b181f080e`.
+`python scripts/check_desktop_tab.py` (what `desktop-gate:check` runs) printed
+`desktop-gate: PASS.` and `rc=0`, with checks (a) to (f) and (h) passing
+(check (g) was removed with ticket 567); (h) compares the rows, `aboveCutoffItems` and `baselineDps` with
 `data/desktop-gate/golden-ret-p4-cap40.json`. Log:
 `.scratch/stage-3t/box4-desktop-gate-176268e7c-2026-10-12.log`.
 
