@@ -177,9 +177,9 @@ const runAndStopExpression = (rows, timeoutMs) => `(async () => {
 	if (closedAt === undefined) return { error: 'the progress dialog never closed after Stop', atClick, messages, timeline };
 	await sleep(500);
 	const pane = q('[id^="upgrades-pane-"][data-testid="tab-pane"]:not([inert])');
-	// The shortlist is the pane's table outside the below-cutoff group; hidden panes are not mounted.
-	const shortlist = pane ? [...pane.querySelectorAll('[data-testid="upgrades-results-table"]')].find(t => !t.closest('[data-testid="upgrades-below-cutoff"]')) : null;
-	const shortlistRows = tableRowCount(shortlist);
+	// The main table is the pane's table outside the below-cutoff group; hidden panes are not mounted.
+	const mainTable = pane ? [...pane.querySelectorAll('[data-testid="upgrades-results-table"]')].find(t => !t.closest('[data-testid="upgrades-below-cutoff"]')) : null;
+	const mainTableRows = tableRowCount(mainTable);
 	const groupText = pane?.querySelector('[data-testid="upgrades-below-cutoff"]')?.textContent ?? '';
 	const groupCount = Number(/(\\d+) item/.exec(groupText)?.[1] ?? 0);
 	return {
@@ -189,9 +189,9 @@ const runAndStopExpression = (rows, timeoutMs) => `(async () => {
 		closedAt,
 		timeline,
 		pane: pane?.id ?? null,
-		shortlistRows,
+		mainTableRows,
 		groupCount,
-		rowsKept: shortlistRows + groupCount,
+		rowsKept: mainTableRows + groupCount,
 		baselineSummary: q('[data-testid="upgrades-baseline-summary"]')?.textContent.trim() ?? null,
 		errorLine: q('[data-testid="upgrades-status-alert"]')?.textContent.trim() || null,
 		consoleErrors: window.__stopCheckErrors ?? [],
@@ -284,7 +284,7 @@ async function main() {
       `rows at Stop ${r.atClick.rows} (non-owned ${r.atClick.nonOwned}) at ${r.atClick.t} ms; dialog closed at ${r.closedAt} ms (${r.closedAt - r.atClick.t} ms after Stop)`
     );
     console.log(
-      `kept ${r.rowsKept} = ${r.shortlistRows} rows in ${r.pane} + ${r.groupCount} below the cutoff; summary: ${r.baselineSummary}`
+      `kept ${r.rowsKept} = ${r.mainTableRows} rows in ${r.pane} + ${r.groupCount} below the cutoff; summary: ${r.baselineSummary}`
     );
     for (const [name, ok] of Object.entries(checks))
       console.log(`${ok ? "ok  " : "FAIL"} ${name}`);
@@ -297,7 +297,7 @@ async function main() {
       closedAt: r.closedAt,
       stopToClosedMs: r.closedAt - r.atClick.t,
       rowsKept: r.rowsKept,
-      shortlistRows: r.shortlistRows,
+      mainTableRows: r.mainTableRows,
       groupCount: r.groupCount,
       pane: r.pane,
       baselineSummary: r.baselineSummary,

@@ -171,7 +171,7 @@ const postRunExpression = `(async () => {
 	for (const table of tables) {
 		const below = table === groupTable;
 		const read = await collectRows(table, tr => readRow(tr, below));
-		if (read.error) return { error: (below ? 'below-cutoff table: ' : 'shortlist table: ') + read.error };
+		if (read.error) return { error: (below ? 'below-cutoff table: ' : 'main table: ') + read.error };
 		if (below) groupRowsMeasured = read.rows.length;
 	}
 	for (const cell of tables.flatMap(t => [...t.querySelectorAll('thead th')])) checkCell(cell);
