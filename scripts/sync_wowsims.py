@@ -531,8 +531,10 @@ def do_update(tag, ref=None):
     if prev and prev.get("currentPhase") != current_phase:
         print(f"\n  *** CONTENT TIER CHANGED: {prev.get('currentPhase')} -> {current_phase} ***")
         print("  The default max phase moves with it. Required follow-up:")
-        print("    1. regenerate the db-derived artifacts: pnpm data:items:generate,")
-        print("       python scripts/list_phase_pool.py, pnpm sim-defaults:build")
+        print("    1. regenerate the db-derived artifacts:")
+        print(f"       pnpm -C \"{here()}\" data:items:generate")
+        print(f"       pnpm -C \"{here()}\" exec python scripts/list_phase_pool.py")
+        print(f"       pnpm -C \"{here()}\" sim-defaults:build")
         print("    2. regenerate data/universes/<spec>-p<N>.json for every spec and")
         print("       phase (scripts/assemble_universe.py) -- these replaced the old")
         print("       hand-curated data/pools/<spec>.json (ADR-0028)")

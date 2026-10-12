@@ -513,7 +513,10 @@ def pair(args: argparse.Namespace) -> int:
     if problem:
         raise Refusal(problem)
     if target.exists():
-        raise Refusal(f"{target} already exists; pick another name or run: pnpm wt:unpair {args.name}")
+        raise Refusal(
+            f"{target} already exists; pick another name or run: "
+            f"pnpm -C \"{main_dir.as_posix()}\" wt:unpair {args.name}"
+        )
     if args.fork_detached == bool(args.fork_branch):
         raise Refusal("give exactly one of <fork-branch> or --fork-detached")
     if args.new_fork_branch and args.fork_detached:
