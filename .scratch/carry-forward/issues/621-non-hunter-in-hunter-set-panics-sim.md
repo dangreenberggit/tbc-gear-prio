@@ -46,7 +46,8 @@ Two related failures that are not this assertion:
 No piece of these sets has a `classAllowlist` in
 `vendor/tbc-new-fork/assets/database/db.json` (only the Ring of the
 Cryptstalker, 23067, has `[3]`). The fork's `canEquipItem`
-(`ui/sim/proto/items.ts:41-45`) refuses an item only through that list, so
+(`ui/sim/proto/items.ts:41-45`) refuses an item for a class only through
+that list (it also refuses by armor and weapon type, `items.ts:44-80`), so
 `data/equip-eligibility.json` (exported from `canEquipItem`) lists:
 
 - all 5 Beast Lord pieces and all 8 Cryptstalker armor pieces for
@@ -104,6 +105,6 @@ reason is the owner's rule for upstream engine fixes, session `ef13ce60`,
 
 ## Done when
 
-Ticket 573 closes. If its decision lands the guards in the fork or
+Ticket 573 closes. If its decision puts the guards in the fork or
 upstream, close this ticket as fixed with it; if the branch is deleted,
 close this ticket with that decision recorded.
