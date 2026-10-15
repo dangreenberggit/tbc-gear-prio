@@ -5402,13 +5402,13 @@ const SWEEP_SLOTS: readonly SweepSlot[] = [
 // The Malorne and Nordrassil 4pc are worth far more than any 2pc (40) or any
 // break (at most 50 + 80), so the 4pc is the best stop at every worn count
 // and each row's 4pc step is printed.
-const M2_497 = 40;
-const M4_497 = 400;
-const N4_497 = 400;
+const MALORNE_2PC_DPS = 40;
+const MALORNE_4PC_DPS = 400;
+const NORDRASSIL_4PC_DPS = 400;
 const SWEEP_BONUSES: SetBonusTable = {
   676: { b2: B2_TH, b4: B4_TH },
-  640: { b2: M2_497, b4: M4_497 },
-  641: { b2: 0, b4: N4_497 },
+  640: { b2: MALORNE_2PC_DPS, b4: MALORNE_4PC_DPS },
+  641: { b2: 0, b4: NORDRASSIL_4PC_DPS },
 };
 
 function sweepWorn(k: number): Record<SweepSlot, number> {
@@ -5517,7 +5517,7 @@ describe.skipIf(!forkPresent)(
         ...Object.values(MALORNE).map((id) => ({ id, setId: 640 })),
         { id: NORDRASSIL.chest, setId: 641 },
       ];
-      let split4 = 0;
+      let fourPcStepsWithBreaks = 0;
       for (let k = 0; k <= 4; k += 1) {
         const worn = sweepWorn(k);
         const { ranking: r } = await runScenario({
@@ -5546,7 +5546,7 @@ describe.skipIf(!forkPresent)(
           const row = thRow(r, id);
           const where = `k=${k} row ${id}`;
           expect(futureOf(row, 4)?.sameGearDps, where).toBeCloseTo(
-            setId === 640 ? M4_497 : N4_497,
+            setId === 640 ? MALORNE_4PC_DPS : NORDRASSIL_4PC_DPS,
             9
           );
           const steps = view.setPotentialSteps(row.setContext, FLOOR) as
@@ -5574,7 +5574,7 @@ describe.skipIf(!forkPresent)(
             } else {
               expect(s.breaksLineDps, at).toBeCloseTo(want.breaks, 9);
               expect(s.piecesLineDps, at).toBeCloseTo(want.pieces, 9);
-              if (s.threshold === 4) split4 += 1;
+              if (s.threshold === 4) fourPcStepsWithBreaks += 1;
             }
             earlier.push(...added);
           }
@@ -5582,7 +5582,7 @@ describe.skipIf(!forkPresent)(
         expectSplitLinesAddUp(view, r);
       }
       // The sweep reaches a 4pc step that breaks Thunderheart (k >= 2).
-      expect(split4).toBeGreaterThan(0);
+      expect(fourPcStepsWithBreaks).toBeGreaterThan(0);
     });
 
     it("497-B: a stat interaction on the 4pc gear moves the pieces line, not the Breaks line", async () => {
