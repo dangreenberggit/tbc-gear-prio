@@ -28,9 +28,10 @@
 //         scroll box while that box is not scrolled sideways, so a phone
 //         shows the figure without scrolling sideways (ticket 606);
 //     (17) hovering the first set-bonus figure opens its popover to the
-//         right of the figure at 1280, where the widest popup fits, and
-//         above it at the narrower widths, inside the viewport either way
-//         (ticket 605; the ticket 495 ruling, kept by Q-606-popover-side);
+//         right of the figure when the room right of it fits the widest
+//         popup (the component's own rule), and above it otherwise, never
+//         left or below, inside the viewport either way (ticket 605; the
+//         ticket 495 ruling, kept by Q-606-popover-side);
 //     the A1 fact: how far each below-cutoff column sits from its head;
 //     axe once, at 653.
 //
@@ -56,6 +57,13 @@ const POST_RUN_AXE_WIDTH = 653;
 const PHONE_WIDTH = 375;
 const TOL = 2; // px of sub-pixel slack
 const MIN_COLUMN_GAP = 8;
+// Check 17 expects the side by the fork's SetBonusPopover.tsx `sideFor` rule:
+// right when the room right of the figure holds the widest popup (30rem), its
+// 10 px gap and the 6 px Base UI's flip keeps from the window's edge; above
+// otherwise. Copied, because this script cannot import that module.
+const POPOVER_WIDEST_REM = 30;
+const POPOVER_GAP_PX = 10;
+const POPOVER_FLIP_MARGIN_PX = 6;
 const ROOT = '[data-testid="upgrades-tab-root"]';
 const FIXTURE_DIR = path.resolve(
   import.meta.dirname,
@@ -92,6 +100,7 @@ const PAGE_HELPERS = `
 	const name = el => el.tagName.toLowerCase() + (el.dataset.testid ? '[' + el.dataset.testid + ']' : '') + (el.textContent ? ' "' + el.textContent.trim().slice(0, 30) + '"' : '');
 	const lineCount = node => { const range = document.createRange(); range.selectNodeContents(node); return new Set([...range.getClientRects()].filter(r => r.width > 0).map(r => Math.round(r.top))).size; };
 	const openPane = () => [...root.querySelectorAll('[id^="upgrades-pane-"][data-testid="tab-pane"]:not([inert])')].find(p => !p.hidden);
+	const rect = el => { if (!el) return null; const b = el.getBoundingClientRect(); return { left: Math.round(b.left), right: Math.round(b.right), top: Math.round(b.top), bottom: Math.round(b.bottom) }; };
 `;
 
 const preRunExpression = (width) => `(async () => {
@@ -149,12 +158,9 @@ const postRunExpression = `(async () => {
 	const groupTable = group?.querySelector('[data-testid="upgrades-results-table"]');
 	// Checks 6, 7, 12 and 14 and the A1 offsets measure each row while it is rendered.
 	const readRow = (tr, below) => {
-		// By test id, not position: the column order changed once (ticket 606).
-		const delta = tr.querySelector('[data-testid="upgrades-delta-cell"]');
-		const slot = delta.nextElementSibling;
+		const { dps: delta, slot } = dpsAndSlotCells(tr);
 		if (!below && !firstDelta && tr.dataset.index === '0') {
 			const scroller = tr.closest('[data-testid="upgrades-table-scroll"]');
-			const rect = r => { const b = r.getBoundingClientRect(); return { left: Math.round(b.left), right: Math.round(b.right) }; };
 			firstDelta = { deltaRect: rect(delta), scrollerRect: rect(scroller), scrollLeft: scroller.scrollLeft };
 		}
 		const figure = delta.querySelector(':scope > span')?.firstChild;
@@ -236,10 +242,12 @@ const popoverExpression = `(async () => {
 	if (!tip) return { error: 'no popover after hovering the figure' };
 	await sleep(300);
 	const figure = [...openPane().querySelectorAll(${JSON.stringify(SET_BONUS_FIGURE)})].find(el => el.matches(':hover')) ?? null;
-	const rect = el => { if (!el) return null; const b = el.getBoundingClientRect(); return { left: Math.round(b.left), right: Math.round(b.right), top: Math.round(b.top), bottom: Math.round(b.bottom) }; };
+	// Measured as SetBonusPopover.tsx's sideFor measures it.
+	const room = figure ? (document.documentElement.clientWidth || window.innerWidth) - figure.getBoundingClientRect().right : null;
 	return {
 		side: tip.closest('[data-testid="sim-popover-positioner"]')?.getAttribute('data-side') ?? null,
 		tipRect: rect(tip), figureRect: rect(figure), vw: document.documentElement.clientWidth,
+		room, rootPx: parseFloat(getComputedStyle(document.documentElement).fontSize) || 16,
 	};
 })()`;
 
@@ -267,7 +275,13 @@ async function judgePopover(send, width) {
     check(17, width, false, m.error ? m : { ...m, error: "no hovered figure" });
     return;
   }
-  const expected = width >= XL ? "right" : "top";
+  // Only ever "right" or "top", so `m.side === expected` also fails a popover
+  // that opened left or below.
+  const expected =
+    m.room >=
+    POPOVER_WIDEST_REM * m.rootPx + POPOVER_GAP_PX + POPOVER_FLIP_MARGIN_PX
+      ? "right"
+      : "top";
   const t = m.tipRect;
   const f = m.figureRect;
   const insideViewport = t.left >= -TOL && t.right <= m.vw + TOL;

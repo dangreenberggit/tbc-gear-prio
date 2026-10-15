@@ -414,8 +414,8 @@ const pollDone = (ms, trace) => `(async () => {
 // A BiS-list row that misses the cutoff sits in the main table (ticket 528) with
 // data-not-upgrade="true", so a row's place alone does not say which side it is on.
 // Only the rows in view are rendered, so each table is read by scrolling
-// through it (rows.mjs collectRows). Cells are read by position: rank, item,
-// slot, ΔDPS, source.
+// through it (rows.mjs collectRows). Rank, item and source are read by
+// position; ΔDPS and slot through rows.mjs dpsAndSlotCells.
 const readResults = `(async () => {
 	${WF}
 	${ROW_HELPERS}
@@ -437,14 +437,13 @@ const readResults = `(async () => {
 		const read = await collectRows(table, tr => {
 			const tds = Array.from(tr.querySelectorAll('td'));
 			if (tds.length < 5) return null;
-			// DPS by test id and Slot as the cell after it: the column order changed once (ticket 606).
-			const delta = tr.querySelector('[data-testid="upgrades-delta-cell"]');
+			const { dps, slot } = dpsAndSlotCells(tr);
 			const text = td => (td?.innerText ?? '').trim();
 			return {
 				rank: text(tds[0]),
 				item: text(tds[1]).split('\\n')[0].trim(),
-				slot: text(delta?.nextElementSibling),
-				dps: number(text(delta).split('\\n')[0]),
+				slot: text(slot),
+				dps: number(text(dps).split('\\n')[0]),
 				source: text(tds[4]),
 				belowCutoff: inGroup || tr.getAttribute('data-not-upgrade') === 'true',
 			};
