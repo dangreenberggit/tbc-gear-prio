@@ -236,7 +236,7 @@ the button reads "Showing all sources" or "{{n}} of {{m}} sources hidden".
 The other choices under "Proposed scope" were settled in the plan
 (`.scratch/stage-gate/tab-view-filter/plan.md`, "Settled decisions") from
 earlier rulings: several sources at once; the options are the sources the
-settled rows carry, keyed as the pre-run Sources box keys them; a row
+settled rows have, keyed as the pre-run Sources box keys them; a row
 stays while any of its sources is shown (the pre-run box's rule); the
 filter combines with BiS only; it persists across runs and reloads like
 the column sort (ticket 582); the Rank column shows the position among

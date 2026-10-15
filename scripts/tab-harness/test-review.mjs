@@ -31,7 +31,7 @@
 // } ] }
 // Every (entry, width) gets a fresh page, but all pages in one run share one
 // browser profile. So what a page saves (localStorage, such as the tab's saved
-// settings, sort and view filters) carries into later entries and widths: order
+// settings, sort and view filters) persists into later entries and widths: order
 // the entries so a clean state comes first, or reset the state in the
 // interactions.
 //
