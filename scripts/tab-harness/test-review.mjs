@@ -40,6 +40,8 @@
 // textContent); attr:<sel>:<name>; prop:<sel>:<name> (a DOM property, such as
 // scrollWidth); exists:<sel>; count:<sel> (all matches);
 // shown:<sel> (visible matches).
+// count: on result rows counts only the rows the virtualised table rendered;
+// for the ranked row count read the tbody's data-row-count with attr: (rows.mjs).
 
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
