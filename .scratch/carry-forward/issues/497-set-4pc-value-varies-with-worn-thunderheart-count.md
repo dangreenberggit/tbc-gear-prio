@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: SME seat, stage-gate upgrades-tab-closeout round 2b Step 7 (finding C1, 2026-09-24)
 Blocks: none
@@ -109,3 +109,23 @@ the set-screen part waits for the orchestrator's Gate C (below).
 
 Evidence: `python -I .scratch/stage-gate/tab-set-bonus/497-read.py` (main
 checkout, gitignored stage folder; output `497-read.txt`).
+
+**2026-10-15 — closed (stage-gate tab-set-bonus, chunk K4).** The
+orchestrator's Gate C ruled the set-screen question: the Nordrassil drop is
+the ADR-0035 band rule working as designed. At worn Thunderheart 0 to 3 the
+screen drops Nordrassil as `outside-band`, with measure 31.3, 30.7, 43.5 and
+16.6 against floors 83.6, 82.8, 95.5 and 68.5 (floor = the 2nd top-k measure
+− √2·σ); at worn 4 it drops Malorne and Nordrassil as `below-zero`, with
+measure + 2σ = −43.0 and −108.4. Every drop meets the rule. The Step 4 rule
+read TICKET at worn 1 to 3 only through its clause "every kept set's rows
+carry `futureBonuses`", and the only rows that failed it are the player's
+own worn Thunderheart pieces (delta 0, piece count unchanged), which add
+nothing and can have no future bonus. No screen ticket is filed. Close
+condition 1 is met by the controlled test (comment above); condition 2 does
+not apply, because no bug was found. The Wolfshead × Thunderheart 2pc
+interaction the SME found is ticket 635.
+
+Verified by:
+`corepack pnpm exec vitest run packages/core/test/fork-set-net.test.ts -t 497`
+and `python -I .scratch/stage-gate/tab-set-bonus/497-read.py` (main
+checkout; prints `497-read.txt`), tbc-new-fork@176268e7c.
