@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: SME verdict 2026-08-29 (stage-gate wowsims-tab-tickets, Execution B/D;
   handoff .scratch/handoffs/sme-rank-judgment-330-4pc-set-bonus-display.md)
@@ -155,3 +155,34 @@ must not show as a real figure); and a DOM readback of both at desktop
 and mobile widths. Corrected 2026-10-11 by the pre-merge review of
 `feat/tab-scope-refresh` (finding A1): the first version of this comment
 said the toggle was on by default.
+
+**2026-10-15 — closed (stage-gate tab-set-bonus, chunks K3 and K4).** The
+owner's rule of 2026-10-11 (above): "what the set bonus toggle does is
+whether that goes into the main DPS number in the row and affects the items
+ranking, not whether the hiver tooltip/poop er is available". Fork
+`f4b78f65d` makes the popover's availability independent of the toggle.
+After the Total, which is always the row's figure, a "Not counted" section
+lists what the figure does not count: each reachable bonus as a separate
+outcome against the item alone ("N DPS more/less"), naming the worn bonuses
+that step breaks beyond the row's own swap, and a set the set screen dropped
+with what the screen found, with no figure. With the toggle on, a credited
+row keeps its old popover (a snapshot test of the 16 credited rows of the
+two feral fixtures), and a row with no credit or a screened set gets the
+section. A bonus below the noise gate is never listed.
+
+Close condition 1 asked for the owner's approval of the mock-up. The
+orchestrating session decided the layout instead, on 2026-10-12 (design A,
+`.scratch/stage-gate/tab-set-bonus/decision-log.md` in the main checkout:
+the figures are listed under the Total, not added, so the popover has one
+Total, which the owner's 2026-09-25 objection asked for). The owner may
+override it. Conditions 2, 4 and 5 passed the gate-visual review
+(`.scratch/handoffs/visual-review-tab-set-bonus-K3.md`, 11 captures at 1280
+and 375 px, including Lightbringer Breastplate 30990 on `ret-p3-p2`, whose
+sub-noise bonuses show no hint and no popover); condition 3 is the fork
+commit, the re-pin and `pnpm verify` rc=0.
+
+Verified by:
+`corepack pnpm tab-review .scratch/stage-gate/tab-set-bonus/review/manifest.json`
+(main checkout, gitignored stage folder), and
+`corepack pnpm -C vendor/tbc-new-fork exec vitest run ui/features/upgrades/model/set_bonus_tip.test.ts ui/features/upgrades/utils/set_bonus_labels.test.ts ui/features/upgrades/components/SetBonusPopover`,
+tbc-new-fork@f4b78f65d.
