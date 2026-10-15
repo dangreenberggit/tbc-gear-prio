@@ -97,6 +97,113 @@ Run through the `code-review` skill (two read-only sub-reviewers).
   popover (30rem) fits, so at some middle widths a narrower popover opens
   above although it would fit on the right.
 
+## Code quality
+
+| ID      | Row                                                                           |
+| ------- | ----------------------------------------------------------------------------- |
+| A3      | Test name at `model/run.test.ts:104` claims more than the mocked test proves  |
+| D1 / S3 | Fork comments cite main-repo `packages/core/test/...` paths without saying so |
+| S4      | `SetBonusPopover.tsx` copies the popover max width and the anchor gap         |
+| S5      | `UpgradesResults.tsx` renders `<ViewToggles …/>` twice                        |
+| S6      | Harness DPS-cell lookup duplicated across two scripts; `rect` defined twice   |
+| S7      | Layout gate predicts the popover side from viewport width, not room           |
+
+## Round 2
+
+Reviewed range: `81f892ece3ce11ad5f3745820d7cc2c27160d592..81d54d16818f6f198efe9646c2bf178e2700cf4c`
+
+Fork range: `899d8c267..bba7380a6`.
+
+Fix commits since round 1 (`git log --oneline 81f892ec..81d54d16`):
+`287477d1` Fix A1 P1 S1 S2 records; add review round 1 — `708992c0` Fix P2:
+assert check 18's box is not scrolled — `7eaf9a0b` Code quality S6 S7 in
+layout gate — `81d54d16` Re-pin fork for review fixes A2 A3 D1 S4 S5 (only
+`data/`: fork lock, `sim-implemented-effects.json`, and the layout baseline
+that the green layout-gate run wrote; the fixer committed the baseline
+separately and the reviewer folded it into the re-pin commit before round 2,
+tree unchanged). Fork: `5a12af896` Fix A2: count Base UI flip margin in
+popover side — `bba7380a6` Code quality pass: A3 D1 S4 S5.
+
+Upstream-file check at fork `bba7380a6`: `--numstat --diff-filter=M 5262ff38`
+prints only `6 0 ui/app/SimTabsSection.tsx`; 259 A, 1 M; same as round 1.
+
+The fixer reported `corepack pnpm -C <pair> verify` rc=0 ("gates: 1524 ran,
+0 skipped") and `corepack pnpm -C <pair> layout-gate:check` rc=0 at 375, 653,
+768 and 1280 px.
+
+## Focused check (round 2)
+
+Fork range: `899d8c267..bba7380a6`. One fresh `general-task` agent on Opus,
+told it writes nothing.
+
+1. **Conditions 1 to 3 hold — pass.** Every commit in both ranges names its
+   finding IDs, is the code-quality pass with its row IDs, or is the re-pin
+   (only `data/`). Every changed non-test, non-comment line sits at a place a
+   fixed finding cites. The upstream-file check at `bba7380a6` matches round 1
+   (`6 0 ui/app/SimTabsSection.tsx`; 259 A, 1 M).
+2. **Each diff changes only what its finding asks — pass.** A2's 6 px matches
+   Base UI 1.8.0 (`useAnchorPositioning.js:72`, `:175-179`: default
+   `collisionPadding` 5 plus a 1 px bias on flip's padding), so a full-width
+   popup flips below 480 + 10 + 6 = 496 px of room. S4's `sideOffset` equals
+   the ui-kit default (`ui/ui-kit/Popover/Popover.tsx:39,54`), so nothing
+   renders differently. The `run-tab-cdp.mjs:417-418` comment rewrite describes
+   the reads S6 changed and is judged inside S6.
+3. **Each new test asserts its finding — pass, by reading.** The 495/496 px
+   tests at `SetBonusPopover.test.tsx:102-116` sit on the A2 boundary; the
+   fixer recorded the 495 test failing before the fix ("expected 'right' to be
+   'top'"). The check agent did not re-run with the fix reverted (it would
+   have had to write to the fork).
+4. **Touched tests pass — pass.** Fork vitest on `SetBonusPopover.test.tsx`,
+   `UpgradesResults.test.tsx` and `model/run.test.ts`: 3 files, 34 tests,
+   rc=0 (Node 22.17.1, vitest 4.1.11). `node --check` rc=0 on `rows.mjs`,
+   `run-tab-cdp.mjs`, `test-layout.mjs`.
+
+Finding: **R1 (bookkeeping)** — the pair's tree had this review file
+uncommitted while the check ran; that was this round's own write-up, committed
+with this section.
+
+Not re-run by the check agent: `pnpm verify` and `layout-gate:check` (fixer
+reported rc=0 for both); the final `merge-to-dev --check-only` below runs
+verify again.
+
 ## Summary
 
-To be completed after the fix round.
+Verdict: **ready to merge** once the owner asks. No finding blocks the merge.
+Round 1 raised 14 finding IDs across three axes (A1-A3, D1, S1-S7, P1-P3; A1 =
+P1 and D1 = S3 are the same finding). None was data loss. A2 was a visibly
+wrong result introduced by this branch (popover opening left over the Item
+cell in a 6 px band of room) and is fixed with a boundary test; P2 was a check
+that could pass when it should fail and is fixed. The code-quality rows (A3,
+D1/S3, S4, S5, S6, S7) were fixed in one pass that changed no behaviour. P3 is
+`wontfix` (reason in its row). Round 2 passed all four checks.
+
+Gate C questions answered (see Adversarial): the three out-of-manifest fork
+paths are needed (`SetChips.test.tsx` for 604, `model/run.test.ts` for 515) or
+harmless (`model/settings_pool.ts`, a doc-comment label update for 604); the
+192-line scope-doc diff is table reflow plus the intended four removals, one
+addition and one extended paragraph.
+
+Tickets on this branch: filed 1 (629), closed 4 (515, 604, 605, 606), from
+`git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`
+(1 `A` row) and the `Status: closed` grep in the review skill (4). This review
+filed no ticket.
+
+## Disposition (round 2)
+
+| ID  | Axis          | Disposition | Ticket / note                                                                                                                                                                                                                                                               |
+| --- | ------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial   | fixed       | Ticket 604's closing note now quotes the shipped "Click Simulate to start." with a re-runnable grep (`287477d1`)                                                                                                                                                            |
+| A2  | Adversarial   | fixed       | `sideFor` counts Base UI's 6 px flip margin; 495/496 px boundary tests (fork `5a12af896`)                                                                                                                                                                                   |
+| A3  | Adversarial   | fixed       | Test renamed to what the mocked test proves (fork `bba7380a6`)                                                                                                                                                                                                              |
+| D1  | Domain        | fixed       | Comments say the cited `packages/core/test/...` files are in the main repo (fork `bba7380a6`); same as S3                                                                                                                                                                   |
+| S1  | Standards     | fixed       | "carries" replaced in ticket 629, scope-doc row 629 (`287477d1`) and the lock `_comment` (`81d54d16`)                                                                                                                                                                       |
+| S2  | Standards     | fixed       | Ticket 629 names a grep that shows verify runs no fork unit test (`287477d1`)                                                                                                                                                                                               |
+| S3  | Standards     | fixed       | Same as D1                                                                                                                                                                                                                                                                  |
+| S4  | Standards     | fixed       | Width read from the one Tailwind literal; gap passed as `sideOffset` from the tab's constant; Base UI's internal 5 px stays a commented copy because the ui-kit Popover exposes no prop for it (fork `bba7380a6`)                                                           |
+| S5  | Standards     | fixed       | `<ViewToggles/>` built once (fork `bba7380a6`)                                                                                                                                                                                                                              |
+| S6  | Standards     | fixed       | `dpsAndSlotCells` shared in `rows.mjs`; one `rect` (`7eaf9a0b`)                                                                                                                                                                                                             |
+| S7  | Standards     | fixed       | Check 17 expects the side from the measured room, same rule as the component (`7eaf9a0b`)                                                                                                                                                                                   |
+| P1  | Spec          | fixed       | Same as A1                                                                                                                                                                                                                                                                  |
+| P2  | Spec          | fixed       | Check 18 asserts `scrollLeft === 0` (`708992c0`)                                                                                                                                                                                                                            |
+| P3  | Spec          | wontfix     | Choosing the side from the widest possible popover before it renders is the threshold the session accepted at Gate C (decision-log row K4-adapts); the owner's Q-606 answer ("i dont care. it's going to cover something…") makes opening above at middle widths acceptable |
+| R1  | Focused check | fixed       | Review write-up committed                                                                                                                                                                                                                                                   |
