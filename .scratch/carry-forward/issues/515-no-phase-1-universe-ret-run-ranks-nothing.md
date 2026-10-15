@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: question
 Origin: .scratch/handoffs/511-512-set-credit-redesign/d1-measurements.md (round 2e-1 measurements, 2026-09-25)
 Blocks: none
@@ -79,3 +79,14 @@ found". Judged against the sentence "the status line says the run
 finished; the results area says the tab has no candidate list for Phase
 1; it does not say No upgrades found": pass. The ticket stays open until
 the re-pin and `pnpm verify` (plan step 16).
+
+**2026-10-15 — closed (stage `tab-small-fixes`, plan step 17).** All three
+close conditions in the 2026-10-11 comment are met. 1: by design, see the
+2026-10-12 comment. 2: fork commit `af93190ba` shows "No candidate list for
+Phase {{phase}}" for a finished run whose spec and phase have no list; the
+live Phase 1 check above passed; the pair's main branch re-pins the fork at
+`899d8c267` (`tbc-gear-prio@976a3d51`) and `pnpm verify` passed on it
+(rc=0, `gates: 1524 ran, 0 skipped`). 3: not needed, because the missing
+list is by design.
+
+Verified by: `tbc-new-fork@af93190ba` (live Phase 1 check, 2026-10-12T18:46Z, comment above); `tbc-gear-prio@976a3d51` re-pin; `pnpm verify` rc=0.
