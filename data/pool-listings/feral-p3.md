@@ -102,7 +102,7 @@ absorbs it silently.
 
 - `vendor/wowsims/db.json` — 8256 items, sha256 `6b708ebb19d9e45ea9554a69f8f0b3f9db4600c7c71ef65dd50b3db7655ada2a` per `data/wowsims.lock.json`
 - pinned from `assets/database/db.json` of upstream `wowsims/tbc-new` at `5262ff386bd171e6349d0f9cf00f4d762a6c9951`, commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`
-- `data/universes/feral-p3.json` — 364 entries
+- `data/universes/feral-p3.json` — 587 entries
 - `data/sim-implemented-effects.json` — 451 stub-only item ids
 
 The fork clone `vendor/tbc-new-fork` is **not** read, and the distinction
@@ -120,11 +120,11 @@ python -c "import json;a=json.load(open('vendor/wowsims/db.json'))['items'];b=js
 
 ## Counts
 
-- local membership (U): 364
-- wowsims-primary membership (W): 1314
-- in both: 355
+- local membership (U): 587
+- wowsims-primary membership (W): 1225
+- in both: 578
 - universe-only (U \ W): 9
-- wowsims-only (W \ U): 959
+- wowsims-only (W \ U): 647
 - phase-disagreements: 0
 - universe ids absent from the wowsims DB: 0
 - unexplained: 0
@@ -165,7 +165,6 @@ carry. Each row names the rule that explains the absence.
 | 13937 | Headmaster's Charge | 1 | c | stub-only sim effect | — |
 | 14553 | Sash of Mercy | 1 | f | no recognized source route | — |
 | 14555 | Alcor's Sunrazor | 1 | f | no recognized source route | — |
-| 14557 | The Lion Horn of Stormwind | 1 | f | no recognized source route | — |
 | 14558 | Lady Maye's Pendant | 1 | f | no recognized source route | — |
 | 16448 | Marshal's Dragonhide Gauntlets | 1 | f | no recognized source route | — |
 | 16449 | Field Marshal's Dragonhide Spaulders | 1 | f | no recognized source route | — |
@@ -212,7 +211,6 @@ carry. Each row names the rule that explains the absence.
 | 17108 | Mark of Deflection | 1 | f | no recognized source route | — |
 | 17109 | Choker of Enlightenment | 1 | e1 | drops only outside this phase's zones | — |
 | 17110 | Seal of the Archmagus | 1 | e1 | drops only outside this phase's zones | — |
-| 17111 | Blazefury Medallion | 1 | f | no recognized source route | — |
 | 17112 | Empyrean Demolisher | 1 | f | no recognized source route | — |
 | 17113 | Amberseal Keeper | 1 | f | no recognized source route | — |
 | 17193 | Sulfuron Hammer | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
@@ -370,7 +368,6 @@ carry. Each row names the rule that explains the absence.
 | 19948 | Zandalarian Hero Badge | 1 | f | no recognized source route | — |
 | 19949 | Zandalarian Hero Medallion | 1 | c | stub-only sim effect | — |
 | 19950 | Zandalarian Hero Charm | 1 | c | stub-only sim effect | — |
-| 19955 | Wushoolay's Charm of Nature | 1 | f | no recognized source route | — |
 | 20032 | Flowing Ritual Robes | 1 | e1 | drops only outside this phase's zones | — |
 | 20059 | Highlander's Leather Shoulders | 1 | f | no recognized source route | — |
 | 20060 | Highlander's Lizardhide Shoulders | 1 | f | no recognized source route | — |
@@ -402,18 +399,15 @@ carry. Each row names the rule that explains the absence.
 | 20633 | Unnatural Leather Spaulders | 1 | f | no recognized source route | — |
 | 20634 | Boots of Fright | 1 | f | no recognized source route | — |
 | 20635 | Jade Inlaid Vestments | 1 | f | no recognized source route | — |
-| 20636 | Hibernation Crystal | 1 | f | no recognized source route | — |
 | 20682 | Elemental Focus Band | 1 | f | no recognized source route | — |
 | 20685 | Wavefront Necklace | 1 | f | no recognized source route | — |
 | 20691 | Windshear Cape | 1 | f | no recognized source route | — |
 | 21126 | Death's Sting | 1 | e1 | drops only outside this phase's zones | — |
 | 21128 | Staff of the Qiraji Prophets | 1 | e1 | drops only outside this phase's zones | — |
-| 21180 | Earthstrike | 1 | f | no recognized source route | — |
 | 21185 | Earthcalm Orb | 1 | f | no recognized source route | — |
 | 21186 | Rockfury Bracers | 1 | f | no recognized source route | — |
 | 21188 | Fist of Cenarius | 1 | f | no recognized source route | — |
 | 21189 | Might of Cenarius | 1 | f | no recognized source route | — |
-| 21190 | Wrath of Cenarius | 1 | f | no recognized source route | — |
 | 21196 | Signet Ring of the Bronze Dragonflight | 1 | f | no recognized source route | — |
 | 21197 | Signet Ring of the Bronze Dragonflight | 1 | f | no recognized source route | — |
 | 21198 | Signet Ring of the Bronze Dragonflight | 1 | f | no recognized source route | — |
@@ -542,8 +536,6 @@ carry. Each row names the rule that explains the absence.
 | 21847 | Spellfire Gloves | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 21848 | Spellfire Robe | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 21863 | Soulcloth Gloves | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 21864 | Soulcloth Shoulders | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 21865 | Soulcloth Vest | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 21869 | Frozen Shadoweave Shoulders | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 21870 | Frozen Shadoweave Boots | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 21871 | Frozen Shadoweave Robe | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
@@ -653,7 +645,6 @@ carry. Each row names the rule that explains the absence.
 | 23071 | Leggings of Apocalypse | 1 | e1 | drops only outside this phase's zones | — |
 | 23073 | Boots of Displacement | 1 | e1 | drops only outside this phase's zones | — |
 | 23206 | Mark of the Champion | 1 | f | no recognized source route | — |
-| 23207 | Mark of the Champion | 1 | f | no recognized source route | — |
 | 23220 | Crystal Webbed Robe | 1 | e1 | drops only outside this phase's zones | — |
 | 23221 | Misplaced Servo Arm | 1 | c | stub-only sim effect | — |
 | 23226 | Ghoul Skin Tunic | 1 | e1 | drops only outside this phase's zones | — |
@@ -698,74 +689,18 @@ carry. Each row names the rule that explains the absence.
 | 24266 | Spellstrike Hood | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 24267 | Battlecast Hood | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 24551 | Talisman of the Horde | 1 | c | stub-only sim effect | — |
-| 24557 | Gladiator's War Staff | 1 | f | no recognized source route | — |
 | 25829 | Talisman of the Alliance | 1 | c | stub-only sim effect | — |
-| 28126 | Gladiator's Dragonhide Gloves | 1 | c | stub-only sim effect | — |
-| 28127 | Gladiator's Dragonhide Helm | 1 | f | no recognized source route | — |
-| 28128 | Gladiator's Dragonhide Legguards | 1 | f | no recognized source route | — |
-| 28129 | Gladiator's Dragonhide Spaulders | 1 | f | no recognized source route | — |
-| 28130 | Gladiator's Dragonhide Tunic | 1 | f | no recognized source route | — |
-| 28136 | Gladiator's Wyrmhide Gloves | 1 | c | stub-only sim effect | — |
-| 28137 | Gladiator's Wyrmhide Helm | 1 | f | no recognized source route | — |
-| 28138 | Gladiator's Wyrmhide Legguards | 1 | f | no recognized source route | — |
-| 28139 | Gladiator's Wyrmhide Spaulders | 1 | f | no recognized source route | — |
-| 28140 | Gladiator's Wyrmhide Tunic | 1 | f | no recognized source route | — |
-| 28244 | Pendant of Triumph | 1 | f | no recognized source route | — |
-| 28245 | Pendant of Dominance | 1 | f | no recognized source route | — |
-| 28297 | Gladiator's Spellblade | 1 | f | no recognized source route | — |
-| 28299 | Gladiator's Bonegrinder | 1 | f | no recognized source route | — |
-| 28305 | Gladiator's Pummeler | 1 | f | no recognized source route | — |
-| 28312 | Gladiator's Shanker | 1 | f | no recognized source route | — |
-| 28313 | Gladiator's Right Ripper | 1 | f | no recognized source route | — |
-| 28346 | Gladiator's Endgame | 1 | f | no recognized source route | — |
-| 28355 | Gladiator's Idol of Tenacity | 1 | c | stub-only sim effect | — |
-| 28377 | Sergeant's Heavy Cloak | 1 | f | no recognized source route | — |
-| 28378 | Sergeant's Heavy Cape | 1 | f | no recognized source route | — |
-| 28379 | Sergeant's Heavy Cape | 1 | f | no recognized source route | — |
-| 28380 | Sergeant's Heavy Cloak | 1 | f | no recognized source route | — |
-| 28422 | General's Leather Boots | 1 | f | no recognized source route | — |
-| 28423 | General's Leather Belt | 1 | f | no recognized source route | — |
-| 28424 | General's Leather Bracers | 1 | f | no recognized source route | — |
 | 28437 | Drakefist Hammer | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 28438 | Dragonmaw | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 28439 | Dragonstrike | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 28440 | Thunder | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 28441 | Deep Thunder | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 28442 | Stormherald | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 28443 | General's Dragonhide Belt | 1 | f | no recognized source route | — |
-| 28444 | General's Dragonhide Boots | 1 | f | no recognized source route | — |
-| 28445 | General's Dragonhide Bracers | 1 | f | no recognized source route | — |
-| 28446 | General's Wyrmhide Belt | 1 | f | no recognized source route | — |
-| 28447 | General's Wyrmhide Boots | 1 | f | no recognized source route | — |
-| 28448 | General's Wyrmhide Bracers | 1 | f | no recognized source route | — |
 | 28553 | Band of the Exorcist | 1 | f | no recognized source route | — |
 | 28555 | Seal of the Exorcist | 1 | f | no recognized source route | — |
 | 28568 | Idol of the Avian Heart | 1 | c | stub-only sim effect | Karazhan |
 | 28590 | Ribbon of Sacrifice | 1 | c | stub-only sim effect | Karazhan |
-| 28790 | Naaru Lightwarden's Band | 1 | f | no recognized source route | — |
-| 28791 | Ring of the Recalcitrant | 1 | f | no recognized source route | — |
-| 28792 | A'dal's Signet of Defense | 1 | f | no recognized source route | — |
-| 28793 | Band of Crimson Fury | 1 | f | no recognized source route | — |
 | 28823 | Eye of Gruul | 1 | c | stub-only sim effect | Gruul's Lair |
-| 28976 | Marshal's Dragonhide Belt | 1 | f | no recognized source route | — |
-| 28977 | Marshal's Dragonhide Boots | 1 | f | no recognized source route | — |
-| 28978 | Marshal's Dragonhide Bracers | 1 | f | no recognized source route | — |
-| 28986 | Marshal's Leather Belt | 1 | f | no recognized source route | — |
-| 28987 | Marshal's Leather Boots | 1 | f | no recognized source route | — |
-| 28988 | Marshal's Leather Bracers | 1 | f | no recognized source route | — |
-| 29004 | Marshal's Wyrmhide Belt | 1 | f | no recognized source route | — |
-| 29005 | Marshal's Wyrmhide Boots | 1 | f | no recognized source route | — |
-| 29006 | Marshal's Wyrmhide Bracers | 1 | f | no recognized source route | — |
-| 29086 | Crown of Malorne | 1 | f | no recognized source route | — |
-| 29087 | Chestguard of Malorne | 1 | f | no recognized source route | — |
-| 29088 | Legguards of Malorne | 1 | f | no recognized source route | — |
-| 29089 | Shoulderguards of Malorne | 1 | f | no recognized source route | — |
-| 29090 | Handguards of Malorne | 1 | f | no recognized source route | — |
-| 29091 | Chestpiece of Malorne | 1 | f | no recognized source route | — |
-| 29092 | Gloves of Malorne | 1 | f | no recognized source route | — |
-| 29093 | Antlers of Malorne | 1 | f | no recognized source route | — |
-| 29094 | Britches of Malorne | 1 | f | no recognized source route | — |
-| 29095 | Pauldrons of Malorne | 1 | f | no recognized source route | — |
 | 29121 | Guile of Khoraazi | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 29122 | Nether Runner's Cowl | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 29123 | Medallion of the Lightbearer | 1 | f | no recognized source route | — |
@@ -793,12 +728,6 @@ carry. Each row names the rule that explains the absence.
 | 29263 | Forestheart Bracers | 1 | e1 | drops only outside this phase's zones | — |
 | 29264 | Tree-Mender's Belt | 1 | e1 | drops only outside this phase's zones | — |
 | 29265 | Barkchip Boots | 1 | e1 | drops only outside this phase's zones | — |
-| 29269 | Sapphiron's Wing Bone | 1 | f | no recognized source route | — |
-| 29270 | Flametongue Seal | 1 | f | no recognized source route | — |
-| 29271 | Talisman of Kalecgos | 1 | f | no recognized source route | — |
-| 29272 | Orb of the Soul-Eater | 1 | f | no recognized source route | — |
-| 29273 | Khadgar's Knapsack | 1 | f | no recognized source route | — |
-| 29274 | Tears of Heaven | 1 | f | no recognized source route | — |
 | 29277 | Violet Signet | 1 | f | no recognized source route | — |
 | 29278 | Violet Signet | 1 | f | no recognized source route | — |
 | 29279 | Violet Signet of the Great Protector | 1 | f | no recognized source route | — |
@@ -822,19 +751,6 @@ carry. Each row names the rule that explains the absence.
 | 29357 | Master Thief's Gloves | 1 | c | stub-only sim effect | — |
 | 29359 | Feral Staff of Lashing | 1 | e1 | drops only outside this phase's zones | — |
 | 29360 | Vileblade of the Betrayer | 1 | e1 | drops only outside this phase's zones | — |
-| 29367 | Ring of Cryptic Dreams | 1 | f | no recognized source route | — |
-| 29368 | Manasurge Pendant | 1 | f | no recognized source route | — |
-| 29369 | Shawl of Shifting Probabilities | 1 | f | no recognized source route | — |
-| 29370 | Icon of the Silver Crescent | 1 | f | no recognized source route | — |
-| 29373 | Band of Halos | 1 | f | no recognized source route | — |
-| 29374 | Necklace of Eternal Hope | 1 | f | no recognized source route | — |
-| 29375 | Bishop's Cloak | 1 | f | no recognized source route | — |
-| 29376 | Essence of the Martyr | 1 | f | no recognized source route | — |
-| 29379 | Ring of Arathi Warlords | 1 | f | no recognized source route | — |
-| 29384 | Ring of Unyielding Force | 1 | f | no recognized source route | — |
-| 29385 | Farstrider Defender's Cloak | 1 | f | no recognized source route | — |
-| 29386 | Necklace of the Juggernaut | 1 | f | no recognized source route | — |
-| 29387 | Gnomeregan Auto-Blocker 600 | 1 | f | no recognized source route | — |
 | 29502 | Cobrascale Hood | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 29503 | Cobrascale Gloves | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 29504 | Windscale Hood | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
@@ -845,81 +761,18 @@ carry. Each row names the rule that explains the absence.
 | 29524 | Windhawk Belt | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 29526 | Primalstrike Belt | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 29527 | Primalstrike Bracers | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 30007 | The Darkener's Grasp | 2 | f | no recognized source route | — |
 | 30008 | Pendant of the Lost Ages | 2 | c | stub-only sim effect | Serpentshrine Cavern |
-| 30015 | The Sun King's Talisman | 2 | f | no recognized source route | — |
-| 30018 | Lord Sanguinar's Claim | 2 | f | no recognized source route | — |
-| 30035 | Boots of the Long Road | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 30036 | Belt of the Long Road | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 30037 | Boots of Blasting | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 30038 | Belt of Blasting | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 30051 | Idol of the Crescent Goddess | 2 | c | stub-only sim effect | Serpentshrine Cavern |
-| 30216 | Nordrassil Chestguard | 2 | f | no recognized source route | — |
-| 30217 | Nordrassil Gloves | 2 | f | no recognized source route | — |
-| 30219 | Nordrassil Headguard | 2 | f | no recognized source route | — |
-| 30220 | Nordrassil Life-Kilt | 2 | f | no recognized source route | — |
-| 30221 | Nordrassil Life-Mantle | 2 | f | no recognized source route | — |
-| 30231 | Nordrassil Chestpiece | 2 | f | no recognized source route | — |
-| 30232 | Nordrassil Gauntlets | 2 | f | no recognized source route | — |
-| 30233 | Nordrassil Headpiece | 2 | f | no recognized source route | — |
-| 30234 | Nordrassil Wrath-Kilt | 2 | f | no recognized source route | — |
-| 30235 | Nordrassil Wrath-Mantle | 2 | f | no recognized source route | — |
 | 30531 | Breeches of the Occultist | 1 | e1 | drops only outside this phase's zones | — |
 | 30532 | Kirin Tor Master's Trousers | 1 | e1 | drops only outside this phase's zones | — |
 | 30535 | Forestwalker Kilt | 1 | e1 | drops only outside this phase's zones | — |
 | 30538 | Midnight Legguards | 1 | e1 | drops only outside this phase's zones | — |
 | 30543 | Pontifex Kilt | 1 | e1 | drops only outside this phase's zones | — |
 | 30619 | Fel Reaver's Piston | 2 | c | stub-only sim effect | Tempest Keep |
-| 30761 | Infernoweave Leggings | 1 | f | no recognized source route | — |
-| 30762 | Infernoweave Robe | 1 | f | no recognized source route | — |
-| 30763 | Infernoweave Boots | 1 | f | no recognized source route | — |
-| 30764 | Infernoweave Gloves | 1 | f | no recognized source route | — |
-| 30776 | Inferno Hardened Chestguard | 1 | f | no recognized source route | — |
-| 30778 | Inferno Hardened Leggings | 1 | f | no recognized source route | — |
-| 30779 | Inferno Hardened Boots | 1 | f | no recognized source route | — |
-| 30780 | Inferno Hardened Gloves | 1 | f | no recognized source route | — |
 | 30832 | Gavel of Unearthed Secrets | 1 | f | no recognized source route | — |
-| 31032 | Thunderheart Gloves | 3 | f | no recognized source route | — |
-| 31035 | Thunderheart Handguards | 3 | f | no recognized source route | — |
-| 31037 | Thunderheart Helmet | 3 | f | no recognized source route | — |
-| 31040 | Thunderheart Headguard | 3 | f | no recognized source route | — |
-| 31041 | Thunderheart Tunic | 3 | f | no recognized source route | — |
-| 31043 | Thunderheart Vest | 3 | f | no recognized source route | — |
-| 31045 | Thunderheart Legguards | 3 | f | no recognized source route | — |
-| 31046 | Thunderheart Pants | 3 | f | no recognized source route | — |
-| 31047 | Thunderheart Spaulders | 3 | f | no recognized source route | — |
-| 31049 | Thunderheart Shoulderpads | 3 | f | no recognized source route | — |
 | 31113 | Violet Badge | 1 | f | no recognized source route | — |
-| 31319 | Band of Impenetrable Defenses | 1 | f | no recognized source route | — |
-| 31321 | Choker of Repentance | 1 | f | no recognized source route | — |
-| 31322 | The Hammer of Destiny | 1 | f | no recognized source route | — |
-| 31326 | Truestrike Ring | 1 | f | no recognized source route | — |
-| 31329 | Lifegiving Cloak | 1 | f | no recognized source route | — |
-| 31331 | The Night Blade | 1 | f | no recognized source route | — |
-| 31333 | The Night Watchman | 1 | f | no recognized source route | — |
-| 31335 | Pants of Living Growth | 1 | f | no recognized source route | — |
-| 31338 | Charlotte's Ivy | 1 | f | no recognized source route | — |
-| 31339 | Lola's Eve | 1 | f | no recognized source route | — |
-| 31340 | Will of Edward the Odd | 1 | f | no recognized source route | — |
-| 31342 | The Ancient Scepter of Sue-Min | 1 | f | no recognized source route | — |
-| 31343 | Kamaei's Cerulean Skirt | 1 | f | no recognized source route | — |
-| 31375 | Gladiator's Kodohide Gloves | 1 | c | stub-only sim effect | — |
-| 31376 | Gladiator's Kodohide Helm | 1 | f | no recognized source route | — |
-| 31377 | Gladiator's Kodohide Legguards | 1 | f | no recognized source route | — |
-| 31378 | Gladiator's Kodohide Spaulders | 1 | f | no recognized source route | — |
-| 31379 | Gladiator's Kodohide Tunic | 1 | f | no recognized source route | — |
 | 31398 | The Frozen Eye | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 31399 | The Natural Ward | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 31594 | General's Kodohide Belt | 1 | f | no recognized source route | — |
-| 31595 | General's Kodohide Boots | 1 | f | no recognized source route | — |
-| 31596 | Marshal's Kodohide Belt | 1 | f | no recognized source route | — |
-| 31597 | Marshal's Kodohide Boots | 1 | f | no recognized source route | — |
-| 31598 | General's Kodohide Bracers | 1 | f | no recognized source route | — |
-| 31599 | Marshal's Kodohide Bracers | 1 | f | no recognized source route | — |
-| 31746 | Phoenix-fire Band | 1 | f | no recognized source route | — |
-| 31856 | Darkmoon Card: Crusade | 1 | f | no recognized source route | — |
-| 31857 | Darkmoon Card: Wrath | 1 | f | no recognized source route | — |
-| 31858 | Darkmoon Card: Vengeance | 1 | f | no recognized source route | — |
 | 31859 | Darkmoon Card: Madness | 1 | c | stub-only sim effect | — |
 | 31919 | Nexus-Prince's Ring of Balance | 1 | e1 | drops only outside this phase's zones | — |
 | 31920 | Shaffar's Band of Brutality | 1 | e1 | drops only outside this phase's zones | — |
@@ -927,187 +780,22 @@ carry. Each row names the rule that explains the absence.
 | 31922 | Ring of Conflict Survival | 1 | e1 | drops only outside this phase's zones | — |
 | 31923 | Band of the Crystalline Void | 1 | e1 | drops only outside this phase's zones | — |
 | 31924 | Yor's Revenge | 1 | e1 | drops only outside this phase's zones | — |
-| 31959 | Merciless Gladiator's Bonegrinder | 2 | f | no recognized source route | — |
-| 31967 | Merciless Gladiator's Dragonhide Gloves | 2 | c | stub-only sim effect | — |
-| 31968 | Merciless Gladiator's Dragonhide Helm | 2 | f | no recognized source route | — |
-| 31969 | Merciless Gladiator's Dragonhide Legguards | 2 | f | no recognized source route | — |
-| 31971 | Merciless Gladiator's Dragonhide Spaulders | 2 | f | no recognized source route | — |
-| 31972 | Merciless Gladiator's Dragonhide Tunic | 2 | f | no recognized source route | — |
-| 31978 | Merciless Gladiator's Endgame | 2 | f | no recognized source route | — |
-| 31987 | Merciless Gladiator's Kodohide Gloves | 2 | c | stub-only sim effect | — |
-| 31988 | Merciless Gladiator's Kodohide Helm | 2 | f | no recognized source route | — |
-| 31989 | Merciless Gladiator's Kodohide Legguards | 2 | f | no recognized source route | — |
-| 31990 | Merciless Gladiator's Kodohide Spaulders | 2 | f | no recognized source route | — |
-| 31991 | Merciless Gladiator's Kodohide Tunic | 2 | f | no recognized source route | — |
-| 32026 | Merciless Gladiator's Pummeler | 2 | f | no recognized source route | — |
-| 32028 | Merciless Gladiator's Right Ripper | 2 | f | no recognized source route | — |
-| 32044 | Merciless Gladiator's Shanker | 2 | f | no recognized source route | — |
-| 32053 | Merciless Gladiator's Spellblade | 2 | f | no recognized source route | — |
-| 32055 | Merciless Gladiator's War Staff | 2 | f | no recognized source route | — |
-| 32056 | Merciless Gladiator's Wyrmhide Gloves | 2 | c | stub-only sim effect | — |
-| 32057 | Merciless Gladiator's Wyrmhide Helm | 2 | f | no recognized source route | — |
-| 32058 | Merciless Gladiator's Wyrmhide Legguards | 2 | f | no recognized source route | — |
-| 32059 | Merciless Gladiator's Wyrmhide Spaulders | 2 | f | no recognized source route | — |
-| 32060 | Merciless Gladiator's Wyrmhide Tunic | 2 | f | no recognized source route | — |
 | 32080 | Mantle of Shadowy Embrace | 1 | e1 | drops only outside this phase's zones | — |
 | 32081 | Eye of the Stalker | 1 | e1 | drops only outside this phase's zones | — |
-| 32087 | Mask of the Deceiver | 1 | f | no recognized source route | — |
-| 32088 | Cowl of Beastly Rage | 1 | f | no recognized source route | — |
-| 32089 | Mana-Binders Cowl | 1 | f | no recognized source route | — |
-| 32090 | Cowl of Naaru Blessings | 1 | f | no recognized source route | — |
 | 32113 | Chancellor's Dragonhide Gloves | 1 | c | stub-only sim effect | — |
-| 32114 | Chancellor's Dragonhide Helm | 1 | f | no recognized source route | — |
-| 32115 | Chancellor's Dragonhide Legguards | 1 | f | no recognized source route | — |
-| 32116 | Chancellor's Dragonhide Spaulders | 1 | f | no recognized source route | — |
-| 32117 | Chancellor's Dragonhide Tunic | 1 | f | no recognized source route | — |
 | 32118 | Chancellor's Kodohide Gloves | 1 | c | stub-only sim effect | — |
-| 32119 | Chancellor's Kodohide Helm | 1 | f | no recognized source route | — |
-| 32121 | Chancellor's Kodohide Spaulders | 1 | f | no recognized source route | — |
-| 32122 | Chancellor's Kodohide Legguards | 1 | f | no recognized source route | — |
-| 32123 | Chancellor's Kodohide Tunic | 1 | f | no recognized source route | — |
 | 32128 | Chancellor's Wyrmhide Gloves | 1 | c | stub-only sim effect | — |
-| 32129 | Chancellor's Wyrmhide Helm | 1 | f | no recognized source route | — |
-| 32130 | Chancellor's Wyrmhide Legguards | 1 | f | no recognized source route | — |
-| 32131 | Chancellor's Wyrmhide Spaulders | 1 | f | no recognized source route | — |
-| 32132 | Chancellor's Wyrmhide Tunic | 1 | f | no recognized source route | — |
-| 32173 | Chancellor's Bonecracker | 1 | f | no recognized source route | — |
-| 32176 | Chancellor's Pummeler | 1 | f | no recognized source route | — |
-| 32178 | Chancellor's Shanker | 1 | f | no recognized source route | — |
-| 32179 | Chancellor's Shiv | 1 | f | no recognized source route | — |
-| 32181 | Chancellor's Bonegrinder | 1 | f | no recognized source route | — |
-| 32183 | Chancellor's Maul | 1 | f | no recognized source route | — |
-| 32185 | Chancellor's War Staff | 1 | f | no recognized source route | — |
-| 32189 | Chancellor's Right Ripper | 1 | f | no recognized source route | — |
-| 32190 | Chancellor's Spellblade | 1 | f | no recognized source route | — |
-| 32191 | Chancellor's Battletome | 1 | f | no recognized source route | — |
-| 32450 | Gladiator's Gavel | 1 | f | no recognized source route | — |
-| 32451 | Gladiator's Salvation | 1 | f | no recognized source route | — |
-| 32452 | Gladiator's Reprieve | 1 | f | no recognized source route | — |
 | 32478 | Deathblow X11 Goggles | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32479 | Wonderheal XT40 Shades | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32480 | Magnified Moon Specs | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32494 | Destruction Holo-gogs | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32495 | Powerheal 4000 Lens | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32500 | Crystal Spire of Karabor | 3 | c | stub-only sim effect | Black Temple |
-| 32540 | Terokk's Might | 1 | f | no recognized source route | — |
-| 32541 | Terokk's Wisdom | 1 | f | no recognized source route | — |
-| 32581 | Swiftstrike Shoulders | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 32582 | Bracers of Renewed Life | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 32583 | Shoulderpads of Renewed Life | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 32584 | Swiftheal Wraps | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 32585 | Swiftheal Mantle | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 32586 | Bracers of Nimble Thought | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 32587 | Mantle of Nimble Thought | 3 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 32649 | Medallion of Karabor | 3 | f | no recognized source route | — |
 | 32651 | Crystal Orb of Enlightenment | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 32655 | Crystalweave Bracers | 1 | f | no recognized source route | — |
-| 32757 | Blessed Medallion of Karabor | 3 | f | no recognized source route | — |
 | 32770 | Skyguard Silver Cross | 1 | c | stub-only sim effect | — |
 | 32771 | Airman's Ribbon of Gallantry | 1 | c | stub-only sim effect | — |
-| 32786 | Veteran's Dragonhide Boots | 2 | f | no recognized source route | — |
-| 32788 | Veteran's Kodohide Boots | 2 | f | no recognized source route | — |
-| 32790 | Veteran's Leather Boots | 2 | f | no recognized source route | — |
-| 32796 | Veteran's Wyrmhide Boots | 2 | f | no recognized source route | — |
-| 32798 | Veteran's Dragonhide Belt | 2 | f | no recognized source route | — |
-| 32800 | Veteran's Kodohide Belt | 2 | f | no recognized source route | — |
-| 32802 | Veteran's Leather Belt | 2 | f | no recognized source route | — |
-| 32808 | Veteran's Wyrmhide Belt | 2 | f | no recognized source route | — |
-| 32810 | Veteran's Dragonhide Bracers | 2 | f | no recognized source route | — |
-| 32812 | Veteran's Kodohide Bracers | 2 | f | no recognized source route | — |
-| 32821 | Veteran's Wyrmhide Bracers | 2 | f | no recognized source route | — |
 | 32854 | Hammer of Righteous Might | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 32914 | Bland Shiv | 1 | f | no recognized source route | — |
-| 32941 | Corruptor's Signet | 1 | f | no recognized source route | — |
-| 32942 | Ring of the Overseer | 1 | f | no recognized source route | — |
-| 32961 | Merciless Gladiator's Reprieve | 2 | f | no recognized source route | — |
-| 32963 | Merciless Gladiator's Gavel | 2 | f | no recognized source route | — |
-| 32964 | Merciless Gladiator's Salvation | 2 | f | no recognized source route | — |
-| 33056 | Veteran's Band of Dominance | 2 | f | no recognized source route | — |
-| 33057 | Veteran's Band of Triumph | 2 | f | no recognized source route | — |
-| 33064 | Veteran's Band of Salvation | 2 | f | no recognized source route | — |
-| 33065 | Veteran's Pendant of Dominance | 2 | f | no recognized source route | — |
-| 33066 | Veteran's Pendant of Triumph | 2 | f | no recognized source route | — |
-| 33067 | Veteran's Pendant of Conquest | 2 | f | no recognized source route | — |
-| 33068 | Veteran's Pendant of Salvation | 2 | f | no recognized source route | — |
-| 33076 | Merciless Gladiator's Idol of Tenacity | 2 | c | stub-only sim effect | — |
 | 33204 | Shadowprowler's Chestguard | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 33663 | Vengeful Gladiator's Bonegrinder | 3 | f | no recognized source route | — |
-| 33671 | Vengeful Gladiator's Dragonhide Gloves | 3 | c | stub-only sim effect | — |
-| 33681 | Vengeful Gladiator's Endgame | 3 | f | no recognized source route | — |
-| 33687 | Vengeful Gladiator's Gavel | 3 | f | no recognized source route | — |
-| 33690 | Vengeful Gladiator's Kodohide Gloves | 3 | c | stub-only sim effect | — |
-| 33691 | Vengeful Gladiator's Kodohide Helm | 3 | f | no recognized source route | — |
-| 33692 | Vengeful Gladiator's Kodohide Legguards | 3 | f | no recognized source route | — |
-| 33693 | Vengeful Gladiator's Kodohide Spaulders | 3 | f | no recognized source route | — |
-| 33694 | Vengeful Gladiator's Kodohide Tunic | 3 | f | no recognized source route | — |
-| 33733 | Vengeful Gladiator's Pummeler | 3 | f | no recognized source route | — |
-| 33736 | Vengeful Gladiator's Reprieve | 3 | f | no recognized source route | — |
-| 33737 | Vengeful Gladiator's Right Ripper | 3 | f | no recognized source route | — |
-| 33743 | Vengeful Gladiator's Salvation | 3 | f | no recognized source route | — |
-| 33754 | Vengeful Gladiator's Shanker | 3 | f | no recognized source route | — |
-| 33763 | Vengeful Gladiator's Spellblade | 3 | f | no recognized source route | — |
-| 33766 | Vengeful Gladiator's War Staff | 3 | f | no recognized source route | — |
-| 33767 | Vengeful Gladiator's Wyrmhide Gloves | 3 | c | stub-only sim effect | — |
-| 33768 | Vengeful Gladiator's Wyrmhide Helm | 3 | f | no recognized source route | — |
-| 33769 | Vengeful Gladiator's Wyrmhide Legguards | 3 | f | no recognized source route | — |
-| 33770 | Vengeful Gladiator's Wyrmhide Spaulders | 3 | f | no recognized source route | — |
-| 33771 | Vengeful Gladiator's Wyrmhide Tunic | 3 | f | no recognized source route | — |
-| 33832 | Battlemaster's Determination | 3 | f | no recognized source route | — |
-| 33841 | Vengeful Gladiator's Idol of Tenacity | 3 | c | stub-only sim effect | — |
-| 33853 | Vindicator's Band of Dominance | 3 | f | no recognized source route | — |
-| 33885 | Vindicator's Kodohide Belt | 3 | f | no recognized source route | — |
-| 33886 | Vindicator's Kodohide Boots | 3 | f | no recognized source route | — |
-| 33887 | Vindicator's Kodohide Bracers | 3 | f | no recognized source route | — |
-| 33891 | Vindicator's Leather Belt | 3 | f | no recognized source route | — |
-| 33892 | Vindicator's Leather Boots | 3 | f | no recognized source route | — |
-| 33915 | Vindicator's Wyrmhide Belt | 3 | f | no recognized source route | — |
-| 33916 | Vindicator's Wyrmhide Boots | 3 | f | no recognized source route | — |
-| 33917 | Vindicator's Wyrmhide Bracers | 3 | f | no recognized source route | — |
-| 33918 | Vindicator's Band of Salvation | 3 | f | no recognized source route | — |
-| 33919 | Vindicator's Band of Triumph | 3 | f | no recognized source route | — |
-| 33920 | Vindicator's Pendant of Conquest | 3 | f | no recognized source route | — |
-| 33921 | Vindicator's Pendant of Dominance | 3 | f | no recognized source route | — |
-| 33922 | Vindicator's Pendant of Salvation | 3 | f | no recognized source route | — |
-| 33923 | Vindicator's Pendant of Triumph | 3 | f | no recognized source route | — |
-| 33942 | Gladiator's Idol of Steadfastness | 1 | c | stub-only sim effect | — |
-| 33943 | Merciless Gladiator's Idol of Steadfastness | 2 | c | stub-only sim effect | — |
-| 33944 | Vengeful Gladiator's Idol of Steadfastness | 3 | c | stub-only sim effect | — |
-| 33945 | Gladiator's Idol of Resolve | 1 | c | stub-only sim effect | — |
-| 33946 | Merciless Gladiator's Idol of Resolve | 2 | c | stub-only sim effect | — |
-| 33947 | Vengeful Gladiator's Idol of Resolve | 3 | c | stub-only sim effect | — |
-| 33957 | Witches Band | 1 | f | no recognized source route | — |
-| 33958 | The Horseman's Signet Ring | 1 | f | no recognized source route | — |
-| 33959 | Ring of Ghoulish Delight | 1 | f | no recognized source route | — |
-| 34033 | Vengeful Gladiator's Grimoire | 3 | f | no recognized source route | — |
-| 34049 | Battlemaster's Audacity | 3 | f | no recognized source route | — |
-| 34050 | Battlemaster's Perseverance | 3 | f | no recognized source route | — |
-| 34073 | The Horseman's Signet Ring | 1 | f | no recognized source route | — |
-| 34074 | Witches Band | 1 | f | no recognized source route | — |
-| 34075 | Ring of Ghoulish Delight | 1 | f | no recognized source route | — |
-| 34162 | Battlemaster's Depravity | 3 | f | no recognized source route | — |
-| 34163 | Battlemaster's Cruelty | 3 | f | no recognized source route | — |
-| 34540 | Vengeful Gladiator's Battle Staff | 3 | f | no recognized source route | — |
-| 34837 | The 2 Ring | 1 | f | no recognized source route | — |
-| 35317 | Vindicator's Pendant of Reprieve | 3 | f | no recognized source route | — |
-| 35319 | Vindicator's Pendant of Subjugation | 3 | f | no recognized source route | — |
-| 35320 | Vindicator's Band of Subjugation | 3 | f | no recognized source route | — |
-| 35327 | Battlemaster's Alacrity | 3 | f | no recognized source route | — |
-| 278774 | Cloak of the Frigid Winds | 2 | f | no recognized source route | — |
-| 278819 | The Frost Lord's War Cloak | 2 | f | no recognized source route | — |
-| 278823 | Icebound Cloak | 2 | f | no recognized source route | — |
-| 278827 | Amulet of Bitter Hatred | 2 | f | no recognized source route | — |
-| 278833 | Choker of the Arctic Flow | 2 | f | no recognized source route | — |
-| 278838 | Amulet of Glacial Tranquility | 2 | f | no recognized source route | — |
-| 278847 | Hailstone Pendant | 2 | f | no recognized source route | — |
-| 278953 | Frostscythe of Lord Ahune | 2 | f | no recognized source route | — |
-| 279240 | Shroud of Winter's Chill | 2 | f | no recognized source route | — |
-| 281735 | Dark Iron Smoking Pipe | 3 | f | no recognized source route | — |
-| 281739 | Empty Mug of Direbrew | 3 | f | no recognized source route | — |
-| 281743 | Coren's Lucky Coin | 3 | f | no recognized source route | — |
-| 281748 | Direbrew Hops | 3 | f | no recognized source route | — |
-| 281893 | Balebrew Charm | 3 | f | no recognized source route | — |
-| 281895 | Brightbrew Charm | 3 | f | no recognized source route | — |
-| 281903 | Direbrew's Shanker | 3 | f | no recognized source route | — |
 
 ### Category totals
 
@@ -1116,10 +804,10 @@ carry. Each row names the rule that explains the absence.
 | d — class allowlist excludes this spec's class | 0 |
 | a — per-spec weapon/hand/armor exclusion | 0 |
 | b — fails the eligible_d7 stat and slot screen | 0 |
-| c — stub-only sim effect | 67 |
+| c — stub-only sim effect | 49 |
 | e1 — drops only outside this phase's zones | 296 |
-| e2 — sourced, but by a route the local assembly did not admit | 97 |
-| f — no recognized source route | 499 |
+| e2 — sourced, but by a route the local assembly did not admit | 84 |
+| f — no recognized source route | 218 |
 | g — unexplained | 0 |
 
 ## Universe-only items, classified
@@ -1154,19 +842,42 @@ it would mean a piece of current raid content the pool silently omits.
 
 ## Full local membership
 
-All 364 entries of the universe the tab sims, with the source
+All 587 entries of the universe the tab sims, with the source
 metadata the local assembly resolved for each.
 
 | itemId | name | slot | phase | sources |
 |---|---|---|---|---|
 | 8345 | Wolfshead Helm | head | 1 | crafted profession=Leatherworking |
+| 14557 | The Lion Horn of Stormwind | trinket | 1 | unknown |
+| 17111 | Blazefury Medallion | neck | 1 | unknown |
+| 19955 | Wushoolay's Charm of Nature | trinket | 1 | unknown |
+| 20636 | Hibernation Crystal | trinket | 1 | unknown |
+| 21180 | Earthstrike | trinket | 1 | unknown |
+| 21190 | Wrath of Cenarius | finger | 1 | unknown |
+| 21864 | Soulcloth Shoulders | shoulder | 1 | crafted profession=Tailoring |
+| 21865 | Soulcloth Vest | chest | 1 | crafted profession=Tailoring |
+| 23207 | Mark of the Champion | trinket | 1 | unknown |
 | 24114 | Braided Eternium Chain | neck | 1 | crafted profession=Jewelcrafting |
 | 24259 | Vengeance Wrap | back | 1 | crafted profession=Tailoring |
 | 25685 | Fel Leather Gloves | hands | 1 | crafted profession=Leatherworking |
 | 25686 | Fel Leather Boots | feet | 1 | crafted profession=Leatherworking |
 | 28034 | Hourglass of the Unraveller | trinket | 1 | unknown |
+| 28244 | Pendant of Triumph | neck | 1 | unknown |
+| 28245 | Pendant of Dominance | neck | 1 | unknown |
+| 28377 | Sergeant's Heavy Cloak | back | 1 | unknown |
+| 28378 | Sergeant's Heavy Cape | back | 1 | unknown |
+| 28379 | Sergeant's Heavy Cape | back | 1 | unknown |
+| 28380 | Sergeant's Heavy Cloak | back | 1 | unknown |
+| 28422 | General's Leather Boots | feet | 1 | unknown |
+| 28423 | General's Leather Belt | waist | 1 | unknown |
+| 28424 | General's Leather Bracers | wrist | 1 | unknown |
+| 28443 | General's Dragonhide Belt | waist | 1 | unknown |
+| 28444 | General's Dragonhide Boots | feet | 1 | unknown |
+| 28445 | General's Dragonhide Bracers | wrist | 1 | unknown |
+| 28446 | General's Wyrmhide Belt | waist | 1 | unknown |
+| 28447 | General's Wyrmhide Boots | feet | 1 | unknown |
+| 28448 | General's Wyrmhide Bracers | wrist | 1 | unknown |
 | 28453 | Bracers of the White Stag | wrist | 1 | raid zone=Karazhan boss=Attumen the Huntsman |
-| 28476 | Gladiator's Maul | weapon | 1 | pvp via=arena; pvp via=honor |
 | 28477 | Harbinger Bands | wrist | 1 | raid zone=Karazhan boss=Attumen the Huntsman |
 | 28506 | Gloves of Dexterous Manipulation | hands | 1 | raid zone=Karazhan boss=Attumen the Huntsman |
 | 28507 | Handwraps of Flowing Thought | hands | 1 | raid zone=Karazhan boss=Attumen the Huntsman |
@@ -1253,6 +964,10 @@ metadata the local assembly resolved for each.
 | 28782 | Crystalheart Pulse-Staff | weapon | 1 | raid zone=Magtheridon's Lair boss=Magtheridon |
 | 28785 | The Lightning Capacitor | trinket | 1 | raid zone=Karazhan boss=Terestian Illhoof |
 | 28789 | Eye of Magtheridon | trinket | 1 | raid zone=Magtheridon's Lair boss=Magtheridon |
+| 28790 | Naaru Lightwarden's Band | finger | 1 | unknown |
+| 28791 | Ring of the Recalcitrant | finger | 1 | unknown |
+| 28792 | A'dal's Signet of Defense | finger | 1 | unknown |
+| 28793 | Band of Crimson Fury | finger | 1 | unknown |
 | 28796 | Malefic Mask of the Shadows | head | 1 | raid zone=Gruul's Lair boss=High King Maulgar |
 | 28797 | Brute Cloak of the Ogre-Magi | back | 1 | raid zone=Gruul's Lair boss=High King Maulgar |
 | 28799 | Belt of Divine Inspiration | waist | 1 | raid zone=Gruul's Lair boss=High King Maulgar |
@@ -1262,6 +977,25 @@ metadata the local assembly resolved for each.
 | 28822 | Teeth of Gruul | neck | 1 | raid zone=Gruul's Lair boss=Gruul the Dragonkiller |
 | 28828 | Gronn-Stitched Girdle | waist | 1 | raid zone=Gruul's Lair boss=Gruul the Dragonkiller |
 | 28830 | Dragonspine Trophy | trinket | 1 | raid zone=Gruul's Lair boss=Gruul the Dragonkiller |
+| 28976 | Marshal's Dragonhide Belt | waist | 1 | unknown |
+| 28977 | Marshal's Dragonhide Boots | feet | 1 | unknown |
+| 28978 | Marshal's Dragonhide Bracers | wrist | 1 | unknown |
+| 28986 | Marshal's Leather Belt | waist | 1 | unknown |
+| 28987 | Marshal's Leather Boots | feet | 1 | unknown |
+| 28988 | Marshal's Leather Bracers | wrist | 1 | unknown |
+| 29004 | Marshal's Wyrmhide Belt | waist | 1 | unknown |
+| 29005 | Marshal's Wyrmhide Boots | feet | 1 | unknown |
+| 29006 | Marshal's Wyrmhide Bracers | wrist | 1 | unknown |
+| 29086 | Crown of Malorne | head | 1 | unknown |
+| 29087 | Chestguard of Malorne | chest | 1 | unknown |
+| 29088 | Legguards of Malorne | legs | 1 | unknown |
+| 29089 | Shoulderguards of Malorne | shoulder | 1 | unknown |
+| 29090 | Handguards of Malorne | hands | 1 | unknown |
+| 29091 | Chestpiece of Malorne | chest | 1 | unknown |
+| 29092 | Gloves of Malorne | hands | 1 | unknown |
+| 29093 | Antlers of Malorne | head | 1 | unknown |
+| 29094 | Britches of Malorne | legs | 1 | unknown |
+| 29095 | Pauldrons of Malorne | shoulder | 1 | unknown |
 | 29096 | Breastplate of Malorne | chest | 1 | token zone=Magtheridon's Lair boss=Magtheridon token=Chestguard of the Fallen Defender |
 | 29097 | Gauntlets of Malorne | hands | 1 | token zone=Karazhan boss=The Curator token=Gloves of the Fallen Defender |
 | 29098 | Stag-Helm of Malorne | head | 1 | token zone=Karazhan boss=Prince Malchezaar token=Helm of the Fallen Defender |
@@ -1269,6 +1003,12 @@ metadata the local assembly resolved for each.
 | 29100 | Mantle of Malorne | shoulder | 1 | token zone=Gruul's Lair boss=High King Maulgar token=Pauldrons of the Fallen Defender |
 | 29119 | Haramad's Bargain | neck | 1 | rep faction=The Consortium |
 | 29171 | Earthwarden | weapon | 1 | rep faction=Cenarion Expedition |
+| 29269 | Sapphiron's Wing Bone | weapon | 1 | unknown |
+| 29270 | Flametongue Seal | weapon | 1 | unknown |
+| 29271 | Talisman of Kalecgos | weapon | 1 | unknown |
+| 29272 | Orb of the Soul-Eater | weapon | 1 | unknown |
+| 29273 | Khadgar's Knapsack | weapon | 1 | unknown |
+| 29274 | Tears of Heaven | weapon | 1 | unknown |
 | 29294 | Band of Eternity | finger | 2 | rep faction=The Scale of the Sands |
 | 29295 | Band of Eternity | finger | 3 | rep faction=The Scale of the Sands |
 | 29296 | Band of Eternity | finger | 3 | rep faction=The Scale of the Sands |
@@ -1285,9 +1025,22 @@ metadata the local assembly resolved for each.
 | 29307 | Band of Eternity | finger | 2 | rep faction=The Scale of the Sands |
 | 29308 | Band of Eternity | finger | 3 | rep faction=The Scale of the Sands |
 | 29309 | Band of the Eternal Restorer | finger | 3 | rep faction=The Scale of the Sands |
+| 29367 | Ring of Cryptic Dreams | finger | 1 | unknown |
+| 29368 | Manasurge Pendant | neck | 1 | unknown |
+| 29369 | Shawl of Shifting Probabilities | back | 1 | unknown |
+| 29370 | Icon of the Silver Crescent | trinket | 1 | unknown |
+| 29373 | Band of Halos | finger | 1 | unknown |
+| 29374 | Necklace of Eternal Hope | neck | 1 | unknown |
+| 29375 | Bishop's Cloak | back | 1 | unknown |
+| 29376 | Essence of the Martyr | trinket | 1 | unknown |
+| 29379 | Ring of Arathi Warlords | finger | 1 | unknown |
 | 29381 | Choker of Vile Intent | neck | 1 | badge |
 | 29382 | Blood Knight War Cloak | back | 1 | unknown |
 | 29383 | Bloodlust Brooch | trinket | 1 | badge |
+| 29384 | Ring of Unyielding Force | finger | 1 | unknown |
+| 29385 | Farstrider Defender's Cloak | back | 1 | unknown |
+| 29386 | Necklace of the Juggernaut | neck | 1 | unknown |
+| 29387 | Gnomeregan Auto-Blocker 600 | trinket | 1 | unknown |
 | 29390 | Everbloom Idol | ranged | 1 | badge |
 | 29507 | Windslayer Wraps | hands | 1 | crafted profession=Leatherworking |
 | 29525 | Primalstrike Vest | chest | 1 | crafted profession=Leatherworking |
@@ -1313,13 +1066,20 @@ metadata the local assembly resolved for each.
 | 29995 | Leggings of Murderous Intent | legs | 2 | raid zone=Tempest Keep boss=Kael'thas Sunstrider |
 | 29996 | Rod of the Sun King | weapon | 2 | raid zone=Tempest Keep boss=Kael'thas Sunstrider |
 | 29997 | Band of the Ranger-General | finger | 2 | raid zone=Tempest Keep boss=Kael'thas Sunstrider |
+| 30007 | The Darkener's Grasp | neck | 2 | unknown |
+| 30015 | The Sun King's Talisman | neck | 2 | unknown |
 | 30017 | Telonicus's Pendant of Mayhem | neck | 2 | raid zone=Tempest Keep; raid zone=Tempest Keep boss=Kael'thas Sunstrider |
+| 30018 | Lord Sanguinar's Claim | neck | 2 | unknown |
 | 30020 | Fire-Cord of the Magus | waist | 2 | raid zone=Tempest Keep; raid zone=Tempest Keep boss=Trash |
 | 30021 | Wildfury Greatstaff | weapon | 2 | raid zone=Serpentshrine Cavern; raid zone=Serpentshrine Cavern boss=Trash |
 | 30022 | Pendant of the Perilous | neck | 2 | raid zone=Serpentshrine Cavern; raid zone=Serpentshrine Cavern boss=Trash |
 | 30024 | Mantle of the Elven Kings | shoulder | 2 | raid zone=Tempest Keep; raid zone=Tempest Keep boss=Trash |
 | 30028 | Seventh Ring of the Tirisfalen | finger | 2 | raid zone=Tempest Keep; raid zone=Tempest Keep boss=Trash |
 | 30029 | Bark-Gloves of Ancient Wisdom | hands | 2 | raid zone=Tempest Keep; raid zone=Tempest Keep boss=Trash |
+| 30035 | Boots of the Long Road | feet | 2 | crafted profession=Tailoring |
+| 30036 | Belt of the Long Road | waist | 2 | crafted profession=Tailoring |
+| 30037 | Boots of Blasting | feet | 2 | crafted profession=Tailoring |
+| 30038 | Belt of Blasting | waist | 2 | crafted profession=Tailoring |
 | 30039 | Boots of Utter Darkness | feet | 2 | crafted profession=Leatherworking |
 | 30040 | Belt of Deep Shadow | waist | 2 | crafted profession=Leatherworking |
 | 30041 | Boots of Natural Grace | feet | 2 | crafted profession=Leatherworking |
@@ -1352,11 +1112,21 @@ metadata the local assembly resolved for each.
 | 30109 | Ring of Endless Coils | finger | 2 | raid zone=Serpentshrine Cavern boss=Lady Vashj |
 | 30110 | Coral Band of the Revived | finger | 2 | raid zone=Serpentshrine Cavern boss=Lady Vashj |
 | 30111 | Runetotem's Mantle | shoulder | 2 | raid zone=Serpentshrine Cavern boss=Lady Vashj |
+| 30216 | Nordrassil Chestguard | chest | 2 | unknown |
+| 30217 | Nordrassil Gloves | hands | 2 | unknown |
+| 30219 | Nordrassil Headguard | head | 2 | unknown |
+| 30220 | Nordrassil Life-Kilt | legs | 2 | unknown |
+| 30221 | Nordrassil Life-Mantle | shoulder | 2 | unknown |
 | 30222 | Nordrassil Chestplate | chest | 2 | token zone=Tempest Keep boss=Kael'thas Sunstrider token=Chestguard of the Vanquished Defender |
 | 30223 | Nordrassil Handgrips | hands | 2 | token zone=Serpentshrine Cavern boss=Leotheras the Blind token=Gloves of the Vanquished Defender |
 | 30228 | Nordrassil Headdress | head | 2 | token zone=Serpentshrine Cavern boss=Lady Vashj token=Helm of the Vanquished Defender |
 | 30229 | Nordrassil Feral-Kilt | legs | 2 | token zone=Serpentshrine Cavern boss=Fathom-Lord Karathress token=Leggings of the Vanquished Defender |
 | 30230 | Nordrassil Feral-Mantle | shoulder | 2 | token zone=Tempest Keep boss=Void Reaver token=Pauldrons of the Vanquished Defender |
+| 30231 | Nordrassil Chestpiece | chest | 2 | unknown |
+| 30232 | Nordrassil Gauntlets | hands | 2 | unknown |
+| 30233 | Nordrassil Headpiece | head | 2 | unknown |
+| 30234 | Nordrassil Wrath-Kilt | legs | 2 | unknown |
+| 30235 | Nordrassil Wrath-Mantle | shoulder | 2 | unknown |
 | 30365 | Overseer's Signet | finger | 1 | unknown |
 | 30620 | Spyglass of the Hidden Fleet | trinket | 2 | raid zone=Serpentshrine Cavern; raid zone=Serpentshrine Cavern boss=Trash |
 | 30621 | Prism of Inner Calm | trinket | 2 | raid zone=Serpentshrine Cavern boss=Lady Vashj |
@@ -1389,6 +1159,14 @@ metadata the local assembly resolved for each.
 | 30736 | Ring of Flowing Light | finger | 1 | raid zone=World Bosses boss=Doom Lord Kazzak |
 | 30737 | Gold-Leaf Wildboots | feet | 1 | raid zone=World Bosses boss=Doom Lord Kazzak |
 | 30738 | Ring of Reciprocity | finger | 1 | raid zone=World Bosses boss=Doom Lord Kazzak |
+| 30761 | Infernoweave Leggings | legs | 1 | unknown |
+| 30762 | Infernoweave Robe | chest | 1 | unknown |
+| 30763 | Infernoweave Boots | feet | 1 | unknown |
+| 30764 | Infernoweave Gloves | hands | 1 | unknown |
+| 30776 | Inferno Hardened Chestguard | chest | 1 | unknown |
+| 30778 | Inferno Hardened Leggings | legs | 1 | unknown |
+| 30779 | Inferno Hardened Boots | feet | 1 | unknown |
+| 30780 | Inferno Hardened Gloves | hands | 1 | unknown |
 | 30834 | Shapeshifter's Signet | finger | 1 | rep faction=Lower City |
 | 30863 | Deadly Cuffs | wrist | 3 | raid zone=Hyjal Summit boss=Rage Winterchill |
 | 30865 | Tracker's Blade | weapon | 3 | raid zone=Hyjal Summit boss=Rage Winterchill |
@@ -1417,15 +1195,73 @@ metadata the local assembly resolved for each.
 | 30916 | Leggings of Channeled Elements | legs | 3 | raid zone=Hyjal Summit boss=Kaz'rogal |
 | 30917 | Razorfury Mantle | shoulder | 3 | raid zone=Hyjal Summit boss=Kaz'rogal |
 | 30918 | Hammer of Atonement | weapon | 3 | raid zone=Hyjal Summit boss=Kaz'rogal |
+| 31032 | Thunderheart Gloves | hands | 3 | unknown |
 | 31034 | Thunderheart Gauntlets | hands | 3 | token zone=Hyjal Summit boss=Azgalor token=Gloves of the Forgotten Vanquisher |
+| 31035 | Thunderheart Handguards | hands | 3 | unknown |
+| 31037 | Thunderheart Helmet | head | 3 | unknown |
 | 31039 | Thunderheart Cover | head | 3 | token zone=Hyjal Summit boss=Archimonde token=Helm of the Forgotten Vanquisher |
+| 31040 | Thunderheart Headguard | head | 3 | unknown |
+| 31041 | Thunderheart Tunic | chest | 3 | unknown |
 | 31042 | Thunderheart Chestguard | chest | 3 | token zone=Black Temple boss=Illidan Stormrage token=Chestguard of the Forgotten Vanquisher |
+| 31043 | Thunderheart Vest | chest | 3 | unknown |
 | 31044 | Thunderheart Leggings | legs | 3 | token zone=Black Temple boss=The Illidari Council token=Leggings of the Forgotten Vanquisher |
+| 31045 | Thunderheart Legguards | legs | 3 | unknown |
+| 31046 | Thunderheart Pants | legs | 3 | unknown |
+| 31047 | Thunderheart Spaulders | shoulder | 3 | unknown |
 | 31048 | Thunderheart Pauldrons | shoulder | 3 | token zone=Black Temple boss=Mother Shahraz token=Pauldrons of the Forgotten Vanquisher |
+| 31049 | Thunderheart Shoulderpads | shoulder | 3 | unknown |
 | 31255 | Cloak of the Craft | back | 1 | world |
 | 31275 | Necklace of Trophies | neck | 1 | world |
+| 31319 | Band of Impenetrable Defenses | finger | 1 | unknown |
+| 31321 | Choker of Repentance | neck | 1 | unknown |
+| 31322 | The Hammer of Destiny | weapon | 1 | unknown |
+| 31326 | Truestrike Ring | finger | 1 | unknown |
+| 31329 | Lifegiving Cloak | back | 1 | unknown |
+| 31331 | The Night Blade | weapon | 1 | unknown |
+| 31333 | The Night Watchman | head | 1 | unknown |
 | 31334 | Staff of Natural Fury | weapon | 1 | world |
-| 32014 | Merciless Gladiator's Maul | weapon | 2 | pvp via=arena |
+| 31335 | Pants of Living Growth | legs | 1 | unknown |
+| 31338 | Charlotte's Ivy | neck | 1 | unknown |
+| 31339 | Lola's Eve | finger | 1 | unknown |
+| 31340 | Will of Edward the Odd | chest | 1 | unknown |
+| 31342 | The Ancient Scepter of Sue-Min | weapon | 1 | unknown |
+| 31343 | Kamaei's Cerulean Skirt | legs | 1 | unknown |
+| 31594 | General's Kodohide Belt | waist | 1 | unknown |
+| 31595 | General's Kodohide Boots | feet | 1 | unknown |
+| 31596 | Marshal's Kodohide Belt | waist | 1 | unknown |
+| 31597 | Marshal's Kodohide Boots | feet | 1 | unknown |
+| 31598 | General's Kodohide Bracers | wrist | 1 | unknown |
+| 31599 | Marshal's Kodohide Bracers | wrist | 1 | unknown |
+| 31746 | Phoenix-fire Band | finger | 1 | unknown |
+| 31856 | Darkmoon Card: Crusade | trinket | 1 | unknown |
+| 31857 | Darkmoon Card: Wrath | trinket | 1 | unknown |
+| 31858 | Darkmoon Card: Vengeance | trinket | 1 | unknown |
+| 32087 | Mask of the Deceiver | head | 1 | unknown |
+| 32088 | Cowl of Beastly Rage | head | 1 | unknown |
+| 32089 | Mana-Binders Cowl | head | 1 | unknown |
+| 32090 | Cowl of Naaru Blessings | head | 1 | unknown |
+| 32114 | Chancellor's Dragonhide Helm | head | 1 | unknown |
+| 32115 | Chancellor's Dragonhide Legguards | legs | 1 | unknown |
+| 32116 | Chancellor's Dragonhide Spaulders | shoulder | 1 | unknown |
+| 32117 | Chancellor's Dragonhide Tunic | chest | 1 | unknown |
+| 32119 | Chancellor's Kodohide Helm | head | 1 | unknown |
+| 32121 | Chancellor's Kodohide Spaulders | shoulder | 1 | unknown |
+| 32122 | Chancellor's Kodohide Legguards | legs | 1 | unknown |
+| 32123 | Chancellor's Kodohide Tunic | chest | 1 | unknown |
+| 32129 | Chancellor's Wyrmhide Helm | head | 1 | unknown |
+| 32130 | Chancellor's Wyrmhide Legguards | legs | 1 | unknown |
+| 32131 | Chancellor's Wyrmhide Spaulders | shoulder | 1 | unknown |
+| 32132 | Chancellor's Wyrmhide Tunic | chest | 1 | unknown |
+| 32173 | Chancellor's Bonecracker | weapon | 1 | unknown |
+| 32176 | Chancellor's Pummeler | weapon | 1 | unknown |
+| 32178 | Chancellor's Shanker | weapon | 1 | unknown |
+| 32179 | Chancellor's Shiv | weapon | 1 | unknown |
+| 32181 | Chancellor's Bonegrinder | weapon | 1 | unknown |
+| 32183 | Chancellor's Maul | weapon | 1 | unknown |
+| 32185 | Chancellor's War Staff | weapon | 1 | unknown |
+| 32189 | Chancellor's Right Ripper | weapon | 1 | unknown |
+| 32190 | Chancellor's Spellblade | weapon | 1 | unknown |
+| 32191 | Chancellor's Battletome | weapon | 1 | unknown |
 | 32235 | Cursed Vision of Sargeras | head | 3 | raid zone=Black Temple boss=Illidan Stormrage |
 | 32237 | The Maelstrom's Fury | weapon | 3 | raid zone=Black Temple boss=High Warlord Naj'entus |
 | 32238 | Ring of Calming Waves | finger | 3 | raid zone=Black Temple boss=High Warlord Naj'entus |
@@ -1495,31 +1331,106 @@ metadata the local assembly resolved for each.
 | 32526 | Band of Devastation | finger | 3 | raid zone=Black Temple; raid zone=Black Temple boss=Trash |
 | 32527 | Ring of Ancient Knowledge | finger | 3 | raid zone=Black Temple; raid zone=Black Temple boss=Trash |
 | 32528 | Blessed Band of Karabor | finger | 3 | raid zone=Black Temple; raid zone=Black Temple boss=Trash |
+| 32540 | Terokk's Might | back | 1 | unknown |
+| 32541 | Terokk's Wisdom | back | 1 | unknown |
 | 32580 | Swiftstrike Bracers | wrist | 3 | crafted profession=Leatherworking |
+| 32581 | Swiftstrike Shoulders | shoulder | 3 | crafted profession=Leatherworking |
+| 32582 | Bracers of Renewed Life | wrist | 3 | crafted profession=Leatherworking |
+| 32583 | Shoulderpads of Renewed Life | shoulder | 3 | crafted profession=Leatherworking |
+| 32584 | Swiftheal Wraps | wrist | 3 | crafted profession=Tailoring |
+| 32585 | Swiftheal Mantle | shoulder | 3 | crafted profession=Tailoring |
+| 32586 | Bracers of Nimble Thought | wrist | 3 | crafted profession=Tailoring |
+| 32587 | Mantle of Nimble Thought | shoulder | 3 | crafted profession=Tailoring |
 | 32589 | Hellfire-Encased Pendant | neck | 3 | raid zone=Hyjal Summit; raid zone=Hyjal Summit boss=Trash; raid zone=Black Temple boss=Trash |
 | 32590 | Nethervoid Cloak | back | 3 | raid zone=Hyjal Summit; raid zone=Hyjal Summit boss=Trash; raid zone=Black Temple boss=Trash |
 | 32591 | Choker of Serrated Blades | neck | 3 | raid zone=Hyjal Summit; raid zone=Hyjal Summit boss=Trash; raid zone=Black Temple boss=Trash |
 | 32593 | Treads of the Den Mother | feet | 3 | raid zone=Black Temple; raid zone=Black Temple boss=Trash |
 | 32609 | Boots of the Divine Light | feet | 3 | raid zone=Hyjal Summit; raid zone=Hyjal Summit boss=Trash; raid zone=Black Temple boss=Trash |
 | 32647 | Shard-bound Bracers | wrist | 1 | rep faction=Ogri'la |
+| 32649 | Medallion of Karabor | neck | 3 | unknown |
 | 32654 | Crystalforged Trinket | trinket | 1 | rep faction=Ogri'la |
+| 32655 | Crystalweave Bracers | wrist | 1 | unknown |
+| 32757 | Blessed Medallion of Karabor | neck | 3 | unknown |
+| 32786 | Veteran's Dragonhide Boots | feet | 2 | unknown |
+| 32788 | Veteran's Kodohide Boots | feet | 2 | unknown |
+| 32790 | Veteran's Leather Boots | feet | 2 | unknown |
+| 32796 | Veteran's Wyrmhide Boots | feet | 2 | unknown |
+| 32798 | Veteran's Dragonhide Belt | waist | 2 | unknown |
+| 32800 | Veteran's Kodohide Belt | waist | 2 | unknown |
+| 32802 | Veteran's Leather Belt | waist | 2 | unknown |
+| 32808 | Veteran's Wyrmhide Belt | waist | 2 | unknown |
+| 32810 | Veteran's Dragonhide Bracers | wrist | 2 | unknown |
+| 32812 | Veteran's Kodohide Bracers | wrist | 2 | unknown |
 | 32814 | Veteran's Leather Bracers | wrist | 2 | pvp via=honor |
+| 32821 | Veteran's Wyrmhide Bracers | wrist | 2 | unknown |
+| 32914 | Bland Shiv | weapon | 1 | unknown |
+| 32941 | Corruptor's Signet | finger | 1 | unknown |
+| 32942 | Ring of the Overseer | finger | 1 | unknown |
 | 32943 | Swiftsteel Bludgeon | weapon | 3 | raid zone=Black Temple; raid zone=Black Temple boss=Trash |
 | 32944 | Talon of the Phoenix | weapon | 2 | raid zone=Tempest Keep boss=Al'ar |
 | 32946 | Claw of Molten Fury | weapon | 3 | raid zone=Hyjal Summit; raid zone=Hyjal Summit boss=Trash |
 | 33054 | The Seal of Danzalar | finger | 2 | raid zone=Serpentshrine Cavern boss=The Lurker Below |
 | 33055 | Band of Vile Aggression | finger | 2 | raid zone=Serpentshrine Cavern boss=Hydross the Unstable |
+| 33056 | Veteran's Band of Dominance | finger | 2 | unknown |
+| 33057 | Veteran's Band of Triumph | finger | 2 | unknown |
 | 33058 | Band of the Vigilant | finger | 2 | raid zone=Serpentshrine Cavern boss=Morogrim Tidewalker |
+| 33064 | Veteran's Band of Salvation | finger | 2 | unknown |
+| 33065 | Veteran's Pendant of Dominance | neck | 2 | unknown |
+| 33066 | Veteran's Pendant of Triumph | neck | 2 | unknown |
+| 33067 | Veteran's Pendant of Conquest | neck | 2 | unknown |
+| 33068 | Veteran's Pendant of Salvation | neck | 2 | unknown |
 | 33122 | Cloak of Darkness | back | 1 | crafted profession=Leatherworking |
-| 33672 | Vengeful Gladiator's Dragonhide Helm | head | 3 | pvp via=arena |
-| 33673 | Vengeful Gladiator's Dragonhide Legguards | legs | 3 | pvp via=arena |
-| 33674 | Vengeful Gladiator's Dragonhide Spaulders | shoulder | 3 | pvp via=arena |
-| 33675 | Vengeful Gladiator's Dragonhide Tunic | chest | 3 | pvp via=arena |
-| 33716 | Vengeful Gladiator's Staff | weapon | 3 | pvp via=arena |
+| 33832 | Battlemaster's Determination | trinket | 3 | unknown |
+| 33853 | Vindicator's Band of Dominance | finger | 3 | unknown |
 | 33879 | Vindicator's Dragonhide Belt | waist | 3 | pvp via=honor |
 | 33880 | Vindicator's Dragonhide Boots | feet | 3 | pvp via=honor |
 | 33881 | Vindicator's Dragonhide Bracers | wrist | 3 | pvp via=honor |
+| 33885 | Vindicator's Kodohide Belt | waist | 3 | unknown |
+| 33886 | Vindicator's Kodohide Boots | feet | 3 | unknown |
+| 33887 | Vindicator's Kodohide Bracers | wrist | 3 | unknown |
+| 33891 | Vindicator's Leather Belt | waist | 3 | unknown |
+| 33892 | Vindicator's Leather Boots | feet | 3 | unknown |
 | 33893 | Vindicator's Leather Bracers | wrist | 3 | pvp via=honor |
+| 33915 | Vindicator's Wyrmhide Belt | waist | 3 | unknown |
+| 33916 | Vindicator's Wyrmhide Boots | feet | 3 | unknown |
+| 33917 | Vindicator's Wyrmhide Bracers | wrist | 3 | unknown |
+| 33918 | Vindicator's Band of Salvation | finger | 3 | unknown |
+| 33919 | Vindicator's Band of Triumph | finger | 3 | unknown |
+| 33920 | Vindicator's Pendant of Conquest | neck | 3 | unknown |
+| 33921 | Vindicator's Pendant of Dominance | neck | 3 | unknown |
+| 33922 | Vindicator's Pendant of Salvation | neck | 3 | unknown |
+| 33923 | Vindicator's Pendant of Triumph | neck | 3 | unknown |
+| 33957 | Witches Band | finger | 1 | unknown |
+| 33958 | The Horseman's Signet Ring | finger | 1 | unknown |
+| 33959 | Ring of Ghoulish Delight | finger | 1 | unknown |
 | 34009 | Hammer of Judgement | weapon | 3 | raid zone=Hyjal Summit; raid zone=Hyjal Summit boss=Trash; raid zone=Black Temple boss=Trash |
 | 34010 | Pepe's Shroud of Pacification | back | 3 | raid zone=Hyjal Summit; raid zone=Hyjal Summit boss=Trash |
 | 34012 | Shroud of the Final Stand | back | 3 | raid zone=Black Temple; raid zone=Black Temple boss=Trash |
+| 34049 | Battlemaster's Audacity | trinket | 3 | unknown |
+| 34050 | Battlemaster's Perseverance | trinket | 3 | unknown |
+| 34073 | The Horseman's Signet Ring | finger | 1 | unknown |
+| 34074 | Witches Band | finger | 1 | unknown |
+| 34075 | Ring of Ghoulish Delight | finger | 1 | unknown |
+| 34162 | Battlemaster's Depravity | trinket | 3 | unknown |
+| 34163 | Battlemaster's Cruelty | trinket | 3 | unknown |
+| 34837 | The 2 Ring | finger | 1 | unknown |
+| 35317 | Vindicator's Pendant of Reprieve | neck | 3 | unknown |
+| 35319 | Vindicator's Pendant of Subjugation | neck | 3 | unknown |
+| 35320 | Vindicator's Band of Subjugation | finger | 3 | unknown |
+| 35327 | Battlemaster's Alacrity | trinket | 3 | unknown |
+| 278774 | Cloak of the Frigid Winds | back | 2 | unknown |
+| 278819 | The Frost Lord's War Cloak | back | 2 | unknown |
+| 278823 | Icebound Cloak | back | 2 | unknown |
+| 278827 | Amulet of Bitter Hatred | neck | 2 | unknown |
+| 278833 | Choker of the Arctic Flow | neck | 2 | unknown |
+| 278838 | Amulet of Glacial Tranquility | neck | 2 | unknown |
+| 278847 | Hailstone Pendant | neck | 2 | unknown |
+| 278953 | Frostscythe of Lord Ahune | weapon | 2 | unknown |
+| 279240 | Shroud of Winter's Chill | back | 2 | unknown |
+| 281735 | Dark Iron Smoking Pipe | trinket | 3 | unknown |
+| 281739 | Empty Mug of Direbrew | trinket | 3 | unknown |
+| 281743 | Coren's Lucky Coin | trinket | 3 | unknown |
+| 281748 | Direbrew Hops | trinket | 3 | unknown |
+| 281893 | Balebrew Charm | trinket | 3 | unknown |
+| 281895 | Brightbrew Charm | trinket | 3 | unknown |
+| 281903 | Direbrew's Shanker | weapon | 3 | unknown |
