@@ -129,3 +129,16 @@ Verified by:
 `corepack pnpm exec vitest run packages/core/test/fork-set-net.test.ts -t 497`
 and `python -I .scratch/stage-gate/tab-set-bonus/497-read.py` (main
 checkout; prints `497-read.txt`), tbc-new-fork@176268e7c.
+
+**2026-10-15 — pre-merge review of `feat/tab-set-bonus` (findings S2, P4).**
+Two corrections to the notes above. The claim "moving 7 DPS between the two
+lines in `view.ts` fails both cases" is a hand mutation run in chunk K1
+(both cases failed with "k=2 row 29098 step 4: expected -57 to be close to
+-50"), recorded in `.scratch/stage-gate/tab-set-bonus/execution-report.md`
+line 20 of the main checkout, a gitignored folder; to repeat it, move 7 DPS
+between the pieces and Breaks lines in the fork's `view.ts`
+`setPotentialSteps` and run the vitest command above. And close condition 1
+rests on two pieces of evidence, not the controlled test alone: the test
+shows the step arithmetic cannot move a Thunderheart loss into the 4pc
+lines, and the live run in ticket 467's closing note shows that the
+2026-09 variation is gone.

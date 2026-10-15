@@ -312,7 +312,8 @@ The placements a reviewer should scrutinize first:
 3. **331 vs 335 vs the set-bonus cluster.** 331 is a confirmed correctness bug
    but lives only in `weightedSetPotentialDps`, called only from the core report,
    not ported into the fork twin and never read by the tab → Out-of-scope for
-   the tab. 336 is the live tab-surface half of the same story → blocking.
+   the tab. 336 is the live tab-surface half of the same story → blocking
+   (closed 2026-10-15; two cases it left are ticket 655).
    On 2026-10-11 the owner restated it as a general rule: the set-bonus
    popover is available for every bonus, and the Set potential toggle
    decides only whether the bonus counts in the row's figure and ranking.
@@ -358,7 +359,8 @@ The placements a reviewer should scrutinize first:
    scope ("Dps only is ok for now", 2026-10-10), and the owner's answers in
    its step 6.** The owner kept 527 on the finish list and restated 336
    (judgment call 3). The session decided the rest without asking: 467 and
-   497 stay until a live feral run checks the set-bonus figures; 515 stays
+   497 stay until a live feral run checks the set-bonus figures (that run
+   was made, and both closed on 2026-10-15); 515 stays
    for its false message only; 398 (a harness settings gap, not an engine
    difference), 525 (check once and close), 291 and 292 are not part of
    "finished" and sit in Tab-adjacent. Ticket 500's five missing feral

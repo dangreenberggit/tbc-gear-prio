@@ -186,3 +186,21 @@ Verified by:
 (main checkout, gitignored stage folder), and
 `corepack pnpm -C vendor/tbc-new-fork exec vitest run ui/features/upgrades/model/set_bonus_tip.test.ts ui/features/upgrades/utils/set_bonus_labels.test.ts ui/features/upgrades/components/SetBonusPopover`,
 tbc-new-fork@f4b78f65d.
+
+**2026-10-15 — pre-merge review of `feat/tab-set-bonus` (findings A1, P1, P2,
+spec decision check 1).** Three points the close note above leaves out:
+
+- The session told the owner of the design-A decision on 2026-10-12 and
+  offered an override (`.scratch/stage-gate/tab-set-bonus/decision-log.md`
+  line 34, main checkout); the owner has not objected.
+- Condition 2 says the toggle-on popover is "unchanged". Fork `f4b78f65d`
+  changes it on purpose for rows with no credit and rows whose set was
+  screened out: they now get the "Not counted" section, which the owner's
+  rule of 2026-10-11 asks for. Credited rows are unchanged (snapshot test).
+- Two cases still list a reachable bonus nowhere, so the owner's rule ("the
+  set-bonus popover is always available, for any bonus") is not fully met:
+  with the toggle on, a bonus past the best stop of a credited row (mock-up
+  row 5's Malorne 4pc); and a row whose only future bonus is below the
+  noise gate, which has no hint and no popover in either state (ret
+  Lightbringer Breastplate 30990). Both behaved this way before this branch.
+  Ticket 655 carries them.

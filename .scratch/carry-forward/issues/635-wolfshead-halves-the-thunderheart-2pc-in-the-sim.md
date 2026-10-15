@@ -46,3 +46,13 @@ its lines 5-16, 53-56, 83-97, 192-195, 255-257 and 335.
 2. either a note that the sim matches the game (close as research done), or
    an upstream issue or note for the owner to decide on (this repo files
    none itself).
+
+**2026-10-15 — lead from the pre-merge review of `feat/tab-set-bonus`
+(finding D2).** Upstream's feral rotation reads both Wolfshead and the
+Mangle cost that the 2pc lowers: `sim/druid/feralcat/rotation.go:52` sets
+`Wolfshead` when item 8345 is worn in the head slot, `:189` reads
+`waitToMangle := mangleNext || (!rotation.Wolfshead && mangleCost <= 38)`,
+and `:268-272` run a Mangle step gated on `mangleCost == 35` that the code
+comment calls relevant for no-Wolfshead rotations (fork `f4b78f65d`). That
+these lines explain the halved 2pc value is a hypothesis, untested; they
+are where close condition 1's check starts.
