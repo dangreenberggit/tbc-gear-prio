@@ -117,3 +117,9 @@ scope creep.
 | S4  | `hooks/useResultsView.ts:61-64`, `ViewSourcesButton.tsx:27-28`, `ViewToggles.tsx:44`        | Offered-and-hidden sources computed in two places, counted in a third.                                                                        |
 | S5  | `model/results_view.ts` `viewSourceOptions`                                                 | Wrapper that only forwards to `sourceOptions`.                                                                                                |
 | S7  | main `scripts/tab-harness/test-review.mjs:34`; fork `model/results_view.ts:168`; ticket 527 | "carries"/"carry", on the AGENTS.md word list.                                                                                                |
+
+## Round 2
+
+Reviewed range: `19cb602fa47f85705a9ffb5a25c306686defc7d1..59f19140d4ca1ea7c50d32373a4d704c0fcdc508`
+
+Fork range (round 2): `vendor/tbc-new-fork` `c99dd97e400ecb8f835f60e7723672628ce36a84..193c8d28ff7099de9d970ec5ff663924e32ee36a`.
