@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: owner walkthrough follow-up to 464, 2026-09-20
 Blocks: none
@@ -204,3 +204,30 @@ at 0, 1, 2, 3 and 4 worn Thunderheart pieces, read against this ticket's
 figures; it is run, not put to the owner as a question. It stays in
 Tab-blocking in `docs/upgrades-tab-scope.md` until that run is recorded
 here.
+
+## Closed 2026-10-15 (stage-gate tab-set-bonus, chunk K2)
+
+The live check ran: five feral runs on fork `176268e7c` (forkDirty false),
+page phase 3, 3000 iterations, Go backend, one base gear (round-2b's:
+Shoulderpads of the Stranger, Bloodsea Brigand's Vest, Gloves of the
+Searing Grip, Leggings of Murderous Intent, worn Malorne 0) with
+Thunderheart hands, legs, chest and shoulders added for worn 0 to 4.
+"Took" 190.6, 200.6, 222.3, 224.4 and 200.4 s. Run files, the gear links
+and the recorder log are in `.scratch/stage-gate/tab-set-bonus/runs/`
+(gitignored). The worn-4 link is the worn-3 link with the shoulders
+swapped to Thunderheart Pauldrons; its second socket is empty.
+
+gate-sme verdict on the printed lines (OFF figure and ON popover of every
+Thunderheart, Malorne and Nordrassil row): **trust-with-caveats at every
+worn count 0 to 4**, do-not-trust nowhere. Breaks lines sit on the right
+rows (Thunderheart 2pc −96.6 at worn 2, 4pc −78.8 at worn 4, none at
+worn 1 and 3) at a size that matches the measured add side; totals agree
+across rows that reach the same gear. Caveats: the empty Pauldrons socket
+at worn 4 (shoulder rows about 10 DPS high), a large Wolfshead × Thunderheart
+2pc interaction (sim modelling, upstream's), and no OFF popover on
+future-only rows (ticket 336). This table's 2026-09 figures predate the
+set screen and the 511/512 step path, so they were read for their
+concerns, not their numbers. Handoff:
+`.scratch/handoffs/sme-rank-judgment-467-worn-thunderheart-sweep.md`.
+
+Verified by: `.scratch/handoffs/sme-rank-judgment-467-worn-thunderheart-sweep.md`; `python -I .scratch/stage-gate/tab-set-bonus/497-read.py` (from the main checkout; it prints the fork's own popover text per row via `.scratch/stage-gate/tab-set-bonus/tipdump/ui/tip.test.ts`); `corepack pnpm exec vitest run packages/core/test/fork-set-net.test.ts -t 497`; tbc-new-fork@176268e7c
