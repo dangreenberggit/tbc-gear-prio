@@ -14,47 +14,49 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 2967,
-  "excludedNoSource": 1220,
-  "universeTotal": 227,
-  "listOnlyMembership": 24,
+  "d7EligibleTotal": 2845,
+  "excludedNoSource": 923,
+  "universeTotal": 405,
+  "listOnlyMembership": 22,
   "perSlot": {
-    "back": 22,
-    "chest": 12,
-    "feet": 19,
-    "finger": 25,
-    "hands": 16,
-    "head": 12,
-    "legs": 11,
-    "neck": 19,
+    "back": 36,
+    "chest": 23,
+    "feet": 35,
+    "finger": 50,
+    "hands": 22,
+    "head": 24,
+    "legs": 22,
+    "neck": 38,
     "ranged": 1,
-    "shoulder": 10,
-    "trinket": 15,
-    "waist": 16,
-    "weapon": 36,
-    "wrist": 13
+    "shoulder": 18,
+    "trinket": 26,
+    "waist": 30,
+    "weapon": 55,
+    "wrist": 25
   },
   "sourceRecordAdds": {
     "atlasloot": 251,
-    "curated": 5,
-    "db": 1622,
+    "curated": 4,
+    "db": 1800,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 14
   },
   "membershipByOrigin": {
     "curated": 4,
+    "dbPhase": 174,
     "itemHasOrigin:atlasloot": 35,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 191,
+    "itemHasOrigin:db": 371,
     "itemHasOrigin:two-hop": 10,
-    "itemHasOrigin:wowhead": 10,
-    "listOnly": 24,
+    "itemHasOrigin:wowhead": 8,
+    "listOnly": 22,
+    "recipeMatch": 6,
     "zoneMatch": 199
   },
   "exclusivePrimaryOrigin": {
-    "db": 191,
-    "wowhead-only": 10,
+    "db": 371,
+    "wowhead-only": 8,
     "atlasloot-only": 13,
     "other": 3,
     "two-hop": 10
@@ -63,22 +65,22 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 227,
-    "casterOnlyReject": 108,
+    "total": 405,
+    "casterOnlyReject": 208,
     "epFloorReject": 0,
-    "combinedReject": 108,
-    "combinedKeep": 119,
-    "casterRejectPct": 47.6,
-    "combinedRejectPct": 47.6,
+    "combinedReject": 208,
+    "combinedKeep": 197,
+    "casterRejectPct": 51.4,
+    "combinedRejectPct": 51.4,
     "applied": false
   },
   "wowheadListIds": 79,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 79,
-    "recalled": 62,
-    "missed": 17,
-    "recallPct": 78.5,
+    "recalled": 60,
+    "missed": 19,
+    "recallPct": 75.9,
     "missedItems": [
       {
         "itemId": 19406,
@@ -147,6 +149,12 @@
         "d7Eligible": true
       },
       {
+        "itemId": 28476,
+        "name": "Gladiator's Maul",
+        "slot": "weapon",
+        "d7Eligible": false
+      },
+      {
         "itemId": 29247,
         "name": "Girdle of the Deathdealer",
         "slot": "waist",
@@ -169,6 +177,12 @@
         "name": "Clefthoof Hide Leggings",
         "slot": "legs",
         "d7Eligible": true
+      },
+      {
+        "itemId": 32014,
+        "name": "Merciless Gladiator's Maul",
+        "slot": "weapon",
+        "d7Eligible": false
       },
       {
         "itemId": 32387,
@@ -435,6 +449,22 @@
       "name": "Lower City Prayerbook"
     },
     {
+      "itemId": 31859,
+      "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 32113,
+      "name": "Chancellor's Dragonhide Gloves"
+    },
+    {
+      "itemId": 32118,
+      "name": "Chancellor's Kodohide Gloves"
+    },
+    {
+      "itemId": 32128,
+      "name": "Chancellor's Wyrmhide Gloves"
+    },
+    {
       "itemId": 32500,
       "name": "Crystal Spire of Karabor"
     },
@@ -525,8 +555,25 @@
     ]
   },
   "excludedIds": {
-    "total": 0,
-    "reason": "",
-    "curatedSetCollisions": []
+    "total": 505,
+    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
+    "curatedSetCollisions": [
+      {
+        "itemId": 32014,
+        "name": "Merciless Gladiator's Maul",
+        "curatedSets": [
+          "p2_6p",
+          "p2_9p"
+        ]
+      },
+      {
+        "itemId": 33716,
+        "name": "Vengeful Gladiator's Staff",
+        "curatedSets": [
+          "p3_6p",
+          "p3_9p"
+        ]
+      }
+    ]
   }
 }

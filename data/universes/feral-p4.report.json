@@ -20,48 +20,50 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 2967,
-  "excludedNoSource": 1212,
-  "universeTotal": 408,
-  "listOnlyMembership": 35,
+  "d7EligibleTotal": 2845,
+  "excludedNoSource": 837,
+  "universeTotal": 668,
+  "listOnlyMembership": 28,
   "perSlot": {
-    "back": 34,
-    "chest": 24,
-    "feet": 33,
-    "finger": 56,
-    "hands": 20,
-    "head": 22,
-    "legs": 21,
-    "neck": 28,
-    "ranged": 2,
-    "shoulder": 20,
-    "trinket": 25,
-    "waist": 30,
-    "weapon": 66,
-    "wrist": 27
+    "back": 54,
+    "chest": 38,
+    "feet": 55,
+    "finger": 85,
+    "hands": 32,
+    "head": 36,
+    "legs": 37,
+    "neck": 56,
+    "ranged": 3,
+    "shoulder": 35,
+    "trinket": 50,
+    "waist": 50,
+    "weapon": 87,
+    "wrist": 50
   },
   "sourceRecordAdds": {
     "atlasloot": 251,
     "curated": 3,
-    "db": 1622,
+    "db": 1882,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 27
   },
   "membershipByOrigin": {
     "curated": 4,
+    "dbPhase": 254,
     "itemHasOrigin:atlasloot": 79,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 342,
+    "itemHasOrigin:db": 609,
     "itemHasOrigin:two-hop": 15,
-    "itemHasOrigin:wowhead": 19,
-    "listOnly": 35,
+    "itemHasOrigin:wowhead": 12,
+    "listOnly": 28,
+    "recipeMatch": 13,
     "repFactionMatch": 26,
     "zoneMatch": 343
   },
   "exclusivePrimaryOrigin": {
-    "db": 342,
-    "wowhead-only": 19,
+    "db": 609,
+    "wowhead-only": 12,
     "atlasloot-only": 29,
     "other": 3,
     "two-hop": 15
@@ -70,22 +72,22 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 408,
-    "casterOnlyReject": 198,
+    "total": 668,
+    "casterOnlyReject": 351,
     "epFloorReject": 0,
-    "combinedReject": 198,
-    "combinedKeep": 210,
-    "casterRejectPct": 48.5,
-    "combinedRejectPct": 48.5,
+    "combinedReject": 351,
+    "combinedKeep": 317,
+    "casterRejectPct": 52.5,
+    "combinedRejectPct": 52.5,
     "applied": false
   },
   "wowheadListIds": 115,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 115,
-    "recalled": 97,
-    "missed": 18,
-    "recallPct": 84.3,
+    "recalled": 90,
+    "missed": 25,
+    "recallPct": 78.3,
     "missedItems": [
       {
         "itemId": 19406,
@@ -154,6 +156,12 @@
         "d7Eligible": true
       },
       {
+        "itemId": 28476,
+        "name": "Gladiator's Maul",
+        "slot": "weapon",
+        "d7Eligible": false
+      },
+      {
         "itemId": 29247,
         "name": "Girdle of the Deathdealer",
         "slot": "waist",
@@ -178,6 +186,12 @@
         "d7Eligible": true
       },
       {
+        "itemId": 32014,
+        "name": "Merciless Gladiator's Maul",
+        "slot": "weapon",
+        "d7Eligible": false
+      },
+      {
         "itemId": 32387,
         "name": "Idol of the Raven Goddess",
         "slot": "ranged",
@@ -188,6 +202,36 @@
         "name": "Badge of Tenacity",
         "slot": "trinket",
         "d7Eligible": true
+      },
+      {
+        "itemId": 33672,
+        "name": "Vengeful Gladiator's Dragonhide Helm",
+        "slot": "head",
+        "d7Eligible": false
+      },
+      {
+        "itemId": 33673,
+        "name": "Vengeful Gladiator's Dragonhide Legguards",
+        "slot": "legs",
+        "d7Eligible": false
+      },
+      {
+        "itemId": 33674,
+        "name": "Vengeful Gladiator's Dragonhide Spaulders",
+        "slot": "shoulder",
+        "d7Eligible": false
+      },
+      {
+        "itemId": 33675,
+        "name": "Vengeful Gladiator's Dragonhide Tunic",
+        "slot": "chest",
+        "d7Eligible": false
+      },
+      {
+        "itemId": 33716,
+        "name": "Vengeful Gladiator's Staff",
+        "slot": "weapon",
+        "d7Eligible": false
       },
       {
         "itemId": 38287,
@@ -448,6 +492,22 @@
       "name": "Lower City Prayerbook"
     },
     {
+      "itemId": 31859,
+      "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 32113,
+      "name": "Chancellor's Dragonhide Gloves"
+    },
+    {
+      "itemId": 32118,
+      "name": "Chancellor's Kodohide Gloves"
+    },
+    {
+      "itemId": 32128,
+      "name": "Chancellor's Wyrmhide Gloves"
+    },
+    {
       "itemId": 32500,
       "name": "Crystal Spire of Karabor"
     },
@@ -466,6 +526,14 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 33508,
+      "name": "Idol of Budding Life"
+    },
+    {
+      "itemId": 33510,
+      "name": "Idol of the Unseen Moon"
     },
     {
       "itemId": 34430,
@@ -538,8 +606,25 @@
     ]
   },
   "excludedIds": {
-    "total": 0,
-    "reason": "",
-    "curatedSetCollisions": []
+    "total": 505,
+    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
+    "curatedSetCollisions": [
+      {
+        "itemId": 32014,
+        "name": "Merciless Gladiator's Maul",
+        "curatedSets": [
+          "p2_6p",
+          "p2_9p"
+        ]
+      },
+      {
+        "itemId": 33716,
+        "name": "Vengeful Gladiator's Staff",
+        "curatedSets": [
+          "p3_6p",
+          "p3_9p"
+        ]
+      }
+    ]
   }
 }

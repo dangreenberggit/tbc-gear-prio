@@ -21,44 +21,45 @@
     1012
   ],
   "d7EligibleTotal": 4248,
-  "excludedNoSource": 888,
-  "universeTotal": 1188,
+  "excludedNoSource": 1180,
+  "universeTotal": 955,
   "listOnlyMembership": 0,
   "perSlot": {
-    "back": 60,
-    "chest": 67,
-    "feet": 100,
-    "finger": 115,
-    "hands": 59,
-    "head": 67,
-    "legs": 88,
-    "neck": 71,
-    "ranged": 28,
+    "back": 52,
+    "chest": 58,
+    "feet": 94,
+    "finger": 84,
+    "hands": 53,
+    "head": 56,
+    "legs": 56,
+    "neck": 53,
+    "ranged": 19,
     "shoulder": 56,
-    "trinket": 52,
-    "waist": 84,
-    "weapon": 248,
-    "wrist": 93
+    "trinket": 48,
+    "waist": 86,
+    "weapon": 157,
+    "wrist": 83
   },
   "sourceRecordAdds": {
     "atlasloot": 376,
     "curated": 5,
-    "db": 3214,
+    "db": 2922,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 16,
-    "dbPhase": 579,
+    "dbPhase": 312,
     "itemHasOrigin:atlasloot": 111,
     "itemHasOrigin:curated": 4,
-    "itemHasOrigin:db": 1131,
+    "itemHasOrigin:db": 898,
     "itemHasOrigin:two-hop": 15,
+    "recipeMatch": 34,
     "repFactionMatch": 34,
     "zoneMatch": 559
   },
   "exclusivePrimaryOrigin": {
-    "db": 1131,
+    "db": 898,
     "other": 4,
     "atlasloot-only": 38,
     "two-hop": 15
@@ -67,13 +68,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 1188,
-    "casterOnlyReject": 489,
+    "total": 955,
+    "casterOnlyReject": 416,
     "epFloorReject": 2,
-    "combinedReject": 491,
-    "combinedKeep": 697,
-    "casterRejectPct": 41.2,
-    "combinedRejectPct": 41.3,
+    "combinedReject": 418,
+    "combinedKeep": 537,
+    "casterRejectPct": 43.6,
+    "combinedRejectPct": 43.8,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -87,10 +88,6 @@
   },
   "ticket157ForceIncluded": [],
   "excludedUnimplementedEffect": [
-    {
-      "itemId": 3475,
-      "name": "Cloak of Flames"
-    },
     {
       "itemId": 11810,
       "name": "Force of Will"
@@ -152,14 +149,6 @@
       "name": "Onyxia Scale Cloak"
     },
     {
-      "itemId": 16484,
-      "name": "Marshal's Plate Gauntlets"
-    },
-    {
-      "itemId": 16548,
-      "name": "General's Plate Gauntlets"
-    },
-    {
       "itemId": 17066,
       "name": "Drillborer Disk"
     },
@@ -172,24 +161,8 @@
       "name": "Spinal Reaper"
     },
     {
-      "itemId": 17182,
-      "name": "Sulfuras, Hand of Ragnaros"
-    },
-    {
-      "itemId": 17904,
-      "name": "Stormpike Insignia Rank 6"
-    },
-    {
-      "itemId": 17909,
-      "name": "Frostwolf Insignia Rank 6"
-    },
-    {
       "itemId": 18382,
       "name": "Fluctuating Cloak"
-    },
-    {
-      "itemId": 18406,
-      "name": "Onyxia Blood Talisman"
     },
     {
       "itemId": 18639,
@@ -216,28 +189,8 @@
       "name": "Essence of the Pure Flame"
     },
     {
-      "itemId": 19287,
-      "name": "Darkmoon Card: Heroism"
-    },
-    {
-      "itemId": 19288,
-      "name": "Darkmoon Card: Blue Dragon"
-    },
-    {
-      "itemId": 19289,
-      "name": "Darkmoon Card: Maelstrom"
-    },
-    {
-      "itemId": 19290,
-      "name": "Darkmoon Card: Twisting Nether"
-    },
-    {
       "itemId": 19341,
       "name": "Lifegiving Gem"
-    },
-    {
-      "itemId": 19577,
-      "name": "Rage of Mugamba"
     },
     {
       "itemId": 19874,
@@ -252,18 +205,6 @@
       "name": "Tigule's Harpoon"
     },
     {
-      "itemId": 19949,
-      "name": "Zandalarian Hero Medallion"
-    },
-    {
-      "itemId": 19950,
-      "name": "Zandalarian Hero Charm"
-    },
-    {
-      "itemId": 19951,
-      "name": "Gri'lek's Charm of Might"
-    },
-    {
       "itemId": 19961,
       "name": "Gri'lek's Grinder"
     },
@@ -276,20 +217,8 @@
       "name": "Pitchfork of Madness"
     },
     {
-      "itemId": 20579,
-      "name": "Green Dragonskin Cloak"
-    },
-    {
       "itemId": 21488,
       "name": "Fetish of Chitinous Spikes"
-    },
-    {
-      "itemId": 21517,
-      "name": "Gnomish Turban of Psychic Might"
-    },
-    {
-      "itemId": 21526,
-      "name": "Band of Icy Depths"
     },
     {
       "itemId": 21625,
@@ -336,22 +265,6 @@
       "name": "Heart of Wyrmthalak"
     },
     {
-      "itemId": 22589,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22630,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22631,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22632,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
       "itemId": 22691,
       "name": "Corrupted Ashbringer"
     },
@@ -362,10 +275,6 @@
     {
       "itemId": 23027,
       "name": "Warmth of Forgiveness"
-    },
-    {
-      "itemId": 23072,
-      "name": "Fists of the Unrelenting"
     },
     {
       "itemId": 23221,
@@ -428,20 +337,12 @@
       "name": "Auslese's Light Channeler"
     },
     {
-      "itemId": 24551,
-      "name": "Talisman of the Horde"
-    },
-    {
       "itemId": 25827,
       "name": "Muck-Covered Drape"
     },
     {
       "itemId": 25828,
       "name": "Petrified Lichen Guard"
-    },
-    {
-      "itemId": 25829,
-      "name": "Talisman of the Alliance"
     },
     {
       "itemId": 25835,

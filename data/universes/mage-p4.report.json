@@ -21,44 +21,45 @@
     1012
   ],
   "d7EligibleTotal": 2174,
-  "excludedNoSource": 454,
-  "universeTotal": 651,
+  "excludedNoSource": 638,
+  "universeTotal": 498,
   "listOnlyMembership": 0,
   "perSlot": {
-    "back": 60,
-    "chest": 24,
-    "feet": 35,
-    "finger": 116,
-    "hands": 16,
-    "head": 23,
-    "legs": 28,
-    "neck": 71,
-    "ranged": 9,
-    "shoulder": 20,
-    "trinket": 53,
-    "waist": 31,
-    "weapon": 131,
-    "wrist": 34
+    "back": 52,
+    "chest": 17,
+    "feet": 30,
+    "finger": 85,
+    "hands": 14,
+    "head": 16,
+    "legs": 19,
+    "neck": 53,
+    "ranged": 8,
+    "shoulder": 16,
+    "trinket": 49,
+    "waist": 30,
+    "weapon": 80,
+    "wrist": 29
   },
   "sourceRecordAdds": {
     "atlasloot": 213,
     "curated": 8,
-    "db": 1614,
+    "db": 1430,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 17,
-    "dbPhase": 343,
+    "dbPhase": 181,
     "itemHasOrigin:atlasloot": 65,
     "itemHasOrigin:curated": 8,
-    "itemHasOrigin:db": 600,
+    "itemHasOrigin:db": 447,
     "itemHasOrigin:two-hop": 15,
+    "recipeMatch": 9,
     "repFactionMatch": 22,
     "zoneMatch": 269
   },
   "exclusivePrimaryOrigin": {
-    "db": 600,
+    "db": 447,
     "atlasloot-only": 28,
     "other": 8,
     "two-hop": 15
@@ -67,13 +68,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 651,
-    "casterOnlyReject": 406,
+    "total": 498,
+    "casterOnlyReject": 306,
     "epFloorReject": 8,
-    "combinedReject": 414,
-    "combinedKeep": 237,
-    "casterRejectPct": 62.4,
-    "combinedRejectPct": 63.6,
+    "combinedReject": 314,
+    "combinedKeep": 184,
+    "casterRejectPct": 61.4,
+    "combinedRejectPct": 63.1,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -87,10 +88,6 @@
   },
   "ticket157ForceIncluded": [],
   "excludedUnimplementedEffect": [
-    {
-      "itemId": 3475,
-      "name": "Cloak of Flames"
-    },
     {
       "itemId": 11810,
       "name": "Force of Will"
@@ -132,32 +129,12 @@
       "name": "Onyxia Scale Cloak"
     },
     {
-      "itemId": 16440,
-      "name": "Marshal's Silk Gloves"
-    },
-    {
-      "itemId": 16540,
-      "name": "General's Silk Handguards"
-    },
-    {
       "itemId": 17082,
       "name": "Shard of the Flame"
     },
     {
-      "itemId": 17904,
-      "name": "Stormpike Insignia Rank 6"
-    },
-    {
-      "itemId": 17909,
-      "name": "Frostwolf Insignia Rank 6"
-    },
-    {
       "itemId": 18382,
       "name": "Fluctuating Cloak"
-    },
-    {
-      "itemId": 18406,
-      "name": "Onyxia Blood Talisman"
     },
     {
       "itemId": 18639,
@@ -180,52 +157,12 @@
       "name": "Essence of the Pure Flame"
     },
     {
-      "itemId": 19287,
-      "name": "Darkmoon Card: Heroism"
-    },
-    {
-      "itemId": 19288,
-      "name": "Darkmoon Card: Blue Dragon"
-    },
-    {
-      "itemId": 19289,
-      "name": "Darkmoon Card: Maelstrom"
-    },
-    {
-      "itemId": 19290,
-      "name": "Darkmoon Card: Twisting Nether"
-    },
-    {
-      "itemId": 19601,
-      "name": "Jewel of Kajaro"
-    },
-    {
       "itemId": 19930,
       "name": "Mar'li's Eye"
     },
     {
-      "itemId": 19949,
-      "name": "Zandalarian Hero Medallion"
-    },
-    {
-      "itemId": 19950,
-      "name": "Zandalarian Hero Charm"
-    },
-    {
-      "itemId": 20579,
-      "name": "Green Dragonskin Cloak"
-    },
-    {
       "itemId": 21488,
       "name": "Fetish of Chitinous Spikes"
-    },
-    {
-      "itemId": 21517,
-      "name": "Gnomish Turban of Psychic Might"
-    },
-    {
-      "itemId": 21526,
-      "name": "Band of Icy Depths"
     },
     {
       "itemId": 21625,
@@ -254,22 +191,6 @@
     {
       "itemId": 22321,
       "name": "Heart of Wyrmthalak"
-    },
-    {
-      "itemId": 22589,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22630,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22631,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22632,
-      "name": "Atiesh, Greatstaff of the Guardian"
     },
     {
       "itemId": 23001,
@@ -320,16 +241,8 @@
       "name": "Auslese's Light Channeler"
     },
     {
-      "itemId": 24551,
-      "name": "Talisman of the Horde"
-    },
-    {
       "itemId": 25827,
       "name": "Muck-Covered Drape"
-    },
-    {
-      "itemId": 25829,
-      "name": "Talisman of the Alliance"
     },
     {
       "itemId": 25835,

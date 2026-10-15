@@ -14,71 +14,73 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 3609,
-  "excludedNoSource": 1340,
-  "universeTotal": 288,
-  "listOnlyMembership": 15,
+  "d7EligibleTotal": 3519,
+  "excludedNoSource": 1067,
+  "universeTotal": 480,
+  "listOnlyMembership": 13,
   "perSlot": {
-    "back": 21,
-    "chest": 21,
-    "feet": 32,
-    "finger": 25,
-    "hands": 24,
-    "head": 23,
-    "legs": 20,
-    "neck": 17,
-    "ranged": 4,
-    "shoulder": 20,
-    "trinket": 16,
-    "waist": 30,
-    "weapon": 11,
-    "wrist": 24
+    "back": 36,
+    "chest": 35,
+    "feet": 57,
+    "finger": 50,
+    "hands": 33,
+    "head": 38,
+    "legs": 34,
+    "neck": 36,
+    "ranged": 5,
+    "shoulder": 28,
+    "trinket": 26,
+    "waist": 47,
+    "weapon": 17,
+    "wrist": 38
   },
   "sourceRecordAdds": {
     "atlasloot": 301,
     "curated": 8,
-    "db": 2134,
+    "db": 2319,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 8
   },
   "membershipByOrigin": {
     "curated": 14,
+    "dbPhase": 179,
     "itemHasOrigin:atlasloot": 50,
     "itemHasOrigin:curated": 8,
-    "itemHasOrigin:db": 245,
+    "itemHasOrigin:db": 439,
     "itemHasOrigin:two-hop": 10,
-    "itemHasOrigin:wowhead": 7,
-    "listOnly": 15,
+    "itemHasOrigin:wowhead": 5,
+    "listOnly": 13,
+    "recipeMatch": 15,
     "zoneMatch": 259
   },
   "exclusivePrimaryOrigin": {
-    "db": 245,
+    "db": 439,
     "atlasloot-only": 18,
     "two-hop": 10,
     "other": 8,
-    "wowhead-only": 7
+    "wowhead-only": 5
   },
   "tierPiecesExpected": 10,
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 288,
-    "casterOnlyReject": 118,
-    "epFloorReject": 9,
-    "combinedReject": 127,
-    "combinedKeep": 161,
-    "casterRejectPct": 41.0,
-    "combinedRejectPct": 44.1,
+    "total": 480,
+    "casterOnlyReject": 214,
+    "epFloorReject": 15,
+    "combinedReject": 229,
+    "combinedKeep": 251,
+    "casterRejectPct": 44.6,
+    "combinedRejectPct": 47.7,
     "applied": false
   },
   "wowheadListIds": 86,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 86,
-    "recalled": 79,
-    "missed": 7,
-    "recallPct": 91.9,
+    "recalled": 77,
+    "missed": 9,
+    "recallPct": 89.5,
     "missedItems": [
       {
         "itemId": 19343,
@@ -121,6 +123,18 @@
         "name": "Shaffar's Band of Brutality",
         "slot": "finger",
         "d7Eligible": true
+      },
+      {
+        "itemId": 31984,
+        "name": "Merciless Gladiator's Greatsword",
+        "slot": "weapon",
+        "d7Eligible": false
+      },
+      {
+        "itemId": 32041,
+        "name": "Merciless Gladiator's Scaled Helm",
+        "slot": "head",
+        "d7Eligible": false
       }
     ]
   },
@@ -434,6 +448,26 @@
       "name": "Lower City Prayerbook"
     },
     {
+      "itemId": 31328,
+      "name": "Leggings of Beast Mastery"
+    },
+    {
+      "itemId": 31859,
+      "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 32154,
+      "name": "Chancellor's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 32159,
+      "name": "Chancellor's Ornamented Gloves"
+    },
+    {
+      "itemId": 32169,
+      "name": "Chancellor's Scaled Gauntlets"
+    },
+    {
       "itemId": 32368,
       "name": "Tome of the Lightbringer"
     },
@@ -456,6 +490,10 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 33808,
+      "name": "The Horseman's Helm"
     },
     {
       "itemId": 34430,
@@ -531,8 +569,8 @@
     ]
   },
   "excludedIds": {
-    "total": 0,
-    "reason": "",
+    "total": 505,
+    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
     "curatedSetCollisions": []
   }
 }

@@ -21,44 +21,45 @@
     1012
   ],
   "d7EligibleTotal": 2878,
-  "excludedNoSource": 612,
-  "universeTotal": 828,
+  "excludedNoSource": 832,
+  "universeTotal": 645,
   "listOnlyMembership": 0,
   "perSlot": {
-    "back": 60,
-    "chest": 37,
-    "feet": 59,
-    "finger": 115,
-    "hands": 30,
-    "head": 36,
-    "legs": 45,
-    "neck": 72,
-    "ranged": 29,
-    "shoulder": 32,
-    "trinket": 53,
+    "back": 52,
+    "chest": 29,
+    "feet": 55,
+    "finger": 84,
+    "hands": 25,
+    "head": 27,
+    "legs": 29,
+    "neck": 54,
+    "ranged": 20,
+    "shoulder": 27,
+    "trinket": 49,
     "waist": 50,
-    "weapon": 154,
-    "wrist": 56
+    "weapon": 95,
+    "wrist": 49
   },
   "sourceRecordAdds": {
     "atlasloot": 265,
     "curated": 3,
-    "db": 2151,
+    "db": 1931,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
     "curated": 10,
-    "dbPhase": 431,
+    "dbPhase": 230,
     "itemHasOrigin:atlasloot": 82,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 779,
+    "itemHasOrigin:db": 596,
     "itemHasOrigin:two-hop": 15,
+    "recipeMatch": 18,
     "repFactionMatch": 26,
     "zoneMatch": 361
   },
   "exclusivePrimaryOrigin": {
-    "db": 779,
+    "db": 596,
     "atlasloot-only": 31,
     "two-hop": 15,
     "other": 3
@@ -67,13 +68,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 828,
-    "casterOnlyReject": 367,
+    "total": 645,
+    "casterOnlyReject": 304,
     "epFloorReject": 6,
-    "combinedReject": 373,
-    "combinedKeep": 455,
-    "casterRejectPct": 44.3,
-    "combinedRejectPct": 45.0,
+    "combinedReject": 310,
+    "combinedKeep": 335,
+    "casterRejectPct": 47.1,
+    "combinedRejectPct": 48.1,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -87,10 +88,6 @@
   },
   "ticket157ForceIncluded": [],
   "excludedUnimplementedEffect": [
-    {
-      "itemId": 3475,
-      "name": "Cloak of Flames"
-    },
     {
       "itemId": 11810,
       "name": "Force of Will"
@@ -124,14 +121,6 @@
       "name": "Onyxia Scale Cloak"
     },
     {
-      "itemId": 16446,
-      "name": "Marshal's Leather Footguards"
-    },
-    {
-      "itemId": 16558,
-      "name": "General's Leather Treads"
-    },
-    {
       "itemId": 16907,
       "name": "Bloodfang Gloves"
     },
@@ -140,20 +129,8 @@
       "name": "Shard of the Flame"
     },
     {
-      "itemId": 17904,
-      "name": "Stormpike Insignia Rank 6"
-    },
-    {
-      "itemId": 17909,
-      "name": "Frostwolf Insignia Rank 6"
-    },
-    {
       "itemId": 18382,
       "name": "Fluctuating Cloak"
-    },
-    {
-      "itemId": 18406,
-      "name": "Onyxia Blood Talisman"
     },
     {
       "itemId": 18639,
@@ -176,64 +153,20 @@
       "name": "Essence of the Pure Flame"
     },
     {
-      "itemId": 19287,
-      "name": "Darkmoon Card: Heroism"
-    },
-    {
-      "itemId": 19288,
-      "name": "Darkmoon Card: Blue Dragon"
-    },
-    {
-      "itemId": 19289,
-      "name": "Darkmoon Card: Maelstrom"
-    },
-    {
-      "itemId": 19290,
-      "name": "Darkmoon Card: Twisting Nether"
-    },
-    {
       "itemId": 19342,
       "name": "Venomous Totem"
-    },
-    {
-      "itemId": 19617,
-      "name": "Zandalarian Shadow Mastery Talisman"
     },
     {
       "itemId": 19930,
       "name": "Mar'li's Eye"
     },
     {
-      "itemId": 19949,
-      "name": "Zandalarian Hero Medallion"
-    },
-    {
-      "itemId": 19950,
-      "name": "Zandalarian Hero Charm"
-    },
-    {
-      "itemId": 19954,
-      "name": "Renataki's Charm of Trickery"
-    },
-    {
       "itemId": 19961,
       "name": "Gri'lek's Grinder"
     },
     {
-      "itemId": 20579,
-      "name": "Green Dragonskin Cloak"
-    },
-    {
       "itemId": 21488,
       "name": "Fetish of Chitinous Spikes"
-    },
-    {
-      "itemId": 21517,
-      "name": "Gnomish Turban of Psychic Might"
-    },
-    {
-      "itemId": 21526,
-      "name": "Band of Icy Depths"
     },
     {
       "itemId": 21625,
@@ -320,16 +253,8 @@
       "name": "Auslese's Light Channeler"
     },
     {
-      "itemId": 24551,
-      "name": "Talisman of the Horde"
-    },
-    {
       "itemId": 25827,
       "name": "Muck-Covered Drape"
-    },
-    {
-      "itemId": 25829,
-      "name": "Talisman of the Alliance"
     },
     {
       "itemId": 26055,

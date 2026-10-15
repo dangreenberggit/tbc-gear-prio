@@ -159,6 +159,14 @@ MIN_QUALITY = 3
 # sample was Classic-era gear -- Serathil at ilvl 61, Deathmist Bracers at 65.
 DB_PHASE_MIN_QUALITY = 4
 
+# Item-level floor for the db-phase route. Sourceless phase-1 epics with ilvl
+# <= 95 are vanilla items (Naxxramas, AQ, vanilla PvP); the next ilvl is 100
+# (ticket 613, Q-613-vanilla). An item whose effect the pinned sim implements
+# (`implementedEffectItemIds`) is exempt: Mark of the Champion and Earthstrike
+# sit below the floor and still do something a player can sim (stage-gate
+# tab-item-lists decision N4).
+DB_PHASE_MIN_ILVL = 100
+
 # Ticket 157: six D7-eligible ret items the SME review named as missing from
 # the pool despite being real, well-known TBC drops/quest rewards. Every one
 # fails the general admission gate the same way -- db.json's `sources[]`
@@ -224,8 +232,6 @@ class SpecProfile:
         policy_two_hand_only: bool = False,
         policy_exclusion_note: str = "",
         ep_weights_by_phase: dict[int, Path] | None = None,
-        db_phase_membership: bool = False,
-        exclude_ids: frozenset[int] = frozenset(),
     ):
         self.spec = spec
         self.ep_weights = ep_weights
@@ -274,17 +280,6 @@ class SpecProfile:
                 f"{spec}: a policy exclusion needs a policy_exclusion_note -- "
                 "an unexplained policy exclusion is indistinguishable from a bug"
             )
-        # Admit eligible db items that carry a `phase` but no parseable
-        # `sources`, in place of the Wowhead-list membership layer the 9 new
-        # specs do not have (plan amendment 1). Off for ret/feral, whose
-        # universes must stay byte-identical.
-        self.db_phase_membership = db_phase_membership
-        # The exclude counterpart to TICKET_157_FORCE_INCLUDE, which had none.
-        # Applied inside eligible_d7, so *every* route respects it rather than
-        # just the db-phase one -- that is what makes it a usable remedy for an
-        # SME "this item does not belong in this spec's pool" ruling, and for
-        # trimming a pool that overruns the runtime budget.
-        self.exclude_ids = exclude_ids
 
 
 def _ep_weights_map(spec: str) -> tuple[Path, dict[int, Path]]:
@@ -321,10 +316,10 @@ def _arena_gear_ids() -> frozenset[int]:
     and gated behind a personal and team rating, so a player reading a PvE
     list cannot act on it the way they can act on a raid drop or a badge
     purchase; a PvE sim systematically mis-values it, because part of its
-    budget is spent on resilience, which does nothing to a boss; and ret and
-    feral ship 5 and 12 such rows against 104-182 for the new specs, so
-    admitting them would make the nine a different product from the two
-    already reviewed.
+    budget is spent on resilience, which does nothing to a boss. The ruling
+    first covered the nine db-phase specs only; ticket 613 put every spec on
+    one rule set, so it now applies to ret and feral too (stage-gate
+    tab-item-lists decision N6).
 
     Deliberately the **narrow** cut the gate preferred. Only the four
     Gladiator season lines are matched -- the rating-gated ones. Honour and
@@ -524,13 +519,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
             ROOT / "vendor/wowsims/balance_p4.gear.json",
             ROOT / "vendor/wowsims/balance_p5.gear.json",
         ],
-        # No Wowhead list layer for this spec; membership comes
-        # from db phase instead. `None` is a sentinel, not a
+        # No Wowhead list layer for this spec. `None` is a sentinel, not a
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
-        db_phase_membership=True,
-        # SME gate F3: rating-gated arena gear is out of a PvE pool.
-        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/balance-tokens.json",
         class_id=CLASS_DRUID,
     ),
@@ -573,13 +564,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
             ROOT / "vendor/wowsims/hunter_p4_sv_dw_9p.gear.json",
             ROOT / "vendor/wowsims/hunter_p1_bm_preraid.gear.json",
         ],
-        # No Wowhead list layer for this spec; membership comes
-        # from db phase instead. `None` is a sentinel, not a
+        # No Wowhead list layer for this spec. `None` is a sentinel, not a
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
-        db_phase_membership=True,
-        # SME gate F3: rating-gated arena gear is out of a PvE pool.
-        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/hunter-tokens.json",
         class_id=CLASS_HUNTER,
     ),
@@ -597,13 +584,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
             ROOT / "vendor/wowsims/mage_p3_staff.gear.json",
             ROOT / "vendor/wowsims/mage_p3_sword.gear.json",
         ],
-        # No Wowhead list layer for this spec; membership comes
-        # from db phase instead. `None` is a sentinel, not a
+        # No Wowhead list layer for this spec. `None` is a sentinel, not a
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
-        db_phase_membership=True,
-        # SME gate F3: rating-gated arena gear is out of a PvE pool.
-        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/mage-tokens.json",
         class_id=CLASS_MAGE,
     ),
@@ -617,13 +600,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
             ROOT / "vendor/wowsims/shadow_p2.gear.json",
             ROOT / "vendor/wowsims/shadow_p3.gear.json",
         ],
-        # No Wowhead list layer for this spec; membership comes
-        # from db phase instead. `None` is a sentinel, not a
+        # No Wowhead list layer for this spec. `None` is a sentinel, not a
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
-        db_phase_membership=True,
-        # SME gate F3: rating-gated arena gear is out of a PvE pool.
-        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/shadow-tokens.json",
         class_id=CLASS_PRIEST,
     ),
@@ -637,13 +616,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
             ROOT / "vendor/wowsims/rogue_p2.gear.json",
             ROOT / "vendor/wowsims/rogue_p3.gear.json",
         ],
-        # No Wowhead list layer for this spec; membership comes
-        # from db phase instead. `None` is a sentinel, not a
+        # No Wowhead list layer for this spec. `None` is a sentinel, not a
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
-        db_phase_membership=True,
-        # SME gate F3: rating-gated arena gear is out of a PvE pool.
-        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/rogue-tokens.json",
         class_id=CLASS_ROGUE,
     ),
@@ -662,13 +637,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
             ROOT / "vendor/wowsims/ele_p4.gear.json",
             ROOT / "vendor/wowsims/ele_p5.gear.json",
         ],
-        # No Wowhead list layer for this spec; membership comes
-        # from db phase instead. `None` is a sentinel, not a
+        # No Wowhead list layer for this spec. `None` is a sentinel, not a
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
-        db_phase_membership=True,
-        # SME gate F3: rating-gated arena gear is out of a PvE pool.
-        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/ele-tokens.json",
         class_id=CLASS_SHAMAN,
     ),
@@ -685,13 +656,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
             ROOT / "vendor/wowsims/enh_p4.gear.json",
             ROOT / "vendor/wowsims/enh_p5.gear.json",
         ],
-        # No Wowhead list layer for this spec; membership comes
-        # from db phase instead. `None` is a sentinel, not a
+        # No Wowhead list layer for this spec. `None` is a sentinel, not a
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
-        db_phase_membership=True,
-        # SME gate F3: rating-gated arena gear is out of a PvE pool.
-        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/enh-tokens.json",
         class_id=CLASS_SHAMAN,
     ),
@@ -714,13 +681,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
             ROOT / "vendor/wowsims/warlock_destro_preraid.gear.json",
             ROOT / "vendor/wowsims/warlock_destro_t4.gear.json",
         ],
-        # No Wowhead list layer for this spec; membership comes
-        # from db phase instead. `None` is a sentinel, not a
+        # No Wowhead list layer for this spec. `None` is a sentinel, not a
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
-        db_phase_membership=True,
-        # SME gate F3: rating-gated arena gear is out of a PvE pool.
-        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/warlock-tokens.json",
         class_id=CLASS_WARLOCK,
     ),
@@ -744,13 +707,9 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
             ROOT / "vendor/wowsims/warrior_p5_arms.gear.json",
             ROOT / "vendor/wowsims/warrior_p5_fury.gear.json",
         ],
-        # No Wowhead list layer for this spec; membership comes
-        # from db phase instead. `None` is a sentinel, not a
+        # No Wowhead list layer for this spec. `None` is a sentinel, not a
         # missing directory -- see SpecProfile.
         wowhead_dir=None,
-        db_phase_membership=True,
-        # SME gate F3: rating-gated arena gear is out of a PvE pool.
-        exclude_ids=ARENA_GEAR_IDS,
         two_hop=ROOT / "data/two-hop/warrior-tokens.json",
         class_id=CLASS_WARRIOR,
     ),
@@ -991,6 +950,18 @@ def stub_only_effect_ids() -> dict[int, str]:
     }
 
 
+def implemented_effect_ids() -> frozenset[int]:
+    """Item ids whose effect the pinned sim registers; exempt from DB_PHASE_MIN_ILVL.
+
+    Empty when the file is absent, for the reason `stub_only_effect_ids` gives.
+    """
+    if not SIM_IMPLEMENTED_EFFECTS.is_file():
+        return frozenset()
+    data = load_json(SIM_IMPLEMENTED_EFFECTS)
+    assert isinstance(data, dict)
+    return frozenset(int(i) for i in data.get("implementedEffectItemIds") or [])
+
+
 def wowsims_curated_item_ids(profile: SpecProfile) -> set[int]:
     """Union of item ids across the pinned gear-set presets (§bisTags).
 
@@ -1138,14 +1109,14 @@ def eligible_d7(it: dict, profile: SpecProfile) -> bool:
       that, in `canEquipItem`. We look the answer up rather than re-deriving
       it — see `_equip_eligibility()` for why the re-derivation was deleted.
     - *Do we want it in an upgrade pool?* Quality floor, Kael's temporary
-      legendaries, per-spec SME exclusions. These are our policy, the fork has
-      no opinion on them, and they stay here.
+      legendaries, arena gear, per-spec weapon rules. These are our policy,
+      the fork has no opinion on them, and they stay here.
     """
     if it["id"] in KAEL_TEMP_LEGENDARY_IDS:
         return False
     # Applied here rather than at any single admission route so that an
     # excluded id cannot re-enter through a different one.
-    if int(it["id"]) in profile.exclude_ids:
+    if int(it["id"]) in ARENA_GEAR_IDS:
         return False
     if int(it["id"]) not in profile.equip_eligible_ids:
         return False
@@ -2313,12 +2284,12 @@ def assemble(
         curated_unsourced.add(iid)
         ticket_157_included.add(iid)
 
-    # db-phase membership (plan amendment 1). The 9 specs added by that
-    # amendment have no Wowhead lists, so the layer that admits badge, PvP and
-    # vendor gear for ret/feral is missing for them. Those items do carry a
-    # `phase` in db.json -- every one of the 8,257 items does -- they just
-    # carry no `sources`, so map_db_source returns None, add_source drops it,
-    # and they die below as `no_zone_excluded`.
+    # db-phase membership (plan amendment 1; every spec since ticket 613). Badge,
+    # PvP and vendor gear carry a `phase` in db.json -- every one of the 8,257
+    # items does -- but no `sources`, so map_db_source returns None, add_source
+    # drops it, and they die below as `no_zone_excluded`. Ret's and feral's
+    # Wowhead lists admit only the items a guide author listed, so this route
+    # is the one rule that admits the rest, for all 11 specs.
     #
     # This admits them on phase alone, with `{"kind": "unknown"}` because that
     # is the honest claim: we know when the item became available, not where it
@@ -2326,25 +2297,27 @@ def assemble(
     #
     # Placement is load-bearing and deliberate:
     #   - after the force-include block, so an id can be both;
-    #   - downstream of the machine-locus freeze and the Wowhead loop, both
-    #     inert here (no lists), and it cannot suppress another route's rows;
+    #   - after the machine-locus freeze and the Wowhead loop, and it skips
+    #     any id they sourced, so it cannot suppress another route's rows;
     #   - admitted items carry a pair, so they pass the empty-pairs check below
     #     and still reach the stub_only_ids unimplemented-effects check, which
     #     admission must not bypass.
     db_phase_admitted: set[int] = set()
-    if profile.db_phase_membership:
-        for it in db["items"]:
-            iid = int(it["id"])
-            if iid in source_acc:
-                continue
-            if not eligible_d7(it, profile):
-                continue
-            if int(it.get("phase") or 99) > max_phase:
-                continue
-            if int(it.get("quality") or 0) < DB_PHASE_MIN_QUALITY:
-                continue
-            add_source(iid, {"kind": "unknown"}, "db")
-            db_phase_admitted.add(iid)
+    implemented_ids = implemented_effect_ids()
+    for it in db["items"]:
+        iid = int(it["id"])
+        if iid in source_acc:
+            continue
+        if not eligible_d7(it, profile):
+            continue
+        if int(it.get("phase") or 99) > max_phase:
+            continue
+        if int(it.get("quality") or 0) < DB_PHASE_MIN_QUALITY:
+            continue
+        if (item_ilvl(it) or 0) < DB_PHASE_MIN_ILVL and iid not in implemented_ids:
+            continue
+        add_source(iid, {"kind": "unknown"}, "db")
+        db_phase_admitted.add(iid)
 
     eligible_count = sum(
         1 for it in db["items"] if eligible_d7(it, profile)
@@ -2430,6 +2403,14 @@ def assemble(
         db_phase = iid in db_phase_admitted and int(
             it.get("phase") or 99
         ) <= max_phase
+        # A crafted item whose pattern drops in an in-phase raid. `recipeZone`
+        # was display-only until ticket 611: a crafted source names no zone,
+        # and db-phase skips sourced ids, so Sunwell crafts such as 34370 Gloves
+        # of Immortal Dusk reached no list. Item-phase guarded like `curated`.
+        in_recipe_phase = any(
+            s.get("kind") == "crafted" and s.get("recipeZone") in phase_zones
+            for s in sources
+        ) and int(it.get("phase") or 99) <= max_phase
         if (
             not in_phase
             and not in_heroic
@@ -2437,6 +2418,7 @@ def assemble(
             and not list_only
             and not curated
             and not db_phase
+            and not in_recipe_phase
         ):
             continue
 
@@ -2453,6 +2435,8 @@ def assemble(
             membership_stats["curated"] += 1
         elif db_phase:
             membership_stats["dbPhase"] += 1
+        elif in_recipe_phase:
+            membership_stats["recipeMatch"] += 1
 
         slot = ITEM_TYPE_SLOT[it["type"]]
         stats = item_stats(it)
@@ -2628,8 +2612,8 @@ def assemble(
         "excludedUnimplementedEffect": sorted(
             excluded_unimplemented, key=lambda e: e["itemId"]
         ),
-        # Per-spec `exclude_ids`, and specifically the ones that collide with
-        # a curated BiS set (SME gate finding A1).
+        # The arena exclusion (ARENA_GEAR_IDS, every spec), and specifically
+        # the ids that collide with a curated BiS set (SME gate finding A1).
         #
         # The exclusion itself is a ruling, not a defect: rating-gated arena
         # gear is out of a PvE pool. What the review caught is that it was
@@ -2665,15 +2649,13 @@ def assemble(
             ),
         },
         "excludedIds": {
-            "total": len(profile.exclude_ids),
+            "total": len(ARENA_GEAR_IDS),
             "reason": (
                 "rating-gated arena gear (Gladiator season lines); SME gate "
                 "finding F3 -- bought with a currency PvE play does not "
                 "generate, rating-gated, and mis-valued by a PvE sim because "
                 "part of its budget is resilience"
-            )
-            if profile.exclude_ids
-            else "",
+            ),
             "curatedSetCollisions": [
                 {
                     "itemId": iid,
@@ -2684,7 +2666,7 @@ def assemble(
                     (
                         (iid, labels)
                         for iid, labels in curated_sets_by_item.items()
-                        if iid in profile.exclude_ids
+                        if iid in ARENA_GEAR_IDS
                     )
                 )
             ],
