@@ -31,3 +31,5 @@ all leaves no row" (red before the fix: the options lacked `Zul'Aman`).
 No committed universe has an entry whose second zone is no entry's first,
 so the pre-run box's list does not change for any spec; the results
 dialog can still gain such a zone when a ranked row has it.
+
+Verified by: tbc-new-fork@c47012b0b, pinned by tbc-gear-prio@3076b0dc (`pnpm verify` rc=0); from `vendor/tbc-new-fork`, `corepack pnpm exec vitest run ui/features/upgrades/model/results_view.test.ts ui/features/upgrades/model/settings_pool.test.ts`; review `docs/reviews/feat-tab-view-filter.md` (R1).

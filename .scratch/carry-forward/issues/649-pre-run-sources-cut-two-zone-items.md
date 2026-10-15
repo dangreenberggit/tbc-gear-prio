@@ -32,3 +32,5 @@ for `[7, 8, 9]`) and "offers every zone an entry matches, each zone that is
 some entry's first in its old place". Over the 44 committed universes
 (`data/universes/*.json`) no entry has such a second zone, so no real
 pool was cut by this.
+
+Verified by: tbc-new-fork@c47012b0b, pinned by tbc-gear-prio@3076b0dc (`pnpm verify` rc=0); from `vendor/tbc-new-fork`, `corepack pnpm exec vitest run ui/features/upgrades/model/settings_pool.test.ts`; review `docs/reviews/feat-tab-view-filter.md` (R3).

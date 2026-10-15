@@ -28,3 +28,5 @@ blame the shown sources for a pane whose rows were all below the cutoff
 before the cut". With the term removed from `paneRows` it fails
 (`noSourceRow` true) and the other 43 tests in the file pass, so the
 hypothesis above held: no earlier test caught that mutant.
+
+Verified by: tbc-new-fork@88dcdb8dd, pinned via tbc-gear-prio@3076b0dc (`pnpm verify` rc=0); from `vendor/tbc-new-fork`, `corepack pnpm exec vitest run ui/features/upgrades/model/results_view.test.ts`; review `docs/reviews/feat-tab-view-filter.md` (R2).
