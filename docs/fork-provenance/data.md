@@ -638,3 +638,31 @@ Verify:
 pnpm atlasloot:regen:check
 pnpm fork-universes:check
 ```
+
+## Refresh, 2026-10-15 (Sunmote upgrades for every spec, ticket 612)
+
+The Sunmote upgrades now come from `data/two-hop/sunmote-pairs.json`, which
+`scripts/parse_atlasloot.py` writes from the commented rows AtlasLoot keeps
+under each Sunwell Plateau base item (28 pairs). `scripts/assemble_universe.py`
+applies them to every spec and keeps a pair when both items are phase 5, share
+a slot and the upgrade's item level is not below the base's; the five head
+pairs whose commented item is ilvl 159 under an ilvl 164 base are dropped. The
+hand-made `data/two-hop/ret-sunmote-upgrades.json` (3 rows) is deleted.
+
+`python scripts/sync_fork_universes.py --write` refreshed 11 of 63 copies, all
+phase 5: `ret-p5.universe.json` gains 20 entries (617 to 637) and
+`feral-p5.universe.json` gains 13 (484 to 497), each with one Sunwell Plateau
+`token` source named `Sunmote + <base item>`. In the other nine specs' p5
+copies (balance, ele, enh, hunter, mage, rogue, shadow, warlock, warrior) the
+entry count is unchanged; 5 to 23 entries per file that were `unknown`
+(db-phase) now carry that `token` source. No EP-weight file changed.
+
+The fork's `ui/features/upgrades/model/settings_pool.test.ts` ret phase-5 count
+moves from 617 to 637 in the same commit. No engine file changed.
+
+Verify:
+
+```bash
+pnpm atlasloot:regen:check
+pnpm fork-universes:check
+```
