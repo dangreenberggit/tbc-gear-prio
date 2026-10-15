@@ -175,3 +175,14 @@ owner has not made.
 
 Revisit when a stage is scoped for it. The decision above is what holds until
 then.
+
+## Amendment 2026-10 (ticket 613)
+
+The local universe stays the artifact the tab reads. The wowsims DB is still
+the auditor, and it is now also one membership route: db-phase admission, the
+same for all 11 specs, admits an epic (quality ≥ 4) with no source once its
+`phase` is reached, when its item level is at least 100 or the pinned sim
+implements its effect. So the sentence above that the audit "never adds an
+item to a pool" now reads: the audit never adds an item; the db-phase route
+does, by rule. Ticket 610 replaces `scripts/list_phase_pool.py` with an audit
+that reads no builder code; that audit is the auditor this ADR names.
