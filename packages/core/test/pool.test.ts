@@ -465,7 +465,10 @@ describe("data/universes/ret-p2.json", () => {
     // ilvl >= 100 or a sim-implemented effect), +15 crafted items whose
     // pattern drops in an in-phase raid, -2 Gladiator arena rows (31984,
     // 32041). Re-run the per-list account in the 613 closing note.
-    expect(entries.length).toBe(480);
+    // 480 -> 502: +22 rewards of factions phase_raids.json does not list
+    // (Violet Signets, A'dal's Command...), admitted by the rep-item route
+    // under db-phase rules (stage-gate tab-item-lists, K3-rep-items).
+    expect(entries.length).toBe(502);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

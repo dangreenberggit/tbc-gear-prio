@@ -468,10 +468,13 @@ describe("data/universes/ret-p3.json hardening", () => {
     // 467 -> 715: ret takes the nine specs' list rules (tickets 611, 613):
     // +224 db-phase rows (139 phase 1, 85 phase 2-3), +28 crafted items whose
     // pattern drops in an in-phase raid, -4 Gladiator arena rows.
+    // 715 -> 737: +22 rewards of factions phase_raids.json does not list
+    // (Violet Signets, A'dal's Command...), admitted by the rep-item route
+    // under db-phase rules (stage-gate tab-item-lists, K3-rep-items).
     // Re-run: `python scripts/assemble_universe.py --spec ret --max-phase 3
     // --out <scratch> --report <scratch>` and
     // `len(json.load(open('<scratch>'))['entries'])`.
-    expect(universeP3.length).toBe(715);
+    expect(universeP3.length).toBe(737);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the

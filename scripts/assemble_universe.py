@@ -2038,6 +2038,9 @@ def assemble(
     phase_zones = zones_for_max_phase(max_phase, phase_raids)
     phase_heroics = heroic_dungeons_for_max_phase(max_phase)
     phase_rep_factions = rep_factions_for_max_phase(max_phase, phase_raids)
+    # Every faction the raid-tier map names, at any phase. A faction it names
+    # is gated by that tier; one it does not name is gated by the item alone.
+    listed_rep_factions = rep_factions_for_max_phase(99, phase_raids)
 
     # itemId -> list of (source, origin)
     source_acc: dict[int, list[tuple[dict, str]]] = defaultdict(list)
@@ -2411,6 +2414,31 @@ def assemble(
             s.get("kind") == "crafted" and s.get("recipeZone") in phase_zones
             for s in sources
         ) and int(it.get("phase") or 99) <= max_phase
+        # A reward of a faction phase_raids.json does not list (The Violet Eye,
+        # The Sha'tar, The Consortium...). That map is deliberately narrow, and
+        # db-phase admission skips sourced ids, so these reached no list at
+        # all: 22-39 epics per list, among them the Violet Signets and A'dal's
+        # Command. They follow db-phase admission's rules -- epic, own phase
+        # in scope, the item-level floor -- because they are the same kind of
+        # claim: the faction does not gate the item by raid tier, so its own
+        # phase does (stage-gate tab-item-lists, K3-rep-items). Only the item's
+        # own `rep` rows count: a craft whose pattern a faction sells (the
+        # Wildguard and Iceguard resistance sets) is ticket 418's question.
+        own_rep_factions = {
+            f
+            for s in sources
+            if s.get("kind") == "rep"
+            for f in source_rep_factions(s)
+        }
+        in_rep_item_phase = (
+            bool(own_rep_factions - listed_rep_factions)
+            and int(it.get("phase") or 99) <= max_phase
+            and int(it.get("quality") or 0) >= DB_PHASE_MIN_QUALITY
+            and (
+                (item_ilvl(it) or 0) >= DB_PHASE_MIN_ILVL
+                or iid in implemented_ids
+            )
+        )
         if (
             not in_phase
             and not in_heroic
@@ -2419,6 +2447,7 @@ def assemble(
             and not curated
             and not db_phase
             and not in_recipe_phase
+            and not in_rep_item_phase
         ):
             continue
 
@@ -2437,6 +2466,8 @@ def assemble(
             membership_stats["dbPhase"] += 1
         elif in_recipe_phase:
             membership_stats["recipeMatch"] += 1
+        elif in_rep_item_phase:
+            membership_stats["repItemPhase"] += 1
 
         slot = ITEM_TYPE_SLOT[it["type"]]
         stats = item_stats(it)
