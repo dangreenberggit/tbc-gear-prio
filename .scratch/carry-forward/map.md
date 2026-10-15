@@ -348,3 +348,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 625 Under BiS only, a slot whose BiS-list item is worn tells the player to widen the filter (pre-merge review feat/bis-rows, D2) 2026-10-11
 - 626 `pnpm verify` does not check the tab's locale strings against their schema (pre-merge review feat/bis-rows, S6) 2026-10-11
 - 628 The lazy-load guard test times out in a full run of the tab's tests (stage-gate tab-view-filter, K1 note) 2026-10-15
+- 645 "Reputation vendor" names the Band of Eternity rings, which are not sold (pre-merge review feat/tab-view-filter, D3) 2026-10-15
+- 646 Some "Source not recorded" rows name a dungeon in their Source cell (pre-merge review feat/tab-view-filter, D2) 2026-10-15
