@@ -5534,9 +5534,13 @@ describe.skipIf(!forkPresent)(
           setBonuses: SWEEP_BONUSES,
           measureBrokenSetValue: true,
         });
-        // At k = 0 the engine ranks no head candidate over this gear (seen on
-        // the first run; cause not examined, hypothesis: the meta-socket drop
-        // 512-C describes), so the head row is checked where it is ranked.
+        // At k = 0 the engine drops both head candidates (Malorne 29098,
+        // Nordrassil 30228); the ranking's substitutions say gem repair found
+        // no recolour that activates their meta (32409: 2 red, 2 yellow,
+        // 2 blue) over this gemless gear, as in 512-C. From k = 1 both rank
+        // (hypothesis: the worn Thunderheart pieces add the sockets the
+        // repair needs). It is the fixture's gear, not a set-bonus path, so
+        // the head row is checked where it is ranked.
         const ranked = rows.filter(({ id }) => k > 0 || id !== MALORNE.head);
         for (const { id, setId } of ranked) {
           const row = thRow(r, id);
