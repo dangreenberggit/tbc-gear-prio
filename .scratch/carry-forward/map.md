@@ -352,3 +352,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 642 The arena exclusion's recorded reason says all arena gear is rating-gated (stage tab-item-lists SME, F3) 2026-10-15
 - 643 Badge and honor items show "Source not recorded" while similar items show a source (stage tab-item-lists SME, F4) 2026-10-15
 - 644 A ranking lists Thunderheart Harness at a 5-piece threshold the set does not have (stage tab-item-lists SME, F6) 2026-10-15
+- 660 Holiday items show no readable source, and the Mug's item-level-141 stats are unchecked (parts of 640 the owner did not rule on) 2026-10-15
