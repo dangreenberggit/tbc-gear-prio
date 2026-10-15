@@ -123,3 +123,45 @@ scope creep.
 Reviewed range: `19cb602fa47f85705a9ffb5a25c306686defc7d1..59f19140d4ca1ea7c50d32373a4d704c0fcdc508`
 
 Fork range (round 2): `vendor/tbc-new-fork` `c99dd97e400ecb8f835f60e7723672628ce36a84..193c8d28ff7099de9d970ec5ff663924e32ee36a`.
+
+## Focused check (round 2)
+
+One fresh `general-task` agent on Opus, main range
+`19cb602f..59f19140` (plus `d84e7d39`, which only records the range), fork
+range `c99dd97e4..193c8d28f`, given the findings above and the four checks.
+
+1. **Conditions 1-3: hold.** Every commit is a fix naming its finding IDs,
+   the code-quality pass naming its rows, the re-pin `59f19140`, the review
+   file, or the ticket filing `04a824bb` (the agent ruled it in scope:
+   `docs/agents/issue-tracker.md:22-27` requires `NEXT` in the commit that
+   adds a ticket, and the two `map.md` lines log the same tickets). Every
+   changed code line is at a place a fixed finding cites. The wowsims-file
+   check gives the same output at `193c8d28f` as at `c99dd97e4` (only
+   `6 0 ui/app/SimTabsSection.tsx`, nothing deleted), and
+   `176268e7c..193c8d28f` touches only the three allowed paths.
+2. **Each change does only what its finding asks: pass.** The code-quality
+   rows change no behaviour (read; `tsc --noEmit -p .` and
+   `oxlint --max-warnings 0 ui/features/upgrades` rc 0 at `193c8d28f`).
+3. **Each new test asserts its finding: pass**, judged by reading (no
+   mutation re-run); the fixer's red runs (AD1, AD2, D4) and mutation runs
+   (AD3, P2) agree.
+4. **Touched tests pass:** 9 files, 151 tests, rc 0.
+
+Findings (none bookkeeping):
+
+- **R1 (visible inconsistency, introduced by the D4 fix; real-data effect
+  untested).** `sourcesView` keeps a row while any zone it matches is not an
+  offered hidden key, but the dialog offers only first zones, so a row whose
+  other zone is no row's first zone survives Hide all while the button reads
+  "m of m sources hidden". Ticket 647.
+- **R2 (missing test).** No test covers AD1's negative case: a pane that
+  had only below-cutoff rows keeps "No upgrades found" when another source
+  is hidden. Ticket 648.
+- **R3 (same defect as D4 in the pre-run box; ticket 527's "same rule"
+  sentence now false).** `effectivePool` still cuts a two-zone entry whose
+  second zone is not offered. Ticket 649.
+
+By the skill's "Round limit" the review stops here with no round 3. The
+caller's standing instruction for this run: "a round-two finding that is
+filed as a ticket is fixed by a fresh agent on the branch". Tickets 647-649
+were filed, and a fresh agent fixes them on the branch (see `## Summary`).

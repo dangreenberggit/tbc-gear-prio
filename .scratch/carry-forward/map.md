@@ -350,3 +350,6 @@ file contention, worker prompt. This file stays the chronological log.
 - 628 The lazy-load guard test times out in a full run of the tab's tests (stage-gate tab-view-filter, K1 note) 2026-10-15
 - 645 "Reputation vendor" names the Band of Eternity rings, which are not sold (pre-merge review feat/tab-view-filter, D3) 2026-10-15
 - 646 Some "Source not recorded" rows name a dungeon in their Source cell (pre-merge review feat/tab-view-filter, D2) 2026-10-15
+- 647 "Filter by source" cannot hide a row whose other zone it does not list (pre-merge review feat/tab-view-filter, round 2 R1) 2026-10-15
+- 648 No test keeps "No upgrades found" for a pane that never had an upgrade (pre-merge review feat/tab-view-filter, round 2 R2) 2026-10-15
+- 649 The pre-run Sources box can cut an item from two raids with one ticked (pre-merge review feat/tab-view-filter, round 2 R3) 2026-10-15
