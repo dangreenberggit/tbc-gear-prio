@@ -108,15 +108,17 @@ START_PRESET = {"ret": {4: ("Phase 3", "P3")}}
 # Pinned eligible-candidate count and its upper bound, from the committed
 # universe, before any run (ticket 560 amendment A-F31):
 #   node -e "console.log(require('<fork>/ui/features/upgrades/model/data/ret-p4.universe.json').entries.length)"
-# prints 523 (2026-10-07, fork feat/upgrades-tab-react). Every ret-p4 entry is
+# prints 838 (2026-10-15, fork 2d168e74f; it was 523 until tickets 611/613
+# gave ret the crafted-from-raid and db-phase routes). Every ret-p4 entry is
 # phase <= 4 and none is a Kael temporary legendary, so neither the phase filter
 # (model/engine/pool.ts filterPoolByPhase) nor the Kael exclusion removes one,
 # and the tab's default settings (no source excluded, prune off) do not filter:
-# the gate's eligibleCount should be 523. If a run reads another number, explain
-# the filter responsible in the stage's desktop-gate.md before changing this.
-# A universe regen that changes the ret-p4 pool must re-measure both.
-EXPECTED_ELIGIBLE = {"ret": {4: 523}}
-UNIVERSE_CAP = {"ret": {4: 523}}
+# the gate's eligibleCount should be 838, and the live readback
+# .scratch/stage-gate/tab-item-lists/readback-ret-p4-cap40.json read 838. If a
+# run reads another number, explain the filter responsible before changing
+# this. A universe regen that changes the ret-p4 pool must re-measure both.
+EXPECTED_ELIGIBLE = {"ret": {4: 838}}
+UNIVERSE_CAP = {"ret": {4: 838}}
 
 # Measured full-pool row count for the --full branch of assertion (e): an
 # uncapped run lands fewer rows than eligible candidates, because screened-out
@@ -131,14 +133,16 @@ FULL_ROWS: dict[str, dict[int, int]] = {}
 # plus every worn item (model/engine/rank.ts, "the cap keeps the first N of
 # the EP order plus every owned row"), and owned rows stay out of the list
 # pane (model/results_view.ts paneRows), so a capped run shows N minus the
-# worn items inside the first N. ret phase 4 from the P3 preset, cap 40:
-# the ranking holds 55 rows, 16 of them owned (the 16 worn items), so
-# 55 = 40 + 15 owned rows outside the first 40, one worn item sits inside
-# it, and the pane shows 39. Measured 2026-10-07 on the desktop binary and,
-# with the same 39 rows, on the WASM dev server (window.__upgradesRanking;
-# ticket 560 stage desktop-gate.md). A change to the pool, the EP order or
-# the preset gear can move it; re-measure and explain before changing it.
-CAPPED_ROWS = {"ret": {4: {40: 39}}}
+# worn items inside the first N. ret phase 4 from the P3 preset, cap 40: the
+# pane shows 40, so none of the 16 worn items is inside the first 40. Measured
+# 2026-10-15 on the desktop binary (readback
+# .scratch/stage-gate/tab-item-lists/readback-ret-p4-cap40.json, fork
+# 2d168e74f). It was 39 (one worn item inside the first 40) until the ret-p4
+# pool grew from 523 to 838 (tickets 611/613): ten new candidates entered the
+# first 40 by EP, pushing out nine old candidates and that worn item. A change
+# to the pool, the EP order or the preset gear can move it; re-measure and
+# explain before changing it.
+CAPPED_ROWS = {"ret": {4: {40: 40}}}
 
 # Tolerances (plan §Approach; out of scope to edit these in response to a
 # failure -- a failure is a finding and a ticket).

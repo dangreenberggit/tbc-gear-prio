@@ -1,15 +1,23 @@
 {
   "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a known-good ret phase-4 cap-40 run from the P3 gear preset on the desktop (HTTP) transport. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter the tab's output (fork re-pin, universe regen, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate. See README.md beside this file.",
-  "recordedAt": "2026-10-11T21:30:53.129Z",
-  "forkCommit": "c4696b091108179b647ea255d303a15b5e282f73",
+  "recordedAt": "2026-10-15T19:35:47.643Z",
+  "forkCommit": "2d168e74fa9a1983efac3aa1f15196156800da23",
   "cpuCount": 20,
   "candidatesRequested": 40,
   "spec": "ret",
   "phase": 4,
-  "elapsedS": 11.4,
+  "elapsedS": 13.4,
   "rows": [
     {
       "rank": "1",
+      "item": "Empty Mug of Direbrew",
+      "slot": "Trinket 1",
+      "dps": 22,
+      "source": "Source not recorded",
+      "belowCutoff": false
+    },
+    {
+      "rank": "2",
       "item": "Berserker's Call",
       "slot": "Trinket 1",
       "dps": 16.9,
@@ -74,6 +82,14 @@
     },
     {
       "rank": "8",
+      "item": "Amulet of Bitter Hatred",
+      "slot": "Neck",
+      "dps": -12.2,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "9",
       "item": "Heartshatter Breastplate",
       "slot": "Chest",
       "dps": -12.4,
@@ -81,23 +97,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "9",
-      "item": "Swiftstrike Shoulders",
-      "slot": "Shoulders",
-      "dps": -12.8,
-      "source": "Leatherworking",
-      "belowCutoff": true
-    },
-    {
       "rank": "10",
-      "item": "Necklace of Trophies",
-      "slot": "Neck",
-      "dps": -15.6,
-      "source": "World drop",
-      "belowCutoff": true
-    },
-    {
-      "rank": "11",
       "item": "Worgen Claw Necklace",
       "slot": "Neck",
       "dps": -15.8,
@@ -105,7 +105,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "12",
+      "rank": "11",
       "item": "Choker of Vile Intent",
       "slot": "Neck",
       "dps": -15.8,
@@ -113,7 +113,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "13",
+      "rank": "12",
       "item": "Krakken-Heart Breastplate",
       "slot": "Chest",
       "dps": -15.8,
@@ -121,7 +121,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "14",
+      "rank": "13",
       "item": "Softstep Boots of Tracking",
       "slot": "Feet",
       "dps": -15.8,
@@ -129,7 +129,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "15",
+      "rank": "14",
       "item": "Tsunami Talisman",
       "slot": "Trinket 1",
       "dps": -16.4,
@@ -137,7 +137,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "16",
+      "rank": "15",
       "item": "Band of the Ranger-General",
       "slot": "Ring 2",
       "dps": -17.1,
@@ -145,15 +145,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "17",
-      "item": "Leggings of Murderous Intent",
-      "slot": "Legs",
-      "dps": -18.3,
-      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
-      "belowCutoff": true
-    },
-    {
-      "rank": "18",
+      "rank": "16",
       "item": "Drape of the Dark Reavers",
       "slot": "Back",
       "dps": -18.8,
@@ -161,23 +153,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "19",
-      "item": "Shattrath Leggings",
-      "slot": "Legs",
-      "dps": -19.3,
-      "source": "Source not recorded",
-      "belowCutoff": true
-    },
-    {
-      "rank": "20",
-      "item": "Bracers of Eradication",
-      "slot": "Wrist",
-      "dps": -19.7,
-      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
-      "belowCutoff": true
-    },
-    {
-      "rank": "21",
+      "rank": "17",
       "item": "Pillager's Gauntlets",
       "slot": "Hands",
       "dps": -20,
@@ -185,15 +161,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "22",
-      "item": "Quickstrider Moccasins",
-      "slot": "Feet",
-      "dps": -20.5,
-      "source": "Hyjal Summit (N)\nAnetheron",
-      "belowCutoff": true
-    },
-    {
-      "rank": "23",
+      "rank": "18",
       "item": "Stormrage Signet Ring",
       "slot": "Ring 2",
       "dps": -20.8,
@@ -201,15 +169,23 @@
       "belowCutoff": true
     },
     {
-      "rank": "24",
-      "item": "Ring of Reciprocity",
-      "slot": "Ring 2",
+      "rank": "19",
+      "item": "Swiftsteel Shoulders",
+      "slot": "Shoulders",
       "dps": -20.9,
-      "source": "World Bosses",
+      "source": "Blacksmithing",
       "belowCutoff": true
     },
     {
-      "rank": "25",
+      "rank": "20",
+      "item": "Nyn'jah's Tabi Boots",
+      "slot": "Feet",
+      "dps": -21.1,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "21",
       "item": "Ring of Deceitful Intent",
       "slot": "Ring 2",
       "dps": -21.6,
@@ -217,7 +193,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "26",
+      "rank": "22",
       "item": "Madness of the Betrayer",
       "slot": "Trinket 1",
       "dps": -21.8,
@@ -225,7 +201,15 @@
       "belowCutoff": true
     },
     {
-      "rank": "27",
+      "rank": "23",
+      "item": "Shallow-grave Trousers",
+      "slot": "Legs",
+      "dps": -22.3,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "24",
       "item": "Ring of Lethality",
       "slot": "Ring 2",
       "dps": -22.9,
@@ -233,7 +217,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "28",
+      "rank": "25",
       "item": "Royal Cloak of Arathi Kings",
       "slot": "Back",
       "dps": -23.2,
@@ -241,7 +225,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "29",
+      "rank": "26",
       "item": "Ring of a Thousand Marks",
       "slot": "Ring 2",
       "dps": -25.2,
@@ -249,7 +233,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "30",
+      "rank": "27",
       "item": "Crystalforge Greaves",
       "slot": "Legs",
       "dps": -27.6,
@@ -257,15 +241,15 @@
       "belowCutoff": true
     },
     {
-      "rank": "31",
-      "item": "Abacus of Violent Odds",
+      "rank": "28",
+      "item": "Battlemaster's Determination",
       "slot": "Trinket 1",
-      "dps": -27.9,
-      "source": "The Mechanar (N)\nPathaleon the Calculator",
+      "dps": -30.4,
+      "source": "Source not recorded",
       "belowCutoff": true
     },
     {
-      "rank": "32",
+      "rank": "29",
       "item": "Blood-stained Pauldrons",
       "slot": "Shoulders",
       "dps": -30.6,
@@ -273,7 +257,23 @@
       "belowCutoff": true
     },
     {
-      "rank": "33",
+      "rank": "30",
+      "item": "Boots of Natural Grace",
+      "slot": "Feet",
+      "dps": -33.4,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "31",
+      "item": "Boots of Utter Darkness",
+      "slot": "Feet",
+      "dps": -33.6,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "32",
       "item": "Mantle of Darkness",
       "slot": "Shoulders",
       "dps": -37.6,
@@ -281,7 +281,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "34",
+      "rank": "33",
       "item": "Skulker's Greaves",
       "slot": "Legs",
       "dps": -38,
@@ -289,7 +289,23 @@
       "belowCutoff": true
     },
     {
+      "rank": "34",
+      "item": "Bloodthirster's Wargreaves",
+      "slot": "Legs",
+      "dps": -38.3,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
       "rank": "35",
+      "item": "Pauldrons of Gruesome Fate",
+      "slot": "Shoulders",
+      "dps": -43.1,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "36",
       "item": "Black Featherlight Boots",
       "slot": "Feet",
       "dps": -43.9,
@@ -297,19 +313,11 @@
       "belowCutoff": true
     },
     {
-      "rank": "36",
+      "rank": "37",
       "item": "Justicar Greaves",
       "slot": "Legs",
       "dps": -44.2,
       "source": "Gruul's Lair",
-      "belowCutoff": true
-    },
-    {
-      "rank": "37",
-      "item": "Pepe's Shroud of Pacification",
-      "slot": "Back",
-      "dps": -48.1,
-      "source": "Hyjal Summit\nTrash",
       "belowCutoff": true
     },
     {
@@ -322,9 +330,10 @@
     }
   ],
   "aboveCutoffItems": [
+    "Empty Mug of Direbrew",
     "Berserker's Call"
   ],
   "baselineDps": 2230.4,
-  "rowCount": 39,
-  "aboveCutoff": 1
+  "rowCount": 40,
+  "aboveCutoff": 2
 }
