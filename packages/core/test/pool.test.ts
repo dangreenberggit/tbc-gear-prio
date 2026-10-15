@@ -460,7 +460,12 @@ describe("data/universes/ret-p2.json", () => {
     // and the SME gate ruled the old omission an unexplained outlier rather
     // than policy (every other spec, warrior included, already admitted it).
     // +48 cloth rows at p2. The 2H-only weapon rule survives as a named policy.
-    expect(entries.length).toBe(288);
+    // 288 -> 480: ret takes the nine specs' list rules (tickets 611, 613).
+    // +179 db-phase rows (badge, PvP, quest and vendor epics with no source,
+    // ilvl >= 100 or a sim-implemented effect), +15 crafted items whose
+    // pattern drops in an in-phase raid, -2 Gladiator arena rows (31984,
+    // 32041). Re-run the per-list account in the 613 closing note.
+    expect(entries.length).toBe(480);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

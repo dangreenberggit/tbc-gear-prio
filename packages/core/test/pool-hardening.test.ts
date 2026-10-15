@@ -465,10 +465,13 @@ describe("data/universes/ret-p3.json hardening", () => {
     // unexplained outlier rather than policy -- every other spec, warrior
     // included, already admitted cloth. +76 cloth rows at p3. Weapons are
     // unaffected: the 2H-only rule survives as a named policy exclusion.
+    // 467 -> 715: ret takes the nine specs' list rules (tickets 611, 613):
+    // +224 db-phase rows (139 phase 1, 85 phase 2-3), +28 crafted items whose
+    // pattern drops in an in-phase raid, -4 Gladiator arena rows.
     // Re-run: `python scripts/assemble_universe.py --spec ret --max-phase 3
     // --out <scratch> --report <scratch>` and
     // `len(json.load(open('<scratch>'))['entries'])`.
-    expect(universeP3.length).toBe(467);
+    expect(universeP3.length).toBe(715);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
@@ -682,7 +685,10 @@ describe("data/universes/ret-p3.json hardening", () => {
     }
     // The recipe zone must agree with the phase the item already sits at,
     // otherwise the join found the wrong recipe.
+    // Karazhan: ticket 611's crafted route admits 21864/21865 Soulcloth
+    // Shoulders/Vest, phase 1 items whose pattern drops there.
     const zonePhase = new Map([
+      ["Karazhan", 1],
       ["Serpentshrine Cavern", 2],
       ["Tempest Keep", 2],
       ["Black Temple", 3],
@@ -1095,12 +1101,18 @@ describe("data/universes/ret-p3.json hardening", () => {
     it.skipIf(!hasWowsimsVendor)(
       "does not rank a competitive weapon last on an empty stat line",
       () => {
+        // Until tickets 611/613 every P3 weapon was within 20% of the best
+        // dps, so this asserted that the last-ranked weapon was competitive.
+        // The db-phase route now admits weak epics too (32183 Chancellor's
+        // Maul, 66.5 dps). The title's property still holds: while any weapon
+        // swings below 80% of the best dps, a competitive one is not last.
         const ranked = weapons().sort((a, b) => a.hint - b.hint);
         const worst = ranked[0]!;
-        const best = ranked[ranked.length - 1]!;
-        // Glaive of the Pit is within 15% of the best weapon dps in the P3
-        // field, so nothing about its swing justifies scoring last.
-        expect(worst.dps).toBeGreaterThan(best.dps * 0.8);
+        const bestDps = Math.max(...ranked.map((w) => w.dps));
+        expect(ranked.some((w) => w.dps < bestDps * 0.8)).toBe(true);
+        expect(worst.dps, `${worst.itemId} ${worst.name}`).toBeLessThan(
+          bestDps * 0.8
+        );
       }
     );
 

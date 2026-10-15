@@ -666,3 +666,34 @@ Verify:
 pnpm atlasloot:regen:check
 pnpm fork-universes:check
 ```
+
+## Refresh, 2026-10-15 (one list rule set for every spec, tickets 611 and 613)
+
+`scripts/assemble_universe.py` now builds every spec's list with the same
+rules. Ret and feral take db-phase admission (an epic with no source, admitted
+at its db.json `phase`) and the Gladiator arena exclusion, which only the nine
+other specs had. The db-phase route skips an item below item level 100 unless
+the pinned sim implements its effect (`implementedEffectItemIds` in
+`data/sim-implemented-effects.json`); this drops the vanilla epics. A new
+route admits a crafted item whose pattern drops in a raid of the list's phase.
+
+`python scripts/sync_fork_universes.py --write` refreshed all 44 universe
+copies:
+
+- ret p2–p5: 288/467/523/637 to 480/715/838/1059 (db-phase +179/+224/+291/+370,
+  crafted +15/+28/+28/+56, arena −2/−4/−4/−4).
+- feral p2–p5: 227/364/408/497 to 405/587/668/836 (db-phase +174/+217/+254/+314,
+  crafted +6/+13/+13/+32, arena −2/−7/−7/−7).
+- the nine others: each list loses 162–267 vanilla db-phase rows (the same
+  count at every phase) and gains 4–65 crafted rows.
+
+No existing entry changed. No EP-weight file changed. The fork's
+`ui/features/upgrades/model/settings_pool.test.ts` ret counts move from
+523/637 to 838/1059, and `ui/features/upgrades/model/feral_p5_pool.test.ts`
+is new (fork-added). No engine file changed.
+
+Verify:
+
+```bash
+pnpm fork-universes:check
+```
