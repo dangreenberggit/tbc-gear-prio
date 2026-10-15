@@ -242,7 +242,12 @@ filter combines with BiS only; it persists across runs and reloads like
 the column sort (ticket 582); the Rank column shows the position among
 the rows shown, 1..N (ticket 287 ruling); the slot sub-tabs stay and a
 pane the filter empties says "No rows from the shown sources."; the
-cutoff bar does not move; the mid-run table is not filtered.
+cutoff bar does not move. Three more choices in the plan are agent
+decisions with no owner ruling (review P3,
+`docs/reviews/feat-tab-view-filter.md`): the table is not filtered while
+a run is in progress; Hide all hides every source the dialog offers and
+keeps hidden any source it does not offer; and the JSON export follows
+the filter, so it lists only the rows shown.
 
 ## 2026-10-15 — closed
 
