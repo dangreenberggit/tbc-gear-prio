@@ -233,7 +233,11 @@ function ownFromRow(row: Row, setBonuses: SetBonus[]): number | undefined {
 // `referenceStep`, written from the step rule, so this list pins the order
 // and sums that check already holds row by row. No ret row gets Set
 // potential (no ret bonus clears its same-gear gate and the screen drops
-// Justicar), so ret's figures are its rows' deltaDps.
+// Justicar), so ret's figures are its rows' deltaDps. The 2026-10-15
+// re-record (tickets 611/613, fork 2d168e74f) kept every surviving row's
+// figure: the arena weapons left (Vengeful Gladiator's Staff and
+// Greatsword), and Empty Mug of Direbrew (db-phase) and Swiftstrike Bracers
+// (crafted from a raid pattern) entered.
 const PINNED_ON_TOP16: Record<string, Array<[string, number]>> = {
   "feral-p3-nordrassil4": [
     ["Thunderheart Gauntlets", 167.2134],
@@ -241,12 +245,12 @@ const PINNED_ON_TOP16: Record<string, Array<[string, number]>> = {
     ["Thunderheart Leggings", 167.2134],
     ["Thunderheart Pauldrons", 167.2134],
     ["Thunderheart Cover", 89.7068],
-    ["Vengeful Gladiator's Staff", 45.5645],
     ["Everbloom Idol", 39.3513],
     ["Breastplate of Malorne", 22.0466],
     ["Gauntlets of Malorne", 22.0466],
     ["Mantle of Malorne", 17.8066],
     ["Band of the Eternal Champion", 17.4232],
+    ["Empty Mug of Direbrew", 16.6113],
     ["Idol of the White Stag", 15.4655],
     ["Shadowmaster's Boots", 14.6446],
     ["Vindicator's Dragonhide Bracers", 13.9207],
@@ -256,20 +260,20 @@ const PINNED_ON_TOP16: Record<string, Array<[string, number]>> = {
   "ret-p3-p2": [
     ["Torch of the Damned", 44.3925],
     ["Cataclysm's Edge", 26.44],
+    ["Empty Mug of Direbrew", 20.5619],
     ["Cursed Vision of Sargeras", 20.2975],
     ["Bulwark of the Ancient Kings", 16.1735],
     ["Shadowmaster's Boots", 13.421],
     ["Band of Devastation", 10.9385],
     ["Bindings of Lightning Reflexes", 10.9229],
     ["Unstoppable Aggressor's Ring", 10.2146],
-    ["Vengeful Gladiator's Greatsword", 10.0227],
     ["Dreadboots of the Legion", 8.554],
+    ["Swiftstrike Bracers", 8.5089],
     ["Leggings of Divine Retribution", 8.2749],
     ["Swiftsteel Bracers", 7.658],
     ["Band of the Eternal Champion", 7.0206],
     ["Bow-stitched Leggings", 6.3641],
     ["Lightbringer Breastplate", 3.8569],
-    ["Twinblade of the Phoenix", 3.7432],
   ],
 };
 
@@ -282,6 +286,7 @@ const FIXTURES: Array<{ name: string; identityRows: number }> = [
   { name: "feral-p3-th-hands-legs", identityRows: 0 },
   { name: "feral-p2-malorne4", identityRows: 0 },
   { name: "ret-p3-p2", identityRows: 0 },
+  { name: "feral-p5-th4pc", identityRows: 0 },
 ];
 
 describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {

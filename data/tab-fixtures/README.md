@@ -49,7 +49,13 @@ Recording needs a fork dev server that can run the sim: either
 `WASM_WORKER=1 node node_modules/vite/bin/vite.js serve --port 5173 --strictPort`
 in `vendor/tbc-new-fork` (the sim runs in the page; build it first with
 `make -C vendor/tbc-new-fork wasm`), or the plain dev server with the backend on
-`:3333`. It also needs a committed fork tree. A run takes about 5 minutes.
+`:3333`. It also needs a committed fork tree. With the backend on `:3333`, a
+run took 319 s for feral-p3 (587 candidates) and 378 s for feral-p5 (836
+candidates) on 2026-10-15. On the same day a `WASM_WORKER=1` run of
+feral-p3-p2bis (587 candidates) did not finish inside the recorder's 25-minute
+limit, so use the backend for the larger lists. Run one recording at a time:
+two recorders on one backend slowed each other enough that page loads timed
+out ("no preset phase tab", "gear not loaded").
 Each fixture's command:
 
 ```sh
@@ -58,7 +64,12 @@ pnpm tab-fixtures:record --spec feral --phase 3 --name nordrassil4 --preset-tab 
 pnpm tab-fixtures:record --spec feral --phase 3 --name th-hands-legs --gear-url "<this fixture's gearUrl>" --expect-item-ids 8345,30017,29994,29966,30106,28545,29997,30052,30627,29383,32014,32387,30055,30101,31034,31044
 pnpm tab-fixtures:record --spec ret --phase 3 --name p2 --preset-tab "Phase 2" --preset "P2" --expect-gear-file ui/specs/paladin/retribution/gear_sets/p2.gear.json
 pnpm tab-fixtures:record --spec feral --phase 2 --name malorne4 --preset-tab "Phase 1" --preset "Alt 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p1_alt_6p.gear.json
+pnpm tab-fixtures:record --spec feral --phase 5 --name th4pc --preset-tab "Phase 4" --preset "BiS 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p4_6p.gear.json
 ```
+
+`feral-p5-th4pc` wears Thunderheart 4pc (the Phase 4 "BiS 6%" preset) at
+page phase 5, so its ranking holds the phase-5 Thunderheart Wristguards,
+Waistguard and Treads (34444, 34556, 34573) as candidates (ticket 500).
 
 Test gear is the previous phase's preset at the next page phase, as for every
 live run and capture in this repo, with one exception: `th-hands-legs` wears
