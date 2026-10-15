@@ -347,3 +347,8 @@ file contention, worker prompt. This file stays the chronological log.
 - 624 The `Verified by:` check still passes some empty values (pre-merge review feat/tab-stage-3t, round 2 R1-R3) 2026-10-11
 - 625 Under BiS only, a slot whose BiS-list item is worn tells the player to widen the filter (pre-merge review feat/bis-rows, D2) 2026-10-11
 - 626 `pnpm verify` does not check the tab's locale strings against their schema (pre-merge review feat/bis-rows, S6) 2026-10-11
+- 640 Holiday-boss items rank near the top with no source (stage tab-item-lists SME, F1) 2026-10-15
+- 641 The 2 Ring is offered in lists before the patch that added it (stage tab-item-lists SME, F2) 2026-10-15
+- 642 The arena exclusion's recorded reason says all arena gear is rating-gated (stage tab-item-lists SME, F3) 2026-10-15
+- 643 Badge and honor items show "Source not recorded" while similar items show a source (stage tab-item-lists SME, F4) 2026-10-15
+- 644 A ranking lists Thunderheart Harness at a 5-piece threshold the set does not have (stage tab-item-lists SME, F6) 2026-10-15
