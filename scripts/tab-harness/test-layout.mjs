@@ -27,6 +27,10 @@
 //     (18) at 375, the first row's ΔDPS cell lies inside the table's
 //         scroll box, so a phone shows the figure without scrolling
 //         sideways (ticket 606);
+//     (17) hovering the first set-bonus figure opens its popover to the
+//         right of the figure at 1280, where the widest popup fits, and
+//         above it at the narrower widths, inside the viewport either way
+//         (ticket 605; the ticket 495 ruling, kept by Q-606-popover-side);
 //     the A1 fact: how far each below-cutoff column sits from its head;
 //     axe once, at 653.
 //
@@ -202,6 +206,79 @@ const postRunExpression = `(async () => {
 	};
 })()`;
 
+// Check 17's hover target and what it reads once the popover is open. The
+// popover is portaled, so it is looked up in the document, not the tab root.
+const SET_BONUS_FIGURE = `${RESULT_ROW}:has(small[data-testid="upgrades-set-bonus"]) [data-testid="upgrades-delta-cell"] button`;
+const SET_BONUS_TIP = '[data-testid="upgrades-set-bonus-tip"]';
+const figureCentreExpression = `(async () => {
+	${PAGE_HELPERS}
+	// Only the rows near the view are rendered (rows.mjs), so walk the page's
+	// scroll box down until a row with a set-bonus figure renders.
+	const box = document.querySelector('[data-testid="sim-ui"]') ?? document.scrollingElement;
+	const find = () => [...(openPane()?.querySelectorAll(${JSON.stringify(SET_BONUS_FIGURE)}) ?? [])].find(shown);
+	box.scrollTop = 0;
+	await sleep(200);
+	let figure = find();
+	for (let step = 0; !figure && step < 200 && box.scrollTop + box.clientHeight < box.scrollHeight - 1; step++) {
+		box.scrollTop += Math.round(box.clientHeight / 2);
+		await sleep(150);
+		figure = find();
+	}
+	if (!figure) return null;
+	figure.scrollIntoView({ block: 'center', inline: 'nearest' });
+	await sleep(250);
+	const r = figure.getBoundingClientRect();
+	return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+})()`;
+const popoverExpression = `(async () => {
+	${PAGE_HELPERS}
+	const tip = await waitFor(() => document.querySelector(${JSON.stringify(SET_BONUS_TIP)}), 2000);
+	if (!tip) return { error: 'no popover after hovering the figure' };
+	await sleep(300);
+	const figure = [...openPane().querySelectorAll(${JSON.stringify(SET_BONUS_FIGURE)})].find(el => el.matches(':hover')) ?? null;
+	const rect = el => { if (!el) return null; const b = el.getBoundingClientRect(); return { left: Math.round(b.left), right: Math.round(b.right), top: Math.round(b.top), bottom: Math.round(b.bottom) }; };
+	return {
+		side: tip.closest('[data-testid="sim-popover-positioner"]')?.getAttribute('data-side') ?? null,
+		tipRect: rect(tip), figureRect: rect(figure), vw: document.documentElement.clientWidth,
+	};
+})()`;
+
+async function moveMouse(send, x, y) {
+  await send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
+}
+
+/** Check 17: hovers the first set-bonus figure in the open pane, reads where its popover opened, then closes it. */
+async function judgePopover(send, width) {
+  const at = await H.evaluate(send, figureCentreExpression);
+  if (!at) {
+    check(17, width, false, { error: "no set-bonus figure in the open pane" });
+    return;
+  }
+  // Two moves, as test-review.mjs does: a pointer that starts on the figure
+  // never enters it.
+  await moveMouse(send, 2, 2);
+  await H.sleep(150);
+  await moveMouse(send, at.x, at.y);
+  await H.sleep(700);
+  const m = await H.evaluate(send, popoverExpression);
+  await moveMouse(send, 2, 2);
+  await H.sleep(700);
+  if (m.error || !m.figureRect) {
+    check(17, width, false, m.error ? m : { ...m, error: "no hovered figure" });
+    return;
+  }
+  const expected = width >= XL ? "right" : "top";
+  const t = m.tipRect;
+  const f = m.figureRect;
+  const insideViewport = t.left >= -TOL && t.right <= m.vw + TOL;
+  const besideFigure =
+    expected === "right" ? t.left >= f.right - TOL : t.bottom <= f.top + TOL;
+  check(17, width, m.side === expected && insideViewport && besideFigure, {
+    expected,
+    ...m,
+  });
+}
+
 function fixturePath() {
   const asked = process.env.TBC_TAB_FIXTURE ?? DEFAULT_FIXTURE;
   const candidates = [path.resolve(asked), path.join(FIXTURE_DIR, asked)];
@@ -356,6 +433,9 @@ async function main() {
       await setWidth(send, width);
       judgePostRun(width, await H.evaluate(send, postRunExpression), facts);
       if (width === POST_RUN_AXE_WIDTH) await audit(send, "post-run", width);
+      // Last at each width: the open popover must not be in the page when
+      // the other checks measure it.
+      await judgePopover(send, width);
     }
   } finally {
     client.close();
