@@ -697,3 +697,30 @@ Verify:
 ```bash
 pnpm fork-universes:check
 ```
+
+## Refresh, 2026-10-15 (rewards of factions the raid map does not list)
+
+`scripts/assemble_universe.py` gains one route for every spec: an item whose
+own reputation source names a faction `data/phase_raids.json` does not list
+(The Violet Eye, The Sha'tar, The Consortium and others) is admitted on the
+db-phase rules: epic, its db.json `phase` within the list's phase, item level
+at least 100 unless the sim implements its effect. These items had a source,
+so db-phase admission skipped them, and the raid-tier faction map skipped
+their faction, so no list held them. A craft whose pattern such a faction
+sells is not admitted (ticket 418).
+
+`python scripts/sync_fork_universes.py --write` refreshed all 44 universe
+copies. Every list gains the same rows at every phase: ret +22, feral +26,
+balance +29, ele +30, enh +31, hunter +34, mage +27, rogue +34, shadow +27,
+warlock +28, warrior +39 (ret p2–p5 now 502/737/860/1081, feral
+431/613/694/862).
+
+No existing entry changed. No EP-weight file changed. The fork's
+`ui/features/upgrades/model/settings_pool.test.ts` ret counts move from
+838/1059 to 860/1081. No engine file changed.
+
+Verify:
+
+```bash
+pnpm fork-universes:check
+```

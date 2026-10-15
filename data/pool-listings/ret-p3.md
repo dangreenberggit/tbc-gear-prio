@@ -102,7 +102,7 @@ absorbs it silently.
 
 - `vendor/wowsims/db.json` — 8256 items, sha256 `6b708ebb19d9e45ea9554a69f8f0b3f9db4600c7c71ef65dd50b3db7655ada2a` per `data/wowsims.lock.json`
 - pinned from `assets/database/db.json` of upstream `wowsims/tbc-new` at `5262ff386bd171e6349d0f9cf00f4d762a6c9951`, commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`
-- `data/universes/ret-p3.json` — 715 entries
+- `data/universes/ret-p3.json` — 737 entries
 - `data/sim-implemented-effects.json` — 451 stub-only item ids
 
 The fork clone `vendor/tbc-new-fork` is **not** read, and the distinction
@@ -120,11 +120,11 @@ python -c "import json;a=json.load(open('vendor/wowsims/db.json'))['items'];b=js
 
 ## Counts
 
-- local membership (U): 715
+- local membership (U): 737
 - wowsims-primary membership (W): 1451
-- in both: 704
+- in both: 726
 - universe-only (U \ W): 11
-- wowsims-only (W \ U): 747
+- wowsims-only (W \ U): 725
 - phase-disagreements: 0
 - universe ids absent from the wowsims DB: 0
 - unexplained: 0
@@ -753,13 +753,7 @@ carry. Each row names the rule that explains the absence.
 | 28592 | Libram of Souls Redeemed | 1 | c | stub-only sim effect | Karazhan |
 | 28774 | Glaive of the Pit | 1 | c | stub-only sim effect | Magtheridon's Lair |
 | 28823 | Eye of Gruul | 1 | c | stub-only sim effect | Gruul's Lair |
-| 29122 | Nether Runner's Cowl | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 29123 | Medallion of the Lightbearer | 1 | f | no recognized source route | — |
-| 29126 | Seer's Signet | 1 | f | no recognized source route | — |
-| 29171 | Earthwarden | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 29172 | Ashyen's Gift | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 29181 | Timelapse Shard | 1 | c | stub-only sim effect | — |
-| 29183 | Bindings of the Timewalker | 1 | f | no recognized source route | — |
 | 29238 | Lion's Heart Girdle | 1 | e1 | drops only outside this phase's zones | — |
 | 29239 | Eaglecrest Warboots | 1 | e1 | drops only outside this phase's zones | — |
 | 29240 | Bands of Negation | 1 | e1 | drops only outside this phase's zones | — |
@@ -786,18 +780,6 @@ carry. Each row names the rule that explains the absence.
 | 29263 | Forestheart Bracers | 1 | e1 | drops only outside this phase's zones | — |
 | 29264 | Tree-Mender's Belt | 1 | e1 | drops only outside this phase's zones | — |
 | 29265 | Barkchip Boots | 1 | e1 | drops only outside this phase's zones | — |
-| 29277 | Violet Signet | 1 | f | no recognized source route | — |
-| 29278 | Violet Signet | 1 | f | no recognized source route | — |
-| 29279 | Violet Signet of the Great Protector | 1 | f | no recognized source route | — |
-| 29281 | Violet Signet | 1 | f | no recognized source route | — |
-| 29282 | Violet Signet | 1 | f | no recognized source route | — |
-| 29283 | Violet Signet of the Master Assassin | 1 | f | no recognized source route | — |
-| 29285 | Violet Signet | 1 | f | no recognized source route | — |
-| 29286 | Violet Signet | 1 | f | no recognized source route | — |
-| 29287 | Violet Signet of the Archmage | 1 | f | no recognized source route | — |
-| 29289 | Violet Signet | 1 | f | no recognized source route | — |
-| 29290 | Violet Signet of the Grand Restorer | 1 | f | no recognized source route | — |
-| 29291 | Violet Signet | 1 | f | no recognized source route | — |
 | 29347 | Talisman of the Breaker | 1 | c | stub-only sim effect | — |
 | 29349 | Adamantine Chain of the Unbroken | 1 | e1 | drops only outside this phase's zones | — |
 | 29352 | Cobalt Band of Tyrigosa | 1 | e1 | drops only outside this phase's zones | — |
@@ -849,8 +831,6 @@ carry. Each row names the rule that explains the absence.
 | 30541 | Stormsong Kilt | 1 | e1 | drops only outside this phase's zones | — |
 | 30543 | Pontifex Kilt | 1 | e1 | drops only outside this phase's zones | — |
 | 30619 | Fel Reaver's Piston | 2 | c | stub-only sim effect | Tempest Keep |
-| 30830 | Trident of the Outcast Tribe | 1 | f | no recognized source route | — |
-| 31113 | Violet Badge | 1 | f | no recognized source route | — |
 | 31328 | Leggings of Beast Mastery | 1 | c | stub-only sim effect | — |
 | 31364 | Wildguard Breastplate | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 31367 | Wildguard Leggings | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
@@ -889,8 +869,6 @@ carry. Each row names the rule that explains the absence.
 | 32489 | Ashtongue Talisman of Zeal | 3 | c | stub-only sim effect | — |
 | 32494 | Destruction Holo-gogs | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32495 | Powerheal 4000 Lens | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 32647 | Shard-bound Bracers | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 32648 | Vortex Walking Boots | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32770 | Skyguard Silver Cross | 1 | c | stub-only sim effect | — |
 | 32771 | Airman's Ribbon of Gallantry | 1 | c | stub-only sim effect | — |
 | 32854 | Hammer of Righteous Might | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
@@ -906,8 +884,8 @@ carry. Each row names the rule that explains the absence.
 | b — fails the eligible_d7 stat and slot screen | 0 |
 | c — stub-only sim effect | 67 |
 | e1 — drops only outside this phase's zones | 343 |
-| e2 — sourced, but by a route the local assembly did not admit | 133 |
-| f — no recognized source route | 204 |
+| e2 — sourced, but by a route the local assembly did not admit | 128 |
+| f — no recognized source route | 187 |
 | g — unexplained | 0 |
 
 ## Universe-only items, classified
@@ -944,7 +922,7 @@ it would mean a piece of current raid content the pool silently omits.
 
 ## Full local membership
 
-All 715 entries of the universe the tab sims, with the source
+All 737 entries of the universe the tab sims, with the source
 metadata the local assembly resolved for each.
 
 | itemId | name | slot | phase | sources |
@@ -1139,8 +1117,26 @@ metadata the local assembly resolved for each.
 | 29074 | Justicar Greaves | legs | 1 | token zone=Gruul's Lair boss=Gruul the Dragonkiller token=Leggings of the Fallen Champion |
 | 29075 | Justicar Shoulderplates | shoulder | 1 | token zone=Gruul's Lair boss=High King Maulgar token=Pauldrons of the Fallen Champion |
 | 29119 | Haramad's Bargain | neck | 1 | rep faction=The Consortium |
+| 29122 | Nether Runner's Cowl | head | 1 | rep faction=The Consortium |
+| 29123 | Medallion of the Lightbearer | neck | 1 | rep faction=The Aldor |
+| 29126 | Seer's Signet | finger | 1 | rep faction=The Scryers |
+| 29171 | Earthwarden | weapon | 1 | rep faction=Cenarion Expedition |
+| 29172 | Ashyen's Gift | finger | 1 | rep faction=Cenarion Expedition |
 | 29177 | A'dal's Command | finger | 1 | rep faction=The Sha'tar |
+| 29183 | Bindings of the Timewalker | wrist | 1 | rep faction=Keepers Of Time |
 | 29237 | Warpath Bracers | wrist | 1 | unknown |
+| 29277 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29278 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29279 | Violet Signet of the Great Protector | finger | 1 | rep faction=The Violet Eye |
+| 29281 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29282 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29283 | Violet Signet of the Master Assassin | finger | 1 | rep faction=The Violet Eye |
+| 29285 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29286 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29287 | Violet Signet of the Archmage | finger | 1 | rep faction=The Violet Eye |
+| 29289 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29290 | Violet Signet of the Grand Restorer | finger | 1 | rep faction=The Violet Eye |
+| 29291 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
 | 29294 | Band of Eternity | finger | 2 | rep faction=The Scale of the Sands |
 | 29295 | Band of Eternity | finger | 3 | rep faction=The Scale of the Sands |
 | 29296 | Band of Eternity | finger | 3 | rep faction=The Scale of the Sands |
@@ -1346,6 +1342,7 @@ metadata the local assembly resolved for each.
 | 30778 | Inferno Hardened Leggings | legs | 1 | unknown |
 | 30779 | Inferno Hardened Boots | feet | 1 | unknown |
 | 30780 | Inferno Hardened Gloves | hands | 1 | unknown |
+| 30830 | Trident of the Outcast Tribe | weapon | 1 | rep faction=Lower City |
 | 30834 | Shapeshifter's Signet | finger | 1 | rep faction=Lower City |
 | 30861 | Furious Shackles | wrist | 3 | raid zone=Hyjal Summit boss=Rage Winterchill |
 | 30862 | Blessed Adamantite Bracers | wrist | 3 | raid zone=Hyjal Summit boss=Rage Winterchill |
@@ -1403,6 +1400,7 @@ metadata the local assembly resolved for each.
 | 30997 | Lightbringer Shoulderbraces | shoulder | 3 | token zone=Black Temple boss=Mother Shahraz token=Pauldrons of the Forgotten Conqueror |
 | 30998 | Lightbringer Shoulderguards | shoulder | 3 | unknown |
 | 31033 | Libram of Righteous Power | ranged | 1 | unknown |
+| 31113 | Violet Badge | trinket | 1 | rep faction=The Violet Eye |
 | 31275 | Necklace of Trophies | neck | 1 | world |
 | 31318 | Singing Crystal Axe | weapon | 1 | unknown |
 | 31319 | Band of Impenetrable Defenses | finger | 1 | unknown |
@@ -1577,6 +1575,8 @@ metadata the local assembly resolved for each.
 | 32606 | Girdle of the Lightbearer | waist | 3 | raid zone=Black Temple; raid zone=Black Temple boss=Trash |
 | 32608 | Pillager's Gauntlets | hands | 3 | raid zone=Black Temple; raid zone=Black Temple boss=Trash |
 | 32609 | Boots of the Divine Light | feet | 3 | raid zone=Hyjal Summit; raid zone=Hyjal Summit boss=Trash; raid zone=Black Temple boss=Trash |
+| 32647 | Shard-bound Bracers | wrist | 1 | rep faction=Ogri'la |
+| 32648 | Vortex Walking Boots | feet | 1 | rep faction=Ogri'la |
 | 32649 | Medallion of Karabor | neck | 3 | unknown |
 | 32655 | Crystalweave Bracers | wrist | 1 | unknown |
 | 32656 | Crystalhide Handwraps | hands | 1 | unknown |

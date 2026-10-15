@@ -102,7 +102,7 @@ absorbs it silently.
 
 - `vendor/wowsims/db.json` — 8256 items, sha256 `6b708ebb19d9e45ea9554a69f8f0b3f9db4600c7c71ef65dd50b3db7655ada2a` per `data/wowsims.lock.json`
 - pinned from `assets/database/db.json` of upstream `wowsims/tbc-new` at `5262ff386bd171e6349d0f9cf00f4d762a6c9951`, commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`
-- `data/universes/feral-p3.json` — 587 entries
+- `data/universes/feral-p3.json` — 613 entries
 - `data/sim-implemented-effects.json` — 451 stub-only item ids
 
 The fork clone `vendor/tbc-new-fork` is **not** read, and the distinction
@@ -120,11 +120,11 @@ python -c "import json;a=json.load(open('vendor/wowsims/db.json'))['items'];b=js
 
 ## Counts
 
-- local membership (U): 587
+- local membership (U): 613
 - wowsims-primary membership (W): 1225
-- in both: 578
+- in both: 604
 - universe-only (U \ W): 9
-- wowsims-only (W \ U): 647
+- wowsims-only (W \ U): 621
 - phase-disagreements: 0
 - universe ids absent from the wowsims DB: 0
 - unexplained: 0
@@ -701,18 +701,7 @@ carry. Each row names the rule that explains the absence.
 | 28568 | Idol of the Avian Heart | 1 | c | stub-only sim effect | Karazhan |
 | 28590 | Ribbon of Sacrifice | 1 | c | stub-only sim effect | Karazhan |
 | 28823 | Eye of Gruul | 1 | c | stub-only sim effect | Gruul's Lair |
-| 29121 | Guile of Khoraazi | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 29122 | Nether Runner's Cowl | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 29123 | Medallion of the Lightbearer | 1 | f | no recognized source route | — |
-| 29125 | Retainer's Blade | 1 | f | no recognized source route | — |
-| 29126 | Seer's Signet | 1 | f | no recognized source route | — |
-| 29170 | Windcaller's Orb | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 29172 | Ashyen's Gift | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
-| 29175 | Gavel of Pure Light | 1 | f | no recognized source route | — |
-| 29177 | A'dal's Command | 1 | f | no recognized source route | — |
 | 29181 | Timelapse Shard | 1 | c | stub-only sim effect | — |
-| 29182 | Riftmaker | 1 | f | no recognized source route | — |
-| 29183 | Bindings of the Timewalker | 1 | f | no recognized source route | — |
 | 29240 | Bands of Negation | 1 | e1 | drops only outside this phase's zones | — |
 | 29241 | Belt of Depravity | 1 | e1 | drops only outside this phase's zones | — |
 | 29242 | Boots of Blasphemy | 1 | e1 | drops only outside this phase's zones | — |
@@ -728,18 +717,6 @@ carry. Each row names the rule that explains the absence.
 | 29263 | Forestheart Bracers | 1 | e1 | drops only outside this phase's zones | — |
 | 29264 | Tree-Mender's Belt | 1 | e1 | drops only outside this phase's zones | — |
 | 29265 | Barkchip Boots | 1 | e1 | drops only outside this phase's zones | — |
-| 29277 | Violet Signet | 1 | f | no recognized source route | — |
-| 29278 | Violet Signet | 1 | f | no recognized source route | — |
-| 29279 | Violet Signet of the Great Protector | 1 | f | no recognized source route | — |
-| 29281 | Violet Signet | 1 | f | no recognized source route | — |
-| 29282 | Violet Signet | 1 | f | no recognized source route | — |
-| 29283 | Violet Signet of the Master Assassin | 1 | f | no recognized source route | — |
-| 29285 | Violet Signet | 1 | f | no recognized source route | — |
-| 29286 | Violet Signet | 1 | f | no recognized source route | — |
-| 29287 | Violet Signet of the Archmage | 1 | f | no recognized source route | — |
-| 29289 | Violet Signet | 1 | f | no recognized source route | — |
-| 29290 | Violet Signet of the Grand Restorer | 1 | f | no recognized source route | — |
-| 29291 | Violet Signet | 1 | f | no recognized source route | — |
 | 29346 | Feltooth Eviscerator | 1 | e1 | drops only outside this phase's zones | — |
 | 29347 | Talisman of the Breaker | 1 | c | stub-only sim effect | — |
 | 29348 | The Bladefist | 1 | e1 | drops only outside this phase's zones | — |
@@ -769,8 +746,6 @@ carry. Each row names the rule that explains the absence.
 | 30538 | Midnight Legguards | 1 | e1 | drops only outside this phase's zones | — |
 | 30543 | Pontifex Kilt | 1 | e1 | drops only outside this phase's zones | — |
 | 30619 | Fel Reaver's Piston | 2 | c | stub-only sim effect | Tempest Keep |
-| 30832 | Gavel of Unearthed Secrets | 1 | f | no recognized source route | — |
-| 31113 | Violet Badge | 1 | f | no recognized source route | — |
 | 31398 | The Frozen Eye | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 31399 | The Natural Ward | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 31859 | Darkmoon Card: Madness | 1 | c | stub-only sim effect | — |
@@ -791,7 +766,6 @@ carry. Each row names the rule that explains the absence.
 | 32494 | Destruction Holo-gogs | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32495 | Powerheal 4000 Lens | 2 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32500 | Crystal Spire of Karabor | 3 | c | stub-only sim effect | Black Temple |
-| 32651 | Crystal Orb of Enlightenment | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
 | 32770 | Skyguard Silver Cross | 1 | c | stub-only sim effect | — |
 | 32771 | Airman's Ribbon of Gallantry | 1 | c | stub-only sim effect | — |
 | 32854 | Hammer of Righteous Might | 1 | e2 | sourced, but by a route the local assembly did not admit | — |
@@ -806,8 +780,8 @@ carry. Each row names the rule that explains the absence.
 | b — fails the eligible_d7 stat and slot screen | 0 |
 | c — stub-only sim effect | 49 |
 | e1 — drops only outside this phase's zones | 296 |
-| e2 — sourced, but by a route the local assembly did not admit | 84 |
-| f — no recognized source route | 218 |
+| e2 — sourced, but by a route the local assembly did not admit | 79 |
+| f — no recognized source route | 197 |
 | g — unexplained | 0 |
 
 ## Universe-only items, classified
@@ -842,7 +816,7 @@ it would mean a piece of current raid content the pool silently omits.
 
 ## Full local membership
 
-All 587 entries of the universe the tab sims, with the source
+All 613 entries of the universe the tab sims, with the source
 metadata the local assembly resolved for each.
 
 | itemId | name | slot | phase | sources |
@@ -1002,13 +976,36 @@ metadata the local assembly resolved for each.
 | 29099 | Greaves of Malorne | legs | 1 | token zone=Gruul's Lair boss=Gruul the Dragonkiller token=Leggings of the Fallen Defender |
 | 29100 | Mantle of Malorne | shoulder | 1 | token zone=Gruul's Lair boss=High King Maulgar token=Pauldrons of the Fallen Defender |
 | 29119 | Haramad's Bargain | neck | 1 | rep faction=The Consortium |
+| 29121 | Guile of Khoraazi | weapon | 1 | rep faction=The Consortium |
+| 29122 | Nether Runner's Cowl | head | 1 | rep faction=The Consortium |
+| 29123 | Medallion of the Lightbearer | neck | 1 | rep faction=The Aldor |
+| 29125 | Retainer's Blade | weapon | 1 | rep faction=The Scryers |
+| 29126 | Seer's Signet | finger | 1 | rep faction=The Scryers |
+| 29170 | Windcaller's Orb | weapon | 1 | rep faction=Cenarion Expedition |
 | 29171 | Earthwarden | weapon | 1 | rep faction=Cenarion Expedition |
+| 29172 | Ashyen's Gift | finger | 1 | rep faction=Cenarion Expedition |
+| 29175 | Gavel of Pure Light | weapon | 1 | rep faction=The Sha'tar |
+| 29177 | A'dal's Command | finger | 1 | rep faction=The Sha'tar |
+| 29182 | Riftmaker | weapon | 1 | rep faction=Keepers Of Time |
+| 29183 | Bindings of the Timewalker | wrist | 1 | rep faction=Keepers Of Time |
 | 29269 | Sapphiron's Wing Bone | weapon | 1 | unknown |
 | 29270 | Flametongue Seal | weapon | 1 | unknown |
 | 29271 | Talisman of Kalecgos | weapon | 1 | unknown |
 | 29272 | Orb of the Soul-Eater | weapon | 1 | unknown |
 | 29273 | Khadgar's Knapsack | weapon | 1 | unknown |
 | 29274 | Tears of Heaven | weapon | 1 | unknown |
+| 29277 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29278 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29279 | Violet Signet of the Great Protector | finger | 1 | rep faction=The Violet Eye |
+| 29281 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29282 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29283 | Violet Signet of the Master Assassin | finger | 1 | rep faction=The Violet Eye |
+| 29285 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29286 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29287 | Violet Signet of the Archmage | finger | 1 | rep faction=The Violet Eye |
+| 29289 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
+| 29290 | Violet Signet of the Grand Restorer | finger | 1 | rep faction=The Violet Eye |
+| 29291 | Violet Signet | finger | 1 | rep faction=The Violet Eye |
 | 29294 | Band of Eternity | finger | 2 | rep faction=The Scale of the Sands |
 | 29295 | Band of Eternity | finger | 3 | rep faction=The Scale of the Sands |
 | 29296 | Band of Eternity | finger | 3 | rep faction=The Scale of the Sands |
@@ -1167,6 +1164,7 @@ metadata the local assembly resolved for each.
 | 30778 | Inferno Hardened Leggings | legs | 1 | unknown |
 | 30779 | Inferno Hardened Boots | feet | 1 | unknown |
 | 30780 | Inferno Hardened Gloves | hands | 1 | unknown |
+| 30832 | Gavel of Unearthed Secrets | weapon | 1 | rep faction=Lower City |
 | 30834 | Shapeshifter's Signet | finger | 1 | rep faction=Lower City |
 | 30863 | Deadly Cuffs | wrist | 3 | raid zone=Hyjal Summit boss=Rage Winterchill |
 | 30865 | Tracker's Blade | weapon | 3 | raid zone=Hyjal Summit boss=Rage Winterchill |
@@ -1210,6 +1208,7 @@ metadata the local assembly resolved for each.
 | 31047 | Thunderheart Spaulders | shoulder | 3 | unknown |
 | 31048 | Thunderheart Pauldrons | shoulder | 3 | token zone=Black Temple boss=Mother Shahraz token=Pauldrons of the Forgotten Vanquisher |
 | 31049 | Thunderheart Shoulderpads | shoulder | 3 | unknown |
+| 31113 | Violet Badge | trinket | 1 | rep faction=The Violet Eye |
 | 31255 | Cloak of the Craft | back | 1 | world |
 | 31275 | Necklace of Trophies | neck | 1 | world |
 | 31319 | Band of Impenetrable Defenses | finger | 1 | unknown |
@@ -1348,6 +1347,7 @@ metadata the local assembly resolved for each.
 | 32609 | Boots of the Divine Light | feet | 3 | raid zone=Hyjal Summit; raid zone=Hyjal Summit boss=Trash; raid zone=Black Temple boss=Trash |
 | 32647 | Shard-bound Bracers | wrist | 1 | rep faction=Ogri'la |
 | 32649 | Medallion of Karabor | neck | 3 | unknown |
+| 32651 | Crystal Orb of Enlightenment | weapon | 1 | rep faction=Ogri'la |
 | 32654 | Crystalforged Trinket | trinket | 1 | rep faction=Ogri'la |
 | 32655 | Crystalweave Bracers | wrist | 1 | unknown |
 | 32757 | Blessed Medallion of Karabor | neck | 3 | unknown |

@@ -30,3 +30,13 @@ Done when: the comment and the recorded reason state what is true (arena
 points come only from rated arena play; which pieces need a rating), with a
 source; and whether to keep excluding previous-season arena gear is put to
 the owner as a decision, not changed silently.
+
+## Comments
+
+2026-10-15 (stage `tab-item-lists`, K5): the owner ruled, verbatim: "the
+"dropping arena gear"--whether it requires a rating doesn't matter to us.
+only whether the user is allowing or filtering out pvp weapons from an
+existing season as a source." So arena gear should not be hard-excluded at
+all: it should be a source the player keeps or filters out. That is a larger
+change, left for the next session; the `_arena_gear_ids` docstring is
+unchanged and this ticket stays open.

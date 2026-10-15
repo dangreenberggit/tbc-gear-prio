@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 follow-on (Tab-adjacent)
 Type: task
 Origin: .scratch/handoffs/sme-rank-judgment-613-tab-item-lists.md (finding F1)
@@ -33,3 +33,12 @@ Re-run to see the rows:
 Done when: holiday-boss items carry a source a player can read (for example
 "World event: Brewfest — Coren Direbrew"), and the 281739 stat line is
 confirmed or corrected with a cited source.
+
+## Comments
+
+2026-10-15 (stage `tab-item-lists`, K5): closed wontfix on the owner's
+ruling, verbatim: ""Empty Mug of Direbrew now tops most trinket lists" this
+is fine."
+
+Verified by: the owner's words in session 55df607d, 2026-10-15, relayed by
+the stage-gate coordinator to the K5 executor.
