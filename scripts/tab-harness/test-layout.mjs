@@ -25,8 +25,8 @@
 //         after a hyphen; A-K5-name-wrap);
 //     (13) at 1280, at least 8 px between the two columns;
 //     (18) at 375, the first row's ΔDPS cell lies inside the table's
-//         scroll box, so a phone shows the figure without scrolling
-//         sideways (ticket 606);
+//         scroll box while that box is not scrolled sideways, so a phone
+//         shows the figure without scrolling sideways (ticket 606);
 //     (17) hovering the first set-bonus figure opens its popover to the
 //         right of the figure at 1280, where the widest popup fits, and
 //         above it at the narrower widths, inside the viewport either way
@@ -367,6 +367,7 @@ function judgePostRun(width, m, facts) {
       18,
       width,
       !!d &&
+        d.scrollLeft === 0 &&
         d.deltaRect.left >= d.scrollerRect.left - TOL &&
         d.deltaRect.right <= d.scrollerRect.right + TOL,
       d ?? { error: "no first row in the main table" }
