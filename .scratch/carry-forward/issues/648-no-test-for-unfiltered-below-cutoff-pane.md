@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
 Type: task
 Origin: docs/reviews/feat-tab-view-filter.md, focused check (round 2), R2
@@ -20,3 +20,11 @@ probably passes every test (hypothesis, untested).
 Done when: a `paneRows` test has a slot whose only rows are below the
 cutoff, hides a source that does not empty it, expects `noSourceRow`
 false, and fails with the `panesWithMainBeforeSourceCut` term removed.
+
+## Resolution
+
+Fork `88dcdb8dd` (2026-10-15), test only: `results_view.test.ts` "does not
+blame the shown sources for a pane whose rows were all below the cutoff
+before the cut". With the term removed from `paneRows` it fails
+(`noSourceRow` true) and the other 43 tests in the file pass, so the
+hypothesis above held: no earlier test caught that mutant.
