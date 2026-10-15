@@ -192,11 +192,11 @@ spec decision check 1).** Three points the close note above leaves out:
 
 - The session told the owner of the design-A decision on 2026-10-12 and
   offered an override (`.scratch/stage-gate/tab-set-bonus/decision-log.md`
-  line 34, main checkout); the owner has not objected.
+  line 34, main checkout); the same line records that the owner has not objected.
 - Condition 2 says the toggle-on popover is "unchanged". Fork `f4b78f65d`
   changes it on purpose for rows with no credit and rows whose set was
   screened out: they now get the "Not counted" section, which the owner's
-  rule of 2026-10-11 asks for. Credited rows are unchanged (snapshot test).
+  rule of 2026-10-11 asks for. Credited rows are unchanged (the snapshot test in `ui/features/upgrades/model/set_bonus_tip.test.ts` against `testing/set_bonus_tip_on.snapshot.json`).
 - Two cases still list a reachable bonus nowhere, so the owner's rule ("the
   set-bonus popover is always available, for any bonus") is not fully met:
   with the toggle on, a bonus past the best stop of a credited row (mock-up

@@ -17,7 +17,7 @@ reachable bonus nowhere. Both behaved this way before that commit.
 1. **Toggle on, a bonus past the best stop.** A row with a positive credit
    keeps its step popover, which `engine/view.ts:665`
    (`stops.slice(0, last + 1)`) cuts at the best stop, and
-   `model/set_bonus_tip.ts:287` then skips the "Not counted" lines. So a
+   `model/set_bonus_tip.ts:287` (fork `f4b78f65d`; `:293` at `80a876bb0`) then skips the "Not counted" lines. So a
    4pc whose step is worth less than the 2pc stop is listed with the toggle
    off and not with it on. Example: Gauntlets of Malorne (29097) on
    `feral-p3-th-hands-legs`, mock-up row 5 of
