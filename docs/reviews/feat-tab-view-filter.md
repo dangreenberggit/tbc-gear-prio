@@ -165,3 +165,67 @@ By the skill's "Round limit" the review stops here with no round 3. The
 caller's standing instruction for this run: "a round-two finding that is
 filed as a ticket is fixed by a fresh agent on the branch". Tickets 647-649
 were filed, and a fresh agent fixes them on the branch (see `## Summary`).
+
+## Summary
+
+Round 1 found three defects this branch introduced and the visual review
+missed: a pane whose upgrades the filter hid said "No upgrades found"
+(AD1 = P1), the Source column sorted on a hidden source (AD2), and a row
+from two raids could vanish while one raid was still shown (D4). All are
+fixed with tests that failed first. The code-quality rows S1-S5 and S7 were
+applied in one pass with no behaviour change, and the Gate C advisories
+V-A2 and V-A4 were fixed in the main repo. The pre-existing source-data gaps
+D1-D3 are deferred to tickets 293, 646 and 645.
+
+Round 2 (the focused check) passed its four checks but found R1-R3. Per the
+caller's rule they were filed as tickets 647-649 and fixed on the branch by
+a fresh agent: fork `88dcdb8dd` (test for 648, killing the mutant the ticket
+named) and `c47012b0b` (647 and 649: both source dialogs now offer every zone
+an entry matches, so the offered list and the keep rule agree). Measured on
+the 44 committed universes: no real pool has an entry whose second zone is no
+entry's first, so the pre-run Sources list is unchanged for every spec and
+phase. These two fork commits had no review round after them; their evidence
+is the red-then-green runs the fixer recorded, the full tab suite (55 files,
+500 tests) and `pnpm verify` rc 0 at main `3076b0dc`.
+
+Final fork pin `c47012b0b` (main `3076b0dc`). The wowsims-file audit at that
+tip: `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M 5262ff38 c47012b0b`
+prints only `6 0 ui/app/SimTabsSection.tsx`, `--diff-filter=D` prints
+nothing, and `176268e7c..c47012b0b` touches only `ui/features/upgrades/**`,
+`assets/locales/en/upgrades.json` and `schemas/upgrades.schema.json`.
+
+Not checked: the fixes were not re-captured on the live tab (the visual
+evidence for ticket 527 is from fork `c99dd97e4`). The layout lock
+`data/wowsims-fork-layout.lock.json` is advanced by the layout gate inside
+`pnpm merge-to-dev`; `pnpm verify` prints `layout: would run`.
+
+Tickets on this branch: filed 6 (628, 645, 646, 647, 648, 649), closed 4
+(527, 647, 648, 649). Filed is higher than closed because 628 (a flaky test
+timeout) and the pre-existing source-data findings 645 and 646 stay open.
+
+## Disposition
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                               |
+| ---- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AD1  | Adversarial   | fixed       | fork `4cf89e432`: `paneRows` marks a pane the source cut emptied of upgrades (`panesWithMainBeforeSourceCut`); test fails first                             |
+| P1   | Spec          | fixed       | same defect as AD1, fork `4cf89e432`                                                                                                                        |
+| AD2  | Adversarial   | fixed       | fork `138170980`: `sortLabelsFor(hiddenSources)` sorts the Source column and the export on the label the cell shows                                         |
+| AD3  | Adversarial   | fixed       | fork `cf83b3d40`: test through `UpgradesResults`; fails with the raw stored list in place of `actingHidden` (fixer's mutation run)                          |
+| D1   | Domain        | defer       | `.scratch/carry-forward/issues/293-wowhead-source-attribution-backfill.md` — older than this branch; badge/PvP/dungeon sources are not recorded for 9 specs |
+| D2   | Domain        | defer       | `.scratch/carry-forward/issues/646-unrecorded-source-rows-name-a-dungeon.md` — the pool keys these items the same way at the base                           |
+| D3   | Domain        | defer       | `.scratch/carry-forward/issues/645-reputation-vendor-label-covers-quest-rings.md` — label older than this branch                                            |
+| D4   | Domain        | fixed       | fork `959c56d9a` (keep while any matched source is not hidden), completed by `c47012b0b` (ticket 647)                                                       |
+| S1   | Standards     | fixed       | fork `ff18853f0`: one shared `SourceSection`                                                                                                                |
+| S2   | Standards     | fixed       | fork `193c8d28f`: `resultsViewFor` lost its test-only parameter                                                                                             |
+| S3   | Standards     | fixed       | fork `2b0a45873`: shared `sourcesOf` and `bucketKeyOf`, `SourcedEntry`                                                                                      |
+| S4   | Standards     | fixed       | fork `193c8d28f`: `offeredSourceKeys` / `offeredHidden`, tested                                                                                             |
+| S5   | Standards     | fixed       | fork `193c8d28f`: `viewSourceOptions` removed                                                                                                               |
+| S6   | Standards     | fixed       | main `59f19140`: lock `_comment` entries give date and D/M checks; no test counts recorded for `c99dd97e4`, said so                                         |
+| S7   | Standards     | fixed       | fork `193c8d28f`, main `6a51c6d3`                                                                                                                           |
+| P2   | Spec          | fixed       | fork `9c5d6767f`: hidden sources hold across a second run; fails when `startRun` clears them (fixer's mutation run)                                         |
+| P3   | Spec          | fixed       | main `98c35f71`: ticket 527 labels three choices as agent decisions                                                                                         |
+| V-A2 | Visual        | fixed       | main `f42a7bc9`: harness comment names `data-row-count`; the gitignored manifest reads it                                                                   |
+| V-A4 | Visual        | fixed       | main `429ac979`: baseline entry for `heading-order` on the export title, `mayNotFire`                                                                       |
+| R1   | Focused check | fixed       | ticket 647 closed; fork `c47012b0b`                                                                                                                         |
+| R2   | Focused check | fixed       | ticket 648 closed; fork `88dcdb8dd`                                                                                                                         |
+| R3   | Focused check | fixed       | ticket 649 closed; fork `c47012b0b`; ticket 527's "same rule" sentence is true again                                                                        |
