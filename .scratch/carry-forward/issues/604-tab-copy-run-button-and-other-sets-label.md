@@ -60,9 +60,11 @@ it does not show the owner ruling on the wording itself.
 **2026-10-15 — closed (stage `tab-small-fixes`, plan steps 1, 2 and 17).**
 Fork commit `d992e0450` changes two strings in
 `assets/locales/en/upgrades.json`. `empty_no_ranking_body` now reads
-"Nothing has been ranked yet. Click Simulate to start; rows appear here as
-each item's sim finishes." It names the button by its label and shares no
-clause with the `idle` status line above it. `sets_other_phases` now reads
+"Click Simulate to start." (`git -C vendor/tbc-new-fork show
+899d8c267:assets/locales/en/upgrades.json | grep empty_no_ranking_body`;
+the plan's longer text was shortened after plan-review-r2 finding N5). It
+names the button by its label and shares no clause with the `idle` status
+line above it. `sets_other_phases` now reads
 "Other phases ({{n}})". The executor checked the retribution page before a
 run on `:5173` (K1): the status line and the empty state say different
 things, the empty state names "Simulate", and the disclosure reads "Other

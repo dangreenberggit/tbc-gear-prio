@@ -25,7 +25,7 @@ Both files are upstream wowsims code, not tab code:
 - `ui/specs/warlock/dps/inputs.ts:75` sets
   `iconGroupClassName: 'curses-toggle-container'`.
 - `git -C vendor/tbc-new-fork diff --stat upstream/master 899d8c267 -- ui/no_class_hooks.test.ts ui/specs/warlock/dps/inputs.ts`
-  prints nothing, so the fork carries both files exactly as upstream has
+  prints nothing, so the fork has both files exactly as upstream has
   them. Hypothesis, untested: the test fails the same way on
   `upstream/master` itself.
 
@@ -35,7 +35,9 @@ prints nothing.
 
 No fix here: changing either file is an edit to an existing wowsims file,
 which needs the owner's OK for that exact edit. The failure does not show
-in `pnpm verify`, because the fork's unit tests are not part of it.
+in `pnpm verify`, because the fork's unit tests are not part of it:
+`grep -rn "test:unit\|no_class_hooks" package.json scripts/*.mjs scripts/*.py`
+prints nothing (checked 2026-10-15).
 
 ## What would close this
 
