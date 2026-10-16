@@ -14,46 +14,47 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 2213,
-  "excludedNoSource": 711,
-  "universeTotal": 350,
+  "d7EligibleTotal": 2301,
+  "excludedNoSource": 761,
+  "universeTotal": 384,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 35,
-    "chest": 14,
+    "chest": 18,
     "feet": 21,
     "finger": 65,
     "hands": 12,
-    "head": 16,
-    "legs": 15,
+    "head": 20,
+    "legs": 19,
     "neck": 37,
-    "ranged": 5,
-    "shoulder": 12,
+    "ranged": 7,
+    "shoulder": 16,
     "trinket": 26,
     "waist": 20,
-    "weapon": 53,
+    "weapon": 69,
     "wrist": 19
   },
   "sourceRecordAdds": {
     "atlasloot": 211,
     "curated": 11,
-    "db": 1395,
+    "db": 1433,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 34,
     "curated": 17,
     "dbPhase": 142,
     "itemHasOrigin:atlasloot": 47,
     "itemHasOrigin:curated": 9,
-    "itemHasOrigin:db": 299,
+    "itemHasOrigin:db": 333,
     "itemHasOrigin:two-hop": 10,
     "recipeMatch": 5,
     "repItemPhase": 27,
     "zoneMatch": 159
   },
   "exclusivePrimaryOrigin": {
-    "db": 299,
+    "db": 333,
     "atlasloot-only": 32,
     "other": 9,
     "two-hop": 10
@@ -62,13 +63,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 350,
-    "casterOnlyReject": 222,
+    "total": 384,
+    "casterOnlyReject": 250,
     "epFloorReject": 8,
-    "combinedReject": 230,
-    "combinedKeep": 120,
-    "casterRejectPct": 63.4,
-    "combinedRejectPct": 65.7,
+    "combinedReject": 258,
+    "combinedKeep": 126,
+    "casterRejectPct": 65.1,
+    "combinedRejectPct": 67.2,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -259,6 +260,10 @@
       "name": "Fetish of the Fallen"
     },
     {
+      "itemId": 27707,
+      "name": "Gladiator's Satin Gloves"
+    },
+    {
       "itemId": 27896,
       "name": "Alembic of Infernal Power"
     },
@@ -295,8 +300,20 @@
       "name": "Lower City Prayerbook"
     },
     {
+      "itemId": 31409,
+      "name": "Gladiator's Mooncloth Gloves"
+    },
+    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 32015,
+      "name": "Merciless Gladiator's Mooncloth Gloves"
+    },
+    {
+      "itemId": 32034,
+      "name": "Merciless Gladiator's Satin Gloves"
     },
     {
       "itemId": 32100,
@@ -387,9 +404,12 @@
       "p2"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 34,
+    "admittedBySeason": {
+      "1": 17,
+      "2": 17
+    }
   }
 }

@@ -20,39 +20,40 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 2213,
-  "excludedNoSource": 655,
-  "universeTotal": 543,
+  "d7EligibleTotal": 2301,
+  "excludedNoSource": 681,
+  "universeTotal": 599,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 52,
-    "chest": 21,
+    "chest": 27,
     "feet": 31,
     "finger": 100,
     "hands": 17,
-    "head": 22,
-    "legs": 23,
+    "head": 28,
+    "legs": 29,
     "neck": 55,
-    "ranged": 8,
-    "shoulder": 20,
+    "ranged": 13,
+    "shoulder": 26,
     "trinket": 50,
     "waist": 30,
-    "weapon": 82,
+    "weapon": 109,
     "wrist": 32
   },
   "sourceRecordAdds": {
     "atlasloot": 211,
     "curated": 11,
-    "db": 1451,
+    "db": 1513,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 56,
     "curated": 20,
     "dbPhase": 198,
     "itemHasOrigin:atlasloot": 86,
     "itemHasOrigin:curated": 11,
-    "itemHasOrigin:db": 469,
+    "itemHasOrigin:db": 525,
     "itemHasOrigin:two-hop": 15,
     "recipeMatch": 8,
     "repFactionMatch": 22,
@@ -60,7 +61,7 @@
     "zoneMatch": 268
   },
   "exclusivePrimaryOrigin": {
-    "db": 469,
+    "db": 525,
     "atlasloot-only": 48,
     "other": 11,
     "two-hop": 15
@@ -69,13 +70,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 543,
-    "casterOnlyReject": 341,
+    "total": 599,
+    "casterOnlyReject": 385,
     "epFloorReject": 11,
-    "combinedReject": 352,
-    "combinedKeep": 191,
-    "casterRejectPct": 62.8,
-    "combinedRejectPct": 64.8,
+    "combinedReject": 396,
+    "combinedKeep": 203,
+    "casterRejectPct": 64.3,
+    "combinedRejectPct": 66.1,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -266,6 +267,10 @@
       "name": "Fetish of the Fallen"
     },
     {
+      "itemId": 27707,
+      "name": "Gladiator's Satin Gloves"
+    },
+    {
       "itemId": 27896,
       "name": "Alembic of Infernal Power"
     },
@@ -302,8 +307,20 @@
       "name": "Lower City Prayerbook"
     },
     {
+      "itemId": 31409,
+      "name": "Gladiator's Mooncloth Gloves"
+    },
+    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 32015,
+      "name": "Merciless Gladiator's Mooncloth Gloves"
+    },
+    {
+      "itemId": 32034,
+      "name": "Merciless Gladiator's Satin Gloves"
     },
     {
       "itemId": 32100,
@@ -332,6 +349,14 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 33717,
+      "name": "Vengeful Gladiator's Mooncloth Gloves"
+    },
+    {
+      "itemId": 33744,
+      "name": "Vengeful Gladiator's Satin Gloves"
     },
     {
       "itemId": 34430,
@@ -394,9 +419,13 @@
       "p3"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 56,
+    "admittedBySeason": {
+      "1": 17,
+      "2": 17,
+      "3": 22
+    }
   }
 }

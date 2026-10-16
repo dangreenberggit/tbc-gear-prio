@@ -22,41 +22,42 @@
     1012,
     1077
   ],
-  "d7EligibleTotal": 3519,
+  "d7EligibleTotal": 3609,
   "excludedNoSource": 870,
-  "universeTotal": 1081,
+  "universeTotal": 1156,
   "listOnlyMembership": 29,
   "perSlot": {
     "back": 57,
-    "chest": 104,
+    "chest": 116,
     "feet": 106,
     "finger": 118,
     "hands": 80,
-    "head": 87,
-    "legs": 90,
+    "head": 99,
+    "legs": 102,
     "neck": 72,
-    "ranged": 7,
-    "shoulder": 78,
-    "trinket": 60,
+    "ranged": 15,
+    "shoulder": 90,
+    "trinket": 61,
     "waist": 99,
-    "weapon": 30,
+    "weapon": 48,
     "wrist": 93
   },
   "sourceRecordAdds": {
     "atlasloot": 301,
     "curated": 8,
-    "db": 2511,
+    "db": 2602,
     "sunmote": 23,
     "two-hop": 18,
-    "wowhead": 17
+    "wowhead": 10
   },
   "membershipByOrigin": {
+    "arenaSource": 74,
     "curated": 12,
-    "dbPhase": 370,
+    "dbPhase": 371,
     "heroicMatch": 12,
     "itemHasOrigin:atlasloot": 115,
     "itemHasOrigin:curated": 8,
-    "itemHasOrigin:db": 970,
+    "itemHasOrigin:db": 1045,
     "itemHasOrigin:sunmote": 23,
     "itemHasOrigin:two-hop": 18,
     "itemHasOrigin:wowhead": 10,
@@ -67,7 +68,7 @@
     "zoneMatch": 542
   },
   "exclusivePrimaryOrigin": {
-    "db": 970,
+    "db": 1045,
     "atlasloot-only": 52,
     "other": 31,
     "two-hop": 18,
@@ -77,22 +78,22 @@
   "tierPiecesPresent": 18,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 1081,
-    "casterOnlyReject": 534,
+    "total": 1156,
+    "casterOnlyReject": 566,
     "epFloorReject": 35,
-    "combinedReject": 569,
-    "combinedKeep": 512,
-    "casterRejectPct": 49.4,
-    "combinedRejectPct": 52.6,
+    "combinedReject": 601,
+    "combinedKeep": 555,
+    "casterRejectPct": 49.0,
+    "combinedRejectPct": 52.0,
     "applied": false
   },
   "wowheadListIds": 160,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 160,
-    "recalled": 142,
-    "missed": 18,
-    "recallPct": 88.8,
+    "recalled": 147,
+    "missed": 13,
+    "recallPct": 91.9,
     "missedItems": [
       {
         "itemId": 18823,
@@ -121,12 +122,6 @@
       {
         "itemId": 23041,
         "name": "Slayer's Crest",
-        "slot": "trinket",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 23206,
-        "name": "Mark of the Champion",
         "slot": "trinket",
         "d7Eligible": true
       },
@@ -165,30 +160,6 @@
         "name": "Shaffar's Band of Brutality",
         "slot": "finger",
         "d7Eligible": true
-      },
-      {
-        "itemId": 31984,
-        "name": "Merciless Gladiator's Greatsword",
-        "slot": "weapon",
-        "d7Eligible": false
-      },
-      {
-        "itemId": 32041,
-        "name": "Merciless Gladiator's Scaled Helm",
-        "slot": "head",
-        "d7Eligible": false
-      },
-      {
-        "itemId": 33688,
-        "name": "Vengeful Gladiator's Greatsword",
-        "slot": "weapon",
-        "d7Eligible": false
-      },
-      {
-        "itemId": 33749,
-        "name": "Vengeful Gladiator's Scaled Chestpiece",
-        "slot": "chest",
-        "d7Eligible": false
       },
       {
         "itemId": 34679,
@@ -454,6 +425,14 @@
       "name": "Fetish of the Fallen"
     },
     {
+      "itemId": 27703,
+      "name": "Gladiator's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 27880,
+      "name": "Gladiator's Scaled Gauntlets"
+    },
+    {
       "itemId": 27896,
       "name": "Alembic of Infernal Power"
     },
@@ -464,6 +443,10 @@
     {
       "itemId": 28296,
       "name": "Libram of the Lightbringer"
+    },
+    {
+      "itemId": 28356,
+      "name": "Gladiator's Libram of Justice"
     },
     {
       "itemId": 28590,
@@ -518,8 +501,24 @@
       "name": "Leggings of Beast Mastery"
     },
     {
+      "itemId": 31614,
+      "name": "Gladiator's Ornamented Gloves"
+    },
+    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 31993,
+      "name": "Merciless Gladiator's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 32021,
+      "name": "Merciless Gladiator's Ornamented Gloves"
+    },
+    {
+      "itemId": 32040,
+      "name": "Merciless Gladiator's Scaled Gauntlets"
     },
     {
       "itemId": 32154,
@@ -558,12 +557,32 @@
       "name": "Airman's Ribbon of Gallantry"
     },
     {
+      "itemId": 33077,
+      "name": "Merciless Gladiator's Libram of Justice"
+    },
+    {
       "itemId": 33502,
       "name": "Libram of Mending"
     },
     {
+      "itemId": 33696,
+      "name": "Vengeful Gladiator's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 33723,
+      "name": "Vengeful Gladiator's Ornamented Gloves"
+    },
+    {
+      "itemId": 33750,
+      "name": "Vengeful Gladiator's Scaled Gauntlets"
+    },
+    {
       "itemId": 33808,
       "name": "The Horseman's Helm"
+    },
+    {
+      "itemId": 33842,
+      "name": "Vengeful Gladiator's Libram of Justice"
     },
     {
       "itemId": 34430,
@@ -588,6 +607,22 @@
     {
       "itemId": 34680,
       "name": "Shattered Sun Pendant of Resolve"
+    },
+    {
+      "itemId": 35028,
+      "name": "Brutal Gladiator's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 35040,
+      "name": "Brutal Gladiator's Libram of Justice"
+    },
+    {
+      "itemId": 35060,
+      "name": "Brutal Gladiator's Ornamented Gloves"
+    },
+    {
+      "itemId": 35089,
+      "name": "Brutal Gladiator's Scaled Gauntlets"
     },
     {
       "itemId": 35403,
@@ -638,9 +673,14 @@
       "p3"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 74,
+    "admittedBySeason": {
+      "1": 19,
+      "2": 19,
+      "3": 18,
+      "4": 18
+    }
   }
 }

@@ -308,43 +308,40 @@ def _ep_fields(spec: str) -> dict:
     return {"ep_weights": fallback, "ep_weights_by_phase": by_phase}
 
 
+# The four arena season lines, by the name prefix db.json gives every piece.
+# db.json has no season field, so the prefix is the only record of it.
+ARENA_SEASON_BY_PREFIX: dict[str, int] = {
+    "Gladiator's ": 1,
+    "Merciless Gladiator's ": 2,
+    "Vengeful Gladiator's ": 3,
+    "Brutal Gladiator's ": 4,
+}
+
+
+def arena_season(name: object) -> int | None:
+    if not isinstance(name, str):
+        return None
+    for prefix, season in ARENA_SEASON_BY_PREFIX.items():
+        if name.startswith(prefix):
+            return season
+    return None
+
+
 def _arena_gear_ids() -> frozenset[int]:
-    """Rating-gated arena gear, read from the pinned db by set line.
+    """Arena gear: every item of the four Gladiator season lines in the pinned db.
 
-    The SME gate ruled this out of a PvE upgrade pool (step 12, finding F3),
-    on three grounds: it is bought with a currency PvE play does not generate
-    and gated behind a personal and team rating, so a player reading a PvE
-    list cannot act on it the way they can act on a raid drop or a badge
-    purchase; a PvE sim systematically mis-values it, because part of its
-    budget is spent on resilience, which does nothing to a boss. The ruling
-    first covered the nine db-phase specs only; ticket 613 put every spec on
-    one rule set, so it now applies to ret and feral too (stage-gate
-    tab-item-lists decision N6).
-
-    Deliberately the **narrow** cut the gate preferred. Only the four
-    Gladiator season lines are matched -- the rating-gated ones. Honour and
-    badge-adjacent PvP gear is reachable without a rating and stays in, as
-    does anything merely PvP-flavoured by name: a broader net over
-    "Veteran's"/"Vindicator's"/Marshal doubles the count to 1,011 and would
-    sweep in vanilla world drops such as 19822 Zandalar Vindicator's
-    Breastplate, which is Zul'Gurub loot rather than arena gear at all.
+    Only those four lines are matched. Honour PvP gear ("Veteran's",
+    "Vindicator's", Marshal) is not arena gear, and a name net that wide
+    doubles the count to 1,011 and sweeps in vanilla world drops such as 19822
+    Zandalar Vindicator's Breastplate, which is Zul'Gurub loot.
 
     Derived from the pinned db rather than written out as 505 literal ids:
     a hand-copied list is a second source of truth that drifts the moment the
-    pin moves, and the set line is exactly the property being excluded.
+    pin moves.
     """
-    prefixes = (
-        "Gladiator's ",
-        "Merciless Gladiator's ",
-        "Vengeful Gladiator's ",
-        "Brutal Gladiator's ",
-    )
     db = load_db()
     return frozenset(
-        int(it["id"])
-        for it in db["items"]
-        if isinstance(it.get("name"), str)
-        and it["name"].startswith(prefixes)
+        int(it["id"]) for it in db["items"] if arena_season(it.get("name"))
     )
 
 
@@ -1109,14 +1106,10 @@ def eligible_d7(it: dict, profile: SpecProfile) -> bool:
       that, in `canEquipItem`. We look the answer up rather than re-deriving
       it — see `_equip_eligibility()` for why the re-derivation was deleted.
     - *Do we want it in an upgrade pool?* Quality floor, Kael's temporary
-      legendaries, arena gear, per-spec weapon rules. These are our policy,
-      the fork has no opinion on them, and they stay here.
+      legendaries, per-spec weapon rules. These are our policy, the fork has
+      no opinion on them, and they stay here.
     """
     if it["id"] in KAEL_TEMP_LEGENDARY_IDS:
-        return False
-    # Applied here rather than at any single admission route so that an
-    # excluded id cannot re-enter through a different one.
-    if int(it["id"]) in ARENA_GEAR_IDS:
         return False
     if int(it["id"]) not in profile.equip_eligible_ids:
         return False
@@ -2196,6 +2189,24 @@ def assemble(
         if any(carries_locus(s) for s, _ in pairs)
     }
 
+    # Guide prose that names a place outside TBC's raids and admitted heroics
+    # is no source at all. 23206 Mark of the Champion reads "Quest: The Fall of
+    # Kel'Thuzad ... (Naxxramas)": recorded, that row was a source no route
+    # keeps, and because db-phase admission skips sourced ids it kept the item
+    # out of ret and feral while the nine specs without guides held it. One
+    # rule set for all 11 specs (ticket 613; stage-gate tab-blocking-finish,
+    # OQ-23206). The validation guard below would reject such a row anyway.
+    tbc_raid_zones = {
+        str(z["name"]) for z in (phase_raids.get("zones") or []) if z.get("name")
+    }
+
+    def unkept_wowhead_place(src: dict) -> bool:
+        if src.get("kind") == "raid":
+            return src.get("zone") not in tbc_raid_zones
+        if src.get("kind") == "heroic":
+            return src.get("dungeon") not in PHASE_HEROIC_DUNGEONS
+        return False
+
     wowhead_list_ids: set[int] = set()
     wowhead_list_only: set[int] = set()
     for stage, doc in wowhead_lists_for_phase(max_phase, profile):
@@ -2222,6 +2233,8 @@ def assemble(
                 # so the guide is the only witness for many vendor and quest
                 # items here.
                 if machine_locus and carries_locus(src):
+                    continue
+                if unkept_wowhead_place(src):
                     continue
                 add_source(iid, src, "wowhead")
             # Items on list with only non-zone sources count as list-only membership.
@@ -2286,6 +2299,36 @@ def assemble(
         add_source(iid, {"kind": "unknown"}, "curated")
         curated_unsourced.add(iid)
         ticket_157_included.add(iid)
+
+    # Arena gear is a source the player keeps or removes, for every spec
+    # (ticket 642). The owner's ruling, verbatim: "the "dropping arena
+    # gear"--whether it requires a rating doesn't matter to us. only whether
+    # the user is allowing or filtering out pvp weapons from an existing
+    # season as a source." The tab's Sources dialog removes it under "PvP
+    # vendor", the key every `pvp` source gets.
+    #
+    # An arena item enters a list exactly when its db phase is in scope, with
+    # one source built from its name, which replaces whatever the other inputs
+    # said: a guide's "arena points" row, a curated set's `unknown`. So every
+    # spec carries the same entry for it, and a guide listing a piece ahead of
+    # its phase cannot admit it early. Stub-only pieces still drop at the
+    # stub check below. Placed before db-phase admission, which skips sourced
+    # ids, so that route cannot add a second source.
+    arena_admitted: set[int] = set()
+    for iid in sorted(ARENA_GEAR_IDS):
+        for _, origin in source_acc.pop(iid, []):
+            origin_counter[origin] -= 1
+        wowhead_list_only.discard(iid)
+        curated_unsourced.discard(iid)
+        curated_list_only.discard(iid)
+        it = db_by_id.get(iid)
+        if it is None or not eligible_d7(it, profile):
+            continue
+        if int(it.get("phase") or 99) > max_phase:
+            continue
+        season = arena_season(it.get("name"))
+        add_source(iid, {"kind": "pvp", "via": "arena", "season": season}, "db")
+        arena_admitted.add(iid)
 
     # db-phase membership (plan amendment 1; every spec since ticket 613). Badge,
     # PvP and vendor gear carry a `phase` in db.json -- every one of the 8,257
@@ -2448,6 +2491,7 @@ def assemble(
             and not db_phase
             and not in_recipe_phase
             and not in_rep_item_phase
+            and iid not in arena_admitted
         ):
             continue
 
@@ -2468,6 +2512,8 @@ def assemble(
             membership_stats["recipeMatch"] += 1
         elif in_rep_item_phase:
             membership_stats["repItemPhase"] += 1
+        elif iid in arena_admitted:
+            membership_stats["arenaSource"] += 1
 
         slot = ITEM_TYPE_SLOT[it["type"]]
         stats = item_stats(it)
@@ -2643,21 +2689,6 @@ def assemble(
         "excludedUnimplementedEffect": sorted(
             excluded_unimplemented, key=lambda e: e["itemId"]
         ),
-        # The arena exclusion (ARENA_GEAR_IDS, every spec), and specifically
-        # the ids that collide with a curated BiS set (SME gate finding A1).
-        #
-        # The exclusion itself is a ruling, not a defect: rating-gated arena
-        # gear is out of a PvE pool. What the review caught is that it was
-        # SILENT -- upstream really does equip 28295 and 32027 in rogue's p1
-        # and p2 sets and 28308 in enhancement's p1, so those universes ship
-        # a curated set with members missing and nothing said which, or why.
-        # A reader diffing membership could not tell a deliberate exclusion
-        # from a pipeline bug.
-        #
-        # `curatedSetCollisions` is the honest half: an excluded id that some
-        # curated set equips, with the sets naming it. `total` is the size of
-        # the exclusion set as configured, so a reader can see the ruling's
-        # scope without this list implying it is the whole of it.
         # Which phase the BiS tags in this universe actually speak for.
         #
         # `bis_set_labels_for_max_phase` scopes the claim to the newest
@@ -2679,28 +2710,21 @@ def assemble(
                 {label for labels in bis_sets_at_phase.values() for label in labels}
             ),
         },
-        "excludedIds": {
+        # Arena gear admitted as a `pvp`/`arena` source (ticket 642), counted
+        # per season so a reader diffing reports sees which lines a phase
+        # opened. `total` is every arena id in the pinned db, so the gap is
+        # the pieces out of phase, not wearable, or stub-only.
+        "arenaSource": {
             "total": len(ARENA_GEAR_IDS),
-            "reason": (
-                "rating-gated arena gear (Gladiator season lines); SME gate "
-                "finding F3 -- bought with a currency PvE play does not "
-                "generate, rating-gated, and mis-valued by a PvE sim because "
-                "part of its budget is resilience"
-            ),
-            "curatedSetCollisions": [
-                {
-                    "itemId": iid,
-                    "name": (db_by_id.get(iid) or {}).get("name") or "",
-                    "curatedSets": labels,
-                }
-                for iid, labels in sorted(
-                    (
-                        (iid, labels)
-                        for iid, labels in curated_sets_by_item.items()
-                        if iid in ARENA_GEAR_IDS
-                    )
+            "admitted": len(arena_admitted & universe_ids),
+            "admittedBySeason": dict(
+                sorted(
+                    Counter(
+                        arena_season(db_by_id[iid].get("name"))
+                        for iid in arena_admitted & universe_ids
+                    ).items()
                 )
-            ],
+            ),
         },
     }
 

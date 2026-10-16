@@ -20,39 +20,40 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 2880,
-  "excludedNoSource": 855,
-  "universeTotal": 693,
+  "d7EligibleTotal": 3006,
+  "excludedNoSource": 889,
+  "universeTotal": 767,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 51,
-    "chest": 38,
+    "chest": 47,
     "feet": 54,
     "finger": 99,
     "hands": 31,
-    "head": 37,
-    "legs": 38,
+    "head": 46,
+    "legs": 47,
     "neck": 55,
     "ranged": 4,
-    "shoulder": 35,
+    "shoulder": 44,
     "trinket": 50,
     "waist": 51,
-    "weapon": 98,
+    "weapon": 136,
     "wrist": 52
   },
   "sourceRecordAdds": {
     "atlasloot": 255,
     "curated": 5,
-    "db": 1912,
+    "db": 2004,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 74,
     "curated": 15,
     "dbPhase": 264,
     "itemHasOrigin:atlasloot": 101,
     "itemHasOrigin:curated": 4,
-    "itemHasOrigin:db": 623,
+    "itemHasOrigin:db": 697,
     "itemHasOrigin:two-hop": 15,
     "recipeMatch": 16,
     "repFactionMatch": 26,
@@ -60,7 +61,7 @@
     "zoneMatch": 343
   },
   "exclusivePrimaryOrigin": {
-    "db": 623,
+    "db": 697,
     "atlasloot-only": 51,
     "two-hop": 15,
     "other": 4
@@ -69,13 +70,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 693,
-    "casterOnlyReject": 372,
+    "total": 767,
+    "casterOnlyReject": 416,
     "epFloorReject": 20,
-    "combinedReject": 392,
-    "combinedKeep": 301,
-    "casterRejectPct": 53.7,
-    "combinedRejectPct": 56.6,
+    "combinedReject": 436,
+    "combinedKeep": 331,
+    "casterRejectPct": 54.2,
+    "combinedRejectPct": 56.8,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -310,6 +311,18 @@
       "name": "Jewel of Charismatic Mystique"
     },
     {
+      "itemId": 28126,
+      "name": "Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 28136,
+      "name": "Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 28355,
+      "name": "Gladiator's Idol of Tenacity"
+    },
+    {
       "itemId": 28568,
       "name": "Idol of the Avian Heart"
     },
@@ -354,8 +367,24 @@
       "name": "Lower City Prayerbook"
     },
     {
+      "itemId": 31375,
+      "name": "Gladiator's Kodohide Gloves"
+    },
+    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 31967,
+      "name": "Merciless Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 31987,
+      "name": "Merciless Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 32056,
+      "name": "Merciless Gladiator's Wyrmhide Gloves"
     },
     {
       "itemId": 32113,
@@ -390,12 +419,56 @@
       "name": "Airman's Ribbon of Gallantry"
     },
     {
+      "itemId": 33076,
+      "name": "Merciless Gladiator's Idol of Tenacity"
+    },
+    {
       "itemId": 33508,
       "name": "Idol of Budding Life"
     },
     {
       "itemId": 33510,
       "name": "Idol of the Unseen Moon"
+    },
+    {
+      "itemId": 33671,
+      "name": "Vengeful Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 33690,
+      "name": "Vengeful Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 33767,
+      "name": "Vengeful Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 33841,
+      "name": "Vengeful Gladiator's Idol of Tenacity"
+    },
+    {
+      "itemId": 33942,
+      "name": "Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33943,
+      "name": "Merciless Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33944,
+      "name": "Vengeful Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33945,
+      "name": "Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 33946,
+      "name": "Merciless Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 33947,
+      "name": "Vengeful Gladiator's Idol of Resolve"
     },
     {
       "itemId": 34430,
@@ -466,9 +539,13 @@
       "p4"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 74,
+    "admittedBySeason": {
+      "1": 24,
+      "2": 24,
+      "3": 26
+    }
   }
 }

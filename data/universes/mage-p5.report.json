@@ -22,40 +22,41 @@
     1012,
     1077
   ],
-  "d7EligibleTotal": 2174,
+  "d7EligibleTotal": 2233,
   "excludedNoSource": 603,
-  "universeTotal": 642,
+  "universeTotal": 697,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 56,
-    "chest": 26,
+    "chest": 30,
     "feet": 36,
     "finger": 118,
     "hands": 20,
-    "head": 22,
-    "legs": 25,
+    "head": 26,
+    "legs": 29,
     "neck": 71,
-    "ranged": 10,
-    "shoulder": 20,
+    "ranged": 18,
+    "shoulder": 24,
     "trinket": 60,
     "waist": 34,
-    "weapon": 110,
+    "weapon": 141,
     "wrist": 34
   },
   "sourceRecordAdds": {
     "atlasloot": 213,
     "curated": 8,
-    "db": 1465,
+    "db": 1524,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 55,
     "curated": 17,
     "dbPhase": 216,
     "heroicMatch": 9,
     "itemHasOrigin:atlasloot": 92,
     "itemHasOrigin:curated": 8,
-    "itemHasOrigin:db": 559,
+    "itemHasOrigin:db": 614,
     "itemHasOrigin:sunmote": 5,
     "itemHasOrigin:two-hop": 18,
     "recipeMatch": 21,
@@ -64,7 +65,7 @@
     "zoneMatch": 322
   },
   "exclusivePrimaryOrigin": {
-    "db": 559,
+    "db": 614,
     "atlasloot-only": 52,
     "other": 13,
     "two-hop": 18
@@ -73,13 +74,13 @@
   "tierPiecesPresent": 18,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 642,
-    "casterOnlyReject": 396,
+    "total": 697,
+    "casterOnlyReject": 433,
     "epFloorReject": 8,
-    "combinedReject": 404,
-    "combinedKeep": 238,
-    "casterRejectPct": 61.7,
-    "combinedRejectPct": 62.9,
+    "combinedReject": 441,
+    "combinedKeep": 256,
+    "casterRejectPct": 62.1,
+    "combinedRejectPct": 63.3,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -254,6 +255,10 @@
       "name": "Explorer's Walking Stick"
     },
     {
+      "itemId": 25857,
+      "name": "Gladiator's Silk Handguards"
+    },
+    {
       "itemId": 26055,
       "name": "Oculus of the Hidden Eye"
     },
@@ -302,6 +307,10 @@
       "name": "Darkmoon Card: Madness"
     },
     {
+      "itemId": 32049,
+      "name": "Merciless Gladiator's Silk Handguards"
+    },
+    {
       "itemId": 32110,
       "name": "Chancellor's Silk Handguards"
     },
@@ -320,6 +329,10 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 33759,
+      "name": "Vengeful Gladiator's Silk Handguards"
     },
     {
       "itemId": 34430,
@@ -344,6 +357,10 @@
     {
       "itemId": 34680,
       "name": "Shattered Sun Pendant of Resolve"
+    },
+    {
+      "itemId": 35098,
+      "name": "Brutal Gladiator's Silk Handguards"
     },
     {
       "itemId": 35581,
@@ -387,9 +404,14 @@
       "p3_sword"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 55,
+    "admittedBySeason": {
+      "1": 11,
+      "2": 11,
+      "3": 16,
+      "4": 17
+    }
   }
 }

@@ -14,46 +14,47 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 4248,
-  "excludedNoSource": 1290,
-  "universeTotal": 584,
+  "d7EligibleTotal": 4384,
+  "excludedNoSource": 1366,
+  "universeTotal": 644,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 35,
-    "chest": 30,
+    "chest": 32,
     "feet": 58,
     "finger": 64,
-    "hands": 33,
-    "head": 35,
-    "legs": 29,
+    "hands": 35,
+    "head": 37,
+    "legs": 31,
     "neck": 37,
-    "ranged": 15,
-    "shoulder": 24,
+    "ranged": 19,
+    "shoulder": 26,
     "trinket": 25,
     "waist": 47,
-    "weapon": 112,
+    "weapon": 158,
     "wrist": 40
   },
   "sourceRecordAdds": {
     "atlasloot": 376,
     "curated": 5,
-    "db": 2812,
+    "db": 2872,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 60,
     "curated": 15,
     "dbPhase": 202,
     "itemHasOrigin:atlasloot": 81,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 526,
+    "itemHasOrigin:db": 586,
     "itemHasOrigin:two-hop": 10,
     "recipeMatch": 18,
     "repItemPhase": 39,
     "zoneMatch": 310
   },
   "exclusivePrimaryOrigin": {
-    "db": 526,
+    "db": 586,
     "atlasloot-only": 45,
     "two-hop": 10,
     "other": 3
@@ -62,13 +63,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 584,
-    "casterOnlyReject": 240,
+    "total": 644,
+    "casterOnlyReject": 254,
     "epFloorReject": 2,
-    "combinedReject": 242,
-    "combinedKeep": 342,
-    "casterRejectPct": 41.1,
-    "combinedRejectPct": 41.4,
+    "combinedReject": 256,
+    "combinedKeep": 388,
+    "casterRejectPct": 39.4,
+    "combinedRejectPct": 39.8,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -500,9 +501,12 @@
       "p2_fury"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 60,
+    "admittedBySeason": {
+      "1": 29,
+      "2": 31
+    }
   }
 }

@@ -14,45 +14,46 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 3495,
-  "excludedNoSource": 1102,
-  "universeTotal": 496,
+  "d7EligibleTotal": 3635,
+  "excludedNoSource": 1176,
+  "universeTotal": 550,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 34,
-    "chest": 28,
+    "chest": 34,
     "feet": 44,
     "finger": 64,
     "hands": 26,
-    "head": 31,
-    "legs": 28,
+    "head": 37,
+    "legs": 34,
     "neck": 37,
-    "shoulder": 22,
+    "shoulder": 28,
     "trinket": 24,
     "waist": 40,
-    "weapon": 85,
+    "weapon": 115,
     "wrist": 33
   },
   "sourceRecordAdds": {
     "atlasloot": 303,
     "curated": 6,
-    "db": 2267,
+    "db": 2333,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 54,
     "curated": 12,
     "dbPhase": 193,
     "itemHasOrigin:atlasloot": 67,
     "itemHasOrigin:curated": 6,
-    "itemHasOrigin:db": 442,
+    "itemHasOrigin:db": 496,
     "itemHasOrigin:two-hop": 10,
     "recipeMatch": 13,
     "repItemPhase": 30,
     "zoneMatch": 248
   },
   "exclusivePrimaryOrigin": {
-    "db": 442,
+    "db": 496,
     "atlasloot-only": 38,
     "other": 6,
     "two-hop": 10
@@ -61,13 +62,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 496,
-    "casterOnlyReject": 250,
+    "total": 550,
+    "casterOnlyReject": 280,
     "epFloorReject": 16,
-    "combinedReject": 266,
-    "combinedKeep": 230,
-    "casterRejectPct": 50.4,
-    "combinedRejectPct": 53.6,
+    "combinedReject": 296,
+    "combinedKeep": 254,
+    "casterRejectPct": 50.9,
+    "combinedRejectPct": 53.8,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -322,12 +323,20 @@
       "name": "Explorer's Walking Stick"
     },
     {
+      "itemId": 26000,
+      "name": "Gladiator's Linked Gauntlets"
+    },
+    {
       "itemId": 26055,
       "name": "Oculus of the Hidden Eye"
     },
     {
       "itemId": 27416,
       "name": "Fetish of the Fallen"
+    },
+    {
+      "itemId": 27470,
+      "name": "Gladiator's Mail Gauntlets"
     },
     {
       "itemId": 27544,
@@ -340,6 +349,10 @@
     {
       "itemId": 27900,
       "name": "Jewel of Charismatic Mystique"
+    },
+    {
+      "itemId": 28357,
+      "name": "Gladiator's Totem of the Third Wind"
     },
     {
       "itemId": 28523,
@@ -402,8 +415,24 @@
       "name": "Leggings of Beast Mastery"
     },
     {
+      "itemId": 31397,
+      "name": "Gladiator's Ringmail Gauntlets"
+    },
+    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 32005,
+      "name": "Merciless Gladiator's Linked Gauntlets"
+    },
+    {
+      "itemId": 32010,
+      "name": "Merciless Gladiator's Mail Gauntlets"
+    },
+    {
+      "itemId": 32030,
+      "name": "Merciless Gladiator's Ringmail Gauntlets"
     },
     {
       "itemId": 32139,
@@ -436,6 +465,26 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 33078,
+      "name": "Merciless Gladiator's Totem of the Third Wind"
+    },
+    {
+      "itemId": 33939,
+      "name": "Gladiator's Totem of Indomitability"
+    },
+    {
+      "itemId": 33940,
+      "name": "Merciless Gladiator's Totem of Indomitability"
+    },
+    {
+      "itemId": 33951,
+      "name": "Gladiator's Totem of Survival"
+    },
+    {
+      "itemId": 33952,
+      "name": "Merciless Gladiator's Totem of Survival"
     },
     {
       "itemId": 34430,
@@ -510,9 +559,12 @@
       "p2"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 54,
+    "admittedBySeason": {
+      "1": 26,
+      "2": 28
+    }
   }
 }

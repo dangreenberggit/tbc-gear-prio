@@ -20,39 +20,40 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 2176,
-  "excludedNoSource": 641,
-  "universeTotal": 528,
+  "d7EligibleTotal": 2255,
+  "excludedNoSource": 664,
+  "universeTotal": 578,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 51,
-    "chest": 18,
+    "chest": 24,
     "feet": 31,
     "finger": 99,
     "hands": 14,
-    "head": 17,
-    "legs": 19,
+    "head": 23,
+    "legs": 25,
     "neck": 55,
-    "ranged": 8,
-    "shoulder": 16,
+    "ranged": 13,
+    "shoulder": 22,
     "trinket": 50,
     "waist": 31,
-    "weapon": 88,
+    "weapon": 109,
     "wrist": 31
   },
   "sourceRecordAdds": {
     "atlasloot": 213,
     "curated": 6,
-    "db": 1431,
+    "db": 1487,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 50,
     "curated": 20,
     "dbPhase": 182,
     "itemHasOrigin:atlasloot": 85,
     "itemHasOrigin:curated": 6,
-    "itemHasOrigin:db": 459,
+    "itemHasOrigin:db": 509,
     "itemHasOrigin:two-hop": 15,
     "recipeMatch": 7,
     "repFactionMatch": 22,
@@ -60,7 +61,7 @@
     "zoneMatch": 269
   },
   "exclusivePrimaryOrigin": {
-    "db": 459,
+    "db": 509,
     "atlasloot-only": 48,
     "two-hop": 15,
     "other": 6
@@ -69,13 +70,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 528,
-    "casterOnlyReject": 321,
+    "total": 578,
+    "casterOnlyReject": 359,
     "epFloorReject": 8,
-    "combinedReject": 329,
-    "combinedKeep": 199,
-    "casterRejectPct": 60.8,
-    "combinedRejectPct": 62.3,
+    "combinedReject": 367,
+    "combinedKeep": 211,
+    "casterRejectPct": 62.1,
+    "combinedRejectPct": 63.5,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -254,6 +255,10 @@
       "name": "Auslese's Light Channeler"
     },
     {
+      "itemId": 24556,
+      "name": "Gladiator's Dreadweave Gloves"
+    },
+    {
       "itemId": 25827,
       "name": "Muck-Covered Drape"
     },
@@ -298,6 +303,10 @@
       "name": "Pendant of the Lost Ages"
     },
     {
+      "itemId": 30188,
+      "name": "Gladiator's Felweave Handguards"
+    },
+    {
       "itemId": 30619,
       "name": "Fel Reaver's Piston"
     },
@@ -308,6 +317,14 @@
     {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 31973,
+      "name": "Merciless Gladiator's Dreadweave Gloves"
+    },
+    {
+      "itemId": 31981,
+      "name": "Merciless Gladiator's Felweave Handguards"
     },
     {
       "itemId": 32093,
@@ -328,6 +345,14 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 33676,
+      "name": "Vengeful Gladiator's Dreadweave Gloves"
+    },
+    {
+      "itemId": 33684,
+      "name": "Vengeful Gladiator's Felweave Handguards"
     },
     {
       "itemId": 34430,
@@ -394,9 +419,13 @@
       "za"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 50,
+    "admittedBySeason": {
+      "1": 15,
+      "2": 15,
+      "3": 20
+    }
   }
 }

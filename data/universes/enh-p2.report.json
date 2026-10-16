@@ -14,45 +14,46 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 3516,
-  "excludedNoSource": 1106,
-  "universeTotal": 506,
+  "d7EligibleTotal": 3678,
+  "excludedNoSource": 1194,
+  "universeTotal": 568,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 35,
-    "chest": 28,
+    "chest": 34,
     "feet": 45,
     "finger": 66,
     "hands": 27,
-    "head": 31,
-    "legs": 29,
+    "head": 37,
+    "legs": 35,
     "neck": 37,
-    "shoulder": 22,
+    "shoulder": 28,
     "trinket": 25,
     "waist": 40,
-    "weapon": 88,
+    "weapon": 126,
     "wrist": 33
   },
   "sourceRecordAdds": {
     "atlasloot": 306,
     "curated": 8,
-    "db": 2282,
+    "db": 2356,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 62,
     "curated": 15,
     "dbPhase": 198,
     "itemHasOrigin:atlasloot": 67,
     "itemHasOrigin:curated": 7,
-    "itemHasOrigin:db": 451,
+    "itemHasOrigin:db": 513,
     "itemHasOrigin:two-hop": 10,
     "recipeMatch": 13,
     "repItemPhase": 31,
     "zoneMatch": 249
   },
   "exclusivePrimaryOrigin": {
-    "db": 451,
+    "db": 513,
     "atlasloot-only": 38,
     "two-hop": 10,
     "other": 7
@@ -61,13 +62,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 506,
-    "casterOnlyReject": 247,
+    "total": 568,
+    "casterOnlyReject": 277,
     "epFloorReject": 14,
-    "combinedReject": 261,
-    "combinedKeep": 245,
+    "combinedReject": 291,
+    "combinedKeep": 277,
     "casterRejectPct": 48.8,
-    "combinedRejectPct": 51.6,
+    "combinedRejectPct": 51.2,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -322,12 +323,20 @@
       "name": "Explorer's Walking Stick"
     },
     {
+      "itemId": 26000,
+      "name": "Gladiator's Linked Gauntlets"
+    },
+    {
       "itemId": 26055,
       "name": "Oculus of the Hidden Eye"
     },
     {
       "itemId": 27416,
       "name": "Fetish of the Fallen"
+    },
+    {
+      "itemId": 27470,
+      "name": "Gladiator's Mail Gauntlets"
     },
     {
       "itemId": 27544,
@@ -340,6 +349,10 @@
     {
       "itemId": 27900,
       "name": "Jewel of Charismatic Mystique"
+    },
+    {
+      "itemId": 28357,
+      "name": "Gladiator's Totem of the Third Wind"
     },
     {
       "itemId": 28523,
@@ -402,8 +415,24 @@
       "name": "Leggings of Beast Mastery"
     },
     {
+      "itemId": 31397,
+      "name": "Gladiator's Ringmail Gauntlets"
+    },
+    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 32005,
+      "name": "Merciless Gladiator's Linked Gauntlets"
+    },
+    {
+      "itemId": 32010,
+      "name": "Merciless Gladiator's Mail Gauntlets"
+    },
+    {
+      "itemId": 32030,
+      "name": "Merciless Gladiator's Ringmail Gauntlets"
     },
     {
       "itemId": 32139,
@@ -438,8 +467,28 @@
       "name": "Airman's Ribbon of Gallantry"
     },
     {
+      "itemId": 33078,
+      "name": "Merciless Gladiator's Totem of the Third Wind"
+    },
+    {
       "itemId": 33507,
       "name": "Stonebreaker's Totem"
+    },
+    {
+      "itemId": 33939,
+      "name": "Gladiator's Totem of Indomitability"
+    },
+    {
+      "itemId": 33940,
+      "name": "Merciless Gladiator's Totem of Indomitability"
+    },
+    {
+      "itemId": 33951,
+      "name": "Gladiator's Totem of Survival"
+    },
+    {
+      "itemId": 33952,
+      "name": "Merciless Gladiator's Totem of Survival"
     },
     {
       "itemId": 34430,
@@ -514,17 +563,12 @@
       "p2"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": [
-      {
-        "itemId": 28308,
-        "name": "Gladiator's Cleaver",
-        "curatedSets": [
-          "p1"
-        ]
-      }
-    ]
+    "admitted": 62,
+    "admittedBySeason": {
+      "1": 30,
+      "2": 32
+    }
   }
 }

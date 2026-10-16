@@ -14,46 +14,47 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 2174,
-  "excludedNoSource": 691,
-  "universeTotal": 337,
+  "d7EligibleTotal": 2233,
+  "excludedNoSource": 726,
+  "universeTotal": 359,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 35,
-    "chest": 11,
+    "chest": 13,
     "feet": 20,
     "finger": 65,
     "hands": 10,
-    "head": 12,
-    "legs": 12,
+    "head": 14,
+    "legs": 14,
     "neck": 37,
-    "ranged": 5,
-    "shoulder": 9,
+    "ranged": 7,
+    "shoulder": 11,
     "trinket": 26,
     "waist": 20,
-    "weapon": 58,
+    "weapon": 70,
     "wrist": 17
   },
   "sourceRecordAdds": {
     "atlasloot": 213,
     "curated": 8,
-    "db": 1377,
+    "db": 1401,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 22,
     "curated": 18,
     "dbPhase": 128,
     "itemHasOrigin:atlasloot": 49,
     "itemHasOrigin:curated": 8,
-    "itemHasOrigin:db": 286,
+    "itemHasOrigin:db": 308,
     "itemHasOrigin:two-hop": 10,
     "recipeMatch": 5,
     "repItemPhase": 27,
     "zoneMatch": 159
   },
   "exclusivePrimaryOrigin": {
-    "db": 286,
+    "db": 308,
     "atlasloot-only": 33,
     "other": 8,
     "two-hop": 10
@@ -62,13 +63,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 337,
-    "casterOnlyReject": 207,
+    "total": 359,
+    "casterOnlyReject": 223,
     "epFloorReject": 5,
-    "combinedReject": 212,
-    "combinedKeep": 125,
-    "casterRejectPct": 61.4,
-    "combinedRejectPct": 62.9,
+    "combinedReject": 228,
+    "combinedKeep": 131,
+    "casterRejectPct": 62.1,
+    "combinedRejectPct": 63.5,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -243,6 +244,10 @@
       "name": "Explorer's Walking Stick"
     },
     {
+      "itemId": 25857,
+      "name": "Gladiator's Silk Handguards"
+    },
+    {
       "itemId": 26055,
       "name": "Oculus of the Hidden Eye"
     },
@@ -289,6 +294,10 @@
     {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 32049,
+      "name": "Merciless Gladiator's Silk Handguards"
     },
     {
       "itemId": 32110,
@@ -375,9 +384,12 @@
       "p2"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 22,
+    "admittedBySeason": {
+      "1": 11,
+      "2": 11
+    }
   }
 }

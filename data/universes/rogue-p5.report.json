@@ -22,40 +22,41 @@
     1012,
     1077
   ],
-  "d7EligibleTotal": 2878,
+  "d7EligibleTotal": 2978,
   "excludedNoSource": 774,
-  "universeTotal": 855,
+  "universeTotal": 951,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 56,
-    "chest": 48,
+    "chest": 52,
     "feet": 62,
     "finger": 118,
     "hands": 40,
-    "head": 40,
-    "legs": 43,
+    "head": 44,
+    "legs": 47,
     "neck": 72,
-    "ranged": 28,
-    "shoulder": 36,
+    "ranged": 40,
+    "shoulder": 40,
     "trinket": 60,
     "waist": 56,
-    "weapon": 139,
+    "weapon": 207,
     "wrist": 57
   },
   "sourceRecordAdds": {
     "atlasloot": 265,
     "curated": 3,
-    "db": 1989,
+    "db": 2089,
     "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 96,
     "curated": 10,
     "dbPhase": 288,
     "heroicMatch": 13,
     "itemHasOrigin:atlasloot": 114,
     "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 762,
+    "itemHasOrigin:db": 858,
     "itemHasOrigin:sunmote": 13,
     "itemHasOrigin:two-hop": 18,
     "recipeMatch": 37,
@@ -64,7 +65,7 @@
     "zoneMatch": 436
   },
   "exclusivePrimaryOrigin": {
-    "db": 762,
+    "db": 858,
     "atlasloot-only": 59,
     "other": 16,
     "two-hop": 18
@@ -73,13 +74,13 @@
   "tierPiecesPresent": 18,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 855,
-    "casterOnlyReject": 418,
+    "total": 951,
+    "casterOnlyReject": 440,
     "epFloorReject": 6,
-    "combinedReject": 424,
-    "combinedKeep": 431,
-    "casterRejectPct": 48.9,
-    "combinedRejectPct": 49.6,
+    "combinedReject": 446,
+    "combinedKeep": 505,
+    "casterRejectPct": 46.3,
+    "combinedRejectPct": 46.9,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -262,6 +263,10 @@
       "name": "Muck-Covered Drape"
     },
     {
+      "itemId": 25834,
+      "name": "Gladiator's Leather Gloves"
+    },
+    {
       "itemId": 26055,
       "name": "Oculus of the Hidden Eye"
     },
@@ -318,6 +323,10 @@
       "name": "Darkmoon Card: Madness"
     },
     {
+      "itemId": 31998,
+      "name": "Merciless Gladiator's Leather Gloves"
+    },
+    {
       "itemId": 32124,
       "name": "Chancellor's Leather Gloves"
     },
@@ -342,6 +351,10 @@
       "name": "Airman's Ribbon of Gallantry"
     },
     {
+      "itemId": 33700,
+      "name": "Vengeful Gladiator's Leather Gloves"
+    },
+    {
       "itemId": 34430,
       "name": "Glimmering Naaru Sliver"
     },
@@ -364,6 +377,10 @@
     {
       "itemId": 34680,
       "name": "Shattered Sun Pendant of Resolve"
+    },
+    {
+      "itemId": 35032,
+      "name": "Brutal Gladiator's Leather Gloves"
     },
     {
       "itemId": 35366,
@@ -414,24 +431,14 @@
       "p3"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": [
-      {
-        "itemId": 28295,
-        "name": "Gladiator's Slicer",
-        "curatedSets": [
-          "p1"
-        ]
-      },
-      {
-        "itemId": 32027,
-        "name": "Merciless Gladiator's Quickblade",
-        "curatedSets": [
-          "p2"
-        ]
-      }
-    ]
+    "admitted": 96,
+    "admittedBySeason": {
+      "1": 21,
+      "2": 21,
+      "3": 27,
+      "4": 27
+    }
   }
 }
