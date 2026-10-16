@@ -395,87 +395,11 @@ describe("data/universes/ret-p3.json hardening", () => {
   );
 
   it("ships no empty sources on any row", () => {
-    // Regenerate with `python scripts/assemble_universe.py --max-phase 3` to
-    // re-derive this count.
-    // 347 -> 349: the D7 weapon rule stopped rejecting polearms alongside
-    // staves (paladins can wield polearms) — +28774 Glaive of the Pit,
-    // +32248 Halberd of Desolation.
-    // 349 -> 362: AtlasLoot's WorldBossesBC block now resolves, admitting the
-    // 13 Doomwalker / Doom Lord Kazzak drops that db.json has no sources for.
-    // 362 -> 354: classAllowlist is enforced, evicting 8 class-specific SSC/TK
-    // trinkets a paladin cannot equip (ticket 25).
-    // 354 -> 356: the Wowhead source parser learned "Requires <standing> with
-    // <faction>", which it previously dropped on the floor — +29119 Haramad's
-    // Bargain, +30834 Shapeshifter's Signet, both rep rewards on the p3 list
-    // admitted through the existing list-only path (ticket 28).
-    // 356 -> 359: the wowsims curated gear sets now grant membership rather
-    // than only labelling rows admitted by another route (ticket 41).
-    // +28176 Sha'tari Wrought Greaves, +29177 A'dal's Command, +30257
-    // Shattrath Leggings — all carrying `{kind: "unknown"}`, which has no zone
-    // and so never appears in a raid-filtered view. Haramad's Bargain and
-    // Shapeshifter's Signet were already here via the rep path above.
-    // 359 -> 361: `{kind: "world"}` (ticket 45 §1) now counts as list-driven
-    // membership, admitting +23203 Libram of Fervor and +31275 Necklace of
-    // Trophies via their "World Drop" Wowhead text.
-    // 361 -> 364: `curated_list_only` (ticket 41 remainder) admits a curated
-    // item whose real db source is list-only shaped (crafted, no zone) but
-    // was not independently a member — +23522 Ragesteel Breastplate, +28429
-    // Lionheart Champion, +33173 Ragesteel Shoulders. 28430 Lionheart
-    // Executioner is not a new row here: its p3 Wowhead text reads
-    // "Profession: ..." (parses today), only its p1-p2 text reads
-    // "Crafting: ..." (does not), so it was already a p3 member and only
-    // needed this fix at p2.
-    // 364 -> 365: a rep source carries no zone, so a rep-only item satisfied
-    // no membership route and was absent entirely. phase_raids.json now maps
-    // faction -> phase (ticket 65 step 2.5), admitting +32489 Ashtongue
-    // Talisman of Zeal, the paladin trinket from Black Temple's faction. The
-    // other eight talismans are held out by classAllowlist, not by this route.
-    // 365 -> 381: AtlasLoot's Factions module is now parsed for vendor loot,
-    // not just faction ids (ticket 65 step 3), admitting the 16-ring Band of
-    // Eternity ladder (29294-29309) sold by Scale of the Sands. db.json has
-    // `sources: null` for all 16, so AtlasLoot is their only witness.
-    // 381 -> 394: a recipe bought from a reputation vendor now gates its
-    // product the way a raid-dropped one does (ticket 65 step 4), admitting
-    // the 13 Ashtongue-taught crafts a paladin can wear — the Redeemed Soul
-    // (leather), Shackled Souls (mail) and Shadesteel (plate) sets, plus
-    // Night's End. The 4 cloth Soulguard pieces go to feral, not here.
-    // 394 -> 400: ticket 157 force-admits six SME-flagged D7-eligible items
-    // (27484, 31033, 22401, 31856, 28034, 28288) whose real db/Wowhead
-    // sources all named a five-man zone outside phase_raids.json and
-    // PHASE_HEROIC_DUNGEONS — see TICKET_157_FORCE_INCLUDE in
-    // assemble_universe.py.
-    // 400 -> 390: ticket 171 (user ruling, exclusion by design) drops every
-    // item whose only sim effect is a commented `TODO: Manual implementation
-    // required` stub in the pinned fork's Go source — see
-    // data/sim-implemented-effects.json and stub_only_effect_ids() in
-    // assemble_universe.py. Ten p3 items are stub-only, including 28592/
-    // 30063/32368 (the three librams the ticket's own diagnosis named) and
-    // 28774 Glaive of the Pit / 32489 Ashtongue Talisman of Zeal (both
-    // asserted below by other tests, updated alongside this count).
-    // 390 -> 391: the engine pin move to feature/backend-reforge implemented
-    // 29297 Band of the Eternal Defender, so it is no longer stub-only and
-    // ticket 171's exclusion no longer reaches it. Nine p3 items remain
-    // stub-only. The ruling is unchanged -- what changed is that the fork now
-    // implements this effect (stat_bonus_procs_auto_gen.go, and every spec's
-    // TestAllItems results carry it).
-    // 391 -> 467: ret's pool stopped filtering by armor class. Equip legality
-    // now comes from the fork's own canEquipItem, which says a paladin can wear
-    // cloth (it can), and the SME gate ruled the old cloth omission an
-    // unexplained outlier rather than policy -- every other spec, warrior
-    // included, already admitted cloth. +76 cloth rows at p3. Weapons are
-    // unaffected: the 2H-only rule survives as a named policy exclusion.
-    // 467 -> 715: ret takes the nine specs' list rules (tickets 611, 613):
-    // +224 db-phase rows (139 phase 1, 85 phase 2-3), +28 crafted items whose
-    // pattern drops in an in-phase raid, -4 Gladiator arena rows.
-    // 715 -> 737: +22 rewards of factions phase_raids.json does not list
-    // (Violet Signets, A'dal's Command...), admitted by the rep-item route
-    // under db-phase rules (stage-gate tab-item-lists, K3-rep-items).
+    // Pins the list size, so a change in ret-p3 membership is a deliberate
+    // edit here; the commit that moves the number says which route changed.
     // Re-run: `python scripts/assemble_universe.py --spec ret --max-phase 3
     // --out <scratch> --report <scratch>` and
     // `len(json.load(open('<scratch>'))['entries'])`.
-    // 737 -> 794: +56 arena pieces (season 1-3) admitted as a pvp/arena
-    // source the player can untick (ticket 642), +1 23206 Mark of the
-    // Champion (stage-gate tab-blocking-finish, OQ-23206).
     expect(universeP3.length).toBe(794);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
@@ -1129,11 +1053,9 @@ describe("data/universes/ret-p3.json hardening", () => {
     it.skipIf(!hasWowsimsVendor)(
       "does not rank a competitive weapon last on an empty stat line",
       () => {
-        // Until tickets 611/613 every P3 weapon was within 20% of the best
-        // dps, so this asserted that the last-ranked weapon was competitive.
-        // The db-phase route now admits weak epics too (32183 Chancellor's
-        // Maul, 66.5 dps). The title's property still holds: while any weapon
-        // swings below 80% of the best dps, a competitive one is not last.
+        // "Competitive" is within 80% of the best dps. The db-phase route
+        // admits weak epics (32183 Chancellor's Maul, 66.5 dps), so the field
+        // holds weapons below that line, and one of them must rank last.
         const ranked = weapons().sort((a, b) => a.hint - b.hint);
         const worst = ranked[0]!;
         const bestDps = Math.max(...ranked.map((w) => w.dps));

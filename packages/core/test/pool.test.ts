@@ -417,61 +417,11 @@ describe("data/universes/ret-p2.json", () => {
     const entries = poolFromUniverse(
       data as Parameters<typeof poolFromUniverse>[0]
     );
-    // 224 -> 238: +28774 Glaive of the Pit (polearms are paladin-equippable,
-    // the D7 rule used to reject them alongside staves) and the 13 Doomwalker /
-    // Doom Lord Kazzak drops now resolving through AtlasLoot's WorldBossesBC.
-    // 238 -> 230: classAllowlist is enforced, evicting 8 class-specific SSC/TK
-    // trinkets a paladin cannot equip (ticket 25).
-    // 230 -> 235: the wowsims curated gear sets now grant membership rather
-    // than only labelling rows that got in some other way, admitting the 5
-    // curated ret items with no recorded origin (ticket 41). They carry
-    // `{kind: "unknown"}` and so are filtered out of every raid view.
-    // 235 -> 236: `{kind: "world"}` (ticket 45 §1) now counts as list-driven
-    // membership, the same way badge/pvp/crafted/rep already did, admitting
-    // 23203 Libram of Fervor via its "World Drop - Azeroth" Wowhead text.
-    // 236 -> 240: a curated item can carry a *real* db source that is still
-    // list-only shaped (no zone) -- `curated_list_only` in
-    // assemble_universe.py now grants membership for that shape the same way
-    // `curated_unsourced` already did for no source at all (ticket 41
-    // remainder). +23522 Ragesteel Breastplate, +28429 Lionheart Champion,
-    // +28430 Lionheart Executioner, +33173 Ragesteel Shoulders — all
-    // `{kind: "crafted"}`, all wowsims-curated, none independently a member
-    // because their own Wowhead row uses "Crafting:" prose the parser does
-    // not read (ticket 45 leaves that prose unmodeled by design).
-    // 240 -> 241: ret_p3.gear.json (slice 6b, 5c7491899) widens the curated
-    // union, admitting +33122 Cloak of Darkness (phase 1, so it clears the
-    // phase guard curated_unsourced/curated_list_only now enforce -- see
-    // assemble_universe.py's `curated` check). A second new member,
-    // 32574 Bindings of Lightning Reflexes, is phase 3 and correctly does
-    // NOT appear here: that same guard is what excludes it from a p2
-    // universe. Before the guard existed it leaked through regardless of its
-    // own phase (pool-file.test.ts caught it -- cli.ts's loadUniversePool
-    // trusts a universe file's own membership as already phase-scoped and
-    // never re-applies filterPoolByPhase).
-    // 241 -> 247: ticket 157 force-admits six SME-flagged D7-eligible items;
-    // three (27484, 22401, 31033) are phase 1, so they land in ret-p2 too.
-    // The other three (31856, 28034, 28288) are also phase 1 and eligible
-    // here — all six are ret-p2 members, matching ret-p3's +6.
-    // 247 -> 240: ticket 171 (user ruling, exclusion by design) drops every
-    // stub-only item — 7 in ret-p2's phase-1/2 slice: 28590, 28592, 28774,
-    // 28823, 30008, 30063, 30619. See data/sim-implemented-effects.json.
-    // 240 -> 288: ret's pool stopped filtering by armor class when equip
-    // legality moved to the fork's own canEquipItem. A paladin can wear cloth,
-    // and the SME gate ruled the old omission an unexplained outlier rather
-    // than policy (every other spec, warrior included, already admitted it).
-    // +48 cloth rows at p2. The 2H-only weapon rule survives as a named policy.
-    // 288 -> 480: ret takes the nine specs' list rules (tickets 611, 613).
-    // +179 db-phase rows (badge, PvP, quest and vendor epics with no source,
-    // ilvl >= 100 or a sim-implemented effect), +15 crafted items whose
-    // pattern drops in an in-phase raid, -2 Gladiator arena rows (31984,
-    // 32041). Re-run the per-list account in the 613 closing note.
-    // 480 -> 502: +22 rewards of factions phase_raids.json does not list
-    // (Violet Signets, A'dal's Command...), admitted by the rep-item route
-    // under db-phase rules (stage-gate tab-item-lists, K3-rep-items).
-    // 502 -> 541: +38 arena pieces (season 1-2, db phase <= 2) admitted as a
-    // pvp/arena source the player can untick (ticket 642), +1 23206 Mark of
-    // the Champion, whose guide prose names Naxxramas and so no longer counts
-    // as a source (stage-gate tab-blocking-finish, OQ-23206).
+    // Pins the list size, so a change in ret-p2 membership is a deliberate
+    // edit here; the commit that moves the number says which route changed.
+    // Re-run: `python scripts/assemble_universe.py --spec ret --max-phase 2
+    // --out <scratch> --report <scratch>` and
+    // `len(json.load(open('<scratch>'))['entries'])`.
     expect(entries.length).toBe(541);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();

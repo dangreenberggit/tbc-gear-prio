@@ -713,13 +713,10 @@ const O1_BASE_HIT: Record<(typeof O1_FIXTURES)[number], number> = {
 };
 
 /**
- * Row repairs per fixture. Ticket 535's probes counted 54/2/8/8/8 on the
- * fixtures recorded before 2026-10-15; the re-record that day (tickets
- * 611/613: ret-p3 467 → 715 candidates, feral-p3 364 → 587, feral-p2
- * 227 → 405) added rows. The 2026-10-16 re-record (ticket 642 admitted
- * arena gear: ret-p3 715 → 794 candidates, feral-p3 587 → 686, feral-p2
- * 405 → 479) added more, and these are this test's counts on them, with
- * every repair still checked against the brute force above.
+ * Row repairs per fixture, as this test counts them on the committed
+ * fixtures (ticket 535, § The probes, gives the method). Pinned so that a
+ * re-record which changes them is a deliberate edit; every repair is still
+ * checked against the brute force above.
  */
 const O1_ROW_REPAIRS: Record<(typeof O1_FIXTURES)[number], number> = {
   "ret-p3-p2": 68,
@@ -732,11 +729,9 @@ const O1_ROW_REPAIRS: Record<(typeof O1_FIXTURES)[number], number> = {
 /**
  * The named package repairs, as (set id, piece number): Burning Rage's
  * second piece on ret-p3-p2, and the first piece of three sets on
- * feral-p3-p2bis. Nothing was repaired before them in their jobs. Ticket
- * 535's probes also found 584:1 (Gladiator's Dragonhide); arena gear left
- * the lists in ticket 613 and returned in ticket 642. On the 2026-10-16
- * re-record the arena sets' repairs (584, 585, 685) are checked like every
- * other package repair and logged as "other package repairs", not named.
+ * feral-p3-p2bis. Nothing was repaired before them in their jobs. The arena
+ * sets' repairs (584, 585, 685) are checked like every other package repair
+ * and logged as "other package repairs", not named.
  */
 const O1_PACKAGE_REPAIRS: Record<(typeof O1_FIXTURES)[number], string[]> = {
   "ret-p3-p2": ["566:2"],
@@ -748,7 +743,7 @@ const O1_PACKAGE_REPAIRS: Record<(typeof O1_FIXTURES)[number], string[]> = {
 
 /**
  * Deficit counts over each fixture's row repairs plus its named package
- * repairs, on the 2026-10-16 re-record (see O1_ROW_REPAIRS).
+ * repairs, pinned for the same reason as O1_ROW_REPAIRS.
  */
 const O1_DEFICITS: Record<
   (typeof O1_FIXTURES)[number],
@@ -819,10 +814,9 @@ const isLayout = (
 
 describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
   it("535-O1: every measured repair, through the tab's own swap path, is the best minimal set", async () => {
-    // Oracle: the brute force for the search; the counts were the probes'
-    // (ticket 535, § The probes) until the 2026-10-15 re-record (see
-    // O1_ROW_REPAIRS); probe 222 for the work (at most
-    // 1,343,593, under the limit of 5,000,000).
+    // Oracle: the brute force for the search; the pinned counts (see
+    // O1_ROW_REPAIRS); probe 222 for the work (at most 1,343,593, under the
+    // limit of 5,000,000).
     const e = await engine();
     const fork = oracleFork(e);
     const t0 = performance.now();
@@ -978,13 +972,8 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
     expect(measured).toBe(182);
     // 39 named d = 1 repairs (ret-p3-p2's rows) plus 4 unnamed package
     // repairs on feral-p3-th-hands-legs (piece 4 of sets 640, 584, 585 and
-    // 685; the last three are arena sets, back in the lists since ticket
-    // 642's 2026-10-16 re-record). The ticket 560
-    // re-record made the three feral files that predated ticket 511 (fork
-    // 2117d5271) step rankings, so their set packages are new jobs; the
-    // 2026-10-15 re-record (tickets 611/613) dropped set 584 (Gladiator's
-    // Dragonhide, arena gear) and its piece-4 repair, which returned with
-    // the arena sets above.
+    // 685; the last three are arena sets). The feral files step rankings, so
+    // their set packages are jobs of their own.
     expect(deficitOne).toBe(43);
     console.log(
       `[535-O1] other package repairs: ${otherPackageRepairs.length === 0 ? "none" : otherPackageRepairs.join("; ")}`
