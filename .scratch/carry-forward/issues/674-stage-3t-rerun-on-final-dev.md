@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 follow-on (Tab-blocking rows)
 Type: task
 Origin: .scratch/stage-gate/tab-blocking-finish/decomposition.md (deferred part P2)
@@ -74,3 +74,22 @@ Blocked by: none
 - One live backend on port 3333 at a time; check that no other folder's
   backend holds it first (`docs/agents/paired-worktrees.md` § Work in it,
   **Live tab**).
+
+## Comments
+
+2026-10-16, closed on `docs/stage-3t-boxes`. Before the re-run, both pins
+moved to upstream `master` `e804c29e8d615fcc6dcc632a1b0c782605e27d46`
+(release v0.0.150): the engine lock, and the fork through merge commit
+`bc96d0a03` on `wt/stage-3t-boxes` with `branchedFrom` set to that commit.
+Boxes 1 to 5 were then run on fork `bc96d0a03` and recorded in
+`docs/verification-log.md` § Stage 3T (the 2026-10-16 entry), and ticked in
+PLAN.md `### Stage 3T`. Box 3's expected row count is now 40
+(`data/desktop-gate/README.md:34`). Ret figures did not move: the desktop
+gate's check (h) and the WASM run both match
+`data/desktop-gate/golden-ret-p4-cap40.json` exactly. The ticket's goal steps
+4 and 5 (the merge ask and the `dev` -> `main` / `tab-1` question) are the
+session's to put to the owner; they need no further work on this branch.
+
+Verified by: `sed -n '/^### Stage 3T/,/^### Stage 4/p' PLAN.md | grep -c '☐'`
+prints 0, and `docs/verification-log.md` § Stage 3T, 2026-10-16 entry, quotes
+each box's command and output.
