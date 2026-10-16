@@ -23,7 +23,7 @@ Three gates run on every verify, and all three are **AtlasLoot-only**:
 | gate | catches |
 | --- | --- |
 | `sync:atlasloot:verify-local` | vendored Lua drifting from the lockfile (rule 1) |
-| `atlasloot:regen:check` | the three committed parse outputs not reproducing (rule 2) |
+| `atlasloot:regen:check` | the 4 committed parse outputs, plus `tier-sets.json` and one `<spec>-tokens.json` per spec in the spec registry when `vendor/wowsims/db.json` is present, not reproducing (rule 2) |
 | `rep-tables:check` | two faction names collapsing to one key (rule 4, invariant 4 at `check_rep_tables.py:136`) |
 
 On any other input these rules are yours to apply by hand. The trap is a green
