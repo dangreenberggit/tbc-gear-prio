@@ -759,7 +759,7 @@ python scripts/check_pool_completeness.py --check
 
 The source repo's engine pin moved from upstream `master`
 `5262ff386bd171e6349d0f9cf00f4d762a6c9951` to `master`
-`e804c29e8d615fcc6dcc632a1b0c782605e27d46` (v0.0.148-8), and the fork branch
+`e804c29e8d615fcc6dcc632a1b0c782605e27d46` (v0.0.150), and the fork branch
 merged the same commit. Upstream's eight commits in that range change the
 arcane mage APL and spec, a UI helper, and the sim's seed-0 handling, and no
 file the source repo's lock pins, so all 44 `data/universes/*` files
