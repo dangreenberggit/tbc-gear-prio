@@ -49,9 +49,11 @@ Recording needs a fork dev server that can run the sim: either
 `WASM_WORKER=1 node node_modules/vite/bin/vite.js serve --port 5173 --strictPort`
 in `vendor/tbc-new-fork` (the sim runs in the page; build it first with
 `make -C vendor/tbc-new-fork wasm`), or the plain dev server with the backend on
-`:3333`. It also needs a committed fork tree. With the backend on `:3333`, a
-run took 319 s for feral-p3 (587 candidates) and 378 s for feral-p5 (836
-candidates) on 2026-10-15. On the same day a `WASM_WORKER=1` run of
+`:3333`. It also needs a committed fork tree. With the backend on `:3333`, on
+2026-10-16 (fork `8cd8d1c80`, one recorder at a time) a run took 291–299 s for
+each feral-p3 fixture (686 candidates), 398 s for feral-p5 (962), 176 s for
+ret-p3 (794) and 200 s for feral-p2 (479); the recorder reports the time as
+`ranking.durationMs`. On the same day a `WASM_WORKER=1` run of
 feral-p3-p2bis (587 candidates) did not finish inside the recorder's 25-minute
 limit, so use the backend for the larger lists. Run one recording at a time:
 two recorders on one backend slowed each other enough that page loads timed

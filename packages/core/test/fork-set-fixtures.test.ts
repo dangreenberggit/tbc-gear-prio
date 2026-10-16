@@ -237,7 +237,14 @@ function ownFromRow(row: Row, setBonuses: SetBonus[]): number | undefined {
 // re-record (tickets 611/613, fork 2d168e74f) kept every surviving row's
 // figure: the arena weapons left (Vengeful Gladiator's Staff and
 // Greatsword), and Empty Mug of Direbrew (db-phase) and Swiftstrike Bracers
-// (crafted from a raid pattern) entered.
+// (crafted from a raid pattern) entered. The 2026-10-16 re-record (ticket
+// 642, arena gear back as a "PvP vendor" source, fork 8cd8d1c80) added
+// Vengeful Gladiator's Staff to feral and three Vengeful Gladiator's
+// weapons to ret. Two arena weapons then take places in ret's paired-
+// replicate top 8 (PAIRED_REPLICATE_TOP_N), so Shadowmaster's Boots and
+// Bindings of Lightning Reflexes now show their single-sim figure
+// (13.4210 -> 13.5214, 10.9229 -> 11.4423); every other surviving figure
+// is unchanged.
 const PINNED_ON_TOP16: Record<string, Array<[string, number]>> = {
   "feral-p3-nordrassil4": [
     ["Thunderheart Gauntlets", 167.2134],
@@ -245,6 +252,7 @@ const PINNED_ON_TOP16: Record<string, Array<[string, number]>> = {
     ["Thunderheart Leggings", 167.2134],
     ["Thunderheart Pauldrons", 167.2134],
     ["Thunderheart Cover", 89.7068],
+    ["Vengeful Gladiator's Staff", 45.5645],
     ["Everbloom Idol", 39.3513],
     ["Breastplate of Malorne", 22.0466],
     ["Gauntlets of Malorne", 22.0466],
@@ -255,7 +263,6 @@ const PINNED_ON_TOP16: Record<string, Array<[string, number]>> = {
     ["Shadowmaster's Boots", 14.6446],
     ["Vindicator's Dragonhide Bracers", 13.9207],
     ["Band of Eternity", 8.6648],
-    ["Insidious Bands", 6.9568],
   ],
   "ret-p3-p2": [
     ["Torch of the Damned", 44.3925],
@@ -263,17 +270,17 @@ const PINNED_ON_TOP16: Record<string, Array<[string, number]>> = {
     ["Empty Mug of Direbrew", 20.5619],
     ["Cursed Vision of Sargeras", 20.2975],
     ["Bulwark of the Ancient Kings", 16.1735],
-    ["Shadowmaster's Boots", 13.421],
+    ["Shadowmaster's Boots", 13.5214],
+    ["Bindings of Lightning Reflexes", 11.4423],
     ["Band of Devastation", 10.9385],
-    ["Bindings of Lightning Reflexes", 10.9229],
     ["Unstoppable Aggressor's Ring", 10.2146],
+    ["Vengeful Gladiator's Bonegrinder", 10.0227],
+    ["Vengeful Gladiator's Greatsword", 10.0227],
+    ["Vengeful Gladiator's Decapitator", 8.7474],
     ["Dreadboots of the Legion", 8.554],
     ["Swiftstrike Bracers", 8.5089],
     ["Leggings of Divine Retribution", 8.2749],
     ["Swiftsteel Bracers", 7.658],
-    ["Band of the Eternal Champion", 7.0206],
-    ["Bow-stitched Leggings", 6.3641],
-    ["Lightbringer Breastplate", 3.8569],
   ],
 };
 
