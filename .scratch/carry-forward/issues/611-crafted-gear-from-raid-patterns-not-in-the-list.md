@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (Tab-blocking; owner answer Q-feral-p5)
 Type: bug
 Origin: owner answers to Chunk 3b step 6, 2026-10-11 (Q-feral-p5)
@@ -55,3 +55,21 @@ ticket 610's gate must give them a reason or a route.
    added items per spec and phase), and 34370 is in
    `data/universes/feral-p5.json` and its fork copy.
 3. `pnpm verify` rc=0.
+
+## Closed 2026-10-16 (stage-gate tab-blocking-finish, K4)
+
+The builder admits a crafted item whose pattern drops in a raid of the
+list's phase, for every spec (`in_recipe_phase` in
+`scripts/assemble_universe.py`, 3c2334a2). Crafted rows added per list, phases
+2/3/4/5 (stage tab-item-lists, 613 table): ret 15/28/28/56, feral 6/13/13/32,
+balance 9/16/16/34, ele 13/24/24/50, enh 13/22/22/47, hunter 13/25/25/51,
+mage 5/9/9/21, rogue 10/18/18/37, shadow 5/8/8/20, warlock 4/7/7/17, warrior
+18/34/34/65. 34370 (Gloves of Immortal Dusk) is in `data/universes/feral-p5.json`
+and its fork copy, and in the `feral-p5-th4pc` fixture's ranking. The
+completeness gate's E-recipe rule fails when the route is off (red run 3:
+32 E-recipe findings, 34370 among them;
+`.scratch/stage-gate/tab-blocking-finish/k2-red-runs.txt`, gitignored).
+
+Verified by: `pnpm pool-listings:check` (rc 0, "44 lists, 0 findings") and
+`python -c "import json;e={x['itemId'] for x in json.load(open('data/universes/feral-p5.json'))['entries']};print(34370 in e)"`
+(True) at tbc-gear-prio@808f0c7f.
