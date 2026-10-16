@@ -347,4 +347,10 @@ file contention, worker prompt. This file stays the chronological log.
 - 624 The `Verified by:` check still passes some empty values (pre-merge review feat/tab-stage-3t, round 2 R1-R3) 2026-10-11
 - 625 Under BiS only, a slot whose BiS-list item is worn tells the player to widen the filter (pre-merge review feat/bis-rows, D2) 2026-10-11
 - 626 `pnpm verify` does not check the tab's locale strings against their schema (pre-merge review feat/bis-rows, S6) 2026-10-11
+- 628 The lazy-load guard test times out in a full run of the tab's tests (stage-gate tab-view-filter, K1 note) 2026-10-15
+- 645 "Reputation vendor" names the Band of Eternity rings, which are not sold (pre-merge review feat/tab-view-filter, D3) 2026-10-15
+- 646 Some "Source not recorded" rows name a dungeon in their Source cell (pre-merge review feat/tab-view-filter, D2) 2026-10-15
+- 647 "Filter by source" cannot hide a row whose other zone it does not list (pre-merge review feat/tab-view-filter, round 2 R1) 2026-10-15
+- 648 No test keeps "No upgrades found" for a pane that never had an upgrade (pre-merge review feat/tab-view-filter, round 2 R2) 2026-10-15
+- 649 The pre-run Sources box can cut an item from two raids with one ticked (pre-merge review feat/tab-view-filter, round 2 R3) 2026-10-15
 - 655 The set-bonus popover still names some reachable bonuses nowhere (pre-merge review feat/tab-set-bonus, A1 P1) 2026-10-15
