@@ -6,7 +6,7 @@ The rules are in the script's docstring; this file names every wearable
 epic the list does not hold, and the policy that excludes it.
 
 List: `data/universes/warlock-p2.json`, 370 entries.
-Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`, sha256 `6b708ebb19d9e45ea9554a69f8f0b3f9db4600c7c71ef65dd50b3db7655ada2a`.
+Wowsims DB: `wowsims/tbc-new` commit `e804c29e8d615fcc6dcc632a1b0c782605e27d46`, sha256 `6b708ebb19d9e45ea9554a69f8f0b3f9db4600c7c71ef65dd50b3db7655ada2a`.
 
 ## Counts
 

@@ -34,11 +34,12 @@ Modes:
   (default)         build (make wowsimtbc) unless --no-build, start the packaged
                     binary on :3333, run the byte check + the harness at
                     --candidates (default 40), assert (a)-(f) and (h). --full uncaps and
-                    skips (h) (no golden for an uncapped run).
+                    skips (h) (no golden for an uncapped run). A byte mismatch
+                    fails the gate.
   --serve-args S    extra flags for the server (e.g. "--usefs=true --wasm=true"
                     for the N1 negative).
-  --update-golden   after (a)-(f) pass, rewrite the committed golden readback for
-                    this spec/phase/cap. A deliberate act -- read
+  --update-golden   after the byte check and (a)-(f) pass, rewrite the committed
+                    golden readback for this spec/phase/cap. A deliberate act -- read
                     data/desktop-gate/README.md first.
   --bytes-only      just the Q1 byte comparison of dist/tbc against the origin.
   --compare A B     just T1-T4 on two existing readback JSONs (--cross-transport
@@ -565,6 +566,21 @@ def bytes_check(origin: str) -> int:
     return 0
 
 
+def gate_passed(bytes_rc: int, gate_ok: bool, golden_rc: int) -> bool:
+    # A mismatch means the harness ran a bundle other than dist/tbc, so
+    # (a)-(h) passing says nothing about the fork commit (ticket 627).
+    return bytes_rc == 0 and gate_ok and golden_rc == 0
+
+
+def golden_refusal(bytes_rc: int, gate_ok: bool) -> str | None:
+    """Why --update-golden must not write, or None when it may."""
+    if bytes_rc != 0:
+        return "the served bundle differs from dist/tbc (byte check above)."
+    if not gate_ok:
+        return "(a)-(f) did not all pass."
+    return None
+
+
 # --- assertions -------------------------------------------------------------
 
 def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool, dict]:
@@ -676,15 +692,16 @@ def main() -> int:
         print(f"{CHECK_NAME}: assertions:")
         gate_ok, checks = assert_gate(rb, candidates, args.spec, args.phase)
 
-        # --update-golden: (a)-(f) gate the write, which stops a *broken* run
+        # --update-golden: the byte check and (a)-(f) gate the write, which
+        # stops a served bundle that is not dist, or a *broken* run
         # (timeout, panic, wrong worker, wrong row count) from becoming a
         # golden. It does NOT stop a ranking regression -- that preserves shape
         # and passes (a)-(f). Value-level correctness rests on the developer
         # reading the diff printed above.
         if args.update_golden:
-            if not gate_ok:
-                print(f"{CHECK_NAME}: refusing to write a golden -- (a)-(f) did "
-                      "not all pass.")
+            refusal = golden_refusal(brc, gate_ok)
+            if refusal:
+                print(f"{CHECK_NAME}: refusing to write a golden -- {refusal}")
                 return 1
             write_golden(rb, args.spec, args.phase, candidates)
             return 0
@@ -698,10 +715,13 @@ def main() -> int:
         else:
             golden_rc = check_golden(rb, args.spec, args.phase, candidates)
 
+        if brc != 0:
+            print("  (bytes) FAIL: the served bundle differs from dist/tbc; "
+                  "the mismatch list is printed above.")
         if golden_rc == 2:
             print(f"{CHECK_NAME}: could not run (h).")
             return 2
-        overall = gate_ok and golden_rc == 0
+        overall = gate_passed(brc, gate_ok, golden_rc)
         print(f"{CHECK_NAME}: {'PASS' if overall else 'FAIL'}.")
         return 0 if overall else 1
     finally:

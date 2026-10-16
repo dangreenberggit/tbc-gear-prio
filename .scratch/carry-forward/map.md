@@ -347,6 +347,7 @@ file contention, worker prompt. This file stays the chronological log.
 - 624 The `Verified by:` check still passes some empty values (pre-merge review feat/tab-stage-3t, round 2 R1-R3) 2026-10-11
 - 625 Under BiS only, a slot whose BiS-list item is worn tells the player to widen the filter (pre-merge review feat/bis-rows, D2) 2026-10-11
 - 626 `pnpm verify` does not check the tab's locale strings against their schema (pre-merge review feat/bis-rows, S6) 2026-10-11
+- 627 The desktop gate prints PASS when the served bundle differs from dist (pre-merge review docs/stage-3t-boxes, R8) 2026-10-12
 - 628 The lazy-load guard test times out in a full run of the tab's tests (stage-gate tab-view-filter, K1 note) 2026-10-15
 - 640 Holiday-boss items rank near the top with no source (stage tab-item-lists SME, F1) 2026-10-15
 - 641 The 2 Ring is offered in lists before the patch that added it (stage tab-item-lists SME, F2) 2026-10-15
@@ -365,3 +366,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 672 Check four item-list results against a game-data source (pre-merge review feat/tab-item-lists, U1-U4) 2026-10-16
 - 673 The completeness gate does not check entries a list should not hold (pre-merge review feat/tab-item-lists, A1) 2026-10-16
 - 674 Re-run Stage 3T on the final dev, record it, and ask about dev -> main (stage-gate tab-blocking-finish, deferred part P2) 2026-10-16
+- 675 `docs/fork-upstream-touchpoints.md` names a fork commit and upstream base the locks no longer pin (pre-merge review docs/stage-3t-boxes, B2) 2026-10-16

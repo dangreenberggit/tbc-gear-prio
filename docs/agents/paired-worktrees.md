@@ -69,6 +69,22 @@ it. The command prints a note when that is the case. See `known-traps.md`,
   servers belong to another folder, the live tab is taken until that session
   stops them.
   `wowsims-fork-prod` (port 4180) always serves the main checkout's `dist/`.
+- **Live tab from a pair (agents).** A pair's fork has no `dist/` unless
+  `wt:pair` ran with `--build`; without it the page hangs in `waitForInit`
+  and loads no gear. Build it with
+  `make -C <pair>/vendor/tbc-new-fork dist/tbc/.dirstamp`. For the backend,
+  `sim/web/main.go` imports the gitignored `binary_dist/`, so first write its
+  stub with `make -C <pair>/vendor/tbc-new-fork binary_dist/dist.go`, then
+  run `go build -o wowsimtbc.exe ./sim/web` in the pair's fork and start it
+  with `./wowsimtbc.exe --usefs=true --launch=false --host=:3333`, as the
+  `wowsims-backend` entry in `.claude/launch.json` does. Start the
+  pair's vite on a free port and give scripts that drive it
+  (`tab-fixtures:record`, `tab-fixtures:smoke`) `TBC_FORK_PORT=<that port>`,
+  and `run-tab-cdp.mjs` `--origin http://localhost:<that port>`, so they
+  drive this pair and not another folder's 5173. The backend port 3333 is
+  shared: while one pair's backend holds it, every folder's vite sends sim
+  calls there, so one folder runs live sims at a time. Run one recorder at a
+  time, and stop it and its shell before starting the next.
 - **Layout gate and `pnpm tab-review`.** Each starts its own server on a free
   port from the pair's own `dist/`. Build `dist/` with `--build`, or later
   with `make -C <pair>/vendor/tbc-new-fork dist/tbc/.dirstamp` in Git Bash.
