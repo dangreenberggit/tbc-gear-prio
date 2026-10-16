@@ -67,7 +67,9 @@ base item), which is what a player sees in the Source column.
 `scripts/parse_atlasloot.py` reads AtlasLoot's commented Sunwell Plateau rows
 into `data/two-hop/sunmote-pairs.json` (c93d673f), and the builder applies the
 pairs for every spec, keeping a pair only when the upgrade's item level is
-higher than the base's, with the reason beside the code (9e17cde1). The
+not below the base's (most kept pairs are equal, 159 -> 159), with the
+reason beside the code (9e17cde1; `scripts/assemble_universe.py`,
+`sunmote_upgrade_pairs` docstring). The
 hand-written `ret-sunmote-upgrades.json` is removed. 34397 (Bladed Chaos
 Tunic) is in `data/universes/feral-p5.json` and its fork copy with source
 "Sunmote + Harness of Carnal Instinct" (M'uru, Sunwell Plateau). Per the fork

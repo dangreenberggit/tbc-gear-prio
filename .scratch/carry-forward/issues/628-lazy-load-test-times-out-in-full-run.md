@@ -34,3 +34,13 @@ machine, with the guard still failing on a planted static import from
 outside the feature folder.
 
 ## Comments
+
+- 2026-10-16 (pre-merge review of `feat/tab-item-lists`): a second
+  test of the same class. In the full fork unit run at step 17 of K4 in
+  `.scratch/stage-gate/tab-blocking-finish/` (main checkout, gitignored;
+  fork `8cd8d1c80`, branch `feat/tab-item-lists`),
+  `ui/i18n/locale_keys.test.ts` also timed out at vitest's 5000 ms limit
+  under load. It passed when run alone and in the next full run (step 20).
+  Source: `progress-K4.md` line 14 and `execution-report.md` line 201 in
+  that folder. That the cause is the same load as the case above is a
+  hypothesis, untested.

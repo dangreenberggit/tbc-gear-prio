@@ -82,7 +82,11 @@ Decide this when the work is planned; this ticket does not edit the ADR.
    tab-item-lists step 10 (`.scratch/stage-gate/tab-item-lists/execution-report.md`,
    "613 table"): ret 288/467/523/637 -> 480/715/838/1059, feral
    227/364/408/497 -> 405/587/668/836; the nine others lose 162-267 vanilla
-   rows (item level below 100) and gain 4-65 crafted rows. Ticket 642 then
+   rows (item level below 100) and gain 4-65 crafted rows. The rep-reward
+   route (c346071c) then added 22 rows to each ret list
+   and 26 to each feral list, net: ret 502/737/860/1081, feral
+   431/613/694/862 (entry counts of `data/universes/<spec>-p<n>.json` at
+   `c346071c^` and `c346071c`). Ticket 642 then
    added every open-season arena item and 23206 (Mark of the Champion) to
    ret and feral; the per-list account is
    `.scratch/stage-gate/tab-blocking-finish/k2-prediction.txt`, "Step 10

@@ -76,7 +76,11 @@ gone) built every spec's token table from `vendor/atlasloot/data-tbc.lua`
 The token maps are generated. `scripts/generate_tier_tokens.py` writes
 `data/two-hop/<spec>-tokens.json` and `data/two-hop/tier-sets.json` from
 AtlasLoot and the wowsims database (7e682fc1); `data/two-hop/token-groups.json`
-is the only hand-written input, and its note says why.
+is the only hand-written input file, and its note says why. It holds four
+small tables, not the one the close condition names: `groups` (the 6 token
+groups' classes), `labels` (17 AtlasLoot set comments to spec slugs),
+`tiers` (3 tier words) and `slots` (8 slot words). No vendored source
+states any of them (the file's `note`).
 `pnpm atlasloot:regen:check` regenerates and byte-compares them. The
 `*_TIER_PIECE_IDS` constants are removed; the builder reads tier pieces from
 the token maps (35f7f82c). `data/universes/feral-p5.json` and its fork copy

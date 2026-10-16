@@ -361,3 +361,6 @@ file contention, worker prompt. This file stays the chronological log.
 - 655 The set-bonus popover still names some reachable bonuses nowhere (pre-merge review feat/tab-set-bonus, A1 P1) 2026-10-15
 - 660 Holiday items show no readable source, and the Mug's item-level-141 stats are unchecked (parts of 640 the owner did not rule on) 2026-10-15
 - 670 The fork's locale-key test fails on two set-bonus label keys (stage-gate tab-blocking-finish, K1 step 4) 2026-10-16
+- 671 The completeness gate reads the weapon exclusions the builder writes (pre-merge review feat/tab-item-lists, P2) 2026-10-16
+- 672 Check four item-list results against a game-data source (pre-merge review feat/tab-item-lists, U1-U4) 2026-10-16
+- 673 The completeness gate does not check entries a list should not hold (pre-merge review feat/tab-item-lists, A1) 2026-10-16
