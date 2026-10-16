@@ -2,6 +2,8 @@
 
 Reviewed range: `a283d3f58dda9c1863b1f82dbc09f915d8b3a039..3b9bb6903dc6fd89f392ee70f7c99609fcee0156`
 
+Reviewed range: `3b9bb6903dc6fd89f392ee70f7c99609fcee0156..7e3a489f740449a981a13792a4ee5ab73ecbecc8`
+
 Fork range (round 1): `000b7be81c75330b6742f925f39fae51f97c00e9..8cd8d1c80a0930e396159ef205aca10304ff2347` in `vendor/tbc-new-fork`, branch `feat/tab-item-lists` (dev's fork pin to this branch's pin in `data/wowsims-fork.lock.json`).
 
 The branch applies one item-list rule set to all 11 DPS specs, generates the
@@ -266,3 +268,73 @@ one.
 | P3    | Spec        | fixed       | Ticket 609's close note now names the four tables in `token-groups.json` and why none can be read from a vendored source                                                                                                                 |
 | P4    | Spec        | fixed       | Ticket 612's close note now says "not below", matching `assemble_universe.py:1427`                                                                                                                                                       |
 | P5    | Spec        | wontfix     | Stricter than the builder; a mismatch would fail the gate loudly, and it changes no result today                                                                                                                                         |
+
+## Focused check (round 2)
+
+Main range `3b9bb690..7e3a489f`: the round-1 review commit `60f08375`,
+the P2 fix `eec7d346` (closes ticket 671), and the code-quality pass
+`8174dce5` (CQ1, CQ7), `8be00576` (CQ2), `52583606` (CQ3), `08edae86`
+(CQ4), `b04544c3` (CQ5), `7e3a489f` (CQ6). Fork range: empty; the fork is
+at `8cd8d1c80` before and after, and `data/wowsims-fork.lock.json` is
+unchanged in the range. One fresh `general-task` agent on Opus (review
+lane) ran the four checks and wrote nothing.
+
+**Conditions.** The six code-quality commits have subject-only messages
+with no CQ ids, so condition 1 does not hold as written. The reviewer of
+this file judged it settled from this file instead: each commit's diff
+matches the CQ rows named above and touches only the files those rows
+cite (the check agent's commit-by-commit mapping). `eec7d346` also adds
+the scope-doc rows for tickets 672 and 673 in `docs/upgrades-tab-scope.md`;
+the rows match their tickets. Condition 3 holds:
+`git -C vendor/tbc-new-fork diff --numstat --diff-filter=M 5262ff38 8cd8d1c80`
+prints only `6 0 ui/app/SimTabsSection.tsx`.
+
+1. **Conditions hold: pass,** with the commit-message note above.
+2. **Each diff changes only what its finding asks: pass.** The gate's
+   restated `POLICY_EXCLUDED_WEAPON_TYPES` (ret {5, 7}, feral {6}) and
+   `TWO_HAND_ONLY_SPECS = {"ret"}` match the only two `SPEC_PROFILES` that
+   set weapon policy (`assemble_universe.py:449-450`, `:493`). The
+   present-weapon check in `eec7d346` is needed: without it a builder rule
+   that is removed (a polearm newly admitted to feral) is never compared,
+   because `wearable()` skips policy-excluded weapons. `08edae86`'s
+   `passes_db_phase_rule` (`assemble_universe.py:1404-1420`) is the same
+   expression both call sites held; checked by reading, not by a rebuild,
+   because the builder always rewrites the tracked
+   `data/weapon-type-exclusions.json` (`:2826`). `b04544c3` still checks
+   all 11 token files (`atlasloot:regen:check`: "16 committed outputs
+   match"). No comment that explained a why was deleted.
+3. **Tests assert their findings: pass.** Planted into scratch copies of
+   the 44 lists (`check_pool_completeness.py --check --universes-dir`,
+   which writes nothing at that path, `:556-558`): unchanged rc 0; 17074
+   (polearm) in feral-p3, 1728 (one-hand) in ret-p3 and 1168 (shield) in
+   ret-p3 each rc 1, "present but <spec>'s weapon policy excludes it".
+   The two builder red runs recorded in ticket 671 (87 and 24 findings)
+   were not repeated, for the tracked-file write above.
+4. **Touched tests pass: pass.** `vitest run` on `pool.test.ts`,
+   `pool-hardening.test.ts`, `fork-meta-repair.test.ts`,
+   `fork-set-fixtures.test.ts`: rc 0, 308 passed, 2 todo.
+   `pnpm pool-listings:check`: rc 0, 44 lists, 0 findings.
+   `pnpm atlasloot:regen:check`: rc 0. `check_desktop_tab.py --compare`
+   of the golden with itself: rc 0 (the range changed only comments there).
+
+**Findings in the lines the fixes wrote:**
+
+- **F1 (code quality).** `packages/core/test/pool.test.ts:422-424`, added
+  by `7e3a489f` (CQ6): the re-run recipe passes `<scratch>` to both
+  `--out` and `--report`, so followed as written the report overwrites the
+  list and the `len(...['entries'])` step raises a KeyError. It also runs
+  the builder, which rewrites the tracked `data/weapon-type-exclusions.json`.
+  The worker copied the recipe from `pool-hardening.test.ts:400-402`,
+  which has the same text on `dev`
+  (`git show dev:packages/core/test/pool-hardening.test.ts | grep -c 'report <scratch>'` prints 1).
+- **F2 (code quality, nit).** `scripts/check_desktop_tab.py:139`, rewritten
+  by `52583606` (CQ3): one comment line is 104 characters among lines
+  wrapped near 78. No lint rule sets a line length.
+
+**Round 2 stops here.** Both findings are code-quality findings in lines
+the fixes wrote, so the skill's "Round limit" stops the review: no round-2
+Disposition table is written and `pnpm merge-to-dev --check-only` is not
+re-run for this round. P2 and CQ1-CQ7 are fixed as checked above; their
+rows (P2, CQ1-CQ7: `fixed`) are written when the owner decides what
+happens to F1 and F2. S9 (the `data-pipeline-work` skill line) is pending
+the owner's answer to Q-S9.
