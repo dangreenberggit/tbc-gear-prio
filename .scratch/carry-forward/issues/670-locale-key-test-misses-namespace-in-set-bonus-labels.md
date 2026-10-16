@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
 Type: bug
 Origin: .scratch/stage-gate/tab-blocking-finish/execution-report.md (K1 step 4 fork checks; stage-gate run, no review file)
@@ -37,3 +37,5 @@ The two failures that `tab-blocking-finish` expected from a full
 Done when: `npx vitest run ui/i18n/locale_keys.test.ts` passes in the fork,
 for example by writing `ns: 'upgrades'` in each of the two `i18n.t` calls
 instead of passing it through `args`.
+
+Verified by: tbc-new-fork@000b7be81, pinned by tbc-gear-prio@ed897463; from `vendor/tbc-new-fork`, `npx vitest run ui/i18n/locale_keys.test.ts ui/features/upgrades/utils/set_bonus_labels.test.ts` (25 passed; the second file asserts the printed text of both changed calls).
