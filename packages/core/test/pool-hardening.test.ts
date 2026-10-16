@@ -157,7 +157,6 @@ const MUST_BE_ABSENT_FROM_P3 = [
   },
 ] as const;
 
-const RET_TIER_SET_IDS = new Set([626, 629, 680]);
 const SUNWELL_TIER_PIECE_IDS = new Set([34431, 34485, 34561]);
 
 describe("S6: bisTags do not affect pool membership", () => {
@@ -474,7 +473,10 @@ describe("data/universes/ret-p3.json hardening", () => {
     // Re-run: `python scripts/assemble_universe.py --spec ret --max-phase 3
     // --out <scratch> --report <scratch>` and
     // `len(json.load(open('<scratch>'))['entries'])`.
-    expect(universeP3.length).toBe(737);
+    // 737 -> 794: +56 arena pieces (season 1-3) admitted as a pvp/arena
+    // source the player can untick (ticket 642), +1 23206 Mark of the
+    // Champion (stage-gate tab-blocking-finish, OQ-23206).
+    expect(universeP3.length).toBe(794);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
@@ -1058,19 +1060,37 @@ describe("data/universes/ret-p3.json hardening", () => {
     }
   });
 
-  it.skipIf(!hasWowsimsVendor)(
-    "wowsims db setIds match the two-hop ret tier map",
-    () => {
-      const fromDb = [...byId.values()]
-        .filter((it) => it.setId != null && RET_TIER_SET_IDS.has(it.setId))
-        .map((it) => it.id)
-        .sort((a, b) => a - b);
-      const fromTwoHop = twoHop.entries
-        .map((e) => e.pieceId)
-        .sort((a, b) => a - b);
-      expect(fromDb).toEqual(fromTwoHop);
-    }
+  // Every spec, not only ret: the token map is the one list of a spec's tier
+  // pieces the builder reads (ticket 609), so a piece db.json puts in one of
+  // the spec's sets but the map lacks would ship without its token source.
+  const tierSets = JSON.parse(
+    readFileSync(join(root, "data/two-hop/tier-sets.json"), "utf8")
+  ) as Record<string, unknown>;
+  const tierSpecs = Object.entries(tierSets).filter(
+    (kv): kv is [string, { setId: number }[]] => Array.isArray(kv[1])
   );
+  it("tier-sets.json names every DPS spec", () => {
+    expect(tierSpecs).toHaveLength(11);
+  });
+  for (const [spec, sets] of tierSpecs) {
+    it.skipIf(!hasWowsimsVendor)(
+      `wowsims db setIds match the two-hop ${spec} tier map`,
+      () => {
+        const setIds = new Set(sets.map((s) => s.setId));
+        const fromDb = [...byId.values()]
+          .filter((it) => it.setId != null && setIds.has(it.setId))
+          .map((it) => it.id)
+          .sort((a, b) => a - b);
+        const tokens = JSON.parse(
+          readFileSync(join(root, `data/two-hop/${spec}-tokens.json`), "utf8")
+        ) as { entries: { pieceId: number }[] };
+        const fromTwoHop = tokens.entries
+          .map((e) => e.pieceId)
+          .sort((a, b) => a - b);
+        expect(fromDb).toEqual(fromTwoHop);
+      }
+    );
+  }
 
   // Weapon damage is the dominant ret term and is not a stat, so a
   // curationHint blind to it ranked two-handers near-arbitrarily -- Glaive of
@@ -1202,9 +1222,15 @@ describe("an item's source does not depend on which tier is assembled", () => {
     // dishonesty in the vocabulary, not a parser regression — ticket 174.
     // Listed explicitly so a *new* item acquiring this shape still fails.
     const ticket157 = new Set([27484, 31033, 22401, 31856, 28034, 28288]);
+    // The parser reads these two, but their prose names a place outside TBC's
+    // raids and admitted heroics ("Classic - Naxxramas", "Heroic Sethekk
+    // Halls"), which the builder records as no source at all (stage-gate
+    // tab-blocking-finish, OQ-23206). Listed explicitly for the same reason.
+    const unkeptPlace = new Set([23206, 32387]);
     for (const e of loadUniverse("data/universes/feral-p3.json").raw.entries) {
       if (!e.sources.some((s) => s.kind === "unknown")) continue;
       if (ticket157.has(e.itemId)) continue;
+      if (unkeptPlace.has(e.itemId)) continue;
       expect(
         listed.has(e.itemId),
         `${e.itemId} ${e.name} is on a Wowhead list but shipped as kind:unknown — the parser dropped its prose`

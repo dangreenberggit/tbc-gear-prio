@@ -13,6 +13,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | Rule | Wearable epics |
 | --- | --- |
 | P-stub | 107 |
+| P-season-closed | 32 |
 | E-arena | 84 |
 | E-token | 15 |
 | E-sunmote | 0 |
@@ -21,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | E-rep | 49 |
 | E-recipe | 39 |
 | E-sourceless | 246 |
-| P-later-phase | 349 |
+| P-later-phase | 317 |
 | P-vanilla | 222 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 232 |
@@ -146,7 +147,44 @@ the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its f
 - 35750 Redeemer's Alchemist Stone
 - 35751 Assassin's Alchemist Stone
 
-### P-later-phase (349)
+### P-season-closed (32)
+
+arena gear of a season that opens after this phase (owner, 2026-10-16: only while its season is open for the selected phase).
+
+- 34986 Brutal Gladiator's Barrier
+- 34987 Brutal Gladiator's Battle Staff
+- 34989 Brutal Gladiator's Bonegrinder
+- 34996 Brutal Gladiator's Cleaver
+- 34997 Brutal Gladiator's Decapitator
+- 35008 Brutal Gladiator's Endgame
+- 35014 Brutal Gladiator's Gavel
+- 35016 Brutal Gladiator's Grimoire
+- 35042 Brutal Gladiator's Linked Armor
+- 35044 Brutal Gladiator's Linked Helm
+- 35045 Brutal Gladiator's Linked Leggings
+- 35046 Brutal Gladiator's Linked Spaulders
+- 35048 Brutal Gladiator's Mail Armor
+- 35050 Brutal Gladiator's Mail Helm
+- 35051 Brutal Gladiator's Mail Leggings
+- 35052 Brutal Gladiator's Mail Spaulders
+- 35071 Brutal Gladiator's Pummeler
+- 35073 Brutal Gladiator's Redoubt
+- 35074 Brutal Gladiator's Reprieve
+- 35076 Brutal Gladiator's Right Ripper
+- 35077 Brutal Gladiator's Ringmail Armor
+- 35079 Brutal Gladiator's Ringmail Helm
+- 35080 Brutal Gladiator's Ringmail Leggings
+- 35081 Brutal Gladiator's Ringmail Spaulders
+- 35082 Brutal Gladiator's Salvation
+- 35093 Brutal Gladiator's Shanker
+- 35094 Brutal Gladiator's Shield Wall
+- 35102 Brutal Gladiator's Spellblade
+- 35103 Brutal Gladiator's Staff
+- 35109 Brutal Gladiator's War Staff
+- 37739 Brutal Gladiator's Blade of Alacrity
+- 37740 Brutal Gladiator's Swift Judgement
+
+### P-later-phase (317)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -426,36 +464,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34936 Tormented Demonsoul Robes
 - 34937 Corrupted Soulcloth Pantaloons
 - 34938 Enslaved Doomguard Soulgrips
-- 34986 Brutal Gladiator's Barrier
-- 34987 Brutal Gladiator's Battle Staff
-- 34989 Brutal Gladiator's Bonegrinder
-- 34996 Brutal Gladiator's Cleaver
-- 34997 Brutal Gladiator's Decapitator
-- 35008 Brutal Gladiator's Endgame
-- 35014 Brutal Gladiator's Gavel
-- 35016 Brutal Gladiator's Grimoire
-- 35042 Brutal Gladiator's Linked Armor
-- 35044 Brutal Gladiator's Linked Helm
-- 35045 Brutal Gladiator's Linked Leggings
-- 35046 Brutal Gladiator's Linked Spaulders
-- 35048 Brutal Gladiator's Mail Armor
-- 35050 Brutal Gladiator's Mail Helm
-- 35051 Brutal Gladiator's Mail Leggings
-- 35052 Brutal Gladiator's Mail Spaulders
-- 35071 Brutal Gladiator's Pummeler
-- 35073 Brutal Gladiator's Redoubt
-- 35074 Brutal Gladiator's Reprieve
-- 35076 Brutal Gladiator's Right Ripper
-- 35077 Brutal Gladiator's Ringmail Armor
-- 35079 Brutal Gladiator's Ringmail Helm
-- 35080 Brutal Gladiator's Ringmail Leggings
-- 35081 Brutal Gladiator's Ringmail Spaulders
-- 35082 Brutal Gladiator's Salvation
-- 35093 Brutal Gladiator's Shanker
-- 35094 Brutal Gladiator's Shield Wall
-- 35102 Brutal Gladiator's Spellblade
-- 35103 Brutal Gladiator's Staff
-- 35109 Brutal Gladiator's War Staff
 - 35129 Guardian's Band of Dominance
 - 35130 Guardian's Band of Salvation
 - 35131 Guardian's Band of Triumph
@@ -492,8 +500,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 35700 Figurine - Crimson Serpent
 - 35702 Figurine - Shadowsong Panther
 - 35733 Ring of Harmonic Beauty
-- 37739 Brutal Gladiator's Blade of Alacrity
-- 37740 Brutal Gladiator's Swift Judgement
 - 37864 Medallion of the Alliance
 - 37865 Medallion of the Horde
 - 37927 Guardian's Band of Subjugation

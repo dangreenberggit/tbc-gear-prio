@@ -13,6 +13,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | Rule | Wearable epics |
 | --- | --- |
 | P-stub | 69 |
+| P-season-closed | 24 |
 | E-arena | 56 |
 | E-token | 15 |
 | E-sunmote | 0 |
@@ -21,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | E-rep | 45 |
 | E-recipe | 15 |
 | E-sourceless | 204 |
-| P-later-phase | 145 |
+| P-later-phase | 121 |
 | P-vanilla | 164 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 160 |
@@ -108,7 +109,36 @@ the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its f
 - 35750 Redeemer's Alchemist Stone
 - 35751 Assassin's Alchemist Stone
 
-### P-later-phase (145)
+### P-season-closed (24)
+
+arena gear of a season that opens after this phase (owner, 2026-10-16: only while its season is open for the selected phase).
+
+- 34985 Brutal Gladiator's Baton of Light
+- 34987 Brutal Gladiator's Battle Staff
+- 35008 Brutal Gladiator's Endgame
+- 35014 Brutal Gladiator's Gavel
+- 35016 Brutal Gladiator's Grimoire
+- 35054 Brutal Gladiator's Mooncloth Hood
+- 35055 Brutal Gladiator's Mooncloth Leggings
+- 35056 Brutal Gladiator's Mooncloth Mantle
+- 35057 Brutal Gladiator's Mooncloth Robe
+- 35065 Brutal Gladiator's Piercing Touch
+- 35071 Brutal Gladiator's Pummeler
+- 35074 Brutal Gladiator's Reprieve
+- 35082 Brutal Gladiator's Salvation
+- 35084 Brutal Gladiator's Satin Hood
+- 35085 Brutal Gladiator's Satin Leggings
+- 35086 Brutal Gladiator's Satin Mantle
+- 35087 Brutal Gladiator's Satin Robe
+- 35093 Brutal Gladiator's Shanker
+- 35102 Brutal Gladiator's Spellblade
+- 35103 Brutal Gladiator's Staff
+- 35107 Brutal Gladiator's Touch of Defeat
+- 35109 Brutal Gladiator's War Staff
+- 37739 Brutal Gladiator's Blade of Alacrity
+- 37740 Brutal Gladiator's Swift Judgement
+
+### P-later-phase (121)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -202,28 +232,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34936 Tormented Demonsoul Robes
 - 34937 Corrupted Soulcloth Pantaloons
 - 34938 Enslaved Doomguard Soulgrips
-- 34985 Brutal Gladiator's Baton of Light
-- 34987 Brutal Gladiator's Battle Staff
-- 35008 Brutal Gladiator's Endgame
-- 35014 Brutal Gladiator's Gavel
-- 35016 Brutal Gladiator's Grimoire
-- 35054 Brutal Gladiator's Mooncloth Hood
-- 35055 Brutal Gladiator's Mooncloth Leggings
-- 35056 Brutal Gladiator's Mooncloth Mantle
-- 35057 Brutal Gladiator's Mooncloth Robe
-- 35065 Brutal Gladiator's Piercing Touch
-- 35071 Brutal Gladiator's Pummeler
-- 35074 Brutal Gladiator's Reprieve
-- 35082 Brutal Gladiator's Salvation
-- 35084 Brutal Gladiator's Satin Hood
-- 35085 Brutal Gladiator's Satin Leggings
-- 35086 Brutal Gladiator's Satin Mantle
-- 35087 Brutal Gladiator's Satin Robe
-- 35093 Brutal Gladiator's Shanker
-- 35102 Brutal Gladiator's Spellblade
-- 35103 Brutal Gladiator's Staff
-- 35107 Brutal Gladiator's Touch of Defeat
-- 35109 Brutal Gladiator's War Staff
 - 35129 Guardian's Band of Dominance
 - 35130 Guardian's Band of Salvation
 - 35131 Guardian's Band of Triumph
@@ -252,8 +260,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 35700 Figurine - Crimson Serpent
 - 35702 Figurine - Shadowsong Panther
 - 35733 Ring of Harmonic Beauty
-- 37739 Brutal Gladiator's Blade of Alacrity
-- 37740 Brutal Gladiator's Swift Judgement
 - 37927 Guardian's Band of Subjugation
 - 37928 Guardian's Pendant of Subjugation
 - 37929 Guardian's Pendant of Reprieve

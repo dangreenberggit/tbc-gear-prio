@@ -13,6 +13,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | Rule | Wearable epics |
 | --- | --- |
 | P-stub | 107 |
+| P-season-closed | 39 |
 | E-arena | 99 |
 | E-token | 15 |
 | E-sunmote | 0 |
@@ -21,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | E-rep | 49 |
 | E-recipe | 39 |
 | E-sourceless | 248 |
-| P-later-phase | 363 |
+| P-later-phase | 324 |
 | P-vanilla | 225 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 233 |
@@ -146,7 +147,51 @@ the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its f
 - 35750 Redeemer's Alchemist Stone
 - 35751 Assassin's Alchemist Stone
 
-### P-later-phase (363)
+### P-season-closed (39)
+
+arena gear of a season that opens after this phase (owner, 2026-10-16: only while its season is open for the selected phase).
+
+- 34986 Brutal Gladiator's Barrier
+- 34987 Brutal Gladiator's Battle Staff
+- 34988 Brutal Gladiator's Bonecracker
+- 34989 Brutal Gladiator's Bonegrinder
+- 34995 Brutal Gladiator's Chopper
+- 34996 Brutal Gladiator's Cleaver
+- 34997 Brutal Gladiator's Decapitator
+- 35008 Brutal Gladiator's Endgame
+- 35014 Brutal Gladiator's Gavel
+- 35016 Brutal Gladiator's Grimoire
+- 35017 Brutal Gladiator's Hacker
+- 35037 Brutal Gladiator's Left Render
+- 35038 Brutal Gladiator's Left Ripper
+- 35042 Brutal Gladiator's Linked Armor
+- 35044 Brutal Gladiator's Linked Helm
+- 35045 Brutal Gladiator's Linked Leggings
+- 35046 Brutal Gladiator's Linked Spaulders
+- 35048 Brutal Gladiator's Mail Armor
+- 35050 Brutal Gladiator's Mail Helm
+- 35051 Brutal Gladiator's Mail Leggings
+- 35052 Brutal Gladiator's Mail Spaulders
+- 35058 Brutal Gladiator's Mutilator
+- 35071 Brutal Gladiator's Pummeler
+- 35073 Brutal Gladiator's Redoubt
+- 35074 Brutal Gladiator's Reprieve
+- 35076 Brutal Gladiator's Right Ripper
+- 35077 Brutal Gladiator's Ringmail Armor
+- 35079 Brutal Gladiator's Ringmail Helm
+- 35080 Brutal Gladiator's Ringmail Leggings
+- 35081 Brutal Gladiator's Ringmail Spaulders
+- 35082 Brutal Gladiator's Salvation
+- 35093 Brutal Gladiator's Shanker
+- 35094 Brutal Gladiator's Shield Wall
+- 35095 Brutal Gladiator's Shiv
+- 35102 Brutal Gladiator's Spellblade
+- 35103 Brutal Gladiator's Staff
+- 35109 Brutal Gladiator's War Staff
+- 37739 Brutal Gladiator's Blade of Alacrity
+- 37740 Brutal Gladiator's Swift Judgement
+
+### P-later-phase (324)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -433,43 +478,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34950 Vanir's Left Fist of Savagery
 - 34951 Vanir's Left Fist of Brutality
 - 34952 The Mutilator
-- 34986 Brutal Gladiator's Barrier
-- 34987 Brutal Gladiator's Battle Staff
-- 34988 Brutal Gladiator's Bonecracker
-- 34989 Brutal Gladiator's Bonegrinder
-- 34995 Brutal Gladiator's Chopper
-- 34996 Brutal Gladiator's Cleaver
-- 34997 Brutal Gladiator's Decapitator
-- 35008 Brutal Gladiator's Endgame
-- 35014 Brutal Gladiator's Gavel
-- 35016 Brutal Gladiator's Grimoire
-- 35017 Brutal Gladiator's Hacker
-- 35037 Brutal Gladiator's Left Render
-- 35038 Brutal Gladiator's Left Ripper
-- 35042 Brutal Gladiator's Linked Armor
-- 35044 Brutal Gladiator's Linked Helm
-- 35045 Brutal Gladiator's Linked Leggings
-- 35046 Brutal Gladiator's Linked Spaulders
-- 35048 Brutal Gladiator's Mail Armor
-- 35050 Brutal Gladiator's Mail Helm
-- 35051 Brutal Gladiator's Mail Leggings
-- 35052 Brutal Gladiator's Mail Spaulders
-- 35058 Brutal Gladiator's Mutilator
-- 35071 Brutal Gladiator's Pummeler
-- 35073 Brutal Gladiator's Redoubt
-- 35074 Brutal Gladiator's Reprieve
-- 35076 Brutal Gladiator's Right Ripper
-- 35077 Brutal Gladiator's Ringmail Armor
-- 35079 Brutal Gladiator's Ringmail Helm
-- 35080 Brutal Gladiator's Ringmail Leggings
-- 35081 Brutal Gladiator's Ringmail Spaulders
-- 35082 Brutal Gladiator's Salvation
-- 35093 Brutal Gladiator's Shanker
-- 35094 Brutal Gladiator's Shield Wall
-- 35095 Brutal Gladiator's Shiv
-- 35102 Brutal Gladiator's Spellblade
-- 35103 Brutal Gladiator's Staff
-- 35109 Brutal Gladiator's War Staff
 - 35129 Guardian's Band of Dominance
 - 35130 Guardian's Band of Salvation
 - 35131 Guardian's Band of Triumph
@@ -506,8 +514,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 35700 Figurine - Crimson Serpent
 - 35702 Figurine - Shadowsong Panther
 - 35733 Ring of Harmonic Beauty
-- 37739 Brutal Gladiator's Blade of Alacrity
-- 37740 Brutal Gladiator's Swift Judgement
 - 37864 Medallion of the Alliance
 - 37865 Medallion of the Horde
 - 37927 Guardian's Band of Subjugation

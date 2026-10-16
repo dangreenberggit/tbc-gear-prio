@@ -13,6 +13,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | Rule | Wearable epics |
 | --- | --- |
 | P-stub | 83 |
+| P-season-closed | 38 |
 | E-arena | 98 |
 | E-token | 15 |
 | E-sunmote | 0 |
@@ -21,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | E-rep | 58 |
 | E-recipe | 51 |
 | E-sourceless | 247 |
-| P-later-phase | 444 |
+| P-later-phase | 406 |
 | P-vanilla | 267 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 293 |
@@ -122,7 +123,50 @@ the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its f
 - 35751 Assassin's Alchemist Stone
 - 38175 The Horseman's Blade
 
-### P-later-phase (444)
+### P-season-closed (38)
+
+arena gear of a season that opens after this phase (owner, 2026-10-16: only while its season is open for the selected phase).
+
+- 34986 Brutal Gladiator's Barrier
+- 34987 Brutal Gladiator's Battle Staff
+- 34988 Brutal Gladiator's Bonecracker
+- 34989 Brutal Gladiator's Bonegrinder
+- 34995 Brutal Gladiator's Chopper
+- 34996 Brutal Gladiator's Cleaver
+- 34997 Brutal Gladiator's Decapitator
+- 35008 Brutal Gladiator's Endgame
+- 35014 Brutal Gladiator's Gavel
+- 35015 Brutal Gladiator's Greatsword
+- 35016 Brutal Gladiator's Grimoire
+- 35017 Brutal Gladiator's Hacker
+- 35018 Brutal Gladiator's Heavy Crossbow
+- 35037 Brutal Gladiator's Left Render
+- 35038 Brutal Gladiator's Left Ripper
+- 35047 Brutal Gladiator's Longbow
+- 35058 Brutal Gladiator's Mutilator
+- 35064 Brutal Gladiator's Painsaw
+- 35066 Brutal Gladiator's Plate Chestpiece
+- 35067 Brutal Gladiator's Plate Gauntlets
+- 35068 Brutal Gladiator's Plate Helm
+- 35069 Brutal Gladiator's Plate Legguards
+- 35070 Brutal Gladiator's Plate Shoulders
+- 35071 Brutal Gladiator's Pummeler
+- 35072 Brutal Gladiator's Quickblade
+- 35073 Brutal Gladiator's Redoubt
+- 35074 Brutal Gladiator's Reprieve
+- 35075 Brutal Gladiator's Rifle
+- 35076 Brutal Gladiator's Right Ripper
+- 35082 Brutal Gladiator's Salvation
+- 35093 Brutal Gladiator's Shanker
+- 35094 Brutal Gladiator's Shield Wall
+- 35095 Brutal Gladiator's Shiv
+- 35101 Brutal Gladiator's Slicer
+- 35102 Brutal Gladiator's Spellblade
+- 35103 Brutal Gladiator's Staff
+- 35108 Brutal Gladiator's War Edge
+- 35109 Brutal Gladiator's War Staff
+
+### P-later-phase (406)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -490,44 +534,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34950 Vanir's Left Fist of Savagery
 - 34951 Vanir's Left Fist of Brutality
 - 34952 The Mutilator
-- 34986 Brutal Gladiator's Barrier
-- 34987 Brutal Gladiator's Battle Staff
-- 34988 Brutal Gladiator's Bonecracker
-- 34989 Brutal Gladiator's Bonegrinder
-- 34995 Brutal Gladiator's Chopper
-- 34996 Brutal Gladiator's Cleaver
-- 34997 Brutal Gladiator's Decapitator
-- 35008 Brutal Gladiator's Endgame
-- 35014 Brutal Gladiator's Gavel
-- 35015 Brutal Gladiator's Greatsword
-- 35016 Brutal Gladiator's Grimoire
-- 35017 Brutal Gladiator's Hacker
-- 35018 Brutal Gladiator's Heavy Crossbow
-- 35037 Brutal Gladiator's Left Render
-- 35038 Brutal Gladiator's Left Ripper
-- 35047 Brutal Gladiator's Longbow
-- 35058 Brutal Gladiator's Mutilator
-- 35064 Brutal Gladiator's Painsaw
-- 35066 Brutal Gladiator's Plate Chestpiece
-- 35067 Brutal Gladiator's Plate Gauntlets
-- 35068 Brutal Gladiator's Plate Helm
-- 35069 Brutal Gladiator's Plate Legguards
-- 35070 Brutal Gladiator's Plate Shoulders
-- 35071 Brutal Gladiator's Pummeler
-- 35072 Brutal Gladiator's Quickblade
-- 35073 Brutal Gladiator's Redoubt
-- 35074 Brutal Gladiator's Reprieve
-- 35075 Brutal Gladiator's Rifle
-- 35076 Brutal Gladiator's Right Ripper
-- 35082 Brutal Gladiator's Salvation
-- 35093 Brutal Gladiator's Shanker
-- 35094 Brutal Gladiator's Shield Wall
-- 35095 Brutal Gladiator's Shiv
-- 35101 Brutal Gladiator's Slicer
-- 35102 Brutal Gladiator's Spellblade
-- 35103 Brutal Gladiator's Staff
-- 35108 Brutal Gladiator's War Edge
-- 35109 Brutal Gladiator's War Staff
 - 35129 Guardian's Band of Dominance
 - 35130 Guardian's Band of Salvation
 - 35131 Guardian's Band of Triumph

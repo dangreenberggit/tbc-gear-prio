@@ -13,6 +13,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | Rule | Wearable epics |
 | --- | --- |
 | P-stub | 107 |
+| P-season-closed | 0 |
 | E-arena | 116 |
 | E-token | 18 |
 | E-sunmote | 17 |

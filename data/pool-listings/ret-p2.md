@@ -13,6 +13,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | Rule | Wearable epics |
 | --- | --- |
 | P-stub | 96 |
+| P-season-closed | 36 |
 | E-arena | 38 |
 | E-token | 10 |
 | E-sunmote | 0 |
@@ -21,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | E-rep | 25 |
 | E-recipe | 18 |
 | E-sourceless | 185 |
-| P-later-phase | 618 |
+| P-later-phase | 582 |
 | P-vanilla | 187 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 226 |
@@ -135,7 +136,48 @@ the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its f
 - 35750 Redeemer's Alchemist Stone
 - 35751 Assassin's Alchemist Stone
 
-### P-later-phase (618)
+### P-season-closed (36)
+
+arena gear of a season that opens after this phase (owner, 2026-10-16: only while its season is open for the selected phase).
+
+- 33663 Vengeful Gladiator's Bonegrinder
+- 33670 Vengeful Gladiator's Decapitator
+- 33688 Vengeful Gladiator's Greatsword
+- 33695 Vengeful Gladiator's Lamellar Chestpiece
+- 33697 Vengeful Gladiator's Lamellar Helm
+- 33698 Vengeful Gladiator's Lamellar Legguards
+- 33699 Vengeful Gladiator's Lamellar Shoulders
+- 33722 Vengeful Gladiator's Ornamented Chestguard
+- 33724 Vengeful Gladiator's Ornamented Headcover
+- 33725 Vengeful Gladiator's Ornamented Legplates
+- 33726 Vengeful Gladiator's Ornamented Spaulders
+- 33727 Vengeful Gladiator's Painsaw
+- 33749 Vengeful Gladiator's Scaled Chestpiece
+- 33751 Vengeful Gladiator's Scaled Helm
+- 33752 Vengeful Gladiator's Scaled Legguards
+- 33753 Vengeful Gladiator's Scaled Shoulders
+- 33938 Vengeful Gladiator's Libram of Fortitude
+- 33950 Vengeful Gladiator's Libram of Vengeance
+- 34989 Brutal Gladiator's Bonegrinder
+- 34997 Brutal Gladiator's Decapitator
+- 35015 Brutal Gladiator's Greatsword
+- 35027 Brutal Gladiator's Lamellar Chestpiece
+- 35029 Brutal Gladiator's Lamellar Helm
+- 35030 Brutal Gladiator's Lamellar Legguards
+- 35031 Brutal Gladiator's Lamellar Shoulders
+- 35039 Brutal Gladiator's Libram of Fortitude
+- 35041 Brutal Gladiator's Libram of Vengeance
+- 35059 Brutal Gladiator's Ornamented Chestguard
+- 35061 Brutal Gladiator's Ornamented Headcover
+- 35062 Brutal Gladiator's Ornamented Legplates
+- 35063 Brutal Gladiator's Ornamented Spaulders
+- 35064 Brutal Gladiator's Painsaw
+- 35088 Brutal Gladiator's Scaled Chestpiece
+- 35090 Brutal Gladiator's Scaled Helm
+- 35091 Brutal Gladiator's Scaled Legguards
+- 35092 Brutal Gladiator's Scaled Shoulders
+
+### P-later-phase (582)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -441,22 +483,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 33591 Shadowcaster's Drape
 - 33592 Cloak of Ancient Rituals
 - 33593 Slikk's Cloak of Placation
-- 33663 Vengeful Gladiator's Bonegrinder
-- 33670 Vengeful Gladiator's Decapitator
-- 33688 Vengeful Gladiator's Greatsword
-- 33695 Vengeful Gladiator's Lamellar Chestpiece
-- 33697 Vengeful Gladiator's Lamellar Helm
-- 33698 Vengeful Gladiator's Lamellar Legguards
-- 33699 Vengeful Gladiator's Lamellar Shoulders
-- 33722 Vengeful Gladiator's Ornamented Chestguard
-- 33724 Vengeful Gladiator's Ornamented Headcover
-- 33725 Vengeful Gladiator's Ornamented Legplates
-- 33726 Vengeful Gladiator's Ornamented Spaulders
-- 33727 Vengeful Gladiator's Painsaw
-- 33749 Vengeful Gladiator's Scaled Chestpiece
-- 33751 Vengeful Gladiator's Scaled Helm
-- 33752 Vengeful Gladiator's Scaled Legguards
-- 33753 Vengeful Gladiator's Scaled Shoulders
 - 33805 Shadowhunter's Treads
 - 33810 Amani Mask of Death
 - 33811 Vindicator's Plate Belt
@@ -483,8 +509,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 33921 Vindicator's Pendant of Dominance
 - 33922 Vindicator's Pendant of Salvation
 - 33923 Vindicator's Pendant of Triumph
-- 33938 Vengeful Gladiator's Libram of Fortitude
-- 33950 Vengeful Gladiator's Libram of Vengeance
 - 33964 Helm of the Stormcaller
 - 33965 Hauberk of the Furious Elements
 - 33970 Pauldrons of the Furious Elements
@@ -687,24 +711,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34945 Shattrath Protectorate's Breastplate
 - 34946 Inscribed Legplates of the Aldor
 - 34947 Blue's Greaves of the Righteous Guardian
-- 34989 Brutal Gladiator's Bonegrinder
-- 34997 Brutal Gladiator's Decapitator
-- 35015 Brutal Gladiator's Greatsword
-- 35027 Brutal Gladiator's Lamellar Chestpiece
-- 35029 Brutal Gladiator's Lamellar Helm
-- 35030 Brutal Gladiator's Lamellar Legguards
-- 35031 Brutal Gladiator's Lamellar Shoulders
-- 35039 Brutal Gladiator's Libram of Fortitude
-- 35041 Brutal Gladiator's Libram of Vengeance
-- 35059 Brutal Gladiator's Ornamented Chestguard
-- 35061 Brutal Gladiator's Ornamented Headcover
-- 35062 Brutal Gladiator's Ornamented Legplates
-- 35063 Brutal Gladiator's Ornamented Spaulders
-- 35064 Brutal Gladiator's Painsaw
-- 35088 Brutal Gladiator's Scaled Chestpiece
-- 35090 Brutal Gladiator's Scaled Helm
-- 35091 Brutal Gladiator's Scaled Legguards
-- 35092 Brutal Gladiator's Scaled Shoulders
 - 35129 Guardian's Band of Dominance
 - 35130 Guardian's Band of Salvation
 - 35131 Guardian's Band of Triumph

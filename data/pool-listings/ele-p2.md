@@ -13,6 +13,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | Rule | Wearable epics |
 | --- | --- |
 | P-stub | 107 |
+| P-season-closed | 62 |
 | E-arena | 54 |
 | E-token | 10 |
 | E-sunmote | 0 |
@@ -21,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | E-rep | 32 |
 | E-recipe | 14 |
 | E-sourceless | 199 |
-| P-later-phase | 602 |
+| P-later-phase | 540 |
 | P-vanilla | 222 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 232 |
@@ -146,7 +147,74 @@ the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its f
 - 35750 Redeemer's Alchemist Stone
 - 35751 Assassin's Alchemist Stone
 
-### P-later-phase (602)
+### P-season-closed (62)
+
+arena gear of a season that opens after this phase (owner, 2026-10-16: only while its season is open for the selected phase).
+
+- 33661 Vengeful Gladiator's Barrier
+- 33663 Vengeful Gladiator's Bonegrinder
+- 33669 Vengeful Gladiator's Cleaver
+- 33670 Vengeful Gladiator's Decapitator
+- 33681 Vengeful Gladiator's Endgame
+- 33687 Vengeful Gladiator's Gavel
+- 33706 Vengeful Gladiator's Linked Armor
+- 33708 Vengeful Gladiator's Linked Helm
+- 33709 Vengeful Gladiator's Linked Leggings
+- 33710 Vengeful Gladiator's Linked Spaulders
+- 33711 Vengeful Gladiator's Mail Armor
+- 33713 Vengeful Gladiator's Mail Helm
+- 33714 Vengeful Gladiator's Mail Leggings
+- 33715 Vengeful Gladiator's Mail Spaulders
+- 33716 Vengeful Gladiator's Staff
+- 33733 Vengeful Gladiator's Pummeler
+- 33735 Vengeful Gladiator's Redoubt
+- 33736 Vengeful Gladiator's Reprieve
+- 33737 Vengeful Gladiator's Right Ripper
+- 33738 Vengeful Gladiator's Ringmail Armor
+- 33740 Vengeful Gladiator's Ringmail Helm
+- 33741 Vengeful Gladiator's Ringmail Leggings
+- 33742 Vengeful Gladiator's Ringmail Spaulders
+- 33743 Vengeful Gladiator's Salvation
+- 33754 Vengeful Gladiator's Shanker
+- 33755 Vengeful Gladiator's Shield Wall
+- 33763 Vengeful Gladiator's Spellblade
+- 33766 Vengeful Gladiator's War Staff
+- 34033 Vengeful Gladiator's Grimoire
+- 34540 Vengeful Gladiator's Battle Staff
+- 34986 Brutal Gladiator's Barrier
+- 34987 Brutal Gladiator's Battle Staff
+- 34989 Brutal Gladiator's Bonegrinder
+- 34996 Brutal Gladiator's Cleaver
+- 34997 Brutal Gladiator's Decapitator
+- 35008 Brutal Gladiator's Endgame
+- 35014 Brutal Gladiator's Gavel
+- 35016 Brutal Gladiator's Grimoire
+- 35042 Brutal Gladiator's Linked Armor
+- 35044 Brutal Gladiator's Linked Helm
+- 35045 Brutal Gladiator's Linked Leggings
+- 35046 Brutal Gladiator's Linked Spaulders
+- 35048 Brutal Gladiator's Mail Armor
+- 35050 Brutal Gladiator's Mail Helm
+- 35051 Brutal Gladiator's Mail Leggings
+- 35052 Brutal Gladiator's Mail Spaulders
+- 35071 Brutal Gladiator's Pummeler
+- 35073 Brutal Gladiator's Redoubt
+- 35074 Brutal Gladiator's Reprieve
+- 35076 Brutal Gladiator's Right Ripper
+- 35077 Brutal Gladiator's Ringmail Armor
+- 35079 Brutal Gladiator's Ringmail Helm
+- 35080 Brutal Gladiator's Ringmail Leggings
+- 35081 Brutal Gladiator's Ringmail Spaulders
+- 35082 Brutal Gladiator's Salvation
+- 35093 Brutal Gladiator's Shanker
+- 35094 Brutal Gladiator's Shield Wall
+- 35102 Brutal Gladiator's Spellblade
+- 35103 Brutal Gladiator's Staff
+- 35109 Brutal Gladiator's War Staff
+- 37739 Brutal Gladiator's Blade of Alacrity
+- 37740 Brutal Gladiator's Swift Judgement
+
+### P-later-phase (540)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -426,34 +494,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 33591 Shadowcaster's Drape
 - 33592 Cloak of Ancient Rituals
 - 33593 Slikk's Cloak of Placation
-- 33661 Vengeful Gladiator's Barrier
-- 33663 Vengeful Gladiator's Bonegrinder
-- 33669 Vengeful Gladiator's Cleaver
-- 33670 Vengeful Gladiator's Decapitator
-- 33681 Vengeful Gladiator's Endgame
-- 33687 Vengeful Gladiator's Gavel
-- 33706 Vengeful Gladiator's Linked Armor
-- 33708 Vengeful Gladiator's Linked Helm
-- 33709 Vengeful Gladiator's Linked Leggings
-- 33710 Vengeful Gladiator's Linked Spaulders
-- 33711 Vengeful Gladiator's Mail Armor
-- 33713 Vengeful Gladiator's Mail Helm
-- 33714 Vengeful Gladiator's Mail Leggings
-- 33715 Vengeful Gladiator's Mail Spaulders
-- 33716 Vengeful Gladiator's Staff
-- 33733 Vengeful Gladiator's Pummeler
-- 33735 Vengeful Gladiator's Redoubt
-- 33736 Vengeful Gladiator's Reprieve
-- 33737 Vengeful Gladiator's Right Ripper
-- 33738 Vengeful Gladiator's Ringmail Armor
-- 33740 Vengeful Gladiator's Ringmail Helm
-- 33741 Vengeful Gladiator's Ringmail Leggings
-- 33742 Vengeful Gladiator's Ringmail Spaulders
-- 33743 Vengeful Gladiator's Salvation
-- 33754 Vengeful Gladiator's Shanker
-- 33755 Vengeful Gladiator's Shield Wall
-- 33763 Vengeful Gladiator's Spellblade
-- 33766 Vengeful Gladiator's War Staff
 - 33805 Shadowhunter's Treads
 - 33828 Tome of Diabolic Remedy
 - 33829 Hex Shrunken Head
@@ -491,7 +531,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34011 Illidari Runeshield
 - 34012 Shroud of the Final Stand
 - 34029 Tiny Voodoo Mask
-- 34033 Vengeful Gladiator's Grimoire
 - 34049 Battlemaster's Audacity
 - 34050 Battlemaster's Perseverance
 - 34162 Battlemaster's Depravity
@@ -603,7 +642,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34470 Timbal's Focusing Crystal
 - 34472 Shard of Contempt
 - 34473 Commendation of Kael'thas
-- 34540 Vengeful Gladiator's Battle Staff
 - 34542 Skyshatter Cord
 - 34543 Skyshatter Belt
 - 34545 Skyshatter Girdle
@@ -668,36 +706,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34936 Tormented Demonsoul Robes
 - 34937 Corrupted Soulcloth Pantaloons
 - 34938 Enslaved Doomguard Soulgrips
-- 34986 Brutal Gladiator's Barrier
-- 34987 Brutal Gladiator's Battle Staff
-- 34989 Brutal Gladiator's Bonegrinder
-- 34996 Brutal Gladiator's Cleaver
-- 34997 Brutal Gladiator's Decapitator
-- 35008 Brutal Gladiator's Endgame
-- 35014 Brutal Gladiator's Gavel
-- 35016 Brutal Gladiator's Grimoire
-- 35042 Brutal Gladiator's Linked Armor
-- 35044 Brutal Gladiator's Linked Helm
-- 35045 Brutal Gladiator's Linked Leggings
-- 35046 Brutal Gladiator's Linked Spaulders
-- 35048 Brutal Gladiator's Mail Armor
-- 35050 Brutal Gladiator's Mail Helm
-- 35051 Brutal Gladiator's Mail Leggings
-- 35052 Brutal Gladiator's Mail Spaulders
-- 35071 Brutal Gladiator's Pummeler
-- 35073 Brutal Gladiator's Redoubt
-- 35074 Brutal Gladiator's Reprieve
-- 35076 Brutal Gladiator's Right Ripper
-- 35077 Brutal Gladiator's Ringmail Armor
-- 35079 Brutal Gladiator's Ringmail Helm
-- 35080 Brutal Gladiator's Ringmail Leggings
-- 35081 Brutal Gladiator's Ringmail Spaulders
-- 35082 Brutal Gladiator's Salvation
-- 35093 Brutal Gladiator's Shanker
-- 35094 Brutal Gladiator's Shield Wall
-- 35102 Brutal Gladiator's Spellblade
-- 35103 Brutal Gladiator's Staff
-- 35109 Brutal Gladiator's War Staff
 - 35129 Guardian's Band of Dominance
 - 35130 Guardian's Band of Salvation
 - 35131 Guardian's Band of Triumph
@@ -738,8 +746,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 35700 Figurine - Crimson Serpent
 - 35702 Figurine - Shadowsong Panther
 - 35733 Ring of Harmonic Beauty
-- 37739 Brutal Gladiator's Blade of Alacrity
-- 37740 Brutal Gladiator's Swift Judgement
 - 37864 Medallion of the Alliance
 - 37865 Medallion of the Horde
 - 37927 Guardian's Band of Subjugation

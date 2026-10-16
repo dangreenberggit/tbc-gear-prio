@@ -13,6 +13,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | Rule | Wearable epics |
 | --- | --- |
 | P-stub | 64 |
+| P-season-closed | 54 |
 | E-arena | 42 |
 | E-token | 10 |
 | E-sunmote | 0 |
@@ -21,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | E-rep | 37 |
 | E-recipe | 10 |
 | E-sourceless | 159 |
-| P-later-phase | 490 |
+| P-later-phase | 436 |
 | P-vanilla | 201 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 203 |
@@ -103,7 +104,66 @@ the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its f
 - 35751 Assassin's Alchemist Stone
 - 38175 The Horseman's Blade
 
-### P-later-phase (490)
+### P-season-closed (54)
+
+arena gear of a season that opens after this phase (owner, 2026-10-16: only while its season is open for the selected phase).
+
+- 33006 Vengeful Gladiator's Heavy Crossbow
+- 33662 Vengeful Gladiator's Bonecracker
+- 33669 Vengeful Gladiator's Cleaver
+- 33681 Vengeful Gladiator's Endgame
+- 33687 Vengeful Gladiator's Gavel
+- 33689 Vengeful Gladiator's Hacker
+- 33701 Vengeful Gladiator's Leather Helm
+- 33702 Vengeful Gladiator's Leather Legguards
+- 33703 Vengeful Gladiator's Leather Spaulders
+- 33704 Vengeful Gladiator's Leather Tunic
+- 33705 Vengeful Gladiator's Left Ripper
+- 33733 Vengeful Gladiator's Pummeler
+- 33734 Vengeful Gladiator's Quickblade
+- 33736 Vengeful Gladiator's Reprieve
+- 33737 Vengeful Gladiator's Right Ripper
+- 33743 Vengeful Gladiator's Salvation
+- 33754 Vengeful Gladiator's Shanker
+- 33756 Vengeful Gladiator's Shiv
+- 33762 Vengeful Gladiator's Slicer
+- 33763 Vengeful Gladiator's Spellblade
+- 33765 Vengeful Gladiator's War Edge
+- 33801 Vengeful Gladiator's Mutilator
+- 34015 Vengeful Gladiator's Chopper
+- 34016 Vengeful Gladiator's Left Render
+- 34033 Vengeful Gladiator's Grimoire
+- 34529 Vengeful Gladiator's Longbow
+- 34530 Vengeful Gladiator's Rifle
+- 34988 Brutal Gladiator's Bonecracker
+- 34995 Brutal Gladiator's Chopper
+- 34996 Brutal Gladiator's Cleaver
+- 35008 Brutal Gladiator's Endgame
+- 35014 Brutal Gladiator's Gavel
+- 35016 Brutal Gladiator's Grimoire
+- 35017 Brutal Gladiator's Hacker
+- 35018 Brutal Gladiator's Heavy Crossbow
+- 35033 Brutal Gladiator's Leather Helm
+- 35034 Brutal Gladiator's Leather Legguards
+- 35035 Brutal Gladiator's Leather Spaulders
+- 35036 Brutal Gladiator's Leather Tunic
+- 35037 Brutal Gladiator's Left Render
+- 35038 Brutal Gladiator's Left Ripper
+- 35047 Brutal Gladiator's Longbow
+- 35058 Brutal Gladiator's Mutilator
+- 35071 Brutal Gladiator's Pummeler
+- 35072 Brutal Gladiator's Quickblade
+- 35074 Brutal Gladiator's Reprieve
+- 35075 Brutal Gladiator's Rifle
+- 35076 Brutal Gladiator's Right Ripper
+- 35082 Brutal Gladiator's Salvation
+- 35093 Brutal Gladiator's Shanker
+- 35095 Brutal Gladiator's Shiv
+- 35101 Brutal Gladiator's Slicer
+- 35102 Brutal Gladiator's Spellblade
+- 35108 Brutal Gladiator's War Edge
+
+### P-later-phase (436)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -248,7 +308,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 32943 Swiftsteel Bludgeon
 - 32945 Fist of Molten Fury
 - 32946 Claw of Molten Fury
-- 33006 Vengeful Gladiator's Heavy Crossbow
 - 33203 Robes of Heavenly Purpose
 - 33211 Bladeangel's Money Belt
 - 33214 Akil'zon's Talonblade
@@ -320,27 +379,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 33592 Cloak of Ancient Rituals
 - 33593 Slikk's Cloak of Placation
 - 33640 Fury
-- 33662 Vengeful Gladiator's Bonecracker
-- 33669 Vengeful Gladiator's Cleaver
-- 33681 Vengeful Gladiator's Endgame
-- 33687 Vengeful Gladiator's Gavel
-- 33689 Vengeful Gladiator's Hacker
-- 33701 Vengeful Gladiator's Leather Helm
-- 33702 Vengeful Gladiator's Leather Legguards
-- 33703 Vengeful Gladiator's Leather Spaulders
-- 33704 Vengeful Gladiator's Leather Tunic
-- 33705 Vengeful Gladiator's Left Ripper
-- 33733 Vengeful Gladiator's Pummeler
-- 33734 Vengeful Gladiator's Quickblade
-- 33736 Vengeful Gladiator's Reprieve
-- 33737 Vengeful Gladiator's Right Ripper
-- 33743 Vengeful Gladiator's Salvation
-- 33754 Vengeful Gladiator's Shanker
-- 33756 Vengeful Gladiator's Shiv
-- 33762 Vengeful Gladiator's Slicer
-- 33763 Vengeful Gladiator's Spellblade
-- 33765 Vengeful Gladiator's War Edge
-- 33801 Vengeful Gladiator's Mutilator
 - 33828 Tome of Diabolic Remedy
 - 33829 Hex Shrunken Head
 - 33830 Ancient Aqir Artifact
@@ -372,10 +410,7 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34009 Hammer of Judgement
 - 34010 Pepe's Shroud of Pacification
 - 34012 Shroud of the Final Stand
-- 34015 Vengeful Gladiator's Chopper
-- 34016 Vengeful Gladiator's Left Render
 - 34029 Tiny Voodoo Mask
-- 34033 Vengeful Gladiator's Grimoire
 - 34049 Battlemaster's Audacity
 - 34050 Battlemaster's Perseverance
 - 34162 Battlemaster's Depravity
@@ -466,8 +501,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34470 Timbal's Focusing Crystal
 - 34472 Shard of Contempt
 - 34473 Commendation of Kael'thas
-- 34529 Vengeful Gladiator's Longbow
-- 34530 Vengeful Gladiator's Rifle
 - 34558 Slayer's Belt
 - 34575 Slayer's Boots
 - 34602 Eversong Cuffs
@@ -519,33 +552,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34950 Vanir's Left Fist of Savagery
 - 34951 Vanir's Left Fist of Brutality
 - 34952 The Mutilator
-- 34988 Brutal Gladiator's Bonecracker
-- 34995 Brutal Gladiator's Chopper
-- 34996 Brutal Gladiator's Cleaver
-- 35008 Brutal Gladiator's Endgame
-- 35014 Brutal Gladiator's Gavel
-- 35016 Brutal Gladiator's Grimoire
-- 35017 Brutal Gladiator's Hacker
-- 35018 Brutal Gladiator's Heavy Crossbow
-- 35033 Brutal Gladiator's Leather Helm
-- 35034 Brutal Gladiator's Leather Legguards
-- 35035 Brutal Gladiator's Leather Spaulders
-- 35036 Brutal Gladiator's Leather Tunic
-- 35037 Brutal Gladiator's Left Render
-- 35038 Brutal Gladiator's Left Ripper
-- 35047 Brutal Gladiator's Longbow
-- 35058 Brutal Gladiator's Mutilator
-- 35071 Brutal Gladiator's Pummeler
-- 35072 Brutal Gladiator's Quickblade
-- 35074 Brutal Gladiator's Reprieve
-- 35075 Brutal Gladiator's Rifle
-- 35076 Brutal Gladiator's Right Ripper
-- 35082 Brutal Gladiator's Salvation
-- 35093 Brutal Gladiator's Shanker
-- 35095 Brutal Gladiator's Shiv
-- 35101 Brutal Gladiator's Slicer
-- 35102 Brutal Gladiator's Spellblade
-- 35108 Brutal Gladiator's War Edge
 - 35129 Guardian's Band of Dominance
 - 35130 Guardian's Band of Salvation
 - 35131 Guardian's Band of Triumph

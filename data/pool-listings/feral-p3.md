@@ -13,6 +13,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | Rule | Wearable epics |
 | --- | --- |
 | P-stub | 91 |
+| P-season-closed | 27 |
 | E-arena | 71 |
 | E-token | 15 |
 | E-sunmote | 0 |
@@ -21,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | E-rep | 47 |
 | E-recipe | 27 |
 | E-sourceless | 229 |
-| P-later-phase | 277 |
+| P-later-phase | 250 |
 | P-vanilla | 197 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 193 |
@@ -130,7 +131,39 @@ the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its f
 - 35750 Redeemer's Alchemist Stone
 - 35751 Assassin's Alchemist Stone
 
-### P-later-phase (277)
+### P-season-closed (27)
+
+arena gear of a season that opens after this phase (owner, 2026-10-16: only while its season is open for the selected phase).
+
+- 34987 Brutal Gladiator's Battle Staff
+- 34989 Brutal Gladiator's Bonegrinder
+- 34999 Brutal Gladiator's Dragonhide Helm
+- 35000 Brutal Gladiator's Dragonhide Legguards
+- 35001 Brutal Gladiator's Dragonhide Spaulders
+- 35002 Brutal Gladiator's Dragonhide Tunic
+- 35008 Brutal Gladiator's Endgame
+- 35014 Brutal Gladiator's Gavel
+- 35016 Brutal Gladiator's Grimoire
+- 35023 Brutal Gladiator's Kodohide Helm
+- 35024 Brutal Gladiator's Kodohide Legguards
+- 35025 Brutal Gladiator's Kodohide Spaulders
+- 35026 Brutal Gladiator's Kodohide Tunic
+- 35071 Brutal Gladiator's Pummeler
+- 35074 Brutal Gladiator's Reprieve
+- 35076 Brutal Gladiator's Right Ripper
+- 35082 Brutal Gladiator's Salvation
+- 35093 Brutal Gladiator's Shanker
+- 35102 Brutal Gladiator's Spellblade
+- 35103 Brutal Gladiator's Staff
+- 35109 Brutal Gladiator's War Staff
+- 35112 Brutal Gladiator's Wyrmhide Helm
+- 35113 Brutal Gladiator's Wyrmhide Legguards
+- 35114 Brutal Gladiator's Wyrmhide Spaulders
+- 35115 Brutal Gladiator's Wyrmhide Tunic
+- 37739 Brutal Gladiator's Blade of Alacrity
+- 37740 Brutal Gladiator's Swift Judgement
+
+### P-later-phase (250)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -344,31 +377,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34936 Tormented Demonsoul Robes
 - 34937 Corrupted Soulcloth Pantaloons
 - 34938 Enslaved Doomguard Soulgrips
-- 34987 Brutal Gladiator's Battle Staff
-- 34989 Brutal Gladiator's Bonegrinder
-- 34999 Brutal Gladiator's Dragonhide Helm
-- 35000 Brutal Gladiator's Dragonhide Legguards
-- 35001 Brutal Gladiator's Dragonhide Spaulders
-- 35002 Brutal Gladiator's Dragonhide Tunic
-- 35008 Brutal Gladiator's Endgame
-- 35014 Brutal Gladiator's Gavel
-- 35016 Brutal Gladiator's Grimoire
-- 35023 Brutal Gladiator's Kodohide Helm
-- 35024 Brutal Gladiator's Kodohide Legguards
-- 35025 Brutal Gladiator's Kodohide Spaulders
-- 35026 Brutal Gladiator's Kodohide Tunic
-- 35071 Brutal Gladiator's Pummeler
-- 35074 Brutal Gladiator's Reprieve
-- 35076 Brutal Gladiator's Right Ripper
-- 35082 Brutal Gladiator's Salvation
-- 35093 Brutal Gladiator's Shanker
-- 35102 Brutal Gladiator's Spellblade
-- 35103 Brutal Gladiator's Staff
-- 35109 Brutal Gladiator's War Staff
-- 35112 Brutal Gladiator's Wyrmhide Helm
-- 35113 Brutal Gladiator's Wyrmhide Legguards
-- 35114 Brutal Gladiator's Wyrmhide Spaulders
-- 35115 Brutal Gladiator's Wyrmhide Tunic
 - 35129 Guardian's Band of Dominance
 - 35130 Guardian's Band of Salvation
 - 35131 Guardian's Band of Triumph
@@ -404,8 +412,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 35700 Figurine - Crimson Serpent
 - 35702 Figurine - Shadowsong Panther
 - 35733 Ring of Harmonic Beauty
-- 37739 Brutal Gladiator's Blade of Alacrity
-- 37740 Brutal Gladiator's Swift Judgement
 - 37864 Medallion of the Alliance
 - 37865 Medallion of the Horde
 - 37927 Guardian's Band of Subjugation

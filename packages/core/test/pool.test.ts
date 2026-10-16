@@ -468,7 +468,11 @@ describe("data/universes/ret-p2.json", () => {
     // 480 -> 502: +22 rewards of factions phase_raids.json does not list
     // (Violet Signets, A'dal's Command...), admitted by the rep-item route
     // under db-phase rules (stage-gate tab-item-lists, K3-rep-items).
-    expect(entries.length).toBe(502);
+    // 502 -> 541: +38 arena pieces (season 1-2, db phase <= 2) admitted as a
+    // pvp/arena source the player can untick (ticket 642), +1 23206 Mark of
+    // the Champion, whose guide prose names Naxxramas and so no longer counts
+    // as a source (stage-gate tab-blocking-finish, OQ-23206).
+    expect(entries.length).toBe(541);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

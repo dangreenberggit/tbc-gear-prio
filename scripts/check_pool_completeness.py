@@ -28,16 +28,21 @@ A drift between a constant here and the builder's shows as a gate failure.
 
 Every epic (quality >= 4) a spec can wear is classified, first match wins:
 
-  hard policy (absent by rule; present is a failure)
+  hard policies (absent by rule; present is a failure)
     P-stub         in `stubOnlyItemIds`: the sim has only a TODO stub for its
                    effect, so its figure would be wrong
+    P-season-closed  arena gear (a Gladiator season prefix) whose season
+                   opens after phase P. The owner's condition, 2026-10-16:
+                   "as long as it's the season is open for the selected
+                   phase". Season N opens at phase ARENA_SEASON_OPENS[N]; an
+                   arena item whose db phase disagrees with that is a finding
+                   of its own, because the builder gates on db phase.
   expectation rules (must be present)
-    E-arena        name starts with a Gladiator season prefix, item phase <= P;
-                   present with the source {kind pvp, via arena, season N},
-                   N = 1-4 from the prefix (owner ruling 2026-10-15, ticket
-                   642: the player removes it with the "PvP vendor" source).
-                   Checked before E-sourceless, which arena items would
-                   otherwise match. Item phase > P falls to P-later-phase.
+    E-arena        arena gear whose season is open at phase P; present with
+                   the source {kind pvp, via arena, season N}, N = 1-4 from
+                   the prefix (owner ruling 2026-10-15, ticket 642: the player
+                   removes it with the "PvP vendor" source). Checked before
+                   E-sourceless, which arena items would otherwise match.
     E-token       `setId` is one of the spec's tier sets, item phase <= P;
                    present with a `token` source
     E-sunmote      upgrade of a Sunmote pair whose upgrade is not below its base
@@ -95,6 +100,11 @@ ARENA_SEASON_BY_PREFIX = {
     "Vengeful Gladiator's ": 3,
     "Brutal Gladiator's ": 4,
 }
+# The content phase each arena season opens in. Season 4 (Brutal) opened
+# with Sunwell, phase 5; phase 4 (Zul'Aman) opened no season. Written out
+# rather than read from db.json so that the db phase the builder gates on is
+# checked against it, not assumed.
+ARENA_SEASON_OPENS = {1: 1, 2: 2, 3: 3, 4: 5}
 KAEL_TEMP_LEGENDARY_IDS = frozenset({30311, 30312, 30313, 30314, 30316, 30317, 30318})
 TWO_HAND_ONLY_SPECS = frozenset({"ret"})
 HAND_TYPE_TWO_HAND = 4
@@ -105,7 +115,7 @@ MIN_SOURCELESS_ILVL = 100
 # db.json zones[].expansion: 1 is the original game.
 EXPANSION_VANILLA = 1
 
-HARD = ("P-stub",)
+HARD = ("P-stub", "P-season-closed")
 EXPECT = (
     "E-arena",
     "E-token",
@@ -128,6 +138,8 @@ SOFT = (
 POLICY_REASONS = {
     "P-stub": "the sim implements only a TODO stub for its effect "
     "(`stubOnlyItemIds`), so its figure would be wrong",
+    "P-season-closed": "arena gear of a season that opens after this phase "
+    "(owner, 2026-10-16: only while its season is open for the selected phase)",
     "P-later-phase": "every route it has (raid, faction, recipe, or its own "
     "phase) opens after this phase",
     "P-vanilla": "no source and item level below 100: vanilla gear "
@@ -297,8 +309,10 @@ def classify(it: dict, spec: str, phase: int, inp: Inputs) -> str:
     if iid in inp.stub:
         return "P-stub"
     own_ok = phase_of(it) <= phase
-    if arena_season(it) is not None:
-        return "E-arena" if own_ok else "P-later-phase"
+    season = arena_season(it)
+    if season is not None:
+        open_now = ARENA_SEASON_OPENS[season] <= phase and own_ok
+        return "E-arena" if open_now else "P-season-closed"
     db_sources = it.get("sources") or []
     drops = [s["drop"] for s in db_sources if isinstance(s.get("drop"), dict)]
     al = inp.atlasloot.get(iid, [])
@@ -494,7 +508,13 @@ def main() -> int:
         f"`{lock['repo']}` commit `{lock['commit']}`, "
         f"sha256 `{lock['files']['db.json']['sha256']}`"
     )
-    all_findings: list[str] = []
+    all_findings: list[str] = [
+        f"{int(it['id'])} {it.get('name')}: db phase {phase_of(it)} but season "
+        f"{arena_season(it)} opens at phase {ARENA_SEASON_OPENS[arena_season(it)]}"
+        for it in inp.items
+        if arena_season(it) is not None
+        and phase_of(it) != ARENA_SEASON_OPENS[arena_season(it)]
+    ]
     drifted: list[str] = []
     table: list[tuple[str, int, Counter]] = []
     for spec in sorted(inp.fork_spec):

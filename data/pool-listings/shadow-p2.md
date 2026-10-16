@@ -13,6 +13,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | Rule | Wearable epics |
 | --- | --- |
 | P-stub | 69 |
+| P-season-closed | 46 |
 | E-arena | 34 |
 | E-token | 10 |
 | E-sunmote | 0 |
@@ -21,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | E-rep | 28 |
 | E-recipe | 6 |
 | E-sourceless | 146 |
-| P-later-phase | 360 |
+| P-later-phase | 314 |
 | P-vanilla | 164 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 160 |
@@ -108,7 +109,58 @@ the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its f
 - 35750 Redeemer's Alchemist Stone
 - 35751 Assassin's Alchemist Stone
 
-### P-later-phase (360)
+### P-season-closed (46)
+
+arena gear of a season that opens after this phase (owner, 2026-10-16: only while its season is open for the selected phase).
+
+- 33681 Vengeful Gladiator's Endgame
+- 33687 Vengeful Gladiator's Gavel
+- 33716 Vengeful Gladiator's Staff
+- 33718 Vengeful Gladiator's Mooncloth Hood
+- 33719 Vengeful Gladiator's Mooncloth Leggings
+- 33720 Vengeful Gladiator's Mooncloth Mantle
+- 33721 Vengeful Gladiator's Mooncloth Robe
+- 33733 Vengeful Gladiator's Pummeler
+- 33736 Vengeful Gladiator's Reprieve
+- 33743 Vengeful Gladiator's Salvation
+- 33745 Vengeful Gladiator's Satin Hood
+- 33746 Vengeful Gladiator's Satin Leggings
+- 33747 Vengeful Gladiator's Satin Mantle
+- 33748 Vengeful Gladiator's Satin Robe
+- 33754 Vengeful Gladiator's Shanker
+- 33763 Vengeful Gladiator's Spellblade
+- 33764 Vengeful Gladiator's Touch of Defeat
+- 33766 Vengeful Gladiator's War Staff
+- 34033 Vengeful Gladiator's Grimoire
+- 34059 Vengeful Gladiator's Baton of Light
+- 34066 Vengeful Gladiator's Piercing Touch
+- 34540 Vengeful Gladiator's Battle Staff
+- 34985 Brutal Gladiator's Baton of Light
+- 34987 Brutal Gladiator's Battle Staff
+- 35008 Brutal Gladiator's Endgame
+- 35014 Brutal Gladiator's Gavel
+- 35016 Brutal Gladiator's Grimoire
+- 35054 Brutal Gladiator's Mooncloth Hood
+- 35055 Brutal Gladiator's Mooncloth Leggings
+- 35056 Brutal Gladiator's Mooncloth Mantle
+- 35057 Brutal Gladiator's Mooncloth Robe
+- 35065 Brutal Gladiator's Piercing Touch
+- 35071 Brutal Gladiator's Pummeler
+- 35074 Brutal Gladiator's Reprieve
+- 35082 Brutal Gladiator's Salvation
+- 35084 Brutal Gladiator's Satin Hood
+- 35085 Brutal Gladiator's Satin Leggings
+- 35086 Brutal Gladiator's Satin Mantle
+- 35087 Brutal Gladiator's Satin Robe
+- 35093 Brutal Gladiator's Shanker
+- 35102 Brutal Gladiator's Spellblade
+- 35103 Brutal Gladiator's Staff
+- 35107 Brutal Gladiator's Touch of Defeat
+- 35109 Brutal Gladiator's War Staff
+- 37739 Brutal Gladiator's Blade of Alacrity
+- 37740 Brutal Gladiator's Swift Judgement
+
+### P-later-phase (314)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -261,24 +313,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 33591 Shadowcaster's Drape
 - 33592 Cloak of Ancient Rituals
 - 33593 Slikk's Cloak of Placation
-- 33681 Vengeful Gladiator's Endgame
-- 33687 Vengeful Gladiator's Gavel
-- 33716 Vengeful Gladiator's Staff
-- 33718 Vengeful Gladiator's Mooncloth Hood
-- 33719 Vengeful Gladiator's Mooncloth Leggings
-- 33720 Vengeful Gladiator's Mooncloth Mantle
-- 33721 Vengeful Gladiator's Mooncloth Robe
-- 33733 Vengeful Gladiator's Pummeler
-- 33736 Vengeful Gladiator's Reprieve
-- 33743 Vengeful Gladiator's Salvation
-- 33745 Vengeful Gladiator's Satin Hood
-- 33746 Vengeful Gladiator's Satin Leggings
-- 33747 Vengeful Gladiator's Satin Mantle
-- 33748 Vengeful Gladiator's Satin Robe
-- 33754 Vengeful Gladiator's Shanker
-- 33763 Vengeful Gladiator's Spellblade
-- 33764 Vengeful Gladiator's Touch of Defeat
-- 33766 Vengeful Gladiator's War Staff
 - 33828 Tome of Diabolic Remedy
 - 33829 Hex Shrunken Head
 - 33830 Ancient Aqir Artifact
@@ -304,11 +338,8 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34010 Pepe's Shroud of Pacification
 - 34012 Shroud of the Final Stand
 - 34029 Tiny Voodoo Mask
-- 34033 Vengeful Gladiator's Grimoire
 - 34049 Battlemaster's Audacity
 - 34050 Battlemaster's Perseverance
-- 34059 Vengeful Gladiator's Baton of Light
-- 34066 Vengeful Gladiator's Piercing Touch
 - 34162 Battlemaster's Depravity
 - 34163 Battlemaster's Cruelty
 - 34165 Fang of Kalecgos
@@ -372,7 +403,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34473 Commendation of Kael'thas
 - 34527 Belt of Absolution
 - 34528 Cord of Absolution
-- 34540 Vengeful Gladiator's Battle Staff
 - 34562 Boots of Absolution
 - 34563 Treads of Absolution
 - 34604 Jaded Crystal Dagger
@@ -402,28 +432,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34936 Tormented Demonsoul Robes
 - 34937 Corrupted Soulcloth Pantaloons
 - 34938 Enslaved Doomguard Soulgrips
-- 34985 Brutal Gladiator's Baton of Light
-- 34987 Brutal Gladiator's Battle Staff
-- 35008 Brutal Gladiator's Endgame
-- 35014 Brutal Gladiator's Gavel
-- 35016 Brutal Gladiator's Grimoire
-- 35054 Brutal Gladiator's Mooncloth Hood
-- 35055 Brutal Gladiator's Mooncloth Leggings
-- 35056 Brutal Gladiator's Mooncloth Mantle
-- 35057 Brutal Gladiator's Mooncloth Robe
-- 35065 Brutal Gladiator's Piercing Touch
-- 35071 Brutal Gladiator's Pummeler
-- 35074 Brutal Gladiator's Reprieve
-- 35082 Brutal Gladiator's Salvation
-- 35084 Brutal Gladiator's Satin Hood
-- 35085 Brutal Gladiator's Satin Leggings
-- 35086 Brutal Gladiator's Satin Mantle
-- 35087 Brutal Gladiator's Satin Robe
-- 35093 Brutal Gladiator's Shanker
-- 35102 Brutal Gladiator's Spellblade
-- 35103 Brutal Gladiator's Staff
-- 35107 Brutal Gladiator's Touch of Defeat
-- 35109 Brutal Gladiator's War Staff
 - 35129 Guardian's Band of Dominance
 - 35130 Guardian's Band of Salvation
 - 35131 Guardian's Band of Triumph
@@ -458,8 +466,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 35700 Figurine - Crimson Serpent
 - 35702 Figurine - Shadowsong Panther
 - 35733 Ring of Harmonic Beauty
-- 37739 Brutal Gladiator's Blade of Alacrity
-- 37740 Brutal Gladiator's Swift Judgement
 - 37864 Medallion of the Alliance
 - 37865 Medallion of the Horde
 - 37927 Guardian's Band of Subjugation

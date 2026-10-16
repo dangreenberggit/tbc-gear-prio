@@ -724,3 +724,33 @@ Verify:
 ```bash
 pnpm fork-universes:check
 ```
+
+## Refresh, 2026-10-16 (arena gear as a source, ticket 642; 23206)
+
+`scripts/assemble_universe.py` no longer excludes arena gear. Every item of
+the four Gladiator season lines enters every spec's list once its season is
+open (its db.json `phase`: seasons 1, 2, 3 and 4 at phases 1, 2, 3 and 5),
+with one source `{"kind": "pvp", "via": "arena", "season": N}`. The tab's
+Sources dialog removes all of it under "PvP vendor". Stub-only arena pieces
+stay out. Separately, guide prose that names a place outside TBC's raids and
+admitted heroics no longer counts as a source, which admits 23206 Mark of the
+Champion to ret and feral p2–p5 and 32387 Idol of the Raven Goddess to feral
+p2–p5.
+
+`python scripts/sync_fork_universes.py --write` refreshed all 44 universe
+copies. Lists p2–p5 are now: ret 541/794/917/1156, feral 479/686/767/962,
+balance 479/686/767/964, ele 550/803/912/1151, enh 568/829/939/1191, hunter
+503/737/846/1080, mage 359/508/563/697, rogue 458/664/748/951, shadow
+384/545/599/744, warlock 370/523/578/716, warrior 644/950/1092/1396.
+
+No existing entry changed. No EP-weight file changed. The fork's
+`ui/features/upgrades/model/settings_pool.test.ts` ret counts move from
+860/1081 to 917/1156, and `ui/features/upgrades/model/arena_source.test.ts`
+is a new fork-added test. No engine file changed.
+
+Verify:
+
+```bash
+pnpm fork-universes:check
+python scripts/check_pool_completeness.py --check
+```

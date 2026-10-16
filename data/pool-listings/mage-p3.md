@@ -13,6 +13,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | Rule | Wearable epics |
 | --- | --- |
 | P-stub | 63 |
+| P-season-closed | 17 |
 | E-arena | 38 |
 | E-token | 15 |
 | E-sunmote | 0 |
@@ -21,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `5262ff386bd171e6349d0f9cf00f4d762a6c9951`,
 | E-rep | 47 |
 | E-recipe | 15 |
 | E-sourceless | 169 |
-| P-later-phase | 188 |
+| P-later-phase | 171 |
 | P-vanilla | 162 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 159 |
@@ -102,7 +103,29 @@ the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its f
 - 35751 Assassin's Alchemist Stone
 - 38175 The Horseman's Blade
 
-### P-later-phase (188)
+### P-season-closed (17)
+
+arena gear of a season that opens after this phase (owner, 2026-10-16: only while its season is open for the selected phase).
+
+- 34985 Brutal Gladiator's Baton of Light
+- 34987 Brutal Gladiator's Battle Staff
+- 35008 Brutal Gladiator's Endgame
+- 35016 Brutal Gladiator's Grimoire
+- 35065 Brutal Gladiator's Piercing Touch
+- 35074 Brutal Gladiator's Reprieve
+- 35093 Brutal Gladiator's Shanker
+- 35096 Brutal Gladiator's Silk Amice
+- 35097 Brutal Gladiator's Silk Cowl
+- 35099 Brutal Gladiator's Silk Raiment
+- 35100 Brutal Gladiator's Silk Trousers
+- 35101 Brutal Gladiator's Slicer
+- 35102 Brutal Gladiator's Spellblade
+- 35103 Brutal Gladiator's Staff
+- 35107 Brutal Gladiator's Touch of Defeat
+- 35109 Brutal Gladiator's War Staff
+- 37739 Brutal Gladiator's Blade of Alacrity
+
+### P-later-phase (171)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -242,22 +265,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 34936 Tormented Demonsoul Robes
 - 34937 Corrupted Soulcloth Pantaloons
 - 34938 Enslaved Doomguard Soulgrips
-- 34985 Brutal Gladiator's Baton of Light
-- 34987 Brutal Gladiator's Battle Staff
-- 35008 Brutal Gladiator's Endgame
-- 35016 Brutal Gladiator's Grimoire
-- 35065 Brutal Gladiator's Piercing Touch
-- 35074 Brutal Gladiator's Reprieve
-- 35093 Brutal Gladiator's Shanker
-- 35096 Brutal Gladiator's Silk Amice
-- 35097 Brutal Gladiator's Silk Cowl
-- 35099 Brutal Gladiator's Silk Raiment
-- 35100 Brutal Gladiator's Silk Trousers
-- 35101 Brutal Gladiator's Slicer
-- 35102 Brutal Gladiator's Spellblade
-- 35103 Brutal Gladiator's Staff
-- 35107 Brutal Gladiator's Touch of Defeat
-- 35109 Brutal Gladiator's War Staff
 - 35129 Guardian's Band of Dominance
 - 35130 Guardian's Band of Salvation
 - 35131 Guardian's Band of Triumph
@@ -288,7 +295,6 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 35700 Figurine - Crimson Serpent
 - 35702 Figurine - Shadowsong Panther
 - 35733 Ring of Harmonic Beauty
-- 37739 Brutal Gladiator's Blade of Alacrity
 - 37864 Medallion of the Alliance
 - 37865 Medallion of the Horde
 - 37927 Guardian's Band of Subjugation
