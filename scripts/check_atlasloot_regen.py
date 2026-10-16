@@ -5,7 +5,8 @@
 `data/faction_ids.json` (and `data/two-hop/sunmote-pairs.json`, ticket 612) are
 generated output committed to the tree, while their
 source (`vendor/atlasloot/`) is gitignored. The tier-token maps
-(`data/two-hop/tier-sets.json` and the eleven `<spec>-tokens.json`) are checked
+(`data/two-hop/tier-sets.json` and one `<spec>-tokens.json` per spec in
+`packages/core/src/spec-registry.json`) are checked
 the same way, by re-running `scripts/generate_tier_tokens.py` (ticket 609). Nothing else re-derives them, so
 between one `--update` and the next a committed file can drift from the Lua it
 claims to come from -- a hand edit, a bad merge, or a parser change shipped
@@ -30,6 +31,7 @@ Run via `pnpm atlasloot:regen:check`.
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 import tempfile
@@ -50,9 +52,12 @@ OUTPUTS = {
     ROOT / "data/two-hop/sunmote-pairs.json": "--sunmote-out",
 }
 
-TOKEN_SPECS = (
-    "balance", "ele", "enh", "feral", "hunter", "mage",
-    "ret", "rogue", "shadow", "warlock", "warrior",
+# Every spec the engine ranks, so a spec added to the registry without a token
+# file fails here as "is not committed" instead of going unchecked.
+TOKEN_SPECS = sorted(
+    json.loads(
+        (ROOT / "packages/core/src/spec-registry.json").read_text(encoding="utf-8")
+    )["specs"]
 )
 TOKEN_OUTPUTS = [ROOT / "data/two-hop/tier-sets.json"] + [
     ROOT / f"data/two-hop/{spec}-tokens.json" for spec in TOKEN_SPECS

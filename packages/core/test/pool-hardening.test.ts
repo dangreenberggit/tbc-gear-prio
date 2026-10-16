@@ -1070,7 +1070,12 @@ describe("data/universes/ret-p3.json hardening", () => {
     (kv): kv is [string, { setId: number }[]] => Array.isArray(kv[1])
   );
   it("tier-sets.json names every DPS spec", () => {
-    expect(tierSpecs).toHaveLength(11);
+    const registry = JSON.parse(
+      readFileSync(join(root, "packages/core/src/spec-registry.json"), "utf8")
+    ) as { specs: Record<string, unknown> };
+    expect(tierSpecs.map(([spec]) => spec).sort()).toEqual(
+      Object.keys(registry.specs).sort()
+    );
   });
   for (const [spec, sets] of tierSpecs) {
     it.skipIf(!hasWowsimsVendor)(
