@@ -79,7 +79,7 @@
     "fork-universes:check": "python scripts/sync_fork_universes.py --check",
     "desktop-gate:check": "python scripts/check_desktop_tab.py",
     "desktop-gate:unit:check": "python scripts/check_desktop_tab_verdict.py",
-    "pool-listings:check": "python scripts/list_phase_pool.py --check",
+    "pool-listings:check": "python scripts/check_pool_completeness.py --check",
     "sim-implemented-effects:generate": "python scripts/generate_sim_implemented_effects.py",
     "sim-implemented-effects:check": "python scripts/check_sim_implemented_effects.py",
     "sim-implemented-effects-classifier:check": "python scripts/check_sim_implemented_effects_classifier.py"

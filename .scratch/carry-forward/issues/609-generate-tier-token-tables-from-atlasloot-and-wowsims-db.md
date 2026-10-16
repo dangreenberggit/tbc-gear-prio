@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (Tab-blocking; owner answer Q-feral-p5)
 Type: bug
 Origin: owner answers to Chunk 3b step 6, 2026-10-11 (Q-feral-p5)
@@ -70,3 +70,25 @@ gone) built every spec's token table from `vendor/atlasloot/data-tbc.lua`
    and 34573, and every other spec's universe is byte-identical or its
    diff is explained in the closing note.
 4. `pnpm verify` rc=0.
+
+## Closed 2026-10-16 (stage-gate tab-blocking-finish, K4)
+
+The token maps are generated. `scripts/generate_tier_tokens.py` writes
+`data/two-hop/<spec>-tokens.json` and `data/two-hop/tier-sets.json` from
+AtlasLoot and the wowsims database (7e682fc1); `data/two-hop/token-groups.json`
+is the only hand-written input file, and its note says why. It holds four
+small tables, not the one the close condition names: `groups` (the 6 token
+groups' classes), `labels` (17 AtlasLoot set comments to spec slugs),
+`tiers` (3 tier words) and `slots` (8 slot words). No vendored source
+states any of them (the file's `note`).
+`pnpm atlasloot:regen:check` regenerates and byte-compares them. The
+`*_TIER_PIECE_IDS` constants are removed; the builder reads tier pieces from
+the token maps (35f7f82c). `data/universes/feral-p5.json` and its fork copy
+hold 34444, 34556 and 34573, and the token check in
+`packages/core/test/pool-hardening.test.ts` loops over `tier-sets.json` for all
+11 specs (d74d5fcc). Ticket 298, which this closes, is already closed.
+
+Verified by: `pnpm atlasloot:regen:check` (rc 0, "16 committed outputs
+match") and `git grep -n _TIER_PIECE_IDS -- scripts/assemble_universe.py scripts/check_policy_notes.py`
+(prints nothing) at tbc-gear-prio@808f0c7f; `pnpm verify` rc 0 on the close
+commit.

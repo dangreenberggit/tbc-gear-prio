@@ -157,7 +157,6 @@ const MUST_BE_ABSENT_FROM_P3 = [
   },
 ] as const;
 
-const RET_TIER_SET_IDS = new Set([626, 629, 680]);
 const SUNWELL_TIER_PIECE_IDS = new Set([34431, 34485, 34561]);
 
 describe("S6: bisTags do not affect pool membership", () => {
@@ -396,79 +395,16 @@ describe("data/universes/ret-p3.json hardening", () => {
   );
 
   it("ships no empty sources on any row", () => {
-    // Regenerate with `python scripts/assemble_universe.py --max-phase 3` to
-    // re-derive this count.
-    // 347 -> 349: the D7 weapon rule stopped rejecting polearms alongside
-    // staves (paladins can wield polearms) — +28774 Glaive of the Pit,
-    // +32248 Halberd of Desolation.
-    // 349 -> 362: AtlasLoot's WorldBossesBC block now resolves, admitting the
-    // 13 Doomwalker / Doom Lord Kazzak drops that db.json has no sources for.
-    // 362 -> 354: classAllowlist is enforced, evicting 8 class-specific SSC/TK
-    // trinkets a paladin cannot equip (ticket 25).
-    // 354 -> 356: the Wowhead source parser learned "Requires <standing> with
-    // <faction>", which it previously dropped on the floor — +29119 Haramad's
-    // Bargain, +30834 Shapeshifter's Signet, both rep rewards on the p3 list
-    // admitted through the existing list-only path (ticket 28).
-    // 356 -> 359: the wowsims curated gear sets now grant membership rather
-    // than only labelling rows admitted by another route (ticket 41).
-    // +28176 Sha'tari Wrought Greaves, +29177 A'dal's Command, +30257
-    // Shattrath Leggings — all carrying `{kind: "unknown"}`, which has no zone
-    // and so never appears in a raid-filtered view. Haramad's Bargain and
-    // Shapeshifter's Signet were already here via the rep path above.
-    // 359 -> 361: `{kind: "world"}` (ticket 45 §1) now counts as list-driven
-    // membership, admitting +23203 Libram of Fervor and +31275 Necklace of
-    // Trophies via their "World Drop" Wowhead text.
-    // 361 -> 364: `curated_list_only` (ticket 41 remainder) admits a curated
-    // item whose real db source is list-only shaped (crafted, no zone) but
-    // was not independently a member — +23522 Ragesteel Breastplate, +28429
-    // Lionheart Champion, +33173 Ragesteel Shoulders. 28430 Lionheart
-    // Executioner is not a new row here: its p3 Wowhead text reads
-    // "Profession: ..." (parses today), only its p1-p2 text reads
-    // "Crafting: ..." (does not), so it was already a p3 member and only
-    // needed this fix at p2.
-    // 364 -> 365: a rep source carries no zone, so a rep-only item satisfied
-    // no membership route and was absent entirely. phase_raids.json now maps
-    // faction -> phase (ticket 65 step 2.5), admitting +32489 Ashtongue
-    // Talisman of Zeal, the paladin trinket from Black Temple's faction. The
-    // other eight talismans are held out by classAllowlist, not by this route.
-    // 365 -> 381: AtlasLoot's Factions module is now parsed for vendor loot,
-    // not just faction ids (ticket 65 step 3), admitting the 16-ring Band of
-    // Eternity ladder (29294-29309) sold by Scale of the Sands. db.json has
-    // `sources: null` for all 16, so AtlasLoot is their only witness.
-    // 381 -> 394: a recipe bought from a reputation vendor now gates its
-    // product the way a raid-dropped one does (ticket 65 step 4), admitting
-    // the 13 Ashtongue-taught crafts a paladin can wear — the Redeemed Soul
-    // (leather), Shackled Souls (mail) and Shadesteel (plate) sets, plus
-    // Night's End. The 4 cloth Soulguard pieces go to feral, not here.
-    // 394 -> 400: ticket 157 force-admits six SME-flagged D7-eligible items
-    // (27484, 31033, 22401, 31856, 28034, 28288) whose real db/Wowhead
-    // sources all named a five-man zone outside phase_raids.json and
-    // PHASE_HEROIC_DUNGEONS — see TICKET_157_FORCE_INCLUDE in
-    // assemble_universe.py.
-    // 400 -> 390: ticket 171 (user ruling, exclusion by design) drops every
-    // item whose only sim effect is a commented `TODO: Manual implementation
-    // required` stub in the pinned fork's Go source — see
-    // data/sim-implemented-effects.json and stub_only_effect_ids() in
-    // assemble_universe.py. Ten p3 items are stub-only, including 28592/
-    // 30063/32368 (the three librams the ticket's own diagnosis named) and
-    // 28774 Glaive of the Pit / 32489 Ashtongue Talisman of Zeal (both
-    // asserted below by other tests, updated alongside this count).
-    // 390 -> 391: the engine pin move to feature/backend-reforge implemented
-    // 29297 Band of the Eternal Defender, so it is no longer stub-only and
-    // ticket 171's exclusion no longer reaches it. Nine p3 items remain
-    // stub-only. The ruling is unchanged -- what changed is that the fork now
-    // implements this effect (stat_bonus_procs_auto_gen.go, and every spec's
-    // TestAllItems results carry it).
-    // 391 -> 467: ret's pool stopped filtering by armor class. Equip legality
-    // now comes from the fork's own canEquipItem, which says a paladin can wear
-    // cloth (it can), and the SME gate ruled the old cloth omission an
-    // unexplained outlier rather than policy -- every other spec, warrior
-    // included, already admitted cloth. +76 cloth rows at p3. Weapons are
-    // unaffected: the 2H-only rule survives as a named policy exclusion.
-    // Re-run: `python scripts/assemble_universe.py --spec ret --max-phase 3
-    // --out <scratch> --report <scratch>` and
-    // `len(json.load(open('<scratch>'))['entries'])`.
-    expect(universeP3.length).toBe(467);
+    // Pins the list size, so a change in ret-p3 membership is a deliberate
+    // edit here; the commit that moves the number says which route changed.
+    // Re-run, with <scratch> a folder outside the repo:
+    // `python scripts/assemble_universe.py --spec ret --max-phase 3
+    // --out <scratch>/ret-p3.json --report <scratch>/ret-p3.report.json`.
+    // The line it prints for the --out file ends with the entry count. No
+    // flag stops it rewriting the tracked data/weapon-type-exclusions.json,
+    // so if `git status` then shows that file changed, run
+    // `git checkout -- data/weapon-type-exclusions.json`.
+    expect(universeP3.length).toBe(794);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the
@@ -682,7 +618,10 @@ describe("data/universes/ret-p3.json hardening", () => {
     }
     // The recipe zone must agree with the phase the item already sits at,
     // otherwise the join found the wrong recipe.
+    // Karazhan: ticket 611's crafted route admits 21864/21865 Soulcloth
+    // Shoulders/Vest, phase 1 items whose pattern drops there.
     const zonePhase = new Map([
+      ["Karazhan", 1],
       ["Serpentshrine Cavern", 2],
       ["Tempest Keep", 2],
       ["Black Temple", 3],
@@ -1049,19 +988,42 @@ describe("data/universes/ret-p3.json hardening", () => {
     }
   });
 
-  it.skipIf(!hasWowsimsVendor)(
-    "wowsims db setIds match the two-hop ret tier map",
-    () => {
-      const fromDb = [...byId.values()]
-        .filter((it) => it.setId != null && RET_TIER_SET_IDS.has(it.setId))
-        .map((it) => it.id)
-        .sort((a, b) => a - b);
-      const fromTwoHop = twoHop.entries
-        .map((e) => e.pieceId)
-        .sort((a, b) => a - b);
-      expect(fromDb).toEqual(fromTwoHop);
-    }
+  // Every spec, not only ret: the token map is the one list of a spec's tier
+  // pieces the builder reads (ticket 609), so a piece db.json puts in one of
+  // the spec's sets but the map lacks would ship without its token source.
+  const tierSets = JSON.parse(
+    readFileSync(join(root, "data/two-hop/tier-sets.json"), "utf8")
+  ) as Record<string, unknown>;
+  const tierSpecs = Object.entries(tierSets).filter(
+    (kv): kv is [string, { setId: number }[]] => Array.isArray(kv[1])
   );
+  it("tier-sets.json names every DPS spec", () => {
+    const registry = JSON.parse(
+      readFileSync(join(root, "packages/core/src/spec-registry.json"), "utf8")
+    ) as { specs: Record<string, unknown> };
+    expect(tierSpecs.map(([spec]) => spec).sort()).toEqual(
+      Object.keys(registry.specs).sort()
+    );
+  });
+  for (const [spec, sets] of tierSpecs) {
+    it.skipIf(!hasWowsimsVendor)(
+      `wowsims db setIds match the two-hop ${spec} tier map`,
+      () => {
+        const setIds = new Set(sets.map((s) => s.setId));
+        const fromDb = [...byId.values()]
+          .filter((it) => it.setId != null && setIds.has(it.setId))
+          .map((it) => it.id)
+          .sort((a, b) => a - b);
+        const tokens = JSON.parse(
+          readFileSync(join(root, `data/two-hop/${spec}-tokens.json`), "utf8")
+        ) as { entries: { pieceId: number }[] };
+        const fromTwoHop = tokens.entries
+          .map((e) => e.pieceId)
+          .sort((a, b) => a - b);
+        expect(fromDb).toEqual(fromTwoHop);
+      }
+    );
+  }
 
   // Weapon damage is the dominant ret term and is not a stat, so a
   // curationHint blind to it ranked two-handers near-arbitrarily -- Glaive of
@@ -1095,12 +1057,16 @@ describe("data/universes/ret-p3.json hardening", () => {
     it.skipIf(!hasWowsimsVendor)(
       "does not rank a competitive weapon last on an empty stat line",
       () => {
+        // "Competitive" is within 80% of the best dps. The db-phase route
+        // admits weak epics (32183 Chancellor's Maul, 66.5 dps), so the field
+        // holds weapons below that line, and one of them must rank last.
         const ranked = weapons().sort((a, b) => a.hint - b.hint);
         const worst = ranked[0]!;
-        const best = ranked[ranked.length - 1]!;
-        // Glaive of the Pit is within 15% of the best weapon dps in the P3
-        // field, so nothing about its swing justifies scoring last.
-        expect(worst.dps).toBeGreaterThan(best.dps * 0.8);
+        const bestDps = Math.max(...ranked.map((w) => w.dps));
+        expect(ranked.some((w) => w.dps < bestDps * 0.8)).toBe(true);
+        expect(worst.dps, `${worst.itemId} ${worst.name}`).toBeLessThan(
+          bestDps * 0.8
+        );
       }
     );
 
@@ -1187,9 +1153,16 @@ describe("an item's source does not depend on which tier is assembled", () => {
     // dishonesty in the vocabulary, not a parser regression — ticket 174.
     // Listed explicitly so a *new* item acquiring this shape still fails.
     const ticket157 = new Set([27484, 31033, 22401, 31856, 28034, 28288]);
+    // The parser reads these two, but their prose names a place outside TBC's
+    // raids and admitted heroics ("Classic - Naxxramas", "Heroic Sethekk
+    // Halls"), which the builder records as no source at all
+    // (`unkept_wowhead_place` in scripts/assemble_universe.py, commit
+    // 3854d7e8). Listed explicitly for the same reason.
+    const unkeptPlace = new Set([23206, 32387]);
     for (const e of loadUniverse("data/universes/feral-p3.json").raw.entries) {
       if (!e.sources.some((s) => s.kind === "unknown")) continue;
       if (ticket157.has(e.itemId)) continue;
+      if (unkeptPlace.has(e.itemId)) continue;
       expect(
         listed.has(e.itemId),
         `${e.itemId} ${e.name} is on a Wowhead list but shipped as kind:unknown — the parser dropped its prose`

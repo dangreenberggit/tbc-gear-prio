@@ -533,14 +533,15 @@ def do_update(tag, ref=None):
         print("  The default max phase moves with it. Required follow-up:")
         print("    1. regenerate the db-derived artifacts:")
         print(f"       pnpm -C \"{cwd_posix()}\" data:items:generate")
-        print(f"       pnpm -C \"{cwd_posix()}\" exec python scripts/list_phase_pool.py")
         print(f"       pnpm -C \"{cwd_posix()}\" sim-defaults:build")
         print("    2. regenerate data/universes/<spec>-p<N>.json for every spec and")
         print("       phase (scripts/assemble_universe.py) -- these replaced the old")
         print("       hand-curated data/pools/<spec>.json (ADR-0028)")
-        print("    3. bump ENGINE_VERSION in packages/core/src/content-hash.ts to")
+        print("    3. rewrite data/pool-listings/ from the rebuilt lists:")
+        print(f"       pnpm -C \"{cwd_posix()}\" exec python scripts/check_pool_completeness.py")
+        print("    4. bump ENGINE_VERSION in packages/core/src/content-hash.ts to")
         print("       invalidate cached rankings")
-        print("    4. update PLAN.md's content-tier row (line 29) to the new tier")
+        print("    5. update PLAN.md's content-tier row (line 29) to the new tier")
     return 0
 
 

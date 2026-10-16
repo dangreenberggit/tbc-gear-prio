@@ -178,9 +178,9 @@ pnpm -C <pair> exec python scripts/sync_wowsims.py --watch-ref --ref master
 pnpm -C <pair> fetch:protos
 pnpm -C <pair> proto:generate
 pnpm -C <pair> data:items:generate
-python <pair>/scripts/list_phase_pool.py
 pnpm -C <pair> sim-defaults:build
 pnpm -C <pair> universe:assemble --spec <spec> --max-phase <N> --report data/universes/<spec>-p<N>.report.json
+python <pair>/scripts/check_pool_completeness.py
 ```
 
 Run the `--unwatch-ref` line only when `watchedRefs` in

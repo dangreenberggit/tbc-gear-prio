@@ -5376,3 +5376,273 @@ describe.skipIf(!forkPresent)(
     });
   }
 );
+
+/* ------------------------------------------------------------------ *
+ * Ticket 497: the printed 4pc lines as worn Thunderheart goes 0 to 4
+ * ------------------------------------------------------------------ */
+
+type SweepSlot = "head" | "shoulder" | "chest" | "hands" | "legs";
+
+// Thunderheart is added in the order of the live sweep's gear (hands, legs,
+// chest, shoulders); every other slot of the five wears a neutral piece.
+const SWEEP_TH_ORDER: readonly SweepSlot[] = [
+  "hands",
+  "legs",
+  "chest",
+  "shoulder",
+];
+const SWEEP_SLOTS: readonly SweepSlot[] = [
+  "head",
+  "shoulder",
+  "chest",
+  "hands",
+  "legs",
+];
+
+// The Malorne and Nordrassil 4pc are worth far more than any 2pc (40) or any
+// break (at most 50 + 80), so the 4pc is the best stop at every worn count
+// and each row's 4pc step is printed.
+const MALORNE_2PC_DPS = 40;
+const MALORNE_4PC_DPS = 400;
+const NORDRASSIL_4PC_DPS = 400;
+const SWEEP_BONUSES: SetBonusTable = {
+  676: { b2: B2_TH, b4: B4_TH },
+  640: { b2: MALORNE_2PC_DPS, b4: MALORNE_4PC_DPS },
+  641: { b2: 0, b4: NORDRASSIL_4PC_DPS },
+};
+
+function sweepWorn(k: number): Record<SweepSlot, number> {
+  const worn: Record<SweepSlot, number> = {
+    head: NEUTRAL.head[0],
+    shoulder: NEUTRAL.shoulder[0],
+    chest: NEUTRAL.chest[0],
+    hands: NEUTRAL.hands[0],
+    legs: NEUTRAL.legs[0],
+  };
+  for (const slot of SWEEP_TH_ORDER.slice(0, k)) {
+    worn[slot] = THUNDERHEART[slot];
+  }
+  return worn;
+}
+
+const SWEEP_SLOT_OF = new Map<number, SweepSlot>(
+  [MALORNE, NORDRASSIL].flatMap((set) =>
+    (Object.entries(set) as Array<[SweepSlot, number]>).map(
+      ([slot, id]) => [id, slot] as const
+    )
+  )
+);
+const isTh = (id: number) =>
+  (Object.values(THUNDERHEART) as number[]).includes(id);
+
+/**
+ * The model's value of one step of a row's popover: the Breaks line is the
+ * Thunderheart bonuses the step newly loses, at their model value; the pieces
+ * line is the added pieces' own values minus the pieces they replace, plus
+ * the bonuses of the row's set the step newly reaches. The gear before the
+ * step is the worn gear with the row's slot and every earlier step's slots
+ * replaced.
+ */
+function modelStepLines(opts: {
+  worn: Record<SweepSlot, number>;
+  rowId: number;
+  setId: number;
+  setIds: readonly number[];
+  earlier: readonly number[];
+  added: readonly number[];
+  values: ReadonlyMap<number, number>;
+}): { breaks: number; pieces: number } {
+  const { worn, rowId, setId, setIds, earlier, added, values } = opts;
+  const before: Record<SweepSlot, number> = { ...worn };
+  for (const id of [rowId, ...earlier]) before[SWEEP_SLOT_OF.get(id)!] = id;
+  const after: Record<SweepSlot, number> = { ...before };
+  for (const id of added) after[SWEEP_SLOT_OF.get(id)!] = id;
+  const count = (g: Record<SweepSlot, number>, pred: (id: number) => boolean) =>
+    SWEEP_SLOTS.filter((s) => pred(g[s])).length;
+  const th0 = count(before, isTh);
+  const th1 = count(after, isTh);
+  const own = (id: number) => setIds.includes(id);
+  const set0 = count(before, own);
+  const set1 = count(after, own);
+  const b = SWEEP_BONUSES[setId]!;
+  const lost =
+    (th0 >= 2 && th1 < 2 ? B2_TH : 0) + (th0 >= 4 && th1 < 4 ? B4_TH : 0);
+  const gained =
+    (set0 < 2 && set1 >= 2 ? b.b2 : 0) + (set0 < 4 && set1 >= 4 ? b.b4 : 0);
+  let pieces = gained;
+  for (const id of added) {
+    const slot = SWEEP_SLOT_OF.get(id)!;
+    pieces += (values.get(id) ?? 0) - (values.get(before[slot]) ?? 0);
+  }
+  return { breaks: -lost, pieces };
+}
+
+describe.skipIf(!forkPresent)(
+  "497: worn Thunderheart sweep, the printed 4pc lines",
+  () => {
+    // Screen off: the scenarios send no `setScreen`, so every set is measured
+    // and the live run's Nordrassil drop (ADR-0035 band rule) is not
+    // reproduced here; the live sweep examines that drop.
+
+    it("497-A: at worn Thunderheart 0-4 the 4pc Breaks line is the Thunderheart bonuses the step loses and the pieces line is pieces plus the bonus", async () => {
+      // Scenario kind: worn Malorne 0, worn Thunderheart k in the live
+      // sweep's order, Malorne and Nordrassil candidates whose 4pc pays far
+      // more than any break. A leak of Thunderheart loss into the 4pc lines
+      // moves one of them off the model value by a fixed amount.
+      //
+      // Hand-derived 4pc step (set pieces 100, neutral 120, Thunderheart 100;
+      // Breaks / pieces). Replacing a neutral piece is -20 a piece, a
+      // Thunderheart piece 0, plus 400 for the 4pc:
+      //   k=0 Malorne: 2 neutral added               ->  none / 360
+      //       Nordrassil chest: 3 neutral added      ->  none / 340
+      //   k=1 Malorne: 2 neutral, or Th hands + 1    ->  none / 360 or 380
+      //       Nordrassil chest: Th hands + 2 neutral ->  none / 360
+      //   k=2 head/shoulder/chest: Th hands + legs   ->   -50 / 400
+      //       hands/legs (own swap broke the 2pc)    ->  none / 360
+      //       Nordrassil chest: Th hands, legs + 1   ->   -50 / 380
+      //   k=3 every Malorne row: 2 Thunderheart      ->   -50 / 400
+      //       Nordrassil chest: 2 Th + 1 neutral     ->   -50 / 380
+      //   k=4 head: 2pc step -80 (the 4pc) / 40; 4pc step -50 / 400
+      //       a Thunderheart slot's row (own swap broke the 4pc): -50 / 400
+      // Which pieces a step adds is the engine's partner choice (ties, and
+      // the close-calls estimate); the assertions price the pieces the
+      // engine printed with the model, so a different partner moves the
+      // expected value with it and only a leak fails.
+      const view = await stepView();
+      const values = withSetValues([
+        ...Object.values(MALORNE),
+        ...Object.values(NORDRASSIL),
+      ]);
+      const rows = [
+        ...Object.values(MALORNE).map((id) => ({ id, setId: 640 })),
+        { id: NORDRASSIL.chest, setId: 641 },
+      ];
+      let fourPcStepsWithBreaks = 0;
+      for (let k = 0; k <= 4; k += 1) {
+        const worn = sweepWorn(k);
+        const { ranking: r } = await runScenario({
+          worn: wornGear(worn),
+          pool: [
+            ...setPool(MALORNE),
+            ...setPool(NORDRASSIL),
+            ...SWEEP_TH_ORDER.map((slot) => ({
+              itemId: NEUTRAL[slot][0],
+              slot,
+            })),
+          ],
+          itemValue: values,
+          setBonuses: SWEEP_BONUSES,
+          measureBrokenSetValue: true,
+        });
+        // At k = 0 the engine drops both head candidates (Malorne 29098,
+        // Nordrassil 30228); the ranking's substitutions say gem repair found
+        // no recolour that activates their meta (32409: 2 red, 2 yellow,
+        // 2 blue) over this gemless gear, as in 512-C. From k = 1 both rank
+        // (hypothesis: the worn Thunderheart pieces add the sockets the
+        // repair needs). It is the fixture's gear, not a set-bonus path, so
+        // the head row is checked where it is ranked.
+        const ranked = rows.filter(({ id }) => k > 0 || id !== MALORNE.head);
+        for (const { id, setId } of ranked) {
+          const row = thRow(r, id);
+          const where = `k=${k} row ${id}`;
+          expect(futureOf(row, 4)?.sameGearDps, where).toBeCloseTo(
+            setId === 640 ? MALORNE_4PC_DPS : NORDRASSIL_4PC_DPS,
+            9
+          );
+          const steps = view.setPotentialSteps(row.setContext, FLOOR) as
+            SplitStepTerm[] | null;
+          expect(steps, `${where}: steps nest`).not.toBeNull();
+          const step4 = steps!.find((s) => s.threshold === 4);
+          expect(step4, `${where}: 4pc step`).toBeDefined();
+          const setIds = Object.values(setId === 640 ? MALORNE : NORDRASSIL);
+          const earlier: number[] = [];
+          for (const s of steps!) {
+            const added = s.pieces.map((p) => p.itemId);
+            const want = modelStepLines({
+              worn,
+              rowId: id,
+              setId,
+              setIds,
+              earlier,
+              added,
+              values,
+            });
+            const at = `${where} step ${s.threshold}`;
+            if (want.breaks === 0) {
+              expect(s.breaksLineDps, at).toBeUndefined();
+              expect(s.dps, at).toBeCloseTo(want.pieces, 9);
+            } else {
+              expect(s.breaksLineDps, at).toBeCloseTo(want.breaks, 9);
+              expect(s.piecesLineDps, at).toBeCloseTo(want.pieces, 9);
+              if (s.threshold === 4) fourPcStepsWithBreaks += 1;
+            }
+            earlier.push(...added);
+          }
+        }
+        expectSplitLinesAddUp(view, r);
+      }
+      // The sweep reaches a 4pc step that breaks Thunderheart (k >= 2).
+      expect(fourPcStepsWithBreaks).toBeGreaterThan(0);
+    });
+
+    it("497-B: a stat interaction on the 4pc gear moves the pieces line, not the Breaks line", async () => {
+      // Scenario kind: worn Thunderheart hands and legs (k = 2), the Malorne
+      // head row. Thunderheart hands are worth 300 so no Malorne 4pc replaces
+      // them; the 4pc gear is Malorne head, shoulder, chest and legs over the
+      // worn Thunderheart hands, and its step replaces the Thunderheart legs,
+      // losing the Thunderheart 2pc (-50). The interaction (Malorne shoulder
+      // + chest + Thunderheart hands, -15) fires on the 4pc gear only, not on
+      // the gear the Breaks line prices.
+      const view = await stepView();
+      const values = withValues([
+        ...Object.values(MALORNE).map((id) => [id, V_TH] as const),
+        [THUNDERHEART.hands, 300],
+      ]);
+      const scenario: Scenario = {
+        worn: wornGear(sweepWorn(2)),
+        pool: [
+          ...setPool(MALORNE),
+          { itemId: NEUTRAL.hands[0], slot: "hands" },
+          { itemId: NEUTRAL.legs[0], slot: "legs" },
+        ],
+        itemValue: values,
+        setBonuses: SWEEP_BONUSES,
+        measureBrokenSetValue: true,
+      };
+      const plain = await runScenario(scenario);
+      const withTerm = await runScenario({
+        ...scenario,
+        interactions: [
+          {
+            ids: [MALORNE.shoulder, MALORNE.chest, THUNDERHEART.hands],
+            dps: -15,
+          },
+        ],
+      });
+      const step4Of = (r: ForkRanking) => {
+        const steps = view.setPotentialSteps(
+          thRow(r, MALORNE.head).setContext,
+          FLOOR
+        ) as SplitStepTerm[] | null;
+        return steps?.find((s) => s.threshold === 4);
+      };
+      const a = step4Of(plain.ranking);
+      const b = step4Of(withTerm.ranking);
+      expect(a).toBeDefined();
+      expect(b).toBeDefined();
+      for (const s of [a!, b!]) {
+        const ids = s.pieces.map((p) => p.itemId);
+        expect(ids).toContain(MALORNE.legs);
+        expect(ids).not.toContain(MALORNE.hands);
+        expect(s.broken.map((x) => [x.setId, x.threshold])).toEqual([[676, 2]]);
+      }
+      // Hand-derived: Breaks -50; pieces -20 (a neutral shoulder or chest
+      // replaced) + 0 (Thunderheart legs replaced) + 400 = 380, and 365 with
+      // the interaction.
+      expect(a!.breaksLineDps).toBeCloseTo(-50, 9);
+      expect(a!.piecesLineDps).toBeCloseTo(380, 9);
+      expect(b!.breaksLineDps).toBeCloseTo(-50, 9);
+      expect(b!.piecesLineDps).toBeCloseTo(365, 9);
+    });
+  }
+);

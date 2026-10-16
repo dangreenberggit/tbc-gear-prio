@@ -21,80 +21,79 @@
     1012
   ],
   "d7EligibleTotal": 2967,
-  "excludedNoSource": 1228,
-  "universeTotal": 408,
-  "listOnlyMembership": 35,
+  "excludedNoSource": 872,
+  "universeTotal": 767,
+  "listOnlyMembership": 28,
   "perSlot": {
-    "back": 34,
-    "chest": 24,
-    "feet": 33,
-    "finger": 56,
-    "hands": 20,
-    "head": 22,
-    "legs": 21,
-    "neck": 28,
-    "ranged": 2,
-    "shoulder": 20,
-    "trinket": 25,
-    "waist": 30,
-    "weapon": 66,
-    "wrist": 27
+    "back": 54,
+    "chest": 47,
+    "feet": 55,
+    "finger": 100,
+    "hands": 32,
+    "head": 46,
+    "legs": 46,
+    "neck": 57,
+    "ranged": 4,
+    "shoulder": 44,
+    "trinket": 52,
+    "waist": 50,
+    "weapon": 129,
+    "wrist": 51
   },
   "sourceRecordAdds": {
     "atlasloot": 251,
-    "curated": 3,
-    "db": 1622,
-    "two-hop": 15,
-    "wowhead": 27
+    "curated": 4,
+    "db": 1972,
+    "sunmote": 23,
+    "two-hop": 18,
+    "wowhead": 13
   },
   "membershipByOrigin": {
-    "curated": 4,
-    "itemHasOrigin:atlasloot": 79,
-    "itemHasOrigin:curated": 3,
-    "itemHasOrigin:db": 342,
+    "arenaSource": 71,
+    "curated": 5,
+    "dbPhase": 255,
+    "itemHasOrigin:atlasloot": 100,
+    "itemHasOrigin:curated": 4,
+    "itemHasOrigin:db": 686,
     "itemHasOrigin:two-hop": 15,
-    "itemHasOrigin:wowhead": 19,
-    "listOnly": 35,
+    "itemHasOrigin:wowhead": 12,
+    "listOnly": 28,
+    "recipeMatch": 13,
     "repFactionMatch": 26,
+    "repItemPhase": 26,
     "zoneMatch": 343
   },
   "exclusivePrimaryOrigin": {
-    "db": 342,
-    "wowhead-only": 19,
-    "atlasloot-only": 29,
-    "other": 3,
+    "db": 686,
+    "wowhead-only": 12,
+    "atlasloot-only": 50,
+    "other": 4,
     "two-hop": 15
   },
-  "tierPiecesExpected": 10,
-  "tierPiecesPresent": 10,
+  "tierPiecesExpected": 15,
+  "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 408,
-    "casterOnlyReject": 198,
+    "total": 767,
+    "casterOnlyReject": 410,
     "epFloorReject": 0,
-    "combinedReject": 198,
-    "combinedKeep": 210,
-    "casterRejectPct": 48.5,
-    "combinedRejectPct": 48.5,
+    "combinedReject": 410,
+    "combinedKeep": 357,
+    "casterRejectPct": 53.5,
+    "combinedRejectPct": 53.5,
     "applied": false
   },
   "wowheadListIds": 115,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 115,
-    "recalled": 97,
-    "missed": 18,
-    "recallPct": 84.3,
+    "recalled": 99,
+    "missed": 16,
+    "recallPct": 86.1,
     "missedItems": [
       {
         "itemId": 19406,
         "name": "Drake Fang Talisman",
-        "slot": "trinket",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 23206,
-        "name": "Mark of the Champion",
         "slot": "trinket",
         "d7Eligible": true
       },
@@ -174,12 +173,6 @@
         "itemId": 31544,
         "name": "Clefthoof Hide Leggings",
         "slot": "legs",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 32387,
-        "name": "Idol of the Raven Goddess",
-        "slot": "ranged",
         "d7Eligible": true
       },
       {
@@ -407,6 +400,18 @@
       "name": "Jewel of Charismatic Mystique"
     },
     {
+      "itemId": 28126,
+      "name": "Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 28136,
+      "name": "Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 28355,
+      "name": "Gladiator's Idol of Tenacity"
+    },
+    {
       "itemId": 28568,
       "name": "Idol of the Avian Heart"
     },
@@ -447,6 +452,38 @@
       "name": "Lower City Prayerbook"
     },
     {
+      "itemId": 31375,
+      "name": "Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 31859,
+      "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 31967,
+      "name": "Merciless Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 31987,
+      "name": "Merciless Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 32056,
+      "name": "Merciless Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 32113,
+      "name": "Chancellor's Dragonhide Gloves"
+    },
+    {
+      "itemId": 32118,
+      "name": "Chancellor's Kodohide Gloves"
+    },
+    {
+      "itemId": 32128,
+      "name": "Chancellor's Wyrmhide Gloves"
+    },
+    {
       "itemId": 32500,
       "name": "Crystal Spire of Karabor"
     },
@@ -465,6 +502,58 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 33076,
+      "name": "Merciless Gladiator's Idol of Tenacity"
+    },
+    {
+      "itemId": 33508,
+      "name": "Idol of Budding Life"
+    },
+    {
+      "itemId": 33510,
+      "name": "Idol of the Unseen Moon"
+    },
+    {
+      "itemId": 33671,
+      "name": "Vengeful Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 33690,
+      "name": "Vengeful Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 33767,
+      "name": "Vengeful Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 33841,
+      "name": "Vengeful Gladiator's Idol of Tenacity"
+    },
+    {
+      "itemId": 33942,
+      "name": "Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33943,
+      "name": "Merciless Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33944,
+      "name": "Vengeful Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33945,
+      "name": "Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 33946,
+      "name": "Merciless Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 33947,
+      "name": "Vengeful Gladiator's Idol of Resolve"
     },
     {
       "itemId": 34430,
@@ -536,9 +625,13 @@
       "p3_9p"
     ]
   },
-  "excludedIds": {
-    "total": 0,
-    "reason": "",
-    "curatedSetCollisions": []
+  "arenaSource": {
+    "total": 505,
+    "admitted": 71,
+    "admittedBySeason": {
+      "1": 23,
+      "2": 23,
+      "3": 25
+    }
   }
 }

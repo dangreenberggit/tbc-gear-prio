@@ -1,0 +1,189 @@
+{
+  "balance": [
+    {
+      "setId": 639,
+      "tier": 4,
+      "name": "Malorne Regalia"
+    },
+    {
+      "setId": 643,
+      "tier": 5,
+      "name": "Nordrassil Regalia"
+    },
+    {
+      "setId": 677,
+      "tier": 6,
+      "name": "Thunderheart Regalia"
+    }
+  ],
+  "ele": [
+    {
+      "setId": 632,
+      "tier": 4,
+      "name": "Cyclone Regalia"
+    },
+    {
+      "setId": 635,
+      "tier": 5,
+      "name": "Cataclysm Regalia"
+    },
+    {
+      "setId": 684,
+      "tier": 6,
+      "name": "Skyshatter Regalia"
+    }
+  ],
+  "enh": [
+    {
+      "setId": 633,
+      "tier": 4,
+      "name": "Cyclone Harness"
+    },
+    {
+      "setId": 636,
+      "tier": 5,
+      "name": "Cataclysm Harness"
+    },
+    {
+      "setId": 682,
+      "tier": 6,
+      "name": "Skyshatter Harness"
+    }
+  ],
+  "feral": [
+    {
+      "setId": 640,
+      "tier": 4,
+      "name": "Malorne Harness"
+    },
+    {
+      "setId": 641,
+      "tier": 5,
+      "name": "Nordrassil Harness"
+    },
+    {
+      "setId": 676,
+      "tier": 6,
+      "name": "Thunderheart Harness"
+    }
+  ],
+  "hunter": [
+    {
+      "setId": 651,
+      "tier": 4,
+      "name": "Demon Stalker Armor"
+    },
+    {
+      "setId": 652,
+      "tier": 5,
+      "name": "Rift Stalker Armor"
+    },
+    {
+      "setId": 669,
+      "tier": 6,
+      "name": "Gronnstalker's Armor"
+    }
+  ],
+  "mage": [
+    {
+      "setId": 648,
+      "tier": 4,
+      "name": "Aldor Regalia"
+    },
+    {
+      "setId": 649,
+      "tier": 5,
+      "name": "Tirisfal Regalia"
+    },
+    {
+      "setId": 671,
+      "tier": 6,
+      "name": "Tempest Regalia"
+    }
+  ],
+  "ret": [
+    {
+      "setId": 626,
+      "tier": 4,
+      "name": "Justicar Battlegear"
+    },
+    {
+      "setId": 629,
+      "tier": 5,
+      "name": "Crystalforge Battlegear"
+    },
+    {
+      "setId": 680,
+      "tier": 6,
+      "name": "Lightbringer Battlegear"
+    }
+  ],
+  "rogue": [
+    {
+      "setId": 621,
+      "tier": 4,
+      "name": "Netherblade"
+    },
+    {
+      "setId": 622,
+      "tier": 5,
+      "name": "Deathmantle"
+    },
+    {
+      "setId": 668,
+      "tier": 6,
+      "name": "Slayer's Armor"
+    }
+  ],
+  "shadow": [
+    {
+      "setId": 664,
+      "tier": 4,
+      "name": "Incarnate Regalia"
+    },
+    {
+      "setId": 666,
+      "tier": 5,
+      "name": "Avatar Regalia"
+    },
+    {
+      "setId": 674,
+      "tier": 6,
+      "name": "Absolution Regalia"
+    }
+  ],
+  "warlock": [
+    {
+      "setId": 645,
+      "tier": 4,
+      "name": "Voidheart Raiment"
+    },
+    {
+      "setId": 646,
+      "tier": 5,
+      "name": "Corruptor Raiment"
+    },
+    {
+      "setId": 670,
+      "tier": 6,
+      "name": "Malefic Raiment"
+    }
+  ],
+  "warrior": [
+    {
+      "setId": 655,
+      "tier": 4,
+      "name": "Warbringer Battlegear"
+    },
+    {
+      "setId": 657,
+      "tier": 5,
+      "name": "Destroyer Battlegear"
+    },
+    {
+      "setId": 672,
+      "tier": 6,
+      "name": "Onslaught Battlegear"
+    }
+  ]
+}

@@ -22,60 +22,65 @@
     1012,
     1077
   ],
-  "d7EligibleTotal": 4248,
-  "excludedNoSource": 802,
-  "universeTotal": 1423,
+  "d7EligibleTotal": 4384,
+  "excludedNoSource": 1094,
+  "universeTotal": 1396,
   "listOnlyMembership": 0,
   "perSlot": {
-    "back": 64,
-    "chest": 99,
-    "feet": 110,
-    "finger": 132,
-    "hands": 77,
-    "head": 81,
-    "legs": 116,
-    "neck": 85,
-    "ranged": 34,
-    "shoulder": 73,
-    "trinket": 62,
-    "waist": 96,
-    "weapon": 294,
-    "wrist": 100
+    "back": 56,
+    "chest": 102,
+    "feet": 105,
+    "finger": 118,
+    "hands": 83,
+    "head": 86,
+    "legs": 88,
+    "neck": 71,
+    "ranged": 40,
+    "shoulder": 77,
+    "trinket": 59,
+    "waist": 98,
+    "weapon": 321,
+    "wrist": 92
   },
   "sourceRecordAdds": {
     "atlasloot": 376,
-    "curated": 7,
-    "db": 3321,
+    "curated": 5,
+    "db": 3144,
+    "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
-    "curated": 21,
-    "dbPhase": 686,
+    "arenaSource": 136,
+    "curated": 19,
+    "dbPhase": 398,
     "heroicMatch": 19,
-    "itemHasOrigin:atlasloot": 127,
-    "itemHasOrigin:curated": 7,
-    "itemHasOrigin:db": 1350,
+    "itemHasOrigin:atlasloot": 150,
+    "itemHasOrigin:curated": 5,
+    "itemHasOrigin:db": 1279,
+    "itemHasOrigin:sunmote": 23,
     "itemHasOrigin:two-hop": 18,
+    "recipeMatch": 65,
     "repFactionMatch": 48,
-    "zoneMatch": 649
+    "repItemPhase": 39,
+    "zoneMatch": 672
   },
   "exclusivePrimaryOrigin": {
-    "db": 1350,
-    "other": 7,
-    "atlasloot-only": 48,
+    "db": 1279,
+    "other": 28,
+    "atlasloot-only": 71,
     "two-hop": 18
   },
   "tierPiecesExpected": 18,
   "tierPiecesPresent": 18,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 1423,
-    "casterOnlyReject": 610,
-    "epFloorReject": 2,
+    "total": 1396,
+    "casterOnlyReject": 609,
+    "epFloorReject": 3,
     "combinedReject": 612,
-    "combinedKeep": 811,
-    "casterRejectPct": 42.9,
-    "combinedRejectPct": 43.0,
+    "combinedKeep": 784,
+    "casterRejectPct": 43.6,
+    "combinedRejectPct": 43.8,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -89,10 +94,6 @@
   },
   "ticket157ForceIncluded": [],
   "excludedUnimplementedEffect": [
-    {
-      "itemId": 3475,
-      "name": "Cloak of Flames"
-    },
     {
       "itemId": 11810,
       "name": "Force of Will"
@@ -154,14 +155,6 @@
       "name": "Onyxia Scale Cloak"
     },
     {
-      "itemId": 16484,
-      "name": "Marshal's Plate Gauntlets"
-    },
-    {
-      "itemId": 16548,
-      "name": "General's Plate Gauntlets"
-    },
-    {
       "itemId": 17066,
       "name": "Drillborer Disk"
     },
@@ -174,24 +167,8 @@
       "name": "Spinal Reaper"
     },
     {
-      "itemId": 17182,
-      "name": "Sulfuras, Hand of Ragnaros"
-    },
-    {
-      "itemId": 17904,
-      "name": "Stormpike Insignia Rank 6"
-    },
-    {
-      "itemId": 17909,
-      "name": "Frostwolf Insignia Rank 6"
-    },
-    {
       "itemId": 18382,
       "name": "Fluctuating Cloak"
-    },
-    {
-      "itemId": 18406,
-      "name": "Onyxia Blood Talisman"
     },
     {
       "itemId": 18639,
@@ -218,28 +195,8 @@
       "name": "Essence of the Pure Flame"
     },
     {
-      "itemId": 19287,
-      "name": "Darkmoon Card: Heroism"
-    },
-    {
-      "itemId": 19288,
-      "name": "Darkmoon Card: Blue Dragon"
-    },
-    {
-      "itemId": 19289,
-      "name": "Darkmoon Card: Maelstrom"
-    },
-    {
-      "itemId": 19290,
-      "name": "Darkmoon Card: Twisting Nether"
-    },
-    {
       "itemId": 19341,
       "name": "Lifegiving Gem"
-    },
-    {
-      "itemId": 19577,
-      "name": "Rage of Mugamba"
     },
     {
       "itemId": 19874,
@@ -254,18 +211,6 @@
       "name": "Tigule's Harpoon"
     },
     {
-      "itemId": 19949,
-      "name": "Zandalarian Hero Medallion"
-    },
-    {
-      "itemId": 19950,
-      "name": "Zandalarian Hero Charm"
-    },
-    {
-      "itemId": 19951,
-      "name": "Gri'lek's Charm of Might"
-    },
-    {
       "itemId": 19961,
       "name": "Gri'lek's Grinder"
     },
@@ -278,20 +223,8 @@
       "name": "Pitchfork of Madness"
     },
     {
-      "itemId": 20579,
-      "name": "Green Dragonskin Cloak"
-    },
-    {
       "itemId": 21488,
       "name": "Fetish of Chitinous Spikes"
-    },
-    {
-      "itemId": 21517,
-      "name": "Gnomish Turban of Psychic Might"
-    },
-    {
-      "itemId": 21526,
-      "name": "Band of Icy Depths"
     },
     {
       "itemId": 21625,
@@ -338,22 +271,6 @@
       "name": "Heart of Wyrmthalak"
     },
     {
-      "itemId": 22589,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22630,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22631,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22632,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
       "itemId": 22691,
       "name": "Corrupted Ashbringer"
     },
@@ -364,10 +281,6 @@
     {
       "itemId": 23027,
       "name": "Warmth of Forgiveness"
-    },
-    {
-      "itemId": 23072,
-      "name": "Fists of the Unrelenting"
     },
     {
       "itemId": 23221,
@@ -430,20 +343,12 @@
       "name": "Auslese's Light Channeler"
     },
     {
-      "itemId": 24551,
-      "name": "Talisman of the Horde"
-    },
-    {
       "itemId": 25827,
       "name": "Muck-Covered Drape"
     },
     {
       "itemId": 25828,
       "name": "Petrified Lichen Guard"
-    },
-    {
-      "itemId": 25829,
-      "name": "Talisman of the Alliance"
     },
     {
       "itemId": 25835,
@@ -607,9 +512,14 @@
       "p5_fury"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 136,
+    "admittedBySeason": {
+      "1": 29,
+      "2": 31,
+      "3": 38,
+      "4": 38
+    }
   }
 }

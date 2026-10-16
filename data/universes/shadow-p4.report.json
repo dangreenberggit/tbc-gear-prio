@@ -20,45 +20,49 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 2213,
-  "excludedNoSource": 475,
-  "universeTotal": 671,
+  "d7EligibleTotal": 2301,
+  "excludedNoSource": 681,
+  "universeTotal": 599,
   "listOnlyMembership": 0,
   "perSlot": {
-    "back": 60,
+    "back": 52,
     "chest": 27,
-    "feet": 36,
-    "finger": 114,
-    "hands": 19,
+    "feet": 31,
+    "finger": 100,
+    "hands": 17,
     "head": 28,
-    "legs": 32,
-    "neck": 71,
-    "ranged": 9,
-    "shoulder": 24,
-    "trinket": 53,
-    "waist": 32,
-    "weapon": 129,
-    "wrist": 37
+    "legs": 29,
+    "neck": 55,
+    "ranged": 13,
+    "shoulder": 26,
+    "trinket": 50,
+    "waist": 30,
+    "weapon": 109,
+    "wrist": 32
   },
   "sourceRecordAdds": {
     "atlasloot": 211,
     "curated": 11,
-    "db": 1636,
+    "db": 1513,
+    "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 56,
     "curated": 20,
-    "dbPhase": 361,
-    "itemHasOrigin:atlasloot": 65,
+    "dbPhase": 198,
+    "itemHasOrigin:atlasloot": 86,
     "itemHasOrigin:curated": 11,
-    "itemHasOrigin:db": 618,
+    "itemHasOrigin:db": 525,
     "itemHasOrigin:two-hop": 15,
+    "recipeMatch": 8,
     "repFactionMatch": 22,
+    "repItemPhase": 27,
     "zoneMatch": 268
   },
   "exclusivePrimaryOrigin": {
-    "db": 618,
-    "atlasloot-only": 27,
+    "db": 525,
+    "atlasloot-only": 48,
     "other": 11,
     "two-hop": 15
   },
@@ -66,13 +70,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 671,
-    "casterOnlyReject": 431,
+    "total": 599,
+    "casterOnlyReject": 385,
     "epFloorReject": 11,
-    "combinedReject": 442,
-    "combinedKeep": 229,
-    "casterRejectPct": 64.2,
-    "combinedRejectPct": 65.9,
+    "combinedReject": 396,
+    "combinedKeep": 203,
+    "casterRejectPct": 64.3,
+    "combinedRejectPct": 66.1,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -86,10 +90,6 @@
   },
   "ticket157ForceIncluded": [],
   "excludedUnimplementedEffect": [
-    {
-      "itemId": 3475,
-      "name": "Cloak of Flames"
-    },
     {
       "itemId": 11810,
       "name": "Force of Will"
@@ -135,28 +135,8 @@
       "name": "Shard of the Flame"
     },
     {
-      "itemId": 17608,
-      "name": "Marshal's Satin Gloves"
-    },
-    {
-      "itemId": 17620,
-      "name": "General's Satin Gloves"
-    },
-    {
-      "itemId": 17904,
-      "name": "Stormpike Insignia Rank 6"
-    },
-    {
-      "itemId": 17909,
-      "name": "Frostwolf Insignia Rank 6"
-    },
-    {
       "itemId": 18382,
       "name": "Fluctuating Cloak"
-    },
-    {
-      "itemId": 18406,
-      "name": "Onyxia Blood Talisman"
     },
     {
       "itemId": 18639,
@@ -179,56 +159,16 @@
       "name": "Essence of the Pure Flame"
     },
     {
-      "itemId": 19287,
-      "name": "Darkmoon Card: Heroism"
-    },
-    {
-      "itemId": 19288,
-      "name": "Darkmoon Card: Blue Dragon"
-    },
-    {
-      "itemId": 19289,
-      "name": "Darkmoon Card: Maelstrom"
-    },
-    {
-      "itemId": 19290,
-      "name": "Darkmoon Card: Twisting Nether"
-    },
-    {
-      "itemId": 19594,
-      "name": "The All-Seeing Eye of Zuldazar"
-    },
-    {
       "itemId": 19930,
       "name": "Mar'li's Eye"
-    },
-    {
-      "itemId": 19949,
-      "name": "Zandalarian Hero Medallion"
-    },
-    {
-      "itemId": 19950,
-      "name": "Zandalarian Hero Charm"
     },
     {
       "itemId": 19961,
       "name": "Gri'lek's Grinder"
     },
     {
-      "itemId": 20579,
-      "name": "Green Dragonskin Cloak"
-    },
-    {
       "itemId": 21488,
       "name": "Fetish of Chitinous Spikes"
-    },
-    {
-      "itemId": 21517,
-      "name": "Gnomish Turban of Psychic Might"
-    },
-    {
-      "itemId": 21526,
-      "name": "Band of Icy Depths"
     },
     {
       "itemId": 21625,
@@ -257,22 +197,6 @@
     {
       "itemId": 22321,
       "name": "Heart of Wyrmthalak"
-    },
-    {
-      "itemId": 22589,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22630,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22631,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22632,
-      "name": "Atiesh, Greatstaff of the Guardian"
     },
     {
       "itemId": 23001,
@@ -327,16 +251,8 @@
       "name": "Auslese's Light Channeler"
     },
     {
-      "itemId": 24551,
-      "name": "Talisman of the Horde"
-    },
-    {
       "itemId": 25827,
       "name": "Muck-Covered Drape"
-    },
-    {
-      "itemId": 25829,
-      "name": "Talisman of the Alliance"
     },
     {
       "itemId": 25835,
@@ -349,6 +265,10 @@
     {
       "itemId": 27416,
       "name": "Fetish of the Fallen"
+    },
+    {
+      "itemId": 27707,
+      "name": "Gladiator's Satin Gloves"
     },
     {
       "itemId": 27896,
@@ -387,8 +307,20 @@
       "name": "Lower City Prayerbook"
     },
     {
+      "itemId": 31409,
+      "name": "Gladiator's Mooncloth Gloves"
+    },
+    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 32015,
+      "name": "Merciless Gladiator's Mooncloth Gloves"
+    },
+    {
+      "itemId": 32034,
+      "name": "Merciless Gladiator's Satin Gloves"
     },
     {
       "itemId": 32100,
@@ -417,6 +349,14 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 33717,
+      "name": "Vengeful Gladiator's Mooncloth Gloves"
+    },
+    {
+      "itemId": 33744,
+      "name": "Vengeful Gladiator's Satin Gloves"
     },
     {
       "itemId": 34430,
@@ -479,9 +419,13 @@
       "p3"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 56,
+    "admittedBySeason": {
+      "1": 17,
+      "2": 17,
+      "3": 22
+    }
   }
 }

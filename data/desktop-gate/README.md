@@ -20,20 +20,30 @@ golden is `golden-ret-p4-cap40.json`.
   The gate moved to phase 4, whose previous phase has `P3` (session ruling
   Q-560-desktop-phase). The phase-5 golden was removed; phase 5 is not gated.
 - **Pinned counts.** `EXPECTED_ELIGIBLE["ret"][4]` and `UNIVERSE_CAP["ret"][4]`
-  in `scripts/check_desktop_tab.py` are 523, the entry count of the ret-p4
+  in `scripts/check_desktop_tab.py` are 917, the entry count of the ret-p4
   universe, measured before any run with
-  `node -e "console.log(require('<fork>/ui/features/upgrades/model/data/ret-p4.universe.json').entries.length)"`.
+  `node -e "console.log(require('<fork>/ui/features/upgrades/model/data/ret-p4.universe.json').entries.length)"`
+  (2026-10-16; 838 before ticket 642 admitted arena gear and the 23206 fix
+  added Mark of the Champion; 523 before tickets 611 and 613 grew the ret
+  lists).
   Neither the phase filter nor the Kael exclusion removes a ret-p4 entry, so a
-  run with the tab's default settings should report `eligibleCount` 523.
+  run with the tab's default settings should report `eligibleCount` 917; the
+  2026-10-16 live readback did.
   `FULL_ROWS` has no phase-4 entry: the gate runs capped, and a capped run
   never reads it.
-- **Pinned row count.** `CAPPED_ROWS["ret"][4][40]` is 39, not 40. The cap
-  sims the first 40 candidates in EP order plus every worn item, and the
-  Upgrades list pane leaves worn (owned) rows out. On this run one worn item
-  is inside the first 40: the ranking holds 55 rows, 16 of them the worn
-  items, so 15 worn rows lie outside the first 40 and the pane shows 39.
-  Measured on the desktop binary and, with the same 39 rows, on the WASM dev
-  server (2026-10-07, ticket 560 stage `desktop-gate.md`).
+- **Pinned row count.** `CAPPED_ROWS["ret"][4][40]` is 40. The cap sims the
+  first 40 candidates in EP order plus every worn item, and the Upgrades list
+  pane leaves worn (owned) rows out, so the pane shows 40 minus the worn items
+  inside the first 40. On this run none of the 16 worn items is inside the
+  first 40. Measured on the desktop binary on 2026-10-15 (fork `2d168e74f`,
+  readback `.scratch/stage-gate/tab-item-lists/readback-ret-p4-cap40.json`,
+  gitignored). It was 39 (one worn item inside the first 40, measured
+  2026-10-07, ticket 560 stage `desktop-gate.md`) until the ret-p4 pool grew
+  from 523 to 838: ten new candidates entered the first 40 by EP and pushed
+  out nine old candidates and that worn item. Re-measured 2026-10-16 after the
+  pool grew to 917 (fork `8cd8d1c80`, readback
+  `.scratch/stage-gate/tab-blocking-finish/readback-ret-p4-cap40.json`,
+  gitignored): still 40.
 - **Where the run's values are explained.** The phase-4 golden's rows and
   `baselineDps`, against the old phase-5 golden, are explained in the commit
   that writes the golden and in the ticket-560 stage's `desktop-gate.md`.

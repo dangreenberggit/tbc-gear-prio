@@ -175,3 +175,21 @@ owner has not made.
 
 Revisit when a stage is scoped for it. The decision above is what holds until
 then.
+
+## Amendment 2026-10 (ticket 613)
+
+The local universe stays the artifact the tab reads. The wowsims DB is still
+the auditor, and it is now also one membership route: db-phase admission, the
+same for all 11 specs, admits an epic (quality ≥ 4) with no source once its
+`phase` is reached, when its item level is at least 100 or the pinned sim
+implements its effect. So the sentence above that the audit "never adds an
+item to a pool" now reads: the audit never adds an item; the db-phase route
+does, by rule. Ticket 610 replaces `scripts/list_phase_pool.py` with an audit
+that reads no builder code; that audit is the auditor this ADR names.
+
+2026-10-16 (ticket 610): the audit is now `scripts/check_pool_completeness.py`,
+run by `pnpm pool-listings:check` in `pnpm verify`, and
+`scripts/list_phase_pool.py` is deleted. Arena gear (the four Gladiator
+season lines) is admitted as a PvP source the player can remove, once its
+season is open for the list's phase, by the owner's rulings of 2026-10-15 and
+2026-10-16 (ticket 642).
