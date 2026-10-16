@@ -416,3 +416,14 @@ file's round 2 commit; it runs `pnpm verify`, then `merge-ready`) printed
 `gates: 1539 ran, 0 skipped`, `disposition rows: 25 parsed of 25 row-shaped
 lines in 3 section(s)`, `merge-ready: ok`, and exited 0. It does not clear
 F1: the gates do not run the commands in `docs/agents/paired-worktrees.md`.
+
+## Disposition (round 2)
+
+The orchestrator decided F1 and F2 inline, without a round 3, under the
+owner's standing rule that small review findings are fixed inline.
+`78fdf88a` fixes both, so F1 no longer blocks the merge.
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                      |
+| --- | ----------- | ----------- | -------------------------------------------------------------------------------------------------- |
+| F1  | Adversarial | fixed       | `78fdf88a`: start command is `./wowsimtbc.exe`                                                     |
+| F2  | Standards   | fixed       | `78fdf88a`: B6 sentence names the three changes, "both times" dropped, ticket 674 names the review |
