@@ -186,3 +186,10 @@ implements its effect. So the sentence above that the audit "never adds an
 item to a pool" now reads: the audit never adds an item; the db-phase route
 does, by rule. Ticket 610 replaces `scripts/list_phase_pool.py` with an audit
 that reads no builder code; that audit is the auditor this ADR names.
+
+2026-10-16 (ticket 610): the audit is now `scripts/check_pool_completeness.py`,
+run by `pnpm pool-listings:check` in `pnpm verify`, and
+`scripts/list_phase_pool.py` is deleted. Arena gear (the four Gladiator
+season lines) is admitted as a PvP source the player can remove, once its
+season is open for the list's phase, by the owner's rulings of 2026-10-15 and
+2026-10-16 (ticket 642).

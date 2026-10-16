@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 follow-on (Tab-adjacent)
 Type: task
 Origin: .scratch/handoffs/sme-rank-judgment-613-tab-item-lists.md (finding F3, contested)
@@ -40,3 +40,30 @@ existing season as a source." So arena gear should not be hard-excluded at
 all: it should be a source the player keeps or filters out. That is a larger
 change, left for the next session; the `_arena_gear_ids` docstring is
 unchanged and this ticket stays open.
+
+2026-10-16 (stage-gate tab-blocking-finish): the owner ruled, verbatim:
+"Yeah sure arena items as a source are fine. If it's good it's good, as long
+as it's the  season is open for the selected phase".
+
+## Closed 2026-10-16 (stage-gate tab-blocking-finish, K2)
+
+Arena gear is no longer excluded. `scripts/assemble_universe.py` admits every
+item of the four Gladiator season lines to every spec's list once its season
+is open (db.json `phase`; seasons 1-4 open at phases 1, 2, 3 and 5), with one
+source `{"kind": "pvp", "via": "arena", "season": N}`; stub-only pieces stay
+out. The tab files every such item under "PvP vendor", so unticking that
+source in the Sources dialog removes all of it. The `_arena_gear_ids`
+docstring and the report no longer give a rating reason: the docstring says
+what the ids are, and the report's `arenaSource` counts admitted rows by
+season. The completeness gate expects each open-season piece present with
+that source (E-arena) and fails on any piece listed before its season opens
+(P-season-closed), and on any piece whose db phase disagrees with its
+season's opening phase. Per-list E-arena counts at phase 5: balance 102, ele
+116, enh 138, feral 98, hunter 93, mage 55, ret 74, rogue 96, shadow 80,
+warlock 71, warrior 136. No list holds a piece before its season opens.
+
+Verified by: `python scripts/check_pool_completeness.py --report` (E-arena and
+P-season-closed columns) at tbc-gear-prio@d74d5fcc, and the fork test
+`ui/features/upgrades/model/arena_source.test.ts` at tbc-new-fork@ad6771f83
+(`npx vitest run ui/features/upgrades/model/arena_source.test.ts` in the
+fork).
