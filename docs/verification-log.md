@@ -2614,11 +2614,12 @@ issues:open` runs, `package.json`) in place of `corepack pnpm -s issues:open`,
 printed nothing. The script exited 0 and listed 161 open tickets. Log:
 `.scratch/stage-3t/box1-scope-loops-2026-10-12.log`.
 
-### ☐ 2 — no tab-blocking ticket is open
+### ☑ 2 — no tab-blocking ticket is open
 
 `sed -n '/^## Tab-blocking/,/^## /p' docs/upgrades-tab-scope.md | grep -c '^| [0-9]'`
 → 0. On 2026-10-11 (`dev` at `64443dc4`) it printed 14. On 2026-10-12 (`dev`
-at `34fe4ac6`) it printed 14.
+at `34fe4ac6`) it printed 14. Met on 2026-10-16: it printed 0 on `66b36da3`
+(see "Re-run on the final commits, 2026-10-16" below).
 
 ### ☑ 3 — a web run completes on the DPS-spec fixtures
 
@@ -2692,3 +2693,80 @@ root in Git Bash:
   → `Status: closed` twice.
 - `sed -n '/^## Awaiting owner sign-off/,/^## /p' docs/upgrades-tab-scope.md | grep -c '^| [0-9]'`
   → 0.
+
+### Re-run on the final commits, 2026-10-16
+
+Boxes 1 to 5 ran again on 2026-10-16 (ticket 674), after the four tab merges
+reached `dev` (`3e9423bf`) and after both pins moved to upstream `master`
+`e804c29e8d615fcc6dcc632a1b0c782605e27d46` (release v0.0.150). They ran in
+the pair `stage-3t-boxes`: main-repo branch `docs/stage-3t-boxes`, which holds
+`dev` `3e9423bf`, and its fork worktree on `wt/stage-3t-boxes` at
+`bc96d0a03fbb0d794e53f6d3bd9047ff9b542c32`, the merge of `e804c29e8` into fork
+`8cd8d1c80` (no conflicts). The checks ran in Git Bash with Node v22.17.1,
+each command naming the pair with `-C` or run from the pair's root. The logs
+were written outside the repo and are not kept, so the lines that matter are
+quoted below.
+
+**Box 5 — both pins on `master`.** 20:55:34Z–20:55:41Z, on `883b3dd0`. The
+engine lock's `commit` and the fork lock's `branchedFrom` are both
+`e804c29e8d615fcc6dcc632a1b0c782605e27d46`. After `git -C
+vendor/tbc-new-fork fetch upstream master` (rc=0), `upstream/master` was that
+same commit, and `git ls-remote https://github.com/wowsims/tbc-new.git
+refs/heads/master` gave it too. For that sha, `merge-base --is-ancestor
+3163bcfaf791ed9818463e07fa6ba438c0099d6e <sha>` and `merge-base --is-ancestor
+<sha> upstream/master` each gave rc=0. `python scripts/sync_wowsims.py
+--check` printed `in sync.` and exited 0; it also printed
+`upstream: v0.0.150 (e804c29e8d61)`.
+
+**Box 4 — the desktop transport.** 20:43:27Z–20:44:29Z. The fork's HEAD and
+the fork lock's `commit` were both
+`bc96d0a03fbb0d794e53f6d3bd9047ff9b542c32` (the lock edit was committed right
+after, as `883b3dd0`). `corepack pnpm -C <pair> desktop-gate:check` printed:
+
+```
+desktop-gate: 187 files compared, 0 mismatches (Q1 bundle intact; sim_worker.js rewritten to net_worker.js).
+  (e) pass: rowCount=40 expected=40 eligibleCount=917 EXPECTED_ELIGIBLE=917 cap=917 (uncapped uses FULL_ROWS=None, C14 false)
+  (h) pass: rows, aboveCutoffItems and baselineDps match data/desktop-gate/golden-ret-p4-cap40.json
+desktop-gate: PASS.
+rc=0
+```
+
+Checks (a) to (d) and (f) also printed `pass`. This is the first run of the
+stricter byte check (ticket 627) on the new pins, and it found no mismatch.
+
+**Box 3 — a web run on the WASM build.** 20:50:39Z–20:55:07Z, on fork
+`bc96d0a03`. `make -C vendor/tbc-new-fork dist/tbc/.dirstamp` rebuilt
+`dist/` after the fork merge (the merge commit is at 20:27:36Z;
+`lib.wasm.gz` was written at 20:35:36Z). `dist/` was served with
+`http-server ... -p 8099 -a 127.0.0.1 -c-1`, and PLAN.md's harness command,
+with `--origin http://127.0.0.1:8099` and `--out` pointed outside the repo,
+exited 0 and printed:
+
+```
+origin=http://127.0.0.1:8099 runner=WorkerPoolSimRunner rows=40 bulk=0 raid=0 workerSessions=8 poolSize=20 done=true elapsedS=257.7 firstRowS=23.072 clickToDoneS=258.066
+```
+
+The readback has `runner` `WorkerPoolSimRunner`, `rowCount` 40 (40 expected,
+`data/desktop-gate/README.md:34`), `done` true, `panicHit` false and
+`runTimedOut` false. Its `rows` and `aboveCutoffItems` equal the golden's,
+and its `baselineDps` is 2230.4, the golden's value.
+
+**Box 2.** On `66b36da3` the Tab-blocking count printed 0.
+
+**Box 1 — the scope doc is current.** 20:58:31Z–20:58:46Z, on `66b36da3`
+(the commit that closes ticket 674 and removes its row), with a clean tree.
+The two loops in `docs/upgrades-tab-scope.md` § Maintenance, with the id list
+written outside the repo in place of `.scratch/open-ids.txt`, printed
+nothing. `corepack pnpm -s issues:open` exited 0 and listed 159 open tickets.
+
+**The engine move did not change the ret or feral figures.** Upstream's eight
+commits from `5262ff386` to `e804c29e8` change the arcane mage APL and spec,
+a UI helper, and the sim's handling of a zero random seed. Box 4's check (h)
+and box 3's readback both equal `golden-ret-p4-cap40.json`. For feral,
+`corepack pnpm -C <pair> tab-fixtures:record --spec feral --phase 2 --name
+malorne4 --preset-tab "Phase 1" --preset "Alt 6%" --expect-gear-file
+ui/specs/druid/feralcat/gear_sets/p1_alt_6p.gear.json --out <outside the repo>`
+(backend on `:3333` and vite on `:5174` from the pair) produced a ranking
+equal in every field except `durationMs` to the committed
+`data/tab-fixtures/feral-p2-malorne4.json` (recorded at fork `8cd8d1c80`), and
+the same worn gear. The six fixtures and the golden were not re-recorded.
