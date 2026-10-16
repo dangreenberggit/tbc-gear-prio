@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b
 Type: bug
 Origin: Chunk 3b step 7 regression check (commit c5741e2c) and the ticket-438 closing note
@@ -54,3 +54,24 @@ it does not show the owner ruling on the wording itself.
   sets (n)" stays (quote the ruling here).
 - `node test-locales.mjs` in the fork passes (ticket 432: it is not part of
   `pnpm verify`).
+
+## Comments
+
+**2026-10-15 — closed (stage `tab-small-fixes`, plan steps 1, 2 and 17).**
+Fork commit `d992e0450` changes two strings in
+`assets/locales/en/upgrades.json`. `empty_no_ranking_body` now reads
+"Click Simulate to start." (`git -C vendor/tbc-new-fork show
+899d8c267:assets/locales/en/upgrades.json | grep empty_no_ranking_body`;
+the plan's longer text was shortened after plan-review-r2 finding N5). It
+names the button by its label and shares no clause with the `idle` status
+line above it. `sets_other_phases` now reads
+"Other phases ({{n}})". The executor checked the retribution page before a
+run on `:5173` (K1): the status line and the empty state say different
+things, the empty state names "Simulate", and the disclosure reads "Other
+phases (n)". The fork is re-pinned at `899d8c267` (`tbc-gear-prio@976a3d51`),
+and `pnpm verify` passed on it (rc=0).
+
+Verified by: `tbc-new-fork@d992e0450`;
+`grep -n 'Press Run\|Other sets' vendor/tbc-new-fork/assets/locales/en/upgrades.json`
+prints nothing and `npm --prefix vendor/tbc-new-fork run test:locales` exits
+0 (both at `899d8c267`, 2026-10-15).
