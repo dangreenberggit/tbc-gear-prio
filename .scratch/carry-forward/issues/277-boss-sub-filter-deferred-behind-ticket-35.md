@@ -8,10 +8,11 @@ Blocked by: 35
 
 Deferred deliberately; the reason is recorded below.
 
-The tab now has a post-sim raid filter: a completed shopping list can be
-narrowed to one zone, or to one of the labelled zoneless buckets (badge
-vendor, crafted, reputation, PvP, world drop, source not recorded), without
-re-simming.
+The tab has a post-sim source filter again (ticket 527, fork `c99dd97e4`):
+the "Filter by source" button under View options narrows a settled table to
+one or more zones and labelled zoneless buckets (badge vendor, crafted,
+reputation, PvP, world drop, source not recorded), without re-simming. The
+first version, a one-zone `<select>`, was removed on 2026-09-18 (ticket 417).
 
 A **boss** sub-filter was considered at the same time and deliberately left
 out. The engine would support it — `applyView` already carries a `boss`

@@ -6,6 +6,13 @@
       "selector": ".ui-accordion-header",
       "match": "css",
       "reason": "wontfix in the tab: the below-cutoff group's header is the <h6> that upstream's ui-kit AccordionItem renders (ui/ui-kit/Accordion/AccordionItem.tsx, render={<h6 />}), with no heading-level prop, and ui-kit is upstream code the tab does not edit (ticket 560 plan, Paths manifest). axe impact moderate, so it is a warning, never a failure; baselined so the warning names its reason (ticket 560, Gate C K4 amendments A-K4-group-head and A-K4-a11y)."
+    },
+    {
+      "ruleId": "heading-order",
+      "selector": "[data-testid=\"content-block-title\"]",
+      "match": "css",
+      "mayNotFire": true,
+      "reason": "wontfix in the tab: the JSON export's title is the <h6> that upstream's ui-kit ContentBlock renders by default (ui/ui-kit/ContentBlock/ContentBlock.tsx, header.titleTag || 'h6', data-testid=content-block-title). ContentBlock has a titleTag prop; the tab's ExportPanel.tsx, its only ContentBlock, keeps the default. It is the same heading skip the .ui-accordion-header entry accepts. axe reports it on the export title only when the shown pane has no below-cutoff group, whose accordion <h6> otherwise sits between the export title and the earlier, higher heading; so a capture may not show it (mayNotFire). axe impact moderate, so it is a warning, never a failure (docs/reviews/feat-tab-view-filter.md, V-A4)."
     }
   ]
 }

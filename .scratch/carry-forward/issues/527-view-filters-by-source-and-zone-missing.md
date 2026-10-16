@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: feature gap (omission)
 Priority: major (owner, 2026-09-29)
 Origin: owner, 2026-09-29, in chat (relayed verbatim by the orchestrating session)
@@ -225,3 +225,51 @@ owner leans toward a control like the pre-run Sources box. The detailed
 design choices under "Proposed scope" are not decided; the owner wants a
 clearer set of choices before answering them, so close condition 1 still
 needs that set brought to the owner.
+
+**2026-10-12 — owner design answer (Q-527-design, stage-gate
+`tab-view-filter`).** Shown two mock-ups, A (a button under View options
+that opens a checkbox dialog like the pre-run Sources box) and B (chips),
+the owner answered, verbatim: "A. select view sourtces is bad wording
+though". The orchestrating session set the wording from that answer: the
+button and the dialog title read "Filter by source", and the line under
+the button reads "Showing all sources" or "{{n}} of {{m}} sources hidden".
+The other choices under "Proposed scope" were settled in the plan
+(`.scratch/stage-gate/tab-view-filter/plan.md`, "Settled decisions") from
+earlier rulings: several sources at once; the options are the sources the
+settled rows have, keyed as the pre-run Sources box keys them; a row
+stays while any of its sources is shown (the pre-run box's rule); the
+filter combines with BiS only; it persists across runs and reloads like
+the column sort (ticket 582); the Rank column shows the position among
+the rows shown, 1..N (ticket 287 ruling); the slot sub-tabs stay and a
+pane the filter empties says "No rows from the shown sources."; the
+cutoff bar does not move. Three more choices in the plan are agent
+decisions with no owner ruling (review P3,
+`docs/reviews/feat-tab-view-filter.md`): the table is not filtered while
+a run is in progress; Hide all hides every source the dialog offers and
+keeps hidden any source it does not offer; and the JSON export follows
+the filter, so it lists only the rows shown.
+
+## 2026-10-15 — closed
+
+Verified by: tbc-new-fork@c99dd97e4 (fork branch `feat/tab-view-filter`,
+commits `ad81076cd` to `c99dd97e4`), which `data/wowsims-fork.lock.json`
+names on `feat/tab-view-filter` (tbc-gear-prio@e89f1da7, `pnpm verify`
+rc=0). From the pair's fork folder, `vendor/tbc-new-fork`:
+`node node_modules/vitest/vitest.mjs run ui/features/upgrades` (55 files,
+489 tests passed on 2026-10-15 at `c99dd97e4`). Close condition 3: the
+test "drops a hidden source’s rows from every pane, keeps every slot tab,
+and re-ranks nothing" in
+`ui/features/upgrades/components/UpgradesResults/UpgradesResults.view.test.tsx`
+asserts the run and settings objects are unchanged after a source is
+unticked, and the capture below records `stale` false and the same status
+text ("Your current gear: 2,082.7 DPS. Took 106.8s.") in every entry.
+Close condition 4: `pnpm tab-review .scratch/stage-gate/tab-view-filter/review-527.json --out .scratch/stage-gate/tab-view-filter/review-out`
+(rc=0, 10 captures, 0 errors, forkHead `c99dd97e4`), judged `pass` at 1280
+and 375 px by gate-visual in
+`.scratch/handoffs/visual-review-tab-view-filter-527.md`
+(tbc-gear-prio@5fb4589e). With only Black Temple shown, the Upgrades table
+lists 9 rows, all Black Temple, ranked 1..9, and the summary reads "13 of
+14 sources hidden". The manifest is gitignored; a copy is in the main
+checkout's `.scratch/stage-gate/tab-view-filter/review-527.json`. Close
+condition 5: ticket 277's opening sentence and the rows for 277 and 35 in
+`docs/upgrades-tab-scope.md` now describe the shipped filter.
