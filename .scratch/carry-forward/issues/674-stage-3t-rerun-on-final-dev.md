@@ -52,7 +52,7 @@ commit can make true, and a third line required the `dev` -> `main` /
 session's: the merge ask, and the `main` question, which PLAN.md
 `### Stage 3T` (last paragraph) keeps open until the merge to `main`. The
 session relayed that the owner said on 2026-10-16 there is no rush to
-`tab-1`; this review did not see the owner's words.
+`tab-1`; the pre-merge review did not see the owner's words.
 
 ## Seam contract (what P1 gives this part)
 

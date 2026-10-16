@@ -2721,7 +2721,7 @@ quoted below.
 the engine version lists build and gate checks for a pin move. Their output
 went into the executor's report to the session, not into a file, and the
 session relayed it to the pre-merge review: `fetch:wowsimcli` for
-`e804c29e8` run twice with the same `sha256=6efbc467...` both times, `go
+`e804c29e8` run twice, printing the same `sha256=6efbc467...`, `go
 build`, `go vet` and `go test` on the merged fork, `fork-lint:check`,
 `meta-conditions:check`, `ep-presets:check` and `pnpm verify` each passing,
 and the tag trigger measured. The relay does not mention the layout gate
@@ -2790,7 +2790,9 @@ nothing. `corepack pnpm -s issues:open` exited 0 and listed 159 open tickets.
 **The engine move did not change the ret or feral figures that were
 compared.** Upstream's eight commits from `5262ff386` to `e804c29e8` change
 the arcane mage APL and spec, a UI helper, and the sim's handling of a zero
-random seed. Neither change reaches a ret or feral request: the seed change
+random seed. None of the three reaches a ret or feral request: the arcane
+changes touch only mage paths (`sim/mage/` and `ui/specs/mage/`, from
+`git diff --name-only 5262ff386 e804c29e8` in the fork); the seed change
 acts only on a request with seed 0, and the tab and the CLI both start their
 seeds at 11 (`DEFAULT_SEED_BASE` in the fork's
 `ui/features/upgrades/model/engine/rank.ts` and in
