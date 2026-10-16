@@ -22,60 +22,65 @@
     1012,
     1077
   ],
-  "d7EligibleTotal": 2880,
-  "excludedNoSource": 576,
-  "universeTotal": 999,
+  "d7EligibleTotal": 3006,
+  "excludedNoSource": 796,
+  "universeTotal": 964,
   "listOnlyMembership": 0,
   "perSlot": {
-    "back": 63,
-    "chest": 61,
-    "feet": 69,
-    "finger": 133,
-    "hands": 47,
-    "head": 53,
-    "legs": 68,
-    "neck": 85,
+    "back": 55,
+    "chest": 69,
+    "feet": 63,
+    "finger": 118,
+    "hands": 46,
+    "head": 61,
+    "legs": 64,
+    "neck": 71,
     "ranged": 4,
-    "shoulder": 48,
-    "trinket": 63,
-    "waist": 61,
+    "shoulder": 56,
+    "trinket": 60,
+    "waist": 59,
     "weapon": 178,
-    "wrist": 66
+    "wrist": 60
   },
   "sourceRecordAdds": {
     "atlasloot": 255,
-    "curated": 7,
-    "db": 2202,
+    "curated": 5,
+    "db": 2097,
+    "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
-    "curated": 19,
-    "dbPhase": 534,
+    "arenaSource": 102,
+    "curated": 17,
+    "dbPhase": 323,
     "heroicMatch": 11,
-    "itemHasOrigin:atlasloot": 85,
-    "itemHasOrigin:curated": 7,
-    "itemHasOrigin:db": 942,
+    "itemHasOrigin:atlasloot": 107,
+    "itemHasOrigin:curated": 5,
+    "itemHasOrigin:db": 874,
+    "itemHasOrigin:sunmote": 13,
     "itemHasOrigin:two-hop": 18,
+    "recipeMatch": 34,
     "repFactionMatch": 33,
-    "zoneMatch": 402
+    "repItemPhase": 29,
+    "zoneMatch": 415
   },
   "exclusivePrimaryOrigin": {
-    "db": 942,
-    "atlasloot-only": 32,
-    "two-hop": 18,
-    "other": 7
+    "db": 874,
+    "atlasloot-only": 54,
+    "other": 18,
+    "two-hop": 18
   },
   "tierPiecesExpected": 18,
   "tierPiecesPresent": 18,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 999,
+    "total": 964,
     "casterOnlyReject": 539,
-    "epFloorReject": 25,
-    "combinedReject": 564,
-    "combinedKeep": 435,
-    "casterRejectPct": 54.0,
-    "combinedRejectPct": 56.5,
+    "epFloorReject": 24,
+    "combinedReject": 563,
+    "combinedKeep": 401,
+    "casterRejectPct": 55.9,
+    "combinedRejectPct": 58.4,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -89,10 +94,6 @@
   },
   "ticket157ForceIncluded": [],
   "excludedUnimplementedEffect": [
-    {
-      "itemId": 3475,
-      "name": "Cloak of Flames"
-    },
     {
       "itemId": 11810,
       "name": "Force of Will"
@@ -134,24 +135,8 @@
       "name": "Shard of the Flame"
     },
     {
-      "itemId": 17182,
-      "name": "Sulfuras, Hand of Ragnaros"
-    },
-    {
-      "itemId": 17904,
-      "name": "Stormpike Insignia Rank 6"
-    },
-    {
-      "itemId": 17909,
-      "name": "Frostwolf Insignia Rank 6"
-    },
-    {
       "itemId": 18382,
       "name": "Fluctuating Cloak"
-    },
-    {
-      "itemId": 18406,
-      "name": "Onyxia Blood Talisman"
     },
     {
       "itemId": 18639,
@@ -174,22 +159,6 @@
       "name": "Essence of the Pure Flame"
     },
     {
-      "itemId": 19287,
-      "name": "Darkmoon Card: Heroism"
-    },
-    {
-      "itemId": 19288,
-      "name": "Darkmoon Card: Blue Dragon"
-    },
-    {
-      "itemId": 19289,
-      "name": "Darkmoon Card: Maelstrom"
-    },
-    {
-      "itemId": 19290,
-      "name": "Darkmoon Card: Twisting Nether"
-    },
-    {
       "itemId": 19340,
       "name": "Rune of Metamorphosis"
     },
@@ -206,14 +175,6 @@
       "name": "Tigule's Harpoon"
     },
     {
-      "itemId": 19949,
-      "name": "Zandalarian Hero Medallion"
-    },
-    {
-      "itemId": 19950,
-      "name": "Zandalarian Hero Charm"
-    },
-    {
       "itemId": 19961,
       "name": "Gri'lek's Grinder"
     },
@@ -222,20 +183,8 @@
       "name": "Pitchfork of Madness"
     },
     {
-      "itemId": 20579,
-      "name": "Green Dragonskin Cloak"
-    },
-    {
       "itemId": 21488,
       "name": "Fetish of Chitinous Spikes"
-    },
-    {
-      "itemId": 21517,
-      "name": "Gnomish Turban of Psychic Might"
-    },
-    {
-      "itemId": 21526,
-      "name": "Band of Icy Depths"
     },
     {
       "itemId": 21625,
@@ -272,22 +221,6 @@
     {
       "itemId": 22399,
       "name": "Idol of Health"
-    },
-    {
-      "itemId": 22589,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22630,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22631,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22632,
-      "name": "Atiesh, Greatstaff of the Guardian"
     },
     {
       "itemId": 23001,
@@ -350,16 +283,8 @@
       "name": "Auslese's Light Channeler"
     },
     {
-      "itemId": 24551,
-      "name": "Talisman of the Horde"
-    },
-    {
       "itemId": 25827,
       "name": "Muck-Covered Drape"
-    },
-    {
-      "itemId": 25829,
-      "name": "Talisman of the Alliance"
     },
     {
       "itemId": 25835,
@@ -388,6 +313,18 @@
     {
       "itemId": 27900,
       "name": "Jewel of Charismatic Mystique"
+    },
+    {
+      "itemId": 28126,
+      "name": "Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 28136,
+      "name": "Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 28355,
+      "name": "Gladiator's Idol of Tenacity"
     },
     {
       "itemId": 28568,
@@ -434,8 +371,24 @@
       "name": "Lower City Prayerbook"
     },
     {
+      "itemId": 31375,
+      "name": "Gladiator's Kodohide Gloves"
+    },
+    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 31967,
+      "name": "Merciless Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 31987,
+      "name": "Merciless Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 32056,
+      "name": "Merciless Gladiator's Wyrmhide Gloves"
     },
     {
       "itemId": 32113,
@@ -470,12 +423,56 @@
       "name": "Airman's Ribbon of Gallantry"
     },
     {
+      "itemId": 33076,
+      "name": "Merciless Gladiator's Idol of Tenacity"
+    },
+    {
       "itemId": 33508,
       "name": "Idol of Budding Life"
     },
     {
       "itemId": 33510,
       "name": "Idol of the Unseen Moon"
+    },
+    {
+      "itemId": 33671,
+      "name": "Vengeful Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 33690,
+      "name": "Vengeful Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 33767,
+      "name": "Vengeful Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 33841,
+      "name": "Vengeful Gladiator's Idol of Tenacity"
+    },
+    {
+      "itemId": 33942,
+      "name": "Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33943,
+      "name": "Merciless Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33944,
+      "name": "Vengeful Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33945,
+      "name": "Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 33946,
+      "name": "Merciless Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 33947,
+      "name": "Vengeful Gladiator's Idol of Resolve"
     },
     {
       "itemId": 34430,
@@ -500,6 +497,30 @@
     {
       "itemId": 34680,
       "name": "Shattered Sun Pendant of Resolve"
+    },
+    {
+      "itemId": 34998,
+      "name": "Brutal Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 35019,
+      "name": "Brutal Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 35020,
+      "name": "Brutal Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 35021,
+      "name": "Brutal Gladiator's Idol of Tenacity"
+    },
+    {
+      "itemId": 35022,
+      "name": "Brutal Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 35111,
+      "name": "Brutal Gladiator's Wyrmhide Gloves"
     },
     {
       "itemId": 35371,
@@ -546,9 +567,14 @@
       "p5"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 102,
+    "admittedBySeason": {
+      "1": 24,
+      "2": 24,
+      "3": 26,
+      "4": 28
+    }
   }
 }

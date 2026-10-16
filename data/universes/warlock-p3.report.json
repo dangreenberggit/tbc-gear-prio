@@ -19,45 +19,49 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 2176,
-  "excludedNoSource": 480,
-  "universeTotal": 600,
+  "d7EligibleTotal": 2255,
+  "excludedNoSource": 682,
+  "universeTotal": 523,
   "listOnlyMembership": 0,
   "perSlot": {
-    "back": 50,
-    "chest": 23,
-    "feet": 35,
-    "finger": 109,
-    "hands": 14,
+    "back": 42,
+    "chest": 22,
+    "feet": 29,
+    "finger": 93,
+    "hands": 12,
     "head": 21,
-    "legs": 26,
-    "neck": 67,
-    "ranged": 8,
-    "shoulder": 19,
-    "trinket": 46,
-    "waist": 30,
-    "weapon": 119,
-    "wrist": 33
+    "legs": 23,
+    "neck": 51,
+    "ranged": 12,
+    "shoulder": 21,
+    "trinket": 43,
+    "waist": 29,
+    "weapon": 97,
+    "wrist": 28
   },
   "sourceRecordAdds": {
     "atlasloot": 213,
     "curated": 6,
-    "db": 1597,
+    "db": 1469,
+    "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 50,
     "curated": 19,
-    "dbPhase": 326,
-    "itemHasOrigin:atlasloot": 52,
+    "dbPhase": 164,
+    "itemHasOrigin:atlasloot": 73,
     "itemHasOrigin:curated": 5,
-    "itemHasOrigin:db": 553,
+    "itemHasOrigin:db": 455,
     "itemHasOrigin:two-hop": 15,
+    "recipeMatch": 7,
     "repFactionMatch": 22,
+    "repItemPhase": 28,
     "zoneMatch": 233
   },
   "exclusivePrimaryOrigin": {
-    "db": 553,
-    "atlasloot-only": 27,
+    "db": 455,
+    "atlasloot-only": 48,
     "two-hop": 15,
     "other": 5
   },
@@ -65,13 +69,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 600,
-    "casterOnlyReject": 377,
+    "total": 523,
+    "casterOnlyReject": 326,
     "epFloorReject": 8,
-    "combinedReject": 385,
-    "combinedKeep": 215,
-    "casterRejectPct": 62.8,
-    "combinedRejectPct": 64.2,
+    "combinedReject": 334,
+    "combinedKeep": 189,
+    "casterRejectPct": 62.3,
+    "combinedRejectPct": 63.9,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -85,10 +89,6 @@
   },
   "ticket157ForceIncluded": [],
   "excludedUnimplementedEffect": [
-    {
-      "itemId": 3475,
-      "name": "Cloak of Flames"
-    },
     {
       "itemId": 11810,
       "name": "Force of Will"
@@ -146,28 +146,8 @@
       "name": "Shard of the Flame"
     },
     {
-      "itemId": 17584,
-      "name": "Marshal's Dreadweave Gloves"
-    },
-    {
-      "itemId": 17588,
-      "name": "General's Dreadweave Gloves"
-    },
-    {
-      "itemId": 17904,
-      "name": "Stormpike Insignia Rank 6"
-    },
-    {
-      "itemId": 17909,
-      "name": "Frostwolf Insignia Rank 6"
-    },
-    {
       "itemId": 18382,
       "name": "Fluctuating Cloak"
-    },
-    {
-      "itemId": 18406,
-      "name": "Onyxia Blood Talisman"
     },
     {
       "itemId": 18639,
@@ -190,52 +170,12 @@
       "name": "Essence of the Pure Flame"
     },
     {
-      "itemId": 19287,
-      "name": "Darkmoon Card: Heroism"
-    },
-    {
-      "itemId": 19288,
-      "name": "Darkmoon Card: Blue Dragon"
-    },
-    {
-      "itemId": 19289,
-      "name": "Darkmoon Card: Maelstrom"
-    },
-    {
-      "itemId": 19290,
-      "name": "Darkmoon Card: Twisting Nether"
-    },
-    {
-      "itemId": 19605,
-      "name": "Kezan's Unstoppable Taint"
-    },
-    {
       "itemId": 19930,
       "name": "Mar'li's Eye"
     },
     {
-      "itemId": 19949,
-      "name": "Zandalarian Hero Medallion"
-    },
-    {
-      "itemId": 19950,
-      "name": "Zandalarian Hero Charm"
-    },
-    {
-      "itemId": 20579,
-      "name": "Green Dragonskin Cloak"
-    },
-    {
       "itemId": 21488,
       "name": "Fetish of Chitinous Spikes"
-    },
-    {
-      "itemId": 21517,
-      "name": "Gnomish Turban of Psychic Might"
-    },
-    {
-      "itemId": 21526,
-      "name": "Band of Icy Depths"
     },
     {
       "itemId": 21625,
@@ -264,22 +204,6 @@
     {
       "itemId": 22321,
       "name": "Heart of Wyrmthalak"
-    },
-    {
-      "itemId": 22589,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22630,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22631,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22632,
-      "name": "Atiesh, Greatstaff of the Guardian"
     },
     {
       "itemId": 23001,
@@ -330,16 +254,12 @@
       "name": "Auslese's Light Channeler"
     },
     {
-      "itemId": 24551,
-      "name": "Talisman of the Horde"
+      "itemId": 24556,
+      "name": "Gladiator's Dreadweave Gloves"
     },
     {
       "itemId": 25827,
       "name": "Muck-Covered Drape"
-    },
-    {
-      "itemId": 25829,
-      "name": "Talisman of the Alliance"
     },
     {
       "itemId": 25835,
@@ -382,6 +302,10 @@
       "name": "Pendant of the Lost Ages"
     },
     {
+      "itemId": 30188,
+      "name": "Gladiator's Felweave Handguards"
+    },
+    {
       "itemId": 30619,
       "name": "Fel Reaver's Piston"
     },
@@ -392,6 +316,14 @@
     {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 31973,
+      "name": "Merciless Gladiator's Dreadweave Gloves"
+    },
+    {
+      "itemId": 31981,
+      "name": "Merciless Gladiator's Felweave Handguards"
     },
     {
       "itemId": 32093,
@@ -412,6 +344,14 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 33676,
+      "name": "Vengeful Gladiator's Dreadweave Gloves"
+    },
+    {
+      "itemId": 33684,
+      "name": "Vengeful Gladiator's Felweave Handguards"
     },
     {
       "itemId": 34430,
@@ -478,9 +418,13 @@
       "t6"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 50,
+    "admittedBySeason": {
+      "1": 15,
+      "2": 15,
+      "3": 20
+    }
   }
 }

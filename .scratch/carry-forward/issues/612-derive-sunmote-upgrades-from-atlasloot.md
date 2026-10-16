@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (Tab-blocking; owner answer Q-feral-p5)
 Type: bug
 Origin: owner answers to Chunk 3b step 6, 2026-10-11 (Q-feral-p5)
@@ -61,3 +61,23 @@ base item), which is what a player sees in the Source column.
    base item's Sunwell zone as source; each changed universe's diff is
    listed in the closing note.
 3. `pnpm verify` rc=0.
+
+## Closed 2026-10-16 (stage-gate tab-blocking-finish, K4)
+
+`scripts/parse_atlasloot.py` reads AtlasLoot's commented Sunwell Plateau rows
+into `data/two-hop/sunmote-pairs.json` (c93d673f), and the builder applies the
+pairs for every spec, keeping a pair only when the upgrade's item level is
+not below the base's (most kept pairs are equal, 159 -> 159), with the
+reason beside the code (9e17cde1; `scripts/assemble_universe.py`,
+`sunmote_upgrade_pairs` docstring). The
+hand-written `ret-sunmote-upgrades.json` is removed. 34397 (Bladed Chaos
+Tunic) is in `data/universes/feral-p5.json` and its fork copy with source
+"Sunmote + Harness of Carnal Instinct" (M'uru, Sunwell Plateau). Per the fork
+lock's entry for b45e5d33f, the p5 lists changed by ret +20 entries, feral
++13, and the nine others by Sunmote token sources on existing entries only.
+The completeness gate's E-sunmote rule fails when the route is off (red run
+2: 36 findings, 34397 among them; `k2-red-runs.txt` in the stage folder).
+
+Verified by: `pnpm atlasloot:regen:check` (rc 0) and
+`git grep -n 'sunmote_upgrades\|ret-sunmote' -- scripts/assemble_universe.py scripts/check_policy_notes.py`
+(prints nothing) at tbc-gear-prio@808f0c7f.

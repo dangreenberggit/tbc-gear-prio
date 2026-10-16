@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (Tab-blocking; owner answer Q-ret-feral-route)
 Type: task
 Origin: owner answers to Chunk 3b step 6, 2026-10-11 (Q-ret-feral-route)
@@ -73,3 +73,31 @@ Decide this when the work is planned; this ticket does not edit the ADR.
 4. Whether ADR-0028 needs an amendment is answered in the closing note,
    with the ADR edit (if any) made on that branch.
 5. `pnpm verify` rc=0.
+
+## Closed 2026-10-16 (stage-gate tab-blocking-finish, K4)
+
+1. All 11 specs use one rule set: `db_phase_membership` is removed and the
+   db-phase route runs for every spec (3c2334a2).
+2. Gains and losses per list, phases 2-5, from the regen loop of stage
+   tab-item-lists step 10 (`.scratch/stage-gate/tab-item-lists/execution-report.md`,
+   "613 table"): ret 288/467/523/637 -> 480/715/838/1059, feral
+   227/364/408/497 -> 405/587/668/836; the nine others lose 162-267 vanilla
+   rows (item level below 100) and gain 4-65 crafted rows. The rep-reward
+   route (c346071c) then added 22 rows to each ret list
+   and 26 to each feral list, net: ret 502/737/860/1081, feral
+   431/613/694/862 (entry counts of `data/universes/<spec>-p<n>.json` at
+   `c346071c^` and `c346071c`). Ticket 642 then
+   added every open-season arena item and 23206 (Mark of the Champion) to
+   ret and feral; the per-list account is
+   `.scratch/stage-gate/tab-blocking-finish/k2-prediction.txt`, "Step 10
+   account" (gitignored): ret +39/+57/+57/+75, feral +48/+73/+73/+100,
+   nothing lost, no existing entry changed.
+3. The fixtures and the desktop golden were re-recorded with reasons in the
+   commits: e1f7909f and 6a4a49ae, then 808f0c7f and f1022c37 after ticket
+   642.
+4. ADR-0028 is amended (`## Amendment 2026-10 (ticket 613)`, 4f5b16f2).
+5. `pnpm verify` rc 0 on the close commit.
+
+Verified by: `git grep -c 'db_phase_membership\|exclude_ids=ARENA' -- scripts/assemble_universe.py`
+(no match, rc 1) and `pnpm pool-listings:check` (rc 0) at
+tbc-gear-prio@808f0c7f, with the tables named above.

@@ -191,6 +191,22 @@
       ]
     },
     {
+      "itemId": 278819,
+      "name": "The Frost Lord's War Cloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 41.77
+    },
+    {
       "itemId": 24259,
       "name": "Vengeance Wrap",
       "slot": "back",
@@ -210,6 +226,70 @@
         "p1",
         "preraid"
       ]
+    },
+    {
+      "itemId": 29382,
+      "name": "Blood Knight War Cloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 36.95
+    },
+    {
+      "itemId": 32540,
+      "name": "Terokk's Might",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 35.2
+    },
+    {
+      "itemId": 28377,
+      "name": "Sergeant's Heavy Cloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 31.16
+    },
+    {
+      "itemId": 28380,
+      "name": "Sergeant's Heavy Cloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 31.16
     },
     {
       "itemId": 28764,
@@ -302,6 +382,22 @@
       "curationHint": 5.76
     },
     {
+      "itemId": 32541,
+      "name": "Terokk's Wisdom",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.28
+    },
+    {
       "itemId": 28766,
       "name": "Ruby Drape of the Mysticant",
       "slot": "back",
@@ -356,6 +452,38 @@
       "curationHint": 4.32
     },
     {
+      "itemId": 28378,
+      "name": "Sergeant's Heavy Cape",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.16
+    },
+    {
+      "itemId": 28379,
+      "name": "Sergeant's Heavy Cape",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.16
+    },
+    {
       "itemId": 29989,
       "name": "Sunshower Light Cloak",
       "slot": "back",
@@ -374,6 +502,22 @@
       "curationHint": 4.16
     },
     {
+      "itemId": 278774,
+      "name": "Cloak of the Frigid Winds",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.0
+    },
+    {
       "itemId": 32524,
       "name": "Shroud of the Highborne",
       "slot": "back",
@@ -390,6 +534,22 @@
         }
       ],
       "curationHint": 3.68
+    },
+    {
+      "itemId": 31329,
+      "name": "Lifegiving Cloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.52
     },
     {
       "itemId": 34012,
@@ -415,6 +575,22 @@
       "curationHint": 3.52
     },
     {
+      "itemId": 29369,
+      "name": "Shawl of Shifting Probabilities",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.36
+    },
+    {
       "itemId": 28765,
       "name": "Stainless Cloak of the Pure Hearted",
       "slot": "back",
@@ -433,6 +609,22 @@
       "curationHint": 2.88
     },
     {
+      "itemId": 279240,
+      "name": "Shroud of Winter's Chill",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.88
+    },
+    {
       "itemId": 28582,
       "name": "Red Riding Hood's Cloak",
       "slot": "back",
@@ -445,6 +637,22 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "The Big Bad Wolf",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.56
+    },
+    {
+      "itemId": 29375,
+      "name": "Bishop's Cloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -481,6 +689,22 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "Terestian Illhoof",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29385,
+      "name": "Farstrider Defender's Cloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -572,6 +796,22 @@
           "kind": "raid",
           "zone": "Black Temple",
           "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 278823,
+      "name": "Icebound Cloak",
+      "slot": "back",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -801,7 +1041,8 @@
         {
           "kind": "pvp",
           "via": "arena",
-          "origin": "wowhead"
+          "season": 3,
+          "origin": "db"
         }
       ],
       "curationHint": 95.6
@@ -881,6 +1122,40 @@
       "curationHint": 73.1
     },
     {
+      "itemId": 31320,
+      "name": "Chestguard of Exile",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 72.8
+    },
+    {
+      "itemId": 32039,
+      "name": "Merciless Gladiator's Scaled Chestpiece",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 64.2
+    },
+    {
       "itemId": 29071,
       "name": "Justicar Breastplate",
       "slot": "chest",
@@ -920,6 +1195,40 @@
         }
       ],
       "curationHint": 52.8
+    },
+    {
+      "itemId": 27879,
+      "name": "Gladiator's Scaled Chestpiece",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 51.8
+    },
+    {
+      "itemId": 32168,
+      "name": "Chancellor's Scaled Chestpiece",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 37.4
     },
     {
       "itemId": 30913,
@@ -1005,6 +1314,22 @@
       "curationHint": 9.12
     },
     {
+      "itemId": 31340,
+      "name": "Will of Edward the Odd",
+      "slot": "chest",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 8.48
+    },
+    {
       "itemId": 30056,
       "name": "Robe of Hateful Echoes",
       "slot": "chest",
@@ -1021,6 +1346,38 @@
         }
       ],
       "curationHint": 8.0
+    },
+    {
+      "itemId": 30991,
+      "name": "Lightbringer Chestguard",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.24
+    },
+    {
+      "itemId": 30992,
+      "name": "Lightbringer Chestpiece",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.24
     },
     {
       "itemId": 30075,
@@ -1113,6 +1470,22 @@
       "curationHint": 5.76
     },
     {
+      "itemId": 30134,
+      "name": "Crystalforge Chestpiece",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.6
+    },
+    {
       "itemId": 28602,
       "name": "Robe of the Elder Scribes",
       "slot": "chest",
@@ -1125,6 +1498,22 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "Nightbane",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.12
+    },
+    {
+      "itemId": 30123,
+      "name": "Crystalforge Chestguard",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -1167,6 +1556,40 @@
       "curationHint": 4.8
     },
     {
+      "itemId": 29062,
+      "name": "Justicar Chestpiece",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.8
+    },
+    {
+      "itemId": 33695,
+      "name": "Vengeful Gladiator's Lamellar Chestpiece",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.8
+    },
+    {
       "itemId": 28735,
       "name": "Earthblood Chestguard",
       "slot": "chest",
@@ -1183,6 +1606,22 @@
         }
       ],
       "curationHint": 4.64
+    },
+    {
+      "itemId": 29066,
+      "name": "Justicar Chestguard",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.32
     },
     {
       "itemId": 29921,
@@ -1221,6 +1660,60 @@
       "curationHint": 4.16
     },
     {
+      "itemId": 31992,
+      "name": "Merciless Gladiator's Lamellar Chestpiece",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.16
+    },
+    {
+      "itemId": 27702,
+      "name": "Gladiator's Lamellar Chestpiece",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.2
+    },
+    {
+      "itemId": 33722,
+      "name": "Vengeful Gladiator's Ornamented Chestguard",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.04
+    },
+    {
       "itemId": 30065,
       "name": "Glowing Breastplate of Truth",
       "slot": "chest",
@@ -1239,6 +1732,93 @@
       "curationHint": 2.88
     },
     {
+      "itemId": 32020,
+      "name": "Merciless Gladiator's Ornamented Chestguard",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.56
+    },
+    {
+      "itemId": 31613,
+      "name": "Gladiator's Ornamented Chestguard",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.24
+    },
+    {
+      "itemId": 32153,
+      "name": "Chancellor's Lamellar Chestpiece",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 1.44
+    },
+    {
+      "itemId": 32158,
+      "name": "Chancellor's Ornamented Chestplate",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.96
+    },
+    {
+      "itemId": 21865,
+      "name": "Soulcloth Vest",
+      "slot": "chest",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeZone": "Karazhan",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 28597,
       "name": "Panzar'Thar Breastplate",
       "slot": "chest",
@@ -1251,6 +1831,70 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "Nightbane",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30762,
+      "name": "Infernoweave Robe",
+      "slot": "chest",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30769,
+      "name": "Inferno Tempered Chestguard",
+      "slot": "chest",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30773,
+      "name": "Inferno Forged Hauberk",
+      "slot": "chest",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30776,
+      "name": "Inferno Hardened Chestguard",
+      "slot": "chest",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -1293,6 +1937,25 @@
       "curationHint": 108.98
     },
     {
+      "itemId": 30039,
+      "name": "Boots of Utter Darkness",
+      "slot": "feet",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 102.77
+    },
+    {
       "itemId": 32345,
       "name": "Dreadboots of the Legion",
       "slot": "feet",
@@ -1309,6 +1972,25 @@
         }
       ],
       "curationHint": 100.7
+    },
+    {
+      "itemId": 30041,
+      "name": "Boots of Natural Grace",
+      "slot": "feet",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 82.08
     },
     {
       "itemId": 30880,
@@ -1415,6 +2097,38 @@
       ]
     },
     {
+      "itemId": 33812,
+      "name": "Vindicator's Plate Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 63.0
+    },
+    {
+      "itemId": 33911,
+      "name": "Vindicator's Scaled Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 61.6
+    },
+    {
       "itemId": 32593,
       "name": "Treads of the Den Mother",
       "slot": "feet",
@@ -1436,6 +2150,57 @@
         }
       ],
       "curationHint": 61.36
+    },
+    {
+      "itemId": 30045,
+      "name": "Boots of the Crimson Hawk",
+      "slot": "feet",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 60.0
+    },
+    {
+      "itemId": 32793,
+      "name": "Veteran's Plate Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 55.8
+    },
+    {
+      "itemId": 32794,
+      "name": "Veteran's Scaled Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 55.4
     },
     {
       "itemId": 30060,
@@ -1536,6 +2301,86 @@
       ]
     },
     {
+      "itemId": 28645,
+      "name": "General's Scaled Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 48.8
+    },
+    {
+      "itemId": 29000,
+      "name": "Marshal's Scaled Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 48.8
+    },
+    {
+      "itemId": 28383,
+      "name": "General's Plate Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 48.6
+    },
+    {
+      "itemId": 28997,
+      "name": "Marshal's Plate Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 48.6
+    },
+    {
+      "itemId": 30491,
+      "name": "General's Plate Greaves Tier 2",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 48.6
+    },
+    {
       "itemId": 28608,
       "name": "Ironstriders of Urgency",
       "slot": "feet",
@@ -1555,6 +2400,25 @@
       "curatedSets": [
         "p1"
       ]
+    },
+    {
+      "itemId": 32648,
+      "name": "Vortex Walking Boots",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "Ogri'la",
+          "standing": "Exalted",
+          "factionId": 1038,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 43.2
     },
     {
       "itemId": 28176,
@@ -1743,6 +2607,44 @@
       "curationHint": 6.24
     },
     {
+      "itemId": 30037,
+      "name": "Boots of Blasting",
+      "slot": "feet",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.24
+    },
+    {
+      "itemId": 30043,
+      "name": "Hurricane Boots",
+      "slot": "feet",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.24
+    },
+    {
       "itemId": 28585,
       "name": "Ruby Slippers",
       "slot": "feet",
@@ -1755,6 +2657,22 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "The Wizard of Oz",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.6
+    },
+    {
+      "itemId": 33890,
+      "name": "Vindicator's Lamellar Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -1777,6 +2695,22 @@
         }
       ],
       "curationHint": 5.44
+    },
+    {
+      "itemId": 32789,
+      "name": "Veteran's Lamellar Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.12
     },
     {
       "itemId": 30027,
@@ -1836,6 +2770,38 @@
         }
       ],
       "curationHint": 4.64
+    },
+    {
+      "itemId": 28642,
+      "name": "General's Lamellar Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.48
+    },
+    {
+      "itemId": 28985,
+      "name": "Marshal's Lamellar Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.48
     },
     {
       "itemId": 30873,
@@ -1910,6 +2876,25 @@
       "curationHint": 4.48
     },
     {
+      "itemId": 30033,
+      "name": "Boots of the Protector",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.32
+    },
+    {
       "itemId": 28517,
       "name": "Boots of Foretelling",
       "slot": "feet",
@@ -1926,6 +2911,25 @@
         }
       ],
       "curationHint": 4.16
+    },
+    {
+      "itemId": 30035,
+      "name": "Boots of the Long Road",
+      "slot": "feet",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.0
     },
     {
       "itemId": 30092,
@@ -1993,6 +2997,38 @@
       "curationHint": 3.52
     },
     {
+      "itemId": 33905,
+      "name": "Vindicator's Ornamented Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.52
+    },
+    {
+      "itemId": 32990,
+      "name": "Veteran's Ornamented Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.2
+    },
+    {
       "itemId": 28569,
       "name": "Boots of Valiance",
       "slot": "feet",
@@ -2052,6 +3088,38 @@
       "curationHint": 3.04
     },
     {
+      "itemId": 32984,
+      "name": "General's Ornamented Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.88
+    },
+    {
+      "itemId": 32987,
+      "name": "Marshal's Ornamented Greaves",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.88
+    },
+    {
       "itemId": 30066,
       "name": "Tempest-Strider Boots",
       "slot": "feet",
@@ -2068,6 +3136,25 @@
         }
       ],
       "curationHint": 2.72
+    },
+    {
+      "itemId": 30031,
+      "name": "Red Havoc Boots",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
     },
     {
       "itemId": 30050,
@@ -2177,6 +3264,70 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "Shadikith the Glider",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30763,
+      "name": "Infernoweave Boots",
+      "slot": "feet",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30768,
+      "name": "Inferno Tempered Boots",
+      "slot": "feet",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30770,
+      "name": "Inferno Forged Boots",
+      "slot": "feet",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30779,
+      "name": "Inferno Hardened Boots",
+      "slot": "feet",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -2374,6 +3525,25 @@
       ]
     },
     {
+      "itemId": 29283,
+      "name": "Violet Signet of the Master Assassin",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 77.27
+    },
+    {
       "itemId": 30738,
       "name": "Ring of Reciprocity",
       "slot": "finger",
@@ -2392,6 +3562,25 @@
       "curationHint": 73.49
     },
     {
+      "itemId": 29282,
+      "name": "Violet Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Revered",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 73.44
+    },
+    {
       "itemId": 28649,
       "name": "Garona's Signet Ring",
       "slot": "finger",
@@ -2408,6 +3597,25 @@
         }
       ],
       "curationHint": 70.1
+    },
+    {
+      "itemId": 29281,
+      "name": "Violet Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 68.3
     },
     {
       "itemId": 32526,
@@ -2471,6 +3679,22 @@
       "bisSets": [
         "p3"
       ]
+    },
+    {
+      "itemId": 32942,
+      "name": "Ring of the Overseer",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 61.0
     },
     {
       "itemId": 32335,
@@ -2568,6 +3792,22 @@
       "curationHint": 45.15
     },
     {
+      "itemId": 33919,
+      "name": "Vindicator's Band of Triumph",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 44.88
+    },
+    {
       "itemId": 28730,
       "name": "Mithril Band of the Unscarred",
       "slot": "finger",
@@ -2627,6 +3867,22 @@
       ]
     },
     {
+      "itemId": 28791,
+      "name": "Ring of the Recalcitrant",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 40.2
+    },
+    {
       "itemId": 29298,
       "name": "Band of Eternity",
       "slot": "finger",
@@ -2644,6 +3900,102 @@
         }
       ],
       "curationHint": 39.25
+    },
+    {
+      "itemId": 34837,
+      "name": "The 2 Ring",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 38.06
+    },
+    {
+      "itemId": 29379,
+      "name": "Ring of Arathi Warlords",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 37.72
+    },
+    {
+      "itemId": 33057,
+      "name": "Veteran's Band of Triumph",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 35.24
+    },
+    {
+      "itemId": 31326,
+      "name": "Truestrike Ring",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 32.13
+    },
+    {
+      "itemId": 33959,
+      "name": "Ring of Ghoulish Delight",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 25.2
+    },
+    {
+      "itemId": 34075,
+      "name": "Ring of Ghoulish Delight",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 25.2
     },
     {
       "itemId": 33055,
@@ -2741,6 +4093,57 @@
       "curationHint": 5.92
     },
     {
+      "itemId": 33958,
+      "name": "The Horseman's Signet Ring",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.6
+    },
+    {
+      "itemId": 34073,
+      "name": "The Horseman's Signet Ring",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.6
+    },
+    {
+      "itemId": 29126,
+      "name": "Seer's Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Scryers",
+          "factionId": 934,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 5.44
+    },
+    {
       "itemId": 29304,
       "name": "Band of Eternity",
       "slot": "finger",
@@ -2777,6 +4180,38 @@
         }
       ],
       "curationHint": 5.44
+    },
+    {
+      "itemId": 32941,
+      "name": "Corruptor's Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.28
+    },
+    {
+      "itemId": 33853,
+      "name": "Vindicator's Band of Dominance",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.28
     },
     {
       "itemId": 28753,
@@ -2839,6 +4274,25 @@
       "curationHint": 4.64
     },
     {
+      "itemId": 29287,
+      "name": "Violet Signet of the Archmage",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 4.64
+    },
+    {
       "itemId": 29302,
       "name": "Band of Eternity",
       "slot": "finger",
@@ -2856,6 +4310,92 @@
         }
       ],
       "curationHint": 4.64
+    },
+    {
+      "itemId": 31339,
+      "name": "Lola's Eve",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.64
+    },
+    {
+      "itemId": 33056,
+      "name": "Veteran's Band of Dominance",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.64
+    },
+    {
+      "itemId": 28793,
+      "name": "Band of Crimson Fury",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.48
+    },
+    {
+      "itemId": 29286,
+      "name": "Violet Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Revered",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 4.48
+    },
+    {
+      "itemId": 29285,
+      "name": "Violet Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 4.16
     },
     {
       "itemId": 30110,
@@ -2953,6 +4493,41 @@
       "curationHint": 3.68
     },
     {
+      "itemId": 29172,
+      "name": "Ashyen's Gift",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "Cenarion Expedition",
+          "standing": "Exalted",
+          "factionId": 942,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.68
+    },
+    {
+      "itemId": 29367,
+      "name": "Ring of Cryptic Dreams",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.68
+    },
+    {
       "itemId": 29308,
       "name": "Band of Eternity",
       "slot": "finger",
@@ -3028,6 +4603,41 @@
       "curationHint": 3.2
     },
     {
+      "itemId": 28790,
+      "name": "Naaru Lightwarden's Band",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.04
+    },
+    {
+      "itemId": 29290,
+      "name": "Violet Signet of the Grand Restorer",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 3.04
+    },
+    {
       "itemId": 29307,
       "name": "Band of Eternity",
       "slot": "finger",
@@ -3065,6 +4675,76 @@
       "curationHint": 3.04
     },
     {
+      "itemId": 29291,
+      "name": "Violet Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Revered",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 2.72
+    },
+    {
+      "itemId": 33918,
+      "name": "Vindicator's Band of Salvation",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.72
+    },
+    {
+      "itemId": 29289,
+      "name": "Violet Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 2.56
+    },
+    {
+      "itemId": 29373,
+      "name": "Band of Halos",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.56
+    },
+    {
       "itemId": 33058,
       "name": "Band of the Vigilant",
       "slot": "finger",
@@ -3077,6 +4757,38 @@
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
           "boss": "Morogrim Tidewalker",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.56
+    },
+    {
+      "itemId": 33957,
+      "name": "Witches Band",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.56
+    },
+    {
+      "itemId": 34074,
+      "name": "Witches Band",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -3101,6 +4813,38 @@
       "curationHint": 2.4
     },
     {
+      "itemId": 33064,
+      "name": "Veteran's Band of Salvation",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.4
+    },
+    {
+      "itemId": 21190,
+      "name": "Wrath of Cenarius",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 28675,
       "name": "Shermanar Great-Ring",
       "slot": "finger",
@@ -3114,6 +4858,79 @@
           "zone": "Karazhan",
           "boss": "Shade of Aran",
           "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 28792,
+      "name": "A'dal's Signet of Defense",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29277,
+      "name": "Violet Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29278,
+      "name": "Violet Signet",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Revered",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29279,
+      "name": "Violet Signet of the Great Protector",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
         }
       ],
       "curationHint": 0.0
@@ -3195,6 +5012,22 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 29384,
+      "name": "Ring of Unyielding Force",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 30028,
       "name": "Seventh Ring of the Tirisfalen",
       "slot": "finger",
@@ -3254,6 +5087,54 @@
           "kind": "raid",
           "zone": "Karazhan",
           "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 31319,
+      "name": "Band of Impenetrable Defenses",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 31746,
+      "name": "Phoenix-fire Band",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 35320,
+      "name": "Vindicator's Band of Subjugation",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -3558,6 +5439,22 @@
       "curationHint": 35.44
     },
     {
+      "itemId": 32656,
+      "name": "Crystalhide Handwraps",
+      "slot": "hands",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 31.55
+    },
+    {
       "itemId": 29987,
       "name": "Gauntlets of the Sun King",
       "slot": "hands",
@@ -3612,6 +5509,22 @@
       "curationHint": 5.6
     },
     {
+      "itemId": 30985,
+      "name": "Lightbringer Handguards",
+      "slot": "hands",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.44
+    },
+    {
       "itemId": 30725,
       "name": "Anger-Spark Gloves",
       "slot": "hands",
@@ -3628,6 +5541,38 @@
         }
       ],
       "curationHint": 4.8
+    },
+    {
+      "itemId": 30124,
+      "name": "Crystalforge Handguards",
+      "slot": "hands",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.64
+    },
+    {
+      "itemId": 30983,
+      "name": "Lightbringer Gloves",
+      "slot": "hands",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.64
     },
     {
       "itemId": 32275,
@@ -3666,6 +5611,22 @@
       "curationHint": 4.48
     },
     {
+      "itemId": 29067,
+      "name": "Justicar Handguards",
+      "slot": "hands",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.32
+    },
+    {
       "itemId": 30112,
       "name": "Glorious Gauntlets of Crestfall",
       "slot": "hands",
@@ -3682,6 +5643,38 @@
         }
       ],
       "curationHint": 4.32
+    },
+    {
+      "itemId": 30135,
+      "name": "Crystalforge Gloves",
+      "slot": "hands",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.16
+    },
+    {
+      "itemId": 29065,
+      "name": "Justicar Gloves",
+      "slot": "hands",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.0
     },
     {
       "itemId": 29976,
@@ -3892,6 +5885,70 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 30764,
+      "name": "Infernoweave Gloves",
+      "slot": "hands",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30767,
+      "name": "Inferno Tempered Gauntlets",
+      "slot": "hands",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30774,
+      "name": "Inferno Forged Gloves",
+      "slot": "hands",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30780,
+      "name": "Inferno Hardened Gloves",
+      "slot": "hands",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 32373,
       "name": "Helm of the Illidari Shatterer",
       "slot": "head",
@@ -4009,6 +6066,24 @@
       "curatedSets": [
         "p2"
       ]
+    },
+    {
+      "itemId": 33751,
+      "name": "Vengeful Gladiator's Scaled Helm",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 95.2
     },
     {
       "itemId": 32376,
@@ -4136,10 +6211,27 @@
         {
           "kind": "pvp",
           "via": "arena",
-          "origin": "wowhead"
+          "season": 2,
+          "origin": "db"
         }
       ],
       "curationHint": 65.4
+    },
+    {
+      "itemId": 31333,
+      "name": "The Night Watchman",
+      "slot": "head",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 61.41
     },
     {
       "itemId": 29073,
@@ -4165,6 +6257,24 @@
       ]
     },
     {
+      "itemId": 27881,
+      "name": "Gladiator's Scaled Helm",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 57.8
+    },
+    {
       "itemId": 28671,
       "name": "Steelspine Faceguard",
       "slot": "head",
@@ -4181,6 +6291,54 @@
         }
       ],
       "curationHint": 52.32
+    },
+    {
+      "itemId": 32088,
+      "name": "Cowl of Beastly Rage",
+      "slot": "head",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 47.98
+    },
+    {
+      "itemId": 32170,
+      "name": "Chancellor's Scaled Helm",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 38.4
+    },
+    {
+      "itemId": 32085,
+      "name": "Warpstalker Helm",
+      "slot": "head",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 37.68
     },
     {
       "itemId": 28593,
@@ -4321,6 +6479,90 @@
       "curationHint": 6.88
     },
     {
+      "itemId": 30987,
+      "name": "Lightbringer Faceguard",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.88
+    },
+    {
+      "itemId": 33697,
+      "name": "Vengeful Gladiator's Lamellar Helm",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.88
+    },
+    {
+      "itemId": 30988,
+      "name": "Lightbringer Greathelm",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.4
+    },
+    {
+      "itemId": 31997,
+      "name": "Merciless Gladiator's Lamellar Helm",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.24
+    },
+    {
+      "itemId": 32086,
+      "name": "Storm Master's Helmet",
+      "slot": "head",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.92
+    },
+    {
       "itemId": 32241,
       "name": "Helm of Soothing Currents",
       "slot": "head",
@@ -4393,6 +6635,22 @@
       "curationHint": 5.76
     },
     {
+      "itemId": 30125,
+      "name": "Crystalforge Faceguard",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.76
+    },
+    {
       "itemId": 30728,
       "name": "Fathom-Helm of the Deeps",
       "slot": "head",
@@ -4409,6 +6667,22 @@
         }
       ],
       "curationHint": 5.76
+    },
+    {
+      "itemId": 30136,
+      "name": "Crystalforge Greathelm",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.6
     },
     {
       "itemId": 32240,
@@ -4445,6 +6719,40 @@
         }
       ],
       "curationHint": 5.44
+    },
+    {
+      "itemId": 32089,
+      "name": "Mana-Binders Cowl",
+      "slot": "head",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.44
+    },
+    {
+      "itemId": 27704,
+      "name": "Gladiator's Lamellar Helm",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.28
     },
     {
       "itemId": 28803,
@@ -4488,6 +6796,175 @@
       "curationHint": 4.32
     },
     {
+      "itemId": 29068,
+      "name": "Justicar Faceguard",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.32
+    },
+    {
+      "itemId": 29061,
+      "name": "Justicar Diadem",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.0
+    },
+    {
+      "itemId": 33724,
+      "name": "Vengeful Gladiator's Ornamented Headcover",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.0
+    },
+    {
+      "itemId": 32084,
+      "name": "Helmet of the Steadfast Champion",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.84
+    },
+    {
+      "itemId": 32022,
+      "name": "Merciless Gladiator's Ornamented Headcover",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.52
+    },
+    {
+      "itemId": 32090,
+      "name": "Cowl of Naaru Blessings",
+      "slot": "head",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.52
+    },
+    {
+      "itemId": 31616,
+      "name": "Gladiator's Ornamented Headcover",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.04
+    },
+    {
+      "itemId": 32155,
+      "name": "Chancellor's Lamellar Helm",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.04
+    },
+    {
+      "itemId": 32160,
+      "name": "Chancellor's Ornamented Headguard",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 1.92
+    },
+    {
+      "itemId": 29122,
+      "name": "Nether Runner's Cowl",
+      "slot": "head",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "The Consortium",
+          "standing": "Exalted",
+          "factionId": 933,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 30731,
       "name": "Faceguard of the Endless Watch",
       "slot": "head",
@@ -4501,6 +6978,38 @@
           "kind": "raid",
           "zone": "World Bosses",
           "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 31330,
+      "name": "Lightning Crown",
+      "slot": "head",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32083,
+      "name": "Faceguard of Determination",
+      "slot": "head",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -4616,6 +7125,24 @@
         }
       ],
       "curationHint": 110.44
+    },
+    {
+      "itemId": 33752,
+      "name": "Vengeful Gladiator's Scaled Legguards",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 108.6
     },
     {
       "itemId": 29995,
@@ -4758,6 +7285,42 @@
       "curationHint": 73.8
     },
     {
+      "itemId": 32042,
+      "name": "Merciless Gladiator's Scaled Legguards",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 71.4
+    },
+    {
+      "itemId": 27882,
+      "name": "Gladiator's Scaled Legguards",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 65.6
+    },
+    {
       "itemId": 29985,
       "name": "Void Reaver Greaves",
       "slot": "legs",
@@ -4774,6 +7337,22 @@
         }
       ],
       "curationHint": 63.97
+    },
+    {
+      "itemId": 32171,
+      "name": "Chancellor's Scaled Legguards",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 48.8
     },
     {
       "itemId": 28740,
@@ -4810,6 +7389,22 @@
         }
       ],
       "curationHint": 38.7
+    },
+    {
+      "itemId": 14554,
+      "name": "Cloudkeeper Legplates",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 34.6
     },
     {
       "itemId": 28621,
@@ -4932,6 +7527,74 @@
       "curationHint": 7.84
     },
     {
+      "itemId": 33698,
+      "name": "Vengeful Gladiator's Lamellar Legguards",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 7.52
+    },
+    {
+      "itemId": 30995,
+      "name": "Lightbringer Legguards",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 7.36
+    },
+    {
+      "itemId": 31995,
+      "name": "Merciless Gladiator's Lamellar Legguards",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.72
+    },
+    {
+      "itemId": 30126,
+      "name": "Crystalforge Legguards",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.56
+    },
+    {
       "itemId": 30912,
       "name": "Leggings of Eternity",
       "slot": "legs",
@@ -4948,6 +7611,40 @@
         }
       ],
       "curationHint": 6.56
+    },
+    {
+      "itemId": 30994,
+      "name": "Lightbringer Leggings",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.08
+    },
+    {
+      "itemId": 27705,
+      "name": "Gladiator's Lamellar Legguards",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.92
     },
     {
       "itemId": 30727,
@@ -4986,6 +7683,22 @@
       "curationHint": 5.92
     },
     {
+      "itemId": 31343,
+      "name": "Kamaei's Cerulean Skirt",
+      "slot": "legs",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.92
+    },
+    {
       "itemId": 32271,
       "name": "Kilt of Immortal Nature",
       "slot": "legs",
@@ -5002,6 +7715,22 @@
         }
       ],
       "curationHint": 5.92
+    },
+    {
+      "itemId": 29069,
+      "name": "Justicar Legguards",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.76
     },
     {
       "itemId": 29991,
@@ -5040,6 +7769,22 @@
       "curationHint": 5.44
     },
     {
+      "itemId": 30137,
+      "name": "Crystalforge Leggings",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.44
+    },
+    {
       "itemId": 28751,
       "name": "Heart-Flame Leggings",
       "slot": "legs",
@@ -5061,6 +7806,56 @@
         }
       ],
       "curationHint": 4.8
+    },
+    {
+      "itemId": 29063,
+      "name": "Justicar Leggings",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.8
+    },
+    {
+      "itemId": 33725,
+      "name": "Vengeful Gladiator's Ornamented Legplates",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.8
+    },
+    {
+      "itemId": 32156,
+      "name": "Chancellor's Lamellar Legguards",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.48
     },
     {
       "itemId": 28591,
@@ -5091,6 +7886,58 @@
         }
       ],
       "curationHint": 4.32
+    },
+    {
+      "itemId": 32023,
+      "name": "Merciless Gladiator's Ornamented Legplates",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.32
+    },
+    {
+      "itemId": 31335,
+      "name": "Pants of Living Growth",
+      "slot": "legs",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.16
+    },
+    {
+      "itemId": 31618,
+      "name": "Gladiator's Ornamented Legplates",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.84
     },
     {
       "itemId": 28742,
@@ -5132,6 +7979,86 @@
         }
       ],
       "curationHint": 3.52
+    },
+    {
+      "itemId": 32161,
+      "name": "Chancellor's Ornamented Leggings",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.88
+    },
+    {
+      "itemId": 30761,
+      "name": "Infernoweave Leggings",
+      "slot": "legs",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30766,
+      "name": "Inferno Tempered Leggings",
+      "slot": "legs",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30772,
+      "name": "Inferno Forged Leggings",
+      "slot": "legs",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30778,
+      "name": "Inferno Hardened Leggings",
+      "slot": "legs",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
     },
     {
       "itemId": 32389,
@@ -5230,6 +8157,22 @@
         }
       ],
       "curationHint": 96.99
+    },
+    {
+      "itemId": 278827,
+      "name": "Amulet of Bitter Hatred",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 79.22
     },
     {
       "itemId": 29381,
@@ -5381,6 +8324,22 @@
       "curationHint": 45.28
     },
     {
+      "itemId": 278847,
+      "name": "Hailstone Pendant",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 45.15
+    },
+    {
       "itemId": 29119,
       "name": "Haramad's Bargain",
       "slot": "neck",
@@ -5465,6 +8424,22 @@
       "curationHint": 38.7
     },
     {
+      "itemId": 33923,
+      "name": "Vindicator's Pendant of Triumph",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 38.6
+    },
+    {
       "itemId": 28674,
       "name": "Saberclaw Talisman",
       "slot": "neck",
@@ -5481,6 +8456,86 @@
         }
       ],
       "curationHint": 34.65
+    },
+    {
+      "itemId": 33066,
+      "name": "Veteran's Pendant of Triumph",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 32.04
+    },
+    {
+      "itemId": 31321,
+      "name": "Choker of Repentance",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 26.52
+    },
+    {
+      "itemId": 28244,
+      "name": "Pendant of Triumph",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 23.12
+    },
+    {
+      "itemId": 29386,
+      "name": "Necklace of the Juggernaut",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 13.87
+    },
+    {
+      "itemId": 17111,
+      "name": "Blazefury Medallion",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 9.49
     },
     {
       "itemId": 32349,
@@ -5501,6 +8556,54 @@
       "curationHint": 7.36
     },
     {
+      "itemId": 30015,
+      "name": "The Sun King's Talisman",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.56
+    },
+    {
+      "itemId": 278833,
+      "name": "Choker of the Arctic Flow",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.28
+    },
+    {
+      "itemId": 33921,
+      "name": "Vindicator's Pendant of Dominance",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.8
+    },
+    {
       "itemId": 28762,
       "name": "Adornment of Stolen Souls",
       "slot": "neck",
@@ -5517,6 +8620,38 @@
         }
       ],
       "curationHint": 4.48
+    },
+    {
+      "itemId": 29368,
+      "name": "Manasurge Pendant",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.48
+    },
+    {
+      "itemId": 30018,
+      "name": "Lord Sanguinar's Claim",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.32
     },
     {
       "itemId": 32370,
@@ -5537,6 +8672,22 @@
       "curationHint": 4.32
     },
     {
+      "itemId": 28245,
+      "name": "Pendant of Dominance",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.16
+    },
+    {
       "itemId": 28530,
       "name": "Brooch of Unquenchable Fury",
       "slot": "neck",
@@ -5549,6 +8700,22 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "Moroes",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.16
+    },
+    {
+      "itemId": 33065,
+      "name": "Veteran's Pendant of Dominance",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -5573,6 +8740,54 @@
       "curationHint": 4.0
     },
     {
+      "itemId": 33920,
+      "name": "Vindicator's Pendant of Conquest",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.0
+    },
+    {
+      "itemId": 35319,
+      "name": "Vindicator's Pendant of Subjugation",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.0
+    },
+    {
+      "itemId": 31338,
+      "name": "Charlotte's Ivy",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.68
+    },
+    {
       "itemId": 28609,
       "name": "Emberspur Talisman",
       "slot": "neck",
@@ -5589,6 +8804,70 @@
         }
       ],
       "curationHint": 3.52
+    },
+    {
+      "itemId": 33067,
+      "name": "Veteran's Pendant of Conquest",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.36
+    },
+    {
+      "itemId": 278838,
+      "name": "Amulet of Glacial Tranquility",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.04
+    },
+    {
+      "itemId": 33922,
+      "name": "Vindicator's Pendant of Salvation",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.72
+    },
+    {
+      "itemId": 35317,
+      "name": "Vindicator's Pendant of Reprieve",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.72
     },
     {
       "itemId": 28731,
@@ -5627,6 +8906,38 @@
       "curationHint": 2.56
     },
     {
+      "itemId": 29374,
+      "name": "Necklace of Eternal Hope",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.56
+    },
+    {
+      "itemId": 33068,
+      "name": "Veteran's Pendant of Salvation",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.4
+    },
+    {
       "itemId": 28516,
       "name": "Barbed Choker of Discipline",
       "slot": "neck",
@@ -5639,6 +8950,41 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "Maiden of Virtue",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29123,
+      "name": "Medallion of the Lightbearer",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Aldor",
+          "factionId": 932,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 30007,
+      "name": "The Darkener's Grasp",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -5692,6 +9038,38 @@
           "kind": "raid",
           "zone": "Black Temple",
           "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32649,
+      "name": "Medallion of Karabor",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32757,
+      "name": "Blessed Medallion of Karabor",
+      "slot": "neck",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -5757,6 +9135,22 @@
       ]
     },
     {
+      "itemId": 29388,
+      "name": "Libram of Repentance",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 31033,
       "name": "Libram of Righteous Power",
       "slot": "ranged",
@@ -5771,6 +9165,133 @@
         }
       ],
       "curationHint": 0.0
+    },
+    {
+      "itemId": 33936,
+      "name": "Gladiator's Libram of Fortitude",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 33937,
+      "name": "Merciless Gladiator's Libram of Fortitude",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 33938,
+      "name": "Vengeful Gladiator's Libram of Fortitude",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 33948,
+      "name": "Gladiator's Libram of Vengeance",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 33949,
+      "name": "Merciless Gladiator's Libram of Vengeance",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 33950,
+      "name": "Vengeful Gladiator's Libram of Vengeance",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 32570,
+      "name": "Swiftsteel Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 130.55
     },
     {
       "itemId": 30866,
@@ -5826,6 +9347,25 @@
         }
       ],
       "curationHint": 98.61
+    },
+    {
+      "itemId": 32575,
+      "name": "Shoulders of Lightning Reflexes",
+      "slot": "shoulder",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 95.93
     },
     {
       "itemId": 30740,
@@ -6070,6 +9610,60 @@
       "curationHint": 57.8
     },
     {
+      "itemId": 33753,
+      "name": "Vengeful Gladiator's Scaled Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 53.8
+    },
+    {
+      "itemId": 32043,
+      "name": "Merciless Gladiator's Scaled Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 50.4
+    },
+    {
+      "itemId": 27883,
+      "name": "Gladiator's Scaled Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 44.8
+    },
+    {
       "itemId": 28589,
       "name": "Beastmaw Pauldrons",
       "slot": "shoulder",
@@ -6098,6 +9692,22 @@
         }
       ],
       "curationHint": 36.84
+    },
+    {
+      "itemId": 32172,
+      "name": "Chancellor's Scaled Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 32.2
     },
     {
       "itemId": 28743,
@@ -6152,6 +9762,25 @@
         }
       ],
       "curationHint": 8.8
+    },
+    {
+      "itemId": 32587,
+      "name": "Mantle of Nimble Thought",
+      "slot": "shoulder",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 7.04
     },
     {
       "itemId": 30024,
@@ -6231,6 +9860,41 @@
       "curationHint": 5.44
     },
     {
+      "itemId": 30996,
+      "name": "Lightbringer Pauldrons",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.64
+    },
+    {
+      "itemId": 32579,
+      "name": "Living Earth Shoulders",
+      "slot": "shoulder",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.64
+    },
+    {
       "itemId": 30878,
       "name": "Glimmering Steel Mantle",
       "slot": "shoulder",
@@ -6303,6 +9967,129 @@
       "curationHint": 4.48
     },
     {
+      "itemId": 32585,
+      "name": "Swiftheal Mantle",
+      "slot": "shoulder",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.48
+    },
+    {
+      "itemId": 33699,
+      "name": "Vengeful Gladiator's Lamellar Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.48
+    },
+    {
+      "itemId": 30998,
+      "name": "Lightbringer Shoulderguards",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.32
+    },
+    {
+      "itemId": 32573,
+      "name": "Dawnsteel Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.32
+    },
+    {
+      "itemId": 32583,
+      "name": "Shoulderpads of Renewed Life",
+      "slot": "shoulder",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.32
+    },
+    {
+      "itemId": 29070,
+      "name": "Justicar Shoulderguards",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.16
+    },
+    {
+      "itemId": 30138,
+      "name": "Crystalforge Pauldrons",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.16
+    },
+    {
       "itemId": 30084,
       "name": "Pauldrons of the Argent Sentinel",
       "slot": "shoulder",
@@ -6337,6 +10124,40 @@
         }
       ],
       "curationHint": 4.0
+    },
+    {
+      "itemId": 31996,
+      "name": "Merciless Gladiator's Lamellar Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.0
+    },
+    {
+      "itemId": 29064,
+      "name": "Justicar Pauldrons",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.68
     },
     {
       "itemId": 28631,
@@ -6375,6 +10196,40 @@
       "curationHint": 3.52
     },
     {
+      "itemId": 30127,
+      "name": "Crystalforge Shoulderguards",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.52
+    },
+    {
+      "itemId": 27706,
+      "name": "Gladiator's Lamellar Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.04
+    },
+    {
       "itemId": 28612,
       "name": "Pauldrons of the Solace-Giver",
       "slot": "shoulder",
@@ -6409,6 +10264,111 @@
         }
       ],
       "curationHint": 3.04
+    },
+    {
+      "itemId": 33726,
+      "name": "Vengeful Gladiator's Ornamented Spaulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.72
+    },
+    {
+      "itemId": 32024,
+      "name": "Merciless Gladiator's Ornamented Spaulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.4
+    },
+    {
+      "itemId": 31619,
+      "name": "Gladiator's Ornamented Spaulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 1.92
+    },
+    {
+      "itemId": 32157,
+      "name": "Chancellor's Lamellar Shoulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 1.92
+    },
+    {
+      "itemId": 32162,
+      "name": "Chancellor's Ornamented Spaulders",
+      "slot": "shoulder",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 1.28
+    },
+    {
+      "itemId": 21864,
+      "name": "Soulcloth Shoulders",
+      "slot": "shoulder",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeZone": "Karazhan",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
     },
     {
       "itemId": 32250,
@@ -6481,6 +10441,54 @@
         }
       ],
       "curationHint": 51.9
+    },
+    {
+      "itemId": 281739,
+      "name": "Empty Mug of Direbrew",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 41.16
+    },
+    {
+      "itemId": 33832,
+      "name": "Battlemaster's Determination",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 33.6
+    },
+    {
+      "itemId": 34163,
+      "name": "Battlemaster's Cruelty",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 32.0
     },
     {
       "itemId": 29383,
@@ -6576,6 +10584,22 @@
       ]
     },
     {
+      "itemId": 281735,
+      "name": "Dark Iron Smoking Pipe",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 9.44
+    },
+    {
       "itemId": 32483,
       "name": "The Skull of Gul'dan",
       "slot": "trinket",
@@ -6612,6 +10636,38 @@
       "curationHint": 8.64
     },
     {
+      "itemId": 34049,
+      "name": "Battlemaster's Audacity",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 7.52
+    },
+    {
+      "itemId": 29370,
+      "name": "Icon of the Silver Crescent",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.88
+    },
+    {
       "itemId": 32496,
       "name": "Memento of Tyrande",
       "slot": "trinket",
@@ -6628,6 +10684,150 @@
         }
       ],
       "curationHint": 5.92
+    },
+    {
+      "itemId": 281748,
+      "name": "Direbrew Hops",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.92
+    },
+    {
+      "itemId": 34050,
+      "name": "Battlemaster's Perseverance",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.8
+    },
+    {
+      "itemId": 29376,
+      "name": "Essence of the Martyr",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.48
+    },
+    {
+      "itemId": 14557,
+      "name": "The Lion Horn of Stormwind",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 19952,
+      "name": "Gri'lek's Charm of Valor",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 20636,
+      "name": "Hibernation Crystal",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 21180,
+      "name": "Earthstrike",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 23206,
+      "name": "Mark of the Champion",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 23207,
+      "name": "Mark of the Champion",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
     },
     {
       "itemId": 28528,
@@ -6678,6 +10878,22 @@
           "kind": "raid",
           "zone": "Karazhan",
           "boss": "Terestian Illhoof",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 29387,
+      "name": "Gnomeregan Auto-Blocker 600",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -6779,6 +10995,25 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 31113,
+      "name": "Violet Badge",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "The Violet Eye",
+          "factionId": 967,
+          "kind": "rep",
+          "standing": "Honored",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
       "itemId": 31856,
       "name": "Darkmoon Card: Crusade",
       "slot": "trinket",
@@ -6790,6 +11025,38 @@
         {
           "kind": "unknown",
           "origin": "curated"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 31857,
+      "name": "Darkmoon Card: Wrath",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 31858,
+      "name": "Darkmoon Card: Vengeance",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
         }
       ],
       "curationHint": 0.0
@@ -6807,6 +11074,86 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Gurtogg Bloodboil",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 34162,
+      "name": "Battlemaster's Depravity",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 35327,
+      "name": "Battlemaster's Alacrity",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 281743,
+      "name": "Coren's Lucky Coin",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 281893,
+      "name": "Balebrew Charm",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 281895,
+      "name": "Brightbrew Charm",
+      "slot": "trinket",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -7010,6 +11357,38 @@
       "curationHint": 68.29
     },
     {
+      "itemId": 33811,
+      "name": "Vindicator's Plate Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 63.0
+    },
+    {
+      "itemId": 33909,
+      "name": "Vindicator's Scaled Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 61.6
+    },
+    {
       "itemId": 30068,
       "name": "Girdle of the Tidal Call",
       "slot": "waist",
@@ -7049,6 +11428,38 @@
       ]
     },
     {
+      "itemId": 32805,
+      "name": "Veteran's Plate Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 55.8
+    },
+    {
+      "itemId": 32806,
+      "name": "Veteran's Scaled Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 55.4
+    },
+    {
       "itemId": 30046,
       "name": "Belt of the Black Eagle",
       "slot": "waist",
@@ -7084,6 +11495,89 @@
         }
       ],
       "curationHint": 50.24
+    },
+    {
+      "itemId": 28644,
+      "name": "General's Scaled Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 48.8
+    },
+    {
+      "itemId": 28998,
+      "name": "Marshal's Scaled Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 48.8
+    },
+    {
+      "itemId": 28385,
+      "name": "General's Plate Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 48.6
+    },
+    {
+      "itemId": 28995,
+      "name": "Marshal's Plate Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 48.6
+    },
+    {
+      "itemId": 30042,
+      "name": "Belt of Natural Power",
+      "slot": "waist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 43.6
     },
     {
       "itemId": 28750,
@@ -7204,6 +11698,25 @@
       "curationHint": 8.8
     },
     {
+      "itemId": 30038,
+      "name": "Belt of Blasting",
+      "slot": "waist",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 8.0
+    },
+    {
       "itemId": 30064,
       "name": "Cord of Screaming Terrors",
       "slot": "waist",
@@ -7276,6 +11789,25 @@
       "curationHint": 6.88
     },
     {
+      "itemId": 30044,
+      "name": "Monsoon Belt",
+      "slot": "waist",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 6.24
+    },
+    {
       "itemId": 28654,
       "name": "Malefic Girdle",
       "slot": "waist",
@@ -7312,6 +11844,38 @@
       "curationHint": 5.6
     },
     {
+      "itemId": 33888,
+      "name": "Vindicator's Lamellar Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.6
+    },
+    {
+      "itemId": 32801,
+      "name": "Veteran's Lamellar Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.12
+    },
+    {
       "itemId": 32342,
       "name": "Girdle of Mighty Resolve",
       "slot": "waist",
@@ -7328,6 +11892,38 @@
         }
       ],
       "curationHint": 4.8
+    },
+    {
+      "itemId": 28641,
+      "name": "General's Lamellar Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.48
+    },
+    {
+      "itemId": 28983,
+      "name": "Marshal's Lamellar Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.48
     },
     {
       "itemId": 30895,
@@ -7461,6 +12057,25 @@
       "curationHint": 4.0
     },
     {
+      "itemId": 30036,
+      "name": "Belt of the Long Road",
+      "slot": "waist",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.0
+    },
+    {
       "itemId": 32519,
       "name": "Belt of Divine Guidance",
       "slot": "waist",
@@ -7533,6 +12148,41 @@
       "curationHint": 3.52
     },
     {
+      "itemId": 33903,
+      "name": "Vindicator's Ornamented Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.52
+    },
+    {
+      "itemId": 30034,
+      "name": "Belt of the Guardian",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeZone": "Serpentshrine Cavern",
+          "recipeBoss": "Trash",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.36
+    },
+    {
       "itemId": 28567,
       "name": "Belt of Gale Force",
       "slot": "waist",
@@ -7567,6 +12217,54 @@
         }
       ],
       "curationHint": 3.2
+    },
+    {
+      "itemId": 32988,
+      "name": "Veteran's Ornamented Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.2
+    },
+    {
+      "itemId": 32982,
+      "name": "General's Ornamented Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.88
+    },
+    {
+      "itemId": 32985,
+      "name": "Marshal's Ornamented Belt",
+      "slot": "waist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.88
     },
     {
       "itemId": 30020,
@@ -7821,6 +12519,24 @@
       "curationHint": 857.84
     },
     {
+      "itemId": 33663,
+      "name": "Vengeful Gladiator's Bonegrinder",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 853.375
+    },
+    {
       "itemId": 33688,
       "name": "Vengeful Gladiator's Greatsword",
       "slot": "weapon",
@@ -7832,7 +12548,8 @@
         {
           "kind": "pvp",
           "via": "arena",
-          "origin": "wowhead"
+          "season": 3,
+          "origin": "db"
         }
       ],
       "curationHint": 853.375
@@ -7883,6 +12600,24 @@
       ]
     },
     {
+      "itemId": 33670,
+      "name": "Vengeful Gladiator's Decapitator",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 846.015
+    },
+    {
       "itemId": 32348,
       "name": "Soul Cleaver",
       "slot": "weapon",
@@ -7901,6 +12636,42 @@
       "curationHint": 804.601
     },
     {
+      "itemId": 33727,
+      "name": "Vengeful Gladiator's Painsaw",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 3,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 804.354
+    },
+    {
+      "itemId": 31959,
+      "name": "Merciless Gladiator's Bonegrinder",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 803.608
+    },
+    {
       "itemId": 31984,
       "name": "Merciless Gladiator's Greatsword",
       "slot": "weapon",
@@ -7912,15 +12683,29 @@
         {
           "kind": "pvp",
           "via": "arena",
-          "origin": "wowhead"
-        },
-        {
-          "kind": "pvp",
-          "via": "honor",
-          "origin": "wowhead"
+          "season": 2,
+          "origin": "db"
         }
       ],
       "curationHint": 803.608
+    },
+    {
+      "itemId": 31966,
+      "name": "Merciless Gladiator's Decapitator",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 796.888
     },
     {
       "itemId": 29993,
@@ -7976,6 +12761,78 @@
         }
       ],
       "curationHint": 762.127
+    },
+    {
+      "itemId": 32025,
+      "name": "Merciless Gladiator's Painsaw",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 756.663
+    },
+    {
+      "itemId": 24550,
+      "name": "Gladiator's Greatsword",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 747.058
+    },
+    {
+      "itemId": 28299,
+      "name": "Gladiator's Bonegrinder",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 747.058
+    },
+    {
+      "itemId": 28298,
+      "name": "Gladiator's Decapitator",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 741.938
     },
     {
       "itemId": 30090,
@@ -8071,6 +12928,24 @@
       "curationHint": 702.926
     },
     {
+      "itemId": 28300,
+      "name": "Gladiator's Painsaw",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 700.361
+    },
+    {
       "itemId": 28800,
       "name": "Hammer of the Naaru",
       "slot": "weapon",
@@ -8087,6 +12962,89 @@
         }
       ],
       "curationHint": 694.846
+    },
+    {
+      "itemId": 32181,
+      "name": "Chancellor's Bonegrinder",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 689.312
+    },
+    {
+      "itemId": 32186,
+      "name": "Chancellor's Warblade",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 689.312
+    },
+    {
+      "itemId": 30830,
+      "name": "Trident of the Outcast Tribe",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "Lower City",
+          "factionId": 1011,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 687.944
+    },
+    {
+      "itemId": 32182,
+      "name": "Chancellor's Decapitator",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 684.352
+    },
+    {
+      "itemId": 32184,
+      "name": "Chancellor's Painsaw",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 683.735
     },
     {
       "itemId": 28587,
@@ -8123,6 +13081,109 @@
         }
       ],
       "curationHint": 671.02
+    },
+    {
+      "itemId": 31322,
+      "name": "The Hammer of Destiny",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 605.921
+    },
+    {
+      "itemId": 31318,
+      "name": "Singing Crystal Axe",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 573.253
+    },
+    {
+      "itemId": 32014,
+      "name": "Merciless Gladiator's Maul",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 2,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 497.115
+    },
+    {
+      "itemId": 28476,
+      "name": "Gladiator's Maul",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "pvp",
+          "via": "arena",
+          "season": 1,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 476.312
+    },
+    {
+      "itemId": 32183,
+      "name": "Chancellor's Maul",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 460.046
+    },
+    {
+      "itemId": 29171,
+      "name": "Earthwarden",
+      "slot": "weapon",
+      "armorType": null,
+      "handType": 4,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "Cenarion Expedition",
+          "standing": "Exalted",
+          "factionId": 942,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 408.792
     },
     {
       "itemId": 30057,
@@ -8205,6 +13266,25 @@
         }
       ],
       "curationHint": 70.6
+    },
+    {
+      "itemId": 32580,
+      "name": "Swiftstrike Bracers",
+      "slot": "wrist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 68.54
     },
     {
       "itemId": 32568,
@@ -8303,6 +13383,22 @@
       "curatedSets": [
         "preraid"
       ]
+    },
+    {
+      "itemId": 33813,
+      "name": "Vindicator's Plate Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 41.8
     },
     {
       "itemId": 33910,
@@ -8416,6 +13512,54 @@
       "curationHint": 38.41
     },
     {
+      "itemId": 29237,
+      "name": "Warpath Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 36.6
+    },
+    {
+      "itemId": 32819,
+      "name": "Veteran's Scaled Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 35.4
+    },
+    {
+      "itemId": 32818,
+      "name": "Veteran's Plate Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 34.6
+    },
+    {
       "itemId": 28454,
       "name": "Stalker's War Bands",
       "slot": "wrist",
@@ -8432,6 +13576,89 @@
         }
       ],
       "curationHint": 33.81
+    },
+    {
+      "itemId": 32647,
+      "name": "Shard-bound Bracers",
+      "slot": "wrist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "rep",
+          "faction": "Ogri'la",
+          "standing": "Exalted",
+          "factionId": 1038,
+          "origin": "db"
+        }
+      ],
+      "curationHint": 32.24
+    },
+    {
+      "itemId": 28646,
+      "name": "General's Scaled Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 31.6
+    },
+    {
+      "itemId": 28999,
+      "name": "Marshal's Scaled Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 31.6
+    },
+    {
+      "itemId": 28381,
+      "name": "General's Plate Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 30.2
+    },
+    {
+      "itemId": 28996,
+      "name": "Marshal's Plate Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 30.2
     },
     {
       "itemId": 32270,
@@ -8524,6 +13751,25 @@
       "curationHint": 5.44
     },
     {
+      "itemId": 32586,
+      "name": "Bracers of Nimble Thought",
+      "slot": "wrist",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 5.44
+    },
+    {
       "itemId": 28515,
       "name": "Bands of Nefarious Deeds",
       "slot": "wrist",
@@ -8540,6 +13786,22 @@
         }
       ],
       "curationHint": 5.12
+    },
+    {
+      "itemId": 33889,
+      "name": "Vindicator's Lamellar Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 4.32
     },
     {
       "itemId": 28453,
@@ -8596,6 +13858,41 @@
       "curationHint": 3.68
     },
     {
+      "itemId": 32655,
+      "name": "Crystalweave Bracers",
+      "slot": "wrist",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.68
+    },
+    {
+      "itemId": 29183,
+      "name": "Bindings of the Timewalker",
+      "slot": "wrist",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "faction": "Keepers Of Time",
+          "factionId": 989,
+          "kind": "rep",
+          "standing": "Exalted",
+          "origin": "atlasloot"
+        }
+      ],
+      "curationHint": 3.52
+    },
+    {
       "itemId": 30868,
       "name": "Rejuvenating Bracers",
       "slot": "wrist",
@@ -8644,6 +13941,98 @@
           "kind": "raid",
           "zone": "Black Temple",
           "boss": "Shade of Akama",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.52
+    },
+    {
+      "itemId": 32571,
+      "name": "Dawnsteel Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Blacksmithing",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.52
+    },
+    {
+      "itemId": 32577,
+      "name": "Living Earth Bindings",
+      "slot": "wrist",
+      "armorType": 3,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.52
+    },
+    {
+      "itemId": 32582,
+      "name": "Bracers of Renewed Life",
+      "slot": "wrist",
+      "armorType": 2,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Leatherworking",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.52
+    },
+    {
+      "itemId": 32584,
+      "name": "Swiftheal Wraps",
+      "slot": "wrist",
+      "armorType": 1,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "crafted",
+          "profession": "Tailoring",
+          "recipeZone": "Black Temple",
+          "recipeBoss": "Patterns",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.52
+    },
+    {
+      "itemId": 32813,
+      "name": "Veteran's Lamellar Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -8722,6 +14111,38 @@
       "curationHint": 3.36
     },
     {
+      "itemId": 28643,
+      "name": "General's Lamellar Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.2
+    },
+    {
+      "itemId": 28984,
+      "name": "Marshal's Lamellar Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.2
+    },
+    {
       "itemId": 32516,
       "name": "Wraps of Purification",
       "slot": "wrist",
@@ -8738,6 +14159,22 @@
         }
       ],
       "curationHint": 2.88
+    },
+    {
+      "itemId": 33904,
+      "name": "Vindicator's Ornamented Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.72
     },
     {
       "itemId": 28503,
@@ -8792,6 +14229,54 @@
         }
       ],
       "curationHint": 2.56
+    },
+    {
+      "itemId": 32989,
+      "name": "Veteran's Ornamented Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 2,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.24
+    },
+    {
+      "itemId": 32983,
+      "name": "General's Ornamented Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.08
+    },
+    {
+      "itemId": 32986,
+      "name": "Marshal's Ornamented Bracers",
+      "slot": "wrist",
+      "armorType": 4,
+      "handType": null,
+      "quality": 4,
+      "phase": 1,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 2.08
     },
     {
       "itemId": 28502,

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (Tab-blocking; owner answer Q-feral-p5)
 Type: task
 Origin: owner answers to Chunk 3b step 6, 2026-10-11 (Q-feral-p5)
@@ -67,3 +67,28 @@ job is to make each of those a stated rule.
    ticket closes when it is a passing gate.
 3. The `pool-hardening.test.ts:1052-1064` token-table check covers all 11
    specs, not ret only.
+
+## Closed 2026-10-16 (stage-gate tab-blocking-finish, K2)
+
+`scripts/check_pool_completeness.py` replaces `scripts/list_phase_pool.py`
+(deleted). It runs for all 11 DPS specs at every phase that has a list
+(2-5), imports nothing from the builder, and classifies every wearable epic
+by a named rule or policy; an item no rule names is `uncovered` and fails the
+gate. It writes `data/pool-listings/<spec>-p<P>.md` (44 files) and runs in
+`pnpm verify` as `pnpm pool-listings:check`. On `feat/tab-item-lists` it
+reports 0 findings and 0 uncovered items in all 44 lists. The token-table
+check in `packages/core/test/pool-hardening.test.ts` now loops over
+`data/two-hop/tier-sets.json` for all 11 specs.
+
+Red runs, each a scratch copy of the builder writing to a temp folder and the
+gate run with `--universes-dir` (script and output:
+`.scratch/stage-gate/tab-blocking-finish/k2_red.py`, `k2-red-runs.txt` in the
+main checkout, gitignored): (1) feral's Sunwell token rows removed -> 3 E-token
+findings, 34444, 34556, 34573; (2) Sunmote route off -> 36 E-sunmote findings
+in ret-p5 and feral-p5, 34397 among them; (3) `in_recipe_phase` off -> 32
+E-recipe findings in feral-p5, 34370 among them; (4) arena route off -> 98
+E-arena findings, every arena id of feral-p5; (5) arena phase gate off -> 63
+P-season-closed findings in ret-p2 and feral-p4.
+
+Verified by: `pnpm pool-listings:check` (rc 0, "44 lists, 0 findings, 0
+drifted listings") at tbc-gear-prio@d74d5fcc, and the five red runs above.

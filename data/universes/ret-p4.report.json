@@ -21,71 +21,75 @@
     1012
   ],
   "d7EligibleTotal": 3609,
-  "excludedNoSource": 1354,
-  "universeTotal": 523,
-  "listOnlyMembership": 27,
+  "excludedNoSource": 972,
+  "universeTotal": 917,
+  "listOnlyMembership": 23,
   "perSlot": {
-    "back": 32,
-    "chest": 45,
-    "feet": 58,
-    "finger": 56,
-    "hands": 33,
-    "head": 41,
-    "legs": 37,
-    "neck": 28,
-    "ranged": 5,
-    "shoulder": 40,
-    "trinket": 25,
-    "waist": 56,
-    "weapon": 19,
-    "wrist": 48
+    "back": 53,
+    "chest": 73,
+    "feet": 95,
+    "finger": 99,
+    "hands": 54,
+    "head": 71,
+    "legs": 71,
+    "neck": 56,
+    "ranged": 13,
+    "shoulder": 70,
+    "trinket": 51,
+    "waist": 86,
+    "weapon": 40,
+    "wrist": 85
   },
   "sourceRecordAdds": {
     "atlasloot": 301,
     "curated": 8,
-    "db": 2134,
-    "sunmote": 3,
+    "db": 2501,
+    "sunmote": 23,
     "two-hop": 18,
-    "wowhead": 16
+    "wowhead": 9
   },
   "membershipByOrigin": {
+    "arenaSource": 56,
     "curated": 12,
-    "itemHasOrigin:atlasloot": 93,
+    "dbPhase": 292,
+    "itemHasOrigin:atlasloot": 110,
     "itemHasOrigin:curated": 8,
-    "itemHasOrigin:db": 453,
+    "itemHasOrigin:db": 834,
     "itemHasOrigin:two-hop": 15,
-    "itemHasOrigin:wowhead": 13,
-    "listOnly": 27,
+    "itemHasOrigin:wowhead": 9,
+    "listOnly": 23,
+    "recipeMatch": 28,
     "repFactionMatch": 33,
+    "repItemPhase": 22,
     "zoneMatch": 451
   },
   "exclusivePrimaryOrigin": {
-    "db": 453,
-    "atlasloot-only": 34,
+    "db": 834,
+    "atlasloot-only": 51,
     "two-hop": 15,
-    "wowhead-only": 13,
-    "other": 8
+    "other": 8,
+    "wowhead-only": 9
   },
   "tierPiecesExpected": 15,
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 523,
-    "casterOnlyReject": 223,
-    "epFloorReject": 17,
-    "combinedReject": 240,
-    "combinedKeep": 283,
-    "casterRejectPct": 42.6,
-    "combinedRejectPct": 45.9,
+    "total": 917,
+    "casterOnlyReject": 428,
+    "epFloorReject": 30,
+    "combinedReject": 458,
+    "combinedKeep": 459,
+    "casterRejectPct": 46.7,
+    "combinedRejectPct": 49.9,
     "applied": false
   },
   "wowheadListIds": 130,
   "wowheadRecall": {
     "heldOut": false,
     "listTotal": 130,
-    "recalled": 117,
-    "missed": 13,
-    "recallPct": 90.0,
+    "recalled": 118,
+    "missed": 12,
+    "recallPct": 90.8,
     "missedItems": [
       {
         "itemId": 18823,
@@ -114,12 +118,6 @@
       {
         "itemId": 23041,
         "name": "Slayer's Crest",
-        "slot": "trinket",
-        "d7Eligible": true
-      },
-      {
-        "itemId": 23206,
-        "name": "Mark of the Champion",
         "slot": "trinket",
         "d7Eligible": true
       },
@@ -417,6 +415,14 @@
       "name": "Fetish of the Fallen"
     },
     {
+      "itemId": 27703,
+      "name": "Gladiator's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 27880,
+      "name": "Gladiator's Scaled Gauntlets"
+    },
+    {
       "itemId": 27896,
       "name": "Alembic of Infernal Power"
     },
@@ -427,6 +433,10 @@
     {
       "itemId": 28296,
       "name": "Libram of the Lightbringer"
+    },
+    {
+      "itemId": 28356,
+      "name": "Gladiator's Libram of Justice"
     },
     {
       "itemId": 28590,
@@ -477,6 +487,42 @@
       "name": "Lower City Prayerbook"
     },
     {
+      "itemId": 31328,
+      "name": "Leggings of Beast Mastery"
+    },
+    {
+      "itemId": 31614,
+      "name": "Gladiator's Ornamented Gloves"
+    },
+    {
+      "itemId": 31859,
+      "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 31993,
+      "name": "Merciless Gladiator's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 32021,
+      "name": "Merciless Gladiator's Ornamented Gloves"
+    },
+    {
+      "itemId": 32040,
+      "name": "Merciless Gladiator's Scaled Gauntlets"
+    },
+    {
+      "itemId": 32154,
+      "name": "Chancellor's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 32159,
+      "name": "Chancellor's Ornamented Gloves"
+    },
+    {
+      "itemId": 32169,
+      "name": "Chancellor's Scaled Gauntlets"
+    },
+    {
       "itemId": 32368,
       "name": "Tome of the Lightbringer"
     },
@@ -499,6 +545,34 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 33077,
+      "name": "Merciless Gladiator's Libram of Justice"
+    },
+    {
+      "itemId": 33502,
+      "name": "Libram of Mending"
+    },
+    {
+      "itemId": 33696,
+      "name": "Vengeful Gladiator's Lamellar Gauntlets"
+    },
+    {
+      "itemId": 33723,
+      "name": "Vengeful Gladiator's Ornamented Gloves"
+    },
+    {
+      "itemId": 33750,
+      "name": "Vengeful Gladiator's Scaled Gauntlets"
+    },
+    {
+      "itemId": 33808,
+      "name": "The Horseman's Helm"
+    },
+    {
+      "itemId": 33842,
+      "name": "Vengeful Gladiator's Libram of Justice"
     },
     {
       "itemId": 34430,
@@ -573,9 +647,13 @@
       "p3"
     ]
   },
-  "excludedIds": {
-    "total": 0,
-    "reason": "",
-    "curatedSetCollisions": []
+  "arenaSource": {
+    "total": 505,
+    "admitted": 56,
+    "admittedBySeason": {
+      "1": 19,
+      "2": 19,
+      "3": 18
+    }
   }
 }

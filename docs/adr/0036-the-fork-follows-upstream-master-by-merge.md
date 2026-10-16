@@ -16,6 +16,12 @@ two ADRs and in the combined procedure of `docs/agents/upstream-catch-up.md`
 'wowsims-fork.lock.json'` prints only `scripts/list_phase_pool.py`, which stamps
 the engine pin and deliberately not the fork pin).
 
+2026-10-16: `scripts/list_phase_pool.py` was deleted (ticket 610; its
+replacement, `scripts/check_pool_completeness.py`, reads only the engine
+pin), so that grep no longer names it. On that date it prints only
+`scripts/worktree_pair.py`, which reads both locks to set up a paired
+worktree and stamps neither.
+
 Because one catch-up had to move both pins, every catch-up was the full
 two-version procedure: build `wowsimcli` twice, sync the engine data, rebuild
 the universes, merge the fork, regenerate, run the desktop gate, and push. So

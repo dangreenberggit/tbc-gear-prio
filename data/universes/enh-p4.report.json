@@ -20,45 +20,49 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 3516,
-  "excludedNoSource": 772,
-  "universeTotal": 1012,
+  "d7EligibleTotal": 3678,
+  "excludedNoSource": 1050,
+  "universeTotal": 939,
   "listOnlyMembership": 0,
   "perSlot": {
-    "back": 60,
-    "chest": 58,
-    "feet": 79,
-    "finger": 117,
-    "hands": 48,
-    "head": 59,
-    "legs": 76,
-    "neck": 71,
+    "back": 52,
+    "chest": 59,
+    "feet": 73,
+    "finger": 101,
+    "hands": 42,
+    "head": 57,
+    "legs": 59,
+    "neck": 55,
     "ranged": 2,
-    "shoulder": 51,
-    "trinket": 52,
-    "waist": 67,
-    "weapon": 197,
-    "wrist": 75
+    "shoulder": 56,
+    "trinket": 49,
+    "waist": 68,
+    "weapon": 198,
+    "wrist": 68
   },
   "sourceRecordAdds": {
     "atlasloot": 306,
-    "curated": 9,
-    "db": 2632,
+    "curated": 8,
+    "db": 2500,
+    "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 99,
     "curated": 18,
-    "dbPhase": 523,
-    "itemHasOrigin:atlasloot": 94,
+    "dbPhase": 298,
+    "itemHasOrigin:atlasloot": 116,
     "itemHasOrigin:curated": 7,
-    "itemHasOrigin:db": 958,
+    "itemHasOrigin:db": 863,
     "itemHasOrigin:two-hop": 15,
+    "recipeMatch": 22,
     "repFactionMatch": 30,
+    "repItemPhase": 31,
     "zoneMatch": 441
   },
   "exclusivePrimaryOrigin": {
-    "db": 958,
-    "atlasloot-only": 32,
+    "db": 863,
+    "atlasloot-only": 54,
     "two-hop": 15,
     "other": 7
   },
@@ -66,13 +70,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 1012,
-    "casterOnlyReject": 497,
+    "total": 939,
+    "casterOnlyReject": 473,
     "epFloorReject": 23,
-    "combinedReject": 520,
-    "combinedKeep": 492,
-    "casterRejectPct": 49.1,
-    "combinedRejectPct": 51.4,
+    "combinedReject": 496,
+    "combinedKeep": 443,
+    "casterRejectPct": 50.4,
+    "combinedRejectPct": 52.8,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -86,10 +90,6 @@
   },
   "ticket157ForceIncluded": [],
   "excludedUnimplementedEffect": [
-    {
-      "itemId": 3475,
-      "name": "Cloak of Flames"
-    },
     {
       "itemId": 11810,
       "name": "Force of Will"
@@ -143,10 +143,6 @@
       "name": "Onyxia Scale Cloak"
     },
     {
-      "itemId": 16573,
-      "name": "General's Mail Boots"
-    },
-    {
       "itemId": 17066,
       "name": "Drillborer Disk"
     },
@@ -159,24 +155,8 @@
       "name": "Spinal Reaper"
     },
     {
-      "itemId": 17182,
-      "name": "Sulfuras, Hand of Ragnaros"
-    },
-    {
-      "itemId": 17904,
-      "name": "Stormpike Insignia Rank 6"
-    },
-    {
-      "itemId": 17909,
-      "name": "Frostwolf Insignia Rank 6"
-    },
-    {
       "itemId": 18382,
       "name": "Fluctuating Cloak"
-    },
-    {
-      "itemId": 18406,
-      "name": "Onyxia Blood Talisman"
     },
     {
       "itemId": 18639,
@@ -199,40 +179,8 @@
       "name": "Essence of the Pure Flame"
     },
     {
-      "itemId": 19287,
-      "name": "Darkmoon Card: Heroism"
-    },
-    {
-      "itemId": 19288,
-      "name": "Darkmoon Card: Blue Dragon"
-    },
-    {
-      "itemId": 19289,
-      "name": "Darkmoon Card: Maelstrom"
-    },
-    {
-      "itemId": 19290,
-      "name": "Darkmoon Card: Twisting Nether"
-    },
-    {
-      "itemId": 19609,
-      "name": "Unmarred Vision of Voodress"
-    },
-    {
       "itemId": 19930,
       "name": "Mar'li's Eye"
-    },
-    {
-      "itemId": 19949,
-      "name": "Zandalarian Hero Medallion"
-    },
-    {
-      "itemId": 19950,
-      "name": "Zandalarian Hero Charm"
-    },
-    {
-      "itemId": 19956,
-      "name": "Wushoolay's Charm of Spirits"
     },
     {
       "itemId": 19961,
@@ -243,20 +191,8 @@
       "name": "Gri'lek's Carver"
     },
     {
-      "itemId": 20579,
-      "name": "Green Dragonskin Cloak"
-    },
-    {
       "itemId": 21488,
       "name": "Fetish of Chitinous Spikes"
-    },
-    {
-      "itemId": 21517,
-      "name": "Gnomish Turban of Psychic Might"
-    },
-    {
-      "itemId": 21526,
-      "name": "Band of Icy Depths"
     },
     {
       "itemId": 21625,
@@ -305,22 +241,6 @@
     {
       "itemId": 22396,
       "name": "Totem of Life"
-    },
-    {
-      "itemId": 22589,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22630,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22631,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22632,
-      "name": "Atiesh, Greatstaff of the Guardian"
     },
     {
       "itemId": 23001,
@@ -399,10 +319,6 @@
       "name": "Totem of the Thunderhead"
     },
     {
-      "itemId": 24551,
-      "name": "Talisman of the Horde"
-    },
-    {
       "itemId": 25827,
       "name": "Muck-Covered Drape"
     },
@@ -411,12 +327,12 @@
       "name": "Petrified Lichen Guard"
     },
     {
-      "itemId": 25829,
-      "name": "Talisman of the Alliance"
-    },
-    {
       "itemId": 25835,
       "name": "Explorer's Walking Stick"
+    },
+    {
+      "itemId": 26000,
+      "name": "Gladiator's Linked Gauntlets"
     },
     {
       "itemId": 26055,
@@ -425,6 +341,10 @@
     {
       "itemId": 27416,
       "name": "Fetish of the Fallen"
+    },
+    {
+      "itemId": 27470,
+      "name": "Gladiator's Mail Gauntlets"
     },
     {
       "itemId": 27544,
@@ -437,6 +357,10 @@
     {
       "itemId": 27900,
       "name": "Jewel of Charismatic Mystique"
+    },
+    {
+      "itemId": 28357,
+      "name": "Gladiator's Totem of the Third Wind"
     },
     {
       "itemId": 28523,
@@ -475,10 +399,6 @@
       "name": "Earthen Netherscale Boots"
     },
     {
-      "itemId": 29606,
-      "name": "Marshal's Mail Boots"
-    },
-    {
       "itemId": 30008,
       "name": "Pendant of the Lost Ages"
     },
@@ -503,8 +423,24 @@
       "name": "Leggings of Beast Mastery"
     },
     {
+      "itemId": 31397,
+      "name": "Gladiator's Ringmail Gauntlets"
+    },
+    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 32005,
+      "name": "Merciless Gladiator's Linked Gauntlets"
+    },
+    {
+      "itemId": 32010,
+      "name": "Merciless Gladiator's Mail Gauntlets"
+    },
+    {
+      "itemId": 32030,
+      "name": "Merciless Gladiator's Ringmail Gauntlets"
     },
     {
       "itemId": 32139,
@@ -539,12 +475,56 @@
       "name": "Airman's Ribbon of Gallantry"
     },
     {
+      "itemId": 33078,
+      "name": "Merciless Gladiator's Totem of the Third Wind"
+    },
+    {
       "itemId": 33505,
       "name": "Totem of Living Water"
     },
     {
       "itemId": 33507,
       "name": "Stonebreaker's Totem"
+    },
+    {
+      "itemId": 33707,
+      "name": "Vengeful Gladiator's Linked Gauntlets"
+    },
+    {
+      "itemId": 33712,
+      "name": "Vengeful Gladiator's Mail Gauntlets"
+    },
+    {
+      "itemId": 33739,
+      "name": "Vengeful Gladiator's Ringmail Gauntlets"
+    },
+    {
+      "itemId": 33843,
+      "name": "Vengeful Gladiator's Totem of the Third Wind"
+    },
+    {
+      "itemId": 33939,
+      "name": "Gladiator's Totem of Indomitability"
+    },
+    {
+      "itemId": 33940,
+      "name": "Merciless Gladiator's Totem of Indomitability"
+    },
+    {
+      "itemId": 33941,
+      "name": "Vengeful Gladiator's Totem of Indomitability"
+    },
+    {
+      "itemId": 33951,
+      "name": "Gladiator's Totem of Survival"
+    },
+    {
+      "itemId": 33952,
+      "name": "Merciless Gladiator's Totem of Survival"
+    },
+    {
+      "itemId": 33953,
+      "name": "Vengeful Gladiator's Totem of Survival"
     },
     {
       "itemId": 34430,
@@ -619,17 +599,13 @@
       "p4"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": [
-      {
-        "itemId": 28308,
-        "name": "Gladiator's Cleaver",
-        "curatedSets": [
-          "p1"
-        ]
-      }
-    ]
+    "admitted": 99,
+    "admittedBySeason": {
+      "1": 30,
+      "2": 32,
+      "3": 37
+    }
   }
 }

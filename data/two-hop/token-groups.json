@@ -1,0 +1,46 @@
+{
+  "kind": "tier-token-groups",
+  "note": "Hand-written input to scripts/generate_tier_tokens.py. These tables hold what neither vendored source states: AtlasLoot lists each tier token under its boss with no class, and db.json has no row for the tokens at all (the Sunwell tokens 34852/34855/34858 included). `groups` maps the last word of a token name to the class ids (data/proto/common.proto `Class`) that redeem it; each piece's db.json `classAllowlist` must fall inside its token's group, and the generator fails if it does not. `labels` maps each AtlasLoot `T<n>_SET` row comment to this repo's spec slug, or null for a tank or healer set. `tiers` and `slots` read the other two words of a token name: the tier word, and the slot word as a db.json item `type`.",
+  "groups": {
+    "Champion": [2, 4, 7],
+    "Defender": [1, 5, 11],
+    "Hero": [3, 8, 9],
+    "Conqueror": [2, 5, 9],
+    "Vanquisher": [4, 8, 11],
+    "Protector": [1, 3, 7]
+  },
+  "labels": {
+    "Warlock": "warlock",
+    "Priest / Heal": null,
+    "Priest / Shadow": "shadow",
+    "Rogue": "rogue",
+    "Hunter": "hunter",
+    "Warrior / Prot": null,
+    "Warrior / DD": "warrior",
+    "Mage": "mage",
+    "Druid / Heal": null,
+    "Druid / Owl": "balance",
+    "Druid / Feral": "feral",
+    "Shaman / Heal": null,
+    "Shaman / Ele": "ele",
+    "Shaman / Enh": "enh",
+    "Paladin / Heal": null,
+    "Paladin / Prot": null,
+    "Paladin / DD": "ret"
+  },
+  "tiers": {
+    "Fallen": 4,
+    "Vanquished": 5,
+    "Forgotten": 6
+  },
+  "slots": {
+    "Helm": 1,
+    "Pauldrons": 3,
+    "Chestguard": 5,
+    "Bracers": 6,
+    "Gloves": 7,
+    "Belt": 8,
+    "Leggings": 9,
+    "Boots": 10
+  }
+}

@@ -13,10 +13,12 @@ Two id sets, by construction rather than symmetry:
 
   - `implementedEffectItemIds`: every item id passed to an *active* (not
     commented out) `core.NewItemEffect(<id>, ...)` or
-    `shared.NewSimpleStatActive(<id>)` call anywhere under sim/**/*.go. This
-    is informational only -- assemble_universe.py does not need it, because
-    an item with NO effect at all (a plain stat stick) also needs no
-    registration and must stay in the pool. Only `stubOnlyItemIds` drives
+    `shared.NewSimpleStatActive(<id>)` call anywhere under sim/**/*.go. It
+    never excludes an item, because an item with NO effect at all (a plain
+    stat stick) also needs no registration and must stay in the pool.
+    assemble_universe.py reads it for one admission rule: a sourceless item
+    in this set is exempt from the db-phase item-level floor
+    (DB_PHASE_MIN_ILVL, ticket 613). Only `stubOnlyItemIds` drives
     exclusion.
   - `stubOnlyItemIds`: item ids that appear *exclusively* inside a commented
     `// TODO: Manual implementation required` block in
@@ -256,9 +258,11 @@ def main() -> int:
         "forkRepo": "dangreenberggit/tbc-new",
         "forkCommit": commit,
         "_comment": (
-            "implementedEffectItemIds is informational -- assemble_universe.py "
-            "does not consult it, because a stat-only item needs no "
-            "registration at all. stubOnlyItemIds is the one that drives "
+            "implementedEffectItemIds never excludes an item, because a "
+            "stat-only item needs no registration at all; assemble_universe.py "
+            "reads it only to exempt a sourceless item from the db-phase "
+            "item-level floor (DB_PHASE_MIN_ILVL, ticket 613). "
+            "stubOnlyItemIds is the one that drives "
             "exclusion: an item id whose only appearance in the fork's Go "
             "tree is inside a commented `TODO: Manual implementation "
             "required` stub block, with no active core.NewItemEffect / "

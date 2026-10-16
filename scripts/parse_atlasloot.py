@@ -33,6 +33,7 @@ DEFAULT_DB = ROOT / "vendor" / "wowsims" / "db.json"
 DEFAULT_OUT = ROOT / "data" / "atlasloot_sources.json"
 DEFAULT_RECIPES_OUT = ROOT / "data" / "two-hop" / "raid-recipes.json"
 DEFAULT_FACTIONS_LUA = ROOT / "vendor" / "atlasloot" / "factions-tbc.lua"
+DEFAULT_SUNMOTE_OUT = ROOT / "data" / "two-hop" / "sunmote-pairs.json"
 DEFAULT_FACTIONS_OUT = ROOT / "data" / "faction_ids.json"
 
 # AtlasLoot stores only the recipe's *item* id in the loot table; the crafted
@@ -77,6 +78,16 @@ DIFF_RE = re.compile(
 )
 LOOT_RE = re.compile(r"^\s*\{\s*(\d+)\s*,\s*(\d+)\s*[,}]")
 IGNORE_SOURCE_RE = re.compile(r"^\s*IgnoreAsSource\s*=\s*true\s*,?\s*$")
+
+# Sunwell Plateau's Sunmote upgrades. AtlasLoot keeps each upgraded item as a
+# commented-out row directly under the live row of the item it upgrades
+# (`--{ 7, 34397 }, -- Bladed Chaos Tunic` under Harness of Carnal Instinct),
+# so the comment is the only place upstream pairs the two (ticket 612). Limited
+# to the Sunwell table and to ids >= 34000: the file's other commented rows,
+# such as `--{ 11, 29434 }` (Badge of Justice), are not upgrades.
+SUNMOTE_INSTANCE = "SunwellPlateau"
+SUNMOTE_MIN_ID = 34000
+COMMENTED_LOOT_RE = re.compile(r"^\s*--\{\s*\d+,\s*(\d+)\s*\}")
 
 RAID_CONTENT = {"RAID10_CONTENT", "RAID25_CONTENT"}
 DUNGEON_CONTENT = "DUNGEON_CONTENT"
@@ -292,6 +303,29 @@ def parse_lua(
     return output, dict(stats)
 
 
+def parse_sunmote_pairs(lua_text: str) -> list[dict]:
+    """Commented Sunwell rows paired with the live row just above them."""
+    pairs: list[dict] = []
+    for match in DATA_BLOCK_RE.finditer(lua_text):
+        if match.group(1) != SUNMOTE_INSTANCE:
+            continue
+        block = extract_brace_block(lua_text, match.end() - 1)
+        previous_live: int | None = None
+        for line in block.splitlines():
+            if not line.strip():
+                continue
+            cm = COMMENTED_LOOT_RE.match(line)
+            if cm:
+                upgrade_id = int(cm.group(1))
+                if previous_live is not None and upgrade_id >= SUNMOTE_MIN_ID:
+                    pairs.append({"baseId": previous_live, "upgradeId": upgrade_id})
+                previous_live = None
+                continue
+            lm = None if line.strip().startswith("--") else LOOT_RE.match(line)
+            previous_live = int(lm.group(2)) if lm else None
+    return pairs
+
+
 def load_db(path: Path) -> dict:
     if not path.is_file():
         raise SystemExit(f"missing {path} — run python scripts/sync_wowsims.py --update")
@@ -484,6 +518,7 @@ def main() -> int:
     ap.add_argument("--recipes-out", type=Path, default=DEFAULT_RECIPES_OUT)
     ap.add_argument("--factions-lua", type=Path, default=DEFAULT_FACTIONS_LUA)
     ap.add_argument("--factions-out", type=Path, default=DEFAULT_FACTIONS_OUT)
+    ap.add_argument("--sunmote-out", type=Path, default=DEFAULT_SUNMOTE_OUT)
     args = ap.parse_args()
 
     if not args.lua.is_file():
@@ -592,6 +627,28 @@ def main() -> int:
     print(f"  wrote {len(recipe_rows)} raid-recipe products -> {args.recipes_out}")
     for key in sorted(recipe_stats):
         print(f"  {key}: {recipe_stats[key]}")
+
+    sunmote_pairs = parse_sunmote_pairs(lua_text)
+    args.sunmote_out.parent.mkdir(parents=True, exist_ok=True)
+    with args.sunmote_out.open("w", encoding="utf-8", newline="") as fh:
+        json.dump(
+            {
+                "kind": "sunmote-pair-map",
+                "generatedBy": "scripts/parse_atlasloot.py",
+                "notes": [
+                    "Each pair is a commented-out row in AtlasLoot's Sunwell Plateau "
+                    "table (`upgradeId`) and the live row directly above it "
+                    "(`baseId`). These are all such rows with id >= 34000; "
+                    "scripts/assemble_universe.py decides which pairs are Sunmote "
+                    "upgrades (ticket 612).",
+                ],
+                "pairs": sunmote_pairs,
+            },
+            fh,
+            indent=2,
+        )
+        fh.write("\n")
+    print(f"  wrote {len(sunmote_pairs)} Sunwell commented-row pairs -> {args.sunmote_out}")
 
     args.factions_out.parent.mkdir(parents=True, exist_ok=True)
     with args.factions_out.open("w", encoding="utf-8", newline="") as fh:

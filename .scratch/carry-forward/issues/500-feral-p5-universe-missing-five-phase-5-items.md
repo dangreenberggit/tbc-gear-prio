@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/stage-gate/upgrades-tab-closeout/set-rule-scenarios/report.md (scenario G, 2026-09-24)
 Blocks: none
@@ -93,3 +93,17 @@ specs (owner: "Yes"). This ticket stays open because close condition 3
 Thunderheart wrist/waist/feet swap) is in none of those tickets. It closes
 when 609, 611 and 612 are closed and that capture is recorded here. It is
 no longer superseded by 505 (see 505's 2026-10-11 note).
+
+## Closed 2026-10-16 (stage-gate tab-blocking-finish, K4)
+
+Close conditions 1 and 2 are met by tickets 609, 611 and 612 (all closed).
+Condition 3: the `feral-p5-th4pc` fixture (Thunderheart 4pc, the Phase 4
+"BiS 6%" preset, at page phase 5), recorded 2026-10-16 at fork 8cd8d1c80,
+ranks Thunderheart Wristguards (34444) +11.2 DPS at rank 9 and Thunderheart
+Treads (34573) +3.3 at rank 15, and lists Thunderheart Waistguard (34556) at
+-24.7 below the cutoff; 34397 and 34370 are in it too. In the Browser pane
+the Feet tab shows Thunderheart Treads +3.3 and the Waist tab's below-cutoff
+list shows Thunderheart Waistguard -24.7.
+
+Verified by: `python -c "import json;r=json.load(open('data/tab-fixtures/feral-p5-th4pc.json'))['ranking'];print(sorted({i['itemId'] for i in r['items']}&{34444,34556,34573,34397,34370}))"`
+(all five) at tbc-gear-prio@808f0c7f.

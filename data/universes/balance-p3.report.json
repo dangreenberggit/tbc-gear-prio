@@ -19,45 +19,49 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 2880,
-  "excludedNoSource": 685,
-  "universeTotal": 767,
+  "d7EligibleTotal": 3006,
+  "excludedNoSource": 928,
+  "universeTotal": 686,
   "listOnlyMembership": 0,
   "perSlot": {
-    "back": 50,
-    "chest": 40,
-    "feet": 55,
-    "finger": 110,
-    "hands": 32,
+    "back": 42,
+    "chest": 41,
+    "feet": 49,
+    "finger": 93,
+    "hands": 27,
     "head": 41,
-    "legs": 49,
-    "neck": 68,
+    "legs": 42,
+    "neck": 51,
     "ranged": 3,
-    "shoulder": 35,
-    "trinket": 46,
-    "waist": 47,
-    "weapon": 140,
-    "wrist": 51
+    "shoulder": 40,
+    "trinket": 43,
+    "waist": 45,
+    "weapon": 124,
+    "wrist": 45
   },
   "sourceRecordAdds": {
     "atlasloot": 255,
-    "curated": 7,
-    "db": 2093,
+    "curated": 5,
+    "db": 1965,
+    "sunmote": 23,
     "two-hop": 18
   },
   "membershipByOrigin": {
+    "arenaSource": 74,
     "curated": 15,
-    "dbPhase": 427,
-    "itemHasOrigin:atlasloot": 64,
+    "dbPhase": 227,
+    "itemHasOrigin:atlasloot": 86,
     "itemHasOrigin:curated": 4,
-    "itemHasOrigin:db": 719,
+    "itemHasOrigin:db": 616,
     "itemHasOrigin:two-hop": 15,
+    "recipeMatch": 16,
     "repFactionMatch": 26,
+    "repItemPhase": 29,
     "zoneMatch": 299
   },
   "exclusivePrimaryOrigin": {
-    "db": 719,
-    "atlasloot-only": 29,
+    "db": 616,
+    "atlasloot-only": 51,
     "two-hop": 15,
     "other": 4
   },
@@ -65,13 +69,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 767,
-    "casterOnlyReject": 399,
-    "epFloorReject": 20,
-    "combinedReject": 419,
-    "combinedKeep": 348,
-    "casterRejectPct": 52.0,
-    "combinedRejectPct": 54.6,
+    "total": 686,
+    "casterOnlyReject": 368,
+    "epFloorReject": 18,
+    "combinedReject": 386,
+    "combinedKeep": 300,
+    "casterRejectPct": 53.6,
+    "combinedRejectPct": 56.3,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -85,10 +89,6 @@
   },
   "ticket157ForceIncluded": [],
   "excludedUnimplementedEffect": [
-    {
-      "itemId": 3475,
-      "name": "Cloak of Flames"
-    },
     {
       "itemId": 11810,
       "name": "Force of Will"
@@ -130,24 +130,8 @@
       "name": "Shard of the Flame"
     },
     {
-      "itemId": 17182,
-      "name": "Sulfuras, Hand of Ragnaros"
-    },
-    {
-      "itemId": 17904,
-      "name": "Stormpike Insignia Rank 6"
-    },
-    {
-      "itemId": 17909,
-      "name": "Frostwolf Insignia Rank 6"
-    },
-    {
       "itemId": 18382,
       "name": "Fluctuating Cloak"
-    },
-    {
-      "itemId": 18406,
-      "name": "Onyxia Blood Talisman"
     },
     {
       "itemId": 18639,
@@ -170,22 +154,6 @@
       "name": "Essence of the Pure Flame"
     },
     {
-      "itemId": 19287,
-      "name": "Darkmoon Card: Heroism"
-    },
-    {
-      "itemId": 19288,
-      "name": "Darkmoon Card: Blue Dragon"
-    },
-    {
-      "itemId": 19289,
-      "name": "Darkmoon Card: Maelstrom"
-    },
-    {
-      "itemId": 19290,
-      "name": "Darkmoon Card: Twisting Nether"
-    },
-    {
       "itemId": 19340,
       "name": "Rune of Metamorphosis"
     },
@@ -202,14 +170,6 @@
       "name": "Tigule's Harpoon"
     },
     {
-      "itemId": 19949,
-      "name": "Zandalarian Hero Medallion"
-    },
-    {
-      "itemId": 19950,
-      "name": "Zandalarian Hero Charm"
-    },
-    {
       "itemId": 19961,
       "name": "Gri'lek's Grinder"
     },
@@ -218,20 +178,8 @@
       "name": "Pitchfork of Madness"
     },
     {
-      "itemId": 20579,
-      "name": "Green Dragonskin Cloak"
-    },
-    {
       "itemId": 21488,
       "name": "Fetish of Chitinous Spikes"
-    },
-    {
-      "itemId": 21517,
-      "name": "Gnomish Turban of Psychic Might"
-    },
-    {
-      "itemId": 21526,
-      "name": "Band of Icy Depths"
     },
     {
       "itemId": 21625,
@@ -268,22 +216,6 @@
     {
       "itemId": 22399,
       "name": "Idol of Health"
-    },
-    {
-      "itemId": 22589,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22630,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22631,
-      "name": "Atiesh, Greatstaff of the Guardian"
-    },
-    {
-      "itemId": 22632,
-      "name": "Atiesh, Greatstaff of the Guardian"
     },
     {
       "itemId": 23001,
@@ -346,16 +278,8 @@
       "name": "Auslese's Light Channeler"
     },
     {
-      "itemId": 24551,
-      "name": "Talisman of the Horde"
-    },
-    {
       "itemId": 25827,
       "name": "Muck-Covered Drape"
-    },
-    {
-      "itemId": 25829,
-      "name": "Talisman of the Alliance"
     },
     {
       "itemId": 25835,
@@ -384,6 +308,18 @@
     {
       "itemId": 27900,
       "name": "Jewel of Charismatic Mystique"
+    },
+    {
+      "itemId": 28126,
+      "name": "Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 28136,
+      "name": "Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 28355,
+      "name": "Gladiator's Idol of Tenacity"
     },
     {
       "itemId": 28568,
@@ -430,8 +366,24 @@
       "name": "Lower City Prayerbook"
     },
     {
+      "itemId": 31375,
+      "name": "Gladiator's Kodohide Gloves"
+    },
+    {
       "itemId": 31859,
       "name": "Darkmoon Card: Madness"
+    },
+    {
+      "itemId": 31967,
+      "name": "Merciless Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 31987,
+      "name": "Merciless Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 32056,
+      "name": "Merciless Gladiator's Wyrmhide Gloves"
     },
     {
       "itemId": 32113,
@@ -464,6 +416,50 @@
     {
       "itemId": 32771,
       "name": "Airman's Ribbon of Gallantry"
+    },
+    {
+      "itemId": 33076,
+      "name": "Merciless Gladiator's Idol of Tenacity"
+    },
+    {
+      "itemId": 33671,
+      "name": "Vengeful Gladiator's Dragonhide Gloves"
+    },
+    {
+      "itemId": 33690,
+      "name": "Vengeful Gladiator's Kodohide Gloves"
+    },
+    {
+      "itemId": 33767,
+      "name": "Vengeful Gladiator's Wyrmhide Gloves"
+    },
+    {
+      "itemId": 33841,
+      "name": "Vengeful Gladiator's Idol of Tenacity"
+    },
+    {
+      "itemId": 33942,
+      "name": "Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33943,
+      "name": "Merciless Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33944,
+      "name": "Vengeful Gladiator's Idol of Steadfastness"
+    },
+    {
+      "itemId": 33945,
+      "name": "Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 33946,
+      "name": "Merciless Gladiator's Idol of Resolve"
+    },
+    {
+      "itemId": 33947,
+      "name": "Vengeful Gladiator's Idol of Resolve"
     },
     {
       "itemId": 34430,
@@ -534,9 +530,13 @@
       "p3"
     ]
   },
-  "excludedIds": {
+  "arenaSource": {
     "total": 505,
-    "reason": "rating-gated arena gear (Gladiator season lines); SME gate finding F3 -- bought with a currency PvE play does not generate, rating-gated, and mis-valued by a PvE sim because part of its budget is resilience",
-    "curatedSetCollisions": []
+    "admitted": 74,
+    "admittedBySeason": {
+      "1": 24,
+      "2": 24,
+      "3": 26
+    }
   }
 }
