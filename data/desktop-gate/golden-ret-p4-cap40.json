@@ -1,12 +1,12 @@
 {
   "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a known-good ret phase-4 cap-40 run from the P3 gear preset on the desktop (HTTP) transport. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter the tab's output (fork re-pin, universe regen, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate. See README.md beside this file.",
-  "recordedAt": "2026-10-15T19:35:47.643Z",
-  "forkCommit": "2d168e74fa9a1983efac3aa1f15196156800da23",
+  "recordedAt": "2026-10-16T02:16:03.094Z",
+  "forkCommit": "8cd8d1c80a0930e396159ef205aca10304ff2347",
   "cpuCount": 20,
   "candidatesRequested": 40,
   "spec": "ret",
   "phase": 4,
-  "elapsedS": 13.4,
+  "elapsedS": 12.3,
   "rows": [
     {
       "rank": "1",
@@ -226,14 +226,6 @@
     },
     {
       "rank": "26",
-      "item": "Ring of a Thousand Marks",
-      "slot": "Ring 2",
-      "dps": -25.2,
-      "source": "Karazhan (N)\nPrince Malchezaar",
-      "belowCutoff": true
-    },
-    {
-      "rank": "27",
       "item": "Crystalforge Greaves",
       "slot": "Legs",
       "dps": -27.6,
@@ -241,7 +233,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "28",
+      "rank": "27",
       "item": "Battlemaster's Determination",
       "slot": "Trinket 1",
       "dps": -30.4,
@@ -249,7 +241,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "29",
+      "rank": "28",
       "item": "Blood-stained Pauldrons",
       "slot": "Shoulders",
       "dps": -30.6,
@@ -257,7 +249,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "30",
+      "rank": "29",
       "item": "Boots of Natural Grace",
       "slot": "Feet",
       "dps": -33.4,
@@ -265,11 +257,19 @@
       "belowCutoff": true
     },
     {
-      "rank": "31",
+      "rank": "30",
       "item": "Boots of Utter Darkness",
       "slot": "Feet",
       "dps": -33.6,
       "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "31",
+      "item": "Vengeful Gladiator's Scaled Legguards",
+      "slot": "Legs",
+      "dps": -34.4,
+      "source": "PvP vendor",
       "belowCutoff": true
     },
     {

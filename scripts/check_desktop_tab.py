@@ -108,17 +108,19 @@ START_PRESET = {"ret": {4: ("Phase 3", "P3")}}
 # Pinned eligible-candidate count and its upper bound, from the committed
 # universe, before any run (ticket 560 amendment A-F31):
 #   node -e "console.log(require('<fork>/ui/features/upgrades/model/data/ret-p4.universe.json').entries.length)"
-# prints 838 (2026-10-15, fork 2d168e74f; it was 523 until tickets 611/613
-# gave ret the crafted-from-raid and db-phase routes). Every ret-p4 entry is
+# prints 917 (2026-10-16, fork 8cd8d1c80; it was 838 until ticket 642 admitted
+# arena gear of every open season and the 23206 fix added Mark of the
+# Champion, and 523 until tickets 611/613 gave ret the crafted-from-raid and
+# db-phase routes). Every ret-p4 entry is
 # phase <= 4 and none is a Kael temporary legendary, so neither the phase filter
 # (model/engine/pool.ts filterPoolByPhase) nor the Kael exclusion removes one,
 # and the tab's default settings (no source excluded, prune off) do not filter:
-# the gate's eligibleCount should be 838, and the live readback
-# .scratch/stage-gate/tab-item-lists/readback-ret-p4-cap40.json read 838. If a
+# the gate's eligibleCount should be 917, and the live readback
+# .scratch/stage-gate/tab-blocking-finish/readback-ret-p4-cap40.json read 917. If a
 # run reads another number, explain the filter responsible before changing
 # this. A universe regen that changes the ret-p4 pool must re-measure both.
-EXPECTED_ELIGIBLE = {"ret": {4: 838}}
-UNIVERSE_CAP = {"ret": {4: 838}}
+EXPECTED_ELIGIBLE = {"ret": {4: 917}}
+UNIVERSE_CAP = {"ret": {4: 917}}
 
 # Measured full-pool row count for the --full branch of assertion (e): an
 # uncapped run lands fewer rows than eligible candidates, because screened-out
@@ -139,9 +141,12 @@ FULL_ROWS: dict[str, dict[int, int]] = {}
 # .scratch/stage-gate/tab-item-lists/readback-ret-p4-cap40.json, fork
 # 2d168e74f). It was 39 (one worn item inside the first 40) until the ret-p4
 # pool grew from 523 to 838 (tickets 611/613): ten new candidates entered the
-# first 40 by EP, pushing out nine old candidates and that worn item. A change
-# to the pool, the EP order or the preset gear can move it; re-measure and
-# explain before changing it.
+# first 40 by EP, pushing out nine old candidates and that worn item.
+# Re-measured 2026-10-16 after the pool grew to 917 (ticket 642, arena gear):
+# still 40 (readback
+# .scratch/stage-gate/tab-blocking-finish/readback-ret-p4-cap40.json, fork
+# 8cd8d1c80). A change to the pool, the EP order or the preset gear can move
+# it; re-measure and explain before changing it.
 CAPPED_ROWS = {"ret": {4: {40: 40}}}
 
 # Tolerances (plan §Approach; out of scope to edit these in response to a
