@@ -419,9 +419,13 @@ describe("data/universes/ret-p2.json", () => {
     );
     // Pins the list size, so a change in ret-p2 membership is a deliberate
     // edit here; the commit that moves the number says which route changed.
-    // Re-run: `python scripts/assemble_universe.py --spec ret --max-phase 2
-    // --out <scratch> --report <scratch>` and
-    // `len(json.load(open('<scratch>'))['entries'])`.
+    // Re-run, with <scratch> a folder outside the repo:
+    // `python scripts/assemble_universe.py --spec ret --max-phase 2
+    // --out <scratch>/ret-p2.json --report <scratch>/ret-p2.report.json`.
+    // The line it prints for the --out file ends with the entry count. No
+    // flag stops it rewriting the tracked data/weapon-type-exclusions.json,
+    // so if `git status` then shows that file changed, run
+    // `git checkout -- data/weapon-type-exclusions.json`.
     expect(entries.length).toBe(541);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();

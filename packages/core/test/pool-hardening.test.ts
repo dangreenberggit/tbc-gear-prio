@@ -397,9 +397,13 @@ describe("data/universes/ret-p3.json hardening", () => {
   it("ships no empty sources on any row", () => {
     // Pins the list size, so a change in ret-p3 membership is a deliberate
     // edit here; the commit that moves the number says which route changed.
-    // Re-run: `python scripts/assemble_universe.py --spec ret --max-phase 3
-    // --out <scratch> --report <scratch>` and
-    // `len(json.load(open('<scratch>'))['entries'])`.
+    // Re-run, with <scratch> a folder outside the repo:
+    // `python scripts/assemble_universe.py --spec ret --max-phase 3
+    // --out <scratch>/ret-p3.json --report <scratch>/ret-p3.report.json`.
+    // The line it prints for the --out file ends with the entry count. No
+    // flag stops it rewriting the tracked data/weapon-type-exclusions.json,
+    // so if `git status` then shows that file changed, run
+    // `git checkout -- data/weapon-type-exclusions.json`.
     expect(universeP3.length).toBe(794);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated

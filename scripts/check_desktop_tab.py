@@ -136,8 +136,9 @@ FULL_ROWS: dict[str, dict[int, int]] = {}
 # pane shows 40, so none of the 16 worn items is inside the first 40. Measured
 # on the desktop binary at fork 8cd8d1c80 (commit f1022c37), and the
 # committed golden data/desktop-gate/golden-ret-p4-cap40.json, recorded at the
-# same fork (`forkCommit`), holds 40 rows (`rowCount`). A change to the pool, the EP order or the preset
-# gear can move it; re-measure and explain before changing it.
+# same fork (`forkCommit`), holds 40 rows (`rowCount`). A change to the pool,
+# the EP order or the preset gear can move it; re-measure and explain before
+# changing it.
 CAPPED_ROWS = {"ret": {4: {40: 40}}}
 
 # Tolerances (plan §Approach; out of scope to edit these in response to a
