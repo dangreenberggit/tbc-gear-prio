@@ -354,3 +354,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 648 No test keeps "No upgrades found" for a pane that never had an upgrade (pre-merge review feat/tab-view-filter, round 2 R2) 2026-10-15
 - 649 The pre-run Sources box can cut an item from two raids with one ticked (pre-merge review feat/tab-view-filter, round 2 R3) 2026-10-15
 - 655 The set-bonus popover still names some reachable bonuses nowhere (pre-merge review feat/tab-set-bonus, A1 P1) 2026-10-15
+- 670 The fork's locale-key test fails on two set-bonus label keys (stage-gate tab-blocking-finish, K1 step 4) 2026-10-16
