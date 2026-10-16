@@ -1401,6 +1401,25 @@ def item_ilvl(item: dict) -> int | None:
     return int(ilvl) if ilvl is not None else None
 
 
+def passes_db_phase_rule(
+    item: dict, max_phase: int, implemented_ids: frozenset[int]
+) -> bool:
+    """The rule an item admitted on its own db.json phase must meet.
+
+    Shared by db-phase admission and the unlisted-faction rep route, which
+    make the same kind of claim: only the item's own phase says when it is
+    available.
+    """
+    return (
+        int(item.get("phase") or 99) <= max_phase
+        and int(item.get("quality") or 0) >= DB_PHASE_MIN_QUALITY
+        and (
+            (item_ilvl(item) or 0) >= DB_PHASE_MIN_ILVL
+            or int(item["id"]) in implemented_ids
+        )
+    )
+
+
 def sunmote_upgrade_pairs(
     sunmote_pairs: object, db_by_id: dict[int, dict], *, report: bool = False
 ) -> list[dict]:
@@ -2356,11 +2375,7 @@ def assemble(
             continue
         if not eligible_d7(it, profile):
             continue
-        if int(it.get("phase") or 99) > max_phase:
-            continue
-        if int(it.get("quality") or 0) < DB_PHASE_MIN_QUALITY:
-            continue
-        if (item_ilvl(it) or 0) < DB_PHASE_MIN_ILVL and iid not in implemented_ids:
+        if not passes_db_phase_rule(it, max_phase, implemented_ids):
             continue
         add_source(iid, {"kind": "unknown"}, "db")
         db_phase_admitted.add(iid)
@@ -2473,15 +2488,9 @@ def assemble(
             if s.get("kind") == "rep"
             for f in source_rep_factions(s)
         }
-        in_rep_item_phase = (
-            bool(own_rep_factions - listed_rep_factions)
-            and int(it.get("phase") or 99) <= max_phase
-            and int(it.get("quality") or 0) >= DB_PHASE_MIN_QUALITY
-            and (
-                (item_ilvl(it) or 0) >= DB_PHASE_MIN_ILVL
-                or iid in implemented_ids
-            )
-        )
+        in_rep_item_phase = bool(
+            own_rep_factions - listed_rep_factions
+        ) and passes_db_phase_rule(it, max_phase, implemented_ids)
         if (
             not in_phase
             and not in_heroic
