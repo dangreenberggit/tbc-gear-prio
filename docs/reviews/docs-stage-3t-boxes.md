@@ -408,3 +408,11 @@ is fixed or the owner allows a deferral. F2 is open with it.
 
 Tickets: 2 filed (627, 675), 2 closed (627, 674).
 Open tickets this review links: 675 (B2), 360 (K2).
+
+## Check-only
+
+`corepack pnpm -C <pair> merge-to-dev --check-only` on `e2c6b3d2` (this
+file's round 2 commit; it runs `pnpm verify`, then `merge-ready`) printed
+`gates: 1539 ran, 0 skipped`, `disposition rows: 25 parsed of 25 row-shaped
+lines in 3 section(s)`, `merge-ready: ok`, and exited 0. It does not clear
+F1: the gates do not run the commands in `docs/agents/paired-worktrees.md`.
