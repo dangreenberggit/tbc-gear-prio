@@ -179,3 +179,232 @@ the ticket leaves the choice of fix open, so this addendum does not make it.
 | A2  | Adversarial | fixed       | The `(bytes) FAIL` line tested `brc == 1` while the verdict tests `!= 0`; it now tests `!= 0`                     |
 | A3  | Standards   | fixed       | `gate_passed` comment said "the committed dist"; `dist/tbc` is a build output, not committed. Reworded            |
 | A4  | Adversarial | fixed       | A mismatch plus "could not run (h)" returned 2 without the `(bytes) FAIL` line; the line now prints before that   |
+
+## New work: 14068730..8207dc06 (merge of `dev`, the bullet, both pins, the re-run)
+
+Reviewed range: `1406873094f159cd53dbb15f55db6465f0eb2aef..8207dc06774692870b0e52917d6877cf0a2fc041`
+
+This range is new work, not fixes for the findings above, so the focused
+check's condition 1 cannot hold. It is reviewed as a fresh round 1 for new
+work ("Round limit": "a fresh round 1 for new work"). Commits: `6e0d86ef`
+(merge of `dev` `3e9423bf`; only its conflict resolutions were reviewed, with
+`git show --remerge-diff 6e0d86ef`), `7503048f` (the paired-worktrees bullet,
+owner-approved: "sure"), `962087b8`, `883b3dd0`, `a8027231` (both pins to
+upstream `master` `e804c29e8`, v0.0.150), `66b36da3` (ticket 674 closed),
+`8207dc06` (Stage 3T boxes 1-5 recorded). The pins moved rather than box 5
+being reworded, under ADR-0036's owner quote "keep up to date with normal git
+behavior and less pin obsessions" (as relayed by the session).
+
+Dispatch: full axes, because the range changes paths under `data/` (both
+locks, `data/sim-implemented-effects.json`, 44 `data/pool-listings/*`).
+`git diff --shortstat 6e0d86ef..8207dc06` → `53 files changed, 274
+insertions(+), 145 deletions(-)`. Adversarial and Standards + Spec (the
+`code-review` skill, which spawned one Standards and one Spec agent) each ran
+on a fresh `general-task` agent on Opus (effort `high`, review lane); `codex`
+is not on `PATH`. Domain axis skipped: the range states no TBC, WCL or
+wowsims game fact of its own. Upstream's eight commits change the arcane mage
+rotation, a UI helper and seed-0 handling; whether they reach ret or feral
+requests is an engineering question, and the adversarial axis answered it
+(B6).
+
+### Wowsims-file audit (owner rule: only the 6 approved lines of `ui/app/SimTabsSection.tsx`)
+
+Run by the dispatching agent from the pair:
+
+```
+git -C vendor/tbc-new-fork merge-base e804c29e8 bc96d0a03          # -> e804c29e8d61...
+git -C vendor/tbc-new-fork diff --numstat --diff-filter=M e804c29e8 bc96d0a03
+# -> 6  0  ui/app/SimTabsSection.tsx
+git -C vendor/tbc-new-fork diff --name-status e804c29e8 bc96d0a03 | cut -f1 | sort | uniq -c
+# -> 268 A, 1 M (the same counts as 5262ff38..8cd8d1c80)
+git -C vendor/tbc-new-fork diff 8cd8d1c80 bc96d0a03 -- ui/app/SimTabsSection.tsx | wc -l   # -> 0
+```
+
+`git diff 8cd8d1c80 bc96d0a03` is byte-identical to `git diff 5262ff38
+e804c29e8` (compared with `diff`, rc 0): the fork merge added upstream's 8
+files and nothing else. The rule holds at `bc96d0a03`.
+`docs/fork-upstream-touchpoints.md` still names the old pins (B2).
+
+### Adversarial
+
+No new commit can make the tab or the CLI show a wrong figure. Checked
+clean, with the reviewer's commands: the merge resolutions keep
+`desktop-gate:unit:check` in `verify:steps` and take dev's
+`pool-listings:check`; `map.md` is dev's file plus the 627 line; ticket
+numbers do not collide (`NEXT` 675, highest file 674). `git ls-remote --tags
+upstream` gives `e804c29e8 refs/tags/v0.0.150`, the same sha as
+`refs/heads/master`. All 114 pinned paths in `data/wowsims.lock.json` are
+outside upstream's 8 changed files and their sha256 values match the blobs at
+`e804c29e8`. `sync_wowsims.py --check`, `check_pool_completeness.py --check`,
+`sync_fork_universes.py --check`, sim-implemented-effects, equip-eligibility,
+ep-presets, meta-conditions and the other pin-derived checks exit 0. The fork
+lock's `_comment` gained an entry and lost nothing. Box figures re-run match.
+Findings:
+
+- **B1** (`docs/agents/paired-worktrees.md:76`, `7503048f`). `go build -o
+wowsimtbc.exe ./sim/web` fails in a fresh pair: `sim/web/main.go:22`
+  imports `github.com/wowsims/tbc/binary_dist`, which the fork's
+  `.gitignore:13` ignores. `.claude/launch.json:42` writes the stub first. It
+  worked in this pair only because the desktop gate had made `binary_dist/`.
+  Loud failure, introduced by this branch.
+- **B2** (`docs/fork-upstream-touchpoints.md:33-51`). The doc names fork
+  `316326a95` on base `5262ff38`. With the old base and the new tip,
+  `git diff --name-only --diff-filter=M 5262ff38 bc96d0a03 | wc -l` prints 9:
+  upstream's 8 files read as fork edits. The fork sha was already stale on
+  `dev` (last refresh `243329e7`).
+- **B3** (ticket 674:42-44). Closed while its Done means said "On `dev`" and
+  required the `dev` -> `main` / `tab-1` question to be asked.
+- **B4** (`962087b8`, `883b3dd0`). No tracked record of the catch-up
+  procedure's build and gate checks (§1 `fetch:wowsimcli` twice, §2 re-run,
+  §4 `go build` / `go vet`, `fork-lint:check`, layout gate, §5 `pnpm
+verify`).
+- **B5** (`docs/verification-log.md`, boxes 1, 3, 4, 5). The 2026-10-12
+  sections had no pointer to the 2026-10-16 re-run; box 3 still read "39
+  expected" while the README now says 40.
+- **B6** (`docs/verification-log.md`, "The engine move did not change the
+  ret or feral figures"). Wider than its evidence (one ret config, one feral
+  fixture). The conclusion holds for a reason the entry did not give: the tab
+  and the CLI start seeds at 11 (`DEFAULT_SEED_BASE`, fork
+  `ui/features/upgrades/model/engine/rank.ts:725`,
+  `packages/core/src/rank.ts:557`), and only `ui/specs/mage/dps/spec.ts:181`
+  calls `hideScheduledCooldownCasts`.
+
+### Standards + Spec
+
+**Standards.** Commit messages meet the seven rules; no banned words in the
+added text; the engine lock diff changes only `tag`, `commit`,
+`watchedRefs.master` and `proto.commit`.
+
+- **S1** = B1, against AGENTS.md "Durable claims" and
+  `docs/agents/upstream-catch-up.md:312-313` ("`sim/web/main.go` imports
+  `binary_dist`, which is gitignored").
+- **S2** (`66b36da3`). Ticket 674's `Verified by:` command printed 1 at the
+  closing commit and 0 only at `8207dc06`, where box 2 was ticked.
+
+**Spec** (ticket 674, PLAN.md § Stage 3T, `upstream-catch-up.md`, ADR-0036):
+boxes 1-5 meet their PLAN.md wording.
+
+- **S3** = B3.
+- **S4** = B4, measured by searching the commit bodies and the
+  verification-log diff; the pair's only verify log
+  (`.scratch/stage-3t/verify-2026-10-16.log`, 20:11Z) predates `962087b8`.
+- **S5** = B1, against ticket 674:43.
+- **S6** (scope). Ticket 674 did not ask for a pin move; the pins moved
+  because box 5 failed (`.scratch/stage-3t/box5-pins-on-master-2026-10-16.log`:
+  "DRIFT: pin is behind master", rc 1). ADR-0036 Decision 2 allows an engine
+  move "by the full procedure". Not a defect.
+
+**Known items.** K1 = B2: no doc or procedure says to refresh
+`docs/fork-upstream-touchpoints.md` on a pin move (`git grep -n
+fork-upstream-touchpoints -- docs/agents .claude/skills` names only this
+skill). K2: `packages/core/test/fixtures/synthetic-roster-recordings.json`
+stamps `simVersion 5262ff386...`; ADR-0033 Consequence 7
+(`docs/adr/0033-upstream-is-master-again.md:204-207`) leaves re-recording
+open, and open ticket 360 covers the missing check; no gate compares the
+stamp with the lock.
+
+### Fixes
+
+`ab0d3471` fixes B1, B3, B4, B5 and B6 and files ticket 675 for B2:
+
+- B1: the bullet now writes the stub with `make -C
+<pair>/vendor/tbc-new-fork binary_dist/dist.go` (`make -n -B` prints
+  `mkdir -p binary_dist/tbc`, `touch binary_dist/tbc/embedded`, `cp
+sim/web/dist.go.tmpl binary_dist/dist.go`), then `go build`, then starts
+  with the flags from `.claude/launch.json`. This changes owner-approved text;
+  the session relayed the owner's standing answer for factual fixes ("If it's
+  a certain factual fix then of course"), which this review did not see. A
+  fresh pair was not built to test it (untested).
+- B3: ticket 674's Done means names this branch, and the `main` question
+  stays with the session and PLAN.md § Stage 3T.
+- B4: the 2026-10-16 entry records what the executor reported to the session
+  (relayed, not logged) and what this review re-ran: `sha256sum` of
+  `vendor/wowsimcli-e804c29e8...-win32-x64/wowsimcli-windows.exe` prints
+  `6efbc4670ab0...`, the relayed hash; the pin-derived checks above; and
+  `merge-to-dev --check-only`. The layout gate has no record; upstream's 8
+  files contain no stylesheet and no tab file.
+- B5: one-line pointers under boxes 1, 3, 4 and 5.
+- B6: the sentence names what was compared and gives the reason.
+
+## Disposition (new work)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                |
+| --- | ----------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| B1  | Adversarial | fixed       | `ab0d3471`: stub step and start flags added to the bullet                                                                                    |
+| B2  | Adversarial | defer       | `.scratch/carry-forward/issues/675-fork-upstream-touchpoints-names-old-pins.md` — doc names old pins; predates this branch for the fork sha  |
+| B3  | Adversarial | fixed       | `ab0d3471`: ticket 674 Done means narrowed to this branch                                                                                    |
+| B4  | Adversarial | fixed       | `ab0d3471`: relayed outputs and the review's re-runs recorded in the 2026-10-16 entry                                                        |
+| B5  | Adversarial | fixed       | `ab0d3471`: pointers under boxes 1, 3, 4 and 5                                                                                               |
+| B6  | Adversarial | fixed       | `ab0d3471`: sentence narrowed, reason cited                                                                                                  |
+| S1  | Standards   | fixed       | Same defect as B1; `ab0d3471`                                                                                                                |
+| S2  | Standards   | wontfix     | Close and `Verified by:` both hold at the tip, and the branch merges whole                                                                   |
+| S3  | Spec        | fixed       | Same as B3; `ab0d3471`                                                                                                                       |
+| S4  | Spec        | fixed       | Same as B4; `ab0d3471`                                                                                                                       |
+| S5  | Spec        | fixed       | Same defect as B1; `ab0d3471`                                                                                                                |
+| S6  | Spec        | wontfix     | Pin move was needed for box 5 and ADR-0036 Decision 2 allows it                                                                              |
+| K2  | Standards   | defer       | `.scratch/carry-forward/issues/360-nothing-binds-a-recorded-fixture-to-the-engine-pin.md` — stale `simVersion` stamp, ADR-0033 Consequence 7 |
+
+## Focused check (round 2)
+
+Reviewed range: `8207dc06774692870b0e52917d6877cf0a2fc041..ab0d3471df13d44e07f3f96a4b293a897775a987`
+
+Fork range: `bc96d0a03..bc96d0a03` (the fork lock did not change). One fresh
+`general-task` agent on Opus (effort `high`) ran the four checks.
+
+1. **Conditions: hold.** `ab0d3471` names the findings it fixes; it changes
+   only docs, tickets and the scope doc
+   (`git diff --name-only 8207dc06..ab0d3471 -- data vendor` is empty); fork
+   HEAD equals the lock's `commit`.
+2. **Each fix is the asked change: yes, with F1-F3 below.** The make target,
+   start flags, sha256, seed base, the one `hideScheduledCooldownCasts`
+   caller, the B5 pointers and every ticket 675 claim re-ran as written. The
+   scope-doc re-pad changed no cell text (whitespace-collapsed difflib
+   compare: only the added 675 row), and both § Maintenance loops print
+   nothing (160 open ids).
+3. **New tests:** none in this range.
+4. **Tests touched:** none.
+
+Findings:
+
+- **F1** (`docs/agents/paired-worktrees.md:79`). The start command is a
+  bare `wowsimtbc.exe ...`; neither Git Bash nor PowerShell runs a bare name
+  from the current folder (`command -v wowsimtbc.exe` rc 1 in the fork;
+  `Get-Command` finds nothing). `.claude/launch.json` uses `.\wowsimtbc.exe`.
+  Loud failure, written by the B1 fix.
+- **F2** (`docs/verification-log.md`, the B6 sentence and the B4 paragraph;
+  ticket 674's narrowing note). The B6 sentence lists three upstream changes
+  and then says "Neither change", covering two (the arcane APL change is
+  mage-only by its paths, but the text does not say so). "the same
+  `sha256=6efbc467...` both times" repeats itself. The ticket note says the
+  review narrowed Done means and "this review did not see the owner's
+  words", which leaves unclear who "this review" is. Code quality (writing).
+- **F3** (`docs/verification-log.md`, B4 paragraph). It says the
+  `merge-to-dev --check-only` commit and result are in this file; at
+  `ab0d3471` they were not. Bookkeeping: the "Check-only" section below
+  records them.
+
+**Round limit: stopped.** Round 2 reported a loud failure (F1) and a
+code-quality finding (F2) in the lines the fixes wrote, so the review stops
+here and does not fix and review again. Likely cause: the B1 fix copied the
+start flags from `.claude/launch.json` but dropped its `.\` prefix, and the
+B6 and B4 edits were written without a second read (hypothesis, untested).
+The owner decides the next step. The fix F1 asks for is two characters:
+`./wowsimtbc.exe` (Git Bash) or `.\wowsimtbc.exe` (PowerShell) at
+`docs/agents/paired-worktrees.md:79`.
+
+## Summary (new work)
+
+The new work (merge of `dev`, the live-tab bullet, both pins on upstream
+v0.0.150, the Stage 3T re-run) cannot change a figure the tab or the CLI
+shows, and the fork still changes only the 6 approved lines of
+`ui/app/SimTabsSection.tsx`. Round 1 found one loud failure (B1: the
+bullet's `go build` fails in a fresh pair) and bookkeeping gaps in the
+record; `ab0d3471` fixed them and filed ticket 675 for the stale touchpoints
+doc. Round 2 found that the B1 fix's start command fails as written (F1),
+plus wording (F2) and a bookkeeping gap (F3, closed below).
+
+**Blocking the merge:** F1, a loud failure written on this branch, until it
+is fixed or the owner allows a deferral. F2 is open with it.
+
+Tickets: 2 filed (627, 675), 2 closed (627, 674).
+Open tickets this review links: 675 (B2), 360 (K2).
