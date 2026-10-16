@@ -39,9 +39,20 @@ Blocked by: none
 
 ## Done means
 
-- On `dev`: `sed -n '/^### Stage 3T/,/^### Stage 4/p' PLAN.md | grep -c '☐'` → 0.
-- `grep -c 'Live tab from a pair (agents)' docs/agents/paired-worktrees.md` → 1 on `dev`.
-- The `dev` -> `main` / `tab-1` question has been put to the owner.
+- On `docs/stage-3t-boxes`, which reaches `dev` only through
+  `pnpm merge-to-dev docs/stage-3t-boxes`:
+  `sed -n '/^### Stage 3T/,/^### Stage 4/p' PLAN.md | grep -c '☐'` → 0.
+- `grep -c 'Live tab from a pair (agents)' docs/agents/paired-worktrees.md` → 1
+  on the same branch.
+
+Narrowed on 2026-10-16 by the pre-merge review of `docs/stage-3t-boxes`
+(findings B3, S3). The first two lines said "On `dev`", which no branch
+commit can make true, and a third line required the `dev` -> `main` /
+`tab-1` question to be put to the owner. Steps 4 and 5 above are the
+session's: the merge ask, and the `main` question, which PLAN.md
+`### Stage 3T` (last paragraph) keeps open until the merge to `main`. The
+session relayed that the owner said on 2026-10-16 there is no rush to
+`tab-1`; this review did not see the owner's words.
 
 ## Seam contract (what P1 gives this part)
 

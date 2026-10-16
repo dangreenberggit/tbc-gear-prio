@@ -2614,6 +2614,8 @@ issues:open` runs, `package.json`) in place of `corepack pnpm -s issues:open`,
 printed nothing. The script exited 0 and listed 161 open tickets. Log:
 `.scratch/stage-3t/box1-scope-loops-2026-10-12.log`.
 
+Re-run on 2026-10-16: see "Re-run on the final commits, 2026-10-16" below.
+
 ### ☑ 2 — no tab-blocking ticket is open
 
 `sed -n '/^## Tab-blocking/,/^## /p' docs/upgrades-tab-scope.md | grep -c '^| [0-9]'`
@@ -2645,6 +2647,9 @@ The readback has `runner` `WorkerPoolSimRunner`, `rowCount` 39 (39 expected,
 `data/desktop-gate/README.md`), `done` true, `panicHit` false and
 `runTimedOut` false. Log: `.scratch/stage-3t/box3-web-run-ret-p4-cap40-2026-10-12.log`.
 
+Re-run on 2026-10-16, when the expected count was 40: see "Re-run on the
+final commits, 2026-10-16" below.
+
 ### ☑ 4 — the desktop transport passes on the shipped fork commit
 
 `corepack pnpm desktop-gate:check; echo rc=$?` → 0, with the fork's HEAD equal
@@ -2658,6 +2663,8 @@ Met on 2026-10-12, 18:00:53Z–18:02:34Z UTC. The fork's HEAD and the lock's
 `aboveCutoffItems` and `baselineDps` with
 `data/desktop-gate/golden-ret-p4-cap40.json`. Log:
 `.scratch/stage-3t/box4-desktop-gate-176268e7c-2026-10-12.log`.
+
+Re-run on 2026-10-16: see "Re-run on the final commits, 2026-10-16" below.
 
 ### ☑ 5 — both pins sit on upstream `master`
 
@@ -2675,6 +2682,9 @@ refs/heads/master` gave it too. For that sha, `merge-base --is-ancestor
 <sha> upstream/master` each gave rc=0. `python scripts/sync_wowsims.py
 --check` printed `in sync.` and exited 0. Log:
 `.scratch/stage-3t/box5-pins-on-master-2026-10-12.log`.
+
+Re-run on 2026-10-16, after both pins moved: see "Re-run on the final
+commits, 2026-10-16" below.
 
 ### ☑ 6 — owner sign-off for the Awaiting bucket
 
@@ -2706,6 +2716,24 @@ the pair `stage-3t-boxes`: main-repo branch `docs/stage-3t-boxes`, which holds
 each command naming the pair with `-C` or run from the pair's root. The logs
 were written outside the repo and are not kept, so the lines that matter are
 quoted below.
+
+**The pin move's own checks.** `docs/agents/upstream-catch-up.md` § Moving
+the engine version lists build and gate checks for a pin move. Their output
+went into the executor's report to the session, not into a file, and the
+session relayed it to the pre-merge review: `fetch:wowsimcli` for
+`e804c29e8` run twice with the same `sha256=6efbc467...` both times, `go
+build`, `go vet` and `go test` on the merged fork, `fork-lint:check`,
+`meta-conditions:check`, `ep-presets:check` and `pnpm verify` each passing,
+and the tag trigger measured. The relay does not mention the layout gate
+(`node scripts/tab-harness/test-layout.mjs`). The review re-ran part of this
+from the pair's root: `sha256sum
+vendor/wowsimcli-e804c29e8d615fcc6dcc632a1b0c782605e27d46-win32-x64/wowsimcli-windows.exe`
+prints `6efbc4670ab0d6090ce657862dedf39c9551963e0b907958d5c1c283868d2cf3`;
+`meta-conditions`, `ep-presets`, `equip-eligibility` and
+`python scripts/sync_wowsims.py --check` exit 0; and
+`corepack pnpm -C <pair> merge-to-dev --check-only`, which runs `pnpm
+verify`, ran on the branch after the commit that adds this paragraph
+(commit and result in `docs/reviews/docs-stage-3t-boxes.md`).
 
 **Box 5 — both pins on `master`.** 20:55:34Z–20:55:41Z, on `883b3dd0`. The
 engine lock's `commit` and the fork lock's `branchedFrom` are both
@@ -2759,9 +2787,15 @@ The two loops in `docs/upgrades-tab-scope.md` § Maintenance, with the id list
 written outside the repo in place of `.scratch/open-ids.txt`, printed
 nothing. `corepack pnpm -s issues:open` exited 0 and listed 159 open tickets.
 
-**The engine move did not change the ret or feral figures.** Upstream's eight
-commits from `5262ff386` to `e804c29e8` change the arcane mage APL and spec,
-a UI helper, and the sim's handling of a zero random seed. Box 4's check (h)
+**The engine move did not change the ret or feral figures that were
+compared.** Upstream's eight commits from `5262ff386` to `e804c29e8` change
+the arcane mage APL and spec, a UI helper, and the sim's handling of a zero
+random seed. Neither change reaches a ret or feral request: the seed change
+acts only on a request with seed 0, and the tab and the CLI both start their
+seeds at 11 (`DEFAULT_SEED_BASE` in the fork's
+`ui/features/upgrades/model/engine/rank.ts` and in
+`packages/core/src/rank.ts`); the UI helper, `hideScheduledCooldownCasts`,
+is called only from `ui/specs/mage/dps/spec.ts`. Box 4's check (h)
 and box 3's readback both equal `golden-ret-p4-cap40.json`. For feral,
 `corepack pnpm -C <pair> tab-fixtures:record --spec feral --phase 2 --name
 malorne4 --preset-tab "Phase 1" --preset "Alt 6%" --expect-gear-file

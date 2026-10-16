@@ -72,8 +72,12 @@ it. The command prints a note when that is the case. See `known-traps.md`,
 - **Live tab from a pair (agents).** A pair's fork has no `dist/` unless
   `wt:pair` ran with `--build`; without it the page hangs in `waitForInit`
   and loads no gear. Build it with
-  `make -C <pair>/vendor/tbc-new-fork dist/tbc/.dirstamp`, and the backend
-  with `go build -o wowsimtbc.exe ./sim/web` in the pair's fork. Start the
+  `make -C <pair>/vendor/tbc-new-fork dist/tbc/.dirstamp`. For the backend,
+  `sim/web/main.go` imports the gitignored `binary_dist/`, so first write its
+  stub with `make -C <pair>/vendor/tbc-new-fork binary_dist/dist.go`, then
+  run `go build -o wowsimtbc.exe ./sim/web` in the pair's fork and start it
+  with `wowsimtbc.exe --usefs=true --launch=false --host=:3333`, as the
+  `wowsims-backend` entry in `.claude/launch.json` does. Start the
   pair's vite on a free port and give scripts that drive it
   (`tab-fixtures:record`, `tab-fixtures:smoke`) `TBC_FORK_PORT=<that port>`,
   and `run-tab-cdp.mjs` `--origin http://localhost:<that port>`, so they
