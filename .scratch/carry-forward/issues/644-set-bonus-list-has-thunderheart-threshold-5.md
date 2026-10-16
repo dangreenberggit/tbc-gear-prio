@@ -20,3 +20,22 @@ Re-run: `python -c "import json;r=json.load(open('data/tab-fixtures/feral-p5-th4
 Done when: the cause is found, and a ranking either has no set-bonus entry
 at a threshold the set lacks or the entry is shown to mean something else
 and is labelled so.
+
+## Owner, 2026-10-16
+
+Verbatim: "Nonexistent set bonuses is on obviously wrong too"
+
+The owner rules that a set-bonus entry at a threshold the set does not
+have is a defect, not a judgment call. "Labelled so" in Done when is
+therefore not enough if a screen shows the entry as a bonus.
+
+On 2026-10-16 the re-run above prints the Thunderheart Harness entry
+second in the list (index 1, not 0), still with `threshold` 5. The fork's
+`sim/druid/item_sets.go:224-250` still defines only the 2-piece and
+4-piece bonuses.
+
+Other open tickets that describe a set bonus that does not exist: none.
+Checked by reading every open ticket under `.scratch/carry-forward/issues/`
+that mentions a set bonus, threshold or piece count. Ticket 621 is related
+but different: those bonuses exist, and the sim panics when another class
+reaches them.

@@ -60,3 +60,46 @@ On `data/tab-fixtures/ret-p3-p2.json`:
 - [ ] Token rows show zone, difficulty and boss in the same form as drop rows.
 - [ ] Reputation rows show the faction and the standing.
 - [ ] PvP rows say whether the item comes from arena or honor.
+
+## Owner, 2026-10-16
+
+Verbatim: "Make a note that tier token should show boss. I thought this was
+already solved."
+
+### Was it solved before?
+
+No. The Upgrades tab has never shown the boss on a tier-token row. The
+boss is in the data, and the command-line HTML report prints it; the tab
+does not. So this is not a regression. Sources, checked 2026-10-16:
+
+- **The data has the boss.** Token rows carry `boss` since the 18-piece
+  token map (main `82bd24be`, 2026-07-28). The boss was guarded by ticket
+  37 (`48c6e7ff`, 2026-08-05) and tickets 48-51 (`c3f5b97a`, 2026-08-07),
+  and the tables are generated from AtlasLoot since ticket 609
+  (`7e682fc1`, 2026-10-12). Lightbringer Greaves in
+  `data/tab-fixtures/ret-p3-p2.json` has `boss: "The Illidari Council"`.
+- **The command-line report shows it.** `formatItemSource`
+  (`packages/core/src/rank-report.ts:54-57`) prints
+  `zone · boss (token)` for a token row. That code came in with the HTML
+  report (main `05ab947c`, 2026-07-28).
+- **The old tab did not show it.** In the pre-React tab (fork `cb561067`,
+  `ui/core/components/individual_sim_ui/upgrades_tab.tsx:3752-3781`) the
+  cell used the site's `getSourceInfo` and fell back to `sourceLabel`,
+  which prints only the zone. That code's comment names tier-token
+  sources as a fallback case. Read it with
+  `git -C vendor/tbc-new-fork show cb561067:ui/core/components/individual_sim_ui/upgrades_tab.tsx`.
+- **The React tab does not show it.** Ticket 569 (fork `ce8ee77de`,
+  2026-10-07, "Link the Source cell's zone and boss again") brought back
+  the linked zone and boss for raid drops through upstream's `ItemSource`.
+  Upstream has no `sources` entry for token pieces, so a token row still
+  falls back to `rowSourceLabel`, which prints only the zone (see Cause
+  above).
+- **No fork commit added it.** `git -C vendor/tbc-new-fork log --oneline
+  feat/upgrades-tab-react cb561067 -G'(source|s)\.boss' -- ui/features/upgrades
+  ui/core/components/individual_sim_ui` lists only engine moves
+  (`1b218b73b`, `7b539641d`, `1165b1fbf`) and an upstream commit
+  (`f03b0d408`). None prints a token row's boss.
+
+Why the owner remembers it as solved: hypothesis, untested. Ticket 569
+restored the boss for drop rows, and the command-line report has always
+shown it for token rows.
