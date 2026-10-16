@@ -29,14 +29,19 @@
 //   facts:        { key: "<op>:<sel>[:<name>]" };
 //   acceptance:   string, for the judge;
 // } ] }
-// Every (entry, width) gets a fresh page, so one entry's clicks never leak into
-// another's, and one width's into the next.
+// Every (entry, width) gets a fresh page, but all pages in one run share one
+// browser profile. So what a page saves (localStorage, such as the tab's saved
+// settings, sort and view filters) persists into later entries and widths: order
+// the entries so a clean state comes first, or reset the state in the
+// interactions.
 //
 // Fact ops (rect, style, text, attr and prop read the first visible match, else the
 // first match): rect:<sel>; style:<sel>:<prop>; text:<sel> (trimmed
 // textContent); attr:<sel>:<name>; prop:<sel>:<name> (a DOM property, such as
 // scrollWidth); exists:<sel>; count:<sel> (all matches);
 // shown:<sel> (visible matches).
+// count: on result rows counts only the rows the virtualised table rendered;
+// for the ranked row count read the tbody's data-row-count with attr: (rows.mjs).
 
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";

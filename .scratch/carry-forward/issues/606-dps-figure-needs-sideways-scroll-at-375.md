@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b
 Type: task
 Origin: Chunk 3b step 7 regression check (commit c5741e2c)
@@ -54,3 +54,20 @@ answered: "Yes". The first close condition is met by this ruling; the
 second (a 375 px capture with the first row's DPS cell inside the panel)
 is now the work. The ticket moves to Tab-blocking in
 `docs/upgrades-tab-scope.md`.
+
+**2026-10-15 — closed (stage `tab-small-fixes`, plan steps 8–10, 15 and
+17).** Fork commit `a16e4cd34` puts the DPS column before Slot (the owner
+said "Yes" on 2026-10-11, comment above) and gives the DPS cell
+`data-testid="upgrades-delta-cell"`. A `pnpm tab-review` capture at fork
+`899d8c267` (pair, gitignored:
+`.scratch/stage-gate/tab-small-fixes/visual/605-606b/`, entry `606`,
+fixture `ret-p3-p2`) shows the following at 375. The first row's DPS cell
+is at x 238–322, inside the panel at x 7–368. The panel still scrolls
+sideways: `scrollerScrollWidth` is 602 and `scrollerClientWidth` is 361.
+gate-visual verdict: **pass**
+(`.scratch/handoffs/visual-review-tab-small-fixes-K5.md`). Layout gate
+check 18 asserts the same position at 375. The fork is re-pinned at
+`899d8c267` (`tbc-gear-prio@976a3d51`), and `pnpm verify` passed on it
+(rc=0).
+
+Verified by: `tbc-new-fork@a16e4cd34`; `node scripts/tab-harness/test-layout.mjs` prints `PASS (18) @375`; `.scratch/handoffs/visual-review-tab-small-fixes-K5.md` (gate-visual pass).

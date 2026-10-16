@@ -19,7 +19,11 @@
 //   collectRows(table, readRow)  for one table, readRow(tr) on every result
 //                              row; resolves { rows } in table order, or
 //                              { error, rows } when it read fewer rows than
-//                              the table's count.
+//                              the table's count;
+//   dpsAndSlotCells(tr)        a row's { dps, slot } cells: the DPS cell by
+//                              its test id and Slot as the cell after it, not
+//                              by position, because the column order changed
+//                              once (ticket 606).
 //
 // collectRows takes one table, never a pane: `data-index` starts at 0 in each
 // table. It selects result rows only, so the spacer rows that stand in for the
@@ -28,6 +32,7 @@
 const RESULT_ROWS = '[data-testid="upgrades-result-rows"]';
 /** One rendered result row; the harness scripts select rows only through this. */
 export const RESULT_ROW = '[data-testid="upgrades-result-row"]';
+const DPS_CELL = '[data-testid="upgrades-delta-cell"]';
 // The page scrolls this box, not the window (`ui/app/SimShell.tsx` in the fork).
 const SCROLL_BOX = '[data-testid="sim-ui"]';
 
@@ -35,6 +40,10 @@ export const ROW_HELPERS = `
 	const tableRowCount = table => Number(table?.querySelector(${JSON.stringify(RESULT_ROWS)})?.dataset.rowCount ?? 0);
 	const paneRowCount = pane => [...(pane?.querySelectorAll(${JSON.stringify(RESULT_ROWS)}) ?? [])].reduce((sum, rows) => sum + Number(rows.dataset.rowCount ?? 0), 0);
 	const documentRowCount = () => paneRowCount(document);
+	const dpsAndSlotCells = tr => {
+		const dps = tr.querySelector(${JSON.stringify(DPS_CELL)});
+		return { dps, slot: dps?.nextElementSibling ?? null };
+	};
 	const collectRows = async (table, readRow) => {
 		const box = document.querySelector(${JSON.stringify(SCROLL_BOX)}) ?? document.scrollingElement;
 		// A scroll reaches the virtualiser on the next frame and its rows render in that frame; the timeout
