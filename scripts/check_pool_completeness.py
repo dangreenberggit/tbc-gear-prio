@@ -3,8 +3,9 @@
 
 For each spec and each phase 2-5 this derives, from data alone, which wearable
 epics a list must contain, and fails when one is absent, when a tier or Sunmote
-piece is present with the wrong source kind, or when an epic is absent and no
-named policy says why. It also renders `data/pool-listings/<spec>-p<P>.md`,
+piece is present with the wrong source kind, when an epic is absent and no
+named policy says why, or when a weapon the spec's weapon policy excludes is
+present. It also renders `data/pool-listings/<spec>-p<P>.md`,
 which name every absent epic and the policy that excludes it.
 
 Independence is the point. The builder (`scripts/assemble_universe.py`) decides
@@ -15,16 +16,18 @@ drops or bends shows up here as a failure instead of passing by construction
 eligibility rules). Inputs:
 `vendor/wowsims/db.json` (pinned by `data/wowsims.lock.json`), the universes
 under check, and these committed files: `data/equip-eligibility.json`,
-`packages/core/src/spec-registry.json`, `data/weapon-type-exclusions.json`,
-`data/class-restricted-sets.json`, `data/phase_raids.json`,
-`data/atlasloot_sources.json`, `data/sim-implemented-effects.json`,
-`data/two-hop/raid-recipes.json`, `data/two-hop/tier-sets.json`,
-`data/two-hop/sunmote-pairs.json`.
+`packages/core/src/spec-registry.json`, `data/class-restricted-sets.json`,
+`data/phase_raids.json`, `data/atlasloot_sources.json`,
+`data/sim-implemented-effects.json`, `data/two-hop/raid-recipes.json`,
+`data/two-hop/tier-sets.json`, `data/two-hop/sunmote-pairs.json`.
 
-Four rules exist only as builder code, so they are restated here as constants:
+Five rules exist only as builder code, so they are restated here as constants:
 Magisters' Terrace as the one admitted heroic dungeon, the four Gladiator name
-prefixes, Kael's temporary legendaries, and retribution's two-hand-only rule.
-A drift between a constant here and the builder's shows as a gate failure.
+prefixes, Kael's temporary legendaries, retribution's two-hand-only rule, and
+each spec's policy weapon-type exclusions. The builder writes the last of these
+to `data/weapon-type-exclusions.json` on every run, so that file is not an
+input here (ticket 671). A drift between a constant here and the builder's
+shows as a gate failure.
 
 Every epic (quality >= 4) a spec can wear is classified, first match wins:
 
@@ -108,6 +111,21 @@ ARENA_SEASON_OPENS = {1: 1, 2: 2, 3: 3, 4: 5}
 KAEL_TEMP_LEGENDARY_IDS = frozenset({30311, 30312, 30313, 30314, 30316, 30317, 30318})
 TWO_HAND_ONLY_SPECS = frozenset({"ret"})
 HAND_TYPE_TWO_HAND = 4
+# `enum WeaponType` in data/proto/common.proto.
+WEAPON_OFFHAND = 5
+WEAPON_POLEARM = 6
+WEAPON_SHIELD = 7
+# Weapon types a spec can equip but whose items do not belong in its list.
+# Types a spec cannot equip at all are already out through
+# data/equip-eligibility.json. Restated from the SME rulings that set them,
+# never read from data/weapon-type-exclusions.json, which the builder rewrites
+# on every run (ticket 671). Ret: .scratch/handoffs/sme-rank-judgment-upgrades-
+# dedup-wowsims-ret-cloth-and-onehand.md, part 2. Feral: .scratch/handoffs/
+# sme-rank-judgment-upgrades-dedup-wowsims-feral-polearms.md.
+POLICY_EXCLUDED_WEAPON_TYPES = {
+    "ret": frozenset({WEAPON_OFFHAND, WEAPON_SHIELD}),
+    "feral": frozenset({WEAPON_POLEARM}),
+}
 HEROIC_DUNGEON_PHASES = {"Magisters' Terrace": 5}
 DIFFICULTY_HEROIC = 2
 MIN_QUALITY = 4
@@ -196,11 +214,6 @@ class Inputs:
                 "specs"
             ].items()
         }
-        self.weapon_excl = {
-            s: frozenset(v)
-            for s, v in load(ROOT / "data/weapon-type-exclusions.json").items()
-            if isinstance(v, list)
-        }
         self.set_class = {
             int(sid): int(row["classId"])
             for sid, row in load(ROOT / "data/class-restricted-sets.json")[
@@ -274,9 +287,16 @@ class Inputs:
             out.add(int(p["upgradeId"]))
         return frozenset(out)
 
+    def weapon_policy_excludes(self, spec: str, it: dict) -> bool:
+        wt = it.get("weaponType")
+        if not wt:
+            return False
+        if int(wt) in POLICY_EXCLUDED_WEAPON_TYPES.get(spec, frozenset()):
+            return True
+        return spec in TWO_HAND_ONLY_SPECS and it.get("handType") != HAND_TYPE_TWO_HAND
+
     def wearable(self, spec: str) -> list[dict]:
         ids = self.eligible[self.fork_spec[spec]]
-        excl = self.weapon_excl.get(spec, frozenset())
         out = []
         for it in self.items:
             iid = int(it["id"])
@@ -287,10 +307,7 @@ class Inputs:
             set_class = self.set_class.get(int(it.get("setId") or 0))
             if set_class is not None and set_class != self.spec_class[spec]:
                 continue
-            wt = it.get("weaponType")
-            if wt and int(wt) in excl:
-                continue
-            if spec in TWO_HAND_ONLY_SPECS and wt and it.get("handType") != HAND_TYPE_TWO_HAND:
+            if self.weapon_policy_excludes(spec, it):
                 continue
             out.append(it)
         return out
@@ -453,6 +470,15 @@ def check_list(
                 absent.append({"id": iid, "name": it.get("name"), "rule": rule})
         elif not present:
             absent.append({"id": iid, "name": it.get("name"), "rule": rule})
+    # wearable() leaves these out, so the loop above never sees them; without
+    # this a builder that dropped a weapon rule would pass (ticket 671).
+    for iid in sorted(entries):
+        it = inp.by_id.get(iid)
+        if it is not None and inp.weapon_policy_excludes(spec, it):
+            findings.append(
+                f"{spec}-p{phase}: {iid} {it.get('name')} is present but "
+                f"{spec}'s weapon policy excludes it"
+            )
     counts["listSize"] = len(entries)
     return counts, absent, findings
 
