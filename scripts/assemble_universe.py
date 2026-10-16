@@ -163,8 +163,8 @@ DB_PHASE_MIN_QUALITY = 4
 # <= 95 are vanilla items (Naxxramas, AQ, vanilla PvP); the next ilvl is 100
 # (ticket 613, Q-613-vanilla). An item whose effect the pinned sim implements
 # (`implementedEffectItemIds`) is exempt: Mark of the Champion and Earthstrike
-# sit below the floor and still do something a player can sim (stage-gate
-# tab-item-lists decision N4).
+# sit below the floor and still do something a player can sim (ticket 613,
+# commit 3c2334a2).
 DB_PHASE_MIN_ILVL = 100
 
 # Ticket 157: six D7-eligible ret items the SME review named as missing from
@@ -2194,8 +2194,8 @@ def assemble(
     # Kel'Thuzad ... (Naxxramas)": recorded, that row was a source no route
     # keeps, and because db-phase admission skips sourced ids it kept the item
     # out of ret and feral while the nine specs without guides held it. One
-    # rule set for all 11 specs (ticket 613; stage-gate tab-blocking-finish,
-    # OQ-23206). The validation guard below would reject such a row anyway.
+    # rule set for all 11 specs (ticket 613's close note, commit 3854d7e8).
+    # The validation guard below would reject such a row anyway.
     tbc_raid_zones = {
         str(z["name"]) for z in (phase_raids.get("zones") or []) if z.get("name")
     }
@@ -2464,7 +2464,7 @@ def assemble(
         # Command. They follow db-phase admission's rules -- epic, own phase
         # in scope, the item-level floor -- because they are the same kind of
         # claim: the faction does not gate the item by raid tier, so its own
-        # phase does (stage-gate tab-item-lists, K3-rep-items). Only the item's
+        # phase does (ticket 613's close note, commit c346071c). Only the item's
         # own `rep` rows count: a craft whose pattern a faction sells (the
         # Wildguard and Iceguard resistance sets) is ticket 418's question.
         own_rep_factions = {

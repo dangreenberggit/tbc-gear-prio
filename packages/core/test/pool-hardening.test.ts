@@ -1224,8 +1224,9 @@ describe("an item's source does not depend on which tier is assembled", () => {
     const ticket157 = new Set([27484, 31033, 22401, 31856, 28034, 28288]);
     // The parser reads these two, but their prose names a place outside TBC's
     // raids and admitted heroics ("Classic - Naxxramas", "Heroic Sethekk
-    // Halls"), which the builder records as no source at all (stage-gate
-    // tab-blocking-finish, OQ-23206). Listed explicitly for the same reason.
+    // Halls"), which the builder records as no source at all
+    // (`unkept_wowhead_place` in scripts/assemble_universe.py, commit
+    // 3854d7e8). Listed explicitly for the same reason.
     const unkeptPlace = new Set([23206, 32387]);
     for (const e of loadUniverse("data/universes/feral-p3.json").raw.entries) {
       if (!e.sources.some((s) => s.kind === "unknown")) continue;
