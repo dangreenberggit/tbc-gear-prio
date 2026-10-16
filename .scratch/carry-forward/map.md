@@ -364,3 +364,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 671 The completeness gate reads the weapon exclusions the builder writes (pre-merge review feat/tab-item-lists, P2) 2026-10-16
 - 672 Check four item-list results against a game-data source (pre-merge review feat/tab-item-lists, U1-U4) 2026-10-16
 - 673 The completeness gate does not check entries a list should not hold (pre-merge review feat/tab-item-lists, A1) 2026-10-16
+- 674 Re-run Stage 3T on the final dev, record it, and ask about dev -> main (stage-gate tab-blocking-finish, deferred part P2) 2026-10-16
