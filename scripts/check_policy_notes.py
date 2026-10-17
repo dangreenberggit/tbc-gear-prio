@@ -22,7 +22,7 @@ Run via `pnpm verify` (`pnpm policy-notes:check`), or by hand:
 
     python scripts/check_policy_notes.py
 
-Exit 0 ok, 1 a check failed.
+Exit 0 ok, 1 a check failed, 2 `vendor/wowsims/db.json` is missing.
 """
 
 from __future__ import annotations

@@ -18,7 +18,8 @@ cannot diverge again without `pnpm verify` going red.
 
 Run via `pnpm verify` (`pnpm curated-set-phase:check`).
 
-Exit 0 ok, 1 drifted, 2 could not parse.
+Exit 0 ok, 1 drifted, 2 could not parse or `vendor/wowsims/db.json` is
+missing.
 """
 
 from __future__ import annotations

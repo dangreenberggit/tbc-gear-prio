@@ -152,7 +152,6 @@ def check_slug_map(spec_keys: set[str]) -> list[str]:
     either file could disagree with what Python actually binds.
     """
     sys.path.insert(0, str(ROOT / "scripts"))
-    exit_if_missing()
     try:
         import assemble_universe  # noqa: PLC0415 -- deliberate late import
     except Exception as exc:  # noqa: BLE001 -- any import failure is a real failure here
@@ -237,6 +236,7 @@ def slug_map_only() -> int:
 
 
 def main() -> int:
+    exit_if_missing()
     if not FORK_ROOT.is_dir():
         rc = slug_map_only()
         if rc == 0:

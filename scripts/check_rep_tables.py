@@ -23,7 +23,8 @@ counted as passing.
 Re-derived here rather than asserted, so drift in ui.proto, in db.json, or in
 the display table fails loudly instead of silently mislabelling a source.
 
-Run via `pnpm verify` (`pnpm rep-tables:check`).
+Run via `pnpm verify` (`pnpm rep-tables:check`). Exits 2 when
+`vendor/wowsims/db.json` is missing.
 """
 
 from __future__ import annotations
@@ -73,8 +74,6 @@ FACTION_NAMES_BY_ID = dict(REP_FACTION_NAMES)
 
 def db_rep_usage() -> tuple[set[int], set[int]]:
     """(faction ids, rep levels) db.json actually uses on a rep source."""
-    if not DB.exists():
-        return set(), set()
     db = json.loads(DB.read_text(encoding="utf-8"))
     factions: set[int] = set()
     levels: set[int] = set()

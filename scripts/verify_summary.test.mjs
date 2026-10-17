@@ -35,7 +35,7 @@ describe("extractPythonSkips", () => {
   });
 
   it("matches a skip line whose 'skipped' is not right after the colon", () => {
-    // check_equip_eligibility.py:239 reads "equip eligibility check: slug
+    // check_equip_eligibility.py main() prints "equip eligibility check: slug
     // map total and injective. Fork diff skipped -- vendor/... is absent
     // ...", not "<name>: skipped -- ...". The shared contract across all
     // seven fork-gated scripts is the substring "skipped -- <reason>", not a
