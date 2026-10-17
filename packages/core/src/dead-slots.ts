@@ -146,8 +146,9 @@ export type ClassifyDeadSlotsOptions = {
   /**
    * Worn items the caller resolved from the character's equipment that never
    * produced a row in `rows` for their slot — absent from the candidate pool
-   * entirely (ticket 163: 27484 excluded from `data/universes/ret-p3.json` by
-   * `assemble_universe.py`'s no-source rule). `rows` alone cannot distinguish
+   * entirely (ticket 163 found this with 27484, which `assemble_universe.py`'s
+   * no-source rule then kept out of `data/universes/ret-p3.json`; ticket 157
+   * has since force-included it). `rows` alone cannot distinguish
    * this from an ordinary dead slot: both look like "no row is owned", but
    * here the classifier has no row to anchor to at all, worn or not, so the
    * cause is read from this list rather than inferred. Optional because most

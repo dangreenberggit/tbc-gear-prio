@@ -67,3 +67,41 @@ for missing badge, honor, holiday and vendor sources. It weighs this
 ticket's per-spec harvest (up to 45 files) against a smaller badge and
 PvP-vendor table, and asks for the 293 count to be re-measured. Read 676
 before starting this ticket.
+
+## Measured 2026-10-16
+
+Stage tab-source-labels moved four force-included items (22401, 27484,
+28034, 28288) from `unknown` to their db.json source. Each line is a p5
+universe: rows, then rows whose first source is `unknown`. Before is pair
+`2eeb2ff5`; after is pair `bc626c07` (the regenerated universes), re-run on
+`b34711d3` with the same result.
+
+| p5 universe | rows | unknown before | unknown after |
+| --- | --- | --- | --- |
+| balance | 964 | 328 | 328 |
+| ele | 1151 | 370 | 370 |
+| enh | 1191 | 380 | 379 |
+| feral | 962 | 319 | 318 |
+| hunter | 1080 | 324 | 323 |
+| mage | 697 | 224 | 224 |
+| ret | 1156 | 379 | 375 |
+| rogue | 951 | 291 | 290 |
+| shadow | 744 | 248 | 248 |
+| warlock | 716 | 223 | 223 |
+| warrior | 1396 | 403 | 403 |
+
+Command, from the repo root:
+
+```bash
+python -c "import json,glob,os;[print(os.path.basename(f),len(es),sum(1 for e in es if (e.get('sources') or [{}])[0].get('kind')=='unknown')) for f in sorted(glob.glob('data/universes/*-p5.json')) if 'report' not in f for es in [json.load(open(f,encoding='utf-8-sig'))['entries']]]"
+```
+
+No first-source `unknown` row left in these files has a db.json source,
+so the rest needs another input; ticket 676 carries that work. This
+command prints `[]` for all 11 files (run 2026-10-16 at
+`tbc-gear-prio@9af4fae8`; it replaces a claim id from the gitignored stage
+plan, pre-merge review feat/tab-source-labels, S2):
+
+```bash
+python -I -c "import json,glob,os;db={i['id']:i for i in json.load(open('vendor/wowsims/db.json',encoding='utf-8'))['items']};[print(os.path.basename(f),ids) for f in sorted(glob.glob('data/universes/*-p5.json')) for ids in [[e['itemId'] for e in json.load(open(f,encoding='utf-8-sig'))['entries'] if (e.get('sources') or [{}])[0].get('kind')=='unknown' and db.get(e['itemId'],{}).get('sources')]]]"
+```

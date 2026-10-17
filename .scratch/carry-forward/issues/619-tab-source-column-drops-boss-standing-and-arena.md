@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-10-16, stage tab-source-labels
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
 Type: bug
 Origin: SME reads of ticket 254 output (live tab capture .scratch/rank-reports/sme-254-tab-boundary.png on fork 316326a95; report .scratch/rank-reports/sme-254-slamaltman.html from .scratch/rank-reports/stage2-close-slamaltman.json), triaged 2026-10-11
@@ -57,9 +58,67 @@ row has to come from somewhere other than the row.
 
 On `data/tab-fixtures/ret-p3-p2.json`:
 
-- [ ] Token rows show zone, difficulty and boss in the same form as drop rows.
-- [ ] Reputation rows show the faction and the standing.
-- [ ] PvP rows say whether the item comes from arena or honor.
+- [x] Token rows show zone, difficulty and boss in the same form as drop rows.
+  Token rows print "zone (N) · boss". The "(N)" is derived: every db.json
+  `drop` source in a `data/phase_raids.json` zone has difficulty 1
+  (Normal), and the builder's guard keeps `token` zones to that file
+  (`scripts/assemble_universe.py`, the "Token zones stay phase raids only"
+  check). Re-run from the repo root:
+  `python -I -c "import json,collections;db=json.load(open('vendor/wowsims/db.json',encoding='utf-8'));zn={z['id']:z['name'] for z in db['zones']};c=collections.defaultdict(collections.Counter);[c[zn.get(d['zoneId'])].update([d.get('difficulty',0)]) for i in db['items'] for s in i.get('sources') or [] for d in [s.get('drop')] if d and d.get('zoneId')];print({z:dict(c[z]) for z in [z['name'] for z in json.load(open('data/phase_raids.json',encoding='utf-8'))['zones']]})"`
+  → every zone with a drop prints only key 1; World Bosses has no db.json
+  drop and prints `{}` (2026-10-16, `tbc-gear-prio@9af4fae8`;
+  this replaces a claim id from the gitignored stage plan, pre-merge review
+  feat/tab-source-labels, S2). The text is upstream's `difficultyNames`. The plain text is one line with
+  ' · ' where upstream's linked block uses two lines.
+  Lightbringer Greaves reads "Black Temple (N) · The Illidari Council".
+- [x] Reputation rows show the faction and the standing. All 12 Band of
+  Eternity rows read "The Scale of the Sands · <standing>".
+- [x] PvP rows say whether the item comes from arena or honor. Vengeful
+  Gladiator's Greatsword reads "PvP vendor · Arena, season 3".
+
+Verified by: `tbc-new-fork@e26c05bb2` on fixture `ret-p3-p2`, with
+`npx vitest run ui/features/upgrades/components/ResultsTable/ResultRow.test.tsx ui/features/upgrades/utils/format.test.ts`
+in the fork. Captures from the stage's step-6 check (ignored path, in the
+pair `tbc-wt/tab-source-labels`):
+`.scratch/tab-fixtures-smoke/ret-p3-p2-after-row-30993.png`,
+`ret-p3-p2-after-row-29298.png` … `-row-29308.png` (Band of Eternity),
+`ret-p3-p2-after-row-33688.png`, `ret-p3-p2-after-row-33910.png`,
+`ret-p3-p2-after-sorted-source-asc-Ring1-below-cutoff.png`.
+
+## Remaining: via data
+
+33910 Vindicator's Scaled Bracers still reads "PvP vendor · Arena"
+(`via: arena`, from its Wowhead prose "Arena Points - Arena Points"),
+while its siblings 33879, 33880, 33881 and 33893 read "PvP vendor ·
+Honor" in `feral-p3-p2bis`. Handled in step 12 of stage
+tab-source-labels.
+
+Step 12, 2026-10-16. The Wowhead item page
+(`https://www.wowhead.com/tbc/item=33910`, read with WebFetch) shows no
+cost line. It says only that the item is sold in Alterac Valley, Arathi
+Basin, Eye of the Storm, Warsong Gulch and Isle of Quel'Danas: the
+battleground vendors. Its item record
+(`https://www.wowhead.com/tbc/item=33910&xml`) has `"source":[3]` and
+`"sourcemore":[{"p":2}]`, the same as honour sibling 33879, while arena
+item 33688 has `"source":[5]`. No page says Arena points, so the 33910
+rows in `data/wowhead-lists/ret/{p3,p4,p5}.json` now carry
+`correctedSourceText: "Vendor: Honor Points (Season 3)"` with a
+`corrections` entry, and the builder gives `pvp via honor` for 33910 in
+ret p3-p5 (checked on temp builds; the committed universes are
+regenerated in step 13).
+
+Resolved, step 15, 2026-10-16. `grep -n -A10 '"itemId": 33910' data/wowhead-lists/ret/p3.json`
+shows `"wowheadSourceText": "Arena Points - Arena Points"` kept verbatim and
+`"correctedSourceText": "Vendor: Honor Points (Season 3)"` (same in p4 and
+p5). The committed universes `data/universes/ret-p{3,4,5}.json` give 33910
+`{"kind": "pvp", "via": "honor", "origin": "wowhead"}`, and the fork's
+bundled copies match them (fork `f28f40769`, `pnpm fork-universes:check`).
+A live run should then show 33910 as "PvP vendor · Honor", like its
+siblings; untested, because no live run was made in this stage.
+
+Fixture `data/tab-fixtures/ret-p3-p2.json` was recorded before this change
+and still embeds `via: arena` for 33910, so the fixture page keeps showing
+"PvP vendor · Arena" until the fixture is re-recorded.
 
 ## Owner, 2026-10-16
 
@@ -103,3 +162,13 @@ does not. So this is not a regression. Sources, checked 2026-10-16:
 Why the owner remembers it as solved: hypothesis, untested. Ticket 569
 restored the boss for drop rows, and the command-line report has always
 shown it for token rows.
+
+## Review note 2026-10-16 (pre-merge review feat/tab-source-labels, P4)
+
+The honour fix for 33910 is not visible on any committed tab fixture. The
+committed fixture `data/tab-fixtures/ret-p3-p2.json` still gives 33910
+`{"kind": "pvp", "via": "arena", "origin": "wowhead"}` (`ranking.items[89]`),
+so its page shows "PvP vendor · Arena". No other fixture has the item
+(`grep -c 33910 data/tab-fixtures/*.json` also counts one line in
+`feral-p3-nordrassil4.json`, the number `-0.8339100925613697`). A fixture re-record or a live
+run is owed to show and check "PvP vendor · Honor" on the tab: ticket 682.

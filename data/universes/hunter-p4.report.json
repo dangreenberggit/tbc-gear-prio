@@ -21,7 +21,7 @@
     1012
   ],
   "d7EligibleTotal": 3484,
-  "excludedNoSource": 998,
+  "excludedNoSource": 997,
   "universeTotal": 846,
   "listOnlyMembership": 0,
   "perSlot": {
@@ -41,9 +41,9 @@
     "wrist": 68
   },
   "sourceRecordAdds": {
-    "atlasloot": 306,
-    "curated": 10,
-    "db": 2354,
+    "atlasloot": 308,
+    "curated": 9,
+    "db": 2356,
     "sunmote": 23,
     "two-hop": 18
   },
@@ -51,9 +51,9 @@
     "arenaSource": 65,
     "curated": 15,
     "dbPhase": 245,
-    "itemHasOrigin:atlasloot": 115,
-    "itemHasOrigin:curated": 10,
-    "itemHasOrigin:db": 766,
+    "itemHasOrigin:atlasloot": 116,
+    "itemHasOrigin:curated": 9,
+    "itemHasOrigin:db": 767,
     "itemHasOrigin:two-hop": 15,
     "recipeMatch": 25,
     "repFactionMatch": 30,
@@ -61,9 +61,9 @@
     "zoneMatch": 432
   },
   "exclusivePrimaryOrigin": {
-    "db": 766,
+    "db": 767,
     "atlasloot-only": 55,
-    "other": 10,
+    "other": 9,
     "two-hop": 15
   },
   "tierPiecesExpected": 15,
@@ -88,7 +88,9 @@
     "recallPct": null,
     "missedItems": []
   },
-  "ticket157ForceIncluded": [],
+  "ticket157ForceIncluded": [
+    28288
+  ],
   "excludedUnimplementedEffect": [
     {
       "itemId": 11810,

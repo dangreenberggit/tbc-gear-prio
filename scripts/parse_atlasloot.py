@@ -25,6 +25,7 @@ import os
 import re
 import sys
 from collections import defaultdict
+from collections.abc import Iterator
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -106,6 +107,24 @@ def extract_brace_block(text: str, open_brace: int) -> str:
     raise ValueError(f"unbalanced braces at offset {open_brace}")
 
 
+def items_block_lines(items_text: str) -> Iterator[tuple[int, str]]:
+    """Each line of an items block with its brace depth before the line.
+
+    An encounter opens at depth 1, its fields (`name`, `npcID`, difficulty
+    keys) sit at depth 2, and its loot rows at depth 3 and below. Comment lines
+    are skipped without counting their braces. Shared by the parser and
+    check_boss_aliases.py, so both read encounters by the same rules.
+    """
+    depth = 0
+    for line in items_text.splitlines():
+        if line.strip().startswith("--"):
+            continue
+        yield depth, line
+        depth += line.count("{") - line.count("}")
+        if depth <= 0:
+            return
+
+
 def first_npc_id(line: str) -> int | None:
     m = NPC_ID_RE.match(line)
     if m:
@@ -159,23 +178,14 @@ def parse_items_section(
     stats: dict,
 ) -> dict[int, list[dict]]:
     out: dict[int, list[dict]] = defaultdict(list)
-    lines = items_text.splitlines()
 
     boss_npc: int | None = None
     boss_name: str | None = None
     ignore_boss = False
     current_diff: str | None = None
-    depth = 0
 
-    for line in lines:
-        stripped = line.strip()
-        if stripped.startswith("--"):
-            continue
-
-        opens = line.count("{")
-        closes = line.count("}")
-
-        if depth == 1 and opens and stripped.startswith("{"):
+    for depth, line in items_block_lines(items_text):
+        if depth == 1 and line.strip().startswith("{"):
             boss_npc = None
             boss_name = None
             ignore_boss = False
@@ -206,9 +216,6 @@ def parse_items_section(
                 if is_dungeon:
                     if current_diff != "HEROIC_DIFF":
                         stats["dungeon_normal_skipped"] += 1
-                        depth += opens - closes
-                        if depth <= 0:
-                            break
                         continue
                     kind = "heroic"
                     dungeon = map_zone or INSTANCE_ZONE_ALIASES.get(instance_key) or instance_key
@@ -224,28 +231,18 @@ def parse_items_section(
                     )
                     if zone is None:
                         stats["items_unresolved_zone"] += 1
-                        depth += opens - closes
-                        if depth <= 0:
-                            break
                         continue
                     boss = boss_name or (npcs_by_id.get(boss_npc) if boss_npc else None)
                     src = {"kind": "raid", "zone": zone}
                     if boss:
                         src["boss"] = boss
                 else:
-                    depth += opens - closes
-                    if depth <= 0:
-                        break
                     continue
 
                 existing = out[item_id]
                 if not any(source_key(s) == source_key(src) for s in existing):
                     existing.append(src)
                     stats["items_emitted"] += 1
-
-        depth += opens - closes
-        if depth <= 0:
-            break
 
     return out
 

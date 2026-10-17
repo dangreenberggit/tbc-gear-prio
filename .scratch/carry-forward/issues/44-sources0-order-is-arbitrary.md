@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-10-16, stage tab-source-labels
 Type: bug
 Origin: pre-merge review of `phase-2/feral` (adversarial A5), 2026-08-06
 Blocks: none
@@ -80,3 +81,28 @@ spliced into `boss`; those were filed and fixed separately as tickets 48-52.
   rather than collapsing to whichever came first.
 - ~~A row's primary source is chosen by a stated rule, not by pipeline order.~~
   Withdrawn — measured false, see above.
+
+## Closed 2026-10-16 (stage tab-source-labels)
+
+The Upgrades tab now applies one stated rule. The plain-text Source cell
+names the row's first shown source: the first source that is not hidden,
+else the first. When nothing is hidden and upstream's `db.json` has the
+item, the cell shows upstream's `ItemSource` block instead. That is true
+for all six rows in `data/universes/*-p5.json` with more than one distinct
+zone (32589, 32590, 32591, 32592, 32609, 34009): each has upstream `drop`
+sources in zones 3606 and 3959. Count run 2026-10-16 at
+`tbc-gear-prio@9af4fae8` from the repo root (corrected by the pre-merge
+review of feat/tab-source-labels, finding S2, which found the count cited
+to a gitignored plan that marked it unrun):
+`python -I -c "import json,glob;ids=set();[ids.add(e['itemId']) for f in glob.glob('data/universes/*-p5.json') for e in json.load(open(f,encoding='utf-8-sig'))['entries'] if len({s['zone'] for s in e.get('sources') or [] if 'zone' in s})>1];db={i['id']:i for i in json.load(open('vendor/wowsims/db.json',encoding='utf-8'))['items']};print(sorted(ids),{i:[s['drop']['zoneId'] for s in db[i]['sources'] if 'drop' in s] for i in sorted(ids)})"`
+→ `[32589, 32590, 32591, 32592, 32609, 34009]`, each `[3606, 3959]`. That
+block names upstream's first drop, so the tab matches the site's gear
+picker. Filtering already scans every source of a row, not only the first:
+`matchesZone` (fork `ui/features/upgrades/model/engine/view.ts:135-137`)
+and `sourceMatches` (fork `ui/features/upgrades/model/settings_pool.ts:60-64`)
+test every source's zone. No cell lists two zones.
+
+Verified by: `npx vitest run ui/features/upgrades/utils/format.test.ts`
+in `tbc-new-fork@e26c05bb2`; the `the Source cell under Filter by source`
+block (format.test.ts:85-118) and `rowSourceDetail` (format.test.ts:156-172)
+test the first-shown rule.

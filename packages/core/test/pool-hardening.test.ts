@@ -105,19 +105,20 @@ function wowsimsCuratedItemIds(): Set<number> {
 }
 
 /**
- * Measured present in ret-p3 (40/44 wowsims curated IDs, re-measured after
+ * Measured present in ret-p3 (42/44 wowsims curated IDs, re-measured after
  * ret_p3.gear.json was vendored -- slice 6b, 5c7491899). The p3 set's own
  * items resolve real sources the earlier p2-only union couldn't provide.
+ * 27484 and 28288 are present because ticket 157 force-includes them.
  */
 const WOWSIMS_ADMITTED_IN_P3 = [
-  23522, 23537, 24259, 28176, 28429, 28430, 28608, 28745, 28757, 28779, 28795,
-  28830, 29071, 29073, 29075, 29119, 29177, 29383, 29947, 30022, 30055, 30061,
-  30098, 30104, 30106, 30129, 30257, 30644, 30834, 30900, 30905, 32087, 32235,
-  32332, 32366, 32461, 32526, 32574, 33122, 33173,
+  23522, 23537, 24259, 27484, 28176, 28288, 28429, 28430, 28608, 28745, 28757,
+  28779, 28795, 28830, 29071, 29073, 29075, 29119, 29177, 29383, 29947, 30022,
+  30055, 30061, 30098, 30104, 30106, 30129, 30257, 30644, 30834, 30900, 30905,
+  32087, 32235, 32332, 32366, 32461, 32526, 32574, 33122, 33173,
 ] as const;
 
-/** Still excluded at p3 — no resolvable source and/or below rare (see hardening handoff). */
-const WOWSIMS_NOT_YET_ADMITTED = [27484, 27985, 28288, 30341] as const;
+/** Still excluded at p3 — below rare or no resolvable source. */
+const WOWSIMS_NOT_YET_ADMITTED = [27985, 30341] as const;
 
 /**
  * Must stay OUT, each for a different enforced rule. The count assertion
@@ -688,8 +689,9 @@ describe("data/universes/ret-p3.json hardening", () => {
   // dungeon/crafted so they are out of scope": content type is not the test,
   // power at the tier is (see the ticket's 2026-08-02 correction). Down to 4
   // after ret_p3.gear.json was vendored (slice 6b) resolved sources for the
-  // other 8 -- the remaining 4 are still phase-1 heroic-dungeon drops or have
-  // no source db.json can resolve at all.
+  // other 8. Ticket 157 force-included 27484 and 28288; the remaining 2 are
+  // still phase-1 heroic-dungeon drops or have no source db.json can resolve
+  // at all.
   it.todo(
     "admits all 44 wowsims curated ret gear-set items — deferred: " +
       WOWSIMS_NOT_YET_ADMITTED.join(", ") +
@@ -832,13 +834,29 @@ describe("data/universes/ret-p3.json hardening", () => {
   });
 
   it("keeps the heroic path out of the tiers below Magisters' Terrace", () => {
-    // The phase map admits MT at 5 only. A heroic source appearing at p3 would
-    // mean the 284 phase-1 heroic items measured in ticket 28 had leaked in.
-    for (const entry of universeP3) {
-      expect(
-        entry.source.kind,
-        `${entry.itemId} ${entry.name} carries a heroic source at maxPhase 3`
-      ).not.toBe("heroic");
+    // The phase map admits MT at 5 only. A heroic source appearing at p2 or p3
+    // would mean the 284 phase-1 heroic items measured in ticket 28 had leaked in.
+    // Ticket 157's force-included items (TICKET_157_FORCE_INCLUDE in
+    // scripts/assemble_universe.py) are exempt: force-include admits them, not
+    // the heroic path, and since ticket 174 they carry their db and AtlasLoot
+    // sources, some of them heroic.
+    const ticket157ForceIncluded = new Set([
+      27484, 31033, 22401, 31856, 28034, 28288,
+    ]);
+    const universes = [
+      ["ret-p2", loadUniverse("data/universes/ret-p2.json").pool],
+      ["ret-p3", universeP3],
+    ] as const;
+    for (const [label, pool] of universes) {
+      for (const entry of pool) {
+        if (ticket157ForceIncluded.has(entry.itemId)) continue;
+        for (const source of entry.sources ?? [entry.source]) {
+          expect(
+            source.kind,
+            `${entry.itemId} ${entry.name} carries a heroic source in ${label}`
+          ).not.toBe("heroic");
+        }
+      }
     }
   });
 
@@ -1146,22 +1164,15 @@ describe("an item's source does not depend on which tier is assembled", () => {
       };
       for (const row of doc.entries) listed.add(row.itemId);
     }
-    // Ticket 157's force-included ids are the one documented exception: their
-    // source text *is* recorded (TICKET_157_FORCE_INCLUDE's own values) but
-    // the closed ItemSource vocabulary has no kind that carries free prose, so
-    // they ship as `unknown` while being Wowhead-listed. That is a known
-    // dishonesty in the vocabulary, not a parser regression — ticket 174.
-    // Listed explicitly so a *new* item acquiring this shape still fails.
-    const ticket157 = new Set([27484, 31033, 22401, 31856, 28034, 28288]);
     // The parser reads these two, but their prose names a place outside TBC's
     // raids and admitted heroics ("Classic - Naxxramas", "Heroic Sethekk
     // Halls"), which the builder records as no source at all
     // (`unkept_wowhead_place` in scripts/assemble_universe.py, commit
-    // 3854d7e8). Listed explicitly for the same reason.
+    // 3854d7e8). Listed explicitly so a *new* item acquiring this shape still
+    // fails.
     const unkeptPlace = new Set([23206, 32387]);
     for (const e of loadUniverse("data/universes/feral-p3.json").raw.entries) {
       if (!e.sources.some((s) => s.kind === "unknown")) continue;
-      if (ticket157.has(e.itemId)) continue;
       if (unkeptPlace.has(e.itemId)) continue;
       expect(
         listed.has(e.itemId),
