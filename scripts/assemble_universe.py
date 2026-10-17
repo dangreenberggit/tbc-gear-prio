@@ -1880,11 +1880,19 @@ def wowhead_lists_for_phase(
 # these three kinds need no such filter.
 CROSS_SPEC_KINDS: tuple[str, ...] = ("badge", "pvp", "world")
 
+# No phase reads the pre-raid guide for membership (WOWHEAD_STAGE_FOR_MAX_PHASE;
+# whether p5 should is ticket 676's open owner question), but its badge, PvP
+# and world rows describe the item, so the cross-spec index reads it first, as
+# the earliest stage (review finding A2 of feat/tab-follow-ups).
+WOWHEAD_PRE_RAID_STAGE = "pre-raid"
+
 
 def cross_spec_list_sources(
     max_phase: int,
 ) -> tuple[dict[int, list[dict]], list[dict]]:
     """Every list's badge/pvp/world sources at this phase, one per kind per item.
+
+    Reads the pre-raid file and every stage file this phase reads.
 
     Returns `(index, conflicts)`. Lists can state different facts for one
     item, so each kind is reduced by a fixed rule and the output does not
@@ -1900,7 +1908,10 @@ def cross_spec_list_sources(
         lambda: defaultdict(list)
     )
     for folder in folders:
-        for stage in WOWHEAD_STAGE_FOR_MAX_PHASE.get(max_phase, []):
+        for stage in [
+            WOWHEAD_PRE_RAID_STAGE,
+            *WOWHEAD_STAGE_FOR_MAX_PHASE.get(max_phase, []),
+        ]:
             path = folder / f"{stage}.json"
             if not path.is_file():
                 continue
