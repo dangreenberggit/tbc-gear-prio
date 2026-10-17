@@ -195,25 +195,34 @@ Findings:
 - **R4 (bookkeeping).** `.scratch/carry-forward/map.md` had no lines for 676,
   677 and 678 (filed on `dev` before this branch).
 
-**Round 2 stopped at R1.** R1 is a finding other than bookkeeping in the
-lines the fixes wrote, so by the skill's "Round limit" the review stops: no
-third round, no `merge-to-dev --check-only`, and the user decides. The
-likely cause: the round-1 fixer and the quality pass each deleted one of the
-two tests of the fallback without checking what else covered it
-(hypothesis, untested). The bookkeeping rows R2-R4 were applied after round
-2 in the commit that adds this file, which changes only this file, tickets
-619 and 676, and `map.md`; R2's script was re-run at `ed8beb00` and printed
-the ticket's counts.
+**Round 2 stopped at R1, then R1 was fixed by ruling.** R1 is a finding
+other than bookkeeping in the lines the fixes wrote, so by the skill's
+"Round limit" the review stopped and the decision went up. The likely cause:
+the round-1 fixer and the quality pass each deleted one of the two tests of
+the fallback without checking what else covered it (hypothesis, untested).
+The orchestrator ruled to fix it under the owner's standing rule for small
+review findings (the gitignored handoff
+`.scratch/handoffs/upgrades-tab-source-labels-HANDOFF.md`, line 51, the
+2026-10-16T04:07Z quote "If it's a certain factual fix then of course", and
+line 176). That is
+the orchestrator's ruling, not an owner decision on R1. The fix is fork
+`093cd5981`, one `rowSourceDetail` case in `format.test.ts` that hides every
+source (`sourceKeysMatching`) of a two-source row and of a `source`-only
+row; re-pin `272a3806`. With the fallback mutated to `row.sources?.[1]` the
+case failed (`expected 'Hyjal Summit · Archimonde' to be 'Black Temple (N) ·
+The Illidari Counc…'`); restored, `format.test.ts` gave 30 passed, and fork
+`tsc --noEmit`, `oxfmt --check` and `oxlint` gave rc 0. No round reviews
+this fix: the skill allows no round 3.
 
-## Proposed disposition (not final: round 2 stopped at R1)
+The bookkeeping rows R2-R4 were applied after round 2 in `154f1223`, which
+changes only this file, tickets 619 and 676, and `map.md`; R2's script was
+re-run at `ed8beb00` and printed the ticket's counts.
 
-This table is not headed `## Disposition`, so `merge-ready` does not read
-it and `pnpm merge-to-dev` refuses the branch until R1 is settled. Rename
-the heading to `## Disposition (round 2)` once R1 has its row.
+## Disposition (round 2)
 
 | ID  | Axis          | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                             |
 | --- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| R1  | Focused check | open        | Blocks the merge until fixed, or deferred to a ticket with the owner's allowance                                                                                                                                                                                                                                                          |
+| R1  | Focused check | fixed       | fork `093cd5981`, re-pin `272a3806` — all-hidden `rowSourceDetail` case, red against a mutated fallback; fixed on the orchestrator's ruling under the owner's standing small-findings rule (handoff lines 51 and 176), not an owner decision on R1                                                                                        |
 | R2  | Focused check | fixed       | Ticket 676 gives the script, its output and the classification rule                                                                                                                                                                                                                                                                       |
 | R3  | Focused check | fixed       | Ticket 619 says "every zone with a drop" and names World Bosses                                                                                                                                                                                                                                                                           |
 | R4  | Focused check | fixed       | `map.md` lines for 676, 677, 678                                                                                                                                                                                                                                                                                                          |
@@ -248,21 +257,20 @@ the heading to `## Disposition (round 2)` once R1 has its row.
 
 ## Summary
 
-**Not mergeable yet: round 2 stopped on one open finding, R1.** Round 1
+**Every finding has a disposition; no finding blocks the merge.** Round 1
 found no wrong figure and no wrong membership: all 44 universes and reports
 rebuild byte-identically from the committed inputs, and the labels match
 AtlasLoot, the wowsims db and the verification log on every spot check.
 Round 1's findings are fixed (15), deferred to open tickets (5) or wontfix
-with a reason (8); see the proposed table above. Round 2 passed all four
-checks but found R1: no test now covers the Source cell's
-every-source-hidden fallback. That blocks the merge until it is fixed or the
-owner allows a deferral.
+with a reason (8). Round 2 passed all four checks and found R1 (the Source
+cell's every-source-hidden fallback had no test) and three bookkeeping
+items; all four are fixed, R1 after round 2 on the orchestrator's ruling.
 
 The fork changes no existing wowsims file except the approved
 `ui/app/SimTabsSection.tsx` (Standards + Spec, and round 2 check 1).
 
-`pnpm verify` at `ed8beb00`: rc 0, `gates: 1539 ran, 0 skipped`. The commit
-that adds this file changes only this file and ticket text, after that run.
+`pnpm verify` at `154f1223` (before the R1 fix): rc 0, `gates: 1539 ran, 0
+skipped`. The run on the final tip is reported with the merge check.
 
 Tickets: this branch filed 4 (679, 680, 681, 682) and closed 5 (44, 174,
 619, 645, 646), by the two commands in the skill's step 3. Ticket 676 also
