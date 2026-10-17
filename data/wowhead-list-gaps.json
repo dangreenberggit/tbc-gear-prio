@@ -1,0 +1,306 @@
+{
+  "_comment": [
+    "Hand-written. pnpm wowhead-list-gaps:check (scripts/check_wowhead_list_gaps.py, tickets 678 and 173) fails when an item a spec's Wowhead list names is absent from that spec's universe, or is present with first source kind unknown, unless a row here names that (spec, itemId) at that phase.",
+    "The check also fails on a row that is no longer a gap (STALE GAP), so this file only shrinks: remove a row when its gap is fixed, and never add one to make the check pass without a ticket that owns the gap.",
+    "Reasons were assigned per id by the investigation in .scratch/agent-reports/2026-10-17-general-task-gates-678-679-683.md section A (gitignored), not classified by code. Ticket 17 owns the five-man and heroic membership rows; ticket 676 (part P4) owns the unknownSource rows and the missing source inputs.",
+    "phases lists every phase 2-5 at which the item is a gap; an item absent at some phases and unknown at others would need two rows (there are none)."
+  ],
+  "reasons": {
+    "notInDb": "The item id is not in vendor/wowsims/db.json, so the builder cannot add it.",
+    "notD7": "The item is in db.json but is not D7-eligible for this spec, so no membership route considers it.",
+    "noSource": "D7-eligible, but no input gives it a source; the report counts it in excludedNoSource.",
+    "stubOnly": "The sim implements its effect only as a TODO stub (stubOnlyItemIds), so the builder leaves it out.",
+    "sourcedNoRoute": "The item has a db.json source, but no membership route admits it; no report count records it.",
+    "unknownSource": "The item is in the universe, but its first source is kind unknown: no source the builder keeps is named for it (ticket 676 section Q-676-source measured, 'Why own-spec list rows stay unknown')."
+  },
+  "gaps": [
+    {
+      "spec": "feral",
+      "itemId": 19406,
+      "name": "Drake Fang Talisman",
+      "phases": [2, 3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "Blackwing Lair, a vanilla raid"
+    },
+    {
+      "spec": "feral",
+      "itemId": 23206,
+      "name": "Mark of the Champion",
+      "phases": [2, 3, 4, 5],
+      "reason": "unknownSource",
+      "note": "the list names Naxxramas, which unkept_wowhead_place drops"
+    },
+    {
+      "spec": "feral",
+      "itemId": 25790,
+      "name": "Expedition Scout's Epaulets",
+      "phases": [2, 3, 4, 5],
+      "reason": "noSource",
+      "note": "db.json has no source"
+    },
+    {
+      "spec": "feral",
+      "itemId": 27797,
+      "name": "Wastewalker Shoulderpads",
+      "phases": [2, 3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "heroic Auchenai Crypts (ticket 17)"
+    },
+    {
+      "spec": "feral",
+      "itemId": 27837,
+      "name": "Wastewalker Leggings",
+      "phases": [2, 3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "heroic Mana-Tombs (ticket 17)"
+    },
+    {
+      "spec": "feral",
+      "itemId": 27877,
+      "name": "Draenic Wildstaff",
+      "phases": [2, 3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "heroic Auchenai Crypts (ticket 17)"
+    },
+    {
+      "spec": "feral",
+      "itemId": 27878,
+      "name": "Auchenai Death Shroud",
+      "phases": [2, 3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "heroic Auchenai Crypts (ticket 17)"
+    },
+    {
+      "spec": "feral",
+      "itemId": 28064,
+      "name": "Idol of the Wild",
+      "phases": [2, 3, 4, 5],
+      "reason": "notD7",
+      "note": "db.json quality 2"
+    },
+    {
+      "spec": "feral",
+      "itemId": 28121,
+      "name": "Icon of Unyielding Courage",
+      "phases": [2, 3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "heroic The Blood Furnace (ticket 17)"
+    },
+    {
+      "spec": "feral",
+      "itemId": 28171,
+      "name": "Spymistress's Wristguards",
+      "phases": [2, 3, 4, 5],
+      "reason": "noSource",
+      "note": "db.json has no source"
+    },
+    {
+      "spec": "feral",
+      "itemId": 28372,
+      "name": "Idol of Feral Shadows",
+      "phases": [2, 3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "The Arcatraz, a five-man that the db row writes as a raid, plus an AtlasLoot heroic row (ticket 17)"
+    },
+    {
+      "spec": "feral",
+      "itemId": 29247,
+      "name": "Girdle of the Deathdealer",
+      "phases": [2, 3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "heroic The Black Morass (ticket 17)"
+    },
+    {
+      "spec": "feral",
+      "itemId": 29359,
+      "name": "Feral Staff of Lashing",
+      "phases": [2, 3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "heroic The Botanica (ticket 17)"
+    },
+    {
+      "spec": "feral",
+      "itemId": 30372,
+      "name": "Socrethar's Girdle",
+      "phases": [2, 3, 4, 5],
+      "reason": "noSource",
+      "note": "db.json has no source"
+    },
+    {
+      "spec": "feral",
+      "itemId": 31544,
+      "name": "Clefthoof Hide Leggings",
+      "phases": [2, 3, 4, 5],
+      "reason": "noSource",
+      "note": "db.json has no source"
+    },
+    {
+      "spec": "feral",
+      "itemId": 32387,
+      "name": "Idol of the Raven Goddess",
+      "phases": [2, 3, 4, 5],
+      "reason": "unknownSource",
+      "note": "the list names heroic Sethekk Halls, which unkept_wowhead_place drops"
+    },
+    {
+      "spec": "feral",
+      "itemId": 32658,
+      "name": "Badge of Tenacity",
+      "phases": [3, 4, 5],
+      "reason": "noSource",
+      "note": "db.json has no source; first listed at p3"
+    },
+    {
+      "spec": "feral",
+      "itemId": 38287,
+      "name": "Empty Mug of Direbrew",
+      "phases": [2, 3, 4, 5],
+      "reason": "notInDb",
+      "note": "upstream's db lists the Mug as 281739 (ticket 677)"
+    },
+    {
+      "spec": "ret",
+      "itemId": 18823,
+      "name": "Aged Core Leather Gloves",
+      "phases": [3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "Molten Core, a vanilla raid"
+    },
+    {
+      "spec": "ret",
+      "itemId": 19343,
+      "name": "Scrolls of Blinding Light",
+      "phases": [2, 3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "Blackwing Lair, a vanilla raid"
+    },
+    {
+      "spec": "ret",
+      "itemId": 19406,
+      "name": "Drake Fang Talisman",
+      "phases": [3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "Blackwing Lair, a vanilla raid"
+    },
+    {
+      "spec": "ret",
+      "itemId": 22954,
+      "name": "Kiss of the Spider",
+      "phases": [3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "Naxxramas, a vanilla raid"
+    },
+    {
+      "spec": "ret",
+      "itemId": 23041,
+      "name": "Slayer's Crest",
+      "phases": [3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "Naxxramas, a vanilla raid"
+    },
+    {
+      "spec": "ret",
+      "itemId": 23206,
+      "name": "Mark of the Champion",
+      "phases": [2, 3, 4, 5],
+      "reason": "unknownSource",
+      "note": "the list names Naxxramas, which unkept_wowhead_place drops"
+    },
+    {
+      "spec": "ret",
+      "itemId": 27878,
+      "name": "Auchenai Death Shroud",
+      "phases": [3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "heroic Auchenai Crypts (ticket 17)"
+    },
+    {
+      "spec": "ret",
+      "itemId": 28442,
+      "name": "Stormherald",
+      "phases": [2],
+      "reason": "sourcedNoRoute",
+      "note": "crafted (db.json); no route admits it at p2"
+    },
+    {
+      "spec": "ret",
+      "itemId": 28774,
+      "name": "Glaive of the Pit",
+      "phases": [2, 3, 4, 5],
+      "reason": "stubOnly",
+      "note": "Magtheridon's Lair; effect is a stub"
+    },
+    {
+      "spec": "ret",
+      "itemId": 29247,
+      "name": "Girdle of the Deathdealer",
+      "phases": [3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "heroic The Black Morass (ticket 17)"
+    },
+    {
+      "spec": "ret",
+      "itemId": 30257,
+      "name": "Shattrath Leggings",
+      "phases": [2, 3, 4, 5],
+      "reason": "unknownSource",
+      "note": "quest text that names no zone parses to no source"
+    },
+    {
+      "spec": "ret",
+      "itemId": 30341,
+      "name": "Flesh Handler's Gauntlets",
+      "phases": [2, 3, 4, 5],
+      "reason": "notD7",
+      "note": "db.json quality 2"
+    },
+    {
+      "spec": "ret",
+      "itemId": 31033,
+      "name": "Libram of Righteous Power",
+      "phases": [2, 3, 4, 5],
+      "reason": "unknownSource",
+      "note": "quest text that names no zone parses to no source"
+    },
+    {
+      "spec": "ret",
+      "itemId": 31544,
+      "name": "Clefthoof Hide Leggings",
+      "phases": [2, 3, 4, 5],
+      "reason": "noSource",
+      "note": "db.json has no source"
+    },
+    {
+      "spec": "ret",
+      "itemId": 31856,
+      "name": "Darkmoon Card: Crusade",
+      "phases": [2, 3, 4, 5],
+      "reason": "unknownSource",
+      "note": "the list's 'Bind on Equip' text is read as a zone, which unkept_wowhead_place drops"
+    },
+    {
+      "spec": "ret",
+      "itemId": 31920,
+      "name": "Shaffar's Band of Brutality",
+      "phases": [2, 3, 4, 5],
+      "reason": "sourcedNoRoute",
+      "note": "heroic Mana-Tombs (ticket 17)"
+    },
+    {
+      "spec": "ret",
+      "itemId": 34679,
+      "name": "Shattered Sun Pendant of Might",
+      "phases": [5],
+      "reason": "stubOnly",
+      "note": "first listed at p5; effect is a stub"
+    },
+    {
+      "spec": "ret",
+      "itemId": 38287,
+      "name": "Empty Mug of Direbrew",
+      "phases": [3, 4, 5],
+      "reason": "notInDb",
+      "note": "upstream's db lists the Mug as 281739 (ticket 677)"
+    }
+  ]
+}
