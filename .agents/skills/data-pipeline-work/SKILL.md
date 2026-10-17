@@ -24,7 +24,7 @@ Three gates run on every verify, and all three are **AtlasLoot-only**:
 | --- | --- |
 | `sync:atlasloot:verify-local` | vendored Lua drifting from the lockfile (rule 1) |
 | `atlasloot:regen:check` | the 4 committed parse outputs, plus `tier-sets.json` and one `<spec>-tokens.json` per spec in the spec registry when `vendor/wowsims/db.json` is present, not reproducing (rule 2) |
-| `rep-tables:check` | two faction names collapsing to one key (rule 4, invariant 4 at `check_rep_tables.py:136`) |
+| `rep-tables:check` | two faction names collapsing to one key (rule 4, invariant 4 in `check_rep_tables.py`) |
 
 On any other input these rules are yours to apply by hand. The trap is a green
 `pnpm verify` on a **non-AtlasLoot** change: it says nothing about that input's
@@ -82,7 +82,7 @@ it.
 The prose→faction-id join collapses names to letters: correct until two
 factions collapse to one key, at which point it is wrong and nothing fails. The
 shortcut and the check that catches its collision go in the same change.
-`check_rep_tables.py:136` is the pattern to copy.
+Invariant 4 in `check_rep_tables.py` is the pattern to copy.
 
 ## 5. A data change falsifies beliefs in code you never opened
 
