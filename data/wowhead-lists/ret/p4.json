@@ -3,7 +3,8 @@
   "corrections": [
     "30129: the page is factually wrong -- it gives [npc=21213] Morogrim Tidewalker (Serpentshrine Cavern) for a Tempest Keep token piece. wowheadSourceText keeps that verbatim; correctedSourceText carries Kael'thas Sunstrider (Tempest Keep), which agrees with p1-p2/p3 and data/two-hop/ret-tokens.json (carry-forward 50, 54).",
     "30990: the page types the token as bare text 'Chestguard of the Vanquished Champion' rather than linking it -- the same upstream mislabel data/two-hop/ret-tokens.json already records. wowheadSourceText keeps it verbatim; correctedSourceText names Chestguard of the Forgotten Conqueror (carry-forward 49, 54).",
-    "30993: the page types the token name and splices it with ' - ' onto the council member 'Gathios the Shatterer' -- the ticket 48 splice shape occurring upstream, not introduced by us. wowheadSourceText keeps it verbatim; correctedSourceText uses the encounter name 'The Illidari Council' (carry-forward 51, 54)."
+    "30993: the page types the token name and splices it with ' - ' onto the council member 'Gathios the Shatterer' -- the ticket 48 splice shape occurring upstream, not introduced by us. wowheadSourceText keeps it verbatim; correctedSourceText uses the encounter name 'The Illidari Council' (carry-forward 51, 54).",
+    "33910: the page gives 'Arena Points - Arena Points' for Vindicator's Scaled Bracers. Vindicator's is the Season 3 honour line (scripts/assemble_universe.py, _arena_gear_ids docstring); the four feral siblings 33879, 33880, 33881 and 33893 read 'Vendor: Honor Points (Season 3)' in data/wowhead-lists/feral/p3.json; and Wowhead's item record for 33910 has the same source fields as 33879 (source 3, sourcemore p 2), not those of arena item 33688 (source 5). wowheadSourceText keeps the page verbatim; correctedSourceText carries the siblings' text (carry-forward 54)."
   ],
   "collectedBy": "delegator-agent",
   "collectedDate": "2026-07-28",
@@ -320,7 +321,8 @@
       "slot": "wrist",
       "viaTokenId": null,
       "viaTokenName": null,
-      "wowheadSourceText": "Arena Points - Arena Points"
+      "wowheadSourceText": "Arena Points - Arena Points",
+      "correctedSourceText": "Vendor: Honor Points (Season 3)"
     },
     {
       "itemId": 23537,

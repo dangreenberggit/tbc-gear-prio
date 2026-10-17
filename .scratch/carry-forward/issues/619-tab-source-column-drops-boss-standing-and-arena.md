@@ -85,6 +85,20 @@ while its siblings 33879, 33880, 33881 and 33893 read "PvP vendor ·
 Honor" in `feral-p3-p2bis`. Handled in step 12 of stage
 tab-source-labels.
 
+Step 12, 2026-10-16. The Wowhead item page
+(`https://www.wowhead.com/tbc/item=33910`, read with WebFetch) shows no
+cost line. It says only that the item is sold in Alterac Valley, Arathi
+Basin, Eye of the Storm, Warsong Gulch and Isle of Quel'Danas: the
+battleground vendors. Its item record
+(`https://www.wowhead.com/tbc/item=33910&xml`) has `"source":[3]` and
+`"sourcemore":[{"p":2}]`, the same as honour sibling 33879, while arena
+item 33688 has `"source":[5]`. No page says Arena points, so the 33910
+rows in `data/wowhead-lists/ret/{p3,p4,p5}.json` now carry
+`correctedSourceText: "Vendor: Honor Points (Season 3)"` with a
+`corrections` entry, and the builder gives `pvp via honor` for 33910 in
+ret p3-p5 (checked on temp builds; the committed universes are
+regenerated in step 13).
+
 ## Owner, 2026-10-16
 
 Verbatim: "Make a note that tier token should show boss. I thought this was
