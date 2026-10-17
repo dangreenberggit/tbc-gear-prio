@@ -806,3 +806,38 @@ Verify:
 pnpm fork-universes:check
 python scripts/check_pool_completeness.py --check
 ```
+
+## Refresh, 2026-10-17 (cross-spec list sources, honour seasons, Libram of Hope's boss; tickets 676, 680, 681)
+
+`scripts/assemble_universe.py` at `5674783e` changes the `sources` of
+existing rows in three ways, and adds or removes no entry:
+
+- A row that would get `{"kind": "unknown"}` now takes the `badge`, `pvp`
+  or `world` source that any spec's vendored Wowhead list gives the item
+  (ticket 676). At p5 this fills 59 rows across the 11 specs; over p2–p5 it
+  fills 195.
+- An honour `pvp` source now carries the season its list names, such as
+  `Vendor: Honor Points (Season 3)` (ticket 681). This adds a season to the
+  19 honour rows that had none.
+- 22401 Libram of Hope's `raid` source in ret p2–p5 names its boss,
+  `Isalien`. Upstream's db.json names npc 16097
+  `Isalien"].." - "..format(AL["Tier %s Sets`, and the builder now keeps the
+  text before the first `"]` instead of dropping the boss (ticket 680).
+
+`python scripts/sync_fork_universes.py --write` refreshed 44 of 63 copies:
+every universe, p2–p5 for all 11 specs. The 44 copies differ from the old
+ones in 218 shared entries (195 + 19 + 4), with 0 entries only on one side;
+ret changes only 22401 (p2–p5) and 33910's season (p3–p5). No EP-weight
+file changed.
+
+The fork's Source cell applies the same `"]` rule to the npc name it reads
+from upstream's database (`overrunNpcKey`,
+`ui/features/upgrades/utils/item_source.ts`, fork `d5d4a45e2`), so the tab
+and the universe name the same boss. No engine file changed.
+
+Verify:
+
+```bash
+pnpm fork-universes:check
+python scripts/check_pool_completeness.py --check
+```
