@@ -834,8 +834,8 @@ describe("data/universes/ret-p3.json hardening", () => {
   });
 
   it("keeps the heroic path out of the tiers below Magisters' Terrace", () => {
-    // The phase map admits MT at 5 only. A heroic source appearing at p3 would
-    // mean the 284 phase-1 heroic items measured in ticket 28 had leaked in.
+    // The phase map admits MT at 5 only. A heroic source appearing at p2 or p3
+    // would mean the 284 phase-1 heroic items measured in ticket 28 had leaked in.
     // Ticket 157's force-included items (TICKET_157_FORCE_INCLUDE in
     // scripts/assemble_universe.py) are exempt: force-include admits them, not
     // the heroic path, and since ticket 174 they carry their db and AtlasLoot
@@ -843,13 +843,19 @@ describe("data/universes/ret-p3.json hardening", () => {
     const ticket157ForceIncluded = new Set([
       27484, 31033, 22401, 31856, 28034, 28288,
     ]);
-    for (const entry of universeP3) {
-      if (ticket157ForceIncluded.has(entry.itemId)) continue;
-      for (const source of entry.sources ?? [entry.source]) {
-        expect(
-          source.kind,
-          `${entry.itemId} ${entry.name} carries a heroic source at maxPhase 3`
-        ).not.toBe("heroic");
+    const universes = [
+      ["ret-p2", loadUniverse("data/universes/ret-p2.json").pool],
+      ["ret-p3", universeP3],
+    ] as const;
+    for (const [label, pool] of universes) {
+      for (const entry of pool) {
+        if (ticket157ForceIncluded.has(entry.itemId)) continue;
+        for (const source of entry.sources ?? [entry.source]) {
+          expect(
+            source.kind,
+            `${entry.itemId} ${entry.name} carries a heroic source in ${label}`
+          ).not.toBe("heroic");
+        }
       }
     }
   });
