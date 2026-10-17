@@ -176,7 +176,7 @@ Any agent that splits a research question across subagents, whether the session 
 
 A subagent writes its full report to a report file and makes its final message the **condensed report**: the conclusion; each important claim with its source or the label `hypothesis, untested`; one line naming what the file holds that the message leaves out; and the file's absolute path. Keep the condensed report to what the caller needs for its next step; everything else goes in the file. The Summary for the user follows, as the global "Chat responses" rule says. The file goes at the path the prompt names, else at `.scratch/agent-reports/<UTC date>-<agent type>-<a few words of the task>.md` (gitignored), under a new name if that file exists; it is allowed even when the prompt allows no other path. Callers with worktree or pair workers name a path in their own checkout.
 
-Skip the file when the whole report fits the condensed report, or when the task's product is already a file the caller reads (a review, a handoff, a plan file). A format or template the prompt names takes precedence. Stage-gate seats (`gate-*`) follow their definitions and the stage-gate skill instead.
+Skip the file when the whole report fits the condensed report, or when the task's product is already a file the caller reads (a review, a handoff, a plan file). A format or template the prompt names takes precedence. Stage-gate seats (`gate-*`) follow their definitions and the stage-gate skill for their own final messages; a seat that spawns workers, such as `gate-executor`, is their caller under this section.
 
 The caller reads a report file only for a detail the condensed report leaves out, such as the evidence behind a claim it is about to build on.
 

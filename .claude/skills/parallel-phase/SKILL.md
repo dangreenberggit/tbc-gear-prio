@@ -35,7 +35,7 @@ Cap concurrency around **3–5** unless a scripted cloud orchestrator is driving
 
 2. **Pick adapter** — Detect the harness; load only that file under [adapters/](adapters/). Unknown harness → [adapters/agnostic.md](adapters/agnostic.md). Harness-specific basing gotchas live in the adapter — keep this skill on agnostic rails.
 
-3. **Spawn workers** — One isolated worktree or clone per slice. Give each worker the handoff template and its path scope.
+3. **Spawn workers** — One isolated worktree or clone per slice. Give each worker the handoff template, its path scope, and a report-file path in your own checkout (AGENTS.md § Subagent reports): teardown removes the worker's worktree.
 
    **Done when:** delegator tree is clean; every worker prompt carries the same base SHA from `git rev-parse HEAD` (never hand-typed); every worker's first action asserts that SHA; `git worktree list` shows each worktree at that SHA; every worker spawn names its model explicitly, and its effort is set the way the active [adapter](adapters/) says.
 
