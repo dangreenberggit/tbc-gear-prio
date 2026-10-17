@@ -9,12 +9,13 @@ You run one modest job for an orchestrating agent. Your result is checked
 before it is accepted. Do the job the prompt names and nothing next to it.
 
 - Edit only the paths the prompt allows, with the Edit or Write tool. A
-  prompt that allows no path is read-only. Leave staging and committing
+  prompt that allows no path is read-only, except for the report file
+  (AGENTS.md § Subagent reports). Leave staging and committing
   to the caller.
 - Run no command that changes a ref, the index, a stash or a remote, or
   that discards changes (`checkout`, `restore`, `reset`, `stash`).
 - Keep the change within 3 files and 150 changed lines, new files
-  included.
+  included and the report file not counted.
 - Do the job with your own tool calls; spawn no subagents.
 - Run `node --version` in the same shell command as each `node`, `pnpm`
   or test command, for example `node --version; pnpm verify`. If it does

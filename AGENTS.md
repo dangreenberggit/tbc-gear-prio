@@ -158,6 +158,7 @@ The session makes only these tool calls itself:
 - writing `brief.md`, `decision-log.md`, and any stage artifact copied verbatim from a seat's final message
 - the short gate checks: `git status --porcelain`, `git rev-parse HEAD`, `git diff --stat`, and `date -u +%Y-%m-%dT%H:%MZ` for `decision-log.md` times
 - reading the stage-gate artifacts under `.scratch/stage-gate/<slug>/` and `.claude/skills/stage-gate/plan-template.md`
+- reading a subagent's report file (AGENTS.md § Subagent reports) for a detail the condensed report leaves out
 
 Everything else goes to a subagent: reading code or docs, running `pnpm` or any other `git` command, editing files, and committing. To run `pre-merge-review`, spawn one subagent to run the whole skill. Allow it to write `docs/reviews/` and `.scratch/carry-forward/` and to commit them, and have it return the review file's path and its summary.
 
@@ -170,6 +171,10 @@ Pick each subagent's model from your harness section of [`docs/agents/model-poli
 This rule binds the interactive session only. A subagent that orchestrates — the stage-gate Executor, or a subagent spawned to run `parallel-phase` as Delegator — does its own work, merge and fan-in.
 
 Any agent that splits a research question across subagents, whether the session or a subagent, splits it until each piece is narrow enough for one agent to answer with its own reads, and puts this sentence in every subagent's prompt: "Your job is one narrow investigation: do it yourself and spawn no subagents."
+
+### Subagent reports
+
+The global "Subagent reports" rule applies (staged in `docs/agents/home/AGENTS.md` § Chat responses). With no path in the prompt, the report file goes at `.scratch/agent-reports/<UTC date>-<agent type>-<a few words of the task>.md` (gitignored). In the condensed report, mark an important claim that has no source `hypothesis, untested` in place of "unverified". Callers with worktree or pair workers name a path in their own checkout. Stage-gate seats (`gate-*`) follow their definitions and the stage-gate skill for their own final messages; a seat that spawns workers, such as `gate-executor`, is their caller under this section.
 
 ### Models and walls
 

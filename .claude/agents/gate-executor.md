@@ -98,7 +98,9 @@ with a silent deviation is the failure.
   the spawn.** An extremely simple slice (see `simple-task`) goes to
   `simple-task` (`model: "sonnet"`). Every other slice goes to
   `general-task` (`model: "opus"`). Keep to the `parallel-phase` cap of
-  3–5 workers at once.
+  3–5 workers at once. Name each worker's report-file path in your own
+  checkout (AGENTS.md § Subagent reports), because teardown removes the
+  worker's worktree.
 - Stay inside the Paths manifest. A file you need that is not in it is a
   `flag` ledger row, not an edit.
 - Per unit with a `Visual check:` line: run `pnpm tab-fixtures:smoke` (it
