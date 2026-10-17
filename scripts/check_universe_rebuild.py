@@ -34,8 +34,18 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+DB = ROOT / "vendor/wowsims/db.json"
 UNIVERSES = ROOT / "data/universes"
 UNIVERSE_NAME_RE = re.compile(r"^(?P<spec>[a-z]+)-p(?P<phase>\d)\.json$")
+
+# Importing the builder parses db.json (its ARENA_GEAR_IDS constant is built at
+# import), so check for it first and exit 2 instead of with a traceback.
+if not DB.is_file():
+    print(
+        f"missing {DB.relative_to(ROOT).as_posix()} -- run pnpm sync:wowsims:restore",
+        file=sys.stderr,
+    )
+    sys.exit(2)
 
 sys.path.insert(0, str(ROOT / "scripts"))
 import assemble_universe as A  # noqa: E402
@@ -47,14 +57,6 @@ def serialise(obj: object) -> bytes:
 
 
 def main() -> int:
-    if not A.DB.is_file():
-        print(
-            f"missing {A.DB.relative_to(ROOT).as_posix()} -- run "
-            "pnpm sync:wowsims:restore",
-            file=sys.stderr,
-        )
-        return 2
-
     started = time.perf_counter()
     checked = 0
     mismatches: list[str] = []
