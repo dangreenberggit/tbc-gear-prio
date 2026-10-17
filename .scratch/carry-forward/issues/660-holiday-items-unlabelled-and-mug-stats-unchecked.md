@@ -3,8 +3,8 @@ Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 follow-on (Tab-adjac
 Type: task
 Origin: .scratch/carry-forward/issues/640-holiday-boss-items-show-no-source.md (parts the 2026-10-15 wontfix did not rule on)
 Blocks: none
-Blocked by: none
-Related: 640, 613, 619, 643
+Blocked by: 676, 677
+Related: 640, 613, 619, 643, 676, 677
 
 # Holiday items show no readable source, and the Mug's item-level-141 stats are unchecked
 
@@ -43,3 +43,10 @@ On `feat/tab-item-lists` `c559b5ea` this prints 11 rows, every one with
 Done when: holiday-boss items carry a source a player can read (for example
 "World event: Midsummer — Ahune"), and the 281739 stat line is confirmed or
 corrected with a cited source (Wowhead tooltip or an in-game check).
+
+## Comments
+
+2026-10-16 (stage tab-source-labels): split in two. Part 1 (holiday items
+have no readable source) is planned in ticket 676, with the badge and honor
+sources of ticket 643. Part 2 (281739's stats) is ticket 677. Close this
+ticket when 676 and 677 are both done.

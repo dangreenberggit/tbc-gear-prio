@@ -3,7 +3,7 @@ Progress: sections 1 and 3 closed 2026-08-06; section 2 (feral pre-raid list) de
 Type: task
 Origin: pre-merge review of `phase-2/feral` (adversarial A2, domain, standards), 2026-08-06
 Blocks: none
-Blocked by: none
+Blocked by: 676
 
 # 87 Wowhead rows still parse to nothing, and `unknown` shows up as a group
 
@@ -160,3 +160,9 @@ items with *no* zone at all, which is unaffected by that decision either way.
 `pnpm verify` green (Node 22.16.0) after both fixes and the two pinned-count
 updates: typecheck, lint, format, `vitest run` (381 passed / 2 skipped / 2
 todo), `skeleton:check`, `mirrors:check`.
+
+## Comments
+
+2026-10-16 (stage tab-source-labels): §2 (the missing feral pre-raid list)
+is one of the inputs ticket 676 weighs: a per-spec Wowhead harvest against a
+smaller badge and PvP-vendor table. Ticket 676 holds that choice.
