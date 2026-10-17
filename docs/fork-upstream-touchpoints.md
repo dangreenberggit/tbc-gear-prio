@@ -83,9 +83,15 @@ git -C vendor/tbc-new-fork diff --name-status e804c29e8 160ae36c2 | cut -f1 | so
 | `218234677` (base `5262ff38`)      | 1                       | 2026-10-09: ticket 591, the store-actions review leftovers, in tab files; no upstream file touched.                                                                       |
 | `d1de72abc` (base `5262ff38`)      | 1                       | 2026-10-09: ticket 592, two tests and three comment edits, in tab files; no upstream file touched.                                                                        |
 | `316326a95` (base `5262ff38`)      | 1                       | 2026-10-09: ticket 585, one tab test file; no upstream file touched.                                                                                                      |
-| `8cd8d1c80` (base `5262ff38`)      | 1                       | 2026-10-15: 44 tab commits since `316326a95`, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                        |
-| `bc96d0a03` (base `e804c29e8`)     | 1                       | 2026-10-16: merge of upstream master `e804c29e8`; no tab commit since `8cd8d1c80`; `ui/app/SimTabsSection.tsx` still 6/0.                                                 |
-| **`160ae36c2` (base `e804c29e8`)** | **1**                   | 2026-10-17: 13 tab commits since `bc96d0a03`, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                        |
+| `176268e7c` (base `5262ff38`)      | 1                       | 2026-10-11: 10 tab commits since `316326a95`, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                        |
+| `bba7380a6` (base `5262ff38`)      | 1                       | 2026-10-15: 7 tab commits, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                                           |
+| `827444b9a` (base `5262ff38`)      | 1                       | 2026-10-15: 18 tab commits, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                                          |
+| `000b7be81` (base `5262ff38`)      | 1                       | 2026-10-15: 4 tab commits, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                                           |
+| `8cd8d1c80` (base `5262ff38`)      | 1                       | 2026-10-15: 5 tab commits, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                                           |
+| `bc96d0a03` (base `e804c29e8`)     | 1                       | 2026-10-16: merge of upstream master `e804c29e8`; no tab commit; `ui/app/SimTabsSection.tsx` still 6/0.                                                                   |
+| `093cd5981` (base `e804c29e8`)     | 1                       | 2026-10-16: 9 tab commits, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                                           |
+| `3bdacb8c6` (base `e804c29e8`)     | 1                       | 2026-10-17: 2 tab commits, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                                           |
+| **`160ae36c2` (base `e804c29e8`)** | **1**                   | 2026-10-17: 2 tab commits, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                                           |
 
 Each row is the `--name-only --diff-filter=M` command above over that range.
 
