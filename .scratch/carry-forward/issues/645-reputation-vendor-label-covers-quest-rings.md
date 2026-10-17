@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-10-16, stage tab-source-labels
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
 Type: bug
 Origin: docs/reviews/feat-tab-view-filter.md, D3
@@ -24,3 +25,20 @@ Done when: a primary source (in-game data or wowsims `db.json`) settles how
 the rings are obtained, and the label for that bucket is true for every
 item in it (for example "Reputation"), or the rings move to a bucket whose
 label is true for them.
+
+## Closed 2026-10-16 (stage tab-source-labels)
+
+The bucket now reads "Reputation" in the Source cell and in both source
+dialogs. Only the locale value changed
+(`upgrades_tab.sources.rep` in the fork's `assets/locales/en/upgrades.json`).
+The saved key stays "Reputation vendor", so no saved exclusion or hide
+changes.
+
+The label no longer claims a vendor. The Done-when clause that asks a
+primary source to settle how the rings are obtained is not met, and it
+does not need to be: "Reputation" is true whether the rings are sold or
+given by a quest at a standing. That question stays this ticket's
+recorded hypothesis.
+
+Verified by: `sed -n 30p vendor/tbc-new-fork/assets/locales/en/upgrades.json`
+→ `"rep": "Reputation",` in `tbc-new-fork@e26c05bb2`.

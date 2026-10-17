@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-10-16, stage tab-source-labels
 Type: bug
 Origin: pre-merge review of `phase-2/feral` (adversarial A5), 2026-08-06
 Blocks: none
@@ -80,3 +81,20 @@ spliced into `boss`; those were filed and fixed separately as tickets 48-52.
   rather than collapsing to whichever came first.
 - ~~A row's primary source is chosen by a stated rule, not by pipeline order.~~
   Withdrawn — measured false, see above.
+
+## Closed 2026-10-16 (stage tab-source-labels)
+
+The Upgrades tab now applies one stated rule. The plain-text Source cell
+names the row's first shown source: the first source that is not hidden,
+else the first. When nothing is hidden and upstream's `db.json` has the
+item, the cell shows upstream's `ItemSource` block instead. That is true
+for all six multi-zone rows in `data/universes/*-p5.json` (32589, 32590,
+32591, 32592, 32609, 34009; plan tab-source-labels C34). That block names
+upstream's first drop, so the tab matches the site's gear picker.
+Filtering already scans every zone (`matchesZone`, plan C15). No cell
+lists two zones.
+
+Verified by: `npx vitest run ui/features/upgrades/utils/format.test.ts`
+in `tbc-new-fork@e26c05bb2`; the `the Source cell under Filter by source`
+block (format.test.ts:85-118) and `rowSourceDetail` (format.test.ts:156-172)
+test the first-shown rule.

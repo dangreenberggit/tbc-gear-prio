@@ -57,9 +57,33 @@ row has to come from somewhere other than the row.
 
 On `data/tab-fixtures/ret-p3-p2.json`:
 
-- [ ] Token rows show zone, difficulty and boss in the same form as drop rows.
-- [ ] Reputation rows show the faction and the standing.
-- [ ] PvP rows say whether the item comes from arena or honor.
+- [x] Token rows show zone, difficulty and boss in the same form as drop rows.
+  Token rows print "zone (N) · boss". The "(N)" is derived: every db.json
+  drop in a phase-raids zone is Normal (plan tab-source-labels C30), and
+  the text is upstream's `difficultyNames`. The plain text is one line with
+  ' · ' where upstream's linked block uses two lines.
+  Lightbringer Greaves reads "Black Temple (N) · The Illidari Council".
+- [x] Reputation rows show the faction and the standing. All 12 Band of
+  Eternity rows read "The Scale of the Sands · <standing>".
+- [x] PvP rows say whether the item comes from arena or honor. Vengeful
+  Gladiator's Greatsword reads "PvP vendor · Arena, season 3".
+
+Verified by: `tbc-new-fork@e26c05bb2` on fixture `ret-p3-p2`, with
+`npx vitest run ui/features/upgrades/components/ResultsTable/ResultRow.test.tsx ui/features/upgrades/utils/format.test.ts`
+in the fork. Captures from the stage's step-6 check (ignored path, in the
+pair `tbc-wt/tab-source-labels`):
+`.scratch/tab-fixtures-smoke/ret-p3-p2-after-row-30993.png`,
+`ret-p3-p2-after-row-29298.png` … `-row-29308.png` (Band of Eternity),
+`ret-p3-p2-after-row-33688.png`, `ret-p3-p2-after-row-33910.png`,
+`ret-p3-p2-after-sorted-source-asc-Ring1-below-cutoff.png`.
+
+## Remaining: via data
+
+33910 Vindicator's Scaled Bracers still reads "PvP vendor · Arena"
+(`via: arena`, from its Wowhead prose "Arena Points - Arena Points"),
+while its siblings 33879, 33880, 33881 and 33893 read "PvP vendor ·
+Honor" in `feral-p3-p2bis`. Handled in step 12 of stage
+tab-source-labels.
 
 ## Owner, 2026-10-16
 
