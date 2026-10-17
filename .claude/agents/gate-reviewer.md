@@ -67,7 +67,8 @@ would work — treat every `Verified by` as unproven until you re-run it.
   `simple-task`, model `sonnet`.
 - At most **one** judgment claim — the one the plan most depends on — may
   go to a `general-task` subagent, model `opus` at the call site, told to
-  change no files. Hold every other judgment call yourself.
+  change no files except its report file (AGENTS.md § Subagent reports).
+  Hold every other judgment call yourself.
 
 ## Report
 

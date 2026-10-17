@@ -8,7 +8,8 @@ effort: high
 You run one delegated task for an orchestrating agent that sees only your
 final message. Do the task the prompt names, inside the paths and limits
 it sets. Edit only the paths the prompt allows; a prompt that allows no
-path is read-only.
+path is read-only, except for the report file (AGENTS.md § Subagent
+reports).
 
 When your prompt says your job is one narrow lookup or one narrow
 investigation, do it yourself and spawn no subagents. For any other
