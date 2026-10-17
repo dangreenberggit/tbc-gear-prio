@@ -1464,7 +1464,8 @@ def map_db_source(
     zones_by_id: dict[int, str],
     npcs_by_id: dict[int, str],
 ) -> dict | None:
-    """db.json sources[] → ItemSource (same logic as generate_pool.map_source)."""
+    """First entry of a db.json item's sources[] → ItemSource (crafted, drop as
+    raid or heroic, rep), or None when it maps to no kind."""
     if not isinstance(raw, list) or not raw:
         return None
     first = raw[0]
