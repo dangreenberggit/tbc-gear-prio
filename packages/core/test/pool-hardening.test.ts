@@ -105,18 +105,19 @@ function wowsimsCuratedItemIds(): Set<number> {
 }
 
 /**
- * Measured present in ret-p3 (40/44 wowsims curated IDs, re-measured after
+ * Measured present in ret-p3 (42/44 wowsims curated IDs, re-measured after
  * ret_p3.gear.json was vendored -- slice 6b, 5c7491899). The p3 set's own
  * items resolve real sources the earlier p2-only union couldn't provide.
+ * 27484 and 28288 are present because ticket 157 force-includes them.
  */
 const WOWSIMS_ADMITTED_IN_P3 = [
-  23522, 23537, 24259, 28176, 28429, 28430, 28608, 28745, 28757, 28779, 28795,
-  28830, 29071, 29073, 29075, 29119, 29177, 29383, 29947, 30022, 30055, 30061,
-  30098, 30104, 30106, 30129, 30257, 30644, 30834, 30900, 30905, 32087, 32235,
-  32332, 32366, 32461, 32526, 32574, 33122, 33173,
+  23522, 23537, 24259, 27484, 28176, 28288, 28429, 28430, 28608, 28745, 28757,
+  28779, 28795, 28830, 29071, 29073, 29075, 29119, 29177, 29383, 29947, 30022,
+  30055, 30061, 30098, 30104, 30106, 30129, 30257, 30644, 30834, 30900, 30905,
+  32087, 32235, 32332, 32366, 32461, 32526, 32574, 33122, 33173,
 ] as const;
 
-/** Still excluded at p3 — below rare or no resolvable source; 27484 and 28288 are force-included with their db sources (ticket 157, 174). */
+/** Still excluded at p3 — below rare or no resolvable source. */
 const WOWSIMS_NOT_YET_ADMITTED = [27985, 30341] as const;
 
 /**
@@ -835,15 +836,21 @@ describe("data/universes/ret-p3.json hardening", () => {
   it("keeps the heroic path out of the tiers below Magisters' Terrace", () => {
     // The phase map admits MT at 5 only. A heroic source appearing at p3 would
     // mean the 284 phase-1 heroic items measured in ticket 28 had leaked in.
-    // 27484 Libram of Avengement is the exception: ticket 157 force-includes
-    // it, and since ticket 174 it carries its db source, Heroic Blood Furnace.
-    // Its membership does not come from the heroic path.
+    // Ticket 157's force-included items (TICKET_157_FORCE_INCLUDE in
+    // scripts/assemble_universe.py) are exempt: force-include admits them, not
+    // the heroic path, and since ticket 174 they carry their db and AtlasLoot
+    // sources, some of them heroic.
+    const ticket157ForceIncluded = new Set([
+      27484, 31033, 22401, 31856, 28034, 28288,
+    ]);
     for (const entry of universeP3) {
-      if (entry.itemId === 27484) continue;
-      expect(
-        entry.source.kind,
-        `${entry.itemId} ${entry.name} carries a heroic source at maxPhase 3`
-      ).not.toBe("heroic");
+      if (ticket157ForceIncluded.has(entry.itemId)) continue;
+      for (const source of entry.sources ?? [entry.source]) {
+        expect(
+          source.kind,
+          `${entry.itemId} ${entry.name} carries a heroic source at maxPhase 3`
+        ).not.toBe("heroic");
+      }
     }
   });
 
