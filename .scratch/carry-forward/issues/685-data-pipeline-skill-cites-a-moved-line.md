@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-tab-follow-ups.md (addendum, finding R2)
 Blocks: none
@@ -24,3 +24,21 @@ skill lands inside invariant 3.
   script cannot break the citation.
 - The owner approved the exact edit first: AGENTS.md § Writing for agents
   requires approval before any skill-file edit.
+
+## Closing note
+
+The owner approved the exact edit in chat on 2026-10-17. Both skill copies
+now say "invariant 4 in `check_rep_tables.py`" at lines 27 and 85. The
+script numbers that check `# 4.` in `main()` (line 138 on `dev` at
+95396325).
+
+Verified by:
+
+```
+grep -c "check_rep_tables.py:136" .claude/skills/data-pipeline-work/SKILL.md .agents/skills/data-pipeline-work/SKILL.md
+grep -in "invariant 4 in" .claude/skills/data-pipeline-work/SKILL.md .agents/skills/data-pipeline-work/SKILL.md
+grep -n "# 4\." scripts/check_rep_tables.py
+```
+
+The first command prints 0 for both files; the second prints lines 27 and
+85 of each; the third prints the check's comment.
