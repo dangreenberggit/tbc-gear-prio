@@ -21,6 +21,13 @@ an encounter of exactly that name; raid bosses stay held to the parsed file.
 That table is read from vendor/atlasloot/data-tbc.lua, which is gitignored,
 so a five-man boss fails while the Lua is absent instead of passing unchecked.
 
+That Lua holds only TBC five-mans, so it cannot witness a vanilla dungeon boss
+(22401 Libram of Hope, Dire Maul · Isalien, recovered from db.json's garbled
+npc name in ticket 680). An item AtlasLoot does not list is still accepted
+when a vendored Wowhead list row for that same item names that boss, in that
+zone or one of its wings ("Dire Maul East"). A boss name neither input states
+for the item still fails.
+
 Run via `pnpm verify` (`pnpm boss-aliases:check`).
 """
 
@@ -37,7 +44,14 @@ PHASE_RAIDS = ROOT / "data/phase_raids.json"
 UNIVERSES = ROOT / "data/universes"
 
 sys.path.insert(0, str(ROOT / "scripts"))
-from assemble_universe import BOSS_UNIT_TO_ENCOUNTER, canonical_boss  # noqa: E402
+from assemble_universe import (  # noqa: E402
+    BOSS_UNIT_TO_ENCOUNTER,
+    SPEC_PROFILES,
+    canonical_boss,
+    load_json,
+    parse_wowhead_source,
+    source_text_for_parsing,
+)
 from parse_atlasloot import (  # noqa: E402
     CONTENT_TYPE_RE,
     DATA_BLOCK_RE,
@@ -79,6 +93,36 @@ def dungeon_encounter_loot(lua_text: str) -> set[tuple[str, int]]:
                 if lm:
                     pairs.add((name, int(lm.group(2))))
     return pairs
+
+
+def wowhead_drop_witnesses() -> set[tuple[str, int, str]]:
+    """(boss, item id, zone) for every boss drop a vendored Wowhead list states.
+
+    Parsed with the assembler's own parse, so the check reads the row the same
+    way the universe build does.
+    """
+    out: set[tuple[str, int, str]] = set()
+    folders = sorted(
+        {p.wowhead_dir for p in SPEC_PROFILES.values() if p.wowhead_dir is not None}
+    )
+    for folder in folders:
+        for path in sorted(folder.glob("*.json")):
+            doc = load_json(path)
+            if not isinstance(doc, dict):
+                continue
+            for row in doc.get("entries") or []:
+                if not isinstance(row, dict):
+                    continue
+                for src in parse_wowhead_source(source_text_for_parsing(row)):
+                    boss = src.get("boss")
+                    zone = src.get("zone")
+                    if isinstance(boss, str) and isinstance(zone, str):
+                        out.add((boss, int(row["itemId"]), zone))
+    return out
+
+
+def zone_or_wing(listed: str, emitted: str) -> bool:
+    return listed == emitted or listed.startswith(emitted + " ")
 
 
 def phase_raid_zones() -> set[str]:
@@ -127,6 +171,8 @@ def main() -> int:
     raid_zones = phase_raid_zones()
     dungeon_loot: set[tuple[str, int]] | None = None
     accepted_dungeon_bosses: list[str] = []
+    wowhead_witnesses: set[tuple[str, int, str]] | None = None
+    wowhead_dungeon_bosses: list[str] = []
     failures: list[str] = []
 
     for unit, encounter in BOSS_UNIT_TO_ENCOUNTER.items():
@@ -167,13 +213,27 @@ def main() -> int:
                 dungeon_loot = dungeon_encounter_loot(
                     ATLASLOOT_LUA.read_text(encoding="utf-8")
                 )
-            unlisted = sorted(i for i in item_ids if (boss, i) not in dungeon_loot)
+            unlisted_hits = {(i, z) for i, z in hits if (boss, i) not in dungeon_loot}
+            if unlisted_hits and wowhead_witnesses is None:
+                wowhead_witnesses = wowhead_drop_witnesses()
+            unlisted = sorted(
+                {
+                    i
+                    for i, zone in unlisted_hits
+                    if not any(
+                        b == boss and wi == i and zone_or_wing(wz, zone or "")
+                        for b, wi, wz in wowhead_witnesses or ()
+                    )
+                }
+            )
             if unlisted:
                 failures.append(
                     f"{boss!r} names five-man drops (items {unlisted[:5]}) that "
                     f"AtlasLoot's dungeon tables do not list under an encounter "
                     f"of that name. Either the boss or the item is wrong."
                 )
+            elif unlisted_hits:
+                wowhead_dungeon_bosses.append(boss)
             else:
                 accepted_dungeon_bosses.append(boss)
         else:
@@ -197,6 +257,12 @@ def main() -> int:
             f" or a five-man encounter its dungeon tables list "
             f"({', '.join(accepted_dungeon_bosses)})"
             if accepted_dungeon_bosses
+            else ""
+        )
+        + (
+            f" or a five-man boss a Wowhead list names for that item "
+            f"({', '.join(wowhead_dungeon_bosses)})"
+            if wowhead_dungeon_bosses
             else ""
         )
     )
