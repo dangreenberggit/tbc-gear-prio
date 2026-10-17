@@ -21,7 +21,7 @@
     1012
   ],
   "d7EligibleTotal": 2967,
-  "excludedNoSource": 872,
+  "excludedNoSource": 871,
   "universeTotal": 767,
   "listOnlyMembership": 28,
   "perSlot": {
@@ -41,9 +41,9 @@
     "wrist": 51
   },
   "sourceRecordAdds": {
-    "atlasloot": 251,
-    "curated": 4,
-    "db": 1972,
+    "atlasloot": 253,
+    "curated": 3,
+    "db": 1974,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 13
@@ -52,9 +52,9 @@
     "arenaSource": 71,
     "curated": 5,
     "dbPhase": 255,
-    "itemHasOrigin:atlasloot": 100,
-    "itemHasOrigin:curated": 4,
-    "itemHasOrigin:db": 686,
+    "itemHasOrigin:atlasloot": 101,
+    "itemHasOrigin:curated": 3,
+    "itemHasOrigin:db": 687,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 12,
     "listOnly": 28,
@@ -64,10 +64,10 @@
     "zoneMatch": 343
   },
   "exclusivePrimaryOrigin": {
-    "db": 686,
+    "db": 687,
     "wowhead-only": 12,
     "atlasloot-only": 50,
-    "other": 4,
+    "other": 3,
     "two-hop": 15
   },
   "tierPiecesExpected": 15,
@@ -189,7 +189,9 @@
       }
     ]
   },
-  "ticket157ForceIncluded": [],
+  "ticket157ForceIncluded": [
+    28034
+  ],
   "excludedUnimplementedEffect": [
     {
       "itemId": 11810,

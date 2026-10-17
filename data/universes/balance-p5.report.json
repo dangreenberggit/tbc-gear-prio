@@ -23,7 +23,7 @@
     1077
   ],
   "d7EligibleTotal": 3006,
-  "excludedNoSource": 796,
+  "excludedNoSource": 794,
   "universeTotal": 964,
   "listOnlyMembership": 0,
   "perSlot": {
@@ -43,9 +43,9 @@
     "wrist": 60
   },
   "sourceRecordAdds": {
-    "atlasloot": 255,
+    "atlasloot": 257,
     "curated": 5,
-    "db": 2097,
+    "db": 2099,
     "sunmote": 23,
     "two-hop": 18
   },
