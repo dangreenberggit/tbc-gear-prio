@@ -168,20 +168,16 @@ DB_PHASE_MIN_QUALITY = 4
 DB_PHASE_MIN_ILVL = 100
 
 # Ticket 157: six D7-eligible ret items the SME review named as missing from
-# the pool despite being real, well-known TBC drops/quest rewards. Every one
-# fails the general admission gate the same way -- db.json's `sources[]`
-# names a five-man zone that is neither a phase_raids.json raid nor listed in
-# PHASE_HEROIC_DUNGEONS (Dire Maul, The Black Morass, The Mechanar are not
-# there; Blood Furnace is, but PHASE_HEROIC_DUNGEONS deliberately excludes it
-# per ticket 17), and the Wowhead prose parser also mis-reads their source
-# text (a " - Heroic" suffix the heroic-zone regex does not match, or a
-# "Quest:" line with no zone at all). Widening PHASE_HEROIC_DUNGEONS would
-# also admit ~280 other phase-1 items from those same dungeons -- exactly the
-# broader question ticket 17 flagged and deferred as its own project, not a
-# drive-by here. This set force-admits only the six named items, the same
-# way `curated_unsourced` force-admits a wowsims-equipped item with no
-# resolvable source: real source text exists (see each entry below), it just
-# isn't in a shape the automated zone/heroic gate currently reads.
+# the pool despite being real, well-known TBC drops/quest rewards. None passes
+# the membership routes: their db.json source names a five-man zone that is
+# neither a phase_raids.json raid nor in PHASE_HEROIC_DUNGEONS. Widening
+# PHASE_HEROIC_DUNGEONS would also admit ~280 other phase-1 items from those
+# dungeons -- ticket 17's question, deferred as its own project. So this set
+# grants membership only, to these six. Their sources come from db.json and
+# AtlasLoot like any other item's (ticket 174); the validation guard accepts
+# a five-man zone that upstream's zone table names. The two quest rewards
+# (31033, 31856) have no source in any committed input but the text below,
+# so they stay `unknown` (ticket 676).
 TICKET_157_FORCE_INCLUDE: dict[int, str] = {
     27484: "Drop: The Maker (Blood Furnace, Heroic)",
     31033: "Quest: News of Victory",
@@ -1455,6 +1451,13 @@ def sunmote_upgrade_pairs(
     return kept
 
 
+# Five db.json npc names carry AtlasLoot's Lua source text, such as
+# 16097 'Isalien"].." - "..format(AL["Tier %s Sets' (ticket 174). A boss
+# printed from one is noise, so the row keeps its zone and drops the boss.
+# Brackets only: npc 6907 'Eric \"The Swift\"' has quotes in a real name.
+GARBLED_NPC_NAME_RE = re.compile(r"[\[\]]")
+
+
 def map_db_source(
     raw: object,
     *,
@@ -1481,6 +1484,8 @@ def map_db_source(
             or zones_by_id.get(drop.get("zoneId"))
         )
         boss = drop.get("npcName") or npcs_by_id.get(drop.get("npcId"))
+        if boss and GARBLED_NPC_NAME_RE.search(str(boss)):
+            boss = None
         if zone:
             # Without this the heroic drops were labelled `raid` and then
             # dropped at membership for naming a zone phase_raids.json has
@@ -2109,16 +2114,6 @@ def assemble(
         if not eligible_d7(it, profile):
             continue
         iid = int(it["id"])
-        # Ticket 157's six force-included items each have a db/Wowhead source
-        # that names a five-man zone the validation guard below correctly
-        # rejects (Dire Maul, The Black Morass, The Mechanar are not raids;
-        # Blood Furnace is a heroic PHASE_HEROIC_DUNGEONS deliberately
-        # excludes). Recording that unusable row here and admitting the item
-        # through TICKET_157_FORCE_INCLUDE below would ship a source the rest
-        # of the engine cannot resolve -- so these items skip the automated
-        # db source entirely and carry only the documented force-include one.
-        if iid in TICKET_157_FORCE_INCLUDE:
-            continue
         db_src = map_db_source(
             it.get("sources"), zones_by_id=zones_by_id, npcs_by_id=npcs_by_id
         )
@@ -2236,14 +2231,6 @@ def assemble(
             wowhead_list_ids.add(iid)
             if hold_out_wowhead:
                 continue
-            # Same reasoning as the db loop above: these six items' Wowhead
-            # prose also mis-parses into an unresolvable zone (a " - Heroic"
-            # suffix WOWHEAD_HEROIC_ZONE_RE does not match, or "Quest:" text
-            # with a parenthetical the parser mistakes for a zone). Force
-            # membership carries them; the raw parse would only add a source
-            # row the validation guard below has to reject.
-            if iid in TICKET_157_FORCE_INCLUDE:
-                continue
             machine_locus = iid in machine_locus_ids
             parsed = parse_wowhead_source(source_text_for_parsing(row))
             for src in parsed:
@@ -2294,30 +2281,35 @@ def assemble(
         elif all(is_list_only_source(s) for s, _ in pairs):
             curated_list_only.add(iid)
 
-    # Ticket 157: force-admit the six named items past the zone/heroic source
-    # gate -- see TICKET_157_FORCE_INCLUDE's comment for why this bypasses
-    # that gate instead of widening it. `eligible_d7` and the phase cut still
-    # apply, so this only rescues items the *source* lookup lost.
+    # Ticket 157: admit the six named items although no membership route
+    # takes their five-man sources -- see TICKET_157_FORCE_INCLUDE's comment
+    # for why this admits them instead of widening those routes. `eligible_d7`
+    # and the phase cut (the `curated` disjunct below) still apply.
     #
-    # Ret-only, because the six were chosen by a ret SME review. Three of them
-    # (the trinkets) also pass `eligible_d7` for feral, so without this guard
-    # they leaked into the feral universes and put feral-p2/p3 out of step with
-    # their own generator -- the exact defect ticket 154 had just fixed. Caught
-    # by this branch's pre-merge review; see ticket 154's comment.
+    # For ret, because the six were chosen by a ret SME review. Three of them
+    # (the trinkets) also pass `eligible_d7` for feral, and admitting them
+    # there put feral-p2/p3 out of step with their own generator (ticket 154).
+    # Another spec admits one only where wowsims equips it (`bis_ids`), which
+    # the loop above already did while it had no source; now that the db source
+    # is recorded, this set is what keeps it in.
     ticket_157_included: set[int] = set()
-    for iid in TICKET_157_FORCE_INCLUDE if profile.spec == "ret" else ():
+    for iid in TICKET_157_FORCE_INCLUDE:
+        if profile.spec != "ret" and iid not in bis_ids:
+            continue
         it = db_by_id.get(iid)
         if it is None or not eligible_d7(it, profile):
             continue
+        ticket_157_included.add(iid)
+        if source_acc.get(iid):
+            continue
         # `origin="curated"` (not a new value) -- pool.ts's ItemSourceOrigin
-        # union is a closed set consumers branch on, and this force-include is
-        # the same *shape* of claim as curated_unsourced above: a real,
-        # documented source the automated gate cannot parse, not a machine
-        # witness. See item-source-kinds.json's own note on why kinds and
-        # origins are shared, closed vocabularies.
+        # union is a closed set consumers branch on, and this is the same
+        # *shape* of claim as curated_unsourced above: a documented source no
+        # committed input records, not a machine witness. See
+        # item-source-kinds.json's own note on why kinds and origins are
+        # shared, closed vocabularies.
         add_source(iid, {"kind": "unknown"}, "curated")
         curated_unsourced.add(iid)
-        ticket_157_included.add(iid)
 
     # Arena gear is a source the player keeps or removes, for every spec
     # (ticket 642). The owner's ruling, verbatim: "the "dropping arena
@@ -2455,8 +2447,13 @@ def assemble(
         # source: without this guard it leaked into ret-p2.json even though
         # cli.ts's loadUniversePool trusts a universe file's own membership as
         # already phase-scoped and never re-applies filterPoolByPhase.
+        # `ticket_157_included` is the one exception to the first sentence:
+        # six named items whose five-man source grants no membership (ticket
+        # 157's comment at TICKET_157_FORCE_INCLUDE).
         curated = (
-            iid in curated_unsourced or iid in curated_list_only
+            iid in curated_unsourced
+            or iid in curated_list_only
+            or iid in ticket_157_included
         ) and int(it.get("phase") or 99) <= max_phase
         # Same `phase <= max_phase` idiom the routes above carry. The admit
         # block already applied it, but re-applying costs nothing and keeps
@@ -2565,6 +2562,11 @@ def assemble(
     known_zones = {
         str(z["name"]) for z in (phase_raids.get("zones") or []) if z.get("name")
     }
+    db_zone_names = {
+        str(z["name"])
+        for z in (db.get("zones") or [])
+        if isinstance(z, dict) and "name" in z
+    }
     source_errors: list[str] = []
     for e in entries:
         if not e["sources"]:
@@ -2577,21 +2579,34 @@ def assemble(
                 source_errors.append(
                     f"{e['itemId']} {e['name']}: sources[{i}] unknown kind {s['kind']!r}"
                 )
-            # A raid/token zone that phase_raids.json does not list can never
-            # match a zone-keyed lookup, so the row advertises a raid the rest
-            # of the engine cannot find. "Maghteridon's Lair" shipped this way.
-            elif s["kind"] in ("raid", "token") and s.get("zone") not in known_zones:
+            # A zone no input knows is a typo: "Maghteridon's Lair" shipped
+            # this way. A five-man zone upstream's zone table names is a real
+            # place (ticket 174's Mechanar and Black Morass rows), and the tab
+            # keys both source dialogs by zone with no zone list of its own,
+            # so it files as its own entry. Membership never reads this guard.
+            elif s["kind"] == "raid" and s.get("zone") not in (
+                known_zones | db_zone_names
+            ):
+                source_errors.append(
+                    f"{e['itemId']} {e['name']}: sources[{i}] zone "
+                    f"{s.get('zone')!r} is not in phase_raids.json or db.json"
+                )
+            # Token zones stay phase raids only: the tab prints "(N)" for a
+            # token row because every db.json drop in a phase raid is Normal.
+            elif s["kind"] == "token" and s.get("zone") not in known_zones:
                 source_errors.append(
                     f"{e['itemId']} {e['name']}: sources[{i}] zone "
                     f"{s.get('zone')!r} is not in phase_raids.json"
                 )
-            # The same trap one kind over: a heroic naming a dungeon the phase
-            # map does not carry can never match a tier, so it would ship as a
-            # source the reader cannot act on.
-            elif s["kind"] == "heroic" and s.get("dungeon") not in PHASE_HEROIC_DUNGEONS:
+            # The same trap one kind over: a heroic naming a dungeon no input
+            # knows is a typo, not a place.
+            elif s["kind"] == "heroic" and s.get("dungeon") not in (
+                PHASE_HEROIC_DUNGEONS.keys() | db_zone_names
+            ):
                 source_errors.append(
                     f"{e['itemId']} {e['name']}: sources[{i}] dungeon "
-                    f"{s.get('dungeon')!r} is not in PHASE_HEROIC_DUNGEONS"
+                    f"{s.get('dungeon')!r} is not in PHASE_HEROIC_DUNGEONS "
+                    "or db.json"
                 )
     if source_errors:
         print(
