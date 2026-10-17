@@ -65,7 +65,8 @@ On `data/tab-fixtures/ret-p3-p2.json`:
   (`scripts/assemble_universe.py`, the "Token zones stay phase raids only"
   check). Re-run from the repo root:
   `python -I -c "import json,collections;db=json.load(open('vendor/wowsims/db.json',encoding='utf-8'));zn={z['id']:z['name'] for z in db['zones']};c=collections.defaultdict(collections.Counter);[c[zn.get(d['zoneId'])].update([d.get('difficulty',0)]) for i in db['items'] for s in i.get('sources') or [] for d in [s.get('drop')] if d and d.get('zoneId')];print({z:dict(c[z]) for z in [z['name'] for z in json.load(open('data/phase_raids.json',encoding='utf-8'))['zones']]})"`
-  → every zone prints only key 1 (2026-10-16, `tbc-gear-prio@9af4fae8`;
+  → every zone with a drop prints only key 1; World Bosses has no db.json
+  drop and prints `{}` (2026-10-16, `tbc-gear-prio@9af4fae8`;
   this replaces a claim id from the gitignored stage plan, pre-merge review
   feat/tab-source-labels, S2). The text is upstream's `difficultyNames`. The plain text is one line with
   ' · ' where upstream's linked block uses two lines.

@@ -367,6 +367,9 @@ file contention, worker prompt. This file stays the chronological log.
 - 673 The completeness gate does not check entries a list should not hold (pre-merge review feat/tab-item-lists, A1) 2026-10-16
 - 674 Re-run Stage 3T on the final dev, record it, and ask about dev -> main (stage-gate tab-blocking-finish, deferred part P2) 2026-10-16
 - 675 `docs/fork-upstream-touchpoints.md` names a fork commit and upstream base the locks no longer pin (pre-merge review docs/stage-3t-boxes, B2) 2026-10-16
+- 676 Badge, honor and holiday items need an input that names their source (stage tab-source-labels, deferred part P3) 2026-10-16
+- 677 Confirm the Empty Mug of Direbrew (281739) ilvl-141 stats (stage tab-source-labels, deferred part P4) 2026-10-16
+- 678 A check that fails when the builder silently drops a listed item (stage tab-source-labels, deferred part P5) 2026-10-16
 - 679 No `pnpm verify` gate rebuilds the committed universes and compares them (pre-merge review feat/tab-source-labels, A1) 2026-10-16
 - 680 Libram of Hope's Source cell probably shows a Lua fragment as the boss (pre-merge review feat/tab-source-labels, D1) 2026-10-16
 - 681 Honour PvP rows name no season, while arena rows do (pre-merge review feat/tab-source-labels, D3) 2026-10-16

@@ -125,6 +125,40 @@ list and are still `unknown` (ret 10, feral 2); why the builder does not
 read those rows is a hypothesis, untested (the stage files read for p5, or
 text `parse_wowhead_source` cannot read).
 
+The 8 / 7 / 20 counts in § Why it is deferred, the 51 / 15 / 68 split and
+the 12 own-spec rows come from this script, saved to a file and run from
+the repo root with `python -I <file>.py` (2026-10-16, `tbc-gear-prio@ed8beb00`:
+`badge ids 8 with a cost 7 honour/arena ids 20` and
+`{'badge': 51, 'pvp': 15, 'other': 68} own-spec {'feral': 2, 'ret': 10}`;
+pre-merge review feat/tab-source-labels, R2). Badge means the list text
+matches `badges? of justice`; honour or arena means it contains `honor` or
+`arena`; "with a cost" means the badge text holds a digit.
+
+```python
+import glob, json, os, re
+L, T = {}, {}
+for p in glob.glob('data/wowhead-lists/**/*.json', recursive=True):
+    spec = os.path.normpath(p).split(os.sep)[2]
+    for e in json.load(open(p, encoding='utf-8'))['entries']:
+        L.setdefault(e['itemId'], set()).add(spec)
+        T.setdefault(e['itemId'], set()).add(e.get('correctedSourceText') or e.get('wowheadSourceText') or '')
+boj = lambda t: re.search('badges? of justice', t.lower())
+badge = {i for i, ts in T.items() if any(boj(t) for t in ts)}
+cost = {i for i in badge if any(boj(t) and re.search(r'\d', t) for t in T[i])}
+pvp = {i for i, ts in T.items() if any('honor' in t.lower() or 'arena' in t.lower() for t in ts)}
+print('badge ids', len(badge), 'with a cost', len(cost), 'honour/arena ids', len(pvp))
+cls, own = {'badge': 0, 'pvp': 0, 'other': 0}, {}
+for p in sorted(glob.glob('data/universes/*-p5.json')):
+    if p.endswith('.report.json'): continue
+    spec = os.path.basename(p).split('-')[0]
+    for e in json.load(open(p, encoding='utf-8-sig'))['entries']:
+        if e['sources'][0]['kind'] != 'unknown' or e['itemId'] not in L: continue
+        ts = ' '.join(T[e['itemId']]).lower()
+        cls['badge' if boj(ts) else 'pvp' if 'honor' in ts or 'arena' in ts else 'other'] += 1
+        if spec in L[e['itemId']]: own[spec] = own.get(spec, 0) + 1
+print(cls, 'own-spec', own)
+```
+
 So the Wowhead lists close at most 134 of 3481 unknown p5 rows (about 4%).
 The rest of this ticket's data collection stands.
 
