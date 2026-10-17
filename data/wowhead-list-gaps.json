@@ -3,7 +3,15 @@
     "Hand-written. pnpm wowhead-list-gaps:check (scripts/check_wowhead_list_gaps.py, tickets 678 and 173) fails when an item a spec's Wowhead list names is absent from that spec's universe, or is present with first source kind unknown, unless a row here names that (spec, itemId) at that phase.",
     "The check also fails on a row that is no longer a gap (STALE GAP), so this file only shrinks: remove a row when its gap is fixed, and never add one to make the check pass without a ticket that owns the gap.",
     "Reasons were assigned per id by the investigation in .scratch/agent-reports/2026-10-17-general-task-gates-678-679-683.md section A (gitignored), not classified by code. Ticket 17 owns the five-man and heroic membership rows; ticket 676 (part P4) owns the unknownSource rows and the missing source inputs.",
-    "phases lists every phase 2-5 at which the item is a gap; an item absent at some phases and unknown at others would need two rows (there are none)."
+    "phases lists every phase 2-5 at which the item is a gap; an item absent at some phases and unknown at others would need two rows (there are none).",
+    "unreadLists names each list file whose name states no phase, so no phase reads it; the check fails on any other such file (UNPLACED LIST) and on a row here that a phase reads or whose file is gone (STALE UNREAD)."
+  ],
+  "unreadLists": [
+    {
+      "path": "data/wowhead-lists/ret/pre-raid.json",
+      "ticket": "676",
+      "reason": "The pre-raid guide is BiS before raiding, and no universe (phases 2-5) has ever read it for membership; whether p5 should read it is ticket 676's open owner question. The builder's cross-spec index does read its badge, PvP and world rows, since those describe the item."
+    }
   ],
   "reasons": {
     "notInDb": "The item id is not in vendor/wowsims/db.json, so the builder cannot add it.",

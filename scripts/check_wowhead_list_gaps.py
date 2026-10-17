@@ -2,12 +2,21 @@
 """Fail when an item a Wowhead list names is missing from its universe (678, 173).
 
 For each spec profile with a Wowhead list folder (`wowhead_dir`) and each phase
-2-5 whose universe is committed, the list ids are the union of the stage files
-`WOWHEAD_STAGE_FOR_MAX_PHASE` names for that phase. A list id is a gap when it
-is absent from `data/universes/<spec>-p<N>.json`, or present with first source
+2-5 whose universe is committed, the list ids are the union of the folder's
+list files that phase reads. A list id is a gap when it is absent from
+`data/universes/<spec>-p<N>.json`, or present with first source
 `kind: unknown`. Every gap must be a row of `data/wowhead-list-gaps.json`
 (reason `unknownSource` for the second case, any other reason for the first),
 and every row must still be a gap, so the file only shrinks.
+
+Which phases read a file comes from the file's own name, not from the
+builder: `p3.json` and `p1-p2.json` hold the guides for phases 3 and 2, so
+they are read at that phase and every later one. A file whose name states no
+phase (`pre-raid.json`) fails as `UNPLACED LIST` unless the gap file's
+`unreadLists` names it with the ticket that owns the choice; an `unreadLists`
+row whose file is gone, or that the builder reads after all, fails as
+`STALE UNREAD`. So a builder that stops reading a list file makes that file's
+items gaps here, and a list file nobody placed cannot go unchecked.
 
 Ticket 173 asked for exactly this: an item that falls out of a universe (into
 `excludedNoSource` or through any other cause) used to change only a count in
@@ -16,12 +25,9 @@ a report. Here it fails `pnpm verify` as `NEW GAP` naming the item.
 Independence: this reads the list files and the committed universes, never a
 `*.report.json` or its `wowheadListIds`, and imports only two constants from
 the builder (`SPEC_PROFILES` for each spec's list folder,
-`WOWHEAD_STAGE_FOR_MAX_PHASE` for which stage files a phase reads). It runs no
-builder code, so a builder that drops a listed item cannot pass by
-construction. Run `pnpm universe-rebuild:check` first so the universes read
-here are what the builder builds. Importing the builder module still parses
-`vendor/wowsims/db.json` (its `ARENA_GEAR_IDS` constant is built at import), so
-a missing db exits 2 before the import instead of with a traceback.
+`WOWHEAD_STAGE_FOR_MAX_PHASE` only for the `STALE UNREAD` test). Run
+`pnpm universe-rebuild:check` first so the universes read here are what the
+builder builds.
 
 Exit 0 no failure, 1 a failure, 2 an input is missing.
 """
@@ -29,24 +35,23 @@ Exit 0 no failure, 1 a failure, 2 an input is missing.
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DB = ROOT / "vendor/wowsims/db.json"
 UNIVERSES = ROOT / "data/universes"
 GAPS = ROOT / "data/wowhead-list-gaps.json"
 PHASES = (2, 3, 4, 5)
 UNKNOWN_REASON = "unknownSource"
-
-if not DB.is_file():
-    print(
-        f"missing {DB.relative_to(ROOT).as_posix()} -- run pnpm sync:wowsims:restore",
-        file=sys.stderr,
-    )
-    sys.exit(2)
+# "p3" or "p1-p2": the guide is for the last phase it names.
+STAGE_PHASE_RE = re.compile(r"^p(?:\d+-p)?(?P<phase>\d+)$")
 
 sys.path.insert(0, str(ROOT / "scripts"))
+from _vendored_inputs import exit_if_missing  # noqa: E402
+
+exit_if_missing()
+
 from assemble_universe import (  # noqa: E402
     SPEC_PROFILES,
     WOWHEAD_STAGE_FOR_MAX_PHASE,
@@ -57,11 +62,15 @@ def load(path: Path) -> object:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def list_rows(wowhead_dir: Path, phase: int) -> dict[int, str]:
+def first_phase(path: Path) -> int | None:
+    m = STAGE_PHASE_RE.match(path.stem)
+    return int(m["phase"]) if m else None
+
+
+def list_rows(files: list[tuple[int, Path]], phase: int) -> dict[int, str]:
     rows: dict[int, str] = {}
-    for stage in WOWHEAD_STAGE_FOR_MAX_PHASE[phase]:
-        path = wowhead_dir / f"{stage}.json"
-        if not path.is_file():
+    for start, path in files:
+        if start > phase:
             continue
         data = load(path)
         assert isinstance(data, dict)
@@ -89,6 +98,35 @@ def main() -> int:
         for spec in listed
     }
 
+    unread = {
+        str(row["path"]): row for row in gap_file.get("unreadLists") or []
+    }
+    builder_stages = {s for stages in WOWHEAD_STAGE_FOR_MAX_PHASE.values() for s in stages}
+    placed: dict[str, list[tuple[int, Path]]] = {}
+    seen_unread: set[str] = set()
+    for spec, wowhead_dir in listed.items():
+        placed[spec] = []
+        for path in sorted(wowhead_dir.glob("*.json")):
+            rel = path.relative_to(ROOT).as_posix()
+            start = first_phase(path)
+            if rel in unread:
+                seen_unread.add(rel)
+                if start is not None or path.stem in builder_stages:
+                    failures.append(
+                        f"STALE UNREAD {rel} -- a phase reads it, remove it "
+                        "from unreadLists"
+                    )
+                continue
+            if start is None:
+                failures.append(
+                    f"UNPLACED LIST {rel} -- its name states no phase; name it "
+                    "in unreadLists with the ticket that owns it, or rename it"
+                )
+                continue
+            placed[spec].append((start, path))
+    for rel in sorted(set(unread) - seen_unread):
+        failures.append(f"STALE UNREAD {rel} -- no such list file")
+
     # (spec, phase, itemId) -> "absent" | "unknown", from the gap file.
     expected: dict[tuple[str, int, int], str] = {}
     for row in gap_file["gaps"]:
@@ -115,9 +153,9 @@ def main() -> int:
     list_total = 0
     found: dict[tuple[str, int, int], str] = {}
     names: dict[tuple[str, int, int], str] = {}
-    for spec, wowhead_dir in listed.items():
+    for spec in listed:
         for phase in built[spec]:
-            rows = list_rows(wowhead_dir, phase)
+            rows = list_rows(placed[spec], phase)
             list_total += len(rows)
             universe = load(UNIVERSES / f"{spec}-p{phase}.json")
             assert isinstance(universe, dict)

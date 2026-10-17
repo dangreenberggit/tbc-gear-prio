@@ -34,20 +34,17 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DB = ROOT / "vendor/wowsims/db.json"
 UNIVERSES = ROOT / "data/universes"
 UNIVERSE_NAME_RE = re.compile(r"^(?P<spec>[a-z]+)-p(?P<phase>\d)\.json$")
 
-# Importing the builder parses db.json (its ARENA_GEAR_IDS constant is built at
-# import), so check for it first and exit 2 instead of with a traceback.
-if not DB.is_file():
-    print(
-        f"missing {DB.relative_to(ROOT).as_posix()} -- run pnpm sync:wowsims:restore",
-        file=sys.stderr,
-    )
-    sys.exit(2)
-
 sys.path.insert(0, str(ROOT / "scripts"))
+from _vendored_inputs import exit_if_missing  # noqa: E402
+
+# Every locked file, not only db.json: the builder skips an absent gear-set
+# file silently, so this check would print MISMATCH and advise a regeneration
+# that drops that file's curated-set labels (review finding A3).
+exit_if_missing(every_locked_file=True)
+
 import assemble_universe as A  # noqa: E402
 
 

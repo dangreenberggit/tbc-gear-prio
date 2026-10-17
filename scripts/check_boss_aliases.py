@@ -25,8 +25,9 @@ That Lua holds only TBC five-mans, so it cannot witness a vanilla dungeon boss
 (22401 Libram of Hope, Dire Maul · Isalien, recovered from db.json's garbled
 npc name in ticket 680). An item AtlasLoot does not list is still accepted
 when a vendored Wowhead list row for that same item names that boss, in that
-zone or one of its wings ("Dire Maul East"). A boss name neither input states
-for the item still fails.
+zone or one of its wings ("Dire Maul East"), and only when the universe row
+did not itself come from a Wowhead list: such a row cannot witness itself. A
+boss name neither input states for the item still fails.
 
 Run via `pnpm verify` (`pnpm boss-aliases:check`).
 """
@@ -148,9 +149,10 @@ def atlasloot_boss_names() -> set[str]:
     return names
 
 
-def emitted_boss_names() -> dict[str, set[tuple[int, str | None]]]:
-    """Keeps each hit's zone so main() can tell a five-man boss from a raid boss."""
-    out: dict[str, set[tuple[int, str | None]]] = {}
+def emitted_boss_names() -> dict[str, set[tuple[int, str | None, str | None]]]:
+    """(item id, zone, origin) per boss. The zone tells a five-man boss from a
+    raid boss; the origin keeps a Wowhead row from witnessing itself."""
+    out: dict[str, set[tuple[int, str | None, str | None]]] = {}
     for path in sorted(UNIVERSES.glob("*-p*.json")):
         if path.name.endswith(".report.json"):
             continue
@@ -160,8 +162,13 @@ def emitted_boss_names() -> dict[str, set[tuple[int, str | None]]]:
                 boss = source.get("boss")
                 if isinstance(boss, str):
                     zone = source.get("zone")
+                    origin = source.get("origin")
                     out.setdefault(boss, set()).add(
-                        (entry["itemId"], zone if isinstance(zone, str) else None)
+                        (
+                            entry["itemId"],
+                            zone if isinstance(zone, str) else None,
+                            origin if isinstance(origin, str) else None,
+                        )
                     )
     return out
 
@@ -192,7 +199,7 @@ def main() -> int:
             )
 
     for boss, hits in sorted(emitted_boss_names().items()):
-        item_ids = {item_id for item_id, _ in hits}
+        item_ids = {item_id for item_id, _, _ in hits}
         if canonical_boss(boss) != boss:
             failures.append(
                 f"{boss!r} reached the universe unfolded (items "
@@ -201,7 +208,7 @@ def main() -> int:
             )
         elif boss in known:
             continue
-        elif all(zone is not None and zone not in raid_zones for _, zone in hits):
+        elif all(zone is not None and zone not in raid_zones for _, zone, _ in hits):
             if dungeon_loot is None:
                 if not ATLASLOOT_LUA.is_file():
                     failures.append(
@@ -213,14 +220,17 @@ def main() -> int:
                 dungeon_loot = dungeon_encounter_loot(
                     ATLASLOOT_LUA.read_text(encoding="utf-8")
                 )
-            unlisted_hits = {(i, z) for i, z in hits if (boss, i) not in dungeon_loot}
+            unlisted_hits = {
+                (i, z, o) for i, z, o in hits if (boss, i) not in dungeon_loot
+            }
             if unlisted_hits and wowhead_witnesses is None:
                 wowhead_witnesses = wowhead_drop_witnesses()
             unlisted = sorted(
                 {
                     i
-                    for i, zone in unlisted_hits
-                    if not any(
+                    for i, zone, origin in unlisted_hits
+                    if origin == "wowhead"
+                    or not any(
                         b == boss and wi == i and zone_or_wing(wz, zone or "")
                         for b, wi, wz in wowhead_witnesses or ()
                     )

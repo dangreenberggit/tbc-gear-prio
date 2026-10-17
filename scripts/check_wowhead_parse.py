@@ -20,6 +20,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 
 sys.path.insert(0, str(ROOT / "scripts"))
+from _vendored_inputs import exit_if_missing  # noqa: E402
+
+exit_if_missing()
+
 from assemble_universe import parse_wowhead_source  # noqa: E402
 
 CASES: list[tuple[str, list[dict]]] = [
