@@ -233,7 +233,8 @@ Tickets: this branch files 1 (684) and closes 7 (677, 678, 679, 680, 681,
 `git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`
 and the skill's `Status:` grep. Ticket 173, closed earlier on the branch,
 is open again with a narrowed scope. Open tickets this review links: 173,
-676, 684.
+676, 684. The addendum below adds commits after round 2 and updates these
+counts (2 filed, 8 closed).
 
 ## Disposition (round 2)
 
@@ -259,3 +260,109 @@ is open again with a narrowed scope. Open tickets this review links: 173,
 | P1  | Spec        | defer       | `.scratch/carry-forward/issues/173-nothing-detects-the-next-silently-dropped-item.md` — reopened, narrowed to the nine specs without lists and items no list names; gap predates this branch                                              |
 | P2  | Spec        | fixed       | fork `18a42296e`: `SourceCell.tsx` draws the overrun drop as upstream's npc link; upstream `ItemSource` unchanged                                                                                                                         |
 | P3  | Spec        | wontfix     | out of scope (owner direction, 2026-10-17): a unit test of the badge/pvp pick rules, which choose between rows of the same kind                                                                                                           |
+
+## Addendum (round 3): owner-requested follow-ups
+
+Reviewed range: `199b32892481144ad4a785e167e540b5dda9649f..b5efceff8b54a47606bd599daff342e5666d7d1c`
+
+Fork range: none; the fork stays at `160ae36c2`.
+
+The owner asked for the three "Observations not acted on" of the round-2
+report to be handled on this branch before the merge (coordinator relay,
+2026-10-17), under the owner rule of 2026-10-17: fix only what affects what
+the tab shows, the item pool, or a gate's correctness.
+
+- **28034 Hourglass of the Unraveller, `kind: raid` for The Black Morass:
+  dropped, no change.** Nothing the tab shows, no pool membership and no
+  gate reads the `raid` kind: the tab prints a `raid` source as zone and
+  boss (fork `utils/format.ts` `sourceDetail`), keys filters by zone under
+  "Raids and dungeons", and `ItemSource` has no other zone kind
+  (`packages/core/src/item-source-kinds.json`); 28034's membership comes
+  from `TICKET_157_FORCE_INCLUDE` (`scripts/assemble_universe.py`).
+- **Seven checks without the db.json guard: fixed** in `78fea887`. With
+  `vendor/wowsims/db.json` moved away all seven exit 2 with
+  `missing vendor/wowsims/db.json`; with it back (same SHA-256) all seven
+  exit 0.
+- **`docs/fork-upstream-touchpoints.md` names base `5262ff38`: fixed** in
+  `b5efceff`. The doc now names fork `160ae36c2` on base `e804c29e8`, and
+  its commands reproduce; ticket 675 asked for this.
+
+Dispatch: one fresh `general-task` reviewer on Opus (review lane), in the
+foreground, with the adversarial brief and the `code-review` Standards and
+Spec checks applied by the same agent. The range is 10 files (four of them
+bookkeeping: the review file, the layout lock, and later tickets), so the
+6-file small-change count does not hold; one reviewer was used because the
+work is two commits: one 3-4-line guard repeated in seven scripts, and one
+doc. No domain axis: no game fact changed, and the reviewer checked the
+28034 decision. `codex` is not on `PATH`.
+
+### Addendum review result
+
+No data loss, no silent wrong result. Six findings: R1 a dirty tree (the
+uncommitted lines were this section's heading and range, written before
+dispatch as step 1 says); R2 line citations that the guard moved
+(`.claude/skills/data-pipeline-work/SKILL.md:27,85` and its `.agents/` copy
+cite `check_rep_tables.py:136`; `scripts/verify_summary.mjs:25` and
+`verify_summary.test.mjs:38` cite `check_equip_eligibility.py:239`); R3 dead
+skip code and docstrings that no longer match (`check_class_restricted_sets.py`,
+`check_rep_tables.py`, exit lines of `check_policy_notes.py` and
+`check_curated_set_phase.py`); R4 the equip-eligibility guard ran after the
+fork compare and hid its output; R5 the ledger said 61 tab commits, the
+true count is 57; R6 ticket 675 asked for this fix and was still open. The
+reviewer confirmed the 28034 decision, including readers not listed above
+(export, sort, `filterPoolByPhase`, `rank-report.ts`, `check_pool_completeness.py`).
+
+### Fixes (addendum)
+
+- `7a894bf0` R3, R4 and R2's code-comment half: dead branches removed,
+  docstrings state exit 2, the equip guard moved to the top of `main()`,
+  the two `verify_summary` comments cite `main()` by name. Planted run
+  repeated: all seven exit 2 with db.json moved away, 0 with it back.
+- `11b103b2` R5, R6: ledger rows, ticket 675 closed with a Resolution, its
+  scope-doc row removed. Ticket 685 filed for R2's skill-file half (a skill
+  edit needs the owner's approval). The scope doc also drops the rows of
+  tickets 677-682 (closed earlier on this branch) and adds 684, so its
+  MISSING and STALE loops print nothing.
+- `0a643739` F1, F2 from the focused check below.
+
+### Focused check (round 3)
+
+Reviewed range: `b5efceff8b54a47606bd599daff342e5666d7d1c..11b103b2b08da279c2e862011415333b6a03f02b`
+
+One fresh `general-task` agent on Opus
+(review lane), in the foreground, wrote nothing. All four checks pass:
+every changed line is at a cited place; no behaviour change beyond the
+guard move (seven checks rc 0 with db.json, rc 2 without it in a scratch
+copy); the ledger numbers and commit counts reproduce and the scope-doc
+loops print nothing; both subjects follow the rules. Two bookkeeping
+findings: F1 the ledger had no row for six fork pins since `316326a95`
+that ticket 675 asked for; F2 the scope-doc row for 684 named
+`scripts/tab-harness/` (the recorder is `scripts/tab-fixtures/record.mjs`)
+and claimed the branch's recordings did not hang, which ticket 684
+contradicts (one hung about 38 minutes). `0a643739` adds the nine
+per-pin rows (each `6 0 ui/app/SimTabsSection.tsx` against its own merge
+base) and corrects the 684 row. As bookkeeping, `0a643739` starts no
+further round.
+
+`pnpm verify` at `11b103b2`: rc 0, `gates: 1542 ran, 0 skipped`.
+`git -C vendor/tbc-new-fork diff --numstat --diff-filter=M e804c29e8 HEAD`
+prints only `6	0	ui/app/SimTabsSection.tsx`.
+
+Tickets after the addendum: this branch files 2 (684, 685) and closes 8
+(675, 677-683), from
+`git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`
+and the skill's `Status:` grep. Open tickets this review links: 173, 676,
+684, 685.
+
+## Disposition (round 3)
+
+| ID  | Axis          | Disposition | Ticket / note                                                                                                                                                                         |
+| --- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R1  | Addendum      | wontfix     | not a defect: the uncommitted lines were this section's heading and range, written by the review's author before dispatch                                                             |
+| R2  | Addendum      | defer       | `.scratch/carry-forward/issues/685-data-pipeline-skill-cites-a-moved-line.md` — skill-file half waits for the owner's approval; the `verify_summary` comment half fixed in `7a894bf0` |
+| R3  | Addendum      | fixed       | `7a894bf0`: dead db.json branches removed; four docstrings state exit 2                                                                                                               |
+| R4  | Addendum      | fixed       | `7a894bf0`: `exit_if_missing()` at the top of `check_equip_eligibility.py` `main()`                                                                                                   |
+| R5  | Addendum      | fixed       | `11b103b2`, then `0a643739`: per-pin rows with the true counts (44 and 13 over the two bases, 57 in all)                                                                              |
+| R6  | Addendum      | fixed       | `11b103b2`: ticket 675 closed, scope-doc row removed                                                                                                                                  |
+| F1  | Focused check | fixed       | `0a643739`: a ledger row for each of the nine pins since `316326a95`                                                                                                                  |
+| F2  | Focused check | fixed       | `0a643739`: 684 row names `scripts/tab-fixtures/record.mjs` and cites ticket 684's 38-minute hang                                                                                     |
