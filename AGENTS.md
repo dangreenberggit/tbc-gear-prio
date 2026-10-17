@@ -158,7 +158,7 @@ The session makes only these tool calls itself:
 - writing `brief.md`, `decision-log.md`, and any stage artifact copied verbatim from a seat's final message
 - the short gate checks: `git status --porcelain`, `git rev-parse HEAD`, `git diff --stat`, and `date -u +%Y-%m-%dT%H:%MZ` for `decision-log.md` times
 - reading the stage-gate artifacts under `.scratch/stage-gate/<slug>/` and `.claude/skills/stage-gate/plan-template.md`
-- reading a report file under `.scratch/agent-reports/` for a detail the condensed report leaves out
+- reading a subagent's report file (AGENTS.md § Subagent reports) for a detail the condensed report leaves out
 
 Everything else goes to a subagent: reading code or docs, running `pnpm` or any other `git` command, editing files, and committing. To run `pre-merge-review`, spawn one subagent to run the whole skill. Allow it to write `docs/reviews/` and `.scratch/carry-forward/` and to commit them, and have it return the review file's path and its summary.
 
@@ -176,7 +176,7 @@ Any agent that splits a research question across subagents, whether the session 
 
 A subagent writes its full report to a report file and makes its final message the **condensed report**: the conclusion; each important claim with its source or the label `hypothesis, untested`; one line naming what the file holds that the message leaves out; and the file's absolute path. Keep the condensed report to what the caller needs for its next step; everything else goes in the file. The Summary for the user follows, as the global "Chat responses" rule says. The file goes at the path the prompt names, else at `.scratch/agent-reports/<UTC date>-<agent type>-<a few words of the task>.md` (gitignored), under a new name if that file exists; it is allowed even when the prompt allows no other path. Claude Code tells every subagent not to write report files, because a parent does not read a file it does not know about. That note does not apply to this file: the condensed report gives the caller its path. Do not start the file name with report, summary, findings or analysis, because Claude Code's Write tool refuses a subagent `.md` file with such a name. Callers with worktree or pair workers name a path in their own checkout.
 
-Skip the file when the whole report fits the condensed report, or when the task's product is already a file the caller reads (a review, a handoff, a plan file). A format or template the prompt names takes precedence. Stage-gate seats (`gate-*`) follow their definitions and the stage-gate skill for their own final messages; a seat that spawns workers, such as `gate-executor`, is their caller under this section.
+Skip the file when the whole report fits the condensed report, or when the task's product is already a file the caller reads (a review, a handoff, a plan file). A format or template the prompt names takes precedence. So does a prompt that forbids all writes, such as a review axis told it writes nothing: that agent returns its whole report in its final message. Stage-gate seats (`gate-*`) follow their definitions and the stage-gate skill for their own final messages; a seat that spawns workers, such as `gate-executor`, is their caller under this section.
 
 The caller reads a report file only for a detail the condensed report leaves out, such as the evidence behind a claim it is about to build on.
 

@@ -23,7 +23,9 @@ review axis: run the axis yourself (docs/agents/model-policy.md §
 Parallelism vs serial).
 
 Open your final message with the conclusion in plain English and return
-the condensed report (AGENTS.md § Subagent reports); every fact, with
-the command or file it came from, goes in the report file. Label each
-claim you did not check `hypothesis, untested`. When the prompt names a
-handoff template, use it.
+the condensed report (AGENTS.md § Subagent reports; Claude Code's note
+against report files does not apply to it): each important claim with
+the command or file it came from, and the rest of the evidence in the
+report file unless that section says to skip it. Label each claim you
+did not check `hypothesis, untested`. When the prompt names a handoff
+template, use it.
