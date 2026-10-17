@@ -3,7 +3,7 @@ Type: detection gap
 Origin: adversarial axis, pre-merge review of `feat/sweep-ret-tickets`, 2026-08-14
 (`docs/reviews/feat-sweep-ret-tickets.md`, finding A2)
 Blocks: none
-Blocked by: none
+Blocked by: 678
 
 # The source-parse gap has no detector, only a manual rescue list
 
@@ -90,3 +90,10 @@ The ticket's closing warning still holds -- do not resolve this by growing
 `TICKET_157_FORCE_INCLUDE`. The listing exists so that growth is visible.
 
 Re-runnable: `pnpm pool-listings:check`.
+
+## Comments
+
+2026-10-16 (stage tab-source-labels): carried forward as ticket 678, a
+`pnpm verify` gate over every committed universe report, to be written
+after stage tab-source-labels part P2 lands. Close this ticket when 678
+closes.

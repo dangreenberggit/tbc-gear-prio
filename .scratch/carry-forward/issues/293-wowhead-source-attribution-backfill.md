@@ -3,6 +3,7 @@ Type: enhancement
 Origin: stage-gate feature upgrades-all-dps-specs, plan amendment 1, 2026-08-25
 Blocks: none
 Blocked by: none
+Related: 676
 
 # Backfill source attribution for the nine db-phase specs
 
@@ -58,3 +59,11 @@ phase. It is noted here as a nice-to-have rather than a dependency.
 Every spec's profile names a real `wowhead_dir`, the universes regenerate
 with `listOnly` and real source kinds in place of `dbPhase` rows, and the
 Assumptions drawer stops rendering the partial-attribution line.
+
+## Comments
+
+2026-10-16 (stage tab-source-labels): ticket 676 now holds the work plan
+for missing badge, honor, holiday and vendor sources. It weighs this
+ticket's per-spec harvest (up to 45 files) against a smaller badge and
+PvP-vendor table, and asks for the 293 count to be re-measured. Read 676
+before starting this ticket.
