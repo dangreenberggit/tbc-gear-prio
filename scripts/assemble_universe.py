@@ -1751,7 +1751,13 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
     if "arena points" in lower or ("pvp:" in lower and "arena" in lower):
         out.append({"kind": "pvp", "via": "arena"})
     elif "honor points" in lower or ("pvp:" in lower and "honor" in lower):
-        out.append({"kind": "pvp", "via": "honor"})
+        honor: dict = {"kind": "pvp", "via": "honor"}
+        # "Vendor: Honor Points (Season 3)": the season tells one honour item
+        # from another in the tab, as it does for arena rows (ticket 681).
+        season = re.search(r"season\s*(\d)", text, re.I)
+        if season:
+            honor["season"] = int(season.group(1))
+        out.append(honor)
     cm = CRAFTED_RE.search(text)
     if cm:
         prof = canonical_profession((cm.group(1) or cm.group(2) or "").strip())
