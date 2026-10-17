@@ -169,8 +169,9 @@ DB_PHASE_MIN_ILVL = 100
 
 # Ticket 157: six D7-eligible ret items the SME review named as missing from
 # the pool despite being real, well-known TBC drops/quest rewards. None passes
-# the membership routes: their db.json source names a five-man zone that is
-# neither a phase_raids.json raid nor in PHASE_HEROIC_DUNGEONS. Widening
+# the membership routes: the four drops' db.json source names a five-man zone
+# that is neither a phase_raids.json raid nor in PHASE_HEROIC_DUNGEONS, and the
+# two quest rewards have no db.json source. Widening
 # PHASE_HEROIC_DUNGEONS would also admit ~280 other phase-1 items from those
 # dungeons -- ticket 17's question, deferred as its own project. So this set
 # grants membership only, to these six. Their sources come from db.json and
