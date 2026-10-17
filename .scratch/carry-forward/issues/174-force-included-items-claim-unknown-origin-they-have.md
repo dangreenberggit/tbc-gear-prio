@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-10-16, stage tab-source-labels
 Type: data honesty
 Origin: orchestrator fan-in, ticket sweep 154–164, 2026-08-14
 (surfaced by `packages/core/test/pool-hardening.test.ts` failing on
@@ -72,3 +73,28 @@ test exclusion is deleted. Options, in rough order of preference:
 Until then the artifact is honest about *membership* and dishonest about
 *provenance* for six rows, which is the milder of the two failure modes but is
 still a claim the data cannot support.
+
+## Closed 2026-10-16 (stage tab-source-labels)
+
+Fixed by the second option, without removing the force-include set:
+`scripts/assemble_universe.py` no longer skips the six ids in the db.json and
+Wowhead loops, so four of them carry the source an input records; the set now
+grants membership only, and membership is unchanged in all 44 universes. The
+validation guard accepts a `raid` zone or `heroic` dungeon that db.json's zone
+table names. The test exclusion in `pool-hardening.test.ts` is deleted.
+
+Verified by:
+`python -c "import json;print([(e['itemId'],e['sources']) for e in json.load(open('data/universes/ret-p3.json',encoding='utf-8-sig'))['entries'] if e['itemId'] in (27484,31033,22401,31856,28034,28288)])"`
+→ 22401 `raid` Dire Maul (origin db, no boss), 27484 `heroic` The Blood
+Furnace (db), 28288 `raid` The Mechanar · Pathaleon the Calculator (db) then
+AtlasLoot `heroic`, 28034 `raid` The Black Morass · Temporus (db) then
+AtlasLoot `heroic`, 31033 and 31856 `unknown` (curated). And
+`git log -1 -- packages/core/test/pool-hardening.test.ts` → `2dbeb4f0` "Drop
+the ticket 174 test exclusion".
+
+## Remaining
+
+31033 Libram of Righteous Power and 31856 Darkmoon Card: Crusade still ship
+`{"kind": "unknown", "origin": "curated"}`. No committed input records a
+source for them except the force-include prose ("Quest: ..."), and no
+`ItemSource` kind carries quest text. Handed to ticket 676.

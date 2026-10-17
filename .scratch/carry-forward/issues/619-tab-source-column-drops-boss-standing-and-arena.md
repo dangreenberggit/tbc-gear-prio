@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-10-16, stage tab-source-labels
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
 Type: bug
 Origin: SME reads of ticket 254 output (live tab capture .scratch/rank-reports/sme-254-tab-boundary.png on fork 316326a95; report .scratch/rank-reports/sme-254-slamaltman.html from .scratch/rank-reports/stage2-close-slamaltman.json), triaged 2026-10-11
@@ -98,6 +99,19 @@ rows in `data/wowhead-lists/ret/{p3,p4,p5}.json` now carry
 `corrections` entry, and the builder gives `pvp via honor` for 33910 in
 ret p3-p5 (checked on temp builds; the committed universes are
 regenerated in step 13).
+
+Resolved, step 15, 2026-10-16. `grep -n -A10 '"itemId": 33910' data/wowhead-lists/ret/p3.json`
+shows `"wowheadSourceText": "Arena Points - Arena Points"` kept verbatim and
+`"correctedSourceText": "Vendor: Honor Points (Season 3)"` (same in p4 and
+p5). The committed universes `data/universes/ret-p{3,4,5}.json` give 33910
+`{"kind": "pvp", "via": "honor", "origin": "wowhead"}`, and the fork's
+bundled copies match them (fork `f28f40769`, `pnpm fork-universes:check`).
+A live run should then show 33910 as "PvP vendor · Honor", like its
+siblings; untested, because no live run was made in this stage.
+
+Fixture `data/tab-fixtures/ret-p3-p2.json` was recorded before this change
+and still embeds `via: arena` for 33910, so the fixture page keeps showing
+"PvP vendor · Arena" until the fixture is re-recorded.
 
 ## Owner, 2026-10-16
 

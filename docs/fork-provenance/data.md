@@ -775,3 +775,34 @@ Verify:
 pnpm fork-universes:check
 python scripts/check_pool_completeness.py --check
 ```
+
+## Refresh, 2026-10-16 (db sources for the force-included items, tickets 174 and 646)
+
+`scripts/assemble_universe.py` no longer skips the six items ticket 157
+force-includes when it reads db.json, AtlasLoot and the Wowhead lists. Their
+membership route is unchanged, but each now carries the source an input
+records instead of `{"kind": "unknown"}`: 28288 Abacus of Violent Odds `raid`
+The Mechanar · Pathaleon the Calculator, 28034 Hourglass of the Unraveller
+`raid` The Black Morass · Temporus (each followed by AtlasLoot's `heroic`
+row), 27484 Libram of Avengement `heroic` The Blood Furnace and 22401 Libram
+of Hope `raid` Dire Maul with no boss. The validation guard now accepts a
+`raid` zone or `heroic` dungeon that db.json's zone table names; `token`
+zones stay limited to `data/phase_raids.json`. Separately, a
+`correctedSourceText` in `data/wowhead-lists/ret/p3.json`–`p5.json` makes
+33910 Vindicator's Scaled Bracers `pvp` via `honor`, like its four siblings.
+31033 and 31856 stay `unknown`: no committed input records a source for them.
+
+`python scripts/sync_fork_universes.py --write` refreshed 20 of 63 copies:
+ret, enh, feral, hunter and rogue p2–p5. In ret the `sources` of 22401,
+27484, 28034 and 28288 change, and 33910's in p3–p5; enh, hunter and rogue
+change 28288 only, feral 28034 only. No entry is added or removed, so every
+list keeps its count.
+
+No EP-weight file changed. No fork test changed, and no engine file changed.
+
+Verify:
+
+```bash
+pnpm fork-universes:check
+python scripts/check_pool_completeness.py --check
+```
