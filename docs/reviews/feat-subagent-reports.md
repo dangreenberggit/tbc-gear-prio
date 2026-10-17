@@ -240,3 +240,32 @@ no `pnpm merge-to-dev --check-only`, no merge. Cause: the agent that handles thi
 review wrote R2's design-task sentence itself (round 1 gave no suggested
 text) and did not carry over the skip condition that R1's suggested text
 has for `general-task.md`. The owner decides what happens next.
+
+## Owner ruling on F1
+
+Owner, 2026-10-16, asked whether to "apply the reviewer's one-sentence
+fix with no further review round, then run pnpm verify and merge",
+answered "A". Reported by the session that dispatched this step. F1 is
+fixed with no round 3.
+
+Fix commit `564f107b` applies the reviewer's suggested text at
+`.claude/agents/design-task.md:11` ("When it names a plan file") and
+`:16-18`. At `:16` it keeps "your plan or recommendation", the words
+commit `06703de4` dropped (`git show 06703de4 -- .claude/agents/design-task.md`).
+No round reads `564f107b`, by the owner's ruling above.
+
+## Disposition (round 2)
+
+| ID  | Axis          | Disposition | Ticket / note                                                                                                                                                |
+| --- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R1  | Code quality  | fixed       | `02b5bd2e`, suggested text with E2; owner approval 2026-10-16: "Sure"; round 2 found it matches word for word                                                |
+| R2  | Adversarial   | fixed       | `06703de4` (four task-type definitions allow the report file) and `e5478faf` (E1); owner approval 2026-10-16: "Sure"; design-task wording corrected under F1 |
+| R3  | Code quality  | fixed       | `02b5bd2e`, suggested sentence added to `AGENTS.md`; owner approval 2026-10-16: "Sure"; round 2 found it matches word for word                               |
+| R4  | Adversarial   | fixed       | `94bf869c`, worktree callers name report paths; owner approval 2026-10-16: "Sure"; round 2 found it inside the finding                                       |
+| R5  | Code quality  | fixed       | `02b5bd2e`, suggested read-list line in `AGENTS.md`; owner approval 2026-10-16: "Sure"; round 2 found it matches word for word                               |
+| E1  | Owner         | fixed       | `e5478faf`, owner addition to R2's fix; owner approval 2026-10-16: "Sure"; round 2 found it matches word for word                                            |
+| E2  | Owner         | fixed       | `02b5bd2e`, owner addition to R1's fix; owner approval 2026-10-16: "Sure"; round 2 found it matches word for word                                            |
+| F1  | Focused check | fixed       | `564f107b`, reviewer's suggested text; owner ruling 2026-10-16: "A" (fix with no further review round, then verify and merge)                                |
+
+Tickets filed: 0. Tickets closed: 0. Counted with the two commands in
+the skill's step 3 at `564f107b`; both printed 0.
