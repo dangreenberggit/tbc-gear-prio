@@ -174,7 +174,7 @@ Any agent that splits a research question across subagents, whether the session 
 
 ### Subagent reports
 
-The global "Subagent reports" rule applies (staged in `docs/agents/home/AGENTS.md` § Chat responses). With no path in the prompt, the report file goes at `.scratch/agent-reports/<UTC date>-<agent type>-<a few words of the task>.md` (gitignored). In the condensed report, label each claim you did not check `hypothesis, untested`. Callers with worktree or pair workers name a path in their own checkout. Stage-gate seats (`gate-*`) follow their definitions and the stage-gate skill for their own final messages; a seat that spawns workers, such as `gate-executor`, is their caller under the global rule.
+The global "Subagent reports" rule applies (staged in `docs/agents/home/AGENTS.md` § Chat responses). With no path in the prompt, the report file goes at `.scratch/agent-reports/<UTC date>-<agent type>-<a few words of the task>.md` (gitignored). In the condensed report, mark an important claim that has no source `hypothesis, untested` in place of "unverified". Callers with worktree or pair workers name a path in their own checkout. Stage-gate seats (`gate-*`) follow their definitions and the stage-gate skill for their own final messages; a seat that spawns workers, such as `gate-executor`, is their caller under this section.
 
 ### Models and walls
 
