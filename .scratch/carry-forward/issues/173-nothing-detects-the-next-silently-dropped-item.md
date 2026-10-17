@@ -1,9 +1,10 @@
-Status: open
+Status: closed
+Closed: 2026-10-17, stage tab-follow-ups
 Type: detection gap
 Origin: adversarial axis, pre-merge review of `feat/sweep-ret-tickets`, 2026-08-14
 (`docs/reviews/feat-sweep-ret-tickets.md`, finding A2)
 Blocks: none
-Blocked by: 678
+Blocked by: none
 
 # The source-parse gap has no detector, only a manual rescue list
 
@@ -97,3 +98,15 @@ Re-runnable: `pnpm pool-listings:check`.
 `pnpm verify` gate over every committed universe report, to be written
 after stage tab-source-labels part P2 lands. Close this ticket when 678
 closes.
+
+## Resolution (2026-10-17, stage tab-follow-ups)
+
+Closed with ticket 678. A Wowhead-list-named item that newly lands in
+`excludedNoSource`, or leaves its universe for any other cause, now fails
+`pnpm verify` as `NEW GAP <spec> p<n> <itemId> <name> absent`, for ret and
+feral at every phase 2-5. 27878 and 29247 are tolerated rows of
+`data/wowhead-list-gaps.json` (reason `sourcedNoRoute`), not force-included;
+`TICKET_157_FORCE_INCLUDE` did not grow. The fix itself (five-man zones,
+the `" - Heroic"` suffix) stays with ticket 17.
+
+Verified by: `pnpm wowhead-list-gaps:check` at `tbc-gear-prio@f4951822`.
