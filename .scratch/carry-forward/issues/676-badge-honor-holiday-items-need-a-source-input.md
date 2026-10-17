@@ -180,6 +180,29 @@ Appended 2026-10-17 from the stage's deferred part P4 draft
 placed before § Q-676-source measured so that section stays last for its
 candidate C subsection (stage plan step 26).
 
+### Owner ruling 2026-10-17: no second source of truth
+
+The owner said in chat on 2026-10-17, about the measured candidate C
+(vendoring the two AtlasLoot modules): "we should be especially careful not
+to put lots of effort into building a second source of truth, which is
+already generally a bad idea unless there is a specific reason it is very
+necessary and *also* isn't an actual second source of truth on a specific
+thing (for example, missing items that for some reason are needed is one
+thing--items that are on wowsims already with the info needed and then
+"atlasloot has different IDs" is immediately suspicious)"
+
+What this means for the next planner:
+
+- Before any new input is added, first measure what wowsims already says
+  about these items: the `vendor/wowsims/db.json` fields, and the upstream UI,
+  such as the PvP block of `ItemSource`
+  (`vendor/tbc-new-fork/ui/features/gear/components/SelectorModal/ItemSource.tsx`),
+  which already renders some PvP sources.
+- The holiday items' ids do not match AtlasLoot's (upstream re-issued them, as
+  281739 and similar). That is a sign that AtlasLoot is the wrong source for
+  them, not a reason to build a name join.
+- Candidate C stays recorded below as measured. It is not a chosen route.
+
 ### The owner's words it serves
 
 "use orchestration to make sure the follow up tickets are knocked out."
@@ -414,6 +437,13 @@ From the same research report (script `own12.py`):
 
 None of them is a `badge`, `pvp` or `world` row in another list, so this
 stage leaves them as they are (part P4).
+
+Update 2026-10-17 (pre-merge review of feat/tab-follow-ups, finding A2): the
+cross-spec index now also reads `ret/pre-raid.json` for badge, PvP and world
+rows, so 29382 (badge 25), 28645 and 28646 (honour) and 31318 and 31322
+(world) are no longer `unknown`: 104 universe rows across the 11 specs, no
+membership change. 28176 stays `unknown` (quest text with no zone). Membership
+still does not read the pre-raid list; that question above is unchanged.
 
 ### Re-run
 

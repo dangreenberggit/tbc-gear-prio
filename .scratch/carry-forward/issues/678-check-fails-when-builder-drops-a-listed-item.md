@@ -96,3 +96,9 @@ file was restored after its run.
 with `unknown`) is left as it is.
 
 Verified by: `pnpm wowhead-list-gaps:check` at `tbc-gear-prio@f4951822`.
+
+## Comments
+
+2026-10-17 (pre-merge review of feat/tab-follow-ups, finding P1): the check
+covers the specs with Wowhead lists (ret and feral). The items no list names,
+and the nine specs without lists, are ticket 173, reopened for that remainder.
