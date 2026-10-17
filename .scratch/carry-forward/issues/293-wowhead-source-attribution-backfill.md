@@ -105,3 +105,17 @@ plan, pre-merge review feat/tab-source-labels, S2):
 ```bash
 python -I -c "import json,glob,os;db={i['id']:i for i in json.load(open('vendor/wowsims/db.json',encoding='utf-8'))['items']};[print(os.path.basename(f),ids) for f in sorted(glob.glob('data/universes/*-p5.json')) for ids in [[e['itemId'] for e in json.load(open(f,encoding='utf-8-sig'))['entries'] if (e.get('sources') or [{}])[0].get('kind')=='unknown' and db.get(e['itemId'],{}).get('sources')]]]"
 ```
+
+## Note, 2026-10-17 (stage tab-follow-ups)
+
+Branch `feat/tab-follow-ups` adds `pnpm wowhead-list-gaps:check`
+(`scripts/check_wowhead_list_gaps.py`). It covers every spec whose profile
+names a `wowhead_dir`. So when this ticket points a spec's profile at its
+new folder, the check covers that spec with no other change, and it fails
+with `NEW GAP` for each real gap in that spec's lists until
+`data/wowhead-list-gaps.json` gains a row for it. Plan for those rows in
+the same change.
+
+Only ret and feral have lists today because the early work was tested on
+those two specs. The other nine DPS specs having no lists is a gap this
+ticket closes, not a design choice (owner, 2026-10-17).
