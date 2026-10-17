@@ -56,8 +56,8 @@ would work — treat every `Verified by` as unproven until you re-run it.
   measurement the plan did not supply is a `material` finding against the
   planner ("unmeasured"), not a probe for you to run.
 - Claim checks go to `general-task` subagents, model `opus` at the call
-  site, cap 4, each told to change no files and to return at most 40
-  lines. Prompt each one to refute:
+  site, cap 4, each told to change no files except its report file
+  (AGENTS.md § Subagent reports). Prompt each one to refute:
   "Find the input, state, or file that breaks this claim: <claim>.
   Return `REFUTED:` with the evidence, or `NOT REFUTED:` with the list of
   checks that failed to break it." A bare confirmation without the checks
@@ -67,7 +67,8 @@ would work — treat every `Verified by` as unproven until you re-run it.
   `simple-task`, model `sonnet`.
 - At most **one** judgment claim — the one the plan most depends on — may
   go to a `general-task` subagent, model `opus` at the call site, told to
-  change no files. Hold every other judgment call yourself.
+  change no files except its report file (AGENTS.md § Subagent reports).
+  Hold every other judgment call yourself.
 
 ## Report
 

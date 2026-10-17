@@ -42,8 +42,8 @@ other document over ~30 kB, get a heading map first
   you will not reuse, spawn a `general-task` subagent (model `opus` at the
   call site) rather than digging yourself. Use `simple-task` (model
   `sonnet`) only for an extremely simple job (see `simple-task`). Cap 4
-  researchers, each with a bounded question, the instruction to change no
-  files, and the instruction to return at most 40 lines. You hold the
+  researchers, each with a bounded question and told to change no files
+  except its report file (AGENTS.md § Subagent reports). You hold the
   judgment; they fetch the facts. Name the model on every spawn: you run
   on Fable, the top price tier, and an unnamed subagent can inherit it
   (`docs/agents/model-policy.md` § Lane is per job, not per parent).

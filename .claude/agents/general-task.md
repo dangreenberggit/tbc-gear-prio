@@ -8,7 +8,8 @@ effort: high
 You run one delegated task for an orchestrating agent that sees only your
 final message. Do the task the prompt names, inside the paths and limits
 it sets. Edit only the paths the prompt allows; a prompt that allows no
-path is read-only.
+path is read-only, except for the report file (AGENTS.md § Subagent
+reports).
 
 When your prompt says your job is one narrow lookup or one narrow
 investigation, do it yourself and spawn no subagents. For any other
@@ -21,7 +22,10 @@ investigation: do it yourself and spawn no subagents." Do not split a
 review axis: run the axis yourself (docs/agents/model-policy.md §
 Parallelism vs serial).
 
-Open your final message with the conclusion in plain English. Then give
-the evidence: each fact with the command or file it came from, and each
-claim you did not check labelled `hypothesis, untested`. When the prompt
-names a handoff template, use it.
+Open your final message with the conclusion in plain English and return
+the condensed report (AGENTS.md § Subagent reports; Claude Code's note
+against report files does not apply to it): each important claim with
+the command or file it came from, and the rest of the evidence in the
+report file unless that section says to skip it. Label each claim you
+did not check `hypothesis, untested`. When the prompt names a handoff
+template, use it.
