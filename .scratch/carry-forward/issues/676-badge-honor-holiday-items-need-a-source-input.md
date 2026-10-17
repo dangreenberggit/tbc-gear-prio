@@ -41,9 +41,15 @@ is data collection, not a code fix.
 
 ## Goal
 
+Scope since stage tab-follow-ups P1 (2026-10-17): only the rows still
+`kind: unknown` after the cross-spec list sources that P1 added; the current
+Goal, Done when, Seam contract and Candidates are in § Remainder after stage
+tab-follow-ups (part P4, deferred) below, which replaces the older sections
+where they differ.
+
 A committed input, regenerated into `data/universes/*` and the fork copies,
-from which badge-vendor, honor, PvP-vendor and holiday-boss items get a
-source kind a player can read, with a `holiday` kind (or an agreed
+from which the badge-vendor, honor, PvP-vendor and holiday-boss items still
+`unknown` after P1 get a source kind a player can read, with a `holiday` kind (or an agreed
 alternative) added to `packages/core/src/item-source-kinds.json`, fork
 `model/engine/pool.ts`, `SOURCE_LABELS`, the locale and the schema.
 
@@ -166,6 +172,117 @@ The rest of this ticket's data collection stands.
 whichever spec's list names it (the builder change in
 `scripts/assemble_universe.py`), then regenerate `data/universes/*` and the
 fork copies, and re-measure the table above.
+
+## Remainder after stage tab-follow-ups (part P4, deferred)
+
+Appended 2026-10-17 from the stage's deferred part P4 draft
+(`.scratch/stage-gate/tab-follow-ups/parts/P4/ticket.md`, gitignored). It is
+placed before § Q-676-source measured so that section stays last for its
+candidate C subsection (stage plan step 26).
+
+### The owner's words it serves
+
+"use orchestration to make sure the follow up tickets are knocked out."
+(owner, 2026-10-17; brief § Goal). Constraint from the same brief: "a fix that
+tweaks a guess instead of using the direct signal 'isnt a solution'" (owner,
+2026-10-17; brief § Constraints). Item data stays borrowed: "Fork items come
+from wowsims (ADR-0029); never re-mirror or grow our own item data" (brief
+§ Constraints).
+
+### Goal
+
+A committed input, inside the item and source data the project already
+borrows, that names the badge-vendor, honour-vendor and holiday-boss source of
+every badge, honour and holiday item still `kind: unknown` after P1 (about
+3,400 p5 rows across the 11 specs; the exact per-spec count is in ticket 676
+§ Q-676-source measured, written by P1 step 4). The tab's Source cell then
+states where each such item comes from. Closes 643, 660 part 1 and 45 §2 when
+done (finish-line plan).
+
+### Done when
+
+- A chosen candidate (below) is vendored or written through the
+  `data-pipeline-work` skill (pin, parser, regen); `pnpm universe:assemble` per
+  spec and phase regenerates the universes and `universe-rebuild:check` stays
+  green.
+- Any new kind (`holiday`) is added together in
+  `packages/core/src/item-source-kinds.json`, fork `model/engine/pool.ts`
+  (ported file: PROVENANCE cycle, `docs/agents/known-traps.md:70-94`),
+  `SOURCE_LABELS` and the locale.
+- Every row of `data/wowhead-list-gaps.json` this work sources or admits is
+  deleted from the file, or `wowhead-list-gaps:check` fails `STALE GAP`; a new
+  cause gets a new key in the file's `reasons` block.
+- The 12 own-spec rows (ticket 676 § Q-676-source measured, cause C16 of the
+  stage plan) are each sourced, admitted in the gap file with a reason, or
+  left with a written owner question: whether to read `ret/pre-raid.json` at
+  p5 (policy, up to 26 rows); quest text with no zone (30257, 31033, 28176);
+  the `unkept_wowhead_place` drops (23206 Naxxramas, 32387 heroic Sethekk
+  Halls, 31856 "Bind on Equip").
+- The 19 raid rows candidate A would name cross-spec get a witness that
+  satisfies `packages/core/test/pool-hardening.test.ts:1373-1440`, or stay
+  `unknown` with that reason written.
+- No new synchronous vitest case over 30 s; an oracle-style case over the
+  fixtures yields per job with `yieldToEventLoop` in
+  `packages/core/test/fork-meta-repair.test.ts` (P3).
+- `pnpm verify` green; the wowsims-file audit lists only
+  `ui/app/SimTabsSection.tsx`.
+
+### Seam contract (what the planned parts give it and assume)
+
+- From P1: the cross-spec index function in `scripts/assemble_universe.py`
+  (badge/pvp/world only; one source per kind, priced badge beats cost 0) and
+  its helper `add_unknown_or_cross_spec`, used at the three `unknown` writes
+  (curated bis, curated force-include, db-phase); a new input plugs in there. The measured
+  table in ticket 676 § Q-676-source measured: per-spec counts for candidates
+  A, B1, B2 and the causes of the 12 own-spec rows. P1 assumes P4 adds its
+  input through `data-pipeline-work` and adds any `holiday` kind in the four
+  places above together.
+- From P2: `data/wowhead-list-gaps.json` and the two check scripts
+  `scripts/check_universe_rebuild.py`, `scripts/check_wowhead_list_gaps.py`.
+  P2 assumes P4 regenerates through `pnpm universe:assemble` and edits neither
+  script to pass.
+- From P3: nothing it reads; the `yieldToEventLoop` helper and the 30 s rule
+  above.
+
+### Candidates (Q-676-source beyond candidate A)
+
+P1 records candidates A (cross-spec Wowhead lists, 59 badge/pvp/world rows of
+3,481 at p5), B1 (other db.json source keys, 0 rows) and B2 (vendored
+AtlasLoot tables, 0 rows) with counts. The remainder needs one of:
+
+- **C: vendor two more AtlasLoot modules** — `AtlasLootClassic_PvP/data-tbc.lua`
+  and `AtlasLootClassic_Collections/data-tbc.lua` at the pinned AtlasLoot
+  commit — and extend `scripts/parse_atlasloot.py`. Win condition, written
+  before measuring: the two modules name, per spec and phase, most of the
+  badge/honour rows and the holiday-boss rows (Ahune, Coren Direbrew, the
+  Headless Horseman) now `unknown`. Measurement: stage tab-follow-ups P3
+  step 26 fetched both files at the pinned commit into scratch (vendored
+  nothing) and recorded the per-spec, per-phase counts in ticket 676
+  § Q-676-source measured, "Candidate C measured". Read that subsection
+  first; if its win condition is met, C is the candidate to vendor.
+- **D: a local badge / PvP source table** — ADR-0029 `:85-90` justifies a
+  source-only table (not item data) when the borrowed inputs name no source.
+  Win condition: every badge and honour row named with a vendor and a cost
+  from a cited page, with no item stats of our own. Dropped if C names the
+  same rows, because C stays inside borrowed data.
+
+Decide C before D: start from C's recorded counts; take D only for the rows C
+leaves, with the reason written. This part was deferred for the stage budget
+(5 chunks, 700 lines), not for a missing measurement.
+
+### What this stage learned that P4's planner needs
+
+- Reading both list folders through `wowhead_dir` is not a route: it adds 82
+  p5 rows through list-only membership and 10 raid+boss claims the witness
+  rule rejects (R-676 § A, `cross.py`; stage plan C4). Membership stays in
+  `ticket_157_included`.
+- The db-phase route skips ids that already have a source (`:2368`), so an
+  input added at the index is read only for rows that would be `unknown`.
+- `vendor/atlasloot/` at the pin holds only dungeon/raid and faction tables;
+  its one Ahune block is Wrath-gated with ids 54801-54806 not in the pinned
+  db (R-676 § B).
+- Research: `C:\Users\dgree\Code\lulz\tbc-gear-prio\.scratch\agent-reports\2026-10-17-general-task-676-source-candidates.md`
+  (gitignored; scripts `cross.py`, `b1.py`, `b2a.py`, `own12.py` in the file).
 
 ## Q-676-source measured 2026-10-17 (stage tab-follow-ups P1)
 

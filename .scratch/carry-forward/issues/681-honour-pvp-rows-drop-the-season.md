@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-10-17, stage tab-follow-ups
 Type: bug
 Origin: pre-merge review feat/tab-source-labels, D3
 Blocks: none
@@ -59,3 +60,25 @@ python -I -c "import glob,json;print(sum(1 for p in glob.glob('data/universes/*-
 ```
 
 The first prints 0 and the second 54.
+
+## Resolution (2026-10-17, stage tab-follow-ups)
+
+The builder records the season on an honour `pvp` source (`5cbb2d59`,
+regenerated universes in `5674783e`), the fork's bundled copies carry it
+(`tbc-new-fork@3bdacb8c6`), and both fixtures were re-recorded on that fork
+commit (`7de8a2c2`). On the fixture pages the honour rows read "PvP vendor ·
+Honor, season N", the same label form as an arena row, through the tab's
+own `sourceDetail` label, not upstream's PvP block:
+
+- `ret-p3-p2`, Wrist: Vindicator's Scaled Bracers (33910) reads "PvP vendor ·
+  Honor, season 3".
+- `feral-p5-th4pc`: Vindicator's Dragonhide Boots (33880), Vindicator's
+  Dragonhide Belt (33879) and Vindicator's Leather Bracers (33893) read
+  "Honor, season 3"; Veteran's Leather Bracers (32814) reads "Honor, season
+  2". Vindicator's Dragonhide Bracers (33881) is the worn item, so it has no
+  table row; its fixture row carries `season: 3`.
+
+Verified by: `python -I -c "import sys;sys.path.insert(0,'scripts');import assemble_universe as A;print(A.parse_wowhead_source('Vendor: Honor Points (Season 3)'))"`
+(prints `[{'kind': 'pvp', 'via': 'honor', 'season': 3}]`) and
+`pnpm wowhead-parse:check` at `tbc-gear-prio@5674783e`; fixture rows at
+`tbc-gear-prio@7de8a2c2`.
