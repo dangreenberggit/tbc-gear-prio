@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-10-17, branch feat/tab-follow-ups
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
 Type: task
 Origin: docs/reviews/docs-stage-3t-boxes.md (findings B2, K1)
@@ -43,3 +44,17 @@ only the pre-merge-review skill).
   prints only `6 0 ui/app/SimTabsSection.tsx`.
 - Optional, the fixer's call: one line in `docs/agents/upstream-catch-up.md`
   § 5 saying to refresh this doc with each re-pin.
+
+## Resolution (2026-10-17, branch feat/tab-follow-ups)
+
+Commits `b5efceff` and the review-fix commit after it move the doc to fork
+`160ae36c2` on base `e804c29e8` (the two locks' `commit` and
+`branchedFrom`), and add ledger rows for `8cd8d1c80` (base `5262ff38`),
+`bc96d0a03` and `160ae36c2` (base `e804c29e8`), each with 1 modified
+upstream file. The optional `docs/agents/upstream-catch-up.md` line is not
+added.
+
+Verified by:
+`git -C vendor/tbc-new-fork diff --numstat --diff-filter=M e804c29e8 160ae36c2`
+prints only `6 0 ui/app/SimTabsSection.tsx`, and the same command over
+`5262ff38 8cd8d1c80` and `e804c29e8 bc96d0a03` prints the same line.

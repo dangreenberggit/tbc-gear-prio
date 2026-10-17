@@ -83,7 +83,9 @@ git -C vendor/tbc-new-fork diff --name-status e804c29e8 160ae36c2 | cut -f1 | so
 | `218234677` (base `5262ff38`)      | 1                       | 2026-10-09: ticket 591, the store-actions review leftovers, in tab files; no upstream file touched.                                                                       |
 | `d1de72abc` (base `5262ff38`)      | 1                       | 2026-10-09: ticket 592, two tests and three comment edits, in tab files; no upstream file touched.                                                                        |
 | `316326a95` (base `5262ff38`)      | 1                       | 2026-10-09: ticket 585, one tab test file; no upstream file touched.                                                                                                      |
-| **`160ae36c2` (base `e804c29e8`)** | **1**                   | 2026-10-17: merge of upstream master `e804c29e8` (`bc96d0a03`, 2026-10-16) and 61 tab commits since `316326a95`; `ui/app/SimTabsSection.tsx` still 6/0.                   |
+| `8cd8d1c80` (base `5262ff38`)      | 1                       | 2026-10-15: 44 tab commits since `316326a95`, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                        |
+| `bc96d0a03` (base `e804c29e8`)     | 1                       | 2026-10-16: merge of upstream master `e804c29e8`; no tab commit since `8cd8d1c80`; `ui/app/SimTabsSection.tsx` still 6/0.                                                 |
+| **`160ae36c2` (base `e804c29e8`)** | **1**                   | 2026-10-17: 13 tab commits since `bc96d0a03`, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                        |
 
 Each row is the `--name-only --diff-filter=M` command above over that range.
 
