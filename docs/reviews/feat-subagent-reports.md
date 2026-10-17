@@ -192,3 +192,51 @@ Reviewed range: `fbf937435c3634eb88af376a59ce167c1aae3caa..02b5bd2ed9cc46a209c42
 `git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json` exits 0: the
 branch never moves the fork pin, so there is no fork range and condition 3
 of the focused check holds.
+
+## Focused check (round 2)
+
+One fresh reviewer (`general-task`, model `opus`), over
+`fbf93743..22b8eeeb` (the fixes end at `02b5bd2e`; `b5a965eb` and
+`22b8eeeb` change only this file). Fork range: none (see above).
+
+1. **Conditions 1 to 3: hold.** Every commit names its finding or is a
+   review-file-only commit. `modest-task.md:17-18` ("the report file not
+   counted") is outside the lines R2 cites, but the reviewer counts it
+   inside R2's scope: without it, a modest-task that touches 3 files
+   breaks its own cap when it writes the report file.
+2. **Only what each finding asks: fails** on R2's `design-task.md` edit
+   (F1 below). E1, R1 + E2, R3 and R5 match the approved text word for
+   word; R4 and the other three R2 edits stay inside their findings.
+3. **New tests: none.** No test file changed
+   (`git diff --name-only fbf93743..HEAD | grep -i -E "test|spec"`, rc=1).
+4. **Touched tests pass: none touched.**
+   `python -I scripts/check_skill_mirrors.py` printed "skill mirrors
+   match", rc=0.
+
+- **F1 (code quality, in lines the R2 fix wrote) — `design-task.md`
+  makes the report file unconditional.** `.claude/agents/design-task.md:16-17`:
+  "When your prompt names no plan file, the plan goes in your report file
+  and your final message is the condensed report." It has no condition,
+  against the skip rule at `AGENTS.md:179` ("Skip the file when the whole
+  report fits the condensed report") and R3's sentence for prompts that
+  forbid all writes. It is the defect R1 fixed in `general-task.md`. The
+  edit also drops "or recommendation", and at lines 10-11 the next
+  sentence, "When it names one", can now be read as naming the report
+  file as well as the plan file. Confirmed by the dispatching agent with
+  `sed -n 8,18p .claude/agents/design-task.md` at `22b8eeeb`. Suggested
+  text (reviewer's, needs the owner's approval as an agent-file edit):
+  "When your prompt names no plan file, put the plan in your report file
+  unless AGENTS.md § Subagent reports says to skip it; your final message
+  is the condensed report", and "When it names a plan file" in the
+  sentence before.
+
+Observation, no finding: at `general-task.md:26-27`, "does not apply to
+it" can be read as referring to the condensed report, not the report
+file. This is the owner's exact E2 text.
+
+**Result: the review stops here** ("Round limit": round 2 reported a
+code-quality finding in the lines the fixes wrote). No Disposition table,
+no `pnpm merge-to-dev --check-only`, no merge. Cause: the agent that handles this
+review wrote R2's design-task sentence itself (round 1 gave no suggested
+text) and did not carry over the skip condition that R1's suggested text
+has for `general-task.md`. The owner decides what happens next.
