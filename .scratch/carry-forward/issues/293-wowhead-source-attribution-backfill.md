@@ -96,6 +96,12 @@ Command, from the repo root:
 python -c "import json,glob,os;[print(os.path.basename(f),len(es),sum(1 for e in es if (e.get('sources') or [{}])[0].get('kind')=='unknown')) for f in sorted(glob.glob('data/universes/*-p5.json')) if 'report' not in f for es in [json.load(open(f,encoding='utf-8-sig'))['entries']]]"
 ```
 
-No first-source `unknown` row left in these files has a db.json source
-(plan tab-source-labels C19 command prints `[]` for all 11), so the rest
-needs another input; ticket 676 carries that work.
+No first-source `unknown` row left in these files has a db.json source,
+so the rest needs another input; ticket 676 carries that work. This
+command prints `[]` for all 11 files (run 2026-10-16 at
+`tbc-gear-prio@9af4fae8`; it replaces a claim id from the gitignored stage
+plan, pre-merge review feat/tab-source-labels, S2):
+
+```bash
+python -I -c "import json,glob,os;db={i['id']:i for i in json.load(open('vendor/wowsims/db.json',encoding='utf-8'))['items']};[print(os.path.basename(f),ids) for f in sorted(glob.glob('data/universes/*-p5.json')) for ids in [[e['itemId'] for e in json.load(open(f,encoding='utf-8-sig'))['entries'] if (e.get('sources') or [{}])[0].get('kind')=='unknown' and db.get(e['itemId'],{}).get('sources')]]]"
+```

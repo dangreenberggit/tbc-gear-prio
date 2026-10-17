@@ -42,3 +42,15 @@ recorded hypothesis.
 
 Verified by: `sed -n 30p vendor/tbc-new-fork/assets/locales/en/upgrades.json`
 → `"rep": "Reputation",` in `tbc-new-fork@e26c05bb2`.
+
+## Review note 2026-10-16 (pre-merge review feat/tab-source-labels, P3)
+
+The primary-source check this ticket's Done-when asks for was not done: no
+in-game data, wowsims `db.json` or other primary source was read to settle
+whether the Band of Eternity rings are sold or are quest rewards, and no
+owner ruling covers that question. The ticket stays closed because the
+tab's label no longer depends on the answer: the bucket now reads
+"Reputation" (`vendor/tbc-new-fork/assets/locales/en/upgrades.json:30`,
+`"rep": "Reputation",` at `tbc-new-fork@b1ec045b1`; `kindLabel` in
+`ui/features/upgrades/utils/format.ts:60` reads it), which is true whether
+the rings are sold or given by a quest at a standing.

@@ -27,13 +27,17 @@ show "Source not recorded" (ticket 643, 660 part 1). At p5 that is 223
 
 ## Why it is deferred
 
-No committed or vendored input names these sources (measured 2026-10-16,
+~~No committed or vendored input names these sources~~ (corrected by the
+pre-merge review of feat/tab-source-labels, finding P1, 2026-10-16: false
+for some rows; see § Review correction below) (measured 2026-10-16,
 stage tab-source-labels planning): `vendor/wowsims/db.json` `sources[]` has
 only `drop`, `crafted`, `rep`; `assets/db_inputs/atlasloot_db.json` only
 `drop`, `crafted`; `data/atlasloot_sources.json` only `raid`, `heroic`,
 `rep`; `data/two-hop/*` only tokens and recipes. The only badge costs in
 the repo are the Wowhead prose in `data/wowhead-lists/{ret,feral}/*.json`
-(4 ids). The work is data collection, not a code fix.
+~~(4 ids)~~ (8 Badge of Justice item ids, 7 of them with a cost, and 20
+with honour or arena text; corrected by the same review). Most of the work
+is data collection, not a code fix.
 
 ## Goal
 
@@ -78,3 +82,53 @@ preference is not derivable.
 - The 293 count is re-measured and recorded.
 - `pnpm verify` green; fork re-pinned; `pnpm tab-fixtures:smoke` shows the
   new labels on `feral-p5-th4pc`.
+
+## Review correction 2026-10-16 (pre-merge review feat/tab-source-labels, P1)
+
+The premise "no committed input names these sources" is false for some
+rows. A committed `data/wowhead-lists/*/*.json` file names their source,
+but only ret and feral have lists, and each universe reads only its own
+spec's list (`wowhead_lists_for_phase`, `scripts/assemble_universe.py`).
+So 33296 Brooch of Deftness is `badge` cost 25 (origin `wowhead`) in
+ret-p5 but `unknown` (origin `db`) in warrior-p5, balance-p5 and
+feral-p5; 33880 is `pvp` honour in feral-p5 and `unknown` in balance-p5;
+33910 is `pvp` honour in ret-p5 and `unknown` in warrior-p5.
+
+Measured at feat/tab-source-labels 9af4fae8: p5 rows whose first source is
+`unknown`, and how many of those item ids any Wowhead list names:
+
+| p5 universe | unknown-first rows | named in a Wowhead list |
+| ----------- | -----------------: | ----------------------: |
+| balance     |                328 |                      27 |
+| ele         |                370 |                      12 |
+| enh         |                379 |                      14 |
+| feral       |                318 |                       8 |
+| hunter      |                323 |                      11 |
+| mage        |                224 |                       8 |
+| ret         |                375 |                      10 |
+| rogue       |                290 |                      13 |
+| shadow      |                248 |                       8 |
+| warlock     |                223 |                       8 |
+| warrior     |                403 |                      15 |
+| total       |               3481 |                     134 |
+
+Re-run from the repo root:
+
+```
+python -I -c "import glob,json,os;L={e['itemId'] for p in glob.glob('data/wowhead-lists/**/*.json',recursive=True) for e in json.load(open(p,encoding='utf-8'))['entries']};[print(os.path.basename(p),len(u),sum(e['itemId'] in L for e in u)) for p in sorted(glob.glob('data/universes/*-p5.json')) if not p.endswith('.report.json') for u in [[e for e in json.load(open(p,encoding='utf-8'))['entries'] if e['sources'][0]['kind']=='unknown']]]"
+```
+
+Of the 134, the list text is Badge of Justice for 51 rows, honour or arena
+for 15, and a drop, quest or world drop for 68 (classified by the list's
+`wowheadSourceText`). 12 of the 134 are named by the universe's own spec's
+list and are still `unknown` (ret 10, feral 2); why the builder does not
+read those rows is a hypothesis, untested (the stage files read for p5, or
+text `parse_wowhead_source` cannot read).
+
+So the Wowhead lists close at most 134 of 3481 unknown p5 rows (about 4%).
+The rest of this ticket's data collection stands.
+
+**Remaining work this review adds:** apply a Wowhead-list source to an item
+whichever spec's list names it (the builder change in
+`scripts/assemble_universe.py`), then regenerate `data/universes/*` and the
+fork copies, and re-measure the table above.

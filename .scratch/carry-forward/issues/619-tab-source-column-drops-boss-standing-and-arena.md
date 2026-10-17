@@ -60,8 +60,14 @@ On `data/tab-fixtures/ret-p3-p2.json`:
 
 - [x] Token rows show zone, difficulty and boss in the same form as drop rows.
   Token rows print "zone (N) · boss". The "(N)" is derived: every db.json
-  drop in a phase-raids zone is Normal (plan tab-source-labels C30), and
-  the text is upstream's `difficultyNames`. The plain text is one line with
+  `drop` source in a `data/phase_raids.json` zone has difficulty 1
+  (Normal), and the builder's guard keeps `token` zones to that file
+  (`scripts/assemble_universe.py`, the "Token zones stay phase raids only"
+  check). Re-run from the repo root:
+  `python -I -c "import json,collections;db=json.load(open('vendor/wowsims/db.json',encoding='utf-8'));zn={z['id']:z['name'] for z in db['zones']};c=collections.defaultdict(collections.Counter);[c[zn.get(d['zoneId'])].update([d.get('difficulty',0)]) for i in db['items'] for s in i.get('sources') or [] for d in [s.get('drop')] if d and d.get('zoneId')];print({z:dict(c[z]) for z in [z['name'] for z in json.load(open('data/phase_raids.json',encoding='utf-8'))['zones']]})"`
+  → every zone prints only key 1 (2026-10-16, `tbc-gear-prio@9af4fae8`;
+  this replaces a claim id from the gitignored stage plan, pre-merge review
+  feat/tab-source-labels, S2). The text is upstream's `difficultyNames`. The plain text is one line with
   ' · ' where upstream's linked block uses two lines.
   Lightbringer Greaves reads "Black Temple (N) · The Illidari Council".
 - [x] Reputation rows show the faction and the standing. All 12 Band of
@@ -155,3 +161,13 @@ does not. So this is not a regression. Sources, checked 2026-10-16:
 Why the owner remembers it as solved: hypothesis, untested. Ticket 569
 restored the boss for drop rows, and the command-line report has always
 shown it for token rows.
+
+## Review note 2026-10-16 (pre-merge review feat/tab-source-labels, P4)
+
+The honour fix for 33910 is not visible on any committed tab fixture. The
+committed fixture `data/tab-fixtures/ret-p3-p2.json` still gives 33910
+`{"kind": "pvp", "via": "arena", "origin": "wowhead"}` (`ranking.items[89]`),
+so its page shows "PvP vendor · Arena". No other fixture has the item
+(`grep -c 33910 data/tab-fixtures/*.json` also counts one line in
+`feral-p3-nordrassil4.json`, the number `-0.8339100925613697`). A fixture re-record or a live
+run is owed to show and check "PvP vendor · Honor" on the tab: ticket 682.

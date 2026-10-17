@@ -24,7 +24,21 @@ whichever route admitted them, checked against a cited source list.
 
 ## Comments
 
-2026-10-16 (stage tab-source-labels): no committed input names badge or
-honor sources for db-phase items, so this needs new data first. The shared
-work plan is ticket 676; this ticket closes when 676's input labels the
-rows named above.
+2026-10-16 (stage tab-source-labels): ~~no committed input names badge or
+honor sources for db-phase items~~ (corrected by the pre-merge review of
+feat/tab-source-labels, finding P1: false for some rows, see below), so
+this needs new data first. The shared work plan is ticket 676; this ticket
+closes when 676's input labels the rows named above.
+
+2026-10-16 (pre-merge review feat/tab-source-labels, P1): a committed
+Wowhead list names the source of some of these rows, but each universe
+reads only its own spec's list, and only ret and feral have lists. For
+example 33296 Brooch of Deftness is `badge` cost 25 in ret-p5 but
+`unknown` in warrior-p5, balance-p5 and feral-p5; 33880 is `pvp` honour in
+feral-p5 and `unknown` in balance-p5. Across the eleven p5 universes, 134
+of 3481 unknown-first rows are item ids a Wowhead list names (51 with
+Badge of Justice text, 15 with honour or arena text); the per-spec table
+and the command are in ticket 676 § Review correction. The rows named in
+this ticket's first paragraph by id (33509, 34898, 34887, 33919, 35167)
+are in no Wowhead list, so they still need new data. The builder change
+(apply a list's source whichever spec's list names the item) is in 676.
