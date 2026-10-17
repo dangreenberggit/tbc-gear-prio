@@ -1453,10 +1453,15 @@ def sunmote_upgrade_pairs(
 
 
 # Five db.json npc names carry AtlasLoot's Lua source text, such as
-# 16097 'Isalien"].." - "..format(AL["Tier %s Sets' (ticket 174). A boss
-# printed from one is noise, so the row keeps its zone and drops the boss.
-# Brackets only: npc 6907 'Eric \"The Swift\"' has quotes in a real name.
-GARBLED_NPC_NAME_RE = re.compile(r"[\[\]]")
+# 16097 'Isalien"].." - "..format(AL["Tier %s Sets' (tickets 174, 680).
+# Upstream's generator (vendor/tbc-new-fork/tools/database/atlasloot.go:84,
+# a lazy `AL(?:IL)?\["(.*?)"\]`) ran past the `AL["..."]` key on five Tier
+# 0.5 boss lines. So the key's closing `"]` inside a name marks the overrun,
+# and the boss is the text before it. npc 6907 'Eric "The Swift"' has quotes
+# in a real name and no `"]`. The fork tab's `overrunNpcKey`
+# (ui/features/upgrades/utils/item_source.ts) applies the same test and
+# recovery, so the universe and the tab name the same boss.
+GARBLED_NPC_NAME_RE = re.compile(r'"\]')
 
 
 def map_db_source(
@@ -1487,7 +1492,7 @@ def map_db_source(
         )
         boss = drop.get("npcName") or npcs_by_id.get(drop.get("npcId"))
         if boss and GARBLED_NPC_NAME_RE.search(str(boss)):
-            boss = None
+            boss = str(boss).split('"]', 1)[0]
         if zone:
             # Without this the heroic drops were labelled `raid` and then
             # dropped at membership for naming a zone phase_raids.json has
@@ -1866,6 +1871,83 @@ def wowhead_lists_for_phase(
     return out
 
 
+# Kinds a list row may give an item on another spec's universe. A badge, PvP or
+# world source describes the item, not the spec whose guide listed it, so it
+# replaces an `unknown` wherever the item lands (ticket 676). Raid and heroic
+# rows are not copied: they also grant membership, and Wowhead-only raid+boss
+# claims are what pool-hardening.test.ts rejects. The place filter
+# (`unkept_wowhead_place` in `assemble`) only rejects raid and heroic rows, so
+# these three kinds need no such filter.
+CROSS_SPEC_KINDS: tuple[str, ...] = ("badge", "pvp", "world")
+
+
+def cross_spec_list_sources(
+    max_phase: int,
+) -> tuple[dict[int, list[dict]], list[dict]]:
+    """Every list's badge/pvp/world sources at this phase, one per kind per item.
+
+    Returns `(index, conflicts)`. Lists can state different facts for one
+    item, so each kind is reduced by a fixed rule and the output does not
+    depend on which folder is read first: badge keeps the highest cost (a
+    priced row beats G'eras's cost-0 row); pvp keeps a row that names a
+    season, else the first in folder/stage order; world rows are identical.
+    `conflicts` names every item and kind whose rows differed, for the record.
+    """
+    folders = sorted(
+        {p.wowhead_dir for p in SPEC_PROFILES.values() if p.wowhead_dir is not None}
+    )
+    seen: dict[int, dict[str, list[tuple[dict, str]]]] = defaultdict(
+        lambda: defaultdict(list)
+    )
+    for folder in folders:
+        for stage in WOWHEAD_STAGE_FOR_MAX_PHASE.get(max_phase, []):
+            path = folder / f"{stage}.json"
+            if not path.is_file():
+                continue
+            doc = load_json(path)
+            assert isinstance(doc, dict)
+            where = f"{folder.name}/{stage}"
+            for row in doc.get("entries") or []:
+                if not isinstance(row, dict):
+                    continue
+                iid = int(row["itemId"])
+                for src in parse_wowhead_source(source_text_for_parsing(row)):
+                    kind = src.get("kind")
+                    if kind not in CROSS_SPEC_KINDS:
+                        continue
+                    if not any(s == src for s, _ in seen[iid][kind]):
+                        seen[iid][kind].append((src, where))
+
+    index: dict[int, list[dict]] = {}
+    conflicts: list[dict] = []
+    for iid in sorted(seen):
+        chosen: list[dict] = []
+        for kind in CROSS_SPEC_KINDS:
+            rows = seen[iid].get(kind) or []
+            if not rows:
+                continue
+            if kind == "badge":
+                pick = max(rows, key=lambda r: int(r[0].get("cost") or 0))[0]
+            elif kind == "pvp":
+                pick = next(
+                    (s for s, _ in rows if s.get("season") is not None), rows[0][0]
+                )
+            else:
+                pick = rows[0][0]
+            chosen.append(pick)
+            if len(rows) > 1:
+                conflicts.append(
+                    {
+                        "itemId": iid,
+                        "kind": kind,
+                        "kept": pick,
+                        "rows": [{"source": s, "list": w} for s, w in rows],
+                    }
+                )
+        index[iid] = chosen
+    return index, conflicts
+
+
 def item_stat_map(it: dict) -> dict[int, float]:
     scaling = (it.get("scalingOptions") or {}).get("0") or {}
     raw = scaling.get("stats")
@@ -2117,6 +2199,23 @@ def assemble(
             source_acc[item_id].append((source, origin))
             origin_counter[origin] += 1
 
+    # Under hold-out no list may speak, or a held-out ret build would take
+    # feral's list rows and its measured recall would be wrong.
+    cross_spec_index: dict[int, list[dict]] = (
+        {} if hold_out_wowhead else cross_spec_list_sources(max_phase)[0]
+    )
+
+    def add_unknown_or_cross_spec(item_id: int, origin: str) -> bool:
+        """At a place a row would get `unknown`, use any list's badge/pvp/world
+        source instead (ticket 676). Returns whether a list source filled it."""
+        listed = cross_spec_index.get(item_id)
+        if listed:
+            for src in listed:
+                add_source(item_id, dict(src), "wowhead")
+            return True
+        add_source(item_id, {"kind": "unknown"}, origin)
+        return False
+
     # db + atlasloot for all D7-eligible items
     for it in db["items"]:
         if not eligible_d7(it, profile):
@@ -2284,8 +2383,11 @@ def assemble(
             continue
         pairs = source_acc.get(iid)
         if not pairs:
-            add_source(iid, {"kind": "unknown"}, "curated")
-            curated_unsourced.add(iid)
+            # A list-filled id has only list-only kinds, so it is that shape.
+            if add_unknown_or_cross_spec(iid, "curated"):
+                curated_list_only.add(iid)
+            else:
+                curated_unsourced.add(iid)
         elif all(is_list_only_source(s) for s, _ in pairs):
             curated_list_only.add(iid)
 
@@ -2316,8 +2418,8 @@ def assemble(
         # committed input records, not a machine witness. See
         # item-source-kinds.json's own note on why kinds and origins are
         # shared, closed vocabularies.
-        add_source(iid, {"kind": "unknown"}, "curated")
-        curated_unsourced.add(iid)
+        if not add_unknown_or_cross_spec(iid, "curated"):
+            curated_unsourced.add(iid)
 
     # Arena gear is a source the player keeps or removes, for every spec
     # (ticket 642). The owner's ruling, verbatim: "the "dropping arena
@@ -2377,7 +2479,7 @@ def assemble(
             continue
         if not passes_db_phase_rule(it, max_phase, implemented_ids):
             continue
-        add_source(iid, {"kind": "unknown"}, "db")
+        add_unknown_or_cross_spec(iid, "db")
         db_phase_admitted.add(iid)
 
     eligible_count = sum(

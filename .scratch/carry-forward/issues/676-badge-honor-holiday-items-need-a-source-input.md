@@ -166,3 +166,176 @@ The rest of this ticket's data collection stands.
 whichever spec's list names it (the builder change in
 `scripts/assemble_universe.py`), then regenerate `data/universes/*` and the
 fork copies, and re-measure the table above.
+
+## Q-676-source measured 2026-10-17 (stage tab-follow-ups P1)
+
+### Candidates
+
+| Candidate | What it is | Unknown-first p5 rows it names |
+| --- | --- | ---: |
+| A | Any spec's Wowhead list gives a row on another spec's universe a `badge`, `pvp` or `world` source (built in this stage) | 59 (badge 40, pvp 11, world 8); 51 by the db-phase route, 8 by the curated routes |
+| A, raid kinds | The same for `raid` rows | 19; not copied: they also grant membership, and Wowhead-only raid+boss claims are what `pool-hardening.test.ts:1373-1440` rejects (part P4) |
+| B1 | Other `sources[]` keys in db.json | 0: db.json has only `drop`, `crafted`, `rep`, and none of the unknown-first rows has any |
+| B2 | Vendored AtlasLoot tables | 0: `vendor/atlasloot/` holds only dungeon/raid and faction tables; its one Ahune block is Wrath-gated with ids not in the pinned db |
+| C | AtlasLootClassic `AtlasLootClassic_PvP/data-tbc.lua` and `AtlasLootClassic_Collections/data-tbc.lua` at the pinned commit, not vendored | measured in P3 step 26 (subsection below) |
+
+B1 and B2 are from the 2026-10-17 research report on 676's source candidates
+(scripts `b1.py`, `b2a.py`, `b2b.py` in it; the report is a gitignored file
+under `.scratch/agent-reports/` in the main checkout). B1 re-runs as
+`python -I -c "import json;print({k for i in json.load(open('vendor/wowsims/db.json',encoding='utf-8'))['items'] for s in i.get('sources',[]) for k in s})"`.
+
+### What the builder now does
+
+`cross_spec_list_sources(max_phase)` in `scripts/assemble_universe.py` reads
+every list folder (`feral`, `ret`) at the stage files the phase reads, keeps
+`badge`, `pvp` and `world` rows, and reduces them to one source per kind per
+item. `add_unknown_or_cross_spec` uses that index at the three places a row
+gets `unknown` (curated bis, ticket-157 force-include, db-phase). Membership
+code is unchanged; a hold-out build reads no index.
+
+Conflict rule, one source per kind per item, so the output does not depend
+on which folder is read first:
+
+- `badge`: the highest `cost`. A priced row beats G'eras's cost-0
+  "Vendor: G'eras (Badges of Justice)" row.
+- `pvp`: the row that names a `season`, else the first in folder/stage order.
+- `world`: rows are identical.
+
+### Measured: committed universes (base `f979411f`) against an in-memory rebuild with the new builder
+
+Every one of the 44 universes keeps the same entry count and the same item
+ids. Ret gains nothing: its own list already supplies these rows. The
+rebuild also gives the 19 honour rows a season (ticket 681); those are not
+counted below. No other row's sources changed.
+
+Totals of rows whose first source leaves `unknown`:
+
+| phase | rows | badge | pvp | world | db route | curated route | distinct item ids |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| p2 | 36 | 26 | 2 | 8 | 28 | 8 | 6 |
+| p3 | 45 | 26 | 11 | 8 | 37 | 8 | 11 |
+| p4 | 55 | 36 | 11 | 8 | 47 | 8 | 12 |
+| p5 | 59 | 40 | 11 | 8 | 51 | 8 | 13 |
+
+At p5 this takes the unknown-first rows from 3481 to 3422.
+
+Per universe (by kind counts each source the filled row carries):
+
+| universe | entries old | entries new | same ids | filled | by kind | by route |
+| --- | --- | --- | --- | --- | --- | --- |
+| balance-p2 | 479 | 479 | True | 6 | {'badge': 4, 'world': 1, 'pvp': 1} | {'db': 6} |
+| balance-p3 | 686 | 686 | True | 10 | {'pvp': 5, 'badge': 4, 'world': 1} | {'db': 10} |
+| balance-p4 | 767 | 767 | True | 11 | {'pvp': 5, 'badge': 5, 'world': 1} | {'db': 11} |
+| balance-p5 | 964 | 964 | True | 11 | {'pvp': 5, 'badge': 5, 'world': 1} | {'db': 11} |
+| ele-p2 | 550 | 550 | True | 4 | {'badge': 3, 'world': 1} | {'db': 4} |
+| ele-p3 | 803 | 803 | True | 4 | {'badge': 3, 'world': 1} | {'db': 4} |
+| ele-p4 | 912 | 912 | True | 5 | {'badge': 4, 'world': 1} | {'db': 5} |
+| ele-p5 | 1151 | 1151 | True | 6 | {'badge': 5, 'world': 1} | {'db': 6} |
+| enh-p2 | 568 | 568 | True | 4 | {'badge': 3, 'world': 1} | {'db': 2, 'curated': 2} |
+| enh-p3 | 829 | 829 | True | 4 | {'badge': 3, 'world': 1} | {'db': 2, 'curated': 2} |
+| enh-p4 | 939 | 939 | True | 5 | {'badge': 4, 'world': 1} | {'db': 3, 'curated': 2} |
+| enh-p5 | 1191 | 1191 | True | 6 | {'badge': 5, 'world': 1} | {'db': 4, 'curated': 2} |
+| feral-p2 | 479 | 479 | True | 1 | {'badge': 1} | {'db': 1} |
+| feral-p3 | 686 | 686 | True | 1 | {'badge': 1} | {'db': 1} |
+| feral-p4 | 767 | 767 | True | 2 | {'badge': 2} | {'db': 2} |
+| feral-p5 | 962 | 962 | True | 2 | {'badge': 2} | {'db': 2} |
+| hunter-p2 | 503 | 503 | True | 4 | {'badge': 3, 'world': 1} | {'db': 2, 'curated': 2} |
+| hunter-p3 | 737 | 737 | True | 4 | {'badge': 3, 'world': 1} | {'db': 2, 'curated': 2} |
+| hunter-p4 | 846 | 846 | True | 5 | {'badge': 4, 'world': 1} | {'db': 3, 'curated': 2} |
+| hunter-p5 | 1080 | 1080 | True | 6 | {'badge': 5, 'world': 1} | {'db': 4, 'curated': 2} |
+| mage-p2 | 359 | 359 | True | 3 | {'badge': 2, 'world': 1} | {'db': 3} |
+| mage-p3 | 508 | 508 | True | 3 | {'badge': 2, 'world': 1} | {'db': 3} |
+| mage-p4 | 563 | 563 | True | 4 | {'badge': 3, 'world': 1} | {'db': 4} |
+| mage-p5 | 697 | 697 | True | 4 | {'badge': 3, 'world': 1} | {'db': 4} |
+| ret-p2 | 541 | 541 | True | 0 | {} | {} |
+| ret-p3 | 794 | 794 | True | 0 | {} | {} |
+| ret-p4 | 917 | 917 | True | 0 | {} | {} |
+| ret-p5 | 1156 | 1156 | True | 0 | {} | {} |
+| rogue-p2 | 458 | 458 | True | 4 | {'badge': 3, 'pvp': 1} | {'db': 2, 'curated': 2} |
+| rogue-p3 | 664 | 664 | True | 8 | {'pvp': 5, 'badge': 3} | {'db': 6, 'curated': 2} |
+| rogue-p4 | 748 | 748 | True | 9 | {'pvp': 5, 'badge': 4} | {'db': 7, 'curated': 2} |
+| rogue-p5 | 951 | 951 | True | 9 | {'pvp': 5, 'badge': 4} | {'db': 7, 'curated': 2} |
+| shadow-p2 | 384 | 384 | True | 3 | {'badge': 2, 'world': 1} | {'db': 3} |
+| shadow-p3 | 545 | 545 | True | 3 | {'badge': 2, 'world': 1} | {'db': 3} |
+| shadow-p4 | 599 | 599 | True | 4 | {'badge': 3, 'world': 1} | {'db': 4} |
+| shadow-p5 | 744 | 744 | True | 4 | {'badge': 3, 'world': 1} | {'db': 4} |
+| warlock-p2 | 370 | 370 | True | 3 | {'badge': 2, 'world': 1} | {'db': 3} |
+| warlock-p3 | 523 | 523 | True | 3 | {'badge': 2, 'world': 1} | {'db': 3} |
+| warlock-p4 | 578 | 578 | True | 4 | {'badge': 3, 'world': 1} | {'db': 4} |
+| warlock-p5 | 716 | 716 | True | 4 | {'badge': 3, 'world': 1} | {'db': 4} |
+| warrior-p2 | 644 | 644 | True | 4 | {'badge': 3, 'world': 1} | {'curated': 2, 'db': 2} |
+| warrior-p3 | 950 | 950 | True | 5 | {'badge': 3, 'world': 1, 'pvp': 1} | {'curated': 2, 'db': 3} |
+| warrior-p4 | 1092 | 1092 | True | 6 | {'badge': 4, 'world': 1, 'pvp': 1} | {'curated': 2, 'db': 4} |
+| warrior-p5 | 1396 | 1396 | True | 7 | {'badge': 5, 'world': 1, 'pvp': 1} | {'curated': 2, 'db': 5} |
+
+### Conflicts between lists
+
+| item | kind | rows | kept | universes it fills |
+| --- | --- | --- | --- | --- |
+| 29381 | badge | `feral/p1-p2` cost 0; `ret/p1-p2` cost 25 | cost 25 | p2-p5: balance, ele, enh, hunter, mage, rogue, shadow, warlock, warrior |
+| 29383 | badge | `feral/p1-p2` cost 0; `ret/p1-p2` cost 41 | cost 41 | p2-p5: the same nine |
+| 28476 | pvp | `feral/p1-p2` arena; `feral/p3` honour season 1 | honour season 1 | none (p3-p5) |
+| 31984 | pvp | `ret/p1-p2` arena; `ret/p3` honour, no season | arena | none (p3-p5) |
+
+No two priced badge rows differ. The two pvp conflicts are arena/honour
+disagreements inside one spec's own lists. Neither item reaches an
+`unknown` site in any universe, so the rule's choice for them changes no
+output today. Which of the two texts is right for 28476 and 31984 is not
+checked here.
+
+### Why own-spec list rows stay `unknown` (12 rows at p5)
+
+From the same research report (script `own12.py`):
+
+- 6 ret ids are only in `ret/pre-raid.json`, which no stage reads: 29382,
+  28645, 28646, 31322, 31318, 28176.
+- Quest text that names no zone parses to `[]` (no `quest` kind): 30257,
+  31033, 28176.
+- `unkept_wowhead_place` drops a place outside TBC's raids and admitted
+  heroics: 23206 (Naxxramas, ret and feral), 32387 (heroic Sethekk Halls,
+  feral), 31856 ("Bind on Equip" read as a zone).
+
+None of them is a `badge`, `pvp` or `world` row in another list, so this
+stage leaves them as they are (part P4).
+
+### Re-run
+
+The measurement compares the committed universes with an in-memory rebuild,
+so it shows the change only on a tree whose universes predate it (at
+`f979411f` with this builder). Save as a file and run
+`python -I <file> <repo root>`:
+
+```python
+import contextlib, io, json, sys
+from collections import Counter, defaultdict
+from pathlib import Path
+
+ROOT = Path(sys.argv[1])
+sys.path.insert(0, str(ROOT / "scripts"))
+import assemble_universe as A
+
+specs = sorted(p.name[:-len("-p2.json")] for p in (ROOT / "data/universes").glob("*-p2.json"))
+filled = defaultdict(lambda: defaultdict(set))
+for spec in specs:
+    for n in (2, 3, 4, 5):
+        old = json.loads((ROOT / f"data/universes/{spec}-p{n}.json").read_text(encoding="utf-8"))
+        with contextlib.redirect_stderr(io.StringIO()):
+            new, _ = A.assemble(n, spec=spec)
+        oe = {e["itemId"]: e for e in old["entries"]}
+        ne = {e["itemId"]: e for e in new["entries"]}
+        kinds, routes, other = Counter(), Counter(), 0
+        for iid, o in oe.items():
+            nn = ne.get(iid)
+            if nn is None or o["sources"] == nn["sources"]:
+                continue
+            if o["sources"][0]["kind"] == "unknown" and nn["sources"][0]["kind"] != "unknown":
+                routes[o["sources"][0]["origin"]] += 1
+                kinds.update(s["kind"] for s in nn["sources"])
+                filled[n][iid].add(spec)
+            else:
+                other += 1
+        print(spec, n, len(oe), len(ne), set(oe) == set(ne), dict(kinds), dict(routes), "other", other)
+for n in (2, 3, 4, 5):
+    for c in A.cross_spec_list_sources(n)[1]:
+        print(n, c["itemId"], c["kind"], c["kept"], c["rows"], sorted(filled[n].get(c["itemId"], ())))
+```

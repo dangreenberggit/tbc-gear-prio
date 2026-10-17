@@ -43,3 +43,19 @@ no owner question is needed to record it).
   the same way an arena row does.
 - A test pins the parse of "Vendor: Honor Points (Season 3)" to
   `{"kind": "pvp", "via": "honor", "season": 3}`.
+
+## Regenerated 2026-10-17 (stage tab-follow-ups P1)
+
+`parse_wowhead_source` now reads `Season N` on an honour row, pinned by
+`pnpm wowhead-parse:check` (`scripts/check_wowhead_parse.py`, a
+`verify:steps` entry). After regenerating the 44 universes, honour `pvp`
+sources without a season: 0 (19 before). With a season: 54, which is the
+19 own-list rows plus 35 honour rows that other specs' universes now take
+from the ret and feral lists (ticket 676). Re-run from the repo root:
+
+```
+python -I -c "import glob,json;print(sum(1 for p in glob.glob('data/universes/*-p*.json') if not p.endswith('.report.json') for e in json.load(open(p,encoding='utf-8'))['entries'] for s in e['sources'] if s.get('kind')=='pvp' and s.get('via')=='honor' and 'season' not in s))"
+python -I -c "import glob,json;print(sum(1 for p in glob.glob('data/universes/*-p*.json') if not p.endswith('.report.json') for e in json.load(open(p,encoding='utf-8'))['entries'] for s in e['sources'] if s.get('kind')=='pvp' and s.get('via')=='honor' and 'season' in s))"
+```
+
+The first prints 0 and the second 54.
