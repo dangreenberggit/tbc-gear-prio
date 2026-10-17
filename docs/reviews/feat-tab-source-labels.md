@@ -254,6 +254,7 @@ re-run at `ed8beb00` and printed the ticket's counts.
 | O3  | Orchestrator  | fixed       | `f39cf3f5` — rows for 676-682 added, closed rows removed, 293 says 29–34%; the scope-doc loop prints nothing missing or stale                                                                                                                                                                                                             |
 | Q1  | Code quality  | fixed       | fork `83f43858a` — fallback kept, with a comment saying why                                                                                                                                                                                                                                                                               |
 | Q2  | Code quality  | fixed       | `ad0ff4ef` — ret-p2 checked too                                                                                                                                                                                                                                                                                                           |
+| V1  | Verify        | defer       | `.scratch/carry-forward/issues/683-verify-fails-on-vitest-rpc-timeout.md` — two of three verify runs at `02058d5f` failed on a vitest RPC timeout with every test passing; the commits since the last green run change no core test                                                                                                       |
 
 ## Summary
 
@@ -270,8 +271,12 @@ The fork changes no existing wowsims file except the approved
 `ui/app/SimTabsSection.tsx` (Standards + Spec, and round 2 check 1).
 
 `pnpm verify` at `154f1223` (before the R1 fix): rc 0, `gates: 1539 ran, 0
-skipped`. The run on the final tip is reported with the merge check.
+skipped`. At `02058d5f` (after it), two runs failed with "vitest exited
+nonzero, but its JSON report lists no failed test or file"; run directly,
+vitest reported 1503 passed and one unhandled
+`Timeout calling "onTaskUpdate"`. The third run passed: rc 0,
+`gates: 1539 ran, 0 skipped`. **V1** records this flaky gate (ticket 683).
 
-Tickets: this branch filed 4 (679, 680, 681, 682) and closed 5 (44, 174,
-619, 645, 646), by the two commands in the skill's step 3. Ticket 676 also
+Tickets: this branch filed 5 (679, 680, 681, 682, 683) and closed 5 (44,
+174, 619, 645, 646), by the two commands in the skill's step 3. Ticket 676 also
 absorbs P1 with a corrected premise and stays open.

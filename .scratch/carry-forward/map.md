@@ -374,3 +374,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 680 Libram of Hope's Source cell probably shows a Lua fragment as the boss (pre-merge review feat/tab-source-labels, D1) 2026-10-16
 - 681 Honour PvP rows name no season, while arena rows do (pre-merge review feat/tab-source-labels, D3) 2026-10-16
 - 682 The tab fixture still shows Vindicator's Scaled Bracers as an arena item (pre-merge review feat/tab-source-labels, P4) 2026-10-16
+- 683 `pnpm verify` fails on a vitest RPC timeout while every test passes (pre-merge review feat/tab-source-labels, V1) 2026-10-16
