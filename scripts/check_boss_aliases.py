@@ -46,15 +46,15 @@ from parse_atlasloot import (  # noqa: E402
     LOOT_RE,
     NAME_RE,
     extract_brace_block,
+    items_block_lines,
 )
 
 
 def dungeon_encounter_loot(lua_text: str) -> set[tuple[str, int]]:
     """(encounter name, item id) for every boss in AtlasLoot's five-man tables.
 
-    Walks the items block with the same depth rules as
-    parse_atlasloot.parse_items_section: an encounter opens at depth 1, its
-    `name` sits at depth 2, its loot rows at depth 3 and below.
+    Unlike the parser, it keeps every difficulty: the question is only whether
+    AtlasLoot lists the item under an encounter of that name.
     """
     pairs: set[tuple[str, int]] = set()
     for match in DATA_BLOCK_RE.finditer(lua_text):
@@ -65,13 +65,10 @@ def dungeon_encounter_loot(lua_text: str) -> set[tuple[str, int]]:
         items_m = ITEMS_START_RE.search(block)
         if not items_m:
             continue
-        depth = 0
         name: str | None = None
-        for line in extract_brace_block(block, items_m.end() - 1).splitlines():
-            stripped = line.strip()
-            if stripped.startswith("--"):
-                continue
-            if depth == 1 and stripped.startswith("{"):
+        items_block = extract_brace_block(block, items_m.end() - 1)
+        for depth, line in items_block_lines(items_block):
+            if depth == 1 and line.strip().startswith("{"):
                 name = None
             if depth == 2:
                 nm = NAME_RE.match(line)
@@ -81,9 +78,6 @@ def dungeon_encounter_loot(lua_text: str) -> set[tuple[str, int]]:
                 lm = LOOT_RE.match(line)
                 if lm:
                     pairs.add((name, int(lm.group(2))))
-            depth += line.count("{") - line.count("}")
-            if depth <= 0:
-                break
     return pairs
 
 
@@ -111,7 +105,7 @@ def atlasloot_boss_names() -> set[str]:
 
 
 def emitted_boss_names() -> dict[str, set[tuple[int, str | None]]]:
-    """Boss name → the (item id, zone) pairs that name it in any universe."""
+    """Keeps each hit's zone so main() can tell a five-man boss from a raid boss."""
     out: dict[str, set[tuple[int, str | None]]] = {}
     for path in sorted(UNIVERSES.glob("*-p*.json")):
         if path.name.endswith(".report.json"):
