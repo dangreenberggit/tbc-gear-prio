@@ -456,3 +456,295 @@ for n in (2, 3, 4, 5):
     for c in A.cross_spec_list_sources(n)[1]:
         print(n, c["itemId"], c["kind"], c["kept"], c["rows"], sorted(filled[n].get(c["itemId"], ())))
 ```
+
+### Candidate C measured (P3 step 26)
+
+Measured 2026-10-17 on `tbc-gear-prio@6a86ef98` (universes as P1 left them).
+Both modules were downloaded into an empty scratch folder and read as data;
+nothing is vendored and no script changed.
+
+Inputs, at the pinned AtlasLoot commit `0bc91eb6899bebbf3b99072b446c1b83778ddeb9`
+(`data/atlasloot.lock.json`):
+
+| File | Bytes | sha256 |
+| --- | ---: | --- |
+| `AtlasLootClassic_PvP/data-tbc.lua` | 46622 | `9dd41d773235eaa873ac9093d3d03bad8e5ac1f7368d7ca356bdeb30d1736d03` |
+| `AtlasLootClassic_Collections/data-tbc.lua` | 31859 | `4ffc8988d0e349004a8ae604ee99d98403ceab01e7c6a6cbaafbf3eb54218e0b` |
+
+A row is `{ <slot>, <id> ... }`, the shape `scripts/parse_atlasloot.py`'s
+`LOOT_RE` reads. The PvP module has 729 rows: 614 item rows and 115 item-set
+ids (sub-tables with `TableType = SET_ITTYPE`). The Collections module has
+546 item rows, plus 3 icon rows with no item id. Set ids name no extra row:
+only the 17 season-1 arena set ids exist in db.json (which files every arena
+season's pieces under the season-1 id), and the rows they reach are not
+`unknown`. The counts below are item rows only.
+
+"Unknown-first" is a row whose `sources[0].kind` is `unknown`. "Named by C"
+counts each row once; no row is named by both modules.
+
+| Universe | Unknown-first | Named by C | PvP module | Collections module | Not named |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| balance-p2 | 178 | 93 | 46 | 47 | 85 |
+| balance-p3 | 221 | 117 | 65 | 52 | 104 |
+| balance-p4 | 257 | 153 | 67 | 86 | 104 |
+| balance-p5 | 317 | 207 | 89 | 118 | 110 |
+| ele-p2 | 195 | 105 | 47 | 58 | 90 |
+| ele-p3 | 242 | 133 | 70 | 63 | 109 |
+| ele-p4 | 294 | 183 | 72 | 111 | 111 |
+| ele-p5 | 364 | 247 | 94 | 153 | 117 |
+| enh-p2 | 200 | 106 | 47 | 59 | 94 |
+| enh-p3 | 247 | 134 | 70 | 64 | 113 |
+| enh-p4 | 299 | 184 | 72 | 112 | 115 |
+| enh-p5 | 373 | 252 | 94 | 158 | 121 |
+| feral-p2 | 177 | 93 | 46 | 47 | 84 |
+| feral-p3 | 220 | 117 | 65 | 52 | 103 |
+| feral-p4 | 256 | 153 | 67 | 86 | 103 |
+| feral-p5 | 316 | 207 | 89 | 118 | 109 |
+| hunter-p2 | 163 | 98 | 47 | 51 | 65 |
+| hunter-p3 | 200 | 126 | 70 | 56 | 74 |
+| hunter-p4 | 249 | 173 | 72 | 101 | 76 |
+| hunter-p5 | 317 | 241 | 94 | 147 | 76 |
+| mage-p2 | 133 | 78 | 38 | 40 | 55 |
+| mage-p3 | 167 | 103 | 58 | 45 | 64 |
+| mage-p4 | 185 | 121 | 60 | 61 | 64 |
+| mage-p5 | 220 | 156 | 79 | 77 | 64 |
+| ret-p2 | 184 | 102 | 47 | 55 | 82 |
+| ret-p3 | 229 | 129 | 69 | 60 | 100 |
+| ret-p4 | 296 | 194 | 71 | 123 | 102 |
+| ret-p5 | 375 | 267 | 93 | 174 | 108 |
+| rogue-p2 | 155 | 97 | 46 | 51 | 58 |
+| rogue-p3 | 188 | 121 | 65 | 56 | 67 |
+| rogue-p4 | 223 | 156 | 67 | 89 | 67 |
+| rogue-p5 | 281 | 214 | 89 | 125 | 67 |
+| shadow-p2 | 148 | 78 | 39 | 39 | 70 |
+| shadow-p3 | 187 | 103 | 59 | 44 | 84 |
+| shadow-p4 | 205 | 121 | 61 | 60 | 84 |
+| shadow-p5 | 244 | 157 | 80 | 77 | 87 |
+| warlock-p2 | 132 | 78 | 38 | 40 | 54 |
+| warlock-p3 | 166 | 103 | 58 | 45 | 63 |
+| warlock-p4 | 184 | 121 | 60 | 61 | 63 |
+| warlock-p5 | 219 | 156 | 79 | 77 | 63 |
+| warrior-p2 | 201 | 117 | 47 | 70 | 84 |
+| warrior-p3 | 242 | 144 | 69 | 75 | 98 |
+| warrior-p4 | 310 | 210 | 71 | 139 | 100 |
+| warrior-p5 | 396 | 293 | 93 | 200 | 103 |
+
+Split by AtlasLoot table at p5. No p5 row is in two tables, so each spec's
+figures sum to its "Named by C" (2,397 over the 11 specs). No row is named
+by `MidsummerFestivalBC` or `Brewfest`.
+
+| Spec (p5) | BadgeofJustice | BadgeofJustice4 | BadgeofJusticeP5 | BCCSunmote | WorldEpicsBC | HalloweenBC | ArenaS1PvP | ArenaS2PvP | ArenaS3PvP | ArenaS4PvP | HonorSetBCC | PVP_INSIGNIA | TerokkarPvP |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| balance | 31 | 39 | 30 | 2 | 13 | 3 | 26 | 18 | 19 | 22 | 2 | 2 | 0 |
+| ele | 40 | 53 | 39 | 3 | 15 | 3 | 26 | 19 | 23 | 22 | 2 | 2 | 0 |
+| enh | 41 | 53 | 43 | 3 | 15 | 3 | 26 | 19 | 23 | 22 | 2 | 2 | 0 |
+| feral | 31 | 39 | 30 | 2 | 13 | 3 | 26 | 18 | 19 | 22 | 2 | 2 | 0 |
+| hunter | 32 | 50 | 43 | 3 | 16 | 3 | 26 | 19 | 23 | 22 | 2 | 2 | 0 |
+| mage | 26 | 21 | 16 | 0 | 11 | 3 | 20 | 16 | 20 | 19 | 2 | 2 | 0 |
+| ret | 38 | 68 | 46 | 5 | 14 | 3 | 26 | 19 | 22 | 22 | 2 | 2 | 0 |
+| rogue | 32 | 38 | 34 | 2 | 16 | 3 | 26 | 18 | 19 | 22 | 2 | 2 | 0 |
+| shadow | 26 | 21 | 17 | 0 | 10 | 3 | 20 | 16 | 20 | 19 | 2 | 2 | 1 |
+| warlock | 26 | 21 | 16 | 0 | 11 | 3 | 20 | 16 | 20 | 19 | 2 | 2 | 0 |
+| warrior | 47 | 69 | 56 | 5 | 20 | 3 | 26 | 19 | 22 | 22 | 2 | 2 | 0 |
+| **all 11** | 370 | 472 | 370 | 25 | 154 | 33 | 268 | 197 | 230 | 233 | 22 | 22 | 1 |
+
+What C leaves `unknown` at p5 (1,025 rows over the 11 specs):
+
+- 173 rows are holiday-boss items that upstream re-issued under ids of
+  200000 and above (Ahune and Coren Direbrew; for example 281739 Empty Mug
+  of Direbrew, original 38287). AtlasLoot lists the original ids, so no id
+  matches. All 173 match a `MidsummerFestivalBC` (97) or `Brewfest` (76) row
+  by item name (`count-c-holiday.py` below).
+- 804 other epics, not classified further. The first examples the script
+  prints are tier pieces (Thunderheart, Nordrassil, Malorne), Chancellor's
+  tunics and Terokk's quest rewards.
+- 30 rows with PvP rank names (Sergeant's, Grand Marshal's, General's ...).
+- 18 rares or lower.
+
+Win condition (`## Remainder after stage tab-follow-ups` § Candidates,
+written before measuring): "the two modules name, per spec and phase, most
+of the badge/honour rows and the holiday-boss rows (Ahune, Coren Direbrew,
+the Headless Horseman) now `unknown`."
+
+- Badge and honour rows: met. C names a row in every one of the 44
+  universes (52% to 76% of unknown-first rows per universe; 2,397 of 3,422
+  at p5), from the three badge-vendor tables, the four arena seasons and
+  the honour table. The universes do not mark which unknown rows are badge
+  or honour items, so there is no exact denominator; of the 1,025 p5 rows
+  C leaves, 30 carry a PvP rank name.
+- Holiday-boss rows: not met by item id. Ahune and Coren Direbrew rows are
+  0 named because upstream re-issued their ids; the Headless Horseman table
+  names 3 rows per spec. A name join reaches all 173 re-issued rows, but
+  joining by name is a P4 design choice, not measured here as a route.
+
+Re-run: save the scripts below in a folder that is not the download
+folder, then run
+`python -I count-c.py <pair root> <pvp data-tbc.lua> <collections data-tbc.lua>`,
+`python -I count-c-rest.py <pair root> <path to count-c.py> <pvp lua> <collections lua>`
+and `python -I count-c-holiday.py <pair root> <collections lua>`.
+
+`count-c.py`:
+
+```python
+"""Candidate C (ticket 676): which unknown-first universe rows the AtlasLoot
+PvP and Collections modules name. Usage:
+  python -I count-c.py <pair root> <pvp data-tbc.lua> <collections data-tbc.lua>
+"""
+
+import collections
+import glob
+import json
+import os
+import re
+import sys
+
+ROOT, PVP, COLL = sys.argv[1:4]
+
+TOP_RE = re.compile(r'^(?:data\["([^"]+)"\]|local ([A-Z_]+))\s*=\s*\{')
+ROW_RE = re.compile(r"^\s*\{\s*(\d+)\s*,\s*(\d+)\s*[,}]")
+ROWLIKE_RE = re.compile(r"^\s*\{\s*\d+\s*,")
+STRING_RE = re.compile(r'"(?:[^"\\]|\\.)*"')
+
+
+def parse(path):
+    """Yield (top table, 'item' or 'set', id). Rows inside a sub-table with
+    TableType = SET_ITTYPE carry item-set ids, not item ids."""
+    out = []
+    unmatched = 0
+    top = None
+    stack = []  # one bool per open brace: inside a SET_ITTYPE table
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            if not stack:
+                m = TOP_RE.match(line)
+                if m:
+                    top = m.group(1) or m.group(2)
+            code = STRING_RE.sub('""', line).split("--", 1)[0]
+            in_set = stack[-1] if stack else False
+            if stack and "TableType" in code and "SET_ITTYPE" in code:
+                stack[-1] = True
+                in_set = True
+            m = ROW_RE.match(code)
+            if m and top is not None and stack:
+                out.append((top, "set" if in_set else "item", int(m.group(2))))
+            elif ROWLIKE_RE.match(code) and stack:
+                unmatched += 1
+            for ch in code:
+                if ch == "{":
+                    stack.append(stack[-1] if stack else False)
+                elif ch == "}":
+                    stack.pop()
+                    if not stack:
+                        top = None
+    return out, unmatched
+
+
+db = json.load(open(os.path.join(ROOT, "vendor/wowsims/db.json"), encoding="utf-8"))
+set_items = collections.defaultdict(set)
+for it in db["items"]:
+    if it.get("setId"):
+        set_items[it["setId"]].add(it["id"])
+
+# itemId -> {(module, table)}: from item rows only, and from set rows
+# resolved through db.json setId. db.json files every arena season's pieces
+# under the season-1 set id (e.g. Merciless Gladiator's Plate Helm 30488 has
+# setId 567), so a resolved set counts all seasons under ArenaS1PvP.
+by_item = collections.defaultdict(set)
+by_set = collections.defaultdict(set)
+for module, path in (("PvP", PVP), ("Collections", COLL)):
+    rows, unmatched = parse(path)
+    tables = collections.Counter(t for t, _, _ in rows)
+    sets = {i for _, k, i in rows if k == "set"}
+    print(
+        f"{module}: {len(rows)} rows ({sum(1 for r in rows if r[1] == 'item')} item, "
+        f"{len(sets)} set ids, {sum(1 for s in sets if s not in set_items)} set ids not in db), "
+        f"{unmatched} row-like lines unmatched, tables {dict(tables)}"
+    )
+    for table, kind, i in rows:
+        if kind == "item":
+            by_item[i].add((module, table))
+        else:
+            for iid in set_items.get(i, set()):
+                by_set[iid].add((module, table))
+
+print()
+print("universe | unknown-first | named by item rows | PvP | Collections | + by resolved sets | by table (item rows)")
+grand = collections.Counter()
+for path in sorted(glob.glob(os.path.join(ROOT, "data/universes/*-p[0-9].json"))):
+    u = json.load(open(path, encoding="utf-8"))
+    unk = [e for e in u["entries"] if e["sources"][0]["kind"] == "unknown"]
+    hit = [e for e in unk if e["itemId"] in by_item]
+    extra = [e for e in unk if e["itemId"] in by_set and e["itemId"] not in by_item]
+    by_mod = collections.Counter(m for e in hit for m in {m for m, _ in by_item[e["itemId"]]})
+    by_table = collections.Counter(t for e in hit for _, t in by_item[e["itemId"]])
+    name = os.path.basename(path)[:-5]
+    print(
+        f"{name} | {len(unk)} | {len(hit)} | {by_mod['PvP']} | {by_mod['Collections']} | {len(extra)} | "
+        + ", ".join(f"{t} {n}" for t, n in sorted(by_table.items()))
+    )
+    if name.endswith("-p5"):
+        grand["unknown"] += len(unk)
+        grand["named by item rows"] += len(hit)
+        grand["added by resolved sets"] += len(extra)
+        grand.update({"table:" + t: n for t, n in by_table.items()})
+        ids = {e["itemId"] for e in unk}
+        grand["renumbered ids >= 200000 among unknown"] += sum(1 for i in ids if i >= 200000)
+print()
+print("p5 totals:", dict(grand))
+```
+
+`count-c-rest.py`:
+
+```python
+"""What the two modules leave unnamed at p5 (ticket 676 candidate C).
+Usage: python -I count-c-rest.py <pair root> <count-c.py> <pvp lua> <collections lua>"""
+import collections, glob, json, os, re, sys
+root, cc, pvp, coll = sys.argv[1:5]
+ns = {}
+exec(open(cc, encoding="utf-8").read().split("db = json.load")[0].replace("ROOT, PVP, COLL = sys.argv[1:4]", ""), ns)
+named = {i for path in (pvp, coll) for _, k, i in ns["parse"](path)[0] if k == "item"}
+db = {it["id"]: it for it in json.load(open(os.path.join(root, "vendor/wowsims/db.json"), encoding="utf-8"))["items"]}
+PVP_WORDS = re.compile(r"Gladiator|Veteran|Vindicator|Grand Marshal|High Warlord|Marshal's|General's|Battlemaster|Guardian's|Sergeant|Commander|Champion's|Legionnaire|Knight-|Blood Guard|Stone Guard")
+cat = collections.Counter(); ex = collections.defaultdict(list)
+for path in sorted(glob.glob(os.path.join(root, "data/universes/*-p5.json"))):
+    for e in json.load(open(path, encoding="utf-8"))["entries"]:
+        if e["sources"][0]["kind"] != "unknown" or e["itemId"] in named:
+            continue
+        i, n = e["itemId"], e["name"]
+        if i >= 200000: c = "renumbered id >= 200000"
+        elif PVP_WORDS.search(n): c = "PvP-named (Gladiator, Veteran, ...)"
+        elif db.get(i, {}).get("quality", 0) >= 4: c = "other epic"
+        else: c = "other rare or lower"
+        cat[c] += 1
+        if len(ex[c]) < 12 and (i, n) not in ex[c]: ex[c].append((i, n))
+for c, n in cat.most_common():
+    print(f"{c}: {n}  e.g. {ex[c]}")
+print("total unnamed:", sum(cat.values()))
+```
+
+`count-c-holiday.py`:
+
+```python
+"""Renumbered (id >= 200000) unknown p5 rows whose name matches a row comment in
+the Collections holiday tables. Usage: python -I count-c-holiday.py <pair root> <collections lua>"""
+import collections, glob, json, os, re, sys
+root, coll = sys.argv[1:3]
+TOP = re.compile(r'^data\["([^"]+)"\]')
+ROW = re.compile(r"^\s*\{\s*\d+\s*,\s*(\d+)\s*[,}].*--\s*(.+?)\s*$")
+names = {}; top = None
+for line in open(coll, encoding="utf-8"):
+    m = TOP.match(line)
+    if m: top = m.group(1)
+    m = ROW.match(line)
+    if m and top in ("MidsummerFestivalBC", "Brewfest", "HalloweenBC"):
+        names[m.group(2)] = (top, int(m.group(1)))
+per = collections.Counter(); unmatched = set(); rows = 0
+for path in sorted(glob.glob(os.path.join(root, "data/universes/*-p5.json"))):
+    for e in json.load(open(path, encoding="utf-8"))["entries"]:
+        if e["sources"][0]["kind"] == "unknown" and e["itemId"] >= 200000:
+            rows += 1
+            hit = names.get(e["name"])
+            if hit: per[hit[0]] += 1
+            else: unmatched.add((e["itemId"], e["name"]))
+print("renumbered unknown p5 rows:", rows, "matched by name:", dict(per), "unmatched ids:", sorted(unmatched))
+```
