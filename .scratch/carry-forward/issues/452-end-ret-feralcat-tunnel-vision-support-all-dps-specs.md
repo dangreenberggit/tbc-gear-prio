@@ -21,20 +21,28 @@ branch. It is explicitly NOT part of the feat/tab-signoff-followups merge.
 
 ## Where the assumption is baked in (hotspots found 2026-09-19, verify before acting)
 
-- **Desktop gate golden:** `data/desktop-gate/golden-ret-p5-cap40.json` is the only
-  golden — a single ret P5 fixture. The gate proves nothing about other specs'
-  ranking output.
+- **Desktop gate golden:** `data/desktop-gate/golden-ret-p4-cap40.json` is the only
+  golden — a single ret P4 fixture. The gate proves nothing about other specs'
+  ranking output. (Updated 2026-10-17: the 2026-09-19 inventory named
+  `golden-ret-p5-cap40.json`; commits 5b919b9f and d72b6ccf on 2026-10-06
+  replaced it with the P4 file — `git log --oneline --name-status -- 'data/desktop-gate/*'`.)
 - **Gates / pipeline scripts** (grep hits for feralcat|retribution|/druid/feral|
   /paladin/retribution): `scripts/check_desktop_tab.py`, `scripts/build_feral_skeleton.py`,
   `scripts/check_ep_presets.py`, `scripts/assemble_universe.py`,
   `scripts/generate_sim_implemented_effects.py`, `scripts/check_sim_implemented_effects_classifier.py`,
   `scripts/sync_wowsims.py`, `scripts/check_sync_wowsims.py`.
-- **Fork harness:** `vendor/tbc-new-fork/test-tab-harness.mjs` (and the layout/
-  review/desktop harnesses that consume it) drive a single hardcoded spec page
-  (`/tbc/druid/feralcat/`). So the layout gate, the a11y ratchet, and the
+- **Tab harness:** `scripts/tab-harness/test-tab-harness.mjs` sets one hardcoded
+  spec page, `PAGE_PATH = "/tbc/paladin/retribution/"`, and
+  `scripts/tab-harness/test-layout.mjs` and `scripts/tab-harness/test-review.mjs`
+  navigate only to that page. So the layout gate, the a11y ratchet, and the
   visual-review capture ALL only ever look at one spec — a caster or other DPS
   spec's controls/violations are invisible to every gate. (This is the same class
   as 449/450: a gate that only scans one surface can't catch a defect on another.)
+  Recorded fixtures can open a second page: `PAGE_PATH_BY_SPEC` in the same file
+  maps only `ret` and `feral`. (Updated 2026-10-17: the 2026-09-19 inventory named
+  `vendor/tbc-new-fork/test-tab-harness.mjs` with the page `/tbc/druid/feralcat/`;
+  fork commit a59711d17 and main-repo commit 152f591e on 2026-10-08 moved the file
+  to `scripts/tab-harness/`.)
 - **Review reasoning:** round-4 domain/adversarial review reasoned in terms of
   "ret P3" / "feral P5" as the universe. Any future review should treat "all DPS
   specs" as the coverage bar.
@@ -61,5 +69,6 @@ branch. It is explicitly NOT part of the feat/tab-signoff-followups merge.
 ## Notes
 
 Hotspot inventory is from a bounded grep on 2026-09-19 — re-run
-`grep -rlie "feralcat|retribution|/druid/feral|/paladin/retribution" scripts/ vendor/tbc-new-fork/*.mjs`
-before acting; the fork is gitignored so its matches won't show in a main-repo grep.
+`grep -rliE "feralcat|retribution|/druid/feral|/paladin/retribution" scripts/`
+before acting. Since 2026-10-08 the tab harness is under `scripts/tab-harness/`,
+so that grep covers it; the fork's own `ui/` code is not covered.

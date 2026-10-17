@@ -22,7 +22,7 @@
  *
  * The shared shape across all seven fork-gated scripts is the substring
  * "skipped -- <reason>", not a fixed "<name>: skipped" prefix --
- * check_equip_eligibility.py:239 reads "...Fork diff skipped -- vendor/..."
+ * check_equip_eligibility.py main() prints "...Fork diff skipped -- vendor/..."
  * with prose ahead of "skipped", not a bare name. Matching on the substring
  * rather than anchoring at the line start catches that shape too.
  */

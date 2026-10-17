@@ -375,3 +375,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 681 Honour PvP rows name no season, while arena rows do (pre-merge review feat/tab-source-labels, D3) 2026-10-16
 - 682 The tab fixture still shows Vindicator's Scaled Bracers as an arena item (pre-merge review feat/tab-source-labels, P4) 2026-10-16
 - 683 `pnpm verify` fails on a vitest RPC timeout while every test passes (pre-merge review feat/tab-source-labels, V1) 2026-10-16
+- 684 The tab fixture recorder hangs for a long time after it writes the fixture (stage-gate tab-follow-ups, K3 step 10) 2026-10-17
+- 685 The data-pipeline-work skill cites a line of check_rep_tables.py that moved (pre-merge review feat/tab-follow-ups, addendum R2) 2026-10-17

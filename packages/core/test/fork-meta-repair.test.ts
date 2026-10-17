@@ -798,6 +798,15 @@ function o1Jobs(e: Engine, fx: Fixture): O1Job[] {
   return jobs;
 }
 
+// Ticket 683: vitest's worker sends `onTaskUpdate` to the main process as a
+// request with a fixed 60 s timer and reads the reply only between event-loop
+// turns. A synchronous stretch longer than that fails the whole run with
+// `Timeout calling "onTaskUpdate"` although every test passes, so 535-O1
+// yields once per job.
+function yieldToEventLoop(): Promise<void> {
+  return new Promise((resolve) => setImmediate(resolve));
+}
+
 function oracleFork(e: Engine): OracleFork {
   return {
     getItem: (id) => e.items.getItem(id),
@@ -828,6 +837,8 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
     const otherPackageRepairs: string[] = [];
     let measured = 0;
     let deficitOne = 0;
+    let longestJobMs = 0;
+    let longestJobLabel = "";
 
     for (const name of O1_FIXTURES) {
       const fx = loadFixture(name);
@@ -854,6 +865,8 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
       const packageRepairs: string[] = [];
       const deficits: Record<number, number> = {};
       for (const job of o1Jobs(e, fx)) {
+        await yieldToEventLoop();
+        const jobStart = performance.now();
         let cur = equipment;
         for (let k = 0; k < job.steps.length; k++) {
           const { idx, id } = job.steps[k]!;
@@ -959,6 +972,11 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
           }
           cur = out;
         }
+        const jobMs = performance.now() - jobStart;
+        if (jobMs > longestJobMs) {
+          longestJobMs = jobMs;
+          longestJobLabel = `${name} ${job.label}`;
+        }
       }
       // Assertion 2: the counts the probes found.
       expect([name, rowRepairs]).toEqual([name, O1_ROW_REPAIRS[name]]);
@@ -980,6 +998,9 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
     );
     console.log(
       `[535-O1] wall ${((performance.now() - t0) / 1000).toFixed(1)} s`
+    );
+    console.log(
+      `[535-O1] longest job ${longestJobLabel} ${(longestJobMs / 1000).toFixed(1)} s`
     );
   }, 180_000);
 

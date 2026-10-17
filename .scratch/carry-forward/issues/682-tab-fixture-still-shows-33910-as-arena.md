@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-10-17, stage tab-follow-ups
 Type: task
 Origin: pre-merge review feat/tab-source-labels, P4
 Blocks: none
@@ -36,3 +37,37 @@ fixture or recorded run shows the fix on the tab.
   "PvP vendor · Honor".
 - The capture or the fixture's row is cited in this ticket, and
   `pnpm tab-fixtures:check` passes.
+
+## Resolution (2026-10-17, stage tab-follow-ups)
+
+Both fixtures were re-recorded with `pnpm tab-fixtures:record` on fork
+`3bdacb8c6` and committed in `7de8a2c2`; `forkSha` is `3bdacb8c6` in both.
+Re-run from the repo root:
+
+```
+python -I -c "import json;r=json.load(open('data/tab-fixtures/ret-p3-p2.json',encoding='utf-8'))['ranking']['items'];print([x['sources'] for x in r if x['itemId'] in (33910,22401)])"
+```
+
+It prints 33910 as `{'kind': 'pvp', 'via': 'honor', 'season': 3, 'origin': 'wowhead'}`
+and 22401 as `{'kind': 'raid', 'zone': 'Dire Maul', 'boss': 'Isalien', 'origin': 'db'}`.
+On the fixture page the 33910 row (Wrist) reads "PvP vendor · Honor,
+season 3". In `feral-p5-th4pc` the 33880 row carries `season: 3`.
+
+- Wall times: `ret-p3-p2` 214 s (the tab reported "Took 183.5s");
+  `feral-p5-th4pc` "Took 383.2s", but the recorder process exited only after
+  2767 s. It wrote the file at about 391 s and then hung for about 38
+  minutes before it exited with rc 0 (cause not investigated; hypothesis,
+  untested, that the browser or keep-awake shutdown hung).
+- Beyond `sources` nothing moved. A Python compare of the old and new
+  fixtures gave the same `itemId` order (794 and 928 items) and no change in
+  any other field except each changed row's shown `source`, `durationMs`,
+  `forkSha` and `recordedAt`. Ret: 5 rows changed source (27484, 33910,
+  22401, 28034, 28288). Feral: 8 rows (33881, 33893, 28034, 32814, 33880,
+  33296, 32087, 33879). So the figures that `fork-meta-repair.test.ts` and
+  `fork-set-fixtures.test.ts` pin did not move; `pnpm verify` passed at
+  `7de8a2c2` with them unchanged.
+- `pnpm tab-fixtures:check` rc 0 (both fixtures: "inputs changed since:
+  none"); `pnpm tab-fixtures:smoke` 6 ok, 0 failed.
+
+Verified by: the command above at `tbc-gear-prio@7de8a2c2`, and
+`pnpm tab-fixtures:check`.

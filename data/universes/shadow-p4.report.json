@@ -43,9 +43,10 @@
   "sourceRecordAdds": {
     "atlasloot": 213,
     "curated": 11,
-    "db": 1515,
+    "db": 1510,
     "sunmote": 23,
-    "two-hop": 18
+    "two-hop": 18,
+    "wowhead": 5
   },
   "membershipByOrigin": {
     "arenaSource": 56,
@@ -53,16 +54,18 @@
     "dbPhase": 198,
     "itemHasOrigin:atlasloot": 86,
     "itemHasOrigin:curated": 11,
-    "itemHasOrigin:db": 525,
+    "itemHasOrigin:db": 520,
     "itemHasOrigin:two-hop": 15,
+    "itemHasOrigin:wowhead": 5,
     "recipeMatch": 8,
     "repFactionMatch": 22,
     "repItemPhase": 27,
     "zoneMatch": 268
   },
   "exclusivePrimaryOrigin": {
-    "db": 525,
+    "db": 520,
     "atlasloot-only": 48,
+    "wowhead-only": 5,
     "other": 11,
     "two-hop": 15
   },

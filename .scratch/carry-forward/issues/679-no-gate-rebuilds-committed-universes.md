@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-10-17, stage tab-follow-ups
 Type: task
 Origin: pre-merge review feat/tab-source-labels, A1
 Blocks: none
@@ -55,3 +56,44 @@ locally, the way the fork-gated suites do (`docs/agents/known-traps.md`,
   is local-only and how a local verify proves it ran.
 - With one committed universe edited by hand, the step fails; restored, it
   passes. Record both runs' output lines.
+
+## Resolution (2026-10-17, stage tab-follow-ups)
+
+`pnpm universe-rebuild:check` (`scripts/check_universe_rebuild.py`) is a
+`pnpm verify` step, directly after `wowhead-parse:check`. In one process it
+calls `assemble()` for every committed `data/universes/<spec>-p<n>.json`,
+serialises the universe and its report as `main()` writes them, and
+byte-compares both with the committed files; it then has the builder write
+its weapon-type exclusions manifest to a temporary file and compares that
+with `data/weapon-type-exclusions.json`. A mismatch prints
+`MISMATCH data/universes/<file> -- run pnpm universe:assemble --spec <spec> --max-phase <n>`
+and exits 1. It writes nothing in the tree.
+
+CI: every gitignored file the builder reads is under `vendor/wowsims/` and
+is restored by `pnpm run sync:wowsims:restore` (`.github/workflows/verify.yml:31`)
+before `pnpm verify`, so the step has no CI skip. With `vendor/wowsims/db.json`
+absent it prints `missing vendor/wowsims/db.json -- run pnpm sync:wowsims:restore`
+and exits 2 (checked locally by moving the file away). Whether CI's Linux
+Python writes the same bytes as Windows is a hypothesis, untested, until the
+branch's first CI run.
+
+Planted check (step 15 of the stage plan), `data/universes/mage-p2.json`
+with one entry name changed by hand:
+
+```
+MISMATCH data/universes/mage-p2.json -- run pnpm universe:assemble --spec mage --max-phase 2
+universe-rebuild: 89 files checked, 1 mismatches, 5.6 s
+```
+
+rc 1. After `git checkout -- data/universes/mage-p2.json`:
+
+```
+universe-rebuild: 89 files checked, 0 mismatches, 5.6 s
+```
+
+rc 0. In the full `pnpm verify` at `tbc-gear-prio@f4951822` the step took
+4.7 s and the run ended `gates: 1542 ran, 0 skipped`.
+
+Verified by: `pnpm universe-rebuild:check` at `tbc-gear-prio@66d6b19a`
+(the step), `tbc-gear-prio@99abc083` (exit 2 before the builder import when
+db.json is missing).

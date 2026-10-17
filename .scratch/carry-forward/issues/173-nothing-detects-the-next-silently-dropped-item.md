@@ -1,9 +1,10 @@
 Status: open
+Related: 293, 678
 Type: detection gap
 Origin: adversarial axis, pre-merge review of `feat/sweep-ret-tickets`, 2026-08-14
 (`docs/reviews/feat-sweep-ret-tickets.md`, finding A2)
 Blocks: none
-Blocked by: 678
+Blocked by: none
 
 # The source-parse gap has no detector, only a manual rescue list
 
@@ -97,3 +98,34 @@ Re-runnable: `pnpm pool-listings:check`.
 `pnpm verify` gate over every committed universe report, to be written
 after stage tab-source-labels part P2 lands. Close this ticket when 678
 closes.
+
+## Partial resolution (2026-10-17, stage tab-follow-ups)
+
+Stage tab-follow-ups closed this with ticket 678; the pre-merge review reopened it (see § Reopened below). A Wowhead-list-named item that newly lands in
+`excludedNoSource`, or leaves its universe for any other cause, now fails
+`pnpm verify` as `NEW GAP <spec> p<n> <itemId> <name> absent`, for ret and
+feral at every phase 2-5. 27878 and 29247 are tolerated rows of
+`data/wowhead-list-gaps.json` (reason `sourcedNoRoute`), not force-included;
+`TICKET_157_FORCE_INCLUDE` did not grow. The fix itself (five-man zones,
+the `" - Heroic"` suffix) stays with ticket 17.
+
+Verified by: `pnpm wowhead-list-gaps:check` at `tbc-gear-prio@f4951822`.
+
+## Reopened 2026-10-17 (pre-merge review of feat/tab-follow-ups, finding P1)
+
+This ticket asked: "A regression that increases the silently-dropped set
+trips a test". `pnpm wowhead-list-gaps:check` covers only items a Wowhead list
+names, and only ret and feral have list folders (`SPEC_PROFILES`
+`wowhead_dir` in `scripts/assemble_universe.py`): 8 of the 44 universes. An
+item no list names, on any spec, or any item on the nine specs without lists
+(balance, ele, enh, hunter, mage, rogue, shadow, warlock, warrior), that lands
+in `excludedNoSource` is caught only by `pnpm universe-rebuild:check`, which
+passes again once the regenerated universe is committed. That is the weakness
+this ticket's § above already called not enough.
+
+Remaining scope: a detector for that remainder that needs no Wowhead list,
+using a direct signal the builder does not itself produce (for example, the
+items wowsims' own curated gear sets equip for a spec, or a committed record
+of each universe's excluded ids that may only shrink). Ticket 293's per-spec
+list harvest would also widen the existing check to more specs; it is the
+route that needs lists.

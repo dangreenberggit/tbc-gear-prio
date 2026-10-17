@@ -20,13 +20,13 @@ rest on their source and the owner's confirmation; the ok line counts each
 kind.
 
 Universe entries do not record a `setId`, so the item -> set join reads
-`vendor/wowsims/db.json`. That file is gitignored: when it is absent this
-skips cleanly (exit 0, saying why), like the other vendor-gated checks.
+`vendor/wowsims/db.json`. That file is gitignored; when it is absent this
+exits 2 before importing the builder (`_vendored_inputs.exit_if_missing`).
 
 Run via `pnpm verify` (`pnpm class-restricted-sets:check`).
 
 Exit 0 ok (including "nothing to check"), 1 a leak, a malformed table or a
-row db.json disagrees with, 2 could not run.
+row db.json disagrees with, 2 could not run or db.json is missing.
 """
 
 from __future__ import annotations
@@ -37,6 +37,9 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _vendored_inputs import exit_if_missing  # noqa: E402
+
+exit_if_missing()
 
 import assemble_universe as A  # noqa: E402
 
@@ -154,12 +157,6 @@ def main() -> int:
         for p in problems:
             print(f"class-restricted sets: {p}")
         return 1
-    if not A.DB.is_file():
-        print(
-            "class-restricted sets: skipped -- vendor/wowsims/db.json is absent "
-            "(gitignored); universe entries carry no setId to check without it"
-        )
-        return 0
     try:
         db = json.loads(A.DB.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:

@@ -276,8 +276,9 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "db"
+          "kind": "badge",
+          "cost": 25,
+          "origin": "wowhead"
         }
       ],
       "curationHint": 36.95
@@ -2769,8 +2770,9 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "db"
+          "kind": "pvp",
+          "via": "honor",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 48.8
@@ -10420,6 +10422,7 @@
         {
           "kind": "raid",
           "zone": "Dire Maul",
+          "boss": "Isalien",
           "origin": "db"
         }
       ],
@@ -15046,8 +15049,8 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "db"
+          "kind": "world",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 605.921
@@ -15062,8 +15065,8 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "db"
+          "kind": "world",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 573.253
@@ -15430,6 +15433,7 @@
         {
           "kind": "pvp",
           "via": "honor",
+          "season": 3,
           "origin": "wowhead"
         }
       ],
@@ -15640,8 +15644,9 @@
       "phase": 1,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "db"
+          "kind": "pvp",
+          "via": "honor",
+          "origin": "wowhead"
         }
       ],
       "curationHint": 31.6

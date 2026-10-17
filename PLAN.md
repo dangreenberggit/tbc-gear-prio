@@ -931,6 +931,8 @@ Not boxes of this gate: owner rulings on open tickets. Ticket 615 was `blocked` 
 
 ### Stage 4 — Deploy
 
+**Not being done (owner ruling, 2026-10-16).** Told "PLAN.md's next stage is deploying the separate web app.", the owner answered: "yeah we're not doing that. We are for all intents and purposes in the fork working on the upgrades tab only." So the work is the fork's Upgrades tab only, and no session proposes this stage as next work. The owner also deferred the `dev` → `main` merge and `tab-1` tag of § Stage 3T the same day: "I don't know wtf "tab 1" is and see no reason to rush to that when there are those related tickets". Both quotes are recorded in local, untracked files: `.scratch/handoffs/upgrades-tab-source-labels-HANDOFF.md` § Owner rulings, item (a), and `.scratch/stage-gate/tab-blocking-finish/decision-log.md:97`. The plan text below is kept as written before the ruling.
+
 One container: Node app + platform-correct `wowsimcli` + SQLite volume. Concurrency caps and queue backpressure. Env secrets. **Hetzner over Fly** — this is a single always-on box with a volume and a CPU-bound workload, which is precisely where Fly's per-machine pricing stops being a bargain and its scale-to-zero story stops being relevant. Revisit only if you need multi-region, which you don't.
 
 **Gate:** ☐ deployed instance completes a job end to end ☐ point budget survives expected concurrency ☐ caches survive restart

@@ -22,7 +22,7 @@ Run via `pnpm verify` (`pnpm policy-notes:check`), or by hand:
 
     python scripts/check_policy_notes.py
 
-Exit 0 ok, 1 a check failed.
+Exit 0 ok, 1 a check failed, 2 `vendor/wowsims/db.json` is missing.
 """
 
 from __future__ import annotations
@@ -33,6 +33,9 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "scripts"))
+from _vendored_inputs import exit_if_missing  # noqa: E402
+
+exit_if_missing()
 
 import assemble_universe as au  # noqa: E402
 

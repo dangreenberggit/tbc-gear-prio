@@ -18,7 +18,8 @@ cannot diverge again without `pnpm verify` going red.
 
 Run via `pnpm verify` (`pnpm curated-set-phase:check`).
 
-Exit 0 ok, 1 drifted, 2 could not parse.
+Exit 0 ok, 1 drifted, 2 could not parse or `vendor/wowsims/db.json` is
+missing.
 """
 
 from __future__ import annotations
@@ -31,6 +32,10 @@ ROOT = Path(__file__).resolve().parent.parent
 RULES_TS = ROOT / "packages/core/src/rank-report-rules.ts"
 
 sys.path.insert(0, str(ROOT / "scripts"))
+from _vendored_inputs import exit_if_missing  # noqa: E402
+
+exit_if_missing()
+
 from assemble_universe import CURATED_SET_PHASE as PY_PHASES  # noqa: E402
 
 # The object literal body only. Anchored on the declaration so an unrelated

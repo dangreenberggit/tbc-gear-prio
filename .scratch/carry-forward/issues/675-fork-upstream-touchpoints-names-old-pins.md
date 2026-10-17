@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Closed: 2026-10-17, branch feat/tab-follow-ups
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
 Type: task
 Origin: docs/reviews/docs-stage-3t-boxes.md (findings B2, K1)
@@ -43,3 +44,19 @@ only the pre-merge-review skill).
   prints only `6 0 ui/app/SimTabsSection.tsx`.
 - Optional, the fixer's call: one line in `docs/agents/upstream-catch-up.md`
   § 5 saying to refresh this doc with each re-pin.
+
+## Resolution (2026-10-17, branch feat/tab-follow-ups)
+
+Commit `b5efceff` and the review-fix commits after it move the doc to fork
+`160ae36c2` on base `e804c29e8` (the two locks' `commit` and
+`branchedFrom`), and add a ledger row for each of the nine fork pins since
+`316326a95` (`git log --first-parent -- data/wowsims-fork.lock.json`):
+`176268e7c`, `bba7380a6`, `827444b9a`, `000b7be81` and `8cd8d1c80` on base
+`5262ff38`; `bc96d0a03`, `093cd5981`, `3bdacb8c6` and `160ae36c2` on base
+`e804c29e8`. Each has 1 modified upstream file. The optional
+`docs/agents/upstream-catch-up.md` line is not added.
+
+Verified by:
+`git -C vendor/tbc-new-fork diff --numstat --diff-filter=M <base> <pin>`
+prints only `6 0 ui/app/SimTabsSection.tsx` for each of the nine pins, with
+`<base>` from `git -C vendor/tbc-new-fork merge-base upstream/master <pin>`.

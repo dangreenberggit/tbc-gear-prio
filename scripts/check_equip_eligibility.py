@@ -48,6 +48,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _fork_gate import ForkGateError, require_pinned_fork  # noqa: E402
+from _vendored_inputs import exit_if_missing  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
@@ -235,6 +236,7 @@ def slug_map_only() -> int:
 
 
 def main() -> int:
+    exit_if_missing()
     if not FORK_ROOT.is_dir():
         rc = slug_map_only()
         if rc == 0:

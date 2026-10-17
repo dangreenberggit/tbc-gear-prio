@@ -36,6 +36,10 @@ ROOT = Path(__file__).resolve().parent.parent
 UNIVERSES = ROOT / "data/universes"
 
 sys.path.insert(0, str(ROOT / "scripts"))
+from _vendored_inputs import exit_if_missing  # noqa: E402
+
+exit_if_missing()
+
 from assemble_universe import carries_locus  # noqa: E402
 
 
