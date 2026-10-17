@@ -152,3 +152,43 @@ applies R2 and R4, one workhorse pass applies R1, R3 and R5, then round 2
 (focused check) runs over `fbf93743..HEAD`.
 
 Tickets filed: 0. Tickets closed: 0.
+
+## Owner approval of the agent-file fixes
+
+Owner, 2026-10-16, asked to approve the whole batch (R1-R5 as suggested
+in this file, plus E1 and E2 below): "Sure". Reported by the session
+that dispatched round 2.
+
+- **E1** (owner addition, part of R2's fix): in `AGENTS.md` § Subagent
+  reports, after "it is allowed even when the prompt allows no other
+  path.", three sentences saying that Claude Code's built-in note against
+  report files does not apply to this file, and that the file name must
+  not start with report, summary, findings or analysis. With E1 in
+  `AGENTS.md`, R2's edits to the four agent files need no clause about
+  the built-in note.
+- **E2** (owner addition, part of R1's fix): R1's suggested text, with
+  its first parenthesis extended to "(AGENTS.md § Subagent reports;
+  Claude Code's note against report files does not apply to it)".
+
+R2 and R4 had no suggested text in round 1; the wording of their fixes
+is the fixer's, inside the approved scope.
+
+## Fixes
+
+| Finding         | Commit     | Files                                                                                                                                            |
+| --------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R2              | `06703de4` | `.claude/agents/{simple,discrete,modest,design}-task.md`                                                                                         |
+| R4              | `94bf869c` | `AGENTS.md`, `.claude/agents/gate-executor.md`, `.claude/skills/parallel-phase/SKILL.md` and its mirror `.agents/skills/parallel-phase/SKILL.md` |
+| E1 (R2)         | `e5478faf` | `AGENTS.md`                                                                                                                                      |
+| R1 + E2, R3, R5 | `02b5bd2e` | `.claude/agents/general-task.md`, `AGENTS.md`                                                                                                    |
+
+The code-quality pass (R1, R3, R5) was applied by the agent that handles
+this review's findings, not by a separate workhorse agent as step 3 of
+the skill says: the owner approved the exact text, so the pass was a
+verbatim edit. Round 2 reads it like any other fix.
+
+Reviewed range: `fbf937435c3634eb88af376a59ce167c1aae3caa..02b5bd2ed9cc46a209c4299c638c050743eed0f9`
+
+`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json` exits 0: the
+branch never moves the fork pin, so there is no fork range and condition 3
+of the focused check holds.
