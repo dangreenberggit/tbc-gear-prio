@@ -841,3 +841,22 @@ Verify:
 pnpm fork-universes:check
 python scripts/check_pool_completeness.py --check
 ```
+
+## Refresh, 2026-10-17 (pre-raid list sources; review finding A2 of feat/tab-follow-ups)
+
+`scripts/assemble_universe.py` at `c90d416c` makes the cross-spec index also
+read `data/wowhead-lists/ret/pre-raid.json` for its badge, PvP and world
+rows. No membership route reads that list, so no entry is added or removed.
+Five items that showed `unknown` now name a source, in 104 rows over p2–p5:
+29382 Blood Knight War Cloak (badge, cost 25, all 11 specs), 28645 and 28646
+(honour, ret and warrior), 31318 and 31322 (world drop).
+
+`python scripts/sync_fork_universes.py --write` refreshed 44 of 63 copies
+(fork `160ae36c2`). No EP-weight file changed and no engine file changed.
+
+Verify:
+
+```bash
+pnpm fork-universes:check
+python scripts/check_pool_completeness.py --check
+```
