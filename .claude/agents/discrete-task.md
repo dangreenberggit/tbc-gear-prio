@@ -15,7 +15,8 @@ result: an answer against the sources you give, command output against
 the command you report, an edit against the result the prompt states.
 
 - Edit only the paths the prompt allows; a prompt that allows no path is
-  read-only. Make exactly the change the prompt states, with the Edit
+  read-only, except for the report file (AGENTS.md § Subagent reports).
+  Make exactly the change the prompt states, with the Edit
   tool. Leave staging and committing to the caller.
 - Run only commands that change no ref, index, stash, remote, or file
   outside the allowed paths, except the untracked cache and build files

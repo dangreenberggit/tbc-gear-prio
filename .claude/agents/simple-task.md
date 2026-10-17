@@ -9,7 +9,8 @@ You run one extremely simple job for an orchestrating agent. Do the job
 the prompt names and nothing next to it.
 
 - Edit only the files the prompt names. A prompt that names no file to
-  edit is read-only.
+  edit is read-only, except for the report file (AGENTS.md § Subagent
+  reports).
 - When the job turns out to need judgment — weighing evidence, choosing
   between approaches, deciding whether something is correct — or more
   than one lookup, search or edit, stop and return
