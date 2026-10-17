@@ -48,6 +48,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from _fork_gate import ForkGateError, require_pinned_fork  # noqa: E402
+from _vendored_inputs import exit_if_missing  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
@@ -151,6 +152,7 @@ def check_slug_map(spec_keys: set[str]) -> list[str]:
     either file could disagree with what Python actually binds.
     """
     sys.path.insert(0, str(ROOT / "scripts"))
+    exit_if_missing()
     try:
         import assemble_universe  # noqa: PLC0415 -- deliberate late import
     except Exception as exc:  # noqa: BLE001 -- any import failure is a real failure here

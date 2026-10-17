@@ -31,6 +31,10 @@ ROOT = Path(__file__).resolve().parent.parent
 RULES_TS = ROOT / "packages/core/src/rank-report-rules.ts"
 
 sys.path.insert(0, str(ROOT / "scripts"))
+from _vendored_inputs import exit_if_missing  # noqa: E402
+
+exit_if_missing()
+
 from assemble_universe import CURATED_SET_PHASE as PY_PHASES  # noqa: E402
 
 # The object literal body only. Anchored on the declaration so an unrelated

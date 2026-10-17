@@ -37,6 +37,9 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _vendored_inputs import exit_if_missing  # noqa: E402
+
+exit_if_missing()
 
 import assemble_universe as A  # noqa: E402
 

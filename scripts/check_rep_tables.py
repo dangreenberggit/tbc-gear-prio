@@ -37,6 +37,10 @@ DB = ROOT / "vendor/wowsims/db.json"
 UNIVERSES = ROOT / "data/universes"
 
 sys.path.insert(0, str(ROOT / "scripts"))
+from _vendored_inputs import exit_if_missing  # noqa: E402
+
+exit_if_missing()
+
 from assemble_universe import (  # noqa: E402
     FACTION_IDS,
     REP_FACTION_NAMES,
