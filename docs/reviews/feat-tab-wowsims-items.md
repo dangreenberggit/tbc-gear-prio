@@ -192,3 +192,102 @@ internals; no fourth port. Findings are judgement calls:
 | CQ8  | `tokenSource` does nothing (S8)                                               | fork `testing/ranking_fixture.ts:6`                                                                                         |
 | CQ9  | `&&pnpm` spacing; duplicated spec map (S9, P5)                                | main `package.json:15`; fork `testing/db_pool.ts:50-62`                                                                     |
 | CQ10 | Test mocks the tab's own `poolFor` (A7)                                       | fork `follow_phase.test.ts`                                                                                                 |
+
+## Focused check (round 2)
+
+Reviewed range: `b0f4429a095025a73acdea0004f4d2ebdd3f6b28..780b7a1f38468f932b7f3dda885fcf5688d96146`
+
+Fork range (round 2): `f0677292955c2420e091dcc3bb3236d17d02a3ef..527c0d798752f7382fafa41ef48573233fbcf739`.
+
+Fixes in the range:
+
+- A1: fork `a394de6dd` raises `SAVED_VERSION` from 1 to 2 in
+  `model/saved_entry.ts`, as its comment prescribes, with a test that failed
+  with the version at 1 ("expected [] to include 'Heroic dungeon'"); main
+  `85165236` re-pins. Effect: every saved Upgrades setting from the old tab
+  (iterations, set picks, excluded sources, sort, view toggles, export
+  choice) reads back as nothing saved, once per spec page.
+- A2: main `339f11ba` adds `scripts/check_fork_tests.py` and
+  `fork-tests:check` to `verify:steps`; `9933fad8` adds two fork-added
+  tab-body tests to it; `67ef0119` lists the gate in
+  `docs/agents/known-traps.md` and `docs/agents/upstream-catch-up.md`. A
+  deliberate break in `pool_source.test.ts` made the step exit 1, and a lock
+  naming another commit made it exit 2 (fixer's report).
+- A3: main `6c19bf85` adds the run-time pool's upstream inputs to
+  `INPUT_PATHS` (`assets/database`, `ui/sim/proto/database.ts`, each spec's
+  `spec.ts`, `presets.ts` and `gear_sets/*`, `ui/app/preset_utils.ts`,
+  `ui/sim/constants/other.ts`, `missing_effects_auto_gen.ts`,
+  `ui/sim/proto/items.ts`, `ui/sim/proto/names.ts`, `utils/item_source.ts`,
+  and the player class and spec files `canEquipItem` reads).
+- D2: main `5d118ba7` corrects the Hourglass sentence in ADR-0038.
+- Code-quality pass: fork `19ede7bdf` (CQ2 part), `ed7b40cac` (CQ3 part),
+  `45ff67c91` (CQ8), `2d7ae0f89` (CQ9 part), `527c0d798` (CQ10); main
+  `4fa7194d` (CQ7 part), `beeda961` (CQ9 part); main `780b7a1f` re-pins the
+  fork to `527c0d798`. The pass edited no fork file in `INPUT_PATHS` and no
+  ported engine file, so the six fixtures stay current; the parts that need
+  such edits (CQ1, CQ4, CQ5, CQ6 and parts of CQ2, CQ3, CQ7) are in ticket 691.
+
+One fresh `general-task` agent on Opus ran the check and wrote nothing.
+
+1. **Conditions 1 to 3 hold: pass.** Every main commit names a finding ID,
+   is a re-pin (`85165236`, `780b7a1f`: the lock and
+   `data/sim-implemented-effects.json` only) or changes only this file
+   (`2fff3b4e`); every fork commit names A1 or a CQ row. Every changed line
+   outside tests, comments and docs is at a place a fixed finding cites. The
+   upstream-file audit at `527c0d798` matches round 1: 1 modified file,
+   `6 0 ui/app/SimTabsSection.tsx`, 232 A and 1 M.
+2. **Each diff changes only what its finding asks: pass**, except the gap in
+   R2-1.
+3. **Each new test asserts its finding: pass.** The A1 test stores a version-1
+   entry with "Heroic dungeon" and asserts the run still excludes it; the A1
+   commit message records the failing run. `check_fork_tests.py` returns 1 on
+   a failing test, 2 when the fork HEAD differs from the lock, and skips only
+   when the fork or its `node_modules` is absent. Every new `INPUT_PATHS`
+   pathspec matches tracked files, and they cover the imports of
+   `pool_source.ts`, `item_sources.ts` and `data.ts` that decide the pool.
+4. **Touched tests pass: pass.** `python scripts/check_fork_tests.py`: rc 0,
+   61 files and 689 tests passed. `python scripts/check_tab_fixtures.py`: rc 0,
+   all six fixtures "inputs changed since: none".
+
+Findings:
+
+- **R2-1. `fork-tests:check` skips one of the fork's three tab-body tests.**
+  Gate correctness. `scripts/check_fork_tests.py` `TEST_PATHS` (lines 46-50)
+  and its docstring (line 13) name two tab-body tests; the fork also adds
+  `ui/app/tabs/UpgradesTabBody.load.test.tsx`, which passes when run alone. A
+  break in the tab's load-failure handling passes `pnpm verify`. Nothing ran
+  that test before this branch either; `9933fad8` widened the gate but missed
+  it, because the follow-up's prompt named two files (the reviewer's
+  omission, not the fixer's).
+- **R2-2. The CQ3 fix left the `alt_badge` text with no reader**
+  (`assets/locales/en/upgrades.json:142` in the fork). Code quality; the tab
+  shows nothing different.
+
+## Summary
+
+**The review stops after round 2.** The focused check passed all four checks
+but reported two findings that are not bookkeeping (R2-1, R2-2). Under the
+skill's round limit the review stops there: no third round, no
+`## Disposition` table yet. The owner decides what happens next.
+
+Where each finding stands:
+
+- **Fixed and checked in round 2:** A1 (same as P1), A2, A3, D2; CQ8 and CQ10
+  in full; CQ2, CQ3, CQ7 and CQ9 in part.
+- **Open, introduced by this branch, blocking the merge until the owner
+  allows a deferral or has them fixed:**
+  - A5 (same as P2), BiS sets chosen by preset name: ticket 686, an owner
+    ruling.
+  - A6 (same as D3), both factions' reputation rewards in the pool: ticket
+    687, an owner ruling.
+  - D1, off-spec tier pieces show "Source not recorded": ticket 688.
+  - P3, the "no other item fact" gate checks only JSON in one folder: ticket 689.
+- **Open, deferrable without the owner:** A9 (before this branch; ticket
+  690); the deferred code-quality parts and R2-2 (ticket 691); R2-1 (a gap
+  that predates the branch; ticket 692).
+- **Bookkeeping:** A8, the untracked review file during round 1; it is now
+  committed.
+
+Tickets: this branch files 7 (686 to 692) and closes 5 (505, 293, 676, 643
+and 660), counted with the two commands in the skill's step 3. It files more
+than it closes.
