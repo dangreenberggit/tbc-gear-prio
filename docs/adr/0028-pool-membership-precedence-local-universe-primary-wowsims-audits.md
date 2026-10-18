@@ -1,6 +1,6 @@
 # ADR-0028 — The local universe is primary for pool membership; the wowsims DB audits it
 
-**Status:** accepted
+**Status:** accepted; superseded for the fork by [ADR-0038](0038-fork-pool-comes-from-wowsims-at-run-time.md) (2026-10-18). It still holds for this repo's builder and CLI.
 **Date:** 2026-08-23
 **Related:** [`ADR-0027`](0027-the-wowsims-upgrades-tab-is-the-primary-product.md), tickets `.scratch/carry-forward/issues/211-fork-bundled-ret-p3-universe-diverges-from-this-repos.md` (closed here), `17-phase2-plus-no-source-gap.md`, `89-season-3-pvp-weapons-missing-from-p3-pools.md`, `173-nothing-detects-the-next-silently-dropped-item.md`
 
@@ -42,6 +42,12 @@ Two gates keep this honest, both in `pnpm verify`:
 - `pnpm pool-listings:check` regenerates the listings and byte-compares.
 - `pnpm fork-universes:check` byte-compares the fork's bundled copies against
   their `data/` sources (this is ticket 211's mechanism).
+
+Superseded for the fork by ADR-0038: since 2026-10-18 the fork's tab builds
+its pool at run time from wowsims' item database and bundles no universe
+copy. `fork-universes:check` now compares the 19 EP-weight copies and the
+tier exchange file, and fails on any other JSON file in the fork's data
+folder.
 
 ## Why not make the wowsims DB primary for membership
 

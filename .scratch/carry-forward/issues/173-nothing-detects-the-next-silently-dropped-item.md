@@ -129,3 +129,12 @@ items wowsims' own curated gear sets equip for a spec, or a committed record
 of each universe's excluded ids that may only shrink). Ticket 293's per-spec
 list harvest would also widen the existing check to more specs; it is the
 route that needs lists.
+
+## Re-scoped 2026-10-18 (stage tab-wowsims-items): this repo's builder only
+
+This ticket is now a gate on this repo's builder. Since ADR-0038 the tab no longer reads the universes: its pool is
+a rule over wowsims' item database, so an item this repo's builder drops
+silently no longer leaves the tab. The fork's `pool_source.test.ts` pins
+the tab's pool size per spec and phase against db.json. What stays open
+here is the detector for this repo's universes, which still feed the CLI
+(owner, 2026-10-17: "they can be in tbc gear prio but not the upgrades tab repo").

@@ -41,3 +41,13 @@ AtlasLoot, or a primary game-data page), and any wrong one has its own
 ticket or fix.
 
 ## Comments
+
+2026-10-18 (stage tab-wowsims-items): what each question means for the
+tab now (ADR-0038). Question 1 still reaches the tab: the fork's
+`tier-exchange.json` holds both pairs, because
+`scripts/generate_fork_exchange.py` keeps the pairs that
+`assemble_universe.sunmote_upgrade_pairs` keeps. Question 2: the tab shows
+"Source not recorded" for 34400-34404, which have no db.json source.
+Questions 3 and 4: the tab takes item phases from db.json, so for the tab a
+wrong phase is wowsims' data. The questions are unchanged for this repo's
+builder.

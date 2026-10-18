@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: enhancement
 Origin: stage-gate feature upgrades-all-dps-specs, plan amendment 1, 2026-08-25
 Blocks: none
@@ -119,3 +119,19 @@ the same change.
 Only ret and feral have lists today because the early work was tested on
 those two specs. The other nine DPS specs having no lists is a gap this
 ticket closes, not a design choice (owner, 2026-10-17).
+
+## Closed 2026-10-18 (stage tab-wowsims-items): moot for the tab
+
+The tab no longer reads this repo's universes (ADR-0038, ticket 505). Its
+Source column reads wowsims' item facts, and a row wowsims names no source
+for shows "Source not recorded". The owner's rulings of 2026-10-17,
+verbatim: ""only ret or feral" is a smell. for development it makes sense, for the app it sounds absurd like a 2nd or even 3rd source of truth in one line you mentioned. yikes. if wowsims has no named source for it then fine. thats an issue for wowsims for another day, not our job" and, about the AtlasLoot, Wowhead and hand-written inputs,
+"they can be in tbc gear prio but not the upgrades tab repo". So a per-spec Wowhead harvest can no longer change what the tab
+shows.
+
+The owner's note above ("a gap this ticket closes, not a design choice") is
+about this repo's builder, whose universes and inputs stay. A builder-only
+version of this ticket may be filed again if the builder's own output needs
+it.
+
+Verified by: `git -C vendor/tbc-new-fork ls-files ui/features/upgrades/model/data | grep -c universe.json` prints 0 at `tbc-new-fork@f06772929`.

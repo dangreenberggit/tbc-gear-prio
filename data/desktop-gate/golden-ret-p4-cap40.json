@@ -1,12 +1,12 @@
 {
-  "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a known-good ret phase-4 cap-40 run from the P3 gear preset on the desktop (HTTP) transport. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter the tab's output (fork re-pin, universe regen, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate. See README.md beside this file.",
-  "recordedAt": "2026-10-16T02:16:03.094Z",
-  "forkCommit": "8cd8d1c80a0930e396159ef205aca10304ff2347",
+  "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a known-good ret phase-4 cap-40 run from the P3 gear preset on the desktop (HTTP) transport. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter the tab's output (fork re-pin, pool rule change, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate. See README.md beside this file.",
+  "recordedAt": "2026-10-18T04:49:33.336Z",
+  "forkCommit": "f0677292955c2420e091dcc3bb3236d17d02a3ef",
   "cpuCount": 20,
   "candidatesRequested": 40,
   "spec": "ret",
   "phase": 4,
-  "elapsedS": 12.3,
+  "elapsedS": 13,
   "rows": [
     {
       "rank": "1",
@@ -69,7 +69,7 @@
       "item": "Brooch of Deftness",
       "slot": "Neck",
       "dps": -10.6,
-      "source": "Badge vendor",
+      "source": "Source not recorded",
       "belowCutoff": true
     },
     {
@@ -109,7 +109,7 @@
       "item": "Choker of Vile Intent",
       "slot": "Neck",
       "dps": -15.8,
-      "source": "Badge vendor",
+      "source": "Source not recorded",
       "belowCutoff": true
     },
     {
@@ -229,7 +229,7 @@
       "item": "Crystalforge Greaves",
       "slot": "Legs",
       "dps": -27.6,
-      "source": "Serpentshrine Cavern",
+      "source": "Serpentshrine Cavern (N) · Fathom-Lord Karathress",
       "belowCutoff": true
     },
     {
@@ -250,14 +250,6 @@
     },
     {
       "rank": "29",
-      "item": "Boots of Natural Grace",
-      "slot": "Feet",
-      "dps": -33.4,
-      "source": "Leatherworking",
-      "belowCutoff": true
-    },
-    {
-      "rank": "30",
       "item": "Boots of Utter Darkness",
       "slot": "Feet",
       "dps": -33.6,
@@ -265,15 +257,15 @@
       "belowCutoff": true
     },
     {
-      "rank": "31",
+      "rank": "30",
       "item": "Vengeful Gladiator's Scaled Legguards",
       "slot": "Legs",
       "dps": -34.4,
-      "source": "PvP vendor",
+      "source": "PvP vendor · Arena",
       "belowCutoff": true
     },
     {
-      "rank": "32",
+      "rank": "31",
       "item": "Mantle of Darkness",
       "slot": "Shoulders",
       "dps": -37.6,
@@ -281,7 +273,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "33",
+      "rank": "32",
       "item": "Skulker's Greaves",
       "slot": "Legs",
       "dps": -38,
@@ -289,11 +281,19 @@
       "belowCutoff": true
     },
     {
-      "rank": "34",
+      "rank": "33",
       "item": "Bloodthirster's Wargreaves",
       "slot": "Legs",
       "dps": -38.3,
       "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "34",
+      "item": "Kiss of the Spider",
+      "slot": "Trinket 1",
+      "dps": -38.8,
+      "source": "Naxxramas (N)\nMaexxna",
       "belowCutoff": true
     },
     {
@@ -317,7 +317,7 @@
       "item": "Justicar Greaves",
       "slot": "Legs",
       "dps": -44.2,
-      "source": "Gruul's Lair",
+      "source": "Gruul's Lair (N) · Gruul the Dragonkiller",
       "belowCutoff": true
     },
     {

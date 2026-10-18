@@ -65,13 +65,23 @@ These are the load-bearing filters. On Phase 2 they drop everything above p2; on
 a higher phase they admit the new tier. Revisit each when upgrading to confirm
 the new phase's data flows through:
 
-- `data.ts:1969` (universe selector) — `if (phase <= maxPhase && phase > bestPhase)`
+- **Since 2026-10-18 (ADR-0038)** the universe selector below is gone:
+  `ui/features/upgrades/model/pool_source.ts` `selectPool` builds the pool at
+  run time and keeps an item when `item.phase <= maxPhase` (or when it is in
+  a preset set whose `presetPhase <= maxPhase`). The page's db.json phase is
+  the only phase input; there is no per-phase file to add for a new tier.
+- `data.ts:1969` (universe selector, removed by ADR-0038) — `if (phase <= maxPhase && phase > bestPhase)`
   picks the highest universe file `<= maxPhase`.
 - `pool.ts:5524` `filterPoolByPhase` — cuts every pool to `entry.phase <= maxPhase`
   (so even the selected file's contents are re-cut to the live phase).
 - `gems.ts:4482` `gemsForPhase` — `<= maxPhase` gem palette gate.
 
 ### 4. The per-phase data we ship (bundled, selected only when phase allows)
+
+Since 2026-10-18 (ADR-0038) the fork ships no universe file; the first three
+bullets below describe the tree before that date. The fork's bundled data is
+now the EP-weight copies and `tier-exchange.json`
+(`docs/fork-provenance/data.md`).
 
 - `data.ts` static imports (~`:84-154`, `:1782-1824`) enumerate
   `*-p2/p3/p4/p5.universe.json` for all specs into `UNIVERSES_BY_SPEC_AND_PHASE`.

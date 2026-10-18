@@ -96,7 +96,7 @@ A fork commit that touches nothing ported still needs steps 3–5.
 ## Before moving the wowsims engine pin
 
 **Symptom when armed:** `pnpm fetch:wowsimcli` 404s, or writes into a nested
-`vendor/wowsimcli-feature/backend-reforge-.../`; or four fork gates exit 2
+`vendor/wowsimcli-feature/backend-reforge-.../`; or five fork gates exit 2
 with "clone HEAD is X but lock pins Y"; or a regen moves a file nobody
 predicted and it gets committed as though it were expected.
 
@@ -131,7 +131,7 @@ For a sha pin `fetch_wowsimcli.py` **builds from source** — it needs `go`,
 used to download a zip. CI never runs it, so CI will not tell you.
 
 The fork gates (`equip-eligibility`, `ep-presets`, `meta-conditions`,
-`fork-lint`) exit 2 until `<repo>/data/wowsims-fork.lock.json` names the clone's
+`fork-lint`, `fork-tests`) exit 2 until `<repo>/data/wowsims-fork.lock.json` names the clone's
 actual HEAD. Between a fork commit and that lock edit they are red **by
 design** — read the message before chasing it.
 

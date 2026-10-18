@@ -322,14 +322,18 @@ folder's fork. The gate is done when it exits 0 and its `LAYOUT_GATE_VERDICT`
 line has `"outcome":"measured"` and `"pass":true`. An `unmeasured` verdict
 means a prerequisite broke, not the layout.
 
-Refresh the bundled data the tab ranks from, then commit again:
+The tab builds its candidate pool at run time from the fork's own
+`assets/database/db.json` (ADR-0038), so the pool needs no refresh. The
+fork's bundled copies are the 19 EP-weight files and `tier-exchange.json`
+(`docs/fork-provenance/data.md`). Refresh them, then commit again:
 
 ```bash
+python <pair>/scripts/generate_fork_exchange.py --write
 python <pair>/scripts/sync_fork_universes.py --write
 pnpm -C <pair> fork-universes:check
 ```
 
-Add a dated section to `<pair>/docs/fork-provenance/data.md`
+If a copy changed, add a dated section to `<pair>/docs/fork-provenance/data.md`
 saying what moved and why. `fork-universes:check` compares **raw bytes**, so a
 pure CRLF/LF difference reads exactly like a real drift — check with
 `--ignore-cr-at-eol` before writing a cause down.
@@ -352,10 +356,11 @@ pnpm -C <pair> equip-eligibility:check
 pnpm -C <pair> meta-conditions:check
 pnpm -C <pair> ep-presets:check
 pnpm -C <pair> fork-lint:check
+pnpm -C <pair> fork-tests:check
 pnpm -C <pair> verify
 ```
 
-The four `require_pinned_fork` gates exit 2 between the fork commit and this lock
+The five `require_pinned_fork` gates exit 2 between the fork commit and this lock
 edit — **red by design**, read the message rather than chasing it.
 
 The three artifacts are made two ways. `<pair>/data/equip-eligibility.json` is

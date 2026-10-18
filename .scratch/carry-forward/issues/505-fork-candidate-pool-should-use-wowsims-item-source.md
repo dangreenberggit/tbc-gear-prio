@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner decision on ticket 500 (2026-09-24)
 Blocks: none
@@ -68,3 +68,24 @@ the re-asked question proposed keeping it out, and the owner's reply did
 not object (not an explicit ruling). Tickets 500 and 298 are no longer
 superseded by this ticket; 298 closed as superseded by 609, and 500 points
 at 609, 611 and 612.
+
+## Closed 2026-10-18 (stage tab-wowsims-items)
+
+The owner's ruling of 2026-10-17, verbatim: "Yes: tier-token and Sunmote exchange data is the one stated exception the fork may carry. Plan ticket 505 with everything else from wowsims only."
+
+Branch `feat/tab-wowsims-items` (this repo and the fork) builds the tab's
+candidate pool at run time from the fork's wowsims item database
+(`sim.db`, `canEquipItem`, `MISSING_ITEM_EFFECTS`) and the spec's wowsims
+preset gear sets, in `ui/features/upgrades/model/pool_source.ts`. Row
+sources come from wowsims' item facts plus one copied exchange file,
+`tier-exchange.json` (tier piece to token, Sunmote upgrade to base item).
+The 44 bundled universe copies are deleted. ADR-0038 records the rule.
+
+The universe-sync path is kept for a stated reason:
+`scripts/sync_fork_universes.py` now copies only the 19 EP-weight files and
+`tier-exchange.json`, and fails on any other JSON file in the fork's data
+folder. This repo's builder and universes are unchanged (owner, 2026-10-17:
+"they can be in tbc gear prio but not the upgrades tab repo").
+
+Verified by: `python -I scripts/sync_fork_universes.py --check` prints "20
+bundled copies byte-match", and `git -C vendor/tbc-new-fork ls-files ui/features/upgrades/model/data | grep -c universe.json` prints 0 at `tbc-new-fork@f06772929`.

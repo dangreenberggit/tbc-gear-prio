@@ -80,11 +80,12 @@ moves.
    HEAD; and the desktop gate (`pnpm desktop-gate:check`) still runs by hand
    before a re-pin that `dev` will receive.
 2. What a fork-only update must re-check: `pnpm sim-implemented-effects:generate`,
-   `pnpm equip-eligibility:check` and `pnpm fork-universes:check`. The fork's
-   bundled universes stay derived from the engine lock's data
-   (`scripts/sync_fork_universes.py` copies `data/universes/`, which
-   `scripts/assemble_universe.py` builds from `vendor/wowsims/db.json`), so a
-   fork-only update does not refresh them.
+   `pnpm equip-eligibility:check` and `pnpm fork-universes:check`. Since
+   ADR-0038 (2026-10-18) the tab builds its candidate pool at run time from
+   the fork's own `assets/database/db.json`, so a fork-only update that moves
+   db.json moves the pool with no sync step. The fork's bundled copies are
+   now only the 19 EP-weight files and `tier-exchange.json`; a fork-only
+   update does not refresh them.
 3. Between engine moves, inputs read from the fork and inputs read from the
    engine lock can describe different upstream commits. One case was measured
    on 2026-10-05: with the fork lock on `42c75dc9` and the engine lock on

@@ -377,3 +377,10 @@ file contention, worker prompt. This file stays the chronological log.
 - 683 `pnpm verify` fails on a vitest RPC timeout while every test passes (pre-merge review feat/tab-source-labels, V1) 2026-10-16
 - 684 The tab fixture recorder hangs for a long time after it writes the fixture (stage-gate tab-follow-ups, K3 step 10) 2026-10-17
 - 685 The data-pipeline-work skill cites a line of check_rep_tables.py that moved (pre-merge review feat/tab-follow-ups, addendum R2) 2026-10-17
+- 686 BiS sets are chosen partly by reading preset names (pre-merge review feat/tab-wowsims-items, A5) 2026-10-18
+- 687 The pool lists both factions' copies of faction-locked reputation rewards (pre-merge review feat/tab-wowsims-items, A6) 2026-10-18
+- 688 Off-spec tier pieces show "Source not recorded" (pre-merge review feat/tab-wowsims-items, D1) 2026-10-18
+- 689 The fork's "no other item fact" gate checks only JSON in one folder (pre-merge review feat/tab-wowsims-items, P3) 2026-10-18
+- 690 Hunter and warrior preset set keys collide (pre-merge review feat/tab-wowsims-items, A9) 2026-10-18
+- 691 Code-quality fixes left in the tab's fixture-input files (pre-merge review feat/tab-wowsims-items, CQ1-CQ7, R2-2) 2026-10-18
+- 692 fork-tests:check skips the tab's load-failure test (pre-merge review feat/tab-wowsims-items, R2-1) 2026-10-18

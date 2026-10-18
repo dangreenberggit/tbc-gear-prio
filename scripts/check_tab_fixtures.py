@@ -15,14 +15,29 @@ Two kinds of problem, treated differently:
     in a layout fixture still lays out, and a blocking rule would force a
     ~5-minute re-record per fixture on every engine edit.
 
-The inputs are the fork paths that can change a Ranking, all under
-`ui/features/upgrades/model/`: the engine (`engine/**`, except `view.ts`,
+The inputs are the fork paths that can change a Ranking, under
+`ui/features/upgrades/`: the engine (`model/engine/**`, except `view.ts`,
 which only shapes a recorded Ranking for display, and the engine's own
-test `fixtures/`), the adapters, the pool data, `run.ts`
-(it builds the engine's input, as the old tab's `run()` did) and
-`settings_pool.ts` (its `effectivePool` builds the pool `run.ts` hands the
-engine). What this cannot see -- the Go sim / WASM, the item
-database, the proto sources -- is named in the README.
+test `fixtures/`), the adapters, `model/data/` (`data.ts` and the bundled
+copies), `model/pool_source.ts` (it builds the candidate pool from the
+wowsims db, ticket 505), `utils/item_sources.ts` (it writes each candidate's
+`sources`, which a Ranking row carries) and `utils/item_source.ts` (its
+`overrunNpcKey` names a source's boss), `run.ts` (it builds the engine's
+input, as the old tab's `run()` did) and `settings_pool.ts` (its
+`effectivePool` builds the pool `run.ts` hands the engine).
+
+Since ticket 505 the pool is built at run time from upstream wowsims files,
+so these are inputs too (pre-merge review A3): the item database
+(`assets/database/`, and `ui/sim/proto/database.ts`, which loads it and adds
+the leftover db when worn gear needs it); each spec's `spec.ts` (which
+presets the page offers), `presets.ts` and `gear_sets/` (the preset items
+that decide BiS tags and phase), with `ui/app/preset_utils.ts` and
+`ui/sim/constants/other.ts` (a preset's phase); `missing_effects_auto_gen.ts`
+(stub-only effects); `ui/sim/proto/items.ts` (`canEquipItem`, `isPVPItem`)
+with the class and spec definitions under `ui/sim/player/` that
+`canEquipItem` reads; and `ui/sim/proto/names.ts` (profession and reputation
+names in sources). What this cannot see -- the Go sim / WASM and the proto
+sources -- is named in the README.
 
 Skips with a note (exit 0) when the fork clone is absent, like the other
 fork-derived checks: `vendor/` is gitignored, so CI and fresh clones have
@@ -51,13 +66,34 @@ INPUT_PATHS = (
     ENGINE,
     f"{_MODEL}/adapters",
     f"{_MODEL}/data",
+    f"{_MODEL}/pool_source.ts",
+    "ui/features/upgrades/utils/item_sources.ts",
+    "ui/features/upgrades/utils/item_source.ts",
     f"{_MODEL}/run.ts",
     f"{_MODEL}/settings_pool.ts",
+    # Upstream wowsims files the run-time pool reads to decide membership,
+    # BiS tags and sources (ticket 505; pre-merge review A3). Git pathspec
+    # globs: `*` also matches `/`.
+    "assets/database",
+    "ui/sim/proto/database.ts",
+    "ui/specs/*/*/spec.ts",
+    "ui/specs/*/*/presets.ts",
+    "ui/specs/*/*/gear_sets/*",
+    "ui/app/preset_utils.ts",
+    "ui/sim/constants/other.ts",
+    "ui/sim/constants/missing_effects_auto_gen.ts",
+    "ui/sim/proto/items.ts",
+    "ui/sim/proto/names.ts",
+    "ui/sim/player/classes",
+    "ui/sim/player/specs",
+    "ui/sim/player/player_class.ts",
+    "ui/sim/player/player_spec.ts",
 )
 ENGINE_EXCLUDED = (
     f"{ENGINE}/view.ts",
 )
 ENGINE_EXCLUDED_DIRS = (f"{ENGINE}/fixtures/",)
+UPSTREAM_EXCLUDED = ("ui/sim/player/specs/spec_index.test.ts",)
 
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
@@ -103,7 +139,7 @@ def _git(*args: str) -> subprocess.CompletedProcess[str]:
 
 
 def _is_input(path: str) -> bool:
-    if path in ENGINE_EXCLUDED:
+    if path in ENGINE_EXCLUDED or path in UPSTREAM_EXCLUDED:
         return False
     return not any(path.startswith(d) for d in ENGINE_EXCLUDED_DIRS)
 

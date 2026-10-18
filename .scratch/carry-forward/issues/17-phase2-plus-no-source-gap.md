@@ -204,3 +204,15 @@ What that does and does not settle:
 
 Re-runnable: `pnpm pool-listings:check`, then read the category f rows of
 `data/pool-listings/ret-p3.md` and `feral-p3.md`.
+
+## Comments
+
+2026-10-18 (stage tab-wowsims-items): the fork's tab now builds its own
+pool from wowsims' item database (ADR-0038), so this repo's
+`excludedNoSource` no longer decides what the tab ranks. For heroic
+five-man drops the fork uses `HEROIC_FIVE_MAN = 'include-unticked'`
+(`ui/features/upgrades/model/pool_source.ts`). The owner answered "1" on
+2026-10-18, choosing the option worded: "Add it, but leave it switched off. The heroic gear shows up as a "Heroic dungeon" checkbox in the tab's Sources list. The box starts unticked. By default the tab ranks exactly what it ranks today, and a player can tick the box to include heroic gear." Magisters' Terrace drops of
+either difficulty stay under the ticked "Magisters' Terrace" entry. All
+crafted epics that pass the pool rule are in the tab's pool. This repo's
+builder scope is unchanged.

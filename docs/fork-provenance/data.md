@@ -1,72 +1,34 @@
 # Data copy provenance
 
-Plan §2.5: "universe/EP-weight data copied into the fork" — deferred by
-slice 2 (`engine/PROVENANCE.md`'s own "Data files copied into the fork"
-section), done here in slice 3, the first slice that has a consumer for it
-(`data.ts` in this directory).
+The fork's `ui/features/upgrades/model/data/` folder holds 20 JSON files.
+Each one is a byte-for-byte copy of a file this repo owns: 19 EP-weight
+copies and `tier-exchange.json`, the tier-token and Sunmote exchange file.
+The folder holds no other item data. The table below lists all 20 files.
+`python scripts/sync_fork_universes.py --check` (`pnpm fork-universes:check`,
+part of `pnpm verify`) compares each copy with its source byte for byte, and
+fails on any JSON file in that folder that the table does not list.
 
-Copied verbatim (byte-for-byte, no field rewriting) from
+Until 2026-10-18 the folder also held 44 per-spec universe copies (the
+candidate lists). They left with ticket 505: the tab now builds its
+candidate pool at run time from wowsims' item database. See "Universe
+copies removed, 2026-10-18" at the end of this file, and ADR-0038. The dated
+sections between the table and that section describe the universe copies as
+they were when each section was written.
+
+The EP-weight files were first copied in slice 3 (plan §2.5) from
 [`dgreenberggit/tbc-gear-prio`](https://github.com/dgreenberggit/tbc-gear-prio),
-`feat/shopping-list-wowsims-tab`. Universes originally copied at commit
-`8730a1cf`, **refreshed 2026-08-16 from `60e05571`** (see "Refresh" below);
-the two EP-weight files are unchanged since `8730a1cf` and were verified
-identical to their sources at the refresh.
+`feat/shopping-list-wowsims-tab`, commit `8730a1cf`.
 
 **Moved 2026-10-05 (ticket 558):** this folder was
 `ui/core/components/individual_sim_ui/upgrades/data/` on fork branch
 `feat/upgrades-tab` (`cb561067`); on `feat/upgrades-tab-react` it is
-`ui/features/upgrades/model/data/`. Every JSON file is byte-identical to its
-`cb561067` copy; `data.ts` changed in its import lines only. Commands below
-that name the old path describe the tree as it was when they ran.
+`ui/features/upgrades/model/data/`. Commands below that name the old path
+describe the tree as it was when they ran.
 
 | Fork file                          | Source                                          |
 | ---------------------------------- | ----------------------------------------------- |
-| `ret-p2.universe.json`             | `data/universes/ret-p2.json`                    |
-| `ret-p3.universe.json`             | `data/universes/ret-p3.json`                    |
-| `ret-p4.universe.json`             | `data/universes/ret-p4.json`                    |
-| `ret-p5.universe.json`             | `data/universes/ret-p5.json`                    |
-| `feral-p2.universe.json`           | `data/universes/feral-p2.json`                  |
-| `feral-p3.universe.json`           | `data/universes/feral-p3.json`                  |
 | `ret-p2.ep-weights.json`           | `data/presets/ret/p2.ep-weights.json`           |
 | `feral-p1.ep-weights.json`         | `data/presets/feral/p1.ep-weights.json`         |
-| `balance-p2.universe.json`         | `data/universes/balance-p2.json`                |
-| `balance-p3.universe.json`         | `data/universes/balance-p3.json`                |
-| `balance-p4.universe.json`         | `data/universes/balance-p4.json`                |
-| `balance-p5.universe.json`         | `data/universes/balance-p5.json`                |
-| `hunter-p2.universe.json`          | `data/universes/hunter-p2.json`                 |
-| `hunter-p3.universe.json`          | `data/universes/hunter-p3.json`                 |
-| `hunter-p4.universe.json`          | `data/universes/hunter-p4.json`                 |
-| `hunter-p5.universe.json`          | `data/universes/hunter-p5.json`                 |
-| `mage-p2.universe.json`            | `data/universes/mage-p2.json`                   |
-| `mage-p3.universe.json`            | `data/universes/mage-p3.json`                   |
-| `mage-p4.universe.json`            | `data/universes/mage-p4.json`                   |
-| `mage-p5.universe.json`            | `data/universes/mage-p5.json`                   |
-| `shadow-p2.universe.json`          | `data/universes/shadow-p2.json`                 |
-| `shadow-p3.universe.json`          | `data/universes/shadow-p3.json`                 |
-| `shadow-p4.universe.json`          | `data/universes/shadow-p4.json`                 |
-| `shadow-p5.universe.json`          | `data/universes/shadow-p5.json`                 |
-| `rogue-p2.universe.json`           | `data/universes/rogue-p2.json`                  |
-| `rogue-p3.universe.json`           | `data/universes/rogue-p3.json`                  |
-| `rogue-p4.universe.json`           | `data/universes/rogue-p4.json`                  |
-| `rogue-p5.universe.json`           | `data/universes/rogue-p5.json`                  |
-| `ele-p2.universe.json`             | `data/universes/ele-p2.json`                    |
-| `ele-p3.universe.json`             | `data/universes/ele-p3.json`                    |
-| `ele-p4.universe.json`             | `data/universes/ele-p4.json`                    |
-| `ele-p5.universe.json`             | `data/universes/ele-p5.json`                    |
-| `enh-p2.universe.json`             | `data/universes/enh-p2.json`                    |
-| `enh-p3.universe.json`             | `data/universes/enh-p3.json`                    |
-| `enh-p4.universe.json`             | `data/universes/enh-p4.json`                    |
-| `enh-p5.universe.json`             | `data/universes/enh-p5.json`                    |
-| `warlock-p2.universe.json`         | `data/universes/warlock-p2.json`                |
-| `warlock-p3.universe.json`         | `data/universes/warlock-p3.json`                |
-| `warlock-p4.universe.json`         | `data/universes/warlock-p4.json`                |
-| `warlock-p5.universe.json`         | `data/universes/warlock-p5.json`                |
-| `warrior-p2.universe.json`         | `data/universes/warrior-p2.json`                |
-| `warrior-p3.universe.json`         | `data/universes/warrior-p3.json`                |
-| `warrior-p4.universe.json`         | `data/universes/warrior-p4.json`                |
-| `warrior-p5.universe.json`         | `data/universes/warrior-p5.json`                |
-| `feral-p4.universe.json`           | `data/universes/feral-p4.json`                  |
-| `feral-p5.universe.json`           | `data/universes/feral-p5.json`                  |
 | `balance-fallback.ep-weights.json` | `data/presets/balance/fallback.ep-weights.json` |
 | `balance-p1.ep-weights.json`       | `data/presets/balance/p1.ep-weights.json`       |
 | `balance-p2.ep-weights.json`       | `data/presets/balance/p2.ep-weights.json`       |
@@ -84,6 +46,7 @@ that name the old path describe the tree as it was when they ran.
 | `warlock-fallback.ep-weights.json` | `data/presets/warlock/fallback.ep-weights.json` |
 | `warrior-fallback.ep-weights.json` | `data/presets/warrior/fallback.ep-weights.json` |
 | `warrior-p2.ep-weights.json`       | `data/presets/warrior/p2.ep-weights.json`       |
+| `tier-exchange.json`               | `data/two-hop/tier-exchange.json`               |
 
 ## Refresh, 2026-08-16 (ticket 211)
 
@@ -859,4 +822,54 @@ Verify:
 ```bash
 pnpm fork-universes:check
 python scripts/check_pool_completeness.py --check
+```
+
+## Universe copies removed, 2026-10-18 (stage `tab-wowsims-items`, ticket 505)
+
+The owner's ruling of 2026-10-17, verbatim: "Yes: tier-token and Sunmote
+exchange data is the one stated exception the fork may carry. Plan ticket
+505 with everything else from wowsims only."
+
+Three changes:
+
+- Fork `607700806` adds `tier-exchange.json`, a copy of
+  `data/two-hop/tier-exchange.json`. `scripts/generate_fork_exchange.py`
+  writes that file from the 11 `data/two-hop/<spec>-tokens.json` files and
+  `data/two-hop/sunmote-pairs.json`: 198 tier piece to token rows and 23
+  Sunmote pairs, with no spec and no date. In this repo, `40f4bcd7` makes
+  `sync_fork_universes.py` fail on any unlisted JSON file in the folder.
+- Fork `d085357a3` adds `model/pool_source.ts`, which builds the pool from
+  `sim.db`, `canEquipItem`, `MISSING_ITEM_EFFECTS` and the spec's wowsims
+  preset gear sets. Fork `f3bb99a11` switches the tab to it and deletes the
+  44 `*.universe.json` copies. ADR-0038 records the rule.
+- Fork `624a577c3` reads each row's source from wowsims' item facts
+  (`utils/item_sources.ts`) plus `tier-exchange.json`.
+
+This repo keeps its universes, builder and CLI unchanged (owner ruling of
+2026-10-17: "they can be in tbc gear prio but not the upgrades tab repo").
+
+Verify:
+
+```bash
+pnpm fork-universes:check                      # 20 bundled copies byte-match
+python scripts/generate_fork_exchange.py --check
+git -C vendor/tbc-new-fork ls-files ui/features/upgrades/model/data | grep -c universe.json   # 0
+```
+
+## Tank and healer token rows, 2026-10-18 (ticket 688)
+
+`scripts/generate_tier_tokens.py` now writes the tank and healer tier sets
+(the AtlasLoot labels `data/two-hop/token-groups.json` maps to null) to
+`data/two-hop/tank-healer-tokens.json`, 108 pieces, where it used to skip
+them. `scripts/generate_fork_exchange.py` adds that map to the union, so
+`tier-exchange.json` holds 306 token rows (54 tokens) and the same 23
+Sunmote pairs. The 198 earlier rows are unchanged and no token id is new.
+Fork `13ac7470a` takes the new copy.
+
+Verify:
+
+```bash
+pnpm atlasloot:regen:check                     # tank-healer-tokens.json among the outputs
+python scripts/generate_fork_exchange.py --check
+pnpm fork-universes:check
 ```

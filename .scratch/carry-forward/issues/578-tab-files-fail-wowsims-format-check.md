@@ -55,3 +55,16 @@ cleanup moved three of ours out of the fork (Gate B row R4-1).
 `npx oxfmt . --check` passes in the fork with `.oxfmtrc.json` unchanged (or
 changed only by an edit the owner approved word for word), and `pnpm verify`
 passes after the re-pin.
+
+## Comments
+
+2026-10-18 (stage tab-wowsims-items): the 44 `*.universe.json` copies
+are gone from the fork (ADR-0038), and `data.ts` now passes. At fork
+`f06772929` the check fails on 57 files: 20 under `model/data/` (the 19
+EP-weight copies and the new `tier-exchange.json`, written by
+`scripts/generate_fork_exchange.py`), the 36 ported engine files, and
+`components/SetBonusPopover/SetBonusPopover.tsx`.
+
+```
+cd vendor/tbc-new-fork && node node_modules/oxfmt/bin/oxfmt --check .   # rc 1, "Format issues found in above 57 files"
+```
