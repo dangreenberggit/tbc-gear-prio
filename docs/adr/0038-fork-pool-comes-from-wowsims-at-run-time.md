@@ -211,6 +211,7 @@ Re-runnable checks:
 ```bash
 pnpm fork-universes:check                     # 20 bundled copies byte-match
 python scripts/generate_fork_exchange.py --check
+pnpm fork-tests:check                         # the fork's ui/features/upgrades tests, pool_source.test.ts among them; part of pnpm verify
 cd vendor/tbc-new-fork && npx vitest run ui/features/upgrades/model/pool_source.test.ts
 ```
 
