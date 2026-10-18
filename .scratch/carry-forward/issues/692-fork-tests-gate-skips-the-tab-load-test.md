@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: pre-merge review feat/tab-wowsims-items, round 2 R2-1 and R2-3
 Blocks: none
@@ -36,3 +36,17 @@ on this branch (review A2), so this intermittent red verify is new with it.
 - The step does not fail on a slow machine: for example the script passes a
   longer `--testTimeout`, with the reason in a comment, and three full
   `pnpm verify` runs in a row pass.
+
+## Closing note
+
+Fixed in `tbc-gear-prio@485f217f`, with no fork change (fork stays at
+`527c0d798`). `TEST_PATHS` now names `UpgradesTabBody.load.test.tsx` and the
+docstring says three tab-body tests. The script passes
+`--testTimeout=60000` to vitest, with the reason in a comment. No retry on
+failure.
+
+Verified by: `pnpm verify` run three times in a row at
+`tbc-gear-prio@485f217f`, each rc 0 with `gates: 1545 ran, 0 skipped` and
+`fork tests check ok at fork commit 527c0d798752: ... (Test Files  62 passed (62); Tests  690 passed (690))`.
+The machine was not under extra load during these runs, so the longer
+timeout is untested against the original 13 s slowdown.
