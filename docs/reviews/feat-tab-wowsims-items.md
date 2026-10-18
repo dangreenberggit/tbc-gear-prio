@@ -271,34 +271,145 @@ Findings:
   same tip passed (rc 0, `gates: 1545 ran, 0 skipped`), and two runs of
   `python scripts/check_fork_tests.py` alone passed. Ticket 692.
 
+## Focused check (round 3)
+
+Reviewed range: `780b7a1f38468f932b7f3dda885fcf5688d96146..7640f3ae8b1bfff2da983e5b53c5192742f4f877`
+
+Fork range (round 3): `527c0d798752f7382fafa41ef48573233fbcf739..bc3cca6a1aba17d832bd1376f94ed8f6a53b36a0`.
+
+Round 2 stopped the review, and the owner then ruled on the open findings,
+so this check covers the fix round that followed. The owner's ruling on
+ticket 686, 2026-10-18, verbatim: "i dont care if it gets a mark that says
+bulwark or "alt" (usually a bis alternative that wowsims or the user thought
+worth noting)". The first two commits of the range, `7c35e76a` and
+`f5b5091c`, change only this file and its tickets.
+
+Fixes in the range:
+
+- R2-1, R2-3 (ticket 692): main `485f217f` adds
+  `ui/app/tabs/UpgradesTabBody.load.test.tsx` to `TEST_PATHS` in
+  `scripts/check_fork_tests.py`, corrects the docstring count, and passes
+  `--testTimeout=60000` with the reason in a comment; `7fba40c1` closes 692.
+- A5 / P2 (ticket 686): fork `c61cc72d6` removes `NOT_BIS_NAME`, so every
+  preset of the tag phase is a BiS set. The cells fixture's `bisRows` go from
+  842 to 858 in exactly ret p3 to p5 (+1, 28485), feral p2 (+5) and shadow p2
+  (+8), and its `_comment` lists the gained ids.
+- D1 (ticket 688): main `2f0666ed` makes `scripts/generate_tier_tokens.py`
+  write the tank and healer sets to `data/two-hop/tank-healer-tokens.json`,
+  and adds that file to `check_atlasloot_regen.py` and to the union in
+  `generate_fork_exchange.py`; `tier-exchange.json` goes from 198 to 306
+  token rows. Fork `13ac7470a` takes the copy and adds a test for 29066.
+- P3 (ticket 689), and the ADR record of 686 and 688: main `67e4a648`.
+- CQ1, CQ2 (rest), CQ4, CQ5, CQ7 (fork part), R2-2 (ticket 691): fork
+  `bc3cca6a1`.
+- Re-pin and regen: main `ef9d6ffd` (fork lock and
+  `data/sim-implemented-effects.json`), `bb984a99` (the six tab fixtures and
+  `data/wowsims-fork-layout.lock.json`), `7640f3ae` (tickets only).
+
+The review's agent ran this check itself and wrote only this file.
+
+1. **Every commit names a finding or ticket, or is a re-pin or regen: pass.**
+   The fork commits name 686, 688 and 691. Main `67e4a648` and `ef9d6ffd`
+   name their tickets; `bb984a99` changes only files under `data/`;
+   `7fba40c1` and `7640f3ae` change only tickets. `485f217f` and `2f0666ed`
+   name no ticket in their messages, but tickets 692 and 688 name them as
+   their fixes (bookkeeping, no row). The upstream-file audit at fork
+   `bc3cca6a1` matches round 1:
+   `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M e804c29e8 HEAD`
+   gives only `6 0 ui/app/SimTabsSection.tsx`, and `--name-status` gives
+   232 A and 1 M.
+2. **Each diff changes only what its finding asks: pass.** The 691 refactors
+   keep behaviour. `isHeroicFiveManDrop` gives the same source kind for every
+   drop as the three branches it replaced. `poolFor(...).length === 0` is the
+   test that `poolSourceFor(...) === undefined` made. `knownPhase` differs
+   from the raw phase only for an item with no phase, and round 1's
+   adversarial axis found no such item in db.json. One effect of 686 needs no
+   change to the logic of `defaultSetKeys`: the sets now tagged BiS (ret's
+   "Bulwark", feral p2's "Alt 6%" and "Alt 9%", shadow p2's pre-raid set) are
+   also ticked by default under "Sim sets". ADR-0038 records this.
+3. **Each new test asserts its finding: pass.** The 686 test asserts that
+   each gained id is tagged in its cell, and that ret p3's sets are
+   {P3, Bulwark}. The test it replaced asserted that 28485 was not tagged, so
+   the new one fails with the rule restored (reasoning from the diff, not a
+   run). The 688 test asserts that 29066 gets its Magtheridon token; ticket
+   688 records it red on the old exchange file. The 692 change adds the load
+   test to the gate; the verify run below lists it in the vitest command.
+4. **Touched tests pass, and regenerated files match a fresh regen: pass.**
+   `corepack pnpm -C <pair> verify` on Node v22.17.1 at main `7640f3ae` and
+   fork `bc3cca6a1`: rc 0, 195 s, `gates: 1545 ran, 0 skipped`. In that run:
+   `fork tests check ok at fork commit bc3cca6a1aba` (62 files, 694 tests,
+   the load test included); `atlasloot parse reproduces: 17 committed outputs match`;
+   `fork exchange check ok: data/two-hop/tier-exchange.json is current`;
+   `fork data copies check ok: 20 bundled copies byte-match their data/ sources`;
+   `sim-implemented-effects check ok ... matches committed file`; and all six
+   tab fixtures `recorded at bc3cca6a1aba; inputs changed since: none`.
+
+**No finding.** Every change in the range is right and complete for its
+finding.
+
 ## Summary
 
-**The review stops after round 2.** The focused check passed all four checks
-but reported two findings that are not bookkeeping (R2-1, R2-2), and the final
-`pnpm verify` then found a third (R2-3). Under the
-skill's round limit the review stops there: no third round, no
-`## Disposition` table yet. The owner decides what happens next.
+**The review is complete.** Round 2 stopped it with findings open. The owner
+ruled on them, a fix round ran, and the focused check of that fix round
+(round 3) passed with no finding. `pnpm verify` passes at `7640f3ae`.
 
 Where each finding stands:
 
-- **Fixed and checked in round 2:** A1 (same as P1), A2, A3, D2; CQ8 and CQ10
-  in full; CQ2, CQ3, CQ7 and CQ9 in part.
-- **Open, introduced by this branch, blocking the merge until the owner
-  allows a deferral or has them fixed:**
-  - A5 (same as P2), BiS sets chosen by preset name: ticket 686, an owner
-    ruling.
-  - A6 (same as D3), both factions' reputation rewards in the pool: ticket
-    687, an owner ruling.
-  - D1, off-spec tier pieces show "Source not recorded": ticket 688.
-  - P3, the "no other item fact" gate checks only JSON in one folder: ticket 689.
-  - R2-3, the new `fork-tests:check` step can time out and fail
-    `pnpm verify`: ticket 692.
-- **Open, deferrable without the owner:** A9 (before this branch; ticket
-  690); the deferred code-quality parts and R2-2 (ticket 691); R2-1 (a gap
-  that predates the branch; ticket 692, with R2-3).
-- **Bookkeeping:** A8, the untracked review file during round 1; it is now
-  committed.
+- **Fixed:** A1 (P1), A2, A3, A4 (S2, CQ2), A5 (P2, by the owner's ruling of
+  2026-10-18), A7 (CQ10), A8, D1, D2; CQ1, CQ3 (the tab's own files), CQ4,
+  CQ5, CQ8, CQ9; R2-1, R2-2, R2-3.
+- **Wontfix:** A6 / D3 (ticket 687): wowsims' own gear picker shows both
+  factions' items by default, so the tab matches the site. P3 (ticket 689):
+  the gate stays on `model/data/*.json`, and ADR-0038 states its reach. P3
+  was a session decision, not an owner ruling, although ticket 689's "Done
+  means" names the owner.
+- **Deferred, tickets open:** A9 (ticket 690, predates the branch); CQ6 and
+  the main-repo part of CQ7 (ticket 691).
 
-Tickets: this branch files 7 (686 to 692) and closes 5 (505, 293, 676, 643
-and 660), counted with the two commands in the skill's step 3. It files more
-than it closes.
+Tickets: this branch files 7 (686 to 692) and closes 10 (505, 293, 676, 643,
+660, 686, 687, 688, 689, 692), counted with the two commands in the skill's
+step 3. Tickets 690 and 691 stay open.
+
+## Disposition
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                                                         |
+| ---- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1   | Adversarial   | fixed       | fork `a394de6dd` raises `SAVED_VERSION` to 2; main `85165236` re-pins                                                                                                                                 |
+| A2   | Adversarial   | fixed       | main `339f11ba`, `9933fad8`, `67ef0119`: `fork-tests:check` runs in verify                                                                                                                            |
+| A3   | Adversarial   | fixed       | main `6c19bf85`: the run-time pool's upstream inputs are in `INPUT_PATHS`                                                                                                                             |
+| A4   | Adversarial   | fixed       | same as CQ2                                                                                                                                                                                           |
+| A5   | Adversarial   | fixed       | fork `c61cc72d6` removes `NOT_BIS_NAME` after the owner's 2026-10-18 ruling; ticket 686 closed                                                                                                        |
+| A6   | Adversarial   | wontfix     | ticket 687: wowsims' picker filters by faction only through a manual setting that defaults to none (fork `ui/sim/player/player.ts:1299-1304`, `ui/sim/sim.ts:1107-1117`), so the tab matches the site |
+| A7   | Adversarial   | fixed       | same as CQ10                                                                                                                                                                                          |
+| A8   | Adversarial   | fixed       | the review file is committed (`2fff3b4e`)                                                                                                                                                             |
+| A9   | Adversarial   | defer       | `.scratch/carry-forward/issues/690-hunter-and-warrior-preset-keys-collide.md` — predates the branch                                                                                                   |
+| D1   | Domain        | fixed       | main `2f0666ed` (tank-healer-tokens.json, 306 token rows), fork `13ac7470a`; ticket 688 closed                                                                                                        |
+| D2   | Domain        | fixed       | main `5d118ba7` corrects the Hourglass sentence in ADR-0038                                                                                                                                           |
+| D3   | Domain        | wontfix     | same as A6 (ticket 687)                                                                                                                                                                               |
+| S1   | Standards     | fixed       | same as CQ1                                                                                                                                                                                           |
+| S2   | Standards     | fixed       | same as CQ2                                                                                                                                                                                           |
+| S3   | Standards     | fixed       | same as CQ3                                                                                                                                                                                           |
+| S4   | Standards     | fixed       | same as CQ4                                                                                                                                                                                           |
+| S5   | Standards     | fixed       | same as CQ5                                                                                                                                                                                           |
+| S6   | Standards     | defer       | `.scratch/carry-forward/issues/691-deferred-code-quality-in-fixture-input-files.md` — same as CQ6                                                                                                     |
+| S7   | Standards     | defer       | `.scratch/carry-forward/issues/691-deferred-code-quality-in-fixture-input-files.md` — same as CQ7                                                                                                     |
+| S8   | Standards     | fixed       | same as CQ8                                                                                                                                                                                           |
+| S9   | Standards     | fixed       | same as CQ9                                                                                                                                                                                           |
+| P1   | Spec          | fixed       | same as A1                                                                                                                                                                                            |
+| P2   | Spec          | fixed       | same as A5                                                                                                                                                                                            |
+| P3   | Spec          | wontfix     | ticket 689 closed: the gate stays on `model/data/*.json`; ADR-0038 states its reach and why item lists in code are not detected (main `67e4a648`); a session decision                                 |
+| P4   | Spec          | fixed       | same as CQ3                                                                                                                                                                                           |
+| P5   | Spec          | fixed       | same as CQ9                                                                                                                                                                                           |
+| CQ1  | Code quality  | fixed       | fork `bc3cca6a1`                                                                                                                                                                                      |
+| CQ2  | Code quality  | fixed       | fork `19ede7bdf` (fixtures and tests), `bc3cca6a1` (`pool_source.ts`)                                                                                                                                 |
+| CQ3  | Code quality  | fixed       | fork `ed7b40cac`; the `engine/types.ts:20` comment and `'Alt'` member stay as ported text from `packages/core/src/types.ts:12` (ticket 691)                                                           |
+| CQ4  | Code quality  | fixed       | fork `bc3cca6a1`: one `isHeroicFiveManDrop`                                                                                                                                                           |
+| CQ5  | Code quality  | fixed       | fork `bc3cca6a1`: one `knownPhase`                                                                                                                                                                    |
+| CQ6  | Code quality  | defer       | `.scratch/carry-forward/issues/691-deferred-code-quality-in-fixture-input-files.md` — changing `poolFor` touches 5 callers and 5 mocks                                                                |
+| CQ7  | Code quality  | defer       | `.scratch/carry-forward/issues/691-deferred-code-quality-in-fixture-input-files.md` — fork part fixed in `bc3cca6a1` and main `4fa7194d`; the main `fork-universes:*` names stay open                 |
+| CQ8  | Code quality  | fixed       | fork `45ff67c91`                                                                                                                                                                                      |
+| CQ9  | Code quality  | fixed       | fork `2d7ae0f89`, main `beeda961`                                                                                                                                                                     |
+| CQ10 | Code quality  | fixed       | fork `527c0d798`                                                                                                                                                                                      |
+| R2-1 | Focused check | fixed       | main `485f217f` adds the load test; ticket 692 closed                                                                                                                                                 |
+| R2-2 | Focused check | fixed       | fork `bc3cca6a1` removes `alt_badge` from the locale and schema                                                                                                                                       |
+| R2-3 | Focused check | fixed       | main `485f217f` passes `--testTimeout=60000`; ticket 692 closed                                                                                                                                       |
