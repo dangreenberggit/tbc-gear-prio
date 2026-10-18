@@ -262,11 +262,20 @@ Findings:
 - **R2-2. The CQ3 fix left the `alt_badge` text with no reader**
   (`assets/locales/en/upgrades.json:142` in the fork). Code quality; the tab
   shows nothing different.
+- **R2-3. `fork-tests:check` can time out inside `pnpm verify`.** Found
+  by the review's final `pnpm verify`, after the check returned. Loud
+  failure, introduced by this branch's A2 gate. At `7c35e76a`, one
+  `pnpm verify` failed (rc 1) because `ui/features/upgrades/lazy_load.test.ts`
+  "is imported statically by no production file outside its folder" took
+  13178 ms against vitest's 5000 ms default. The next `pnpm verify` on the
+  same tip passed (rc 0, `gates: 1545 ran, 0 skipped`), and two runs of
+  `python scripts/check_fork_tests.py` alone passed. Ticket 692.
 
 ## Summary
 
 **The review stops after round 2.** The focused check passed all four checks
-but reported two findings that are not bookkeeping (R2-1, R2-2). Under the
+but reported two findings that are not bookkeeping (R2-1, R2-2), and the final
+`pnpm verify` then found a third (R2-3). Under the
 skill's round limit the review stops there: no third round, no
 `## Disposition` table yet. The owner decides what happens next.
 
@@ -282,9 +291,11 @@ Where each finding stands:
     687, an owner ruling.
   - D1, off-spec tier pieces show "Source not recorded": ticket 688.
   - P3, the "no other item fact" gate checks only JSON in one folder: ticket 689.
+  - R2-3, the new `fork-tests:check` step can time out and fail
+    `pnpm verify`: ticket 692.
 - **Open, deferrable without the owner:** A9 (before this branch; ticket
   690); the deferred code-quality parts and R2-2 (ticket 691); R2-1 (a gap
-  that predates the branch; ticket 692).
+  that predates the branch; ticket 692, with R2-3).
 - **Bookkeeping:** A8, the untracked review file during round 1; it is now
   committed.
 
