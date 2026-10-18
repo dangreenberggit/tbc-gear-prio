@@ -84,6 +84,7 @@ that name the old path describe the tree as it was when they ran.
 | `warlock-fallback.ep-weights.json` | `data/presets/warlock/fallback.ep-weights.json` |
 | `warrior-fallback.ep-weights.json` | `data/presets/warrior/fallback.ep-weights.json` |
 | `warrior-p2.ep-weights.json`       | `data/presets/warrior/p2.ep-weights.json`       |
+| `tier-exchange.json`               | `data/two-hop/tier-exchange.json`               |
 
 ## Refresh, 2026-08-16 (ticket 211)
 
