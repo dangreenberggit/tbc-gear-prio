@@ -119,12 +119,14 @@ committed, re-record with the commands above.
 fixture <name>: recorded at <sha>; inputs changed since: <paths|none>
 ```
 
-The inputs are the fork paths that can change a `Ranking`, all under
-`ui/features/upgrades/model/` (`INPUT_PATHS` in `scripts/check_tab_fixtures.py`):
-`engine/**` (except `view.ts` and the engine's test
-`fixtures/`), `adapters/**`, `data/**`, `run.ts`, which builds the engine's
-input, and `settings_pool.ts`, whose `effectivePool` builds the pool `run.ts`
-hands the engine. A listed path means
+The inputs are the fork paths that can change a `Ranking`
+(`INPUT_PATHS` in `scripts/check_tab_fixtures.py`). Under
+`ui/features/upgrades/model/`: `engine/**` (except `view.ts` and the engine's
+test `fixtures/`), `adapters/**`, `data/**`, `pool_source.ts`, which builds the
+candidate pool from the wowsims db (ticket 505), `run.ts`, which builds the
+engine's input, and `settings_pool.ts`, whose `effectivePool` builds the pool
+`run.ts` hands the engine. Under `ui/features/upgrades/utils/`:
+`item_sources.ts`, which writes each candidate's `sources`. A listed path means
 the fixture may no longer match what a run would produce now. Read the diff and
 re-record when it changes what a run computes; a change that only affects
 rendering does not need one.

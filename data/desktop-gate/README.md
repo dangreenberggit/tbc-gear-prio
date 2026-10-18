@@ -19,16 +19,16 @@ golden is `golden-ret-p4-cap40.json`.
   `P3`, `Bulwark`, `Pre-raid`), so phase 5 has no previous-phase start gear.
   The gate moved to phase 4, whose previous phase has `P3` (session ruling
   Q-560-desktop-phase). The phase-5 golden was removed; phase 5 is not gated.
-- **Pinned counts.** `EXPECTED_ELIGIBLE["ret"][4]` and `UNIVERSE_CAP["ret"][4]`
-  in `scripts/check_desktop_tab.py` are 917, the entry count of the ret-p4
-  universe, measured before any run with
-  `node -e "console.log(require('<fork>/ui/features/upgrades/model/data/ret-p4.universe.json').entries.length)"`
-  (2026-10-16; 838 before ticket 642 admitted arena gear and the 23206 fix
-  added Mark of the Champion; 523 before tickets 611 and 613 grew the ret
-  lists).
-  Neither the phase filter nor the Kael exclusion removes a ret-p4 entry, so a
-  run with the tab's default settings should report `eligibleCount` 917; the
-  2026-10-16 live readback did.
+- **Pinned counts.** Since ticket 505 the tab builds the ret-p4 pool at run
+  time from the wowsims db (`<fork>/ui/features/upgrades/model/pool_source.ts`,
+  ADR-0038). `POOL_CAP["ret"][4]` in `scripts/check_desktop_tab.py` is 1178,
+  the pool with every source ticked, and `EXPECTED_ELIGIBLE["ret"][4]` is
+  1121, the pool with the Sources dialog's "Heroic dungeon" entry unticked,
+  which is the tab's default. Both sizes are pinned in the fork's
+  `model/pool_source.cells.fixture.json` (`"ret-p4"`: include 1178, exclude
+  1121), which `pool_source.test.ts` checks against db.json. Before ticket 505
+  both constants were 917, the entry count of the bundled ret-p4 universe
+  file, which no longer exists.
   `FULL_ROWS` has no phase-4 entry: the gate runs capped, and a capped run
   never reads it.
 - **Pinned row count.** `CAPPED_ROWS["ret"][4][40]` is 40. The cap sims the
@@ -62,7 +62,7 @@ rows when the gate was written.
 output changed. Find out why before you touch this file.
 
 **Regenerating is a deliberate act.** It is legitimate when a change is *meant*
-to alter the output — a fork re-pin, a universe regen, an intended ranking
+to alter the output — a fork re-pin, a pool rule change, an intended ranking
 change. Run `pnpm desktop-gate:check --update-golden`, read the diff it prints,
 and commit the new file with the reason the output changed in the commit body.
 The write is gated on checks (a)-(f) passing ((g) removed), which stops a
