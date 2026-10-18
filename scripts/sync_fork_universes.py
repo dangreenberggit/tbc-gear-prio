@@ -3,9 +3,9 @@
 other JSON out of the fork's data folder.
 
 The Upgrades tab in `vendor/tbc-new-fork` bundles a few JSON files into its
-own dist (`upgrades/model/data/data.ts` static imports): EP-weight copies,
-the tier exchange file, and, until ticket 505 removes them, per-spec universe
-copies. Each is a verbatim copy of an artifact this repo owns under `data/`,
+own dist (`upgrades/model/data/data.ts` static imports): EP-weight copies
+and the tier exchange file. (The per-spec universe copies it also held left
+with ticket 505.) Each is a verbatim copy of an artifact this repo owns under `data/`,
 and nothing regenerates it, so it goes stale the moment its source changes
 and nothing notices. That already happened: the 2026-08-16 refresh recorded
 in `docs/fork-provenance/data.md` fixed the data but not the mechanism, and

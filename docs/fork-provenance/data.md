@@ -1,23 +1,29 @@
 # Data copy provenance
 
-Plan §2.5: "universe/EP-weight data copied into the fork" — deferred by
-slice 2 (`engine/PROVENANCE.md`'s own "Data files copied into the fork"
-section), done here in slice 3, the first slice that has a consumer for it
-(`data.ts` in this directory).
+The fork's `ui/features/upgrades/model/data/` folder holds 20 JSON files.
+Each one is a byte-for-byte copy of a file this repo owns: 19 EP-weight
+copies and `tier-exchange.json`, the tier-token and Sunmote exchange file.
+The folder holds no other item data. The table below lists all 20 files.
+`python scripts/sync_fork_universes.py --check` (`pnpm fork-universes:check`,
+part of `pnpm verify`) compares each copy with its source byte for byte, and
+fails on any JSON file in that folder that the table does not list.
 
-Copied verbatim (byte-for-byte, no field rewriting) from
+Until 2026-10-18 the folder also held 44 per-spec universe copies (the
+candidate lists). They left with ticket 505: the tab now builds its
+candidate pool at run time from wowsims' item database. See "Universe
+copies removed, 2026-10-18" at the end of this file, and ADR-0038. The dated
+sections between the table and that section describe the universe copies as
+they were when each section was written.
+
+The EP-weight files were first copied in slice 3 (plan §2.5) from
 [`dgreenberggit/tbc-gear-prio`](https://github.com/dgreenberggit/tbc-gear-prio),
-`feat/shopping-list-wowsims-tab`. Universes originally copied at commit
-`8730a1cf`, **refreshed 2026-08-16 from `60e05571`** (see "Refresh" below);
-the two EP-weight files are unchanged since `8730a1cf` and were verified
-identical to their sources at the refresh.
+`feat/shopping-list-wowsims-tab`, commit `8730a1cf`.
 
 **Moved 2026-10-05 (ticket 558):** this folder was
 `ui/core/components/individual_sim_ui/upgrades/data/` on fork branch
 `feat/upgrades-tab` (`cb561067`); on `feat/upgrades-tab-react` it is
-`ui/features/upgrades/model/data/`. Every JSON file is byte-identical to its
-`cb561067` copy; `data.ts` changed in its import lines only. Commands below
-that name the old path describe the tree as it was when they ran.
+`ui/features/upgrades/model/data/`. Commands below that name the old path
+describe the tree as it was when they ran.
 
 | Fork file                          | Source                                          |
 | ---------------------------------- | ----------------------------------------------- |
@@ -816,4 +822,36 @@ Verify:
 ```bash
 pnpm fork-universes:check
 python scripts/check_pool_completeness.py --check
+```
+
+## Universe copies removed, 2026-10-18 (stage `tab-wowsims-items`, ticket 505)
+
+The owner's ruling of 2026-10-17, verbatim: "Yes: tier-token and Sunmote
+exchange data is the one stated exception the fork may carry. Plan ticket
+505 with everything else from wowsims only."
+
+Three changes:
+
+- Fork `607700806` adds `tier-exchange.json`, a copy of
+  `data/two-hop/tier-exchange.json`. `scripts/generate_fork_exchange.py`
+  writes that file from the 11 `data/two-hop/<spec>-tokens.json` files and
+  `data/two-hop/sunmote-pairs.json`: 198 tier piece to token rows and 23
+  Sunmote pairs, with no spec and no date. In this repo, `40f4bcd7` makes
+  `sync_fork_universes.py` fail on any unlisted JSON file in the folder.
+- Fork `d085357a3` adds `model/pool_source.ts`, which builds the pool from
+  `sim.db`, `canEquipItem`, `MISSING_ITEM_EFFECTS` and the spec's wowsims
+  preset gear sets. Fork `f3bb99a11` switches the tab to it and deletes the
+  44 `*.universe.json` copies. ADR-0038 records the rule.
+- Fork `624a577c3` reads each row's source from wowsims' item facts
+  (`utils/item_sources.ts`) plus `tier-exchange.json`.
+
+This repo keeps its universes, builder and CLI unchanged (owner ruling of
+2026-10-17: "they can be in tbc gear prio but not the upgrades tab repo").
+
+Verify:
+
+```bash
+pnpm fork-universes:check                      # 20 bundled copies byte-match
+python scripts/generate_fork_exchange.py --check
+git -C vendor/tbc-new-fork ls-files ui/features/upgrades/model/data | grep -c universe.json   # 0
 ```
