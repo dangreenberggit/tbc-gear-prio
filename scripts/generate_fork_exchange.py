@@ -10,10 +10,11 @@ Sunmote pair map. This script reduces them to one spec-independent file,
 copies into the fork.
 
 Inputs: the `<spec>-tokens.json` of every spec in
-`packages/core/src/spec-registry.json`, `data/two-hop/sunmote-pairs.json`, and
-`vendor/wowsims/db.json`. The token rows are the union of the per-spec maps,
-sorted by piece id; two maps that disagree on a piece fail the run, because
-the tab has one row per piece. The Sunmote rows are the pairs
+`packages/core/src/spec-registry.json`, `data/two-hop/tank-healer-tokens.json`
+(the tank and healer sets, which the tab's pool offers too: ticket 688),
+`data/two-hop/sunmote-pairs.json`, and `vendor/wowsims/db.json`. The token
+rows are the union of those maps, sorted by piece id; two maps that disagree
+on a piece fail the run, because the tab has one row per piece. The Sunmote rows are the pairs
 `assemble_universe.sunmote_upgrade_pairs` keeps, so the tab and the builder
 agree on which pairs are upgrades.
 
@@ -43,6 +44,7 @@ SPEC_REGISTRY = ROOT / "packages/core/src/spec-registry.json"
 SUNMOTE_PAIRS = TWO_HOP / "sunmote-pairs.json"
 VENDOR_DB = ROOT / "vendor/wowsims/db.json"
 OUT = TWO_HOP / "tier-exchange.json"
+TANK_HEALER = "tank-healer"
 
 TOKEN_FIELDS = ("pieceId", "tokenId", "tokenName", "zone", "boss")
 
@@ -52,7 +54,7 @@ def load(path: Path) -> object:
 
 
 def token_rows(token_maps: dict[str, object]) -> list[dict]:
-    """Union of the per-spec token maps, one row per piece.
+    """Union of the token maps, one row per piece.
 
     Raises ValueError naming both specs when two maps give one piece
     different token facts.
@@ -76,7 +78,7 @@ def token_rows(token_maps: dict[str, object]) -> list[dict]:
 
 def build() -> str:
     specs = sorted(load(SPEC_REGISTRY)["specs"])
-    token_maps = {spec: load(TWO_HOP / f"{spec}-tokens.json") for spec in specs}
+    token_maps = {name: load(TWO_HOP / f"{name}-tokens.json") for name in [*specs, TANK_HEALER]}
     db = load(VENDOR_DB)
     db_by_id = {int(item["id"]): item for item in db["items"]}
     doc = {

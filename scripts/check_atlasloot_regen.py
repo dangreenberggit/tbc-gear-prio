@@ -5,8 +5,8 @@
 `data/faction_ids.json` (and `data/two-hop/sunmote-pairs.json`, ticket 612) are
 generated output committed to the tree, while their
 source (`vendor/atlasloot/`) is gitignored. The tier-token maps
-(`data/two-hop/tier-sets.json` and one `<spec>-tokens.json` per spec in
-`packages/core/src/spec-registry.json`) are checked
+(`data/two-hop/tier-sets.json`, one `<spec>-tokens.json` per spec in
+`packages/core/src/spec-registry.json`, and `tank-healer-tokens.json`) are checked
 the same way, by re-running `scripts/generate_tier_tokens.py` (ticket 609). Nothing else re-derives them, so
 between one `--update` and the next a committed file can drift from the Lua it
 claims to come from -- a hand edit, a bad merge, or a parser change shipped
@@ -59,9 +59,10 @@ TOKEN_SPECS = sorted(
         (ROOT / "packages/core/src/spec-registry.json").read_text(encoding="utf-8")
     )["specs"]
 )
-TOKEN_OUTPUTS = [ROOT / "data/two-hop/tier-sets.json"] + [
-    ROOT / f"data/two-hop/{spec}-tokens.json" for spec in TOKEN_SPECS
-]
+TOKEN_OUTPUTS = [
+    ROOT / "data/two-hop/tier-sets.json",
+    ROOT / "data/two-hop/tank-healer-tokens.json",
+] + [ROOT / f"data/two-hop/{spec}-tokens.json" for spec in TOKEN_SPECS]
 
 
 def compare(committed: Path, regenerated: Path, rerun: str) -> str | None:
