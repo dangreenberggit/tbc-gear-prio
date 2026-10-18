@@ -117,8 +117,8 @@ START_PRESET = {"ret": {4: ("Phase 3", "P3")}}
 # unticked, and the eligible count beside Run applies that exclusion
 # (hooks/useUpgradesSettings.ts effectiveExcludedSources). So a run with the
 # tab's default settings reports eligibleCount 1121 (the exclude size), and
-# 1178 is the upper bound with every source ticked. Not yet read from a live
-# desktop run (untested). If a run reads another number, explain the filter
+# 1178 is the upper bound with every source ticked. A desktop run at fork
+# f06772929 read eligibleCount 1121. If a run reads another number, explain the filter
 # responsible before changing this; a change to the pool rule or the db must
 # re-measure both.
 EXPECTED_ELIGIBLE = {"ret": {4: 1121}}
@@ -139,9 +139,9 @@ FULL_ROWS: dict[str, dict[int, int]] = {}
 # pane (model/results_view.ts paneRows), so a capped run shows N minus the
 # worn items inside the first N. ret phase 4 from the P3 preset, cap 40: the
 # pane shows 40, so none of the 16 worn items is inside the first 40. Measured
-# on the desktop binary at fork 8cd8d1c80 (commit f1022c37), and the
-# committed golden data/desktop-gate/golden-ret-p4-cap40.json, recorded at the
-# same fork (`forkCommit`), holds 40 rows (`rowCount`). A change to the pool,
+# on the desktop binary at fork f06772929, on the run-time pool (ticket 505),
+# and the committed golden data/desktop-gate/golden-ret-p4-cap40.json, recorded
+# at the same fork (`forkCommit`), holds 40 rows (`rowCount`). A change to the pool,
 # the EP order or the preset gear can move it; re-measure and explain before
 # changing it.
 CAPPED_ROWS = {"ret": {4: {40: 40}}}

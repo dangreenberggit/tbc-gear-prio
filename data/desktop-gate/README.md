@@ -43,7 +43,11 @@ golden is `golden-ret-p4-cap40.json`.
   out nine old candidates and that worn item. Re-measured 2026-10-16 after the
   pool grew to 917 (fork `8cd8d1c80`, readback
   `.scratch/stage-gate/tab-blocking-finish/readback-ret-p4-cap40.json`,
-  gitignored): still 40.
+  gitignored): still 40. Re-measured 2026-10-18 on the run-time pool (fork
+  `f06772929`, `eligibleCount` 1121): still 40. In the first 40, Kiss of the
+  Spider (22954, a Naxxramas epic with a wowsims effect record) replaced Boots
+  of Natural Grace (30041, still in the pool); every other row and
+  `baselineDps` kept its value.
 - **Where the run's values are explained.** The phase-4 golden's rows and
   `baselineDps`, against the old phase-5 golden, are explained in the commit
   that writes the golden and in the ticket-560 stage's `desktop-gate.md`.
