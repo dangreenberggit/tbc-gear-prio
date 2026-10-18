@@ -10,7 +10,7 @@ this repo's `vitest.config.ts` excludes `**/vendor/**`, and
 inside verify; without this step verify passed with `pool_source.ts` broken
 (pre-merge review of feat/tab-wowsims-items, finding A2).
 
-Scoped to `ui/features/upgrades/` and the two tab-body tests the fork adds
+Scoped to `ui/features/upgrades/` and the three tab-body tests the fork adds
 under `ui/app/tabs/`, for the reason `check_fork_lint.py` gives: everything
 else in the fork is upstream's, and its tests are not ours to gate on.
 
@@ -47,7 +47,13 @@ TEST_PATHS = (
     "ui/features/upgrades",
     "ui/app/tabs/UpgradesTabBody.test.tsx",
     "ui/app/tabs/UpgradesTabBody.unopened.test.tsx",
+    "ui/app/tabs/UpgradesTabBody.load.test.tsx",
 )
+
+# lazy_load.test.ts walks the fork's import graph and took 13 s against vitest's
+# 5 s default inside a busy `pnpm verify` (ticket 692); set here, not in the fork,
+# so the fix needs no fork re-pin.
+TEST_TIMEOUT_MS = 60_000
 
 _ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
@@ -107,7 +113,7 @@ def main() -> int:
     tested = " ".join(TEST_PATHS)
     try:
         result = subprocess.run(
-            ["node", str(VITEST), "run", *TEST_PATHS],
+            ["node", str(VITEST), "run", f"--testTimeout={TEST_TIMEOUT_MS}", *TEST_PATHS],
             capture_output=True,
             text=True,
             encoding="utf-8",
