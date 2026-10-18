@@ -198,10 +198,13 @@ The Horseman's Helm (epic, ilvl 110, phase 1), which joins the pool.
   key changed from `preset::<name>` to `preset:<phase>:<name>`, so a saved
   pick of such a preset is dropped once.
 - **Size against the old lists** (44 cells, box unticked): 114 rows of 20
-  items leave (94 rare rows, Thunderfury's 20, and the 4 rows of feral's
-  28034 Hourglass of the Unraveller, a heroic Black Morass drop); 4,263
-  rows of 290 items join, among them 2,842 crafted epic rows, 588 pre-TBC
-  raid rows, and ret shields, one-handers and off-hands.
+  items leave (94 rare rows, among them ret's 4 rows of 28034 Hourglass of
+  the Unraveller, and Thunderfury's 20). The Hourglass is a rare Temporus
+  drop in The Black Morass, normal and heroic (db.json). The rare-quality
+  floor removes it from ret's lists, whose presets lack it; feral keeps it
+  because feral's presets hold it. 4,263 rows of 290 items join, among them
+  2,842 crafted epic rows, 588 pre-TBC raid rows, and ret shields,
+  one-handers and off-hands.
 - **This repo is unchanged.** Its builder, universes, CLI, AtlasLoot and
   Wowhead inputs stay (owner, 2026-10-17: "they can be in tbc gear prio but
   not the upgrades tab repo").
