@@ -81,7 +81,7 @@ GOLDEN_NOTE = (
     "aboveCutoffItems and baselineDps of a known-good ret phase-4 cap-40 run "
     "from the P3 gear preset on the desktop (HTTP) transport. The gate fails when a run differs from these "
     "three fields; every other field here is provenance. Regenerate ONLY when a "
-    "change is meant to alter the tab's output (fork re-pin, universe regen, "
+    "change is meant to alter the tab's output (fork re-pin, pool rule change, "
     "intended ranking change) and after the printed diff is explained: pnpm "
     "desktop-gate:check --update-golden, then commit with the reason in the "
     "body. A red gate is a finding, not a prompt to regenerate. See README.md "
@@ -106,19 +106,23 @@ ORIGIN = f"http://localhost:{PORT}"
 DESKTOP_PHASE = 4
 START_PRESET = {"ret": {4: ("Phase 3", "P3")}}
 
-# Pinned eligible-candidate count and its upper bound, from the committed
-# universe, before any run (ticket 560 amendment A-F31):
-#   node -e "console.log(require('<fork>/ui/features/upgrades/model/data/ret-p4.universe.json').entries.length)"
-# prints 917 at fork 8cd8d1c80. Every ret-p4 entry is
-# phase <= 4 and none is a Kael temporary legendary, so neither the phase filter
-# (model/engine/pool.ts filterPoolByPhase) nor the Kael exclusion removes one,
-# and the tab's default settings (no source excluded, prune off) do not filter:
-# the gate's eligibleCount should be 917, and the live run behind commit
-# f1022c37 read 917. If a
-# run reads another number, explain the filter responsible before changing
-# this. A universe regen that changes the ret-p4 pool must re-measure both.
-EXPECTED_ELIGIBLE = {"ret": {4: 917}}
-UNIVERSE_CAP = {"ret": {4: 917}}
+# Pinned eligible-candidate count and its upper bound. Since ticket 505 the tab
+# builds the ret-p4 pool at run time from the wowsims db
+# (<fork>/ui/features/upgrades/model/pool_source.ts, ADR-0038). Its size is
+# pinned per heroic five-man policy in the fork's
+# model/pool_source.cells.fixture.json ("ret-p4": exclude 1121, include 1178),
+# which pool_source.test.ts checks against db.json; the fixture's _comment
+# names the script that measured it. The policy is include-unticked: the pool
+# holds the 1178 items, but the Sources dialog's "Heroic dungeon" entry starts
+# unticked, and the eligible count beside Run applies that exclusion
+# (hooks/useUpgradesSettings.ts effectiveExcludedSources). So a run with the
+# tab's default settings reports eligibleCount 1121 (the exclude size), and
+# 1178 is the upper bound with every source ticked. Not yet read from a live
+# desktop run (untested). If a run reads another number, explain the filter
+# responsible before changing this; a change to the pool rule or the db must
+# re-measure both.
+EXPECTED_ELIGIBLE = {"ret": {4: 1121}}
+POOL_CAP = {"ret": {4: 1178}}
 
 # Measured full-pool row count for the --full branch of assertion (e): an
 # uncapped run lands fewer rows than eligible candidates, because screened-out
@@ -614,7 +618,7 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
 
     eligible = rb.get("eligibleCount")
     expected = EXPECTED_ELIGIBLE.get(spec, {}).get(phase)
-    cap = UNIVERSE_CAP.get(spec, {}).get(phase)
+    cap = POOL_CAP.get(spec, {}).get(phase)
     full_rows = FULL_ROWS.get(spec, {}).get(phase)
     requested = rb.get("candidatesRequested") or 0
     # C14 is FALSE (D4): an uncapped run lands FULL_ROWS (< eligibleCount), not

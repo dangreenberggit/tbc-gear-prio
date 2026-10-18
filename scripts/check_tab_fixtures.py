@@ -15,14 +15,17 @@ Two kinds of problem, treated differently:
     in a layout fixture still lays out, and a blocking rule would force a
     ~5-minute re-record per fixture on every engine edit.
 
-The inputs are the fork paths that can change a Ranking, all under
-`ui/features/upgrades/model/`: the engine (`engine/**`, except `view.ts`,
+The inputs are the fork paths that can change a Ranking, under
+`ui/features/upgrades/`: the engine (`model/engine/**`, except `view.ts`,
 which only shapes a recorded Ranking for display, and the engine's own
-test `fixtures/`), the adapters, the pool data, `run.ts`
-(it builds the engine's input, as the old tab's `run()` did) and
-`settings_pool.ts` (its `effectivePool` builds the pool `run.ts` hands the
-engine). What this cannot see -- the Go sim / WASM, the item
-database, the proto sources -- is named in the README.
+test `fixtures/`), the adapters, `model/data/` (`data.ts` and the bundled
+copies), `model/pool_source.ts` (it builds the candidate pool from the
+wowsims db, ticket 505), `utils/item_sources.ts` (it writes each candidate's
+`sources`, which a Ranking row carries), `run.ts` (it builds the engine's
+input, as the old tab's `run()` did) and `settings_pool.ts` (its
+`effectivePool` builds the pool `run.ts` hands the engine). What this cannot
+see -- the Go sim / WASM, the item database, the proto sources -- is named in
+the README.
 
 Skips with a note (exit 0) when the fork clone is absent, like the other
 fork-derived checks: `vendor/` is gitignored, so CI and fresh clones have
@@ -51,6 +54,8 @@ INPUT_PATHS = (
     ENGINE,
     f"{_MODEL}/adapters",
     f"{_MODEL}/data",
+    f"{_MODEL}/pool_source.ts",
+    "ui/features/upgrades/utils/item_sources.ts",
     f"{_MODEL}/run.ts",
     f"{_MODEL}/settings_pool.ts",
 )
