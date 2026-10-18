@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the fork's Upgrades tab tests (`vitest run ui/features/upgrades`).
+"""Run the fork's Upgrades tab tests (`vitest run` over `TEST_PATHS`).
 
 Since ticket 505 the tab builds its candidate pool at run time in fork code
 (`pool_source.ts`, `item_sources.ts`, `settings_pool.ts`), and the pool's
@@ -10,9 +10,9 @@ this repo's `vitest.config.ts` excludes `**/vendor/**`, and
 inside verify; without this step verify passed with `pool_source.ts` broken
 (pre-merge review of feat/tab-wowsims-items, finding A2).
 
-Scoped to `ui/features/upgrades/` for the reason `check_fork_lint.py` gives:
-everything else in the fork is upstream's, and its tests are not ours to
-gate on.
+Scoped to `ui/features/upgrades/` and the two tab-body tests the fork adds
+under `ui/app/tabs/`, for the reason `check_fork_lint.py` gives: everything
+else in the fork is upstream's, and its tests are not ours to gate on.
 
 Skips cleanly (exit 0, saying why) when the fork clone is absent, or is
 present without `node_modules`, the same contract as `check_fork_lint.py`.
@@ -42,8 +42,12 @@ VITEST = FORK_MODULES / "vitest/vitest.mjs"
 
 CHECK_NAME = "fork tests check"
 
-# Fork-relative; must exist, so a moved folder fails loudly instead of running no tests.
-TEST_PATH = "ui/features/upgrades"
+# Fork-relative; each must exist, so a moved path fails loudly instead of running no tests.
+TEST_PATHS = (
+    "ui/features/upgrades",
+    "ui/app/tabs/UpgradesTabBody.test.tsx",
+    "ui/app/tabs/UpgradesTabBody.unopened.test.tsx",
+)
 
 _ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
@@ -90,17 +94,20 @@ def main() -> int:
         )
         return 2
 
-    if not (FORK_ROOT / TEST_PATH).is_dir():
+    absent = [p for p in TEST_PATHS if not (FORK_ROOT / p).exists()]
+    if absent:
         print(
-            f"{CHECK_NAME}: {TEST_PATH} is missing from the fork at {pin[:12]}. "
-            "Update TEST_PATH in scripts/check_fork_tests.py to its new name.",
+            f"{CHECK_NAME}: {', '.join(absent)} missing from the fork at "
+            f"{pin[:12]}. Update TEST_PATHS in scripts/check_fork_tests.py to "
+            "the new names.",
             file=sys.stderr,
         )
         return 1
 
+    tested = " ".join(TEST_PATHS)
     try:
         result = subprocess.run(
-            ["node", str(VITEST), "run", TEST_PATH],
+            ["node", str(VITEST), "run", *TEST_PATHS],
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -116,7 +123,7 @@ def main() -> int:
     if result.returncode != 0:
         print(output.strip() or "(vitest printed nothing)", file=sys.stderr)
         print(
-            f"\n{CHECK_NAME}: vitest run {TEST_PATH} exited "
+            f"\n{CHECK_NAME}: vitest run {tested} exited "
             f"{result.returncode} at fork commit {pin[:12]}. Fix the failing "
             "tests named above -- they are ours.",
             file=sys.stderr,
@@ -124,7 +131,7 @@ def main() -> int:
         return 1
 
     counts = "; ".join(summary_lines(output)) or "no count line printed"
-    print(f"{CHECK_NAME} ok at fork commit {pin[:12]}: vitest run {TEST_PATH} ({counts})")
+    print(f"{CHECK_NAME} ok at fork commit {pin[:12]}: vitest run {tested} ({counts})")
     return 0
 
 
