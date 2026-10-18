@@ -39,3 +39,41 @@ anyway. Fork paths are under `ui/features/upgrades/` unless stated, at fork
 
 Each item is fixed or ruled out with a reason, and the fixtures are
 re-recorded in the same change.
+
+## Progress, 2026-10-18 (fix round after the pre-merge review)
+
+Done in fork `bc3cca6a1` (pinned by `tbc-gear-prio@ef9d6ffd`, fixtures
+re-recorded in `bb984a99`), no behaviour change:
+
+- CQ1: both comments now say the owner chose the policy (answer "1").
+- CQ2: `pool_source.ts` cites the cells fixture's `_comment` and ADR-0038 in
+  place of the gitignored script, the unsourced "5.4x" and "plan-review M1".
+- CQ4: one `isHeroicFiveManDrop` in `utils/item_sources.ts`, used by
+  `sourceOfEntry` and `isHeroicFiveManOnly`.
+- CQ5: one `knownPhase` lookup; the floor, `selectPool`'s preset phases and
+  `itemPhaseLookup` all read a missing phase as none.
+- CQ7 (fork part): `poolSourceFor` returns `name`, not `file`;
+  `UpgradesResults.tsx` tests `poolFor(...).length === 0` directly. Building
+  the pool there is kept: it runs only for a finished run with no rows, and
+  nothing cheaper says whether the pool is empty.
+- R2-2: `alt_badge` removed from `assets/locales/en/upgrades.json` and
+  `schemas/upgrades.schema.json` (both fork-added); after ticket 686 nothing
+  reads it.
+
+Ruled out: CQ3's `model/engine/types.ts:20` comment and the `'Alt'` member
+in `engine/pool.ts` and `engine/rank.ts`. Those are ported text from
+`packages/core/src/types.ts:12`, `pool.ts:139,165` and `rank.ts:262`, where
+this repo's builder still makes universes and `Alt` tags; changing only the
+copy would make the fork's engine differ from its source for a comment.
+
+Still open:
+
+- CQ6: `poolFor` reads presets from the host while `bisTagPhaseFor` and
+  `presetsWithPhase` take them as arguments, and `assumptions.ts` and
+  `useUpgradesSettings.ts` walk them again. Changing `poolFor`'s signature
+  touches its 5 production callers (`run.ts`, `follow_phase.ts`,
+  `assumptions.ts`, `useUpgradesSettings.ts`, `UpgradesResults.tsx`) and 5 test
+  mocks; not cheap enough for
+  this round.
+- CQ7 (main part): the `fork-universes:*` script and gate names still say
+  "universes" (80 tracked files mention them).
