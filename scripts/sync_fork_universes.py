@@ -62,7 +62,7 @@ DATA_DIR = FORK_ROOT / "ui/features/upgrades/model/data"
 PROVENANCE_MD = ROOT / "docs/fork-provenance/data.md"
 
 # One row per copied file in data.md's mapping table, e.g.
-# | `ret-p3.universe.json` | `data/universes/ret-p3.json` |
+# | `ret-p2.ep-weights.json` | `data/presets/ret/p2.ep-weights.json` |
 ROW = re.compile(
     r"^\|\s*`([\w.-]+\.json)`\s*\|\s*`(data/[\w./-]+\.json)`\s*\|\s*$",
     re.MULTILINE,
@@ -82,41 +82,14 @@ def parse_provenance(text: str) -> dict[str, str]:
 
 
 def describe_delta(source: Path, copy: Path) -> str:
-    """A one-line, checkable summary of how a copy differs from its source.
-
-    For files keyed by `itemId` under `entries` (the universe copies),
-    membership is the delta worth naming first -- membership is what the
-    upstream commits behind the recorded drifts actually changed. Any other
-    file reports content inequality instead of pretending to a membership
-    diff it cannot compute.
-    """
+    """A one-line, checkable summary of how a copy differs from its source:
+    whether the parsed content is equal, so a reformat or an encoding change
+    reads apart from a real edit."""
     try:
         a = json.loads(source.read_text(encoding="utf-8"))
         b = json.loads(copy.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         return f"bytes differ; could not parse for a delta ({exc})"
-
-    if (
-        isinstance(a, dict)
-        and isinstance(b, dict)
-        and "entries" in a
-        and "entries" in b
-    ):
-        by_id_a = {e["itemId"]: e for e in a["entries"]}
-        by_id_b = {e["itemId"]: e for e in b["entries"]}
-        local_only = sorted(set(by_id_a) - set(by_id_b))
-        fork_only = sorted(set(by_id_b) - set(by_id_a))
-        shared_differ = sum(
-            1
-            for item_id in set(by_id_a) & set(by_id_b)
-            if by_id_a[item_id] != by_id_b[item_id]
-        )
-        return (
-            f"{len(local_only)} local-only {local_only or ''}".rstrip()
-            + f"; {len(fork_only)} fork-only {fork_only or ''}".rstrip()
-            + f"; {shared_differ} shared entries differ in content"
-        )
-
     return f"bytes differ; parsed content equal: {a == b}"
 
 
