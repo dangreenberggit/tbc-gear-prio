@@ -126,7 +126,25 @@ test `fixtures/`), `adapters/**`, `data/**`, `pool_source.ts`, which builds the
 candidate pool from the wowsims db (ticket 505), `run.ts`, which builds the
 engine's input, and `settings_pool.ts`, whose `effectivePool` builds the pool
 `run.ts` hands the engine. Under `ui/features/upgrades/utils/`:
-`item_sources.ts`, which writes each candidate's `sources`. A listed path means
+`item_sources.ts`, which writes each candidate's `sources`, and
+`item_source.ts`, whose `overrunNpcKey` names a source's boss.
+
+The pool is built at run time from upstream wowsims files (ticket 505), so
+these upstream paths are inputs too:
+
+- `assets/database/**`, the item database, and `ui/sim/proto/database.ts`,
+  which loads it (and the leftover db when worn gear needs it).
+- `ui/specs/*/*/spec.ts`, `presets.ts` and `gear_sets/**`: which presets the
+  page offers and their items, which decide BiS tags and preset phases;
+  `ui/app/preset_utils.ts` and `ui/sim/constants/other.ts` set a preset's
+  phase.
+- `ui/sim/constants/missing_effects_auto_gen.ts`, the stub-only effects.
+- `ui/sim/proto/items.ts` (`canEquipItem`, `isPVPItem`) and what
+  `canEquipItem` reads: `ui/sim/player/classes/**`, `ui/sim/player/specs/**`
+  (except `spec_index.test.ts`), `player_class.ts` and `player_spec.ts`.
+- `ui/sim/proto/names.ts`, the profession and reputation names in sources.
+
+A listed path means
 the fixture may no longer match what a run would produce now. Read the diff and
 re-record when it changes what a run computes; a change that only affects
 rendering does not need one.
@@ -138,6 +156,7 @@ still lays out the same. A blocking rule would force a re-record of every
 fixture on every engine edit.
 
 **What the check cannot see.** A `Ranking` also depends on inputs outside those
-paths: the Go sim and the WASM built from it, the item database
-(`assets/database/`), and the proto sources. A change to any of these is not
+paths: the Go sim and the WASM built from it, and the proto sources (`proto/`,
+from which `ui/generated/proto/` is built; the pool reads enums such as item
+quality and dungeon difficulty from it). A change to any of these is not
 reported. Re-record by hand after one of them moves.
