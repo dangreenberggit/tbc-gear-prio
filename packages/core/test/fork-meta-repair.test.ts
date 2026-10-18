@@ -719,11 +719,11 @@ const O1_BASE_HIT: Record<(typeof O1_FIXTURES)[number], number> = {
  * checked against the brute force above.
  */
 const O1_ROW_REPAIRS: Record<(typeof O1_FIXTURES)[number], number> = {
-  "ret-p3-p2": 68,
-  "feral-p2-malorne4": 20,
-  "feral-p3-nordrassil4": 30,
-  "feral-p3-p2bis": 30,
-  "feral-p3-th-hands-legs": 30,
+  "ret-p3-p2": 78,
+  "feral-p2-malorne4": 25,
+  "feral-p3-nordrassil4": 35,
+  "feral-p3-p2bis": 35,
+  "feral-p3-th-hands-legs": 35,
 };
 
 /**
@@ -749,11 +749,11 @@ const O1_DEFICITS: Record<
   (typeof O1_FIXTURES)[number],
   Record<number, number>
 > = {
-  "ret-p3-p2": { 1: 39, 2: 30 },
-  "feral-p2-malorne4": { 2: 3, 3: 17 },
-  "feral-p3-nordrassil4": { 2: 3, 3: 27 },
-  "feral-p3-p2bis": { 2: 4, 3: 29 },
-  "feral-p3-th-hands-legs": { 2: 3, 3: 27 },
+  "ret-p3-p2": { 1: 45, 2: 34 },
+  "feral-p2-malorne4": { 2: 4, 3: 21 },
+  "feral-p3-nordrassil4": { 2: 4, 3: 31 },
+  "feral-p3-p2bis": { 2: 5, 3: 33 },
+  "feral-p3-th-hands-legs": { 2: 4, 3: 31 },
 };
 
 /** `6 × 15.769233`: feral's 9% cap minus Improved Faerie Fire's 3%, in rating. */
@@ -987,12 +987,14 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
       expect([name, deficits]).toEqual([name, O1_DEFICITS[name]]);
     }
     // The row repairs plus the four named package repairs.
-    expect(measured).toBe(182);
-    // 39 named d = 1 repairs (ret-p3-p2's rows) plus 4 unnamed package
-    // repairs on feral-p3-th-hands-legs (piece 4 of sets 640, 584, 585 and
-    // 685; the last three are arena sets). The feral files step rankings, so
-    // their set packages are jobs of their own.
-    expect(deficitOne).toBe(43);
+    expect(measured).toBe(212);
+    // 45 named d = 1 repairs (ret-p3-p2's rows), 5 unnamed package repairs
+    // on ret-p3-p2 (crafted sets the run-time pool admits: piece 1 of 552,
+    // piece 2 of 553 and 554, pieces 2 and 3 of 619) and 4 on
+    // feral-p3-th-hands-legs (piece 4 of sets 640, 584, 585 and 685; the
+    // last three are arena sets). The feral files step rankings, so their
+    // set packages are jobs of their own.
+    expect(deficitOne).toBe(54);
     console.log(
       `[535-O1] other package repairs: ${otherPackageRepairs.length === 0 ? "none" : otherPackageRepairs.join("; ")}`
     );

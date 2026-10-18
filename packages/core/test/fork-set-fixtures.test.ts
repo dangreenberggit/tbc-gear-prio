@@ -267,11 +267,11 @@ const PINNED_ON_TOP16: Record<string, Array<[string, number]>> = {
     ["Unstoppable Aggressor's Ring", 10.2146],
     ["Vengeful Gladiator's Bonegrinder", 10.0227],
     ["Vengeful Gladiator's Greatsword", 10.0227],
+    ["Bulwark of Kings", 9.1302],
     ["Vengeful Gladiator's Decapitator", 8.7474],
     ["Dreadboots of the Legion", 8.554],
     ["Swiftstrike Bracers", 8.5089],
     ["Leggings of Divine Retribution", 8.2749],
-    ["Swiftsteel Bracers", 7.658],
   ],
 };
 
