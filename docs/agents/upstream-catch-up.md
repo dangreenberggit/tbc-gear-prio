@@ -356,10 +356,11 @@ pnpm -C <pair> equip-eligibility:check
 pnpm -C <pair> meta-conditions:check
 pnpm -C <pair> ep-presets:check
 pnpm -C <pair> fork-lint:check
+pnpm -C <pair> fork-tests:check
 pnpm -C <pair> verify
 ```
 
-The four `require_pinned_fork` gates exit 2 between the fork commit and this lock
+The five `require_pinned_fork` gates exit 2 between the fork commit and this lock
 edit — **red by design**, read the message rather than chasing it.
 
 The three artifacts are made two ways. `<pair>/data/equip-eligibility.json` is
