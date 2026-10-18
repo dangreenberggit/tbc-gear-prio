@@ -2,7 +2,7 @@ Status: open
 Type: investigation
 Origin: owner, 2026-09-28, during stage-gate 511-512-set-credit (`.scratch/stage-gate/511-512-set-credit/decision-log.md`, 2026-09-28 entries, and `other-pieces-decisions.md` in the same folder; both gitignored)
 Blocks: none
-Blocked by: 500, 505
+Blocked by: none (500 closed; 505 closed 2026-10-18 on feat/tab-wowsims-items)
 Related: 511, 512, 298, 500, 505, 519
 
 # The tab cannot show the value of moving a worn set bonus to other slots
@@ -325,3 +325,8 @@ the pair explains the row and does not move it.
 **When to revisit.** Once tickets 500 and 505 are closed, re-run this scan on a
 feral phase-5 run (the owner's P4-to-P5 example in the body) and decide
 from that result whether the fix sketch is needed.
+
+2026-10-18 (stage tab-wowsims-items): blocker 505 closed. The tab's pool
+now comes from wowsims at run time (ADR-0038). This ticket stays open: the
+next step is to re-run `.scratch/stage-gate/523-move-scan/move_scan.py`
+(gitignored) against the new pool.

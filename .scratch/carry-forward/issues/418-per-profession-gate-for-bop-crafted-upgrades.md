@@ -76,3 +76,12 @@ The `upgrades_tab.tsx` path under "Where" above is pre-React. Checked at fork
 grep -m1 '^Status' .scratch/carry-forward/issues/417-*.md          # Status: closed
 grep -n '"crafted"' vendor/tbc-new-fork/assets/locales/en/upgrades.json   # 29: "crafted": "Crafted"
 ```
+
+2026-10-18 (stage tab-wowsims-items): since ADR-0038 every crafted epic
+that passes the pool rule is in the tab's pool, and its source is
+`{kind: "crafted", profession}` with the profession name from upstream's
+`professionNames` (`ui/features/upgrades/utils/item_sources.ts`). The tab's
+data no longer comes from a universe. Whether db.json states an item's
+binding is not checked (untested). For heroic drops the fork uses
+`HEROIC_FIVE_MAN = 'include-unticked'`; the owner chose it on 2026-10-18
+(answer "1", option worded: "Add it, but leave it switched off. The heroic gear shows up as a "Heroic dungeon" checkbox in the tab's Sources list. The box starts unticked. By default the tab ranks exactly what it ranks today, and a player can tick the box to include heroic gear."). This repo's builder scope is unchanged.

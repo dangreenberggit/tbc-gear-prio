@@ -32,3 +32,7 @@ runs recorded in the closing note), or the closing note says which of
 them the owner rules out of scope; `pnpm verify` rc 0.
 
 ## Comments
+
+2026-10-18 (stage tab-wowsims-items): since ADR-0038 the tab reads none
+of the lists this gate checks; it builds its pool from wowsims' item
+database. The gate still guards this repo's universes, which feed the CLI.

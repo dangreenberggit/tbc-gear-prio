@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: stage tab-source-labels (deferred part P3), branch feat/tab-source-labels
 Blocks: none
@@ -778,3 +778,21 @@ for path in sorted(glob.glob(os.path.join(root, "data/universes/*-p5.json"))):
             else: unmatched.add((e["itemId"], e["name"]))
 print("renumbered unknown p5 rows:", rows, "matched by name:", dict(per), "unmatched ids:", sorted(unmatched))
 ```
+
+## Closed 2026-10-18 (stage tab-wowsims-items)
+
+Badge, honour and holiday items have no source in wowsims' item database:
+its `sources[]` holds only `drop`, `crafted` and `rep`. The owner's ruling
+of 2026-10-17, verbatim: ""only ret or feral" is a smell. for development it makes sense, for the app it sounds absurd like a 2nd or even 3rd source of truth in one line you mentioned. yikes. if wowsims has no named source for it then fine. thats an issue for wowsims for another day, not our job". Since ADR-0038 the tab reads its sources
+from wowsims, so these rows show "Source not recorded" by that ruling, and
+no new input is wanted for the tab. The cross-spec list sources that stage
+tab-follow-ups P1 added stay in this repo's universes (owner, 2026-10-17:
+"they can be in tbc gear prio but not the upgrades tab repo").
+
+The tickets that waited on this one: 643 and 660 close by the same ruling
+(660's part 2 is ticket 677, still open); 45 is re-scoped to this repo's
+builder.
+
+Verified by: `python -I -c "import json,collections;db=json.load(open('vendor/tbc-new-fork/assets/database/db.json',encoding='utf-8'));print(collections.Counter(k for i in db['items'] for s in i.get('sources') or [] for k in s))"`
+prints `Counter({'drop': 2821, 'crafted': 1113, 'rep': 111})` at
+`tbc-new-fork@f06772929`.

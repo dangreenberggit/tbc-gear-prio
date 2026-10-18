@@ -133,3 +133,14 @@ ever confirmed: `raid-recipes.json` carries `recipeId`, and a single
 completes it with no new data work.
 
 `pnpm verify` fully green, including `fork-universes:check`, at branch tip.
+
+## Comments
+
+2026-10-18 (stage tab-wowsims-items): in the fork, a tier piece's
+`tokenId` now comes from `ui/features/upgrades/model/data/tier-exchange.json`
+(written by `scripts/generate_fork_exchange.py` from
+`data/two-hop/<spec>-tokens.json`), not from a bundled universe
+(ADR-0038). The export's "Use tier token ids" setting reads the same field;
+the fork's `export.test.ts` checks that 29073 Justicar Crown exports as
+29760. This repo's builder still writes `tokenId` into its universes for
+the CLI.

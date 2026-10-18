@@ -1,9 +1,9 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 follow-on (Tab-adjacent)
 Type: task
 Origin: .scratch/handoffs/sme-rank-judgment-613-tab-item-lists.md (finding F4)
 Blocks: none
-Blocked by: 676
+Blocked by: none (676 closed 2026-10-18)
 Related: 613, 619, 676
 
 # Badge and honor items show "Source not recorded" while similar items show a source
@@ -42,3 +42,16 @@ and the command are in ticket 676 § Review correction. The rows named in
 this ticket's first paragraph by id (33509, 34898, 34887, 33919, 35167)
 are in no Wowhead list, so they still need new data. The builder change
 (apply a list's source whichever spec's list names the item) is in 676.
+
+2026-10-18 (stage tab-wowsims-items): closed. Blocker 676 closed. Since
+ADR-0038 the tab takes every row's source from wowsims through one route,
+so badge and honour items no longer show a source on one spec and
+"Source not recorded" on another: every item wowsims names no source for
+shows "Source not recorded", and items whose name holds "Gladiator"
+(upstream's `isPVPItem`) show "PvP vendor · Arena". The five items named
+above by id have no db.json source. The owner's ruling of 2026-10-17,
+verbatim: ""only ret or feral" is a smell. for development it makes sense, for the app it sounds absurd like a 2nd or even 3rd source of truth in one line you mentioned. yikes. if wowsims has no named source for it then fine. thats an issue for wowsims for another day, not our job". This repo's universes keep their own labels (owner,
+2026-10-17: "they can be in tbc gear prio but not the upgrades tab repo").
+
+Verified by: `python -I -c "import json;db={i['id']:i for i in json.load(open('vendor/tbc-new-fork/assets/database/db.json',encoding='utf-8'))['items']};print([db[i].get('sources') for i in (33509,34898,34887,33919,35167)])"`
+prints `[None, None, None, None, None]` at `tbc-new-fork@f06772929`.
