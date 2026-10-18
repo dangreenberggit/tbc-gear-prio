@@ -3,7 +3,7 @@
 **Status:** accepted
 **Date:** 2026-10-18
 **Supersedes for the fork:** [ADR-0028](0028-pool-membership-precedence-local-universe-primary-wowsims-audits.md) § Decision ("Membership stays local"). ADR-0028 still holds for this repo's builder and CLI.
-**Related:** [ADR-0029](0029-borrow-the-decision-derive-with-a-gate-or-justify-the-copy.md), [ADR-0036](0036-the-fork-follows-upstream-master-by-merge.md); tickets `.scratch/carry-forward/issues/505-fork-candidate-pool-should-use-wowsims-item-source.md` (closed by this ADR), `293-wowhead-source-attribution-backfill.md`, `676-badge-honor-holiday-items-need-a-source-input.md`, `17-phase2-plus-no-source-gap.md`, `173-nothing-detects-the-next-silently-dropped-item.md`; stage `.scratch/stage-gate/tab-wowsims-items/` (gitignored, owner's checkout)
+**Related:** [ADR-0029](0029-borrow-the-decision-derive-with-a-gate-or-justify-the-copy.md), [ADR-0036](0036-the-fork-follows-upstream-master-by-merge.md); tickets `.scratch/carry-forward/issues/505-fork-candidate-pool-should-use-wowsims-item-source.md` (closed by this ADR), `293-wowhead-source-attribution-backfill.md`, `676-badge-honor-holiday-items-need-a-source-input.md`, `17-phase2-plus-no-source-gap.md`, `173-nothing-detects-the-next-silently-dropped-item.md`, `686-bis-sets-are-chosen-by-preset-name.md`, `688-off-spec-tier-pieces-have-no-token-row.md`, `689-fork-item-fact-gate-checks-one-folder.md`; stage `.scratch/stage-gate/tab-wowsims-items/` (gitignored, owner's checkout)
 
 ## Context
 
@@ -130,24 +130,34 @@ unticked box.
 
 `presetPhase(preset) = preset.phase ?? max(item.phase)` over the preset's
 items. Five specs declare `phase`; for the six that do not, the newest item
-decides. The BiS sets at phase p are the presets whose phase is the newest
-preset phase `<= p`, minus presets whose name matches
-`/pre[- ]?raid|prebis|realistic|\balt\b|bulwark/i`. This is a **name rule**:
-wowsims' `PresetGear` has no BiS field. `bulwark` is in it because the tab
-already treats ret's "Bulwark" set as a same-phase alternative it never
-selects by default (`model/settings_pool.ts` `defaultSetKeys`). Items of a
-BiS set get `bisTags: ["BiS"]` and `bisSets`; items of any preset get
-`curatedSets`. The new pool tags 842 rows (the old lists tagged 788).
+decides. The BiS sets at phase p are **every** preset whose phase is the
+newest preset phase `<= p`. wowsims' `PresetGear` has no BiS field, and no
+preset is told apart by its name. Items of a BiS set get `bisTags: ["BiS"]`
+and `bisSets`; items of any preset get `curatedSets`. The new pool tags 858
+rows over the 44 cells (the old lists tagged 788).
 
-Two visible effects:
+The first build of this ADR also dropped presets whose name matched
+`/pre[- ]?raid|prebis|realistic|\balt\b|bulwark/i`. The pre-merge review
+flagged that as a name-reading rule (ticket 686), and the owner ruled on
+2026-10-18: "i dont care if it gets a mark that says bulwark or "alt"
+(usually a bis alternative that wowsims or the user thought worth noting)".
+Fork `c61cc72d6` removed the rule. That adds 16 BiS rows at phases 2 to 5:
+ret p3 to p5 tag 28485 Bulwark of the Ancient Kings, feral p2 tags the five
+items of its "Alt 6%" and "Alt 9%" sets, and shadow p2 tags the eight items
+of its pre-raid set. At phase 1 every spec's pre-raid set now counts too.
+Those sets are also selected by default, so their items show the set's name
+as a badge ("Bulwark", "Alt 6%", "Pre-raid").
+
+Two more visible effects:
 
 - Feral p4 and p5 BiS badges follow the fork's own p4 and p5 sets. The old
   feral lists used the p3 sets because the p4 and p5 files were never
   vendored.
 - Shadow's "P2 Preset" counts as phase 3, because it holds 281735 Dark Iron
-  Smoking Pipe, which db.json marks phase 3. So shadow p2 tags the P1
-  Preset, and p3 to p5 tag both the P2 and P3 Presets. Session ruling: follow
-  wowsims' item phase, edit no preset file, read no phase from a name.
+  Smoking Pipe, which db.json marks phase 3. So shadow p2 tags its two
+  phase-1 sets (P1 Preset and Pre Raid Preset), and p3 to p5 tag both the P2
+  and P3 Presets. Session ruling: follow wowsims' item phase, edit no preset
+  file, read no phase from a name.
 
 ### Sources
 
@@ -167,11 +177,21 @@ builds them.
 
 wowsims states no tier-token or Sunmote exchange. The fork carries one
 copied file, `model/data/tier-exchange.json`, written by
-`scripts/generate_fork_exchange.py` from `data/two-hop/<spec>-tokens.json`
-and `data/two-hop/sunmote-pairs.json`: 198 tier piece to token rows (54
-tokens) and 23 Sunmote pairs. It gives tier pieces their token source and
-the export's token id, and Sunmote upgrades their source. It holds no spec
-and no date.
+`scripts/generate_fork_exchange.py` from `data/two-hop/<spec>-tokens.json`,
+`data/two-hop/tank-healer-tokens.json` and `data/two-hop/sunmote-pairs.json`:
+306 tier piece to token rows (54 tokens) and 23 Sunmote pairs. It gives tier
+pieces their token source and the export's token id, and Sunmote upgrades
+their source. It holds no spec and no date.
+
+The first build had 198 token rows, from the 11 DPS specs' maps only. The
+pool offers every tier set a class can wear, as wowsims' gear picker does
+(`canEquipItem` has no spec or role test), so 108 tank and healer pieces,
+such as Justicar Armor (29066 to 29070), showed "Source not recorded"
+(ticket 688). `scripts/generate_tier_tokens.py` now writes those sets'
+pieces to `tank-healer-tokens.json` with the same AtlasLoot matcher, where it
+used to skip them; every one of the 108 matches exactly one token, and no
+new token id appears. `pnpm atlasloot:regen:check` compares that file, and
+`pnpm fork-exchange:check` compares the union.
 
 ### Effect data: wowsims' own lists, not a copy
 
@@ -188,6 +208,14 @@ The Horseman's Helm (epic, ilvl 110, phase 1), which joins the pool.
 --check` (`pnpm fork-universes:check`) byte-compares the 20 copies
   `docs/fork-provenance/data.md` lists (19 EP-weight files and
   `tier-exchange.json`), and fails on any other JSON file in the folder.
+  **It checks `ui/features/upgrades/model/data/*.json` only** (ticket 689).
+  The stage brief asked that "a gate fails if any other non-wowsims item
+  fact reaches the fork"; the plan (`plan.md:9`, gitignored) narrowed that to
+  this folder, where the bundled universes lived and where the sync script
+  writes. An item list typed into a `.ts` file, or JSON elsewhere in the tab,
+  passes it. Nothing tells such a list from other numbers in code without a
+  name or id-shape heuristic, the kind of rule the owner rejected on
+  2026-10-17, so the narrow gate stays and review catches the rest.
 - **A fork-only upstream update changes the pool directly.** The pool reads
   the fork's own `assets/database/db.json`, so a fork merge that moves
   db.json moves the pool with no sync step.
@@ -220,6 +248,6 @@ cd vendor/tbc-new-fork && npx vitest run ui/features/upgrades/model/pool_source.
 
 `pool_source.test.ts` builds all 44 cells from the fork's db.json and checks
 each size against `model/pool_source.cells.fixture.json` (36,945 rows
-unticked, 38,897 ticked, 842 BiS rows). The comparison with the old lists
+unticked, 38,897 ticked, 858 BiS rows). The comparison with the old lists
 comes from the stage script named in that fixture's `_comment`, which lives
 in a gitignored folder.

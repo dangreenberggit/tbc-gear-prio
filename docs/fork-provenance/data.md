@@ -855,3 +855,21 @@ pnpm fork-universes:check                      # 20 bundled copies byte-match
 python scripts/generate_fork_exchange.py --check
 git -C vendor/tbc-new-fork ls-files ui/features/upgrades/model/data | grep -c universe.json   # 0
 ```
+
+## Tank and healer token rows, 2026-10-18 (ticket 688)
+
+`scripts/generate_tier_tokens.py` now writes the tank and healer tier sets
+(the AtlasLoot labels `data/two-hop/token-groups.json` maps to null) to
+`data/two-hop/tank-healer-tokens.json`, 108 pieces, where it used to skip
+them. `scripts/generate_fork_exchange.py` adds that map to the union, so
+`tier-exchange.json` holds 306 token rows (54 tokens) and the same 23
+Sunmote pairs. The 198 earlier rows are unchanged and no token id is new.
+Fork `13ac7470a` takes the new copy.
+
+Verify:
+
+```bash
+pnpm atlasloot:regen:check                     # tank-healer-tokens.json among the outputs
+python scripts/generate_fork_exchange.py --check
+pnpm fork-universes:check
+```

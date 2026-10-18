@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: pre-merge review feat/tab-wowsims-items, P3
 Blocks: none
@@ -21,3 +21,15 @@ Either the gate covers every JSON file the tab bundles (test fixtures listed by
 name), with a stated reason why item lists in code cannot be detected without
 a name or id heuristic, or the owner accepts the narrow gate and ADR-0038 says
 so.
+
+## Closing note
+
+Recorded, not widened (session ruling 2026-10-18, decision log row P3).
+ADR-0038 § Consequences, "The gate on the fork's data folder", now states that
+`scripts/sync_fork_universes.py` checks `ui/features/upgrades/model/data/*.json`
+only, why the plan narrowed it there, and why an item list in code is not
+detected: nothing tells it from other numbers without a name or id-shape
+heuristic.
+
+Verified by: `grep -n "(ticket 689)" docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`
+(the gate bullet) and `pnpm fork-universes:check`.

@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: decision
 Origin: pre-merge review feat/tab-wowsims-items, A6 (same as D3)
 Blocks: none
@@ -33,3 +33,16 @@ player can get (game fact, hypothesis, untested).
 The owner rules whether the tab filters by the player's faction the way
 upstream's picker does, treating wrong marks as a wowsims data gap, or keeps
 both copies. The chosen behaviour is built and tested.
+
+## Closing note
+
+The tab keeps both factions' copies, as the site does. wowsims' gear picker
+hides nothing by race: its faction filter is a manual picker setting whose
+default is none (fork `ui/sim/player/player.ts:1299-1304`,
+`ui/sim/sim.ts:1107-1117`). So the tab's default pool already matches the
+site's default item list, and the tab reads no other picker filter either;
+adopting this one alone is out of scope. wowsims marks some neutral
+reputation rewards Alliance-only (db.json 29119 The Consortium, 29171
+Cenarion Expedition); that is wowsims' data, not the tab's to correct.
+Investigation: `.scratch/agent-reports/2026-10-18-general-task-faction-filter.md`
+in the main folder (gitignored).
