@@ -50,14 +50,15 @@ Absence of a prerequisite is an ordinary state, never a merge veto:
 
   - the fork clone is absent (fresh clone, CI)            -> skip, exit 0
   - the built `dist/` is absent (no prior `make host`)    -> skip, exit 0
-  - no Playwright Chromium is on disk, or the lookup fails -> skip, exit 0
+  - no Playwright Chromium is on disk, or its path lookup fails -> skip, exit 0
   - the tab digest equals the last green-tested digest     -> skip, exit 0
 
 Only a real assertion failure from `test-layout.mjs` -- the gate RAN and the
 layout is broken -- returns nonzero and blocks the merge. The one exception is
 a digest that cannot be computed (a missing tracked file, or a Chromium build
-that `chromium.mjs --build` cannot read): that exits 2, because a digest
-without the build in it could be recorded as a baseline that later
+that `chromium.mjs --build` cannot read, as on a checkout with no Node 22 or
+no `playwright` package): that exits 2 and also blocks the merge, because a
+digest without the build in it could be recorded as a baseline that later
 Playwright bumps match. A rotted browser path
 or a stale `dist/` must never wall off a merge; those are "skipped, prereq
 absent", reported as such and distinguished from "ran and failed".
@@ -622,7 +623,8 @@ def _node_command(
     `extra` is appended as its arguments (e.g. --manifest/--out for
     test-review.mjs). Node 22 is required; if the ambient node is already >= 22
     it is used directly, else `fnm exec --using=22` is preferred when fnm is on
-    PATH. When neither is available the gate is skipped, not run wrong.
+    PATH. When neither is available it returns None, and the caller reports
+    that rather than run the script on the wrong Node.
     """
     tail = [str(script), *extra]
     ambient = _node_major("node")

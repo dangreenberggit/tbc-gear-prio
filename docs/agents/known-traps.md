@@ -21,9 +21,12 @@ failure is a Node-version symptom before it is a code regression. Confirm
 The WSL host's intended setup has one place that names the machine's Node:
 `~/.local/node-default`, a symlink to an nvm version folder.
 `/usr/local/bin/{node,npm,npx,corepack,pnpm}` point through it, and nvm's
-default alias is `system`. With that setup, login and interactive shells,
-`bash -c`, `wsl.exe -e`, `t3code.service`, the Claude Code processes T3
-starts, and git hooks all get the same Node. Claude Code's Bash tool takes
+default alias is `system`. With that setup, a process gets that Node when
+its PATH has `/usr/local/bin` and no nvm folder: login and interactive
+shells, `bash -c` and `wsl.exe -e` (the check below), and `t3code.service`
+(its PATH in `/proc/<pid>/environ`). Git hooks get the PATH of the process
+that runs git. Whether the Claude Code processes T3 starts get it:
+hypothesis, untested. Claude Code's Bash tool takes
 its PATH from the claude process, not from `~/.bashrc`, so a fix made only in
 a shell rc file does not reach it (before the setup, `echo $PATH` in that
 tool shows no nvm folder, although `~/.bashrc` loads nvm).
@@ -52,7 +55,7 @@ needs root.
 ```sh
 V="$(cat .node-version)"
 nvm install "$V" && ~/.nvm/versions/node/v"$V"/bin/corepack enable
-ln -sfn ~/.nvm/versions/node/v"$V" ~/.local/node-default
+mkdir -p ~/.local && ln -sfn ~/.nvm/versions/node/v"$V" ~/.local/node-default
 for b in node npm npx corepack pnpm; do sudo ln -sfn "$HOME/.local/node-default/bin/$b" /usr/local/bin/$b; done
 nvm alias default system
 ```
