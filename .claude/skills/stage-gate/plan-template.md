@@ -38,8 +38,10 @@ desktop app's Browser pane; untested under T3 Code or WSL mode). Only the
 browser pane covers hover and widths other than 1280, so without one a
 step that needs either uses a `Visual acceptance:` block. No live sim
 runs. Use a `Visual acceptance:` block instead only when the ticket
-must close on recorded evidence: captures at fixed widths, axe results,
-measured facts, a pre-run state, or an independent `gate-visual` verdict.
+must close on recorded evidence (captures at fixed widths, axe results,
+measured facts, a pre-run state, or an independent `gate-visual`
+verdict), or when a step needs hover or other widths and no browser pane
+exists.
 The block names the state (`pre-run` / `post-run`), widths, selectors to
 capture, interactions, facts to record, and the sentence; the manifest
 schema is in the header comment of `scripts/tab-harness/test-review.mjs`.

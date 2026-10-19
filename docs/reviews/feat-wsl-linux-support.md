@@ -293,7 +293,7 @@ with "run `pnpm install`" until the Windows checkout installs the
 
 Tickets: this branch filed 4 (695, 696, 697, 698) and closed 1 (696), so it
 filed more than it closed. `.scratch/carry-forward/issues/NEXT` read 686
-while tickets up to 692 existed; it now reads 697.
+while tickets up to 692 existed; it now reads 699.
 
 ## Disposition
 
@@ -484,7 +484,8 @@ result. It did add one loud failure with a wrong last line (R3-1), stale
 comments (R3-2) and two gaps in the new Node entry (R3-4, R3-5); all four
 are fixed in `b8567697`. R3-3 records a behaviour change that the owner's
 words cover. Every round 1 and round 2 finding now has a Disposition row,
-in round 1's table or the table below; Q9 keeps its round 1 `defer` row.
+in round 1's table or the table below; Q9's round 1 row reads `fixed`
+(`142ce6bc`).
 
 Nothing is left that blocks the merge ask. Open tickets from this branch:
 695, 697 and 698.
