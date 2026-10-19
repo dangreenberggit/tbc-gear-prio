@@ -193,7 +193,7 @@ scripts and logs are in the review session's scratchpad, `wsl-review/r2/`.
 Commits checked:
 
 - `2f5664c1` Record round 1 of the WSL branch review (review file, tickets
-  693 and 694, `NEXT`, `map.md`).
+  695 and 696, `NEXT`, `map.md`).
 - `5a8af638` Hash the harness Chromium build in the layout gate (A1).
 - `3c008551` Name the real cause when the Chromium lookup fails (A2, Q5).
 - `362682b2` Exit nonzero and reap the group when a server dies (A3, A4).
@@ -275,7 +275,7 @@ State of the round 1 findings:
   A3 and A4.
 - Code-quality pass `8ea2fe7a`: Q1-Q4, Q6-Q8 and Q10.
 - Disposed in round 1's table: A5, A8, S3, S4, P2, P4, P5 and P6 are
-  wontfix. A6, A7, S10, P3 and Q9 are deferred to tickets 693 and 694.
+  wontfix. A6, A7, S10, P3 and Q9 are deferred to tickets 695 and 696.
 - R2-1 is in the A1 fix. It is a silent wrong result, so under step 3 it
   must be fixed before the merge. R2-2 and R2-3 are in the fixes for Q2 and
   A2.
@@ -289,24 +289,24 @@ pnpm's Node and no longer forces Node 22 through fnm. The layout gate skips
 with "run `pnpm install`" until the Windows checkout installs the
 `playwright` package.
 
-Tickets: this branch filed 2 (693, 694) and closed 0, so it filed more than
+Tickets: this branch filed 2 (695, 696) and closed 0, so it filed more than
 it closed. `.scratch/carry-forward/issues/NEXT` read 686 while tickets up to
-692 existed; it now reads 695.
+692 existed; it now reads 697.
 
 ## Disposition
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                |
 | --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | A5  | Adversarial | wontfix     | SIGKILL cannot be caught, so no handler in the script can stop its children; the next start then fails loudly on the held port, and `known-traps.md` "Before starting the dev servers" says how to find the holder (`ss -ltnp`, `readlink /proc/<pid>/cwd`). |
-| A6  | Adversarial | defer       | `.scratch/carry-forward/issues/693-dev-tab-orphans-when-only-pnpm-is-signalled.md` — pnpm does not pass a single-pid SIGTERM on to its child; this holds for every pnpm script in the repo, not only this branch's.                                          |
-| A7  | Adversarial | defer       | `.scratch/carry-forward/issues/694-agent-files-on-the-wsl-host.md` — editing `.claude/launch.json` needs the owner's approval; the Windows entry ran vite the same way.                                                                                      |
+| A6  | Adversarial | defer       | `.scratch/carry-forward/issues/695-dev-tab-orphans-when-only-pnpm-is-signalled.md` — pnpm does not pass a single-pid SIGTERM on to its child; this holds for every pnpm script in the repo, not only this branch's.                                          |
+| A7  | Adversarial | defer       | `.scratch/carry-forward/issues/696-agent-files-on-the-wsl-host.md` — editing `.claude/launch.json` needs the owner's approval; the Windows entry ran vite the same way.                                                                                      |
 | A8  | Adversarial | wontfix     | The owner's approved plan replaces the Windows-only entries ("rewrite the Windows-only `.claude/launch.json` entries"); what breaks on the Windows checkout is listed in Summary for the owner.                                                              |
 | S3  | Standards   | wontfix     | The commit message is history and is not rewritten; the same claim in `chromium.mjs` is Q3.                                                                                                                                                                  |
 | S4  | Standards   | wontfix     | `AGENTS.md` § CLI environment is in the owner's pending AGENTS.md proposal (`.scratch/wsl-move/agents-md-proposal.md`, item A1, "CLI environment, first paragraph").                                                                                         |
-| S10 | Standards   | defer       | `.scratch/carry-forward/issues/694-agent-files-on-the-wsl-host.md` — the old entries relied on the session's PATH the same way (fnm, `cmd`); needs a test from a Claude Code session inside WSL.                                                             |
+| S10 | Standards   | defer       | `.scratch/carry-forward/issues/696-agent-files-on-the-wsl-host.md` — the old entries relied on the session's PATH the same way (fnm, `cmd`); needs a test from a Claude Code session inside WSL.                                                             |
 | P2  | Spec        | wontfix     | The Git Bash form `TBC_VERIFY_WITHOUT_FORK=1 pnpm verify` is POSIX shell syntax and works in WSL bash as written.                                                                                                                                            |
-| P3  | Spec        | defer       | `.scratch/carry-forward/issues/694-agent-files-on-the-wsl-host.md` — `.claude/hooks/` is an agent file; the proposal lists the hook only under "Related, outside this proposal", so no one owns it yet.                                                      |
+| P3  | Spec        | defer       | `.scratch/carry-forward/issues/696-agent-files-on-the-wsl-host.md` — `.claude/hooks/` is an agent file; the proposal lists the hook only under "Related, outside this proposal", so no one owns it yet.                                                      |
 | P4  | Spec        | wontfix     | The edit is one word and correct for the WSL host.                                                                                                                                                                                                           |
 | P5  | Spec        | wontfix     | The win32 branches keep `pnpm tab:*` usable on the Windows checkout until it is frozen, and cost nothing on Linux.                                                                                                                                           |
 | P6  | Spec        | wontfix     | Same effect as A8; see A8.                                                                                                                                                                                                                                   |
-| Q9  | Standards   | defer       | `.scratch/carry-forward/issues/694-agent-files-on-the-wsl-host.md` — the fix edits `.claude/launch.json`, an agent file that needs the owner's approval.                                                                                                     |
+| Q9  | Standards   | defer       | `.scratch/carry-forward/issues/696-agent-files-on-the-wsl-host.md` — the fix edits `.claude/launch.json`, an agent file that needs the owner's approval.                                                                                                     |
