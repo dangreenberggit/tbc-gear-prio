@@ -3,32 +3,32 @@
 Read the entry for what you are **about to do** — each heading is the
 action that arms the trap. The _Symptom_ line doubles as the after-the-fact
 index when something already broke. Every trap here fired for real during
-the upgrades-ui-fit pass (2026-08-24). Environment basics (two shells,
-backgrounded `cd`, Windows path forms, read-the-error-first) live in
+the upgrades-ui-fit pass (2026-08-24). Environment basics live in
 `AGENTS.md` § CLI environment — this file covers only what that section
-does not.
+does not. The commands below are for the WSL (Ubuntu) dev host.
 
 ## Before running node / pnpm / test commands
 
-**Symptom when armed:** `error: We can't find the necessary environment
-variables to replace the Node version`; or a dozen test suites failing at
-once with `Error: No such built-in module: node:sqlite`; or
-`node --version` printing nothing.
+**Symptom when armed:** a dozen test suites failing at once with
+`Error: No such built-in module: node:sqlite`; or `pnpm verify` stopping at
+`preflight:node` with "Node ... is too old"; or `pnpm --version` printing a
+version other than `package.json`'s `packageManager`.
 
-The shell can lose its fnm environment mid-session, silently resolving no
-Node or an old one — this repo needs Node 22 (`node:sqlite`). Mass test
-failure right after a shell hiccup is a Node-version symptom, not a code
-regression. Confirm `node --version` prints v22.x before diagnosing test
-output; when it doesn't, pin the PATH:
+Node comes from nvm and pnpm from corepack inside that Node. The repo needs
+the Node in `.node-version` (22.17.1); under another nvm Node, `pnpm` can be
+a different global pnpm (v22.23.2 had pnpm 10.6.2 on 2026-10-18). Mass test
+failure is a Node-version symptom before it is a code regression. Confirm
+`node --version` and `pnpm --version` before diagnosing test output; when
+either is wrong, switch in that shell:
 
-```powershell
-$env:PATH = "C:\Users\dgree\AppData\Roaming\fnm\node-versions\v22.17.1\installation;" + $env:PATH
+```sh
+source ~/.nvm/nvm.sh && nvm use 22.17.1
 ```
 
-Bash's `eval "$(fnm env)"` can fail with the same error the commands do;
-the PATH pin works in either shell.
-
-- In the Bash tool, `cd` returns exit code 1 even when it changes directory: ~/.bashrc runs `fnm env --use-on-cd`, which replaces `cd` with fnm's `__fnmcd`, and fnm cannot find its settings in the agent shell. So `cd X && cmd` never runs `cmd`. Use the command's own directory flag (`git -C`, `pnpm -C`, `npm --prefix`), or separate commands with `;`.
+Run commands in a login shell (`bash -l`). nvm and the `go`, `protoc` and
+`protoc-gen-go` PATH block load from the profile, so a plain `bash -c` gets
+`/usr/local/bin/node` (v22.23.2 on 2026-10-18) and no `go`: the fork builds
+fail with "command not found".
 
 **Fork-gated suites never run in CI.** Every suite that imports
 `forkPresent` — among them `fork-set-net.test.ts`,
@@ -49,12 +49,15 @@ for an edit you know was small (a 4-line schema edit staging as ~18k
 lines; a 2-hash `sed` rewriting all 182 lines of a file); or a reviewer
 reports CRLF where HEAD is LF.
 
-`sed -i` and CRLF-writing editors each flip a whole file's line endings.
-Edit text files with the harness Edit tool, which preserves endings. After
+A rewrite that changes a whole file's line endings does this: a script that
+writes LF over one of the CRLF files (the index holds 289, most under
+`.scratch/`; `git ls-files --eol | grep -c i/crlf`), or a Windows editor
+saving over the `\\wsl.localhost\...` path as CRLF. Edit text files with the
+harness Edit tool, which preserves endings. After
 any scripted or generated write, read `git diff --stat` before committing:
 a line count near the file's length means endings flipped — confirm the
 real change with `git diff --ignore-cr-at-eol`, rewrite the file back to
-LF, then commit.
+the endings HEAD has, then commit.
 
 The Python generators no longer do this (ticket 283, fixed by 399 on
 2026-09-15 across fourteen write sites). **Keep it that way when you add
@@ -101,7 +104,7 @@ with "clone HEAD is X but lock pins Y"; or a regen moves a file nobody
 predicted and it gets committed as though it were expected.
 
 `<repo>` below is the main checkout or the pair you are moving the pin in, as
-an absolute `C:/Users/...` path. Every command names that folder: a bare
+an absolute path (`/home/daniel/...`). Every command names that folder: a bare
 `python scripts/<x>.py` or `git diff` acts on whatever folder the shell is in,
 which for a subagent is usually the main checkout, not the pair.
 
@@ -127,8 +130,9 @@ difference. Nothing in `pnpm verify` reads either field, so a hand edit there
 is invisible to every gate.
 
 For a sha pin `fetch_wowsimcli.py` **builds from source** — it needs `go`,
-`protoc` and `protoc-gen-go` on PATH, and it hard-fails without them where it
-used to download a zip. CI never runs it, so CI will not tell you.
+`protoc` and `protoc-gen-go` on PATH (a login shell; see "Before running node /
+pnpm / test commands"), and it hard-fails without them where it used to
+download a zip. CI never runs it, so CI will not tell you.
 
 The fork gates (`equip-eligibility`, `ep-presets`, `meta-conditions`,
 `fork-lint`, `fork-tests`) exit 2 until `<repo>/data/wowsims-fork.lock.json` names the clone's
@@ -197,15 +201,16 @@ swallowed into it).
 
 ## Before starting the dev servers
 
-**Symptom when armed:** `preview_start` refuses because the port is held —
-3333 by a stray `wowsimtbc.exe`, or 5173 by another session's vite.
+**Symptom when armed:** a dev server will not start because its port is
+held — 3333 by a stray `wowsimtbc`, or 5173 by another session's vite
+(`pnpm tab:dev` exits; `preview_start` refuses).
 
 Each port's server builds and serves the fork of the folder that started it,
 so first find that folder (`docs/agents/paired-worktrees.md`, "Live tab").
 **3333** must be exactly 3333 (the frontend hardcodes the proxy; the entry
-sets `autoPort: false`): if the `wowsimtbc.exe` on it was built in your
+sets `autoPort: false`): if the `wowsimtbc` on it was built in your
 folder and none of your sessions manages it, stop it and start the managed
-`wowsims-backend` entry. **5173** held by your own folder's vite: use it with
+`wowsims-backend` entry or `pnpm tab:backend`. **5173** held by your own folder's vite: use it with
 HMR; a second copy buys nothing. Either port held by another folder: the live
 tab is taken until that session stops its servers. One HMR side-effect: an
 engine-file edit reloads the page, dropping in-page run state and sometimes

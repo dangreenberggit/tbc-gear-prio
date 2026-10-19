@@ -17,20 +17,18 @@ Both procedures run in a pair (`docs/agents/paired-worktrees.md`).
 makes the main branch from `dev` and the fork branch at the fork lock's
 `commit`. Give that call a 600000 ms timeout. It is done when it prints
 `pair ready` with no `WARNING` line after it. `<pair>` is the pair's folder as
-an absolute `C:/Users/...` path (Windows `python` and `node` cannot read Git
-Bash's `/c/Users/...`), and `<fork>` is `<pair>/vendor/tbc-new-fork`.
+an absolute path, and `<fork>` is `<pair>/vendor/tbc-new-fork`.
 
 A subagent starts in the spawning session's folder, usually the main folder,
 and Bash returns to it between calls.
 So every command below names its folder (`git -C`, `pnpm -C`, `npm --prefix`,
 `go -C`, `make -C`, or an absolute path) and runs the same from any folder.
 Run each one exactly as written. A bare `python scripts/<x>.py` or
-`pnpm <script>` reads and writes the main folder's files, not the pair's, and
-a `cd X && …` chain breaks on the error fnm prints.
+`pnpm <script>` reads and writes the main folder's files, not the pair's.
 `pnpm -C <pair> exec python scripts/<x>.py …` runs a script in `<pair>` with
-flags that no `package.json` script passes. Run every `make -C` command in
-this guide in Git Bash: the fork's makefile calls `sh` and GNU `find`
-(`scripts/worktree_pair.py` `make_env`).
+flags that no `package.json` script passes. Run the commands in a login shell
+(`bash -l`), which has nvm's Node and the Go and protoc tools on PATH
+(`docs/agents/known-traps.md`, "Before running node / pnpm / test commands").
 
 Both procedures merge into `dev` at §7 step 5, and only when the owner asks.
 
@@ -62,7 +60,8 @@ A pipe reports the **last** command's status, so append
    upstream's version and run `npm --prefix <fork> install`.
 
 3. Regenerate the gitignored bindings: `make -C <fork> proto` and
-   `make -C <fork> go-to-ts` (both ran on Windows at `42c75dc9`; ticket 558).
+   `make -C <fork> go-to-ts` (both ran on Windows at `42c75dc9`, ticket 558,
+   and on WSL at fork `bc3cca6a1` on 2026-10-18).
 4. Check the merged tree:
    `node <fork>/node_modules/typescript/bin/tsc --noEmit -p <fork>`,
    `npm --prefix <fork> run lint:js`,
@@ -292,7 +291,8 @@ grep -n '<pattern>' <fork>/<file>
 `pnpm wt:pair` generated them when it made the pair, but if upstream's source
 arrives referencing new proto fields, Go and TypeScript both fail to compile
 until you run `make -C <fork> proto` and `make -C <fork> go-to-ts` again. Both
-ran on Windows at upstream `42c75dc9` (ticket 558). If `make` fails, run
+ran on Windows at upstream `42c75dc9` (ticket 558) and on WSL at fork
+`bc3cca6a1` (2026-10-18). If `make` fails, run
 `protoc` from Python with an argument list and no shell, as
 `build_from_source` in `scripts/fetch_wowsimcli.py` does.
 

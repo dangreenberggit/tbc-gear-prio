@@ -24,8 +24,10 @@ pnpm wt:pair <name> <main-branch> --fork-detached
 
 `<name>` is 1-23 characters of a-z, 0-9 and `-`, starting with a letter or
 digit. Flags: `python scripts/worktree_pair.py pair --help`. The pair is made
-at `<parent of the main checkout>/tbc-wt/<name>`, outside the repo and short
-enough that its deepest file stays under Windows' 260-character limit. The
+at `<parent of the main checkout>/tbc-wt/<name>`, outside the repo. The
+command applies Windows' 260-character path limit on every OS
+(`length_problem` in `scripts/worktree_pair.py`), so a long parent path is
+refused on Linux too. The
 command copies `vendor/` inputs from the main checkout, installs, and runs
 `make proto` and `make go-to-ts`.
 
@@ -44,7 +46,9 @@ it. The command prints a note when that is the case. See `known-traps.md`,
 - **Memory.** Memory is kept per folder, so a session opened in the pair
   folder (needed only for the live tab) starts with no memory notes (ticket
   572). The owner's notes are in
-  `C:\Users\dgree\.claude\projects\C--Users-dgree-Code-lulz-tbc-gear-prio\memory\`.
+  `~/.claude/projects/-home-daniel-Code-lulz-tbc-gear-prio/memory/` (copied
+  there from Windows on 2026-10-18; that Claude Code reads this folder for the
+  main checkout is untested).
 - **Subagents.** A subagent starts in the spawning session's folder, not the
   pair. Give it the pair's path and have it use `git -C <pair>` and
   `pnpm -C <pair>`. `pnpm -C <pair> verify` checks the pair: in a scratch pair
@@ -52,33 +56,28 @@ it. The command prints a note when that is the case. See `known-traps.md`,
   which the main checkout's fork has.
 - **Fork commits.** Commit with `git -C <pair>/vendor/tbc-new-fork`, then
   re-pin the pair's lock. AGENTS.md "The forked tab repo" has the full cycle.
-- **Live tab.** One session at a time runs it. In `.claude/launch.json`, vite
+- **Live tab.** One session at a time runs it. In `.claude/launch.json` and
+  `pnpm tab:dev`, vite
   must have port 5173 (`--strictPort`) and the backend port 3333
   (`autoPort: false`), and each serves the fork of the folder that started
   it. Use servers already on those ports only when your session started them
-  (`preview_list` shows them). Otherwise find the folder from the backend.
-  `wowsimtbc.exe` is built inside that folder's fork, so its path names the
-  folder (PowerShell: `Get-NetTCPConnection -LocalPort 3333 -State Listen`
-  for `OwningProcess`, then
-  `(Get-CimInstance Win32_Process -Filter "ProcessId=<pid>").ExecutablePath`;
-  on 2026-10-10 it gave
-  `C:\Users\dgree\Code\lulz\tbc-wt\worktree-pair\vendor\tbc-new-fork\wowsimtbc.exe`
-  for a backend started in that pair). The vite command line holds only
-  relative paths and names no folder, so if only 5173 is held, treat the live
-  tab as taken unless `preview_list` shows your session's vite. If the
+  (`preview_list` shows them). Otherwise find the folder from the process:
+  both servers run with the fork as their working directory, so
+  `ss -ltnp 'sport = :3333'` (or `:5173`) gives the pid and
+  `readlink /proc/<pid>/cwd` names the fork, and with it the folder. If the
   servers belong to another folder, the live tab is taken until that session
   stops them.
   `wowsims-fork-prod` (port 4180) always serves the main checkout's `dist/`.
 - **Live tab from a pair (agents).** A pair's fork has no `dist/` unless
   `wt:pair` ran with `--build`; without it the page hangs in `waitForInit`
   and loads no gear. Build it with
-  `make -C <pair>/vendor/tbc-new-fork dist/tbc/.dirstamp`. For the backend,
-  `sim/web/main.go` imports the gitignored `binary_dist/`, so first write its
-  stub with `make -C <pair>/vendor/tbc-new-fork binary_dist/dist.go`, then
-  run `go build -o wowsimtbc.exe ./sim/web` in the pair's fork and start it
-  with `./wowsimtbc.exe --usefs=true --launch=false --host=:3333`, as the
-  `wowsims-backend` entry in `.claude/launch.json` does. Start the
-  pair's vite on a free port and give scripts that drive it
+  `make -C <pair>/vendor/tbc-new-fork dist/tbc/.dirstamp`. Start the backend
+  with `node <pair>/scripts/dev-tab.mjs backend`: it writes the gitignored
+  `binary_dist/` stub that `sim/web/main.go` imports, builds the pair's
+  `wowsimtbc` and serves on 3333, as the `wowsims-backend` entry in
+  `.claude/launch.json` does. Start the pair's vite on a free port
+  (`node <pair>/scripts/dev-tab.mjs frontend --frontend-port <port>`) and give
+  scripts that drive it
   (`tab-fixtures:record`, `tab-fixtures:smoke`) `TBC_FORK_PORT=<that port>`,
   and `run-tab-cdp.mjs` `--origin http://localhost:<that port>`, so they
   drive this pair and not another folder's 5173. The backend port 3333 is
@@ -87,7 +86,7 @@ it. The command prints a note when that is the case. See `known-traps.md`,
   time, and stop it and its shell before starting the next.
 - **Layout gate and `pnpm tab-review`.** Each starts its own server on a free
   port from the pair's own `dist/`. Build `dist/` with `--build`, or later
-  with `make -C <pair>/vendor/tbc-new-fork dist/tbc/.dirstamp` in Git Bash.
+  with `make -C <pair>/vendor/tbc-new-fork dist/tbc/.dirstamp`.
   Without `dist/`, the layout gate skips. Leave `TBC_FORK_PORT` unset: when it
   is set, both reuse the server on that port, which may serve another
   folder's fork.
@@ -190,10 +189,12 @@ inside the pair it removes. Without `--force` it refuses when:
   as a worktree, and either no earlier unpair of this pair started removing
   it or the folder holds its own `.git` folder (a separate clone); with
   `--force`, unpair deletes it as a leftover;
-- on Windows, a running process has its program inside the pair or names
-  the pair on its command line, in Windows or Git Bash (`/c/...`) spelling,
-  such as `tsc.exe` under `node_modules` or the backend `wowsimtbc.exe`. It
-  lists each one with its pid. With `--force`, it lists them and goes on.
+- on Windows only, a running process has its program inside the pair or
+  names the pair on its command line, such as `tsc.exe` under
+  `node_modules` or the backend `wowsimtbc.exe`. It lists each one with its
+  pid. With `--force`, it lists them and goes on. On Linux the process list
+  is not read (`running_processes` in `scripts/worktree_pair.py`), so stop the
+  pair's servers before you unpair.
 
 Even with `--force`, it refuses a locked worktree, and a pair with another
 worktree registered inside it (such as a second fork worktree under
@@ -208,8 +209,8 @@ drops the registration and then leaves a pair's main folder half-deleted
 what git leaves behind only once git has dropped the registration, and only
 after it checks that no link inside the pair points out of it.
 
-**When unpair stops part-way.** A file that some process holds open stops
-the delete, and git may already have dropped that half's registration. The
+**When unpair stops part-way.** On Windows, a file that some process holds
+open stops the delete (Linux deletes files that are open), and git may already have dropped that half's registration. The
 process check above misses a process whose program is outside the pair and
 whose command line does not name it, such as a shell or vite started inside
 it. It probably also misses an elevated process when unpair runs in a shell
