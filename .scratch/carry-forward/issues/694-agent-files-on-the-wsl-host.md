@@ -35,10 +35,11 @@ holds the steps. The entry must keep `port: 3333` and `autoPort: false`.
 
 ## S10. Launch entries assume a login-shell PATH
 
-`node` and `go` in `.claude/launch.json` must resolve to nvm's Node 22.17.1
-and the profile's Go. A plain `bash -c` in WSL gets `/usr/local/bin/node`
-(v22.23.2) and no `go` (`docs/agents/known-traps.md`, "Before running node /
-pnpm / test commands"). Whether a Claude Code session started inside WSL
+`node` and `go` in `.claude/launch.json` must resolve to the `.node-version`
+Node and the profile's Go. A `bash -c` in WSL gets no `go`, and before the
+one-time Node setup it also gets a different `/usr/local/bin/node`
+(`docs/agents/known-traps.md`, "Before running node / pnpm / test
+commands"). Whether a Claude Code session started inside WSL
 passes a login-shell PATH to `preview_start`: hypothesis, untested. Check it
 by starting `wowsims-backend` from such a session.
 

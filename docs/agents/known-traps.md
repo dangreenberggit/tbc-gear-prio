@@ -13,24 +13,58 @@ does not. The commands below are for the WSL (Ubuntu) dev host.
 `preflight:node` with "Node ... is too old"; or `pnpm --version` printing a
 version other than `package.json`'s `packageManager`.
 
-Node comes from nvm and pnpm from corepack inside that Node. The repo needs
-the Node in `.node-version`; under another Node, `pnpm` can be a different
-pnpm (`nvm exec <version> pnpm --version` shows which). Mass test failure is
-a Node-version symptom before it is a code regression. Confirm
-`node --version` and `pnpm --version` before diagnosing test output; when
-either is wrong, switch in that shell, from the repo root (nvm reads only
-`.nvmrc`, so name the version):
+The repo needs the Node in `.node-version`, and `pnpm` is corepack's shim,
+which runs the version in `package.json`'s `packageManager`. Mass test
+failure is a Node-version symptom before it is a code regression. Confirm
+`node --version` and `pnpm --version` before diagnosing test output.
+
+The WSL host's intended setup has one place that names the machine's Node:
+`~/.local/node-default`, a symlink to an nvm version folder.
+`/usr/local/bin/{node,npm,npx,corepack,pnpm}` point through it, and nvm's
+default alias is `system`. With that setup, login and interactive shells,
+`bash -c`, `wsl.exe -e`, `t3code.service`, the Claude Code processes T3
+starts, and git hooks all get the same Node. Claude Code's Bash tool takes
+its PATH from the claude process, not from `~/.bashrc`, so a fix made only in
+a shell rc file does not reach it (before the setup, `echo $PATH` in that
+tool shows no nvm folder, although `~/.bashrc` loads nvm).
+
+Check the setup in a new WSL terminal, from the repo root. Each line must
+print what its comment says, where `<v>` is the `.node-version` version:
 
 ```sh
-source ~/.nvm/nvm.sh && nvm use "$(cat .node-version)"
+readlink ~/.local/node-default   # /home/<user>/.nvm/versions/node/v<v>
+readlink /usr/local/bin/node     # /home/<user>/.local/node-default/bin/node
+bash -lc 'node --version'        # v<v>
+env -i PATH=/usr/local/bin:/usr/bin:/bin bash -c 'node --version'   # v<v>
 ```
 
-Run commands in a login shell (`bash -l`). The login profile must load nvm
-and put the directories holding `go`, `protoc` and `protoc-gen-go` on PATH;
-on the WSL host the untracked `~/.profile` does both (its nvm block and its
-`tbc-gear-prio WSL move` block). A plain `bash -c` skips the profile, so it
-gets the system `node` (`bash -c 'command -v node; node --version'` shows
-which) and no `go`: the fork builds fail with "command not found".
+From Windows, `wsl.exe -d Ubuntu-22.04 -e node --version` must print it too,
+and `pnpm --version` in the repo must print the `packageManager` version.
+Before this setup, the WSL host's `/usr/local/bin/node` points straight at
+one nvm version folder while nvm's default alias names another, so
+`bash -c`, `wsl.exe` and T3's processes get one Node and login shells
+another; the second `readlink` line shows which state the host is in.
+
+One-time setup on a new host, after installing nvm: run this in a login
+shell (where `nvm` is defined), from the repo root. Only the `sudo` line
+needs root.
+
+```sh
+V="$(cat .node-version)"
+nvm install "$V" && ~/.nvm/versions/node/v"$V"/bin/corepack enable
+ln -sfn ~/.nvm/versions/node/v"$V" ~/.local/node-default
+for b in node npm npx corepack pnpm; do sudo ln -sfn "$HOME/.local/node-default/bin/$b" /usr/local/bin/$b; done
+nvm alias default system
+```
+
+To change the machine's Node later, bump `.node-version` and run the first three lines again; they
+need no `sudo`. To use another Node in one shell only: `nvm use <v>`.
+
+Run commands in a login shell (`bash -l`). The login profile must put the
+directories holding `go`, `protoc` and `protoc-gen-go` on PATH; on the WSL
+host the untracked `~/.profile` does this in its `tbc-gear-prio WSL move`
+block. A `bash -c` or `wsl.exe -e` process skips the profile and has no
+`go`: the fork builds fail with "command not found".
 
 **Fork-gated suites never run in CI.** Every suite that imports
 `forkPresent` — among them `fork-set-net.test.ts`,
