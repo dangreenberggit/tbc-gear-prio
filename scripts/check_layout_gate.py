@@ -54,7 +54,11 @@ Absence of a prerequisite is an ordinary state, never a merge veto:
   - the tab digest equals the last green-tested digest     -> skip, exit 0
 
 Only a real assertion failure from `test-layout.mjs` -- the gate RAN and the
-layout is broken -- returns nonzero and blocks the merge. A rotted browser path
+layout is broken -- returns nonzero and blocks the merge. The one exception is
+a digest that cannot be computed (a missing tracked file, or a Chromium build
+that `chromium.mjs --build` cannot read): that exits 2, because a digest
+without the build in it could be recorded as a baseline that later
+Playwright bumps match. A rotted browser path
 or a stale `dist/` must never wall off a merge; those are "skipped, prereq
 absent", reported as such and distinguished from "ran and failed".
 
@@ -73,8 +77,9 @@ the dev host Node comes from nvm: `nvm use "$(cat .node-version)"` puts the
 repo's Node 22 on PATH (nvm itself reads only `.nvmrc`). When the `node` on
 PATH is older, this script falls back to `fnm exec --using=22` if `fnm` is on
 PATH, so the gate does not silently misbehave on a shell that resolved Node 20.
-If neither a suitable Node nor `fnm` is available, that is reported and the
-gate is skipped rather than run wrong.
+If neither a suitable Node nor `fnm` is available, the Chromium build cannot be
+read, so the digest cannot be computed and the script exits 2 naming that
+cause rather than run the gate wrong.
 
 Usage
 -----
@@ -91,7 +96,7 @@ accessibility violation (test-layout.mjs exits 1 for either, and this
 script blocks on any measured nonzero exit, so the a11y ratchet needs no branch
 here), or the gate would run but its tab fixture is missing or unreadable; 2 = a
 real error (could not read a tracked source file that the record
-expects).
+expects, or could not read the harness's Chromium build).
 
 Accessibility: the gate passes TBC_A11Y_BASELINE (data/wowsims-fork-a11y-baseline.json)
 to the gate script when it exists, so seeded/known violations are tracked debt
@@ -356,6 +361,7 @@ def compute_tab_hash() -> tuple[str, list[str]]:
     The digest folds in each file's fork-relative path as well as its bytes, so
     a rename or a delete moves the digest even when the surviving bytes are
     unchanged. `missing` lists any LAYOUT_FILES entry absent from disk.
+    Raises ChromiumBuildUnknown when the Chromium build cannot be read.
     """
     h = hashlib.sha256()
     missing: list[str] = []
@@ -513,6 +519,32 @@ def _stderr_excerpt(stderr: str) -> str:
     return text
 
 
+def _lookup_failure(out: subprocess.CompletedProcess[str], flags: str = "") -> str:
+    """Why a chromium.mjs run that exited nonzero failed: its stderr and the fix."""
+    if "MODULE_NOT_FOUND" in out.stderr:
+        fix = (
+            "A package it imports is missing from node_modules (a checkout "
+            "where `pnpm install` has not run since `playwright` was added); "
+            "run `pnpm install`."
+        )
+    else:
+        fix = f"Run `node scripts/tab-harness/chromium.mjs{flags}` to see the whole error."
+    return (
+        f"scripts/tab-harness/chromium.mjs{flags} exited {out.returncode}. "
+        f"stderr: {_stderr_excerpt(out.stderr)} {fix}"
+    )
+
+
+class ChromiumBuildUnknown(Exception):
+    """`chromium.mjs --build` gave no build, so the tab digest cannot be computed.
+
+    Not hashed as a placeholder: a green run would record that placeholder
+    digest as the baseline, and while the lookup kept failing every later run
+    would match it and skip as "unchanged", a Playwright bump included
+    (review of feat/wsl-linux-support, finding R2-1).
+    """
+
+
 def _chromium_problem() -> str | None:
     """None when the Chromium the harness will launch is on disk, else why not.
 
@@ -531,18 +563,9 @@ def _chromium_problem() -> str | None:
     if out.returncode == CHROMIUM_NOT_INSTALLED_EXIT:
         return CHROMIUM_MISSING
     if out.returncode != 0:
-        if "MODULE_NOT_FOUND" in out.stderr:
-            fix = (
-                "A package it imports is missing from node_modules (a checkout "
-                "where `pnpm install` has not run since `playwright` was added); "
-                "run `pnpm install`."
-            )
-        else:
-            fix = "Run `node scripts/tab-harness/chromium.mjs` to see the whole error."
         return (
             "The Chromium lookup failed, so whether Playwright's Chromium is "
-            f"installed is unknown: scripts/tab-harness/chromium.mjs exited "
-            f"{out.returncode}. stderr: {_stderr_excerpt(out.stderr)} {fix}"
+            f"installed is unknown: {_lookup_failure(out)}"
         )
     if Path(out.stdout.strip()).is_file():
         return None
@@ -555,17 +578,23 @@ def _chromium_build() -> bytes:
     `chromium.mjs --build` reads it from the browsers.json of the
     playwright-core that the pinned `playwright` resolves, the file Playwright
     itself picks the build from, so a `playwright` bump that changes the build
-    moves the digest. When the lookup cannot run, a fixed marker is hashed: the
-    digest then differs from any recorded green run, and the Chromium check
-    that follows skips the gate.
+    moves the digest. Raises ChromiumBuildUnknown, naming the cause, when the
+    lookup does not give a build.
     """
-    out, _why = _run_chromium_lookup(["--build"])
-    if out is None or out.returncode != 0:
-        return b"<lookup failed>"
+    out, why = _run_chromium_lookup(["--build"])
+    if out is None:
+        raise ChromiumBuildUnknown(f"The Chromium build lookup failed: {why}")
+    if out.returncode != 0:
+        raise ChromiumBuildUnknown(
+            f"The Chromium build lookup failed: {_lookup_failure(out, ' --build')}"
+        )
     try:
         entry = json.loads(out.stdout.strip().splitlines()[-1])
     except (ValueError, IndexError):
-        return b"<lookup failed>"
+        raise ChromiumBuildUnknown(
+            "The Chromium build lookup printed no JSON line: "
+            f"scripts/tab-harness/chromium.mjs --build wrote {out.stdout.strip()[:200]!r}."
+        ) from None
     return json.dumps(entry, sort_keys=True).encode("utf-8")
 
 
@@ -840,7 +869,17 @@ def run(
             "restored in CI). The tab layout lives only on the main checkout."
         )
 
-    digest, missing = compute_tab_hash()
+    try:
+        digest, missing = compute_tab_hash()
+    except ChromiumBuildUnknown as err:
+        # Before --print-hash and --update-baseline too: no path may print or
+        # record a digest that does not cover the Chromium build.
+        print(
+            f"layout gate: FAILED -- cannot compute the tab digest. {err} "
+            "No baseline was read or written.",
+            file=sys.stderr,
+        )
+        return 2
     if missing:
         # A named LAYOUT_FILES entry is gone. This is not an
         # ordinary absence like a missing clone -- the fork is present but a
@@ -993,7 +1032,11 @@ def main() -> int:
     )
     args = ap.parse_args()
     if args.preview_skip:
-        reason = preview_skip_reason()
+        try:
+            reason = preview_skip_reason()
+        except ChromiumBuildUnknown as err:
+            print(f"layout: would fail -- cannot compute the tab digest. {err}")
+            return 0
         if reason is None:
             print("layout: would run (not a verify step; see pnpm merge-to-dev)")
         else:
