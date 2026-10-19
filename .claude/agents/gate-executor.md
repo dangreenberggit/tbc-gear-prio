@@ -105,9 +105,9 @@ with a silent deviation is the failure.
   `flag` ledger row, not an edit.
 - Per unit with a `Visual check:` line: run `pnpm tab-fixtures:smoke` (it
   starts `:5173` if the port is free) and Read the named fixtures' PNGs in
-  `.scratch/tab-fixtures-smoke/`, or open their links from
-  `http://localhost:5173/tbc/tab-fixtures/` in the Browser pane → judge
-  against the sentence → record the smoke line and what you saw in the
+  `.scratch/tab-fixtures-smoke/`, or, where the harness has a browser pane,
+  open their links from `http://localhost:5173/tbc/tab-fixtures/` in it →
+  judge against the sentence → record the smoke line and what you saw in the
   ledger → re-pin.
 - Per unit with a `Visual acceptance:` block: fork edits → write
   `.scratch/stage-gate/<slug>/visual/<unit>/manifest.json` →
