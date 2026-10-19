@@ -181,10 +181,117 @@ is right: `playwright-core@1.57.0`'s `browsers.json` gives chromium
 | Q9  | Backend build steps duplicated between `.claude/launch.json` `wowsims-backend` and `dev-tab.mjs` `backend()`                                     | S5     |
 | Q10 | `scripts/tab-harness/README.md` does not say that the Chromium build is part of the layout digest (raised by the A1 fixer after round 1)         | A1     |
 
+## Focused check (round 2)
+
+Main range `1ac94a4b..4d36a3ca` (second `Reviewed range:` line). Fork range:
+none. The branch never moves the fork pin
+(`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json` exits 0), and
+the fork is at the lock's `bc3cca6a1` with an empty `status --porcelain`.
+One fresh `general-task` agent on Opus ran the check and wrote nothing. Its
+scripts and logs are in the review session's scratchpad, `wsl-review/r2/`.
+
+Commits checked:
+
+- `2f5664c1` Record round 1 of the WSL branch review (review file, tickets
+  693 and 694, `NEXT`, `map.md`).
+- `5a8af638` Hash the harness Chromium build in the layout gate (A1).
+- `3c008551` Name the real cause when the Chromium lookup fails (A2, Q5).
+- `362682b2` Exit nonzero and reap the group when a server dies (A3, A4).
+- `8ea2fe7a` Apply review code-quality rows Q1-Q4, Q6-Q8, Q10.
+- `4d36a3ca` Advance the layout baseline after A1 and Q6. It followed a
+  measured green run: `LAYOUT_GATE_VERDICT {"outcome":"measured","pass":true,"failed":0,"a11yFailed":0,...}`
+  (`wsl-review/cq/layout-gate.log`).
+
+1. **Conditions 1 to 3: pass.** Each commit names its finding IDs or is
+   bookkeeping. `2f5664c1` also touches `NEXT` and `map.md`, which filing a
+   ticket requires (`docs/agents/issue-tracker.md`, "Allocating `<NN>`"; this
+   skill's step 3). Every changed code line is at a place that A1, A2, A3/A4
+   or a Q row cites. The fork did not move, so the touchpoint commands in
+   `docs/fork-upstream-touchpoints.md` give the same output (1 modified
+   file, `ui/app/SimTabsSection.tsx`, and 232 added).
+2. **The diff changes only what each finding asks for: fail** (finding R2-1
+   below).
+3. **The evidence shows each fix working: pass.** No automated test was
+   added; the repo has no unit tests for `check_layout_gate.py` or
+   `dev-tab.mjs`. A1: `wsl-review/fix1/a1.log` shows a playwright-core copy
+   with build 1248 moving the digest, and `PLAYWRIGHT_BROWSERS_PATH` not
+   moving it. A2: `fix1/a2.log` shows exit 2 and the old message for a
+   missing browser, and exit 1 with the `ERR_MODULE_NOT_FOUND` text and
+   "run `pnpm install`" for a missing package. A3/A4: stub re-runs on ports
+   5398/5399 (`r2/t-new.log`) give T3 rc 137, T3b rc 143 and T8 rc 137,
+   with no process left. Two race cases also leave nothing. The same cases
+   on the `1ac94a4b` code give rc 0 and leave orphans (`r2/t-old.log`).
+   T12 still leaves the backend running, which is A5 (wontfix).
+4. **The touched tests pass: pass.** `pnpm verify` at `4dba6951`: rc=0,
+   `gates: 1545 ran, 0 skipped`, `layout: skipped -- ... unchanged ...
+(digest e58106611753...)`. `node scripts/tab-harness/chromium.mjs`
+   prints the `chromium-1200` path, and `--build` prints revision 1200,
+   browserVersion 143.0.7499.4, both rc 0. `--print-hash` equals the
+   lock's `e5810661...`.
+
+Findings:
+
+- **R2-1 (A1 fix; a silent wrong result in a rare case).**
+  `scripts/check_layout_gate.py` `_chromium_build` hashes the fixed marker
+  `<lookup failed>` when `chromium.mjs --build` fails. Its docstring says
+  "the Chromium check that follows skips the gate". That check does not
+  skip when only `--build` fails while the executable lookup still works,
+  for example on a timeout under load, or with a playwright-core that
+  `chromiumBuild()` cannot read. The gate then runs, and a green run
+  records the digest that holds the marker. On later runs, while `--build`
+  keeps failing, the digest stays equal to that baseline, so the gate skips
+  as "unchanged" even after a Playwright bump. Shown with patched functions
+  and no file writes (`r2/a1demo.py`): the baseline was written, and the
+  next run printed "SKIPPED -- ... unchanged". Likely cause (hypothesis,
+  untested): the fixer added the marker so that the digest stays
+  computable on a checkout with no Node or no `playwright`, and assumed the
+  executable lookup fails in every case where the build lookup fails.
+  Suggested fix: treat a failed `--build` as a Chromium problem, so that
+  the gate skips, or never advance the baseline over the marker.
+- **R2-2 (Q2 fix; a wrong command in an agent doc).**
+  `docs/agents/known-traps.md:31-32` says "A plain `bash -c` skips the
+  profile, so it gets the system `node` (`bash -c 'command -v node; node
+--version'` shows which)". Typed in a login shell, that command inherits
+  the caller's PATH and printed nvm's `v22.17.1`. Only
+  `wsl.exe -d Ubuntu-22.04 -- bash -c '...'` showed `/usr/local/bin/node`
+  v22.23.2. The other Q2 commands are correct as written. Likely cause
+  (hypothesis, untested): the code-quality agent tested the non-login case
+  through `wsl.exe -- bash` and wrote it as plain `bash -c`.
+- **R2-3 (A2 fix; hypothesis, untested).** Under the `fnm exec` fallback, a
+  usage error that makes fnm itself exit 2 would read as "Chromium is not
+  installed". Node errors exit 1 (`fix1/a2.log`). The WSL host has no fnm.
+
 ## Summary
 
-Round 2 (focused check) is in progress over the second `Reviewed range:`
-line.
+**Stopped at the round limit.** Round 2 reported findings other than
+bookkeeping (R2-1, R2-2, R2-3), so this review stops here with no round 3,
+as the skill's "Round limit" says. `pnpm merge-to-dev --check-only` was not
+run. The owner decides what happens next, for example a small fix pass for
+R2-1 and R2-2 followed by a fresh review of that fix.
+
+State of the round 1 findings:
+
+- Fixed by commits, checked in round 2 and found working: A1, A2 (with Q5),
+  A3 and A4.
+- Code-quality pass `8ea2fe7a`: Q1-Q4, Q6-Q8 and Q10.
+- Disposed in round 1's table: A5, A8, S3, S4, P2, P4, P5 and P6 are
+  wontfix. A6, A7, S10, P3 and Q9 are deferred to tickets 693 and 694.
+- R2-1 is in the A1 fix. It is a silent wrong result, so under step 3 it
+  must be fixed before the merge. R2-2 and R2-3 are in the fixes for Q2 and
+  A2.
+
+What breaks on the Windows checkout after a merge (A8, P6, not asked to be
+fixed): the `wowsims-backend` launch entry needs `sh`, which PowerShell does
+not find on this machine. `wowsims-fork`, `wowsims-fork-prod` and
+`web-shell-prod` run the PATH `node`, which is v20.18.1 there. On Node 20,
+`web-shell-prod` cannot import `node:sqlite`. `pnpm tab:dev` runs vite on
+pnpm's Node and no longer forces Node 22 through fnm. The layout gate skips
+with "run `pnpm install`" until the Windows checkout installs the
+`playwright` package.
+
+Tickets: this branch filed 2 (693, 694) and closed 0, so it filed more than
+it closed. `.scratch/carry-forward/issues/NEXT` read 686 while tickets up to
+692 existed; it now reads 695.
 
 ## Disposition
 
