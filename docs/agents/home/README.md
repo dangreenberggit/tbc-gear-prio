@@ -10,9 +10,10 @@ were installed 2026-10-19. The hook refuses an agent's writes to
 logs it to `~/.local/state/agent-guard/outside-writes.jsonl` except under
 `~/.claude/projects/` and `~/.claude/plans/`. The hook sees a Write or
 Edit call, and a Bash redirect or write command such as `cp` or `tee`
-that names the path with `~` or in full. It does not see a path written
-as `$HOME/...` or a write made inside a script. The `settings.json` in
-the Windows home wires no hook.
+that names the path with `~` or in full. It expands `$HOME`, `$USER` and
+the XDG directory variables before it checks a path. It does not see a
+write made inside a script or an interpreter one-liner. The
+`settings.json` in the Windows home wires no hook.
 
 The files are versioned here, and **the user runs the copy in their own
 terminal**:
