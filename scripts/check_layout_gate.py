@@ -50,7 +50,7 @@ Absence of a prerequisite is an ordinary state, never a merge veto:
 
   - the fork clone is absent (fresh clone, CI)            -> skip, exit 0
   - the built `dist/` is absent (no prior `make host`)    -> skip, exit 0
-  - no Playwright Chromium is on disk                      -> skip, exit 0
+  - no Playwright Chromium is on disk, or the lookup fails -> skip, exit 0
   - the tab digest equals the last green-tested digest     -> skip, exit 0
 
 Only a real assertion failure from `test-layout.mjs` -- the gate RAN and the
@@ -446,14 +446,68 @@ def write_baseline(digest: str) -> None:
 
 
 CHROMIUM_LOOKUP = HARNESS_DIR / "chromium.mjs"
+CHROMIUM_LOOKUP_TIMEOUT_S = 60
+# chromium.mjs exits 2 when Playwright named a path and no browser is there.
+# Every other nonzero exit is the lookup itself failing (Node exits 1 when, say,
+# the `playwright` package cannot be imported), which must not be reported as a
+# missing browser: the install command below needs that package too.
+CHROMIUM_NOT_INSTALLED_EXIT = 2
 CHROMIUM_MISSING = (
     "Playwright's Chromium is not installed (scripts/tab-harness/chromium.mjs "
     "found none; install it with `pnpm exec playwright install chromium`)."
 )
+LOOKUP_STDERR_CHARS = 600
 
 
-def _find_chromium() -> Path | None:
-    """The Chromium the harness will launch, or None if it is not installed.
+def _run_chromium_lookup(
+    extra: Sequence[str] = (),
+) -> tuple[subprocess.CompletedProcess[str] | None, str]:
+    """Run chromium.mjs under the gate's own Node selection.
+
+    Returns (completed, "") when it ran to an exit code, or (None, why) when it
+    could not run at all.
+    """
+    cmd = _node_command(CHROMIUM_LOOKUP, extra)
+    if cmd is None:
+        return None, (
+            "no Node >= 22 is on PATH and no `fnm` to select one, so "
+            "scripts/tab-harness/chromium.mjs could not run. Put Node 22 on PATH."
+        )
+    argv, _how = cmd
+    try:
+        out = subprocess.run(
+            argv,
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            timeout=CHROMIUM_LOOKUP_TIMEOUT_S,
+        )
+    except subprocess.TimeoutExpired:
+        return None, (
+            f"`{' '.join(argv)}` did not finish in {CHROMIUM_LOOKUP_TIMEOUT_S} s. "
+            "Run it by hand to see where it stops."
+        )
+    except (OSError, subprocess.SubprocessError) as err:
+        return None, f"`{' '.join(argv)}` could not start: {err}."
+    return out, ""
+
+
+def _stderr_excerpt(stderr: str) -> str:
+    """The error lines of a failed lookup's stderr, bounded for one message.
+
+    Node prints a stack after the error line, so the lines naming an error say
+    more than the tail does.
+    """
+    lines = [line.strip() for line in stderr.splitlines() if line.strip()]
+    picked = [line for line in lines if re.search(r"\bError\b", line)][:2]
+    text = " | ".join(picked or lines[-5:]) or "(empty)"
+    if len(text) > LOOKUP_STDERR_CHARS:
+        text = text[: LOOKUP_STDERR_CHARS - 3] + "..."
+    return text
+
+
+def _chromium_problem() -> str | None:
+    """None when the Chromium the harness will launch is on disk, else why not.
 
     The layout test throws when it cannot find one, which would surface as a
     nonzero exit and read as "layout broken". A missing browser is a prereq
@@ -461,21 +515,31 @@ def _find_chromium() -> Path | None:
     clean skip -- the run/skip/fail distinction the whole gate is built on. The
     answer comes from the same helper the harness uses (chromium.mjs, which asks
     the pinned Playwright), so the gate and the test cannot disagree about it.
+    The message names the real cause: a browser that is not installed, or a
+    lookup that failed, with its stderr and the fix.
     """
-    try:
-        out = subprocess.run(
-            ["node", str(CHROMIUM_LOOKUP)],
-            cwd=str(ROOT),
-            capture_output=True,
-            text=True,
-            timeout=60,
-        )
-    except (OSError, subprocess.SubprocessError):
-        return None
+    out, why = _run_chromium_lookup()
+    if out is None:
+        return f"The Chromium lookup failed: {why}"
+    if out.returncode == CHROMIUM_NOT_INSTALLED_EXIT:
+        return CHROMIUM_MISSING
     if out.returncode != 0:
+        if "MODULE_NOT_FOUND" in out.stderr:
+            fix = (
+                "A package it imports is missing from node_modules (a checkout "
+                "where `pnpm install` has not run since `playwright` was added); "
+                "run `pnpm install`."
+            )
+        else:
+            fix = "Run `node scripts/tab-harness/chromium.mjs` to see the whole error."
+        return (
+            "The Chromium lookup failed, so whether Playwright's Chromium is "
+            f"installed is unknown: scripts/tab-harness/chromium.mjs exited "
+            f"{out.returncode}. stderr: {_stderr_excerpt(out.stderr)} {fix}"
+        )
+    if Path(out.stdout.strip()).is_file():
         return None
-    exe = Path(out.stdout.strip())
-    return exe if exe.is_file() else None
+    return CHROMIUM_MISSING
 
 
 def _chromium_build() -> bytes:
@@ -488,16 +552,8 @@ def _chromium_build() -> bytes:
     digest then differs from any recorded green run, and the Chromium check
     that follows skips the gate.
     """
-    cmd = _node_command(CHROMIUM_LOOKUP, ["--build"])
-    if cmd is None:
-        return b"<lookup unavailable>"
-    try:
-        out = subprocess.run(
-            cmd[0], cwd=str(ROOT), capture_output=True, text=True, timeout=60
-        )
-    except (OSError, subprocess.SubprocessError):
-        return b"<lookup failed>"
-    if out.returncode != 0:
+    out, _why = _run_chromium_lookup(["--build"])
+    if out is None or out.returncode != 0:
         return b"<lookup failed>"
     try:
         entry = json.loads(out.stdout.strip().splitlines()[-1])
@@ -741,11 +797,12 @@ def preview_skip_reason() -> str | None:
             "the bundle on top of it and cannot run without it. Run `make host` "
             "in the fork once to arm the gate."
         )
-    if _find_chromium() is None:
+    chromium_problem = _chromium_problem()
+    if chromium_problem is not None:
         return (
-            f"{CHROMIUM_MISSING} The gate drives a headless Chromium and cannot "
-            "run without one -- a missing browser skips the gate rather than "
-            "blocking the merge."
+            f"{chromium_problem} The gate drives a headless Chromium and cannot "
+            "run without one -- a missing prerequisite skips the gate rather "
+            "than blocking the merge."
         )
 
     return None
@@ -826,11 +883,12 @@ def run(
             "the bundle on top of it and cannot run without it. Run `make host` "
             "in the fork once to arm the gate."
         )
-    if _find_chromium() is None:
+    chromium_problem = _chromium_problem()
+    if chromium_problem is not None:
         return _skip(
-            f"{CHROMIUM_MISSING} The gate drives a headless Chromium and cannot "
-            "run without one -- a missing browser skips the gate rather than "
-            "blocking the merge."
+            f"{chromium_problem} The gate drives a headless Chromium and cannot "
+            "run without one -- a missing prerequisite skips the gate rather "
+            "than blocking the merge."
         )
 
     if baseline is None:

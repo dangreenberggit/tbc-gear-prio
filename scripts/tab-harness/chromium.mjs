@@ -9,9 +9,11 @@
 // includes the build (`--build` below), and a bump reruns the gate.
 //
 // Run directly, it prints the path and exits 0, or prints why there is none
-// and exits 1. With `--build` it prints the Chromium entry of Playwright's
-// browsers.json as JSON. The Python gates (check_layout_gate.py) call it that
-// way.
+// and exits 2 (NOT_INSTALLED_EXIT). Any other failure, such as a `playwright`
+// package that cannot be imported, exits 1, so the Python gates
+// (check_layout_gate.py) can tell a missing browser from a broken lookup.
+// With `--build` it prints the Chromium entry of Playwright's browsers.json
+// as JSON.
 //
 // Install the browser once per machine:
 //   pnpm exec playwright install chromium
@@ -24,6 +26,9 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
 export const INSTALL_HINT = "pnpm exec playwright install chromium";
+// check_layout_gate.py's CHROMIUM_NOT_INSTALLED_EXIT must match.
+const NOT_INSTALLED_EXIT = 2;
+const NOT_INSTALLED = "CHROMIUM_NOT_INSTALLED";
 
 /**
  * The `chromium` entry (revision, browserVersion, any per-host overrides) of
@@ -51,8 +56,11 @@ export function chromiumBuild() {
 export function findChromium() {
   const exe = chromium.executablePath();
   if (!fs.existsSync(exe))
-    throw new Error(
-      `Playwright's Chromium is not installed (expected ${exe}). Run: ${INSTALL_HINT}`
+    throw Object.assign(
+      new Error(
+        `Playwright's Chromium is not installed (expected ${exe}). Run: ${INSTALL_HINT}`
+      ),
+      { code: NOT_INSTALLED }
     );
   return exe;
 }
@@ -64,6 +72,6 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     else console.log(findChromium());
   } catch (err) {
     console.error(err.message);
-    process.exit(1);
+    process.exit(err.code === NOT_INSTALLED ? NOT_INSTALLED_EXIT : 1);
   }
 }

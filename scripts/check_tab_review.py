@@ -9,7 +9,7 @@ ticket's acceptance sentence. It is invoked by hand inside stage-gate execution
 (`pnpm tab-review <manifest>`), never in CI and never by pnpm merge-to-dev.
 
 Reuses check_layout_gate's fork/dist/Chromium/Node-22 machinery rather than
-copying it: same FORK_ROOT, same _find_chromium, same _node_command Node-22
+copying it: same FORK_ROOT, same _chromium_problem, same _node_command Node-22
 selection, same TBC_A11Y_BASELINE wiring.
 
 Exit codes -- and why 2 is an error here, unlike the layout gate's skip:
@@ -38,14 +38,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_layout_gate import (  # noqa: E402
     A11Y_BASELINE_PATH,
-    CHROMIUM_MISSING,
     DIST_ASSETS,
     DIST_WASM_CANDIDATES,
     FIXTURE_DIR,
     FORK_ROOT,
     HARNESS_DIR,
     ROOT,
-    _find_chromium,
+    _chromium_problem,
     _node_command,
 )
 
@@ -98,9 +97,10 @@ def run(manifest: str, out: str | None) -> int:
             "the fork's built dist/ is absent (no prior `make host`). test-review "
             "builds the bundle on top of it and cannot run without it."
         )
-    if _find_chromium() is None:
+    chromium_problem = _chromium_problem()
+    if chromium_problem is not None:
         return _error(
-            f"{CHROMIUM_MISSING} The capture drives a headless Chromium and "
+            f"{chromium_problem} The capture drives a headless Chromium and "
             "cannot run without one."
         )
 
