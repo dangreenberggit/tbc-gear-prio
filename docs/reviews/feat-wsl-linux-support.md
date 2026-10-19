@@ -276,7 +276,8 @@ State of the round 1 findings:
   A3 and A4.
 - Code-quality pass `8ea2fe7a`: Q1-Q4, Q6-Q8 and Q10.
 - Disposed in round 1's table: A5, A8, S3, S4, P2, P4, P5 and P6 are
-  wontfix. A6, A7, S10, P3 and Q9 are deferred to tickets 695 and 696.
+  wontfix. A6 is deferred to ticket 695, which is open. A7 and Q9 are
+  fixed in `142ce6bc` (ticket 696, closed); S10 and P3 are wontfix.
 - R2-1 is in the A1 fix. It is a silent wrong result, so under step 3 it
   must be fixed before the merge. R2-2 and R2-3 are in the fixes for Q2 and
   A2.
@@ -291,8 +292,8 @@ with "run `pnpm install`" until the Windows checkout installs the
 `playwright` package.
 
 Tickets: this branch filed 4 (695, 696, 697, 698) and closed 1 (696), so it
-filed more than it closed. `.scratch/carry-forward/issues/NEXT` read 686 while tickets up to
-692 existed; it now reads 697.
+filed more than it closed. `.scratch/carry-forward/issues/NEXT` read 686
+while tickets up to 692 existed; it now reads 697.
 
 ## Disposition
 
@@ -486,7 +487,7 @@ words cover. Every round 1 and round 2 finding now has a Disposition row,
 in round 1's table or the table below; Q9 keeps its round 1 `defer` row.
 
 Nothing is left that blocks the merge ask. Open tickets from this branch:
-695, 696, 697 and 698.
+695, 697 and 698.
 
 Tickets: this branch filed 4 (695, 696, 697, 698) and closed 1 (696), so it
 filed more than it closed (`git diff --name-status dev...HEAD --
