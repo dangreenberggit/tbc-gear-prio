@@ -11,7 +11,10 @@ directory.
 - `chromium.mjs`: the browser every script and the Python gates launch, asked
   from the pinned `playwright` devDependency. Install it once per machine with
   `pnpm exec playwright install chromium`; until then the layout gate skips and
-  the other scripts stop with that command in the error.
+  the other scripts stop with that command in the error. The layout gate's
+  digest includes the Chromium build that `playwright` names
+  (`_chromium_build` in `scripts/check_layout_gate.py`), so a `playwright`
+  bump that changes the build makes `pnpm layout-gate:check` re-measure.
 - `test-layout.mjs`, `test-review.mjs`, `test-stop.mjs`: the layout gate, the
   per-ticket visual capture and the Stop check. `scripts/check_layout_gate.py`
   and `scripts/check_tab_review.py` run the first two.

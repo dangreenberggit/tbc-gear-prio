@@ -3,10 +3,12 @@
 // searching its cache folder, follows its own per-OS layout and the browser
 // revision this repo pins, and honours PLAYWRIGHT_BROWSERS_PATH.
 //
-// The pin is 1.57.0 (Chromium 143, build 1200): the build the layout gate ran
-// on under Windows, where it was the only one installed. Whether a newer build
-// moves the measured geometry is untested, so the layout gate's digest
-// includes the build (`--build` below), and a bump reruns the gate.
+// package.json pins `playwright` to an exact version because each Playwright
+// release names its own Chromium build (in playwright-core's browsers.json),
+// and whether a different build moves the measured geometry is untested. The
+// layout gate's digest includes that build (`--build` below, read by
+// `_chromium_build` in scripts/check_layout_gate.py), so a bump that changes
+// the build reruns the gate.
 //
 // Run directly, it prints the path and exits 0, or prints why there is none
 // and exits 2 (NOT_INSTALLED_EXIT). Any other failure, such as a `playwright`

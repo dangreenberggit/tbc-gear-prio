@@ -92,9 +92,8 @@ function runSync(cmd, args, env = process.env) {
     throw new Error(`${cmd} ${args.join(" ")} exited ${r.status}`);
 }
 
-// Exits 0 only when this script stopped the server (Ctrl+C, SIGTERM or
-// SIGHUP to it). A server that ends any other way, even with code 0 or by a
-// signal from outside, is a failure the caller (a terminal, a launcher, or
+// A server that ends without this script stopping it, even with code 0 or by
+// a signal from outside, is a failure the caller (a terminal, a launcher, or
 // `both` mode) must be able to see.
 function serve(cmd, args) {
   // stdin is ignored because a process outside the terminal's foreground
@@ -228,8 +227,8 @@ function both(args) {
     });
   for (const { mode, child } of children) {
     child.on("exit", (code, signal) => {
-      // The first wrapper to end decides. A wrapper exits 0 only when it
-      // stopped its own server on a stop signal (see serve).
+      // A wrapper exits 0 only when it stopped its own server on a stop
+      // signal (see serve), so its code can be passed on unchanged.
       if (exitCode === null) {
         exitCode = stopRequested ? 0 : (code ?? signalExitCode(signal));
         log(

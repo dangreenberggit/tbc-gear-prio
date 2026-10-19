@@ -109,8 +109,9 @@ def run(manifest: str, out: str | None) -> int:
     )
     if cmd is None:
         return _error(
-            "no Node >= 22 and no `fnm` to select it. test-review.mjs needs Node "
-            "22 (global WebSocket); refusing to run it on an older Node."
+            "no Node >= 22 is on PATH. test-review.mjs needs Node 22 (global "
+            "WebSocket); refusing to run it on an older Node. Put the repo's "
+            'Node 22 on PATH with `nvm use "$(cat .node-version)"`.'
         )
     argv, how = cmd
 

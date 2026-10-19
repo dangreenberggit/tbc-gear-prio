@@ -61,8 +61,6 @@ export function freePort() {
   });
 }
 
-export { findChromium };
-
 // ---------------------------------------------------------------------------
 // Build and serve: the same steps as the makefile's bundle target
 // (`npx tsx vite.build-workers.mts`, `npx vite build`), with the fixture loader

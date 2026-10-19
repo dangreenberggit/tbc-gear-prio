@@ -2,8 +2,7 @@
 
 Read the entry for what you are **about to do** — each heading is the
 action that arms the trap. The _Symptom_ line doubles as the after-the-fact
-index when something already broke. Every trap here fired for real during
-the upgrades-ui-fit pass (2026-08-24). Environment basics live in
+index when something already broke. Environment basics live in
 `AGENTS.md` § CLI environment — this file covers only what that section
 does not. The commands below are for the WSL (Ubuntu) dev host.
 
@@ -15,20 +14,23 @@ does not. The commands below are for the WSL (Ubuntu) dev host.
 version other than `package.json`'s `packageManager`.
 
 Node comes from nvm and pnpm from corepack inside that Node. The repo needs
-the Node in `.node-version` (22.17.1); under another nvm Node, `pnpm` can be
-a different global pnpm (v22.23.2 had pnpm 10.6.2 on 2026-10-18). Mass test
-failure is a Node-version symptom before it is a code regression. Confirm
+the Node in `.node-version`; under another Node, `pnpm` can be a different
+pnpm (`nvm exec <version> pnpm --version` shows which). Mass test failure is
+a Node-version symptom before it is a code regression. Confirm
 `node --version` and `pnpm --version` before diagnosing test output; when
-either is wrong, switch in that shell:
+either is wrong, switch in that shell, from the repo root (nvm reads only
+`.nvmrc`, so name the version):
 
 ```sh
-source ~/.nvm/nvm.sh && nvm use 22.17.1
+source ~/.nvm/nvm.sh && nvm use "$(cat .node-version)"
 ```
 
-Run commands in a login shell (`bash -l`). nvm and the `go`, `protoc` and
-`protoc-gen-go` PATH block load from the profile, so a plain `bash -c` gets
-`/usr/local/bin/node` (v22.23.2 on 2026-10-18) and no `go`: the fork builds
-fail with "command not found".
+Run commands in a login shell (`bash -l`). The login profile must load nvm
+and put the directories holding `go`, `protoc` and `protoc-gen-go` on PATH;
+on the WSL host the untracked `~/.profile` does both (its nvm block and its
+`tbc-gear-prio WSL move` block). A plain `bash -c` skips the profile, so it
+gets the system `node` (`bash -c 'command -v node; node --version'` shows
+which) and no `go`: the fork builds fail with "command not found".
 
 **Fork-gated suites never run in CI.** Every suite that imports
 `forkPresent` — among them `fork-set-net.test.ts`,
@@ -50,8 +52,8 @@ lines; a 2-hash `sed` rewriting all 182 lines of a file); or a reviewer
 reports CRLF where HEAD is LF.
 
 A rewrite that changes a whole file's line endings does this: a script that
-writes LF over one of the CRLF files (the index holds 289, most under
-`.scratch/`; `git ls-files --eol | grep -c i/crlf`), or a Windows editor
+writes LF over one of the CRLF files (`git ls-files --eol | grep i/crlf`
+lists them), or a Windows editor
 saving over the `\\wsl.localhost\...` path as CRLF. Edit text files with the
 harness Edit tool, which preserves endings. After
 any scripted or generated write, read `git diff --stat` before committing:

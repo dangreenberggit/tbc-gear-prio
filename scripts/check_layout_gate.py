@@ -68,11 +68,13 @@ gate forever, which is the "report success by skipping" failure mode again.
 
 Node 22 note
 ------------
-`test-layout.mjs` uses Node 22's global `WebSocket` and `node:*` modules. This
-script launches it under `fnm exec --using=22` when `fnm` is on PATH and the
-running interpreter's Node is older, so the gate does not silently misbehave on
-a shell that resolved Node 20. If neither a suitable Node nor `fnm` is
-available, that is reported and the gate is skipped rather than run wrong.
+`test-layout.mjs` uses Node 22's global `WebSocket` and `node:*` modules. On
+the dev host Node comes from nvm: `nvm use "$(cat .node-version)"` puts the
+repo's Node 22 on PATH (nvm itself reads only `.nvmrc`). When the `node` on
+PATH is older, this script falls back to `fnm exec --using=22` if `fnm` is on
+PATH, so the gate does not silently misbehave on a shell that resolved Node 20.
+If neither a suitable Node nor `fnm` is available, that is reported and the
+gate is skipped rather than run wrong.
 
 Usage
 -----
@@ -456,6 +458,10 @@ CHROMIUM_MISSING = (
     "Playwright's Chromium is not installed (scripts/tab-harness/chromium.mjs "
     "found none; install it with `pnpm exec playwright install chromium`)."
 )
+CHROMIUM_SKIP_NOTE = (
+    "The gate drives a headless Chromium and cannot run without one -- a "
+    "missing prerequisite skips the gate rather than blocking the merge."
+)
 LOOKUP_STDERR_CHARS = 600
 
 
@@ -470,8 +476,9 @@ def _run_chromium_lookup(
     cmd = _node_command(CHROMIUM_LOOKUP, extra)
     if cmd is None:
         return None, (
-            "no Node >= 22 is on PATH and no `fnm` to select one, so "
-            "scripts/tab-harness/chromium.mjs could not run. Put Node 22 on PATH."
+            "no Node >= 22 is on PATH, so scripts/tab-harness/chromium.mjs "
+            "could not run. Put the repo's Node 22 on PATH with "
+            '`nvm use "$(cat .node-version)"`.'
         )
     argv, _how = cmd
     try:
@@ -673,9 +680,10 @@ def run_gate(fixture: Path | None = None) -> GateResult:
     cmd = _layout_command()
     if cmd is None:
         print(
-            "layout gate: SKIPPED -- no Node >= 22 and no `fnm` to select it. "
+            "layout gate: SKIPPED -- no Node >= 22 is on PATH. "
             "test-layout.mjs needs Node 22 (global WebSocket); refusing to run "
-            "it on an older Node rather than fail for the wrong reason.",
+            "it on an older Node rather than fail for the wrong reason. Put the "
+            'repo\'s Node 22 on PATH with `nvm use "$(cat .node-version)"`.',
         )
         return GateResult(GATE_UNMEASURED, None, None)
     argv, how = cmd
@@ -799,11 +807,7 @@ def preview_skip_reason() -> str | None:
         )
     chromium_problem = _chromium_problem()
     if chromium_problem is not None:
-        return (
-            f"{chromium_problem} The gate drives a headless Chromium and cannot "
-            "run without one -- a missing prerequisite skips the gate rather "
-            "than blocking the merge."
-        )
+        return f"{chromium_problem} {CHROMIUM_SKIP_NOTE}"
 
     return None
 
@@ -885,11 +889,7 @@ def run(
         )
     chromium_problem = _chromium_problem()
     if chromium_problem is not None:
-        return _skip(
-            f"{chromium_problem} The gate drives a headless Chromium and cannot "
-            "run without one -- a missing prerequisite skips the gate rather "
-            "than blocking the merge."
-        )
+        return _skip(f"{chromium_problem} {CHROMIUM_SKIP_NOTE}")
 
     if baseline is None:
         print(
