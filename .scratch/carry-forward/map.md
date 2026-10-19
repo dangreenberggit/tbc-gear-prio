@@ -387,3 +387,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 695 Tab dev servers keep running when only pnpm is signalled (pre-merge review feat/wsl-linux-support, A6) 2026-10-19
 - 696 Agent files left to change for the WSL dev host (pre-merge review feat/wsl-linux-support, A7 S10 Q9 P3) 2026-10-19
 - 697 The CLI ranking can print tied items with their rank labels out of order (sim comparison 2026-10-18, feat/wsl-linux-support fix pass) 2026-10-19
+- 698 Two WSL distros with the same prompt make it easy to work in the wrong one (owner request, WSL move) 2026-10-19
