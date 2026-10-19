@@ -3,8 +3,9 @@
 // (scripts/tab-fixtures/smoke.mjs, record.mjs) import it. It lives in the main
 // repo and drives the fork clone at vendor/tbc-new-fork (FORK_ROOT).
 //
-// It drives an on-disk Chromium (Playwright's, already present) over raw CDP on
-// Node 22's global WebSocket: no puppeteer, no playwright, no jsdom.
+// It drives Playwright's Chromium (located by chromium.mjs) over raw CDP on
+// Node 22's global WebSocket. Playwright only finds the browser: no puppeteer,
+// no Playwright page API, no jsdom.
 //
 // Re-created for the React tab (ticket 558): selectors are the tab's
 // data-testids and the tab is opened through the sim tab strip. The layout and
@@ -19,6 +20,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { findChromium } from "./chromium.mjs";
 import { documentRowCountExpression, RESULT_ROW } from "./rows.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -59,19 +61,7 @@ export function freePort() {
   });
 }
 
-export function findChromium() {
-  const base = path.join(os.homedir(), "AppData", "Local", "ms-playwright");
-  if (fs.existsSync(base)) {
-    for (const dir of fs.readdirSync(base).sort().reverse()) {
-      if (!dir.startsWith("chromium-")) continue;
-      const exe = path.join(base, dir, "chrome-win64", "chrome.exe");
-      if (fs.existsSync(exe)) return exe;
-    }
-  }
-  throw new Error(
-    `no Chromium found under ${base} -- expected a Playwright chromium-*/chrome-win64/chrome.exe`
-  );
-}
+export { findChromium };
 
 // ---------------------------------------------------------------------------
 // Build and serve: the same steps as the makefile's bundle target

@@ -19,7 +19,8 @@
 // The caller owns the server; this harness owns only the browser. See the
 // desktop-transport-gate stage plan for the signals and the gate that
 // judges them (scripts/check_desktop_tab.py). Node 22+ only (global WebSocket
-// and fetch, no npm deps).
+// and fetch); its one npm dependency, playwright, only locates the browser
+// (chromium.mjs).
 //
 // Usage:
 //   node scripts/tab-harness/run-tab-cdp.mjs --origin http://localhost:3333 [--page /tbc/paladin/retribution/]
@@ -57,11 +58,11 @@
 
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
-import fs from "node:fs";
 import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
+import { findChromium } from "./chromium.mjs";
 import { RESULT_ROW, ROW_HELPERS } from "./rows.mjs";
 
 const WIDTH = 1280;
@@ -131,16 +132,6 @@ function freePort() {
       srv.close(() => resolve(port));
     });
   });
-}
-
-function findChromium() {
-  const base = path.join(os.homedir(), "AppData", "Local", "ms-playwright");
-  for (const dir of fs.readdirSync(base)) {
-    if (!dir.startsWith("chromium-")) continue;
-    const exe = path.join(base, dir, "chrome-win64", "chrome.exe");
-    if (fs.existsSync(exe)) return exe;
-  }
-  throw new Error("no chromium under ms-playwright");
 }
 
 async function launchChrome() {

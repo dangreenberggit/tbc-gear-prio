@@ -38,6 +38,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from check_layout_gate import (  # noqa: E402
     A11Y_BASELINE_PATH,
+    CHROMIUM_MISSING,
     DIST_ASSETS,
     DIST_WASM_CANDIDATES,
     FIXTURE_DIR,
@@ -99,9 +100,8 @@ def run(manifest: str, out: str | None) -> int:
         )
     if _find_chromium() is None:
         return _error(
-            "no Playwright Chromium found under ~/AppData/Local/ms-playwright "
-            "(chromium-*/chrome-win64/chrome.exe). The capture drives a headless "
-            "Chromium and cannot run without one."
+            f"{CHROMIUM_MISSING} The capture drives a headless Chromium and "
+            "cannot run without one."
         )
 
     cmd = _node_command(

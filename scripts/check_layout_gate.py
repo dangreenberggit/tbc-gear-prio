@@ -432,30 +432,37 @@ def write_baseline(digest: str) -> None:
     )
 
 
+CHROMIUM_LOOKUP = HARNESS_DIR / "chromium.mjs"
+CHROMIUM_MISSING = (
+    "Playwright's Chromium is not installed (scripts/tab-harness/chromium.mjs "
+    "found none; install it with `pnpm exec playwright install chromium`)."
+)
+
+
 def _find_chromium() -> Path | None:
-    """A Playwright Chromium on disk, or None. Mirrors test-layout.mjs findChromium.
+    """The Chromium the harness will launch, or None if it is not installed.
 
     The layout test throws when it cannot find one, which would surface as a
     nonzero exit and read as "layout broken". A missing browser is a prereq
     absence, not a layout failure, so it must be detected here and turned into a
     clean skip -- the run/skip/fail distinction the whole gate is built on. The
-    search matches the fork's own: any `chromium-*/chrome-win64/chrome.exe` under
-    the user's `ms-playwright`, so a version bump that moves the pinned path
-    still counts as present.
+    answer comes from the same helper the harness uses (chromium.mjs, which asks
+    the pinned Playwright), so the gate and the test cannot disagree about it.
     """
-    base = Path(os.path.expanduser("~")) / "AppData" / "Local" / "ms-playwright"
-    if not base.is_dir():
-        return None
     try:
-        for child in sorted(base.iterdir()):
-            if not child.name.startswith("chromium-"):
-                continue
-            exe = child / "chrome-win64" / "chrome.exe"
-            if exe.is_file():
-                return exe
-    except OSError:
+        out = subprocess.run(
+            ["node", str(CHROMIUM_LOOKUP)],
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+    except (OSError, subprocess.SubprocessError):
         return None
-    return None
+    if out.returncode != 0:
+        return None
+    exe = Path(out.stdout.strip())
+    return exe if exe.is_file() else None
 
 
 def _node_major(node_exe: str = "node") -> int | None:
@@ -695,10 +702,9 @@ def preview_skip_reason() -> str | None:
         )
     if _find_chromium() is None:
         return (
-            "no Playwright Chromium found under ~/AppData/Local/ms-playwright "
-            "(chromium-*/chrome-win64/chrome.exe). The gate drives a headless "
-            "Chromium and cannot run without one -- a missing/rotted browser "
-            "path skips the gate rather than blocking the merge."
+            f"{CHROMIUM_MISSING} The gate drives a headless Chromium and cannot "
+            "run without one -- a missing browser skips the gate rather than "
+            "blocking the merge."
         )
 
     return None
@@ -781,10 +787,9 @@ def run(
         )
     if _find_chromium() is None:
         return _skip(
-            "no Playwright Chromium found under ~/AppData/Local/ms-playwright "
-            "(chromium-*/chrome-win64/chrome.exe). The gate drives a headless "
-            "Chromium and cannot run without one -- a missing/rotted browser "
-            "path skips the gate rather than blocking the merge."
+            f"{CHROMIUM_MISSING} The gate drives a headless Chromium and cannot "
+            "run without one -- a missing browser skips the gate rather than "
+            "blocking the merge."
         )
 
     if baseline is None:
