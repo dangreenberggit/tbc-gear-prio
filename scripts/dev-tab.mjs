@@ -41,6 +41,8 @@ function parseArgs(argv) {
   const args = { mode: "both", backendPort: 3333, frontendPort: 5173 };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
+    // pnpm passes a literal `--` through to the script.
+    if (a === "--") continue;
     if (a === "--backend-port") args.backendPort = Number(argv[++i]);
     else if (a === "--frontend-port") args.frontendPort = Number(argv[++i]);
     else if (["both", "backend", "frontend", "desktop"].includes(a))
