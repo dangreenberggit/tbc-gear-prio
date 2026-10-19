@@ -23,6 +23,7 @@
 
 import { spawn, spawnSync } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -67,9 +68,22 @@ function killTree(child, group = false) {
     spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
       stdio: "ignore",
     });
-  else if (group) process.kill(-child.pid, "SIGTERM");
+  else if (group) killGroup(child.pid);
   else child.kill("SIGTERM");
 }
+
+// The group outlives its leader: when the server exits on its own, its
+// children (tsc --watch) are still running in it.
+function killGroup(pgid) {
+  try {
+    process.kill(-pgid, "SIGTERM");
+  } catch (err) {
+    if (err.code !== "ESRCH") throw err;
+  }
+}
+
+// A signal death has no exit code; 128 + its number is the shell's convention.
+const signalExitCode = (signal) => 128 + (os.constants.signals[signal] ?? 0);
 
 function runSync(cmd, args, env = process.env) {
   const r = spawnSync(cmd, args, { cwd: FORK, stdio: "inherit", env });
@@ -78,8 +92,10 @@ function runSync(cmd, args, env = process.env) {
     throw new Error(`${cmd} ${args.join(" ")} exited ${r.status}`);
 }
 
-// Runs the server in the foreground until it exits or this process is told
-// to stop, then exits with the server's code.
+// Exits 0 only when this script stopped the server (Ctrl+C, SIGTERM or
+// SIGHUP to it). A server that ends any other way, even with code 0 or by a
+// signal from outside, is a failure the caller (a terminal, a launcher, or
+// `both` mode) must be able to see.
 function serve(cmd, args) {
   // stdin is ignored because a process outside the terminal's foreground
   // group is stopped (SIGTTIN) when it reads the terminal, and both servers
@@ -90,13 +106,24 @@ function serve(cmd, args) {
     stdio: ["ignore", "inherit", "inherit"],
     detached,
   });
-  const stop = () => killTree(child, detached);
+  let stopRequested = false;
+  const stop = () => {
+    stopRequested = true;
+    killTree(child, detached);
+  };
   for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"]) process.on(sig, stop);
   child.on("error", (err) => {
     console.error(`[dev-tab] could not start ${cmd}: ${err.message}`);
     process.exit(1);
   });
-  child.on("exit", (code, signal) => process.exit(code ?? (signal ? 0 : 1)));
+  child.on("exit", (code, signal) => {
+    if (detached) killGroup(child.pid);
+    if (stopRequested) process.exit(0);
+    console.error(
+      `[dev-tab] the server ended on its own (${signal ? `signal ${signal}` : `exit ${code}`}).`
+    );
+    process.exit(signal ? signalExitCode(signal) : code || 1);
+  });
 }
 
 function backend(port) {
@@ -192,13 +219,22 @@ function both(args) {
     return { mode, child };
   });
   let exitCode = null;
+  let stopRequested = false;
   const stopAll = () => children.forEach(({ child }) => killTree(child));
-  for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"]) process.on(sig, stopAll);
+  for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"])
+    process.on(sig, () => {
+      stopRequested = true;
+      stopAll();
+    });
   for (const { mode, child } of children) {
-    child.on("exit", (code) => {
+    child.on("exit", (code, signal) => {
+      // The first wrapper to end decides. A wrapper exits 0 only when it
+      // stopped its own server on a stop signal (see serve).
       if (exitCode === null) {
-        exitCode = code ?? 0;
-        log(`${mode} stopped (exit ${code}); stopping the other server.`);
+        exitCode = stopRequested ? 0 : (code ?? signalExitCode(signal));
+        log(
+          `${mode} stopped (${signal ? `signal ${signal}` : `exit ${code}`}); stopping the other server.`
+        );
         stopAll();
       }
       if (
