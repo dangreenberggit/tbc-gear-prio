@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-wsl-linux-support.md
 Blocks: none
@@ -51,3 +51,39 @@ says to drop it on the WSL host, and the AGENTS.md proposal
 (`.scratch/wsl-move/agents-md-proposal.md`) lists it only under "Related,
 outside this proposal". Decide whether to drop it or keep it for the Windows
 checkout until that is frozen.
+
+## Closing note
+
+Resolved by the commit "Apply WSL edits to AGENTS.md and launch.json" on
+`feat/wsl-linux-support`, the child of `tbc-gear-prio@12b5c899`; that commit
+also closes this ticket, so it cannot name its own sha. The owner approved
+`.scratch/wsl-move/agents-md-proposal-v2.md` P1-P12 as written, and P9-P12
+cover all four items:
+
+- A7 (P9): `wowsims-fork` runs `node scripts/dev-tab.mjs frontend` from the
+  repo root.
+- Q9 (P10): `wowsims-backend` runs `node scripts/dev-tab.mjs backend`, with
+  `port: 3333` and `autoPort: false` kept.
+- S10 (P11): no change. `node` and `go` resolve in every consumer measured on
+  2026-10-18 (known-traps entry, as committed in `tbc-gear-prio@12b5c899`).
+- P3 (P12): no change to the tracked hook; its tests pass on WSL.
+
+Verified by:
+
+```sh
+# from the repo root, for each entry: start its runtimeExecutable and
+# runtimeArgs, wait for the port, SIGTERM only the top-level pid, then:
+node scripts/dev-tab.mjs frontend & sleep 5; kill -TERM $!; sleep 2
+pgrep -f 'tsc --noEmit --watch'   # prints nothing
+node scripts/dev-tab.mjs backend & sleep 30; kill -TERM $!; sleep 2
+pgrep -af 'vite|wowsimtbc'; ss -ltn 'sport = :5173 or sport = :3333'
+bash .claude/hooks/tests/bash-footguns.sh
+```
+
+On 2026-10-18 on WSL, before the stop, Windows `Invoke-WebRequest` got 200
+from `http://localhost:5173/tbc/` and from `http://localhost:3333/version`.
+After the SIGTERM, each top-level process exited 0, `pgrep` found no tsc,
+vite, wowsimtbc or dev-tab process, and both ports were free. These runs
+started the entries by hand; `preview_start` and `preview_stop` from a Claude
+Code session in WSL were not run, so whether `preview_stop` sends SIGTERM is
+untested.

@@ -18,26 +18,13 @@
     {
       "name": "wowsims-fork",
       "runtimeExecutable": "node",
-      "runtimeArgs": [
-        "node_modules/vite/bin/vite.js",
-        "serve",
-        "--config",
-        "../../scripts/tab-harness/vite.config.mjs",
-        "--port",
-        "5173",
-        "--strictPort"
-      ],
-      "cwd": "vendor/tbc-new-fork",
+      "runtimeArgs": ["scripts/dev-tab.mjs", "frontend"],
       "port": 5173
     },
     {
       "name": "wowsims-backend",
-      "runtimeExecutable": "sh",
-      "runtimeArgs": [
-        "-c",
-        "mkdir -p binary_dist/tbc && cp sim/web/dist.go.tmpl binary_dist/dist.go && : > binary_dist/tbc/embedded && go build -o wowsimtbc ./sim/web && exec ./wowsimtbc --usefs=true --launch=false --host=:3333"
-      ],
-      "cwd": "vendor/tbc-new-fork",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/dev-tab.mjs", "backend"],
       "port": 3333,
       "autoPort": false
     },
