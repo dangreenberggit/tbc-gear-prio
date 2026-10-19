@@ -17,12 +17,8 @@
     },
     {
       "name": "wowsims-fork",
-      "runtimeExecutable": "fnm",
+      "runtimeExecutable": "node",
       "runtimeArgs": [
-        "exec",
-        "--using=22",
-        "--",
-        "node",
         "node_modules/vite/bin/vite.js",
         "serve",
         "--config",
@@ -36,10 +32,10 @@
     },
     {
       "name": "wowsims-backend",
-      "runtimeExecutable": "cmd",
+      "runtimeExecutable": "sh",
       "runtimeArgs": [
-        "/c",
-        "(if not exist binary_dist\\tbc mkdir binary_dist\\tbc) && copy /y sim\\web\\dist.go.tmpl binary_dist\\dist.go && type nul > binary_dist\\tbc\\embedded && go build -o wowsimtbc.exe ./sim/web && .\\wowsimtbc.exe --usefs=true --launch=false --host=:3333"
+        "-c",
+        "mkdir -p binary_dist/tbc && cp sim/web/dist.go.tmpl binary_dist/dist.go && : > binary_dist/tbc/embedded && go build -o wowsimtbc ./sim/web && exec ./wowsimtbc --usefs=true --launch=false --host=:3333"
       ],
       "cwd": "vendor/tbc-new-fork",
       "port": 3333,
@@ -47,13 +43,15 @@
     },
     {
       "name": "wowsims-fork-prod",
-      "runtimeExecutable": "C:\\Users\\dgree\\Code\\lulz\\tbc-gear-prio\\vendor\\tbc-new-fork\\node_modules\\.bin\\http-server.cmd",
+      "runtimeExecutable": "node",
       "runtimeArgs": [
-        "C:\\Users\\dgree\\Code\\lulz\\tbc-gear-prio\\vendor\\tbc-new-fork\\dist",
+        "node_modules/http-server/bin/http-server",
+        "dist",
         "-p",
         "4180",
         "-c-1"
       ],
+      "cwd": "vendor/tbc-new-fork",
       "port": 4180
     },
     {
@@ -68,7 +66,7 @@
     },
     {
       "name": "web-shell-prod",
-      "runtimeExecutable": "C:/Users/dgree/AppData/Roaming/fnm/node-versions/v22.16.0/installation/node.exe",
+      "runtimeExecutable": "node",
       "runtimeArgs": [
         "apps/web/dist-server/main.js"
       ],

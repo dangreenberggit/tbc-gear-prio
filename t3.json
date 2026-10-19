@@ -1,0 +1,22 @@
+{
+  "$schema": "https://t3.codes/schema/t3.json",
+  "scripts": [
+    {
+      "name": "Tab dev servers",
+      "command": "pnpm tab:dev",
+      "icon": "play",
+      "previewUrl": "http://localhost:5173/tbc/"
+    },
+    {
+      "name": "Tab frontend (vite :5173)",
+      "command": "pnpm tab:frontend",
+      "icon": "play",
+      "previewUrl": "http://localhost:5173/tbc/"
+    },
+    {
+      "name": "Tab backend (Go :3333)",
+      "command": "pnpm tab:backend",
+      "icon": "play"
+    }
+  ]
+}
