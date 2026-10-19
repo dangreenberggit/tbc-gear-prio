@@ -18,39 +18,56 @@ which runs the version in `package.json`'s `packageManager`. Mass test
 failure is a Node-version symptom before it is a code regression. Confirm
 `node --version` and `pnpm --version` before diagnosing test output.
 
-The WSL host's intended setup has one place that names the machine's Node:
-`~/.local/node-default`, a symlink to an nvm version folder.
-`/usr/local/bin/{node,npm,npx,corepack,pnpm}` point through it, and nvm's
-default alias is `system`. With that setup, a process gets that Node when
-its PATH has `/usr/local/bin` and no nvm folder: login and interactive
-shells, `bash -c` and `wsl.exe -e` (the check below), and `t3code.service`
-(its PATH in `/proc/<pid>/environ`). Git hooks get the PATH of the process
-that runs git. Whether the Claude Code processes T3 starts get it:
-hypothesis, untested. Claude Code's Bash tool takes
-its PATH from the claude process, not from `~/.bashrc`, so a fix made only in
-a shell rc file does not reach it (before the setup, `echo $PATH` in that
-tool shows no nvm folder, although `~/.bashrc` loads nvm).
+In WSL, `/usr/local/bin` is the one directory on every process's PATH, so
+each tool the project runs is linked there: `node`, `npm`, `npx`,
+`corepack` and `pnpm` through `~/.local/node-default` (a symlink to an nvm
+version folder; nvm's default alias is `system`), and `go`, `gofmt`,
+`protoc` and `protoc-gen-go` straight to `~/.local/go/bin`,
+`~/.local/protoc/bin` and `~/go/bin`. `python` is `/usr/bin/python` from
+the apt package `python-is-python3`. So any shell finds them: login,
+interactive, `bash -c`, `wsl.exe -e`, `t3code.service` and the git hooks
+each of those runs. To upgrade, replace the files behind a link, with no
+sudo: repoint `~/.local/node-default`, unpack a new Go or protoc into its
+folder, or `go install google.golang.org/protobuf/cmd/protoc-gen-go@<ver>`.
 
-Check the setup in a new WSL terminal, from the repo root. Each line must
-print what its comment says, where `<v>` is the `.node-version` version:
+T3 reads PATH from `bash -ilc` once, when it starts, puts it in front of
+its own, and passes it to every Claude Code process it launches; Claude
+Code's Bash tool takes its PATH from that process. Measured on 2026-10-18:
+T3 started before nvm's default became `system`, so its PATH still has
+`~/.nvm/versions/node/v22.17.1/bin` ahead of `/usr/local/bin`, and
+`command -v node` there names that folder (same version today). A headless
+`claude -p` run in that environment found the same node, go, protoc,
+protoc-gen-go and python as a login shell. So after a change to
+`~/.profile`, `~/.bashrc`, the nvm default or `~/.local/node-default`,
+restart T3 when `C:\Users\<user>\.local\bin\t3-safe-off.ps1 -Check -Json`
+says it is idle; until then its agents keep the PATH from T3's start.
+
+Check the setup in a new WSL terminal, from the repo root. The `readlink`
+lines must print what their comments say, where `<v>` is the
+`.node-version` version, and the last two lines must print the same
+versions as each other:
 
 ```sh
 readlink ~/.local/node-default   # /home/<user>/.nvm/versions/node/v<v>
 readlink /usr/local/bin/node     # /home/<user>/.local/node-default/bin/node
-bash -lc 'node --version'        # v<v>
-env -i PATH=/usr/local/bin:/usr/bin:/bin bash -c 'node --version'   # v<v>
+T='node --version; pnpm --version; go version; protoc --version; protoc-gen-go --version; python --version'
+bash -lc "$T" | tr '\n' ' '; echo
+env -i HOME=$HOME PATH=/usr/local/bin:/usr/bin:/bin bash -c "$T" | tr '\n' ' '; echo
 ```
 
-From Windows, `wsl.exe -d Ubuntu-22.04 -e node --version` must print it too,
-and `pnpm --version` in the repo must print the `packageManager` version.
-Before this setup, the WSL host's `/usr/local/bin/node` points straight at
-one nvm version folder while nvm's default alias names another, so
-`bash -c`, `wsl.exe` and T3's processes get one Node and login shells
-another; the second `readlink` line shows which state the host is in.
+`pnpm --version` must print the `packageManager` version. From Windows,
+`wsl.exe -d Ubuntu-22.04 -e go version` and
+`wsl.exe -d Ubuntu-22.04 -e node --version` must print the same versions.
+Before the Node part of this setup, the WSL host's `/usr/local/bin/node`
+points straight at one nvm version folder while nvm's default alias names
+another, so `bash -c`, `wsl.exe` and T3's processes get one Node and login
+shells another; the second `readlink` line shows which state the host is in.
 
-One-time setup on a new host, after installing nvm: run this in a login
-shell (where `nvm` is defined), from the repo root. Only the `sudo` line
-needs root.
+One-time setup on a new host, after installing nvm, unpacking Go into
+`~/.local/go` and protoc into `~/.local/protoc`, and running
+`go install google.golang.org/protobuf/cmd/protoc-gen-go@<ver>`: run this
+in a login shell (where `nvm` is defined), from the repo root. Only the
+`sudo` lines need root.
 
 ```sh
 V="$(cat .node-version)"
@@ -58,16 +75,13 @@ nvm install "$V" && ~/.nvm/versions/node/v"$V"/bin/corepack enable
 mkdir -p ~/.local && ln -sfn ~/.nvm/versions/node/v"$V" ~/.local/node-default
 for b in node npm npx corepack pnpm; do sudo ln -sfn "$HOME/.local/node-default/bin/$b" /usr/local/bin/$b; done
 nvm alias default system
+sudo ln -sf -t /usr/local/bin "$HOME/.local/go/bin/go" "$HOME/.local/go/bin/gofmt" "$HOME/.local/protoc/bin/protoc" "$HOME/go/bin/protoc-gen-go"
+sudo apt install python-is-python3
 ```
 
-To change the machine's Node later, bump `.node-version` and run the first three lines again; they
-need no `sudo`. To use another Node in one shell only: `nvm use <v>`.
-
-Run commands in a login shell (`bash -l`). The login profile must put the
-directories holding `go`, `protoc` and `protoc-gen-go` on PATH; on the WSL
-host the untracked `~/.profile` does this in its `tbc-gear-prio WSL move`
-block. A `bash -c` or `wsl.exe -e` process skips the profile and has no
-`go`: the fork builds fail with "command not found".
+To change the machine's Node later, bump `.node-version` and run the first
+three lines again; they need no `sudo`. To use another Node in one shell
+only: `nvm use <v>`.
 
 **Fork-gated suites never run in CI.** Every suite that imports
 `forkPresent` — among them `fork-set-net.test.ts`,
@@ -169,8 +183,8 @@ difference. Nothing in `pnpm verify` reads either field, so a hand edit there
 is invisible to every gate.
 
 For a sha pin `fetch_wowsimcli.py` **builds from source** — it needs `go`,
-`protoc` and `protoc-gen-go` on PATH (a login shell; see "Before running node /
-pnpm / test commands"), and it hard-fails without them where it used to
+`protoc` and `protoc-gen-go` on PATH (see "Before running node / pnpm / test
+commands"), and it hard-fails without them where it used to
 download a zip. CI never runs it, so CI will not tell you.
 
 The fork gates (`equip-eligibility`, `ep-presets`, `meta-conditions`,

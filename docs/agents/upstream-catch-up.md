@@ -26,9 +26,9 @@ So every command below names its folder (`git -C`, `pnpm -C`, `npm --prefix`,
 Run each one exactly as written. A bare `python scripts/<x>.py` or
 `pnpm <script>` reads and writes the main folder's files, not the pair's.
 `pnpm -C <pair> exec python scripts/<x>.py …` runs a script in `<pair>` with
-flags that no `package.json` script passes. Run the commands in a login shell
-(`bash -l`), which has the Go and protoc tools on PATH
-(`docs/agents/known-traps.md`, "Before running node / pnpm / test commands").
+flags that no `package.json` script passes. The Go and protoc tools are on
+every WSL shell's PATH (`docs/agents/known-traps.md`, "Before running node /
+pnpm / test commands").
 
 Both procedures merge into `dev` at §7 step 5, and only when the owner asks.
 
