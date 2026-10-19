@@ -193,7 +193,8 @@ scripts and logs are in the review session's scratchpad, `wsl-review/r2/`.
 Commits checked:
 
 - `2f5664c1` Record round 1 of the WSL branch review (review file, tickets
-  695 and 696, `NEXT`, `map.md`).
+  693 and 694, which `8ce1f9e1` later renumbered to 695 and 696, `NEXT`,
+  `map.md`).
 - `5a8af638` Hash the harness Chromium build in the layout gate (A1).
 - `3c008551` Name the real cause when the Chromium lookup fails (A2, Q5).
 - `362682b2` Exit nonzero and reap the group when a server dies (A3, A4).
@@ -310,3 +311,218 @@ it closed. `.scratch/carry-forward/issues/NEXT` read 686 while tickets up to
 | P5  | Spec        | wontfix     | The win32 branches keep `pnpm tab:*` usable on the Windows checkout until it is frozen, and cost nothing on Linux.                                                                                                                                           |
 | P6  | Spec        | wontfix     | Same effect as A8; see A8.                                                                                                                                                                                                                                   |
 | Q9  | Standards   | defer       | `.scratch/carry-forward/issues/696-agent-files-on-the-wsl-host.md` — the fix edits `.claude/launch.json`, an agent file that needs the owner's approval.                                                                                                     |
+
+## Fix pass after the stop (owner-approved)
+
+Reviewed range: `4d36a3ca9e96e2c2017a44dcc162bdbd95438ea3..519d48ddf2c98a6e40108ed8dc456711e9fa3a38`
+
+The skill allows no round 3, so after the stop the owner decided how to go
+on: "yeah a fix pass if fine and should happen first. the node version issue
+is basically a critical environment issue". A fix pass then made five
+commits, `99422b97`, `1e4e1f56`, `8ce1f9e1`, `368a821e` and `519d48dd`
+(`git log b25c77fa..519d48dd`). The two commits before them in this range,
+`4dba6951` and `b25c77fa`, change only this file (`git log --stat`).
+
+Dispatch: one fresh `general-task` agent on Opus (review lane), which ran
+every check itself, spawned no subagents, and had no part in writing the
+fix pass. It ran in the WSL clone (Ubuntu-22.04, user `daniel`), through
+scripts in the review session's scratchpad, `wsl-rereview/` (`s1.sh` to
+`s7.sh`, logs beside them). The branch never moves the fork pin
+(`git diff --quiet dev...519d48dd -- data/wowsims-fork.lock.json` exits 0).
+Before this check the owner ran the one-time Node setup that
+`docs/agents/known-traps.md` now describes.
+
+### R2-1: the layout gate and an unknown Chromium build
+
+**Fixed.** `_chromium_build` raises `ChromiumBuildUnknown` on each way the
+`--build` lookup can give no build: Node not runnable or timed out, a
+nonzero exit, or stdout with no JSON line. `run()` catches it before
+`--print-hash`, `--update-baseline` and the baseline read, prints the cause
+and returns 2. `compute_tab_hash` hashes the build last and returns nothing
+when it raises, so no partial digest can leave it. `chromium.mjs --build`
+prints a JSON object or exits 1 (`scripts/tab-harness/chromium.mjs:41-55,
+70-78`), so there is no exit-0 output that the gate would hash wrongly.
+`write_baseline` has two callers, the `--update-baseline` path and a green
+run, and both come after `compute_tab_hash` in `run()`. `merge_to_dev.py`
+and `check_tab_review.py` reach the digest only through `run()` and
+`preview_skip_reason()` (`git grep`).
+
+Evidence (`s4.sh`, `s4.log`):
+
+- With `PATH=/usr/bin:/bin` (no Node, no fnm), the default run,
+  `--print-hash` and `--update-baseline` each print `layout gate: FAILED --
+  cannot compute the tab digest. The Chromium build lookup failed: no Node
+  > = 22 is on PATH ... No baseline was read or written.`and exit 2.`--preview-skip`prints`layout: would fail -- ...`and exits 0, which is
+what`pnpm verify`'s tail line shows.
+- In-process, with only the `--build` lookup faked (exit 1, non-JSON
+  stdout, or a timeout) and the executable lookup real, which is the case
+  R2-1 described: `run()`, `run(print_hash=True)` and
+  `run(update_baseline=True)` each return 2, and the stubbed
+  `write_baseline` was never called.
+- `sha256sum` of `data/wowsims-fork-layout.lock.json` was the same before
+  and after, and `git status --porcelain` stayed empty.
+- With the real build, `--print-hash` prints `e5810661...`, equal to the
+  lock's `testedTabHash`, and `chromium.mjs --build` prints revision 1200.
+
+Exit 2 fits the script's contract: 1 means the gate ran and measured a
+failure, 2 means a real error (module docstring, "Exit codes", which the
+fix extended to name the build).
+
+Other exceptions: a `UnicodeDecodeError` while decoding the lookup's output
+is not caught, and would end the script with a traceback (exit 1). It
+writes no baseline, so it is loud, not silent. Not a finding.
+
+### R2-2: the single-source Node entry in `known-traps.md`
+
+**Fixed, and correct on the machine as it is now.** The check block, run as
+written (`s6.sh`; the last line from Windows):
+
+| Command                                                             | Expected                                    | Printed                                     |
+| ------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------- |
+| `readlink ~/.local/node-default`                                    | `/home/<user>/.nvm/versions/node/v<v>`      | `/home/daniel/.nvm/versions/node/v22.17.1`  |
+| `readlink /usr/local/bin/node`                                      | `/home/<user>/.local/node-default/bin/node` | `/home/daniel/.local/node-default/bin/node` |
+| `bash -lc 'node --version'`                                         | `v<v>`                                      | `v22.17.1`                                  |
+| `env -i PATH=/usr/local/bin:/usr/bin:/bin bash -c 'node --version'` | `v<v>`                                      | `v22.17.1`                                  |
+| `wsl.exe -d Ubuntu-22.04 -e node --version`                         | `v<v>`                                      | `v22.17.1`                                  |
+| `pnpm --version`                                                    | `packageManager`, `pnpm@11.24.0`            | `11.24.0` (also under `env -i`)             |
+
+`.node-version` is `22.17.1`. All five `/usr/local/bin` links (`node`,
+`npm`, `npx`, `corepack`, `pnpm`) point into `~/.local/node-default/bin`,
+and nvm's default alias is `system`. `t3code.service`'s processes have the
+systemd user PATH, with `/usr/local/bin` and no nvm folder
+(`/proc/<pid>/environ`, `s7.sh`). No fnm is on the WSL host.
+
+The setup block is in the right order: it installs Node and corepack's
+shims, points `~/.local/node-default` at that Node, links `/usr/local/bin`
+through it, then sets nvm's default to `system`. Its only gap is R3-4. The
+entry keeps machine facts out of the text, and every line of the check
+block names its expected output. One sentence claimed processes that the
+check does not cover (R3-5). The rest of the entry follows the
+durable-claims rule and the `writing-for-agents` skill: one entry holds the
+whole Node topic, and `upstream-catch-up.md` and ticket 696 point at it
+rather than copy it.
+
+### Renumbering and the new tickets
+
+**Clean, with one bookkeeping slip.** No reference to 693 or 694 meant as
+this branch's tickets is left (`git grep -nE '\b69[34]\b' HEAD`; every hit is
+an unrelated number such as a line number or a sim value). The renumber
+avoids `693-mirror-metric-rename-to-fork-engine-copy.md` on
+`claude/dps-naming-audit-d26eb7` (`git ls-tree` over the Windows checkout's
+branches). `NEXT` reads 699. Tickets 697 and 698 have the five header lines,
+`Status: open`, a `Blocked by:` line, and a `map.md` line. Their `Origin:`
+names the sim comparison and the owner's request, because no review created
+them. The slip is R3-6.
+
+### R2-3
+
+**Wontfix, now unreachable in practice.** `_chromium_build` runs inside
+`compute_tab_hash` before `_chromium_problem`, through the same
+`_node_command` argv prefix. If fnm exits nonzero on the `--build` call,
+the gate now exits 2 with fnm's own stderr in the message, before the
+"Chromium is not installed" branch can run. The misreport would need fnm to
+fail on the plain lookup and succeed on `--build` a moment earlier. The
+WSL host has no fnm (`command -v fnm`). The worker's reason (the clean fix
+touches the hashed `chromium.mjs`) is true but not needed.
+
+### New findings
+
+- **R3-1 (R2-1 fix; a loud failure with a wrong line).**
+  `scripts/merge_to_dev.py:496` prints `FAIL: layout gate failed — Upgrades
+tab layout is broken` for any nonzero exit. After the R2-1 fix, exit 2 is
+  the normal result on a checkout with no Node 22 or no `playwright`
+  package, so the last line blames the layout for a setup problem. The
+  gate's own line above it names the real cause.
+- **R3-2 (R2-1 fix; comments).** Four comments still say a failed lookup
+  skips: the `check_layout_gate.py` docstring list ("or the lookup fails ->
+  skip, exit 0") and its next paragraph ("A rotted browser path ... must
+  never wall off a merge"), the `_node_command` docstring ("When neither is
+  available the gate is skipped"), and the comment above the gate call in
+  `merge_to_dev.py` ("skips cleanly (returns 0) otherwise").
+- **R3-3 (R2-1 fix; behaviour change, checked).** A missing Node 22 or
+  `playwright` package used to skip the gate; it now blocks
+  `pnpm merge-to-dev` with exit 2. That includes the Windows checkout until
+  `pnpm install` runs there, as the fix pass's worker said. Both fixes that
+  R2-1 suggested kept a skip; this one fails loudly, which matches the
+  owner's words above about the Node version. A fork-less
+  checkout and CI still skip, because `run()` checks for the fork before it
+  hashes.
+- **R3-4 (R2-2 fix; setup command).** `ln -sfn ... ~/.local/node-default`
+  fails when `~/.local` does not exist, which nothing in the block creates.
+- **R3-5 (R2-2 fix; durable claim).** "login and interactive shells, `bash
+-c`, `wsl.exe -e`, `t3code.service`, the Claude Code processes T3 starts,
+  and git hooks all get the same Node" is stated as fact. The check block
+  covers the first four. This review checked `t3code.service`'s PATH. No
+  command covers the Claude Code processes T3 starts; git hooks get the PATH
+  of the process that runs git.
+- **R3-6 (bookkeeping).** The renumber edited the round 2 record of
+  `2f5664c1` to say it filed tickets 695 and 696. That commit filed 693 and
+  694; `8ce1f9e1` renamed them.
+
+R3-1, R3-2, R3-4 and R3-5 are fixed in `b8567697` (3 files, 18
+insertions, 9 deletions). Its edits are comments, docs and one message
+string, plus one `if` that picks the message for exit 2; no exit code or
+other behaviour changed. This reviewer wrote that commit, so no fresh agent
+has read it. After it: `py_compile` passes on both scripts, `prettier
+--check` passes on `known-traps.md`, `--print-hash` still prints
+`e5810661...`, and the no-Node run still exits 2 (`s8.sh`). R3-6 is fixed
+in the commit that records this section.
+
+### `pnpm verify`
+
+At `519d48dd`, in the WSL clone with a clean tree (Node v22.17.1, pnpm
+11.24.0): rc=0, `gates: 1545 ran, 0 skipped`, `layout: skipped -- tab
+layout source unchanged since the last green run (digest
+e58106611753...)` (`verify-519d48dd.log`).
+
+## Summary (fix pass after the stop)
+
+The fix pass fixes R2-1 and R2-2. R2-3 is wontfix because the R2-1 fix
+makes it unreachable. The fix range added no data loss and no silent wrong
+result. It did add one loud failure with a wrong last line (R3-1), stale
+comments (R3-2) and two gaps in the new Node entry (R3-4, R3-5); all four
+are fixed in `b8567697`. R3-3 records a behaviour change that the owner's
+words cover. Every round 1 and round 2 finding now has a Disposition row,
+in round 1's table or the table below; Q9 keeps its round 1 `defer` row.
+
+Nothing is left that blocks the merge ask. Open tickets from this branch:
+695, 696, 697 and 698.
+
+Tickets: this branch filed 4 (695, 696, 697, 698) and closed 0, so it filed
+more than it closed (`git diff --name-status dev...HEAD --
+'.scratch/carry-forward/issues/*.md'`). `NEXT` reads 699.
+
+## Disposition (fix pass after the stop)
+
+| ID   | Axis           | Disposition | Ticket / note                                                                                                                                                  |
+| ---- | -------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1   | Adversarial    | fixed       | `5a8af638`, checked in round 2; the gap that R2-1 found is fixed in `99422b97`.                                                                                |
+| A2   | Adversarial    | fixed       | `3c008551` (with Q5), checked in round 2.                                                                                                                      |
+| A3   | Adversarial    | fixed       | `362682b2`, checked in round 2 with stub re-runs (`r2/t-new.log`).                                                                                             |
+| A4   | Adversarial    | fixed       | `362682b2`, checked in round 2.                                                                                                                                |
+| S1   | Standards      | fixed       | As Q1.                                                                                                                                                         |
+| S2   | Standards      | fixed       | As Q2.                                                                                                                                                         |
+| S5   | Standards      | defer       | `.scratch/carry-forward/issues/696-agent-files-on-the-wsl-host.md` — the `launch.json` half is Q9; the `check_layout_gate.py` half is Q4, fixed in `8ea2fe7a`. |
+| S6   | Standards      | fixed       | As Q5.                                                                                                                                                         |
+| S7   | Standards      | fixed       | As Q6.                                                                                                                                                         |
+| S8   | Standards      | fixed       | As Q3.                                                                                                                                                         |
+| S9   | Standards      | fixed       | As Q7.                                                                                                                                                         |
+| P1   | Spec           | fixed       | As Q8.                                                                                                                                                         |
+| Q1   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
+| Q2   | Code quality   | fixed       | `8ea2fe7a`; its wrong command (R2-2) fixed in `1e4e1f56`.                                                                                                      |
+| Q3   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
+| Q4   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
+| Q5   | Code quality   | fixed       | `3c008551`, with A2.                                                                                                                                           |
+| Q6   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
+| Q7   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
+| Q8   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
+| Q10  | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
+| R2-1 | Focused check  | fixed       | `99422b97`: an unknown build exits 2 and no path reads, prints or writes a digest (`s4.log`).                                                                  |
+| R2-2 | Focused check  | fixed       | `1e4e1f56`; its check block prints the stated values on this host (`s6.sh`). R3-4 and R3-5 fixed the rest.                                                     |
+| R2-3 | Focused check  | wontfix     | After `99422b97`, an fnm failure on the `--build` call exits 2 with fnm's stderr before the "not installed" branch runs; the WSL host has no fnm.              |
+| R3-1 | Fix-pass check | fixed       | `b8567697`: exit 2 now ends with "layout gate could not run — the cause is printed above".                                                                     |
+| R3-2 | Fix-pass check | fixed       | `b8567697`: the module docstring, the `_node_command` docstring and the `merge_to_dev.py` comment say exit 2 blocks the merge.                                 |
+| R3-3 | Fix-pass check | wontfix     | Intended: the owner called the Node version "basically a critical environment issue"; a fork-less checkout and CI still skip.                                  |
+| R3-4 | Fix-pass check | fixed       | `b8567697`: `mkdir -p ~/.local` before the `ln`.                                                                                                               |
+| R3-5 | Fix-pass check | fixed       | `b8567697`: the sentence names what the check and `/proc/<pid>/environ` cover, and marks the Claude Code processes T3 starts as hypothesis, untested.          |
+| R3-6 | Fix-pass check | fixed       | The round 2 line for `2f5664c1` now names 693 and 694 and the renumber.                                                                                        |
