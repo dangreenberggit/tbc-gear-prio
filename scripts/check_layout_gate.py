@@ -50,11 +50,16 @@ Absence of a prerequisite is an ordinary state, never a merge veto:
 
   - the fork clone is absent (fresh clone, CI)            -> skip, exit 0
   - the built `dist/` is absent (no prior `make host`)    -> skip, exit 0
-  - no Playwright Chromium is on disk                      -> skip, exit 0
+  - no Playwright Chromium is on disk, or its path lookup fails -> skip, exit 0
   - the tab digest equals the last green-tested digest     -> skip, exit 0
 
 Only a real assertion failure from `test-layout.mjs` -- the gate RAN and the
-layout is broken -- returns nonzero and blocks the merge. A rotted browser path
+layout is broken -- returns nonzero and blocks the merge. The one exception is
+a digest that cannot be computed (a missing tracked file, or a Chromium build
+that `chromium.mjs --build` cannot read, as on a checkout with no Node 22 or
+no `playwright` package): that exits 2 and also blocks the merge, because a
+digest without the build in it could be recorded as a baseline that later
+Playwright bumps match. A rotted browser path
 or a stale `dist/` must never wall off a merge; those are "skipped, prereq
 absent", reported as such and distinguished from "ran and failed".
 
@@ -68,11 +73,14 @@ gate forever, which is the "report success by skipping" failure mode again.
 
 Node 22 note
 ------------
-`test-layout.mjs` uses Node 22's global `WebSocket` and `node:*` modules. This
-script launches it under `fnm exec --using=22` when `fnm` is on PATH and the
-running interpreter's Node is older, so the gate does not silently misbehave on
-a shell that resolved Node 20. If neither a suitable Node nor `fnm` is
-available, that is reported and the gate is skipped rather than run wrong.
+`test-layout.mjs` uses Node 22's global `WebSocket` and `node:*` modules. On
+the dev host Node comes from nvm: `nvm use "$(cat .node-version)"` puts the
+repo's Node 22 on PATH (nvm itself reads only `.nvmrc`). When the `node` on
+PATH is older, this script falls back to `fnm exec --using=22` if `fnm` is on
+PATH, so the gate does not silently misbehave on a shell that resolved Node 20.
+If neither a suitable Node nor `fnm` is available, the Chromium build cannot be
+read, so the digest cannot be computed and the script exits 2 naming that
+cause rather than run the gate wrong.
 
 Usage
 -----
@@ -89,7 +97,7 @@ accessibility violation (test-layout.mjs exits 1 for either, and this
 script blocks on any measured nonzero exit, so the a11y ratchet needs no branch
 here), or the gate would run but its tab fixture is missing or unreadable; 2 = a
 real error (could not read a tracked source file that the record
-expects).
+expects, or could not read the harness's Chromium build).
 
 Accessibility: the gate passes TBC_A11Y_BASELINE (data/wowsims-fork-a11y-baseline.json)
 to the gate script when it exists, so seeded/known violations are tracked debt
@@ -234,7 +242,11 @@ MODULE_SUFFIXES = (".ts", ".tsx", ".css")
 # harness files are the assertions themselves: editing one changes the gate's
 # verdict without touching a line of tab source. `rows.mjs` is the row reader
 # `test-layout.mjs` and `test-tab-harness.mjs` import (ticket 580).
+# `chromium.mjs` decides which browser the harness launches; the build it
+# resolves is hashed too (`_chromium_build`), because a `playwright` bump
+# changes the browser without changing any file listed here.
 ROOT_GATE_FILES = (
+    "scripts/tab-harness/chromium.mjs",
     "scripts/tab-harness/rows.mjs",
     "scripts/tab-harness/test-layout.mjs",
     "scripts/tab-harness/test-tab-harness.mjs",
@@ -343,11 +355,14 @@ def _rel_root(path: Path) -> str:
 
 
 def compute_tab_hash() -> tuple[str, list[str]]:
-    """(digest, missing) over the layout source. Pure but for file reads.
+    """(digest, missing) over the layout source and the harness's Chromium build.
+
+    Pure but for file reads and the `chromium.mjs --build` lookup.
 
     The digest folds in each file's fork-relative path as well as its bytes, so
     a rename or a delete moves the digest even when the surviving bytes are
     unchanged. `missing` lists any LAYOUT_FILES entry absent from disk.
+    Raises ChromiumBuildUnknown when the Chromium build cannot be read.
     """
     h = hashlib.sha256()
     missing: list[str] = []
@@ -367,6 +382,9 @@ def compute_tab_hash() -> tuple[str, list[str]]:
         h.update(b"\0")
         h.update(path.read_bytes() if path.is_file() else b"<absent>")
         h.update(b"\0")
+    h.update(b"chromium-build\0")
+    h.update(_chromium_build())
+    h.update(b"\0")
     return h.hexdigest(), missing
 
 
@@ -413,9 +431,13 @@ def write_baseline(digest: str) -> None:
         "assets/locales/en/upgrades.json (the axe pass's accessible names are "
         "locale strings) and vite.config.mts (the gate's build reads it). "
         "It also covers, by repo-relative name, the gate's own harness "
-        "(scripts/tab-harness/rows.mjs, test-layout.mjs, test-tab-harness.mjs, "
-        "test-review.mjs; rows.mjs by ticket 580) and the recorded tab fixtures "
-        "the fixture pass renders (data/tab-fixtures/*.json, ticket 504). "
+        "(scripts/tab-harness/chromium.mjs, rows.mjs, test-layout.mjs, "
+        "test-tab-harness.mjs, test-review.mjs; rows.mjs by ticket 580), the "
+        "recorded tab fixtures the fixture pass renders (data/tab-fixtures/*.json, "
+        "ticket 504), and the Chromium build the harness launches: the chromium "
+        "entry of the browsers.json in the playwright-core that the pinned "
+        "playwright resolves (`chromium.mjs --build`), so a playwright bump "
+        "that changes the browser moves the digest. "
         "scripts/check_layout_gate.py compares the live digest to this on "
         "`pnpm merge-to-dev`; equal means the layout source that last passed is "
         "still on disk, so the gate is skipped. A green measured gate run "
@@ -432,30 +454,149 @@ def write_baseline(digest: str) -> None:
     )
 
 
-def _find_chromium() -> Path | None:
-    """A Playwright Chromium on disk, or None. Mirrors test-layout.mjs findChromium.
+CHROMIUM_LOOKUP = HARNESS_DIR / "chromium.mjs"
+CHROMIUM_LOOKUP_TIMEOUT_S = 60
+# chromium.mjs exits 2 when Playwright named a path and no browser is there.
+# Every other nonzero exit is the lookup itself failing (Node exits 1 when, say,
+# the `playwright` package cannot be imported), which must not be reported as a
+# missing browser: the install command below needs that package too.
+CHROMIUM_NOT_INSTALLED_EXIT = 2
+CHROMIUM_MISSING = (
+    "Playwright's Chromium is not installed (scripts/tab-harness/chromium.mjs "
+    "found none; install it with `pnpm exec playwright install chromium`)."
+)
+CHROMIUM_SKIP_NOTE = (
+    "The gate drives a headless Chromium and cannot run without one -- a "
+    "missing prerequisite skips the gate rather than blocking the merge."
+)
+LOOKUP_STDERR_CHARS = 600
+
+
+def _run_chromium_lookup(
+    extra: Sequence[str] = (),
+) -> tuple[subprocess.CompletedProcess[str] | None, str]:
+    """Run chromium.mjs under the gate's own Node selection.
+
+    Returns (completed, "") when it ran to an exit code, or (None, why) when it
+    could not run at all.
+    """
+    cmd = _node_command(CHROMIUM_LOOKUP, extra)
+    if cmd is None:
+        return None, (
+            "no Node >= 22 is on PATH, so scripts/tab-harness/chromium.mjs "
+            "could not run. Put the repo's Node 22 on PATH with "
+            '`nvm use "$(cat .node-version)"`.'
+        )
+    argv, _how = cmd
+    try:
+        out = subprocess.run(
+            argv,
+            cwd=str(ROOT),
+            capture_output=True,
+            text=True,
+            timeout=CHROMIUM_LOOKUP_TIMEOUT_S,
+        )
+    except subprocess.TimeoutExpired:
+        return None, (
+            f"`{' '.join(argv)}` did not finish in {CHROMIUM_LOOKUP_TIMEOUT_S} s. "
+            "Run it by hand to see where it stops."
+        )
+    except (OSError, subprocess.SubprocessError) as err:
+        return None, f"`{' '.join(argv)}` could not start: {err}."
+    return out, ""
+
+
+def _stderr_excerpt(stderr: str) -> str:
+    """The error lines of a failed lookup's stderr, bounded for one message.
+
+    Node prints a stack after the error line, so the lines naming an error say
+    more than the tail does.
+    """
+    lines = [line.strip() for line in stderr.splitlines() if line.strip()]
+    picked = [line for line in lines if re.search(r"\bError\b", line)][:2]
+    text = " | ".join(picked or lines[-5:]) or "(empty)"
+    if len(text) > LOOKUP_STDERR_CHARS:
+        text = text[: LOOKUP_STDERR_CHARS - 3] + "..."
+    return text
+
+
+def _lookup_failure(out: subprocess.CompletedProcess[str], flags: str = "") -> str:
+    """Why a chromium.mjs run that exited nonzero failed: its stderr and the fix."""
+    if "MODULE_NOT_FOUND" in out.stderr:
+        fix = (
+            "A package it imports is missing from node_modules (a checkout "
+            "where `pnpm install` has not run since `playwright` was added); "
+            "run `pnpm install`."
+        )
+    else:
+        fix = f"Run `node scripts/tab-harness/chromium.mjs{flags}` to see the whole error."
+    return (
+        f"scripts/tab-harness/chromium.mjs{flags} exited {out.returncode}. "
+        f"stderr: {_stderr_excerpt(out.stderr)} {fix}"
+    )
+
+
+class ChromiumBuildUnknown(Exception):
+    """`chromium.mjs --build` gave no build, so the tab digest cannot be computed.
+
+    Not hashed as a placeholder: a green run would record that placeholder
+    digest as the baseline, and while the lookup kept failing every later run
+    would match it and skip as "unchanged", a Playwright bump included
+    (review of feat/wsl-linux-support, finding R2-1).
+    """
+
+
+def _chromium_problem() -> str | None:
+    """None when the Chromium the harness will launch is on disk, else why not.
 
     The layout test throws when it cannot find one, which would surface as a
     nonzero exit and read as "layout broken". A missing browser is a prereq
     absence, not a layout failure, so it must be detected here and turned into a
     clean skip -- the run/skip/fail distinction the whole gate is built on. The
-    search matches the fork's own: any `chromium-*/chrome-win64/chrome.exe` under
-    the user's `ms-playwright`, so a version bump that moves the pinned path
-    still counts as present.
+    answer comes from the same helper the harness uses (chromium.mjs, which asks
+    the pinned Playwright), so the gate and the test cannot disagree about it.
+    The message names the real cause: a browser that is not installed, or a
+    lookup that failed, with its stderr and the fix.
     """
-    base = Path(os.path.expanduser("~")) / "AppData" / "Local" / "ms-playwright"
-    if not base.is_dir():
+    out, why = _run_chromium_lookup()
+    if out is None:
+        return f"The Chromium lookup failed: {why}"
+    if out.returncode == CHROMIUM_NOT_INSTALLED_EXIT:
+        return CHROMIUM_MISSING
+    if out.returncode != 0:
+        return (
+            "The Chromium lookup failed, so whether Playwright's Chromium is "
+            f"installed is unknown: {_lookup_failure(out)}"
+        )
+    if Path(out.stdout.strip()).is_file():
         return None
+    return CHROMIUM_MISSING
+
+
+def _chromium_build() -> bytes:
+    """The Chromium build the harness would launch, as bytes for the digest.
+
+    `chromium.mjs --build` reads it from the browsers.json of the
+    playwright-core that the pinned `playwright` resolves, the file Playwright
+    itself picks the build from, so a `playwright` bump that changes the build
+    moves the digest. Raises ChromiumBuildUnknown, naming the cause, when the
+    lookup does not give a build.
+    """
+    out, why = _run_chromium_lookup(["--build"])
+    if out is None:
+        raise ChromiumBuildUnknown(f"The Chromium build lookup failed: {why}")
+    if out.returncode != 0:
+        raise ChromiumBuildUnknown(
+            f"The Chromium build lookup failed: {_lookup_failure(out, ' --build')}"
+        )
     try:
-        for child in sorted(base.iterdir()):
-            if not child.name.startswith("chromium-"):
-                continue
-            exe = child / "chrome-win64" / "chrome.exe"
-            if exe.is_file():
-                return exe
-    except OSError:
-        return None
-    return None
+        entry = json.loads(out.stdout.strip().splitlines()[-1])
+    except (ValueError, IndexError):
+        raise ChromiumBuildUnknown(
+            "The Chromium build lookup printed no JSON line: "
+            f"scripts/tab-harness/chromium.mjs --build wrote {out.stdout.strip()[:200]!r}."
+        ) from None
+    return json.dumps(entry, sort_keys=True).encode("utf-8")
 
 
 def _node_major(node_exe: str = "node") -> int | None:
@@ -482,7 +623,8 @@ def _node_command(
     `extra` is appended as its arguments (e.g. --manifest/--out for
     test-review.mjs). Node 22 is required; if the ambient node is already >= 22
     it is used directly, else `fnm exec --using=22` is preferred when fnm is on
-    PATH. When neither is available the gate is skipped, not run wrong.
+    PATH. When neither is available it returns None, and the caller reports
+    that rather than run the script on the wrong Node.
     """
     tail = [str(script), *extra]
     ambient = _node_major("node")
@@ -569,9 +711,10 @@ def run_gate(fixture: Path | None = None) -> GateResult:
     cmd = _layout_command()
     if cmd is None:
         print(
-            "layout gate: SKIPPED -- no Node >= 22 and no `fnm` to select it. "
+            "layout gate: SKIPPED -- no Node >= 22 is on PATH. "
             "test-layout.mjs needs Node 22 (global WebSocket); refusing to run "
-            "it on an older Node rather than fail for the wrong reason.",
+            "it on an older Node rather than fail for the wrong reason. Put the "
+            'repo\'s Node 22 on PATH with `nvm use "$(cat .node-version)"`.',
         )
         return GateResult(GATE_UNMEASURED, None, None)
     argv, how = cmd
@@ -693,13 +836,9 @@ def preview_skip_reason() -> str | None:
             "the bundle on top of it and cannot run without it. Run `make host` "
             "in the fork once to arm the gate."
         )
-    if _find_chromium() is None:
-        return (
-            "no Playwright Chromium found under ~/AppData/Local/ms-playwright "
-            "(chromium-*/chrome-win64/chrome.exe). The gate drives a headless "
-            "Chromium and cannot run without one -- a missing/rotted browser "
-            "path skips the gate rather than blocking the merge."
-        )
+    chromium_problem = _chromium_problem()
+    if chromium_problem is not None:
+        return f"{chromium_problem} {CHROMIUM_SKIP_NOTE}"
 
     return None
 
@@ -732,7 +871,17 @@ def run(
             "restored in CI). The tab layout lives only on the main checkout."
         )
 
-    digest, missing = compute_tab_hash()
+    try:
+        digest, missing = compute_tab_hash()
+    except ChromiumBuildUnknown as err:
+        # Before --print-hash and --update-baseline too: no path may print or
+        # record a digest that does not cover the Chromium build.
+        print(
+            f"layout gate: FAILED -- cannot compute the tab digest. {err} "
+            "No baseline was read or written.",
+            file=sys.stderr,
+        )
+        return 2
     if missing:
         # A named LAYOUT_FILES entry is gone. This is not an
         # ordinary absence like a missing clone -- the fork is present but a
@@ -779,13 +928,9 @@ def run(
             "the bundle on top of it and cannot run without it. Run `make host` "
             "in the fork once to arm the gate."
         )
-    if _find_chromium() is None:
-        return _skip(
-            "no Playwright Chromium found under ~/AppData/Local/ms-playwright "
-            "(chromium-*/chrome-win64/chrome.exe). The gate drives a headless "
-            "Chromium and cannot run without one -- a missing/rotted browser "
-            "path skips the gate rather than blocking the merge."
-        )
+    chromium_problem = _chromium_problem()
+    if chromium_problem is not None:
+        return _skip(f"{chromium_problem} {CHROMIUM_SKIP_NOTE}")
 
     if baseline is None:
         print(
@@ -889,7 +1034,11 @@ def main() -> int:
     )
     args = ap.parse_args()
     if args.preview_skip:
-        reason = preview_skip_reason()
+        try:
+            reason = preview_skip_reason()
+        except ChromiumBuildUnknown as err:
+            print(f"layout: would fail -- cannot compute the tab digest. {err}")
+            return 0
         if reason is None:
             print("layout: would run (not a verify step; see pnpm merge-to-dev)")
         else:

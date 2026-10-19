@@ -9,7 +9,7 @@ ticket's acceptance sentence. It is invoked by hand inside stage-gate execution
 (`pnpm tab-review <manifest>`), never in CI and never by pnpm merge-to-dev.
 
 Reuses check_layout_gate's fork/dist/Chromium/Node-22 machinery rather than
-copying it: same FORK_ROOT, same _find_chromium, same _node_command Node-22
+copying it: same FORK_ROOT, same _chromium_problem, same _node_command Node-22
 selection, same TBC_A11Y_BASELINE wiring.
 
 Exit codes -- and why 2 is an error here, unlike the layout gate's skip:
@@ -44,7 +44,7 @@ from check_layout_gate import (  # noqa: E402
     FORK_ROOT,
     HARNESS_DIR,
     ROOT,
-    _find_chromium,
+    _chromium_problem,
     _node_command,
 )
 
@@ -97,11 +97,11 @@ def run(manifest: str, out: str | None) -> int:
             "the fork's built dist/ is absent (no prior `make host`). test-review "
             "builds the bundle on top of it and cannot run without it."
         )
-    if _find_chromium() is None:
+    chromium_problem = _chromium_problem()
+    if chromium_problem is not None:
         return _error(
-            "no Playwright Chromium found under ~/AppData/Local/ms-playwright "
-            "(chromium-*/chrome-win64/chrome.exe). The capture drives a headless "
-            "Chromium and cannot run without one."
+            f"{chromium_problem} The capture drives a headless Chromium and "
+            "cannot run without one."
         )
 
     cmd = _node_command(
@@ -109,8 +109,9 @@ def run(manifest: str, out: str | None) -> int:
     )
     if cmd is None:
         return _error(
-            "no Node >= 22 and no `fnm` to select it. test-review.mjs needs Node "
-            "22 (global WebSocket); refusing to run it on an older Node."
+            "no Node >= 22 is on PATH. test-review.mjs needs Node 22 (global "
+            "WebSocket); refusing to run it on an older Node. Put the repo's "
+            'Node 22 on PATH with `nvm use "$(cat .node-version)"`.'
         )
     argv, how = cmd
 

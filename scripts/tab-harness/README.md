@@ -8,6 +8,13 @@ directory.
 
 - `test-tab-harness.mjs`: shared CDP plumbing (Chromium, build, serve, fixture
   loading, axe-core).
+- `chromium.mjs`: the browser every script and the Python gates launch, asked
+  from the pinned `playwright` devDependency. Install it once per machine with
+  `pnpm exec playwright install chromium`; until then the layout gate skips and
+  the other scripts stop with that command in the error. The layout gate's
+  digest includes the Chromium build that `playwright` names
+  (`_chromium_build` in `scripts/check_layout_gate.py`), so a `playwright`
+  bump that changes the build makes `pnpm layout-gate:check` re-measure.
 - `test-layout.mjs`, `test-review.mjs`, `test-stop.mjs`: the layout gate, the
   per-ticket visual capture and the Stop check. `scripts/check_layout_gate.py`
   and `scripts/check_tab_review.py` run the first two.
@@ -61,7 +68,7 @@ S4, a count of page-console messages starting `[upgrades] screening fell back`,
 is removed: nothing prints that message since the bulk screening pass was
 deleted (ticket 567).
 
-Run it from the repo root (Node 22+, no npm deps):
+Run it from the repo root (Node 22+, with Playwright's Chromium installed):
 
 ```sh
 node scripts/tab-harness/run-tab-cdp.mjs --origin http://localhost:3333 --candidates 40 --out out.json

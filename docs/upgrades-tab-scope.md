@@ -265,7 +265,7 @@ makes this index wrong, and nothing else catches it. This doc is also
 re-checked at the merge of every chunk of
 `.scratch/plans/upgrades-tab-finish-line.md`.
 
-Two loops check it. Run them in Git Bash from the repo root. `pnpm issues:open`
+Two loops check it. Run them in bash from the repo root. `pnpm issues:open`
 lists only `open`, `claimed` and `blocked` tickets
 (`scripts/check_merge_ready.py`), so a `resolved` or `closed` ticket must have
 no row. `.scratch/open-ids.txt` is a scratch file; any gitignored path works.

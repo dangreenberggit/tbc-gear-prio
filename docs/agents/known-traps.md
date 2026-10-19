@@ -2,33 +2,86 @@
 
 Read the entry for what you are **about to do** — each heading is the
 action that arms the trap. The _Symptom_ line doubles as the after-the-fact
-index when something already broke. Every trap here fired for real during
-the upgrades-ui-fit pass (2026-08-24). Environment basics (two shells,
-backgrounded `cd`, Windows path forms, read-the-error-first) live in
+index when something already broke. Environment basics live in
 `AGENTS.md` § CLI environment — this file covers only what that section
-does not.
+does not. The commands below are for the WSL (Ubuntu) dev host.
 
 ## Before running node / pnpm / test commands
 
-**Symptom when armed:** `error: We can't find the necessary environment
-variables to replace the Node version`; or a dozen test suites failing at
-once with `Error: No such built-in module: node:sqlite`; or
-`node --version` printing nothing.
+**Symptom when armed:** a dozen test suites failing at once with
+`Error: No such built-in module: node:sqlite`; or `pnpm verify` stopping at
+`preflight:node` with "Node ... is too old"; or `pnpm --version` printing a
+version other than `package.json`'s `packageManager`.
 
-The shell can lose its fnm environment mid-session, silently resolving no
-Node or an old one — this repo needs Node 22 (`node:sqlite`). Mass test
-failure right after a shell hiccup is a Node-version symptom, not a code
-regression. Confirm `node --version` prints v22.x before diagnosing test
-output; when it doesn't, pin the PATH:
+The repo needs the Node in `.node-version`, and `pnpm` is corepack's shim,
+which runs the version in `package.json`'s `packageManager`. Mass test
+failure is a Node-version symptom before it is a code regression. Confirm
+`node --version` and `pnpm --version` before diagnosing test output.
 
-```powershell
-$env:PATH = "C:\Users\dgree\AppData\Roaming\fnm\node-versions\v22.17.1\installation;" + $env:PATH
+In WSL, `/usr/local/bin` is the one directory on every process's PATH, so
+each tool the project runs is linked there: `node`, `npm`, `npx`,
+`corepack` and `pnpm` through `~/.local/node-default` (a symlink to an nvm
+version folder; nvm's default alias is `system`), and `go`, `gofmt`,
+`protoc` and `protoc-gen-go` straight to `~/.local/go/bin`,
+`~/.local/protoc/bin` and `~/go/bin`. `python` is `/usr/bin/python` from
+the apt package `python-is-python3`. So any shell finds them: login,
+interactive, `bash -c`, `wsl.exe -e`, `t3code.service` and the git hooks
+each of those runs. To upgrade, replace the files behind a link, with no
+sudo: repoint `~/.local/node-default`, unpack a new Go or protoc into its
+folder, or `go install google.golang.org/protobuf/cmd/protoc-gen-go@<ver>`.
+
+T3 reads PATH from `bash -ilc` once, when it starts, puts it in front of
+its own, and passes it to every Claude Code process it launches; Claude
+Code's Bash tool takes its PATH from that process. Measured on 2026-10-18:
+T3 started before nvm's default became `system`, so its PATH still has
+`~/.nvm/versions/node/v22.17.1/bin` ahead of `/usr/local/bin`, and
+`command -v node` there names that folder (same version today). A headless
+`claude -p` run in that environment found the same node, go, protoc,
+protoc-gen-go and python as a login shell. So after a change to
+`~/.profile`, `~/.bashrc`, the nvm default or `~/.local/node-default`,
+restart T3 when `C:\Users\<user>\.local\bin\t3-safe-off.ps1 -Check -Json`
+says it is idle; until then its agents keep the PATH from T3's start.
+
+Check the setup in a new WSL terminal, from the repo root. The `readlink`
+lines must print what their comments say, where `<v>` is the
+`.node-version` version, and the last two lines must print the same
+versions as each other:
+
+```sh
+readlink ~/.local/node-default   # /home/<user>/.nvm/versions/node/v<v>
+readlink /usr/local/bin/node     # /home/<user>/.local/node-default/bin/node
+T='node --version; pnpm --version; go version; protoc --version; protoc-gen-go --version; python --version'
+bash -lc "$T" | tr '\n' ' '; echo
+env -i HOME=$HOME PATH=/usr/local/bin:/usr/bin:/bin bash -c "$T" | tr '\n' ' '; echo
 ```
 
-Bash's `eval "$(fnm env)"` can fail with the same error the commands do;
-the PATH pin works in either shell.
+`pnpm --version` must print the `packageManager` version. From Windows,
+`wsl.exe -d Ubuntu-22.04 -e go version` and
+`wsl.exe -d Ubuntu-22.04 -e node --version` must print the same versions.
+Before the Node part of this setup, the WSL host's `/usr/local/bin/node`
+points straight at one nvm version folder while nvm's default alias names
+another, so `bash -c`, `wsl.exe` and T3's processes get one Node and login
+shells another; the second `readlink` line shows which state the host is in.
 
-- In the Bash tool, `cd` returns exit code 1 even when it changes directory: ~/.bashrc runs `fnm env --use-on-cd`, which replaces `cd` with fnm's `__fnmcd`, and fnm cannot find its settings in the agent shell. So `cd X && cmd` never runs `cmd`. Use the command's own directory flag (`git -C`, `pnpm -C`, `npm --prefix`), or separate commands with `;`.
+One-time setup on a new host, after installing nvm, unpacking Go into
+`~/.local/go` and protoc into `~/.local/protoc`, and running
+`go install google.golang.org/protobuf/cmd/protoc-gen-go@<ver>`: run this
+in a login shell (where `nvm` is defined), from the repo root. Only the
+`sudo` lines need root.
+
+```sh
+V="$(cat .node-version)"
+nvm install "$V" && ~/.nvm/versions/node/v"$V"/bin/corepack enable
+mkdir -p ~/.local && ln -sfn ~/.nvm/versions/node/v"$V" ~/.local/node-default
+for b in node npm npx corepack pnpm; do sudo ln -sfn "$HOME/.local/node-default/bin/$b" /usr/local/bin/$b; done
+nvm alias default system
+sudo ln -sf -t /usr/local/bin "$HOME/.local/go/bin/go" "$HOME/.local/go/bin/gofmt" "$HOME/.local/protoc/bin/protoc" "$HOME/go/bin/protoc-gen-go"
+sudo apt install python-is-python3
+```
+
+To change the machine's Node later, bump `.node-version` and run the first
+three lines again; they need no `sudo`. To use another Node in one shell
+only: `nvm use <v>`.
 
 **Fork-gated suites never run in CI.** Every suite that imports
 `forkPresent` — among them `fork-set-net.test.ts`,
@@ -49,12 +102,15 @@ for an edit you know was small (a 4-line schema edit staging as ~18k
 lines; a 2-hash `sed` rewriting all 182 lines of a file); or a reviewer
 reports CRLF where HEAD is LF.
 
-`sed -i` and CRLF-writing editors each flip a whole file's line endings.
-Edit text files with the harness Edit tool, which preserves endings. After
+A rewrite that changes a whole file's line endings does this: a script that
+writes LF over one of the CRLF files (`git ls-files --eol | grep i/crlf`
+lists them), or a Windows editor
+saving over the `\\wsl.localhost\...` path as CRLF. Edit text files with the
+harness Edit tool, which preserves endings. After
 any scripted or generated write, read `git diff --stat` before committing:
 a line count near the file's length means endings flipped — confirm the
 real change with `git diff --ignore-cr-at-eol`, rewrite the file back to
-LF, then commit.
+the endings HEAD has, then commit.
 
 The Python generators no longer do this (ticket 283, fixed by 399 on
 2026-09-15 across fourteen write sites). **Keep it that way when you add
@@ -101,7 +157,7 @@ with "clone HEAD is X but lock pins Y"; or a regen moves a file nobody
 predicted and it gets committed as though it were expected.
 
 `<repo>` below is the main checkout or the pair you are moving the pin in, as
-an absolute `C:/Users/...` path. Every command names that folder: a bare
+an absolute path (`/home/daniel/...`). Every command names that folder: a bare
 `python scripts/<x>.py` or `git diff` acts on whatever folder the shell is in,
 which for a subagent is usually the main checkout, not the pair.
 
@@ -127,8 +183,9 @@ difference. Nothing in `pnpm verify` reads either field, so a hand edit there
 is invisible to every gate.
 
 For a sha pin `fetch_wowsimcli.py` **builds from source** — it needs `go`,
-`protoc` and `protoc-gen-go` on PATH, and it hard-fails without them where it
-used to download a zip. CI never runs it, so CI will not tell you.
+`protoc` and `protoc-gen-go` on PATH (see "Before running node / pnpm / test
+commands"), and it hard-fails without them where it used to
+download a zip. CI never runs it, so CI will not tell you.
 
 The fork gates (`equip-eligibility`, `ep-presets`, `meta-conditions`,
 `fork-lint`, `fork-tests`) exit 2 until `<repo>/data/wowsims-fork.lock.json` names the clone's
@@ -197,15 +254,16 @@ swallowed into it).
 
 ## Before starting the dev servers
 
-**Symptom when armed:** `preview_start` refuses because the port is held —
-3333 by a stray `wowsimtbc.exe`, or 5173 by another session's vite.
+**Symptom when armed:** a dev server will not start because its port is
+held — 3333 by a stray `wowsimtbc`, or 5173 by another session's vite
+(`pnpm tab:dev` exits; `preview_start` refuses).
 
 Each port's server builds and serves the fork of the folder that started it,
 so first find that folder (`docs/agents/paired-worktrees.md`, "Live tab").
 **3333** must be exactly 3333 (the frontend hardcodes the proxy; the entry
-sets `autoPort: false`): if the `wowsimtbc.exe` on it was built in your
+sets `autoPort: false`): if the `wowsimtbc` on it was built in your
 folder and none of your sessions manages it, stop it and start the managed
-`wowsims-backend` entry. **5173** held by your own folder's vite: use it with
+`wowsims-backend` entry or `pnpm tab:backend`. **5173** held by your own folder's vite: use it with
 HMR; a second copy buys nothing. Either port held by another folder: the live
 tab is taken until that session stops its servers. One HMR side-effect: an
 engine-file edit reloads the page, dropping in-page run state and sometimes

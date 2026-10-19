@@ -1,8 +1,21 @@
 # Staged copies of ~/.claude/AGENTS.md and ~/.claude/CLAUDE.md
 
-`~/.claude/hooks/block-outside-repo.sh` blocks agent writes to `~/.claude/`,
-so the files are versioned here and **the user runs the copy in their own
-terminal** — an agent that attempts it gets blocked by that same hook:
+On the WSL host, `~/.claude/hooks/agent-guard.py` and `permissions.deny`
+rules in `~/.claude/settings.json` replace `block-outside-repo.sh`; both
+were installed 2026-10-19. The hook refuses an agent's writes to
+`~/.claude/settings.json`, `~/.claude/settings.local.json` and
+`~/.claude/hooks/`, and the deny rules also refuse Write and Edit calls to
+`settings.json` and `hooks/`. An agent's write anywhere else in
+`~/.claude/`, including the two copies below, goes ahead, and the hook
+logs it to `~/.local/state/agent-guard/outside-writes.jsonl` except under
+`~/.claude/projects/` and `~/.claude/plans/`. The hook sees a Write or
+Edit call, and a Bash redirect or write command such as `cp` or `tee`
+that names the path with `~` or in full. It does not see a path written
+as `$HOME/...` or a write made inside a script. The `settings.json` in
+the Windows home wires no hook.
+
+The files are versioned here, and **the user runs the copy in their own
+terminal**:
 
 ```bash
 cp docs/agents/home/AGENTS.md ~/.claude/AGENTS.md

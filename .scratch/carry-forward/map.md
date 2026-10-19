@@ -384,3 +384,7 @@ file contention, worker prompt. This file stays the chronological log.
 - 690 Hunter and warrior preset set keys collide (pre-merge review feat/tab-wowsims-items, A9) 2026-10-18
 - 691 Code-quality fixes left in the tab's fixture-input files (pre-merge review feat/tab-wowsims-items, CQ1-CQ7, R2-2) 2026-10-18
 - 692 fork-tests:check skips the tab's load-failure test (pre-merge review feat/tab-wowsims-items, R2-1) 2026-10-18
+- 695 Tab dev servers keep running when only pnpm is signalled (pre-merge review feat/wsl-linux-support, A6) 2026-10-19
+- 696 Agent files left to change for the WSL dev host (pre-merge review feat/wsl-linux-support, A7 S10 Q9 P3) 2026-10-19
+- 697 The CLI ranking can print tied items with their rank labels out of order (sim comparison 2026-10-18, feat/wsl-linux-support fix pass) 2026-10-19
+- 698 Two WSL distros with the same prompt make it easy to work in the wrong one (owner request, WSL move) 2026-10-19

@@ -479,7 +479,9 @@ def main() -> int:
     # The Upgrades-tab layout gate. Runs only when the fork's tab source changed
     # since the last green run AND the fork, its built dist/, and a Chromium are
     # all present; skips cleanly (returns 0) otherwise. A real assertion failure
-    # returns nonzero and blocks the merge. See scripts/check_layout_gate.py and
+    # returns 1 and blocks the merge. A tab digest it cannot compute (a missing
+    # tracked file, or no Chromium build because Node 22 or `playwright` is
+    # missing) returns 2 and blocks it too. See scripts/check_layout_gate.py and
     # ticket 325.
     #
     # A green run advances data/wowsims-fork-layout.lock.json. That write lands
@@ -492,6 +494,8 @@ def main() -> int:
     layout_rc = check_layout_gate.run(
         on_baseline_advanced=_commit_layout_baseline if not args.check_only else None
     )
+    if layout_rc == 2:
+        die("layout gate could not run — the cause is printed above", layout_rc)
     if layout_rc != 0:
         die("layout gate failed — Upgrades tab layout is broken", layout_rc)
 
