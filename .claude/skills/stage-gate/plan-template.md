@@ -32,16 +32,15 @@ criterion (a command or an observable), and the claims it depends on
 A step that changes what the Upgrades tab renders says how it is looked
 at. The default is a `Visual check:` line: the fixture names to look at
 (from `data/tab-fixtures/`) and the one sentence to judge against. The
-executor looks with `pnpm tab-fixtures:smoke` and its PNGs, or with the
-fixture's link in a browser pane where the harness has one (the Claude
-desktop app's Browser pane; untested under T3 Code or WSL mode). Only the
-browser pane covers hover and widths other than 1280, so without one a
-step that needs either uses a `Visual acceptance:` block. No live sim
-runs. Use a `Visual acceptance:` block instead only when the ticket
+executor opens the fixture's link in a browser pane where the harness has
+one (the Claude desktop app's Browser pane; untested under T3 Code or WSL
+mode), and otherwise looks at the PNGs from `pnpm tab-fixtures:smoke`.
+Only the browser pane covers hover and widths other than 1280. No live
+sim runs. Use a `Visual acceptance:` block instead only when the ticket
 must close on recorded evidence (captures at fixed widths, axe results,
 measured facts, a pre-run state, or an independent `gate-visual`
-verdict), or when a step needs hover or other widths and no browser pane
-exists.
+verdict), or when a step needs hover or another width and the harness has
+no browser pane.
 The block names the state (`pre-run` / `post-run`), widths, selectors to
 capture, interactions, facts to record, and the sentence; the manifest
 schema is in the header comment of `scripts/tab-harness/test-review.mjs`.
