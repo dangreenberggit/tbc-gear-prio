@@ -290,8 +290,8 @@ pnpm's Node and no longer forces Node 22 through fnm. The layout gate skips
 with "run `pnpm install`" until the Windows checkout installs the
 `playwright` package.
 
-Tickets: this branch filed 2 (695, 696) and closed 0, so it filed more than
-it closed. `.scratch/carry-forward/issues/NEXT` read 686 while tickets up to
+Tickets: this branch filed 4 (695, 696, 697, 698) and closed 1 (696), so it
+filed more than it closed. `.scratch/carry-forward/issues/NEXT` read 686 while tickets up to
 692 existed; it now reads 697.
 
 ## Disposition
@@ -300,17 +300,17 @@ it closed. `.scratch/carry-forward/issues/NEXT` read 686 while tickets up to
 | --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | A5  | Adversarial | wontfix     | SIGKILL cannot be caught, so no handler in the script can stop its children; the next start then fails loudly on the held port, and `known-traps.md` "Before starting the dev servers" says how to find the holder (`ss -ltnp`, `readlink /proc/<pid>/cwd`). |
 | A6  | Adversarial | defer       | `.scratch/carry-forward/issues/695-dev-tab-orphans-when-only-pnpm-is-signalled.md` — pnpm does not pass a single-pid SIGTERM on to its child; this holds for every pnpm script in the repo, not only this branch's.                                          |
-| A7  | Adversarial | defer       | `.scratch/carry-forward/issues/696-agent-files-on-the-wsl-host.md` — editing `.claude/launch.json` needs the owner's approval; the Windows entry ran vite the same way.                                                                                      |
+| A7  | Adversarial | fixed       | `142ce6bc` — `wowsims-fork` runs `node scripts/dev-tab.mjs frontend`, which stops vite's whole process group on SIGTERM (proposal P9, ticket 696).                                                                                                           |
 | A8  | Adversarial | wontfix     | The owner's approved plan replaces the Windows-only entries ("rewrite the Windows-only `.claude/launch.json` entries"); what breaks on the Windows checkout is listed in Summary for the owner.                                                              |
 | S3  | Standards   | wontfix     | The commit message is history and is not rewritten; the same claim in `chromium.mjs` is Q3.                                                                                                                                                                  |
 | S4  | Standards   | wontfix     | `AGENTS.md` § CLI environment is in the owner's pending AGENTS.md proposal (`.scratch/wsl-move/agents-md-proposal.md`, item A1, "CLI environment, first paragraph").                                                                                         |
-| S10 | Standards   | defer       | `.scratch/carry-forward/issues/696-agent-files-on-the-wsl-host.md` — the old entries relied on the session's PATH the same way (fnm, `cmd`); needs a test from a Claude Code session inside WSL.                                                             |
+| S10 | Standards   | wontfix     | Since the two sudo steps, `/usr/local/bin` links `node` and `go`, and every consumer measured on 2026-10-18 found them (`known-traps.md` entry, as committed in `12b5c899`); `preview_start` itself was not run (proposal P11).                              |
 | P2  | Spec        | wontfix     | The Git Bash form `TBC_VERIFY_WITHOUT_FORK=1 pnpm verify` is POSIX shell syntax and works in WSL bash as written.                                                                                                                                            |
-| P3  | Spec        | defer       | `.scratch/carry-forward/issues/696-agent-files-on-the-wsl-host.md` — `.claude/hooks/` is an agent file; the proposal lists the hook only under "Related, outside this proposal", so no one owns it yet.                                                      |
+| P3  | Spec        | wontfix     | Rule 1 (`cd` in a backgrounded call) is about the harness and still applies; rule 2 matches only a `/x/Users/` path after `node` or `python`, which no Linux path has; the 26 hook tests pass on WSL (proposal P12).                                         |
 | P4  | Spec        | wontfix     | The edit is one word and correct for the WSL host.                                                                                                                                                                                                           |
 | P5  | Spec        | wontfix     | The win32 branches keep `pnpm tab:*` usable on the Windows checkout until it is frozen, and cost nothing on Linux.                                                                                                                                           |
 | P6  | Spec        | wontfix     | Same effect as A8; see A8.                                                                                                                                                                                                                                   |
-| Q9  | Standards   | defer       | `.scratch/carry-forward/issues/696-agent-files-on-the-wsl-host.md` — the fix edits `.claude/launch.json`, an agent file that needs the owner's approval.                                                                                                     |
+| Q9  | Standards   | fixed       | `142ce6bc` — `wowsims-backend` runs `node scripts/dev-tab.mjs backend`, so one place holds the build steps (proposal P10, ticket 696).                                                                                                                       |
 
 ## Fix pass after the stop (owner-approved)
 
@@ -488,41 +488,41 @@ in round 1's table or the table below; Q9 keeps its round 1 `defer` row.
 Nothing is left that blocks the merge ask. Open tickets from this branch:
 695, 696, 697 and 698.
 
-Tickets: this branch filed 4 (695, 696, 697, 698) and closed 0, so it filed
-more than it closed (`git diff --name-status dev...HEAD --
+Tickets: this branch filed 4 (695, 696, 697, 698) and closed 1 (696), so it
+filed more than it closed (`git diff --name-status dev...HEAD --
 '.scratch/carry-forward/issues/*.md'`). `NEXT` reads 699.
 
 ## Disposition (fix pass after the stop)
 
-| ID   | Axis           | Disposition | Ticket / note                                                                                                                                                  |
-| ---- | -------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1   | Adversarial    | fixed       | `5a8af638`, checked in round 2; the gap that R2-1 found is fixed in `99422b97`.                                                                                |
-| A2   | Adversarial    | fixed       | `3c008551` (with Q5), checked in round 2.                                                                                                                      |
-| A3   | Adversarial    | fixed       | `362682b2`, checked in round 2 with stub re-runs (`r2/t-new.log`).                                                                                             |
-| A4   | Adversarial    | fixed       | `362682b2`, checked in round 2.                                                                                                                                |
-| S1   | Standards      | fixed       | As Q1.                                                                                                                                                         |
-| S2   | Standards      | fixed       | As Q2.                                                                                                                                                         |
-| S5   | Standards      | defer       | `.scratch/carry-forward/issues/696-agent-files-on-the-wsl-host.md` — the `launch.json` half is Q9; the `check_layout_gate.py` half is Q4, fixed in `8ea2fe7a`. |
-| S6   | Standards      | fixed       | As Q5.                                                                                                                                                         |
-| S7   | Standards      | fixed       | As Q6.                                                                                                                                                         |
-| S8   | Standards      | fixed       | As Q3.                                                                                                                                                         |
-| S9   | Standards      | fixed       | As Q7.                                                                                                                                                         |
-| P1   | Spec           | fixed       | As Q8.                                                                                                                                                         |
-| Q1   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
-| Q2   | Code quality   | fixed       | `8ea2fe7a`; its wrong command (R2-2) fixed in `1e4e1f56`.                                                                                                      |
-| Q3   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
-| Q4   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
-| Q5   | Code quality   | fixed       | `3c008551`, with A2.                                                                                                                                           |
-| Q6   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
-| Q7   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
-| Q8   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
-| Q10  | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                                |
-| R2-1 | Focused check  | fixed       | `99422b97`: an unknown build exits 2 and no path reads, prints or writes a digest (`s4.log`).                                                                  |
-| R2-2 | Focused check  | fixed       | `1e4e1f56`; its check block prints the stated values on this host (`s6.sh`). R3-4 and R3-5 fixed the rest.                                                     |
-| R2-3 | Focused check  | wontfix     | After `99422b97`, an fnm failure on the `--build` call exits 2 with fnm's stderr before the "not installed" branch runs; the WSL host has no fnm.              |
-| R3-1 | Fix-pass check | fixed       | `b8567697`: exit 2 now ends with "layout gate could not run — the cause is printed above".                                                                     |
-| R3-2 | Fix-pass check | fixed       | `b8567697`: the module docstring, the `_node_command` docstring and the `merge_to_dev.py` comment say exit 2 blocks the merge.                                 |
-| R3-3 | Fix-pass check | wontfix     | Intended: the owner called the Node version "basically a critical environment issue"; a fork-less checkout and CI still skip.                                  |
-| R3-4 | Fix-pass check | fixed       | `b8567697`: `mkdir -p ~/.local` before the `ln`.                                                                                                               |
-| R3-5 | Fix-pass check | fixed       | `b8567697`: the sentence names what the check and `/proc/<pid>/environ` cover, and marks the Claude Code processes T3 starts as hypothesis, untested.          |
-| R3-6 | Fix-pass check | fixed       | The round 2 line for `2f5664c1` now names 693 and 694 and the renumber.                                                                                        |
+| ID   | Axis           | Disposition | Ticket / note                                                                                                                                         |
+| ---- | -------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1   | Adversarial    | fixed       | `5a8af638`, checked in round 2; the gap that R2-1 found is fixed in `99422b97`.                                                                       |
+| A2   | Adversarial    | fixed       | `3c008551` (with Q5), checked in round 2.                                                                                                             |
+| A3   | Adversarial    | fixed       | `362682b2`, checked in round 2 with stub re-runs (`r2/t-new.log`).                                                                                    |
+| A4   | Adversarial    | fixed       | `362682b2`, checked in round 2.                                                                                                                       |
+| S1   | Standards      | fixed       | As Q1.                                                                                                                                                |
+| S2   | Standards      | fixed       | As Q2.                                                                                                                                                |
+| S5   | Standards      | fixed       | The `launch.json` half is Q9, fixed in `142ce6bc`; the `check_layout_gate.py` half is Q4, fixed in `8ea2fe7a`.                                        |
+| S6   | Standards      | fixed       | As Q5.                                                                                                                                                |
+| S7   | Standards      | fixed       | As Q6.                                                                                                                                                |
+| S8   | Standards      | fixed       | As Q3.                                                                                                                                                |
+| S9   | Standards      | fixed       | As Q7.                                                                                                                                                |
+| P1   | Spec           | fixed       | As Q8.                                                                                                                                                |
+| Q1   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                       |
+| Q2   | Code quality   | fixed       | `8ea2fe7a`; its wrong command (R2-2) fixed in `1e4e1f56`.                                                                                             |
+| Q3   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                       |
+| Q4   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                       |
+| Q5   | Code quality   | fixed       | `3c008551`, with A2.                                                                                                                                  |
+| Q6   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                       |
+| Q7   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                       |
+| Q8   | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                       |
+| Q10  | Code quality   | fixed       | `8ea2fe7a`, checked in round 2.                                                                                                                       |
+| R2-1 | Focused check  | fixed       | `99422b97`: an unknown build exits 2 and no path reads, prints or writes a digest (`s4.log`).                                                         |
+| R2-2 | Focused check  | fixed       | `1e4e1f56`; its check block prints the stated values on this host (`s6.sh`). R3-4 and R3-5 fixed the rest.                                            |
+| R2-3 | Focused check  | wontfix     | After `99422b97`, an fnm failure on the `--build` call exits 2 with fnm's stderr before the "not installed" branch runs; the WSL host has no fnm.     |
+| R3-1 | Fix-pass check | fixed       | `b8567697`: exit 2 now ends with "layout gate could not run — the cause is printed above".                                                            |
+| R3-2 | Fix-pass check | fixed       | `b8567697`: the module docstring, the `_node_command` docstring and the `merge_to_dev.py` comment say exit 2 blocks the merge.                        |
+| R3-3 | Fix-pass check | wontfix     | Intended: the owner called the Node version "basically a critical environment issue"; a fork-less checkout and CI still skip.                         |
+| R3-4 | Fix-pass check | fixed       | `b8567697`: `mkdir -p ~/.local` before the `ln`.                                                                                                      |
+| R3-5 | Fix-pass check | fixed       | `b8567697`: the sentence names what the check and `/proc/<pid>/environ` cover, and marks the Claude Code processes T3 starts as hypothesis, untested. |
+| R3-6 | Fix-pass check | fixed       | The round 2 line for `2f5664c1` now names 693 and 694 and the renumber.                                                                               |
