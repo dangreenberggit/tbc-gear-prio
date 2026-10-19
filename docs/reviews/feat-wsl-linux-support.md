@@ -2,6 +2,8 @@
 
 Reviewed range: `0c0c7a562dce59450954cd8e6653b3c2354ef459..1ac94a4be779b020b01b2bffd6f36a5146b4dc0c`
 
+Reviewed range: `1ac94a4be779b020b01b2bffd6f36a5146b4dc0c..4d36a3ca9e96e2c2017a44dcc162bdbd95438ea3`
+
 Dispatch (round 1): full axes, not the small-change lane.
 `git diff --shortstat dev...HEAD` gave `17 files changed, 452 insertions(+),
 327 deletions(-)`, and `git diff --name-only dev...HEAD` lists
@@ -177,11 +179,12 @@ is right: `playwright-core@1.57.0`'s `browsers.json` gives chromium
 | Q7  | The `serve` comment in `dev-tab.mjs` restates the code                                                                                           | S9     |
 | Q8  | `check_layout_gate.py` and `check_tab_review.py` messages name only `fnm` as the way to get Node 22                                              | P1     |
 | Q9  | Backend build steps duplicated between `.claude/launch.json` `wowsims-backend` and `dev-tab.mjs` `backend()`                                     | S5     |
+| Q10 | `scripts/tab-harness/README.md` does not say that the Chromium build is part of the layout digest (raised by the A1 fixer after round 1)         | A1     |
 
 ## Summary
 
-Round 1 in progress: fixes for A1-A4 and the code-quality pass are next,
-then round 2.
+Round 2 (focused check) is in progress over the second `Reviewed range:`
+line.
 
 ## Disposition
 
