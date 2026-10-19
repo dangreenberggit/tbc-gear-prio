@@ -234,7 +234,11 @@ MODULE_SUFFIXES = (".ts", ".tsx", ".css")
 # harness files are the assertions themselves: editing one changes the gate's
 # verdict without touching a line of tab source. `rows.mjs` is the row reader
 # `test-layout.mjs` and `test-tab-harness.mjs` import (ticket 580).
+# `chromium.mjs` decides which browser the harness launches; the build it
+# resolves is hashed too (`_chromium_build`), because a `playwright` bump
+# changes the browser without changing any file listed here.
 ROOT_GATE_FILES = (
+    "scripts/tab-harness/chromium.mjs",
     "scripts/tab-harness/rows.mjs",
     "scripts/tab-harness/test-layout.mjs",
     "scripts/tab-harness/test-tab-harness.mjs",
@@ -343,7 +347,9 @@ def _rel_root(path: Path) -> str:
 
 
 def compute_tab_hash() -> tuple[str, list[str]]:
-    """(digest, missing) over the layout source. Pure but for file reads.
+    """(digest, missing) over the layout source and the harness's Chromium build.
+
+    Pure but for file reads and the `chromium.mjs --build` lookup.
 
     The digest folds in each file's fork-relative path as well as its bytes, so
     a rename or a delete moves the digest even when the surviving bytes are
@@ -367,6 +373,9 @@ def compute_tab_hash() -> tuple[str, list[str]]:
         h.update(b"\0")
         h.update(path.read_bytes() if path.is_file() else b"<absent>")
         h.update(b"\0")
+    h.update(b"chromium-build\0")
+    h.update(_chromium_build())
+    h.update(b"\0")
     return h.hexdigest(), missing
 
 
@@ -413,9 +422,13 @@ def write_baseline(digest: str) -> None:
         "assets/locales/en/upgrades.json (the axe pass's accessible names are "
         "locale strings) and vite.config.mts (the gate's build reads it). "
         "It also covers, by repo-relative name, the gate's own harness "
-        "(scripts/tab-harness/rows.mjs, test-layout.mjs, test-tab-harness.mjs, "
-        "test-review.mjs; rows.mjs by ticket 580) and the recorded tab fixtures "
-        "the fixture pass renders (data/tab-fixtures/*.json, ticket 504). "
+        "(scripts/tab-harness/chromium.mjs, rows.mjs, test-layout.mjs, "
+        "test-tab-harness.mjs, test-review.mjs; rows.mjs by ticket 580), the "
+        "recorded tab fixtures the fixture pass renders (data/tab-fixtures/*.json, "
+        "ticket 504), and the Chromium build the harness launches: the chromium "
+        "entry of the browsers.json in the playwright-core that the pinned "
+        "playwright resolves (`chromium.mjs --build`), so a playwright bump "
+        "that changes the browser moves the digest. "
         "scripts/check_layout_gate.py compares the live digest to this on "
         "`pnpm merge-to-dev`; equal means the layout source that last passed is "
         "still on disk, so the gate is skipped. A green measured gate run "
@@ -463,6 +476,34 @@ def _find_chromium() -> Path | None:
         return None
     exe = Path(out.stdout.strip())
     return exe if exe.is_file() else None
+
+
+def _chromium_build() -> bytes:
+    """The Chromium build the harness would launch, as bytes for the digest.
+
+    `chromium.mjs --build` reads it from the browsers.json of the
+    playwright-core that the pinned `playwright` resolves, the file Playwright
+    itself picks the build from, so a `playwright` bump that changes the build
+    moves the digest. When the lookup cannot run, a fixed marker is hashed: the
+    digest then differs from any recorded green run, and the Chromium check
+    that follows skips the gate.
+    """
+    cmd = _node_command(CHROMIUM_LOOKUP, ["--build"])
+    if cmd is None:
+        return b"<lookup unavailable>"
+    try:
+        out = subprocess.run(
+            cmd[0], cwd=str(ROOT), capture_output=True, text=True, timeout=60
+        )
+    except (OSError, subprocess.SubprocessError):
+        return b"<lookup failed>"
+    if out.returncode != 0:
+        return b"<lookup failed>"
+    try:
+        entry = json.loads(out.stdout.strip().splitlines()[-1])
+    except (ValueError, IndexError):
+        return b"<lookup failed>"
+    return json.dumps(entry, sort_keys=True).encode("utf-8")
 
 
 def _node_major(node_exe: str = "node") -> int | None:
