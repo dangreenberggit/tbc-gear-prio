@@ -68,3 +68,9 @@ to how `unknown-item` was carved out.
       `dead-slots.test.ts` "bypasses the best>0 gate" test.
 - [x] `pnpm verify` green (typecheck, lint, format, 769 tests, all script
       gates) on commit `2e6b257`.
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: the fork's ported `ui/features/upgrades/model/engine/dead-slots.ts` has the same classifier; part 2 was not re-measured (tbc-new-fork@bc3cca6a1).

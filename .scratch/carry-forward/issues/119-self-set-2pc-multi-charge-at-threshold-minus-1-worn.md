@@ -118,3 +118,9 @@ it renders, naming the missing 2pc term (commit `102b425`,
 `feat/set-bonus-value`). The arithmetic itself is untouched: `bonusDps` is
 still `4pc − 2·2pc` exactly as this ticket documents, and the suppress-vs-
 qualify-vs-correct decision above remains open and unmade.
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: the fork's ported `engine/set-value.ts:386-391` computes `bonusDps` the same way, and the tab offers the set-potential toggle (`components/ViewToggles/ViewToggles.tsx:49`) (tbc-new-fork@bc3cca6a1).

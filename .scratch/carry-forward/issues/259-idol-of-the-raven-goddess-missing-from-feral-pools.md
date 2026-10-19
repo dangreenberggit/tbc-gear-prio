@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: bug (pool coverage — an upstream BiS item never reaches the candidate set)
 Origin: `gate-sme` recheck of the Stage 2 shortlists, 2026-08-22; handoff at
   `.scratch/handoffs/sme-rank-judgment-stage2-recheck-feral.md` (the shared caveat
@@ -163,3 +163,9 @@ the heroic exclusion, which is deliberate and belongs to ticket 17.
       id — or, if hardcoded, says why and links the general ticket.
 - [ ] The diff of upstream BiS sets against the pools is run and its result
       recorded, so the size of the gap is known rather than guessed.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`), and since ADR-0038 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`) the tab builds its pool from wowsims' item database at run time and reads no universe file. The ticket asks for the sourceless-item mechanism in the universe builder; the tab's pool rule needs no source: it admits every equippable epic of item level 100 or more with a known phase, plus every preset item (`selectPool` in `ui/features/upgrades/model/pool_source.ts`, tbc-new-fork@bc3cca6a1), so a sourceless item does not vanish from the tab's pool for want of a source.

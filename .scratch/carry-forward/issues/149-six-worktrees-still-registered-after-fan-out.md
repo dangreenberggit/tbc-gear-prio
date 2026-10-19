@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: cleanup
 Origin: docs/reviews/feat-set-bonus-value.md round 5 (process P6)
 Blocks: none
@@ -84,3 +84,16 @@ merged-into-HEAD branch can still be the only ref for a worktree above.
 **`.scratch/wt-fan-out-retro` remains the live hazard** this ticket flags: a
 full checkout inside `.scratch/`, where the test runner scans, and it is one of
 the three carrying uncommitted work.
+
+## Comments
+
+### 2026-10-19 — closed (ticket housekeeping)
+
+The worktrees this ticket lists are gone from the live WSL clone: `git worktree list` shows only the main checkout and the `chore/ticket-housekeeping` worktree made for this edit, and neither `.claude/worktrees/` nor `.scratch/wt-fan-out-retro` exists in the main checkout. The branch sweep the ticket also mentions was not done; it is tidiness only.
+
+Verified by:
+
+```
+git -C /home/daniel/Code/lulz/tbc-gear-prio worktree list
+ls -d /home/daniel/Code/lulz/tbc-gear-prio/.claude/worktrees /home/daniel/Code/lulz/tbc-gear-prio/.scratch/wt-fan-out-retro
+```

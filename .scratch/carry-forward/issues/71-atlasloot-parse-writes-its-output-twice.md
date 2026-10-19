@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: chore
 Origin: pre-merge review of feat/phase-3-vendor-and-craft-coverage
   (standards axis finding 1)
@@ -30,3 +30,9 @@ generated file is a claim" as a first-class concern.
 - One write to `args.out`, after the faction merge.
 - The printed count reflects what was actually written.
 - `pnpm verify` still green (`atlasloot:regen:check` in particular).
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`), and since ADR-0038 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`) the tab builds its pool from wowsims' item database at run time and reads no universe file. A readability chore in `scripts/parse_atlasloot.py`; the ticket's own check shows the final file and its gate are unaffected.

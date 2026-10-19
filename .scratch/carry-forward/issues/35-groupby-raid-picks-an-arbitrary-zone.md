@@ -53,3 +53,9 @@ making with the Phase 3 UI in front of us, not guessing now.
 
 `groupBy: 'raid'` places multi-zone items by a stated rule rather than by
 source order, with a test naming a real multi-zone item from the universe.
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: the fork's ported `ui/features/upgrades/model/engine/view.ts:160` has the same `zoneKeyOf`; no tab code passes `groupBy` today (grep in tbc-new-fork@bc3cca6a1).

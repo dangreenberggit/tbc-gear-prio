@@ -116,3 +116,7 @@ item-swap panic that stopped the enhancement page substituting) is closed. The
 reasoning and its measurements are in `ADR-0031`; the related question of
 whether to generate skeletons for the other nine specs is ticket 367, which
 found no consumer for them today.
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: the file records that ret and feral are never offered an off-hand placement although druids can hold off-hand items; the fork's `ui/features/upgrades/model/engine/pool.ts:248` has the same `DUAL_WIELD_SPECS` rule (tbc-new-fork@bc3cca6a1) and no other open ticket tracks it. The CLI fixture part is out of scope.

@@ -43,3 +43,9 @@ shared template would cover both.
   so call sites name what they are passing.
 - `notFoundMessage` is either a plain label or genuinely uses its arguments.
 - `pnpm verify` stays green; no behaviour change intended.
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: the fork's ported `ui/features/upgrades/model/engine/fixtures/report-events-offline.ts:139` has the same seven-parameter signature (tbc-new-fork@bc3cca6a1).

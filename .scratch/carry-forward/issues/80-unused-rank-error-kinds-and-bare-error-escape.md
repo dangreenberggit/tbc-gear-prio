@@ -25,3 +25,9 @@ kinds are actually reachable and what should throw them. Fixing this
 speculatively now risks inventing error paths nothing exercises. At minimum,
 `RecordedGearSource.readGear`'s bare `Error` should become a `RankError`
 with kind `gear-unreadable` when that work happens.
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: the fork's ported `engine/rank.ts:281-287` declares the same four unused kinds and `engine/seams/gear-source.ts:104` the same bare `Error` (tbc-new-fork@bc3cca6a1); no fork code constructs `RecordedGearSource`, and the `Blocked by:` Warcraft Logs source will not be built (scope ruling, `PLAN.md:934`).

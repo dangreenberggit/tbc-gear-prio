@@ -59,3 +59,9 @@ than a silently wrong low score. Look at how wowsims models these first.
 - A slot whose recommendation depends on a random-suffix item either sims it
   correctly or tells the user it cannot.
 - The three rows above are not silently ranked on base-item stats.
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: the tab's pool rule admits these three items (epic, item level 115, phase 1 in `vendor/wowsims/db.json`) and no fork code handles random suffixes in the pool (`selectPool` in `ui/features/upgrades/model/pool_source.ts`, tbc-new-fork@bc3cca6a1), so the tab may rank them on base stats; hypothesis, untested in a run.

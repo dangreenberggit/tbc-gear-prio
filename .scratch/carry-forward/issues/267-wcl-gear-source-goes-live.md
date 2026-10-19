@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: feature
 Origin: Stage 3 web-shell plan (`.scratch/stage-gate/stage-3-web-shell/plan.md`, Q1), 2026-08-22
 Blocks: phase-3
@@ -132,3 +132,9 @@ needs no WCL source. Its optional import slice is **report-URL-first**;
 character-first discovery, which is what this ticket builds, is explicitly
 deferred there (`plan.md:447-451`). So this ticket is critical for the
 standalone app and at most an optional later feature for the tab.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`). Going live on Warcraft Logs served only the standalone web shell; the ticket's own last section says the tab does not need it.

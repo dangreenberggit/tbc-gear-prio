@@ -21,3 +21,9 @@ Blocked by: none
 
 Fix: derive the count from the swapped equipment array (setCounts before/after
 the actual swap, as `setBreakNote` already does), not from `owned`.
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: the fork's ported `ui/features/upgrades/model/engine/rank.ts:3371` derives `piecesAfterSwap` from `item.owned` the same way (tbc-new-fork@bc3cca6a1).

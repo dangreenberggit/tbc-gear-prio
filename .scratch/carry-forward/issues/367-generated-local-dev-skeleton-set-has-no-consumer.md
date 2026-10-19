@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: .scratch/stage-gate/skeleton-scope-and-local-dev-fixture/brief.md
 Blocks: none
@@ -168,3 +168,9 @@ are the pricing, and they were measured at base `43052fb`.
   has never been a tab limitation.
 - **Nothing here claims the nine specs are unrankable in principle** — only that
   no path in today's CLI reaches a ranking for them, with or without a skeleton.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. The ticket itself records that nothing would read the generated skeletons and that the tab never reads one.

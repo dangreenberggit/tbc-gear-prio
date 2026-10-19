@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: investigation
 Origin: combined 103/106 diagnostic loop, 2026-08-11 (`.scratch/set-bonus-value/loop-103-106/10-baseline-offset.md`)
 Blocks: none
@@ -69,3 +69,9 @@ themselves exactly, and ticket 111 covers the one defect the loop actually found
 But we treat wowsims as the oracle, so a persistent ~1% disagreement of unknown
 origin is a standing caveat on every absolute number we publish, and the
 non-cancelling ~20% is a smaller but real caveat on deltas.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. The offset is between the pinned `wowsimcli` and the wowsims web build; the tab runs inside the web build, so it has no such offset to explain.

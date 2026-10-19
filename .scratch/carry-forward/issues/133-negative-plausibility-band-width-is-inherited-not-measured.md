@@ -49,3 +49,9 @@ so anchoring the band and fixing the disclosure want doing together.
       calibrated the same way as the positive one.
 - [ ] Either a measured negative anchor exists, or the inherited width is
       explicitly labelled untested.
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: the fork's ported `ui/features/upgrades/model/engine/plausibility.ts:19,64` applies the same 7.5% band to both signs (tbc-new-fork@bc3cca6a1).

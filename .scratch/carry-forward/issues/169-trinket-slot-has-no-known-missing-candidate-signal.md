@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: .scratch/carry-forward/issues/164-relic-retraction-does-not-travel-to-slot-section.md, Comments 2026-08-14 ("trinket-slot half is not done")
 Blocks: none
@@ -45,3 +45,9 @@ report-layer mechanism (`deadSlotWarningsBySlot` in `rank-report.ts`) can
 render it the same way it renders `dead-slot`. Engine-side work
 (`rank.ts`/`plausibility.ts`), not report-layer — distinct from ticket
 164, which stays report-layer-only.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`), and since ADR-0038 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`) the tab builds its pool from wowsims' item database at run time and reads no universe file. The proposed signal comes from `wowheadRecall.missedItems` in this repo's universes; the fork has no such field (grep in tbc-new-fork@bc3cca6a1).

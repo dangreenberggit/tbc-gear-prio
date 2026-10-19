@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: pre-merge review of `phase-2/caches` (adversarial + spec axes), 2026-08-05
 Blocks: phase-4
@@ -69,3 +69,9 @@ add the case to the shared suite so the claim is backed.
 - The adapters agree on a top-level `undefined` input, with a contract case
   covering it.
 - The shared `Store` contract suite still passes for both adapters.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`). `SqliteStore` exists only for the web app; the fork has only `MemoryStore` (`ui/features/upgrades/model/engine/seams/store.ts:5`, tbc-new-fork@bc3cca6a1).

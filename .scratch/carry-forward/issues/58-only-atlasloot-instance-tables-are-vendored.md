@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: bug
 Origin: user correction during ticket 54 fixture-gate work, 2026-08-07
 Blocks: none
@@ -94,3 +94,9 @@ inherits the gate rather than widening the hole. Regenerate and commit when
   wherever they are quoted.
 - `KNOWN_UNCORROBORATED` and the `real-source.ts` fixture gate are re-checked:
   both should get strictly easier to satisfy, never harder.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`), and since ADR-0038 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`) the tab builds its pool from wowsims' item database at run time and reads no universe file. The missing AtlasLoot modules (badge, reputation, PvP, crafted) affect only the universe builder; the tab takes sources from wowsims, and the tier-token links it bundles come from instance drops, which are vendored.

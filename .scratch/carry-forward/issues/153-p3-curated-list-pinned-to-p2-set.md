@@ -1,4 +1,4 @@
-Status: open — root cause fixed 2026-08-14, display-side items still stand
+Status: wontfix
 Type: task
 Origin: human review of .scratch/set-bonus-value/ret-catchup/artifacts/slamaltman-p3.html, 2026-08-12
 Blocks: none
@@ -153,3 +153,9 @@ claim it contradicts, and (2) the observation (point 2) that `bisStale` can
 only detect a curated set as *older*, never *absent* — it has no way to
 distinguish "upstream will never ship a P3 ret set" from "we have not
 vendored P3 yet." Not a duplicate; not merging.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. `bisStale` and the curated box are in `packages/core/src/rank-report.ts`; the fork has no `bisStale` (grep in tbc-new-fork@bc3cca6a1). The tab's own case, BiS tags at phases 4 and 5 taken from phase-3 presets, is checked by the 2026-10-19 handoff's Track A step 2 (`.scratch/handoffs/2026-10-19-next-session-handoff.md`).

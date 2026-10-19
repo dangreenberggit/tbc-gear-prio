@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: docs/reviews/fix-carry-forward-backlog.md (adversarial A4, A5)
 Blocks: none
@@ -87,3 +87,9 @@ try to force the branch with a synthetic classification object — that would
 test the mock, not the classifier.
 
 Finding 2 (`view.test.ts:361`) is unchanged by 61's work.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. Neither test was ported: the fork has no `spec.ts` and no copy of the `view.test.ts` case (grep in tbc-new-fork@bc3cca6a1).
