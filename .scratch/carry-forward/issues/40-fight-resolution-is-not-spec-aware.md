@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: `phase-2/resolution-and-fallback` review fallout (domain D1), and user direction 2026-08-06
 Blocks: none
@@ -197,3 +197,9 @@ spec-matching fight, rather than the current refuse-after-resolve), bullet 4
 (a test driving report `mKTA9V7Lx4Ck2DXf` end to end), and the "no matching
 fight" product decision — the guard refuses, but cannot yet offer to sim the
 spec the character actually played, because only ret and feral ship presets.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`). The tab never picks a fight: it reads the page's own gear under the page's own spec, and its ported `rank.ts` drops the spec check on purpose (`ui/features/upgrades/model/engine/rank.ts:8-16`, tbc-new-fork@bc3cca6a1).

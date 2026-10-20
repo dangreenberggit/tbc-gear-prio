@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: docs/reviews/phase-3-web-shell.md (spec axis, Sp10)
 Blocks: phase-4
@@ -25,3 +25,9 @@ fight is pre-selected stays.
 ## Verify
 
 `grep -n "mostRecent" apps/web/server/characters.ts apps/web/src/pages/Character.tsx`
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`). The route is in `apps/web/server`, which will not ship.

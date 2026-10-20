@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: investigation (scope unclear; owner has ruled on the acceptance bar, not the fix)
 Origin: owner question during the 2026-08-20 ticket 227/234 investigation — "i'm
   more interested in whether or not WE ARE THE PROBLEM--our development of our
@@ -242,3 +242,9 @@ reviewer was messaged twice with new instructions, and the scope was re-opened
 after a plan had already been reviewed. Injecting unverified facts between
 rounds is what made the reviews worthless — each round re-vetted a moving
 target whose premises were wrong.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. The skeleton is a CLI harness input (ADR-0031); the tab sims the page's own settings, including talents, rotation and consumables (`ui/features/upgrades/model/run_inputs.ts:20-28`, tbc-new-fork@bc3cca6a1).

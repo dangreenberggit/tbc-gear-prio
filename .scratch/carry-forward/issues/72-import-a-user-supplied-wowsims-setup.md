@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: feature
 Origin: chat, 2026-08-08
 Blocks: phase-5
@@ -162,3 +162,9 @@ a product question, not a codec one, and it does not gate Stage 3's web
 shell, which only ever exports.
 
 Re-blocked to phase-5.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`). The tab sims the page's own settings, including talents, rotation and consumables (`ui/features/upgrades/model/run_inputs.ts:20-28`, tbc-new-fork@bc3cca6a1), so a user's own setup is already what the tab ranks.

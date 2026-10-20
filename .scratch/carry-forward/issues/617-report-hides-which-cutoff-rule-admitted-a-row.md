@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: bug
 Origin: SME reads of ticket 254 output (live tab capture .scratch/rank-reports/sme-254-tab-boundary.png on fork 316326a95; report .scratch/rank-reports/sme-254-slamaltman.html from .scratch/rank-reports/stage2-close-slamaltman.json), triaged 2026-10-11
 Blocks: none
@@ -41,3 +41,9 @@ an empty list for each file: 482 values in the slamaltman report, and 224,
 The original ticket (SME read of ticket 254's output) asked for a marker on
 rows only the percentage rule admitted, in every view and in plain wording.
 With no percentage rule there are no such rows.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. The ticket states it concerns the core HTML report only.

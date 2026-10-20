@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: coverage gap
 Origin: stage-gate finish-the-tab, Step 9 cell 3, 2026-08-23
 Blocks: none
@@ -115,3 +115,9 @@ A fresh worktree also needs the gitignored generated inputs seeded
 (`ui/**/index.html`, `ui/core/proto/`, `dist/tbc/*.wasm`,
 `upgrades/adapters/local.wcl-credentials.ts`) — see ticket 272 for the related
 lockfile defect.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+The racing timing can no longer be taken: racing was removed (ADR-0026, `docs/adr/0026-racing-is-removed-the-engine-full-sweeps-every-eligible-candidate.md`; fork commit `f70378155`), and the ticket itself says a measurement could not reopen the deletion.

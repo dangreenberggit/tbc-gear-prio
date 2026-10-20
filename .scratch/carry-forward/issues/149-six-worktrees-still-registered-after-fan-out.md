@@ -84,3 +84,24 @@ merged-into-HEAD branch can still be the only ref for a worktree above.
 **`.scratch/wt-fan-out-retro` remains the live hazard** this ticket flags: a
 full checkout inside `.scratch/`, where the test runner scans, and it is one of
 the three carrying uncommitted work.
+
+## Comments
+
+### 2026-10-19 — closed (ticket housekeeping)
+
+The worktrees this ticket lists are gone from the live WSL clone: `git worktree list` shows only the main checkout and the `chore/ticket-housekeeping` worktree made for this edit, and neither `.claude/worktrees/` nor `.scratch/wt-fan-out-retro` exists in the main checkout. The branch sweep the ticket also mentions was not done; it is tidiness only.
+
+Verified by:
+
+```
+git -C /home/daniel/Code/lulz/tbc-gear-prio worktree list
+ls -d /home/daniel/Code/lulz/tbc-gear-prio/.claude/worktrees /home/daniel/Code/lulz/tbc-gear-prio/.scratch/wt-fan-out-retro
+```
+
+### 2026-10-19 — reopened (pre-merge review of `chore/ticket-housekeeping`, A1/S1)
+
+The close above checked only the WSL clone. The frozen Windows clone still registers the three worktrees this ticket says carry uncommitted work, including `.scratch/wt-fan-out-retro`; from WSL, `git worktree list` marks them `prunable` only because it cannot resolve `C:/` paths, and `ls -d` on the `/mnt/c/...` paths finds the directories. The `Verified by:` block above does not prove the close.
+
+```
+git -C /mnt/c/Users/dgree/Code/lulz/tbc-gear-prio worktree list | grep -iE 'fan-out-retro|wowhead-collection|salvage-docs'
+```

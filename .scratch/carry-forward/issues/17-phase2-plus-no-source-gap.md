@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: `.scratch/handoffs/raid-scoped-pool-implementation-review.md` defect 3
 Blocks: none
@@ -216,3 +216,7 @@ five-man drops the fork uses `HEROIC_FIVE_MAN = 'include-unticked'`
 either difficulty stay under the ticked "Magisters' Terrace" entry. All
 crafted epics that pass the pool rule are in the tab's pool. This repo's
 builder scope is unchanged.
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`), and since ADR-0038 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`) the tab builds its pool from wowsims' item database at run time and reads no universe file. The universe builder's `excludedNoSource` gap no longer decides what the tab ranks: the tab's pool rule needs no source: it admits every equippable epic of item level 100 or more with a known phase, plus every preset item (`selectPool` in `ui/features/upgrades/model/pool_source.ts`, tbc-new-fork@bc3cca6a1).

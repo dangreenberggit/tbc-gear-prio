@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: pre-merge review of `phase-2/caches` (domain axis), 2026-08-05
 Blocks: phase-4
@@ -40,3 +40,9 @@ closes the gate.
   responses it already receives.
 - Something can report points consumed for a run, so the Phase 4 gate box has
   evidence behind it rather than an assertion.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`). The Warcraft Logs adapter and the Phase 4 gate box this ticket serves will not be built.

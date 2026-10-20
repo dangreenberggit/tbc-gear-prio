@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: bug (hypothesis, untested)
 Origin: `.scratch/stage-gate/558-p4-engine-move/sme-verdict.md` (gate-sme verdict on stage 558-p4-engine-move, 2026-10-06, section 3 "Findings for engineering", first row; gitignored, owner's checkout)
 Blocks: none
@@ -59,3 +59,9 @@ out here; the CLI loads its recordings through `offlineGearRecordings`
 The measurement above, recorded here with its command and output. If the
 run stops, the ticket then records what happens instead; that choice is
 not made here.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. The chain runs through `CliSimRunner`; the tab sims through the page's own engine.

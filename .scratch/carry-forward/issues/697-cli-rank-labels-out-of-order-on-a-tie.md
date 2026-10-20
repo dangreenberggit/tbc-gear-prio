@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: bug
 Origin: Linux-vs-Windows sim comparison of 2026-10-18 (WSL move, feat/wsl-linux-support fix pass)
 Blocks: none
@@ -50,3 +50,9 @@ tie-break.
 
 Running the command above several times prints the tied rows with labels in
 increasing order every time, in the same order on every run.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. The defect is CLI labels disagreeing with the CLI's printed order; the tab never shows `rank` (no read of `.rank` in `ui/features/upgrades` outside `engine/`, grep in tbc-new-fork@bc3cca6a1).

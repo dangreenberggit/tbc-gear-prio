@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Progress: sections 1 and 3 closed 2026-08-06; section 2 (feral pre-raid list) deliberately deferred, needs a hand-transcribed Wowhead fetch out of scope for this worker
 Type: task
 Origin: pre-merge review of `phase-2/feral` (adversarial A2, domain, standards), 2026-08-06
@@ -172,3 +172,7 @@ this repo's builder. Section 2 (a feral pre-raid Wowhead list) is an input
 of `scripts/assemble_universe.py` only: since ADR-0038 the tab builds its
 pool and sources from wowsims and reads no Wowhead list (owner, 2026-10-17:
 "they can be in tbc gear prio but not the upgrades tab repo"). The section stays open for the builder and CLI.
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`), and since ADR-0038 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`) the tab builds its pool from wowsims' item database at run time and reads no universe file. Unparsed Wowhead rows affect only this repo's universe builder; Wowhead lists are not a tab input.

@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: bug
 Tab-scope: out-of-scope — core report path only (re-filed 2026-08-29, see below)
 Origin: owner report 2026-08-28 ("the system got it wrong on the 4pc"); confirmed by investigation same day
@@ -176,3 +176,9 @@ copies on `setBonusNoiseFloorDps` (verified: `grep -n "setBonusNoiseFloorDps"
 packages/core/src/view.ts vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/view.ts`).
 The weighted/full path (`weightedSetPotentialDps`) applies no floor, but the tab
 does not read it. So no tab surface can show the wrong weighted/full number.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. The ticket's own 2026-08-29 section shows the weighted/full modes exist only in the core report; re-run 2026-10-19: `grep -rn weightedSetPotentialDps vendor/tbc-new-fork/ui` finds nothing (tbc-new-fork@bc3cca6a1).

@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Progress: worn-absent count now 24 -> 14 -> 13 across two fix passes (2026-08-06); remaining 13 are not-in-db (4), PvP (4), ticket 17 five-mans (3), and genuinely sourceless (2) — see "Second remainder, closed 2026-08-06"
 Type: bug
 Origin: sme-rank-review on phase-2/feral (ticket 05, gate box 2)
@@ -293,3 +293,9 @@ appeared.
   reason it is excluded. ✅ (20 admitted total across both fix passes; the
   remaining 13 are each accounted for above: not-in-db, PvP, ticket 17
   five-mans, or genuinely sourceless.)
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`), and since ADR-0038 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`) the tab builds its pool from wowsims' item database at run time and reads no universe file. The worn-item gap is in this repo's universes; the tab reads the worn item from the page.

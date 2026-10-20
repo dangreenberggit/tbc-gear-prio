@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: pool membership question
 Origin: stage-gate `phase-item-pool`, Step 5, 2026-08-23
 (`docs/adr/0028-pool-membership-precedence-local-universe-primary-wowsims-audits.md`)
@@ -179,3 +179,9 @@ That diff is the proof.
 
 No universe, assembler or two-hop file was edited when this ruling was
 recorded.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`), and since ADR-0038 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`) the tab builds its pool from wowsims' item database at run time and reads no universe file. The five items the owner ruled in (32757, 32649, 31043, 32570, 32581) are epic, item level 141 or 146, phase 3 in `vendor/wowsims/db.json`. The tab's pool rule (`selectPool` in `ui/features/upgrades/model/pool_source.ts`, tbc-new-fork@bc3cca6a1) needs no source; by code reading (not checked in a run) it admits them, since they are equippable epics within the run's phase and none is excluded for missing effects.

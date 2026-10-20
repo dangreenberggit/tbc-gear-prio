@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: gate gap
 Origin: standards axis, pre-merge review of `feat/sweep-ret-tickets`, 2026-08-14
 (`docs/reviews/feat-sweep-ret-tickets.md`, finding S1's tail)
@@ -61,3 +61,11 @@ Two things to get right:
 Ticket 154 (the drift this would have caught, twice), ticket 157 (the change
 that caused the second instance), ticket 167 (line-ending sensitivity in the
 sibling gate).
+
+## Comments
+
+### 2026-10-19 — closed (ticket housekeeping)
+
+`pnpm universe-rebuild:check` (`scripts/check_universe_rebuild.py`, added in `66d6b19a` for ticket 679) regenerates the committed universes and fails on any difference, and it runs inside `pnpm verify` (`verify:steps`, `package.json:15`). Re-run 2026-10-19 on `chore/ticket-housekeeping`: `universe-rebuild: 89 files checked, 0 mismatches`.
+
+Verified by: `pnpm universe-rebuild:check`

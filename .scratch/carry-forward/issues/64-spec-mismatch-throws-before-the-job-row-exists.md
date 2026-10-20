@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: docs/reviews/fix-ticket-60-61-spec-and-caps.md (adversarial A4)
 Blocks: none
@@ -46,3 +46,9 @@ same-branch fix.
 - If it records one: a test asserts the row reaches a terminal state carrying
   the kind, rather than being left `running` (see ticket 29 for that failure
   shape).
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. The fork has no spec-mismatch check (`ui/features/upgrades/model/engine/rank.ts:8-16`, tbc-new-fork@bc3cca6a1).

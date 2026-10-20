@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: cleanup (trivial)
 Origin: pre-merge review of `feat/set-bonus-value`, round 3, 2026-08-12 (spec axis, 3-S2)
 Blocks: none
@@ -23,3 +23,9 @@ Fix is one string: `[--spec ret|feral (default ret)]` or similar.
       accepted values, and its default.
 - [ ] Ticket 125's acceptance boxes are ticked, or its note is corrected to say
       what was left out.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. The usage string is in `packages/core/src/cli.ts`.

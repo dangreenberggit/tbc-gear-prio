@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-342-learn-from-upstream.md (Standards axis)
 Blocks: none
@@ -88,3 +88,9 @@ either rule (`grep -rn "NEXT" scripts/*.py scripts/*.mjs .githooks/` finds
 no reader of the file). Still open: the first acceptance box (one
 procedure, stated once, in `issue-tracker.md`) and the owner's approval of
 the wording.
+
+### 2026-10-19 — closed (ticket housekeeping)
+
+The two documents no longer contradict each other. `docs/agents/known-traps.md` "Before filing a ticket" now takes the number from `NEXT` as `docs/agents/issue-tracker.md` says, checks the directory first, and says what to do when the two disagree. The combined procedure lives in known-traps.md rather than in issue-tracker.md, as the first acceptance box asked; there is still one procedure and no conflicting rule. Whether the owner approved that wording in chat is not recorded here.
+
+Verified by: `tbc-gear-prio@bd711561`

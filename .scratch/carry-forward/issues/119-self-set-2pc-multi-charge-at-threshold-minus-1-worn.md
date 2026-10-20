@@ -1,4 +1,4 @@
-Status: open
+Status: blocked
 Type: bug (owner decision required)
 Origin: ret catch-up round, 2026-08-11
 (`.scratch/set-bonus-value/ret-catchup/03-verify.md` task 2, anomalies A and B)
@@ -118,3 +118,9 @@ it renders, naming the missing 2pc term (commit `102b425`,
 `feat/set-bonus-value`). The arithmetic itself is untouched: `bonusDps` is
 still `4pc − 2·2pc` exactly as this ticket documents, and the suppress-vs-
 qualify-vs-correct decision above remains open and unmade.
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open, status `blocked` on the owner's suppress / qualify / correct decision above. The fork does not compute `bonusDps` the same way as `packages/core`: ticket 492 adds `(n−1)·B2`, measured by a pair sim, back into the 4pc figure at one worn piece, and leaves `bonusDpsNet` unset with only a disclosure when no break-free pair exists (`ui/features/upgrades/model/engine/rank.ts:2371-2411`, tbc-new-fork@bc3cca6a1). That is the "correct" option, against ticket 90's "never correct" precedent, and neither 492 nor this file records the owner choosing it. The tab offers the set-potential toggle (`components/ViewToggles/ViewToggles.tsx:49`), so the choice reaches what the tab shows. (Corrected in the pre-merge review of `chore/ticket-housekeeping`, D2.)

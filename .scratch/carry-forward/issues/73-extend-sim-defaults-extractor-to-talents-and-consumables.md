@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: chore
 Origin: ADR-0022 follow-up, 2026-08-08
 Blocks: none
@@ -95,3 +95,9 @@ export carries those too.
   "first preset in the file" is not the same claim.
 - Regenerating must leave `data/presets/feral/p2.raid-sim-skeleton.json`
   byte-identical, since none of these values are changing. That is the test.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. The feral skeleton is a CLI harness input (ADR-0031); the tab sims the page's own settings, including talents, rotation and consumables (`ui/features/upgrades/model/run_inputs.ts:20-28`, tbc-new-fork@bc3cca6a1).

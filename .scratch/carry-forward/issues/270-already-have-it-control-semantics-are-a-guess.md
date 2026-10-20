@@ -1,4 +1,4 @@
-Status: blocked
+Status: wontfix
 Type: task
 Origin: docs/reviews/phase-3-web-shell.md (spec axis, Sp7)
 Blocks: phase-4
@@ -31,3 +31,9 @@ Only the control's meaning is a guess.
 ## Verify
 
 `grep -n greyOwned apps/web/src/components/ViewControls.tsx apps/web/src/view-options.ts`
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`). The control is in `apps/web`, which will not ship; the owner ruling it waited on is no longer needed.

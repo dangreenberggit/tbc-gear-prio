@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: bug
 Origin: unfiled aside in closed ticket 57, recovered 2026-08-07
 Blocks: none
@@ -74,3 +74,9 @@ reconstruction of it.
 - A test covers the three named shapes, verified red first.
 - The gate is over the parser, not over the shipped universes — the universes
   cannot catch it while these items are absent.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`), and since ADR-0038 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`) the tab builds its pool from wowsims' item database at run time and reads no universe file. The wrong zone comes from this repo's Wowhead source parser; the tab takes sources from wowsims.

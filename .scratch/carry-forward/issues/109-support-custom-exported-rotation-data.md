@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: feature
 Origin: owner decision, 2026-08-10, closing the 103/106 loop
 Blocks: none
@@ -24,3 +24,9 @@ Also noted, no action: the skeleton carries both party-level Lesser Drums
 and a Greater Drums consumable; drums create a shared cooldown in this TBC
 round. Owner decision: let the sim handle it, assuming the web defaults do
 the same. Untested whether the two entries stack, override, or get ignored.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`): this concerns only this repo's command-line ranking or its HTML report, which the tab does not use. The tab sims the page's own settings, including talents, rotation and consumables (`ui/features/upgrades/model/run_inputs.ts:20-28`, tbc-new-fork@bc3cca6a1), so a player's custom rotation is already what the tab ranks with.

@@ -1,6 +1,6 @@
 # 88 — `curated_set_phase` docstring calls the `_6p`/`_9p` suffix a tier-bonus count
 
-Status: open
+Status: wontfix
 **Found:** 2026-08-10, while adding the report's BiS filter.
 
 ## The claim in the code
@@ -62,3 +62,9 @@ is a hit-percentage variant. Optionally surface a reader-facing label
 ("~6% hit" / "~9% hit") if `bisSets` is ever rendered per-variant.
 
 No behaviour change — parsing already only reads the `pN` prefix.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`), and since ADR-0038 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`) the tab builds its pool from wowsims' item database at run time and reads no universe file. The wrong docstring is in `scripts/assemble_universe.py`; the tab takes BiS sets from wowsims presets.

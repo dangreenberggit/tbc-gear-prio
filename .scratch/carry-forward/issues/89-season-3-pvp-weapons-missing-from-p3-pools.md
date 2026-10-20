@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: pool membership gap
 Origin: feral P3 rank report review, 2026-08-10
 Blocks: none
@@ -105,3 +105,9 @@ is untouched by any of this and still stands.
 
 Re-runnable: `pnpm pool-listings:check`, then read the "Wowsims-only items,
 classified" table in each listing.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`), and since ADR-0038 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`) the tab builds its pool from wowsims' item database at run time and reads no universe file. The named weapons (33662, 33762, 33716, 32014) are epic, item level 136 or 146, with a phase in `vendor/wowsims/db.json`. The tab's pool rule (`selectPool` in `ui/features/upgrades/model/pool_source.ts`, tbc-new-fork@bc3cca6a1) needs no source, so by code reading (not checked in a run) it admits each weapon the spec can equip. That is two of the four per spec: feral can use 33716 (staff) and 32014 (maul); ret can use 33762 (sword) and 32014. 33662 is an off-hand weapon (`handType` 3), which neither spec can dual-wield, and druids cannot use swords, so its absence for feral is correct game behaviour. (Corrected in the pre-merge review of `chore/ticket-housekeeping`, D1/A5.)

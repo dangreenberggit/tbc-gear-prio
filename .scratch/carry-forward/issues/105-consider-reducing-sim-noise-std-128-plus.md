@@ -31,3 +31,9 @@ Questions to answer, in order:
 If (2) shows the ranking near the cutoff is stable despite the spread,
 close this with that finding — a big std on the absolute DPS is harmless if
 the deltas are tight.
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: Engine research on tab ranking: whether run noise changes which rows clear the cutoff applies to the fork's ported `engine/cutoff.ts` and `engine/se.ts` (tbc-new-fork@bc3cca6a1); question 1 is answered by ticket 616 (the figure is `baseline.stdev`).

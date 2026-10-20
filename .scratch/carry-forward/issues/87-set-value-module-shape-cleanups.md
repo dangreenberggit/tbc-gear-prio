@@ -23,3 +23,9 @@ same module surface:
 5. **Digest pin**: rank-report.test.ts's pinned `{digest, length}` grew more
    brittle with the new interpolation points; the targeted `toContain` tests
    already cover the feature — consider dropping the pin or scoping it.
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: the fork's engine has `set-value.ts` beside `set-bonus.ts` and the same `buildSetBonuses` at `engine/rank.ts:1853` (items 1, 2 and 4; items 3 and 5 are core-only) (tbc-new-fork@bc3cca6a1).

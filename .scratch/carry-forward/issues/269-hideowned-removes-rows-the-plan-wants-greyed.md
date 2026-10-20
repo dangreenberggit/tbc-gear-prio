@@ -49,3 +49,9 @@ Check who relies on the current behaviour first:
 ```bash
 grep -rn "hideOwned" packages/core/src packages/core/test apps
 ```
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: the fork's ported `ui/features/upgrades/model/engine/view.ts:784` has the same `hideOwned` option and the tab calls `applyView`; no tab code passes `hideOwned` today (grep in tbc-new-fork@bc3cca6a1).

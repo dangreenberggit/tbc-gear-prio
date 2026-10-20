@@ -123,3 +123,9 @@ the wheel"*), so that sweep is likely the more valuable half of this ticket.
       reader sees, not only in the code that applies it.
 - [ ] The wider hardcoded-from-wowsims sweep is run and its findings filed.
 - [ ] `pnpm verify` green.
+
+## Comments
+
+### 2026-10-19 — kept open in ticket housekeeping
+
+Kept open: the fork's ported `ui/features/upgrades/model/engine/candidate-gems.ts:218` carries the same hand-copied `SPEC_PREFERRED_METAS` table the tab uses for candidate gems (tbc-new-fork@bc3cca6a1).

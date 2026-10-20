@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: bug
 Origin: pre-merge review of feat/phase-3-vendor-and-craft-coverage (adversarial
   A1, standards axis finding 3 — found independently by both)
@@ -82,3 +82,9 @@ same way 59 became reachable when step 3 admitted item 29301.
 - A test covers each shape: zone-plus-rep keeps the zone; bare standing
   yields no zone.
 - Ticket 59's defect class is closed rather than narrowed again.
+
+## Comments
+
+### 2026-10-19 — wontfix (ticket housekeeping)
+
+Per the owner's 2026-10-16 scope ruling: there is no standalone web app or Stage 4 deploy, and the work is the fork's Upgrades tab only (`PLAN.md:934`; `.scratch/plans/upgrades-tab-finish-line.md:53-56`), and since ADR-0038 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md`) the tab builds its pool from wowsims' item database at run time and reads no universe file. Latent defects in this repo's Wowhead source parser; the tab takes sources from wowsims.
