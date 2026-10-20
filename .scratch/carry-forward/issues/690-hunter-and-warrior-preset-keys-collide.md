@@ -41,3 +41,10 @@ Mastery)", and after unticking it; only the ticked chip turned on, and its
 Survival twin stayed off. The dev-server log had no "same key" error (the run
 on 2026-10-19 logged 709). Record: the pair's gitignored
 `.scratch/agent-reports/2026-10-20-live-dps-spec-coverage.md`, section 3.
+
+Not restored (pre-merge review feat/dps-spec-coverage, P1): a hunter or warrior
+pick saved under the old key matches no option now, and `setSelection` drops
+it without a message (fork `settings_pool.ts`, `setSelection`). The old key
+named two sets at once, so there is no single set to restore it to, and the
+tab has no users outside development (no deploy; tab-1 deferred), so the
+pick is lost once on a development browser only.
