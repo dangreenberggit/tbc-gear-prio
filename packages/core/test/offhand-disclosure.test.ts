@@ -7,6 +7,10 @@
  * placeholders, not spending candidate-cap places — when a two-hander is worn,
  * because placing one then means a two-item swap.
  *
+ * The last block checks the same Stop placeholder rule for rings and trinkets
+ * (ticket 701): a placeholder for an item worn in its second slot names that
+ * slot, as its simmed row would.
+ *
  * Driven at the `rankUpgrades` seam with a hand-built pool of real mage-p3
  * universe rows and a synthetic sim (AGENTS.md § Testing). Nothing here asserts
  * on a DPS number.
@@ -16,7 +20,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { getItem } from "../src/items.js";
-import type { PoolEntry } from "../src/pool.js";
+import { simSlotsForPoolSlot, type PoolEntry } from "../src/pool.js";
 import { HandType } from "../src/proto/common_pb.js";
 import {
   rankUpgrades,
@@ -53,8 +57,8 @@ const ONE_HANDERS = [28524, 29182]; // Emerald Ripper, Riftmaker
 const TWO_HANDER = 29988; // The Nexus Key
 const OTHERS = [31056, 32349]; // a head and a neck
 
-function pool(): PoolEntry[] {
-  return [...HELD, ...ONE_HANDERS, TWO_HANDER, ...OTHERS].map((id) =>
+function pool(extra: readonly number[] = []): PoolEntry[] {
+  return [...HELD, ...ONE_HANDERS, TWO_HANDER, ...OTHERS, ...extra].map((id) =>
     realPoolEntry(id, "mage-p3")
   );
 }
@@ -118,6 +122,7 @@ async function rankMage(args: {
   candidateCap?: number;
   sim?: SimRunner;
   signal?: AbortSignal;
+  extraPool?: readonly number[];
 }): Promise<Ranking | PartialRanking> {
   const gear = loadJson<PresetGearFile>(args.gearFile);
   const ref = { region: "US" as const, realm: "synthetic", name: "syn-mage" };
@@ -152,7 +157,7 @@ async function rankMage(args: {
       clock: () => new Date("2026-10-19T00:00:00Z"),
       raidSimSkeleton: skeletonFor(gear),
       epWeights,
-      pool: pool(),
+      pool: pool(args.extraPool),
       ...(args.signal ? { concurrency: 1, signal: args.signal } : {}),
     }
   );
@@ -243,5 +248,46 @@ describe("off-hand items while a two-hander is worn", () => {
     expect(placeholders.length).toBeGreaterThan(0);
     expect(placeholders.filter((i) => isOffHandOnly(i.itemId))).toEqual([]);
     expect(disclosures(ranking)).toHaveLength(1);
+  });
+});
+
+describe("Stop placeholders for rings and trinkets", () => {
+  // ONE_HAND_GEAR wears these in finger1, finger2, trinket1 and trinket2.
+  const WORN = {
+    29305: "finger1",
+    32527: "finger2",
+    30720: "trinket1",
+    29370: "trinket2",
+  } as const;
+
+  it("name the slot the item is worn in, as its simmed row would", async () => {
+    // A worn ring or trinket may only be placed in the slot it is worn in, so
+    // a simmed row names that slot. Without the same on a placeholder,
+    // readers fall back to the first slot and file a finger2 ring under
+    // finger1.
+    const controller = new AbortController();
+    const sim = new SyntheticSimRunner((calls) => {
+      if (calls === 2) controller.abort();
+    });
+    const ranking = await rankMage({
+      gearFile: ONE_HAND_GEAR,
+      sim,
+      signal: controller.signal,
+      extraPool: Object.keys(WORN).map(Number),
+    });
+    expect(ranking.complete).toBe(false);
+    const rows = Object.keys(WORN).map((id) =>
+      ranking.items.find((i) => i.itemId === Number(id))
+    );
+    expect(rows.map((row) => row?.simmed)).toEqual(rows.map(() => false));
+    // The slot each row names, read as the tab reads it (fork
+    // `results_view.ts` `effectiveSlot`, `utils/format.ts` `slotLabel`).
+    const named = Object.fromEntries(
+      rows.map((row) => [
+        row!.itemId,
+        row!.slotChoice ?? simSlotsForPoolSlot(row!.slot)[0],
+      ])
+    );
+    expect(named).toEqual(WORN);
   });
 });
