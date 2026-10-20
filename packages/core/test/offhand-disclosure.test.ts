@@ -174,6 +174,26 @@ describe("off-hand items for a spec that cannot dual-wield", () => {
     expect(oneHanderRows.length).toBeGreaterThan(0);
     for (const row of oneHanderRows) expect(row.slotChoice).toBe("mainhand");
   });
+
+  it("files a Stop placeholder for a held item in the off hand", async () => {
+    // Without a slotChoice, readers fall back to the weapon slot's first
+    // placement and show an unsimmed held item as a main-hand row.
+    const controller = new AbortController();
+    const sim = new SyntheticSimRunner((calls) => {
+      if (calls === 2) controller.abort();
+    });
+    const ranking = await rankMage({
+      gearFile: ONE_HAND_GEAR,
+      sim,
+      signal: controller.signal,
+    });
+    expect(ranking.complete).toBe(false);
+    const heldPlaceholders = ranking.items.filter(
+      (i) => i.simmed === false && isOffHandOnly(i.itemId)
+    );
+    expect(heldPlaceholders.length).toBeGreaterThan(0);
+    for (const row of heldPlaceholders) expect(row.slotChoice).toBe("offhand");
+  });
 });
 
 describe("off-hand items while a two-hander is worn", () => {

@@ -904,6 +904,87 @@ export async function rankUpgrades(
     });
 
     /**
+     * Whether `runCandidate` skips placing `entry` in `slotName` rather than
+     * pricing it there. A Stop placeholder asks the same question to name its
+     * hand (`placeholderSlotChoice`).
+     */
+    const placementSkipped = (
+      entry: PoolEntry,
+      slotName: SimSlotName,
+      slotIndex: number
+    ): boolean => {
+      // A one-hander is only a legal off-hand candidate if the weapon
+      // already in the main hand is itself one-handed. `simSlotsForPoolSlot`
+      // filters the *candidate's* hand type and knows nothing about what is
+      // worn, so without this the ranker sims a one-hander into an empty off
+      // hand while a two-hander stays in the main hand — a pairing the game
+      // cannot equip, priced as an upgrade.
+      //
+      // Skipping is the minimal correct semantics. The alternative, letting
+      // the off-hand pick displace the worn two-hander, prices a two-item
+      // swap under a one-item row: the delta would silently include losing
+      // the two-hander, which is not what the row claims. A player holding a
+      // two-hander who wants to dual-wield gets that answer from the
+      // main-hand rows, which are ranked normally.
+      //
+      // Scope: this covers a two-hander already WORN with a one-hander
+      // offered for the off hand. The mirror case — a two-hander as the
+      // CANDIDATE for the main hand while a one-hander plus an off-hand item
+      // is worn — never reaches this test, because the guard keys on the
+      // candidate's target slot. That case is ticket 350 and is handled
+      // separately: clearing the worn off-hand item leaves a legal two-hander
+      // build and an honest one-for-one swap, which is not the trade rejected
+      // above.
+      if (slotName === "offhand" && !mainHandIsOneHanded) return true;
+      // A paired slot tries both placements and keeps the better one, so
+      // without this an item already worn in finger2 gets swapped over
+      // finger1 as well — pricing a *second copy* the game will not equip,
+      // and shipping it as an upgrade for gear the player already has on
+      // (carry-forward 46). Skipping leaves the identity swap as the only
+      // outcome for a worn item, which is what every unpaired slot already
+      // does. Written against the equipment array rather than special-cased
+      // to fingers so trinkets and any later paired slot inherit it.
+      //
+      // Wearing a second copy of a *non-unique* ring or trinket is legal in
+      // TBC, and this guard blocks that row. Ticket 308 decided it is
+      // deliberately out of scope, because relaxing the guard here does not
+      // produce the missing row. The candidate loop emits one row per
+      // *item*, not per placement: it keeps only the best swap across slots,
+      // so an unguarded second placement would not appear alongside the worn
+      // item's identity swap — it would win the comparison and overwrite it,
+      // turning "you already wear this" into "wear a second one" with
+      // nothing in the row saying so. Producing it honestly needs a
+      // per-placement row concept through the engine output, the view, and
+      // the UI. The item data is already there when someone builds it: every
+      // item entry has `unique`, currently read only by the gem solver.
+      // Ticket 309 holds the redesign map.
+      const wornAt = equipment.findIndex((spec) => spec.id === entry.itemId);
+      return wornAt >= 0 && wornAt !== slotIndex;
+    };
+
+    /**
+     * The hand a Stop placeholder for a weapon names. A simmed weapon row
+     * names the hand its best swap went into; when only one placement
+     * survives `placementSkipped`, that hand is known without a sim, so the
+     * placeholder names it too and files in the same pane. With two legal
+     * placements only the sim could choose, so the row leaves it unset.
+     */
+    const placeholderSlotChoice = (
+      entry: PoolEntry
+    ): SimSlotName | undefined => {
+      if (entry.slot !== "weapon") return undefined;
+      const legal = simSlotsForPoolSlot(
+        entry.slot,
+        input.spec,
+        entry.itemId
+      ).filter(
+        (slotName) =>
+          !placementSkipped(entry, slotName, SIM_ORDER.indexOf(slotName))
+      );
+      return legal.length === 1 ? legal[0] : undefined;
+    };
+
+    /**
      * One candidate's full slot-attempt loop, unchanged from the old serial
      * body except that it is now a `promisePool` task rather than one turn
      * of a `for` loop (candidate-pool.md §5.1.2) — every mutation below
@@ -927,29 +1008,6 @@ export async function rankUpgrades(
 
       for (let s = 0; s < slotNames.length; s++) {
         const slotName = slotNames[s]!;
-        // A one-hander is only a legal off-hand candidate if the weapon
-        // already in the main hand is itself one-handed. `simSlotsForPoolSlot`
-        // filters the *candidate's* hand type and knows nothing about what is
-        // worn, so without this the ranker sims a one-hander into an empty off
-        // hand while a two-hander stays in the main hand — a pairing the game
-        // cannot equip, priced as an upgrade.
-        //
-        // Skipping is the minimal correct semantics. The alternative, letting
-        // the off-hand pick displace the worn two-hander, prices a two-item
-        // swap under a one-item row: the delta would silently include losing
-        // the two-hander, which is not what the row claims. A player holding a
-        // two-hander who wants to dual-wield gets that answer from the
-        // main-hand rows, which are ranked normally.
-        //
-        // Scope: this covers a two-hander already WORN with a one-hander
-        // offered for the off hand. The mirror case — a two-hander as the
-        // CANDIDATE for the main hand while a one-hander plus an off-hand item
-        // is worn — never reaches this test, because the guard keys on the
-        // candidate's target slot. That case is ticket 350 and is handled
-        // separately: clearing the worn off-hand item leaves a legal two-hander
-        // build and an honest one-for-one swap, which is not the trade rejected
-        // above.
-        if (slotName === "offhand" && !mainHandIsOneHanded) continue;
         const slotIndex = SIM_ORDER.indexOf(slotName);
         // `continue` here would drop the candidate from the ranking silently —
         // the item just never appears, with no error and no substitution row.
@@ -962,30 +1020,7 @@ export async function rankUpgrades(
               `(item ${entry.itemId} ${entry.name})`
           );
         }
-        // A paired slot tries both placements and keeps the better one, so
-        // without this an item already worn in finger2 gets swapped over
-        // finger1 as well — pricing a *second copy* the game will not equip,
-        // and shipping it as an upgrade for gear the player already has on
-        // (carry-forward 46). Skipping leaves the identity swap as the only
-        // outcome for a worn item, which is what every unpaired slot already
-        // does. Written against the equipment array rather than special-cased
-        // to fingers so trinkets and any later paired slot inherit it.
-        //
-        // Wearing a second copy of a *non-unique* ring or trinket is legal in
-        // TBC, and this guard blocks that row. Ticket 308 decided it is
-        // deliberately out of scope, because relaxing the guard here does not
-        // produce the missing row. This loop emits one row per *item*, not per
-        // placement: it keeps only the best swap across slots, so an unguarded
-        // second placement would not appear alongside the worn item's identity
-        // swap — it would win the comparison and overwrite it, turning "you
-        // already wear this" into "wear a second one" with nothing in the row
-        // saying so. Producing it honestly needs a per-placement row concept
-        // through the engine output, the view, and the UI. The item data is
-        // already there when someone builds it: every item entry has
-        // `unique`, currently read only by the gem solver. Ticket 309 holds
-        // the redesign map.
-        const wornAt = equipment.findIndex((spec) => spec.id === entry.itemId);
-        if (wornAt >= 0 && wornAt !== slotIndex) continue;
+        if (placementSkipped(entry, slotName, slotIndex)) continue;
         let swapped: SimItemSpec[];
         let repairSwaps: readonly MetaRepairSwap[];
         let removed: readonly { slotIndex: number; itemId: number }[];
@@ -1213,6 +1248,7 @@ export async function rankUpgrades(
         )
       : [];
     for (const entry of unsimmedCandidates) {
+      const slotChoice = placeholderSlotChoice(entry);
       // A row Stop never reached — placeholder numbers so the row stays a
       // valid RankedItem, but `simmed: false` pulls it out of cutoff
       // classification and tie groups below rather than letting a zeroed
@@ -1222,6 +1258,7 @@ export async function rankUpgrades(
         itemId: entry.itemId,
         name: entry.name,
         slot: entry.slot,
+        ...(slotChoice ? { slotChoice } : {}),
         source: entry.source,
         deltaDps: 0,
         deltaPct: 0,
