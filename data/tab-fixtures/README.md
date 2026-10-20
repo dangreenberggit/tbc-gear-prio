@@ -58,6 +58,12 @@ feral-p3-p2bis (587 candidates) did not finish inside the recorder's 25-minute
 limit, so use the backend for the larger lists. Run one recording at a time:
 two recorders on one backend slowed each other enough that page loads timed
 out ("no preset phase tab", "gear not loaded").
+On 2026-10-20 (fork `c89b0b912`, backend on `:3333`, one recorder at a time)
+the eight runs took 353–370 s for each feral-p3 fixture (733 ranked items),
+446 s for feral-p5 (1005), 225 s for ret-p3 (962), 246 s for feral-p2 (536),
+85 s for warlock-p3 (572) and 648 s for enh-p3 (931). A first feral-p2 run
+that day did not settle inside the 25-minute limit; the retry settled in
+246 s (cause not found).
 Each fixture's command:
 
 ```sh
