@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: .scratch/stage-gate/reforge-catchup-leftovers/brief.md
 Blocks: none
@@ -120,3 +120,23 @@ found no consumer for them today.
 ### 2026-10-19 — kept open in ticket housekeeping
 
 Kept open: the file records that ret and feral are never offered an off-hand placement although druids can hold off-hand items; the fork's `ui/features/upgrades/model/engine/pool.ts:248` has the same `DUAL_WIELD_SPECS` rule (tbc-new-fork@bc3cca6a1) and no other open ticket tracks it. The CLI fixture part is out of scope.
+
+### 2026-10-20 — closed (stage dps-spec-coverage)
+
+Verified by: `pnpm exec vitest run packages/core/test/offhand-disclosure.test.ts packages/core/test/slot-mapping.test.ts`
+at tbc-gear-prio@b0533ff6, and tbc-new-fork@4f58202a3
+(`ui/features/upgrades/model/dual_wield_specs.test.ts`)
+
+The part this file was kept open for is fixed in both engine copies (core
+`packages/core/src/pool.ts`, fork `ui/features/upgrades/model/engine/pool.ts`):
+an off-hand-only item (shield, held item, off-hand-only weapon) now maps to the
+off hand for every spec, and `DUAL_WIELD_SPECS` is pinned to wowsims'
+`canDualWield` by a test. When the worn main hand is a two-hander, those items
+are left out before ordering and one line in the tab's substitutions list says
+how many. The recorded tab fixtures at tbc-new-fork@c89b0b912
+(tbc-gear-prio@47c30e66) show it: `warlock-p3-t5` has 29 off-hand-only rows
+and `enh-p3-p2` 76, all with `slotChoice: "offhand"`; the feral and ret
+fixtures, which wear two-handers, carry one "off-hand candidates" line
+(feral P3 29 items, feral P5 36, feral P2 22, ret P3 28) and no placeholder
+rows. The CLI dual-wield `RaidSimRequest` fixture stays out of scope, as the
+2026-10-19 comment says.
