@@ -22,6 +22,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { filterPoolByPhase, poolFromUniverse } from "../src/pool.js";
+import { HandType } from "../src/proto/common_pb.js";
 import { rankUpgrades, type Ranking } from "../src/rank.js";
 import { RecordedGearSource } from "../src/seams/gear-source.js";
 import type {
@@ -201,9 +202,8 @@ describe("shadow — a caster archetype", () => {
     const itemIndex = loadJson<
       Record<string, { name: string; handType: number | null }>
     >("data/items/index.json");
-    const HAND_TYPE_OFF_HAND = 3;
     const isOffHandOnly = (id: number) =>
-      itemIndex[String(id)]?.handType === HAND_TYPE_OFF_HAND;
+      itemIndex[String(id)]?.handType === HandType.HandTypeOffHand;
     const universe = loadJson<{ entries: unknown[] }>(
       "data/universes/shadow-p3.json"
     );
@@ -255,12 +255,12 @@ describe("rogue — a dual-wield melee archetype", () => {
       Record<string, { name: string; handType: number | null }>
     >("data/items/index.json");
     const HAND_TYPE_ONE_HAND = 2;
-    const HAND_TYPE_OFF_HAND = 3;
     const offenders = offhandRows
       .filter((i) => {
         const handType = itemIndex[String(i.itemId)]?.handType;
         return (
-          handType !== HAND_TYPE_ONE_HAND && handType !== HAND_TYPE_OFF_HAND
+          handType !== HAND_TYPE_ONE_HAND &&
+          handType !== HandType.HandTypeOffHand
         );
       })
       .map(
