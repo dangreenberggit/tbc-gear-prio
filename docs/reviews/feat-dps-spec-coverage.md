@@ -225,7 +225,7 @@ for rings and trinkets worn in their second slot may name the first slot
 
 ## Disposition (round 2)
 
-| ID  | Axis          | Disposition | Ticket / note                                                                                                                             |
-| --- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| F1  | Focused check | defer       | `.scratch/carry-forward/issues/702-no-test-that-eligible-count-follows-worn-weapon.md` — hook-level test of the count after a weapon swap |
-| F2  | Focused check | wontfix     | Owner scope filter: a test-only literal, no effect on the tab, the pool or gates                                                          |
+| ID  | Axis          | Disposition | Ticket / note                                                                                                                    |
+| --- | ------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| F1  | Focused check | fixed       | Hook-level test of the count after a weapon swap: fork 4bb8da4f2, re-pinned in main 5cc39958; ticket 702 closed (addendum below) |
+| F2  | Focused check | wontfix     | Owner scope filter: a test-only literal, no effect on the tab, the pool or gates                                                 |

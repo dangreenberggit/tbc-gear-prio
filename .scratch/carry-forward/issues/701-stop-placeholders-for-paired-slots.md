@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-dps-spec-coverage.md (A1 fix, fixer's listed change)
 Serves: .scratch/plans/upgrades-tab-finish-line.md
@@ -25,3 +25,27 @@ A test aborts a run with a ring or trinket worn in its second slot still
 unsimmed and shows which slot its placeholder row names. If it names the
 wrong one, the placeholder takes the slot a simmed row would; if not, close
 this ticket with the test as the evidence.
+
+## Closed, 2026-10-20 (stage dps-spec-coverage)
+
+Verified by: main 9e12e390, test `packages/core/test/offhand-disclosure.test.ts`
+("Stop placeholders for rings and trinkets"; re-run: `pnpm exec vitest run packages/core/test/offhand-disclosure.test.ts`),
+fork fix tbc-new-fork@3797dd6b4, re-pinned in main 5cc39958
+
+The slot was wrong. The test ranks a mage wearing
+`vendor/wowsims/mage_p3_sword.gear.json` with its worn rings and trinkets
+added to the pool, and stops the run after the first candidate sim. Before
+the fix the placeholders for Ring of Ancient Knowledge (32527, worn in
+finger2) and Icon of the Silver Crescent (29370, worn in trinket2) had no
+`slotChoice`, so the tab's readers (`effectiveSlot`, `slotLabel`) named
+finger1 and trinket1:
+
+    - "29370": "trinket2",  + "29370": "trinket1",
+    - "32527": "finger2",   + "32527": "finger1",
+
+`placeholderSlotChoice` (fork `model/engine/rank.ts`, core
+`packages/core/src/rank.ts`) now names the slot for any weapon, ring or
+trinket placeholder with exactly one legal placement, the same rule a simmed
+row uses to set `slotChoice`. The test passes with the fix: the four rows
+name finger1, finger2, trinket1 and trinket2. An unworn ring or trinket
+still has two legal slots, so its placeholder names none, as before.
