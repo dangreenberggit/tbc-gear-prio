@@ -201,6 +201,9 @@ were recorded. The fixes change only partial rankings and the pre-run count,
 so the recorded rankings should still be right (hypothesis, untested);
 re-record them when convenient (`data/tab-fixtures/README.md`).
 
+Tickets: this branch filed 3 (700, 701, 702) and closed 4 (365, 690, 691,
+699), by the skill's two `git diff dev...HEAD` counts.
+
 Ticket 701 comes from the A1 fixer's list of other changes: Stop placeholders
 for rings and trinkets worn in their second slot may name the first slot
 (hypothesis, untested).
