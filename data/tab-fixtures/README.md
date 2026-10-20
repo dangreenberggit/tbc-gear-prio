@@ -14,8 +14,8 @@ with `"fixture": "<name>"`.
 | `schemaVersion` | `1` |
 | `forkSha` | `vendor/tbc-new-fork` commit the run was made on |
 | `forkDirty` | always `false` here; the recorder refuses an uncommitted fork tree unless `--allow-dirty` is given (see below) |
-| `spec`, `phase` | engine spec id (`feral`, `ret`) and the page phase during the run |
-| `preset` or `gearUrl` | how the gear was loaded: `"<phase tab> / <Gear Sets chip>"`, or the page link |
+| `spec`, `phase` | engine spec id (`feral`, `ret`, `warlock`, `enh`) and the page phase during the run |
+| `preset` or `gearUrl` | how the gear was loaded: `"<phase tab> / <Gear Sets chip>"`, or `"<Gear Sets chip>"` when the page's preset picker has no phase tabs, or the page link |
 | `gear` | the worn gear as protojson `EquipmentSpec` |
 | `recordedAt`, `iterations` | when, and the tab's iterations setting |
 | `ranking` | the `Ranking` object the run produced, as JSON |
@@ -67,7 +67,13 @@ pnpm tab-fixtures:record --spec feral --phase 3 --name th-hands-legs --gear-url 
 pnpm tab-fixtures:record --spec ret --phase 3 --name p2 --preset-tab "Phase 2" --preset "P2" --expect-gear-file ui/specs/paladin/retribution/gear_sets/p2.gear.json
 pnpm tab-fixtures:record --spec feral --phase 2 --name malorne4 --preset-tab "Phase 1" --preset "Alt 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p1_alt_6p.gear.json
 pnpm tab-fixtures:record --spec feral --phase 5 --name th4pc --preset-tab "Phase 4" --preset "BiS 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p4_6p.gear.json
+pnpm tab-fixtures:record --spec warlock --phase 3 --name t5 --preset "T5" --expect-gear-file ui/specs/warlock/dps/gear_sets/t5.gear.json
+pnpm tab-fixtures:record --spec enh --phase 3 --name p2 --preset "P2 Preset" --expect-gear-file ui/specs/shaman/enhancement/gear_sets/p2.gear.json
 ```
+
+The warlock and enhancement presets declare no phase, so their Gear Sets
+picker has no phase tabs; those two commands leave out `--preset-tab`, and the
+recorder clicks the chip directly.
 
 `feral-p5-th4pc` wears Thunderheart 4pc (the Phase 4 "BiS 6%" preset) at
 page phase 5, so its ranking holds the phase-5 Thunderheart Wristguards,

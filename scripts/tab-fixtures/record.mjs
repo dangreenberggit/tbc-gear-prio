@@ -34,13 +34,15 @@ const OUT_DIR = path.join(ROOT, "data", "tab-fixtures");
 const PAGE_BY_SPEC = {
   feral: "/tbc/druid/feralcat/",
   ret: "/tbc/paladin/retribution/",
+  warlock: "/tbc/warlock/dps/",
+  enh: "/tbc/shaman/enhancement/",
 };
 const RUN_LIMIT_MS = 25 * 60 * 1000;
 // Above the longest single call: activateTabExpression polls for up to 45 s.
 const CALL_TIMEOUT_MS = 90 * 1000;
 
-const USAGE = `usage: node scripts/tab-fixtures/record.mjs --spec feral|ret --phase N --name NAME
-         (--preset-tab "Phase 2" --preset "BiS 6%" --expect-gear-file <fork-relative .gear.json>
+const USAGE = `usage: node scripts/tab-fixtures/record.mjs --spec feral|ret|warlock|enh --phase N --name NAME
+         ([--preset-tab "Phase 2"] --preset "BiS 6%" --expect-gear-file <fork-relative .gear.json>
           | --gear-url <page link> --expect-item-ids 1,2,3)
          [--iterations 3000] [--base http://localhost:$TBC_FORK_PORT, default 5173]
          [--out <dir> [--allow-dirty]]
@@ -50,8 +52,9 @@ Writes data/tab-fixtures/<spec>-p<phase>-<name>.json, or the same name under
 committed fork tree. --allow-dirty records an uncommitted fork tree; it needs
 an --out folder other than data/tab-fixtures, stamps forkDirty: true and the
 sha256 of the fork's diff, and refuses to write if that diff changed during
-the run. --preset loads a chip from the page's "Gear Sets" presets under the
-named phase tab; --gear-url opens a gear link. Either way the worn gear is
+the run. --preset loads a chip from the page's "Gear Sets" presets, under the
+named phase tab when --preset-tab is given; leave --preset-tab out on a page
+whose picker has no phase tabs (warlock, enh). --gear-url opens a gear link. Either way the worn gear is
 checked item by item before the run, and the run is refused on a mismatch.`;
 
 function parseArgs(argv) {
@@ -93,8 +96,10 @@ function validate(args) {
   const viaPreset = args.preset !== undefined;
   const viaUrl = args.gearUrl !== undefined;
   if (viaPreset === viaUrl) return "give exactly one of --preset or --gear-url";
-  if (viaPreset && (!args.presetTab || !args.expectGearFile))
-    return "--preset needs --preset-tab and --expect-gear-file";
+  if (viaPreset && !args.expectGearFile)
+    return "--preset needs --expect-gear-file";
+  if (args.presetTab !== undefined && !viaPreset)
+    return "--preset-tab needs --preset";
   if (viaUrl && !args.expectItemIds)
     return "--gear-url needs --expect-item-ids";
   args.outDir = args.out === undefined ? OUT_DIR : path.resolve(args.out);
@@ -215,10 +220,14 @@ async function main() {
         send,
         `(async () => {
           const end = Date.now() + 30000;
-          let tab;
-          while (!(tab = [...document.querySelectorAll('[data-testid="preset-group-phase-tabs"] button')].find(t => t.textContent.trim() === ${JSON.stringify(args.presetTab)})) && Date.now() < end) await new Promise(r => setTimeout(r, 100));
-          if (!tab) return { error: 'no preset phase tab ' + ${JSON.stringify(args.presetTab)} };
-          tab.click();
+          const presetTab = ${JSON.stringify(args.presetTab ?? null)};
+          // A picker whose presets declare no phase renders no phase tabs.
+          if (presetTab !== null) {
+            let tab;
+            while (!(tab = [...document.querySelectorAll('[data-testid="preset-group-phase-tabs"] button')].find(t => t.textContent.trim() === presetTab)) && Date.now() < end) await new Promise(r => setTimeout(r, 100));
+            if (!tab) return { error: 'no preset phase tab ' + presetTab };
+            tab.click();
+          }
           // On a fresh page the chips render seconds after the tabs.
           const gearChips = () =>
             [...document.querySelectorAll('[data-testid="preset-group-picker"] [data-testid="content-block"]')]
@@ -369,7 +378,12 @@ async function main() {
       spec: args.spec,
       phase: args.phase,
       ...(args.preset !== undefined
-        ? { preset: `${args.presetTab} / ${args.preset}` }
+        ? {
+            preset:
+              args.presetTab === undefined
+                ? args.preset
+                : `${args.presetTab} / ${args.preset}`,
+          }
         : { gearUrl: args.gearUrl }),
       gear,
       recordedAt: new Date().toISOString(),
