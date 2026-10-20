@@ -70,7 +70,7 @@ field. Nothing needs building; the convention needs deciding and writing down.
 
 ### 2026-10-19 — closed (ticket housekeeping)
 
-`docs/agents/issue-tracker.md:45-49` defines `Status: blocked` for open work that only a named human can move, and `pnpm issues:open` prints each ticket's status in its first column (ticket 270 shows as `blocked`). Of the seven tickets named above, 117, 118, 122, 222 and 257 are resolved and 227 is wontfix; 119 stays open.
+`docs/agents/issue-tracker.md:45-49` defines `Status: blocked` for open work that only a named human can move, and `pnpm issues:open` prints each ticket's status in its first column (ticket 119 shows as `blocked`). Of the seven tickets named above, 117, 118, 122, 222 and 257 are resolved and 227 is wontfix; 119, which waits on an owner decision, is set to `Status: blocked` in the same branch (pre-merge review fix, A2/S2).
 
 Verified by:
 

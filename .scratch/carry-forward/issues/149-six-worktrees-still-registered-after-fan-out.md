@@ -1,4 +1,4 @@
-Status: closed
+Status: open
 Type: cleanup
 Origin: docs/reviews/feat-set-bonus-value.md round 5 (process P6)
 Blocks: none
@@ -96,4 +96,12 @@ Verified by:
 ```
 git -C /home/daniel/Code/lulz/tbc-gear-prio worktree list
 ls -d /home/daniel/Code/lulz/tbc-gear-prio/.claude/worktrees /home/daniel/Code/lulz/tbc-gear-prio/.scratch/wt-fan-out-retro
+```
+
+### 2026-10-19 — reopened (pre-merge review of `chore/ticket-housekeeping`, A1/S1)
+
+The close above checked only the WSL clone. The frozen Windows clone still registers the three worktrees this ticket says carry uncommitted work, including `.scratch/wt-fan-out-retro`; from WSL, `git worktree list` marks them `prunable` only because it cannot resolve `C:/` paths, and `ls -d` on the `/mnt/c/...` paths finds the directories. The `Verified by:` block above does not prove the close.
+
+```
+git -C /mnt/c/Users/dgree/Code/lulz/tbc-gear-prio worktree list | grep -iE 'fan-out-retro|wowhead-collection|salvage-docs'
 ```

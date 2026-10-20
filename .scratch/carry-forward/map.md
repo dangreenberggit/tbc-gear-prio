@@ -388,3 +388,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 696 Agent files left to change for the WSL dev host (pre-merge review feat/wsl-linux-support, A7 S10 Q9 P3) 2026-10-19
 - 697 The CLI ranking can print tied items with their rank labels out of order (sim comparison 2026-10-18, feat/wsl-linux-support fix pass) 2026-10-19
 - 698 Two WSL distros with the same prompt make it easy to work in the wrong one (owner request, WSL move) 2026-10-19
+- 699 The tab's BiS tags can come from an older phase, noted only in the console (pre-merge review chore/ticket-housekeeping, A3) 2026-10-19
