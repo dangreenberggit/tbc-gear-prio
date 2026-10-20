@@ -228,12 +228,20 @@ async function main() {
             if (!tab) return { error: 'no preset phase tab ' + presetTab };
             tab.click();
           }
-          // On a fresh page the chips render seconds after the tabs.
+          // On a fresh page the chips render seconds after the tabs. A page
+          // with no phase tabs (warlock, enh) renders its Gear Sets as a plain
+          // saved-data panel outside preset-group-picker, so a chip's block is
+          // found by the nearest ancestor that holds a block title.
+          const blockTitle = c => {
+            for (let p = c.parentElement; p; p = p.parentElement) {
+              const t = p.querySelector(':scope > [data-testid="content-block-title"], :scope > * > [data-testid="content-block-title"]');
+              if (t) return t.textContent.trim();
+            }
+            return null;
+          };
           const gearChips = () =>
-            [...document.querySelectorAll('[data-testid="preset-group-picker"] [data-testid="content-block"]')]
-              .filter(s => s.querySelector('[data-testid="content-block-title"]')?.textContent.trim() === 'Gear Sets')
-              .flatMap(s => [...s.querySelectorAll('[data-testid="saved-data-set-chip"]')])
-              .filter(c => c.offsetParent);
+            [...document.querySelectorAll('[data-testid="saved-data-set-chip"]')]
+              .filter(c => c.offsetParent && blockTitle(c) === 'Gear Sets');
           let chips = gearChips();
           let chip;
           while (!(chip = chips.find(c => c.textContent.trim() === ${JSON.stringify(args.preset)})) && Date.now() < end) {
