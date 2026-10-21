@@ -57,10 +57,13 @@ const ONE_HANDERS = [28524, 29182]; // Emerald Ripper, Riftmaker
 const TWO_HANDER = 29988; // The Nexus Key
 const OTHERS = [31056, 32349]; // a head and a neck
 
-function pool(extra: readonly number[] = []): PoolEntry[] {
-  return [...HELD, ...ONE_HANDERS, TWO_HANDER, ...OTHERS, ...extra].map((id) =>
-    realPoolEntry(id, "mage-p3")
-  );
+function pool(
+  extra: readonly number[] = [],
+  omit: readonly number[] = []
+): PoolEntry[] {
+  return [...HELD, ...ONE_HANDERS, TWO_HANDER, ...OTHERS, ...extra]
+    .filter((id) => !omit.includes(id))
+    .map((id) => realPoolEntry(id, "mage-p3"));
 }
 
 const isOffHandOnly = (itemId: number): boolean =>
@@ -123,6 +126,7 @@ async function rankMage(args: {
   sim?: SimRunner;
   signal?: AbortSignal;
   extraPool?: readonly number[];
+  omitFromPool?: readonly number[];
 }): Promise<Ranking | PartialRanking> {
   const gear = loadJson<PresetGearFile>(args.gearFile);
   const ref = { region: "US" as const, realm: "synthetic", name: "syn-mage" };
@@ -157,7 +161,7 @@ async function rankMage(args: {
       clock: () => new Date("2026-10-19T00:00:00Z"),
       raidSimSkeleton: skeletonFor(gear),
       epWeights,
-      pool: pool(args.extraPool),
+      pool: pool(args.extraPool, args.omitFromPool),
       ...(args.signal ? { concurrency: 1, signal: args.signal } : {}),
     }
   );
@@ -218,10 +222,11 @@ describe("off-hand items while a two-hander is worn", () => {
   });
 
   it("spends no candidate-cap places on them", async () => {
-    // The pool holds 5 items that can be placed; a cap of 3 must sim 3 of
-    // them. Were the blocked items still in the EP order, they would sort
-    // near the top (priced against an empty off hand) and take the places.
-    const cap = 3;
+    // Beside the two-hander the pool holds 3 items that can be placed (the
+    // one-handers are held out too); a cap of 2 must sim 2 of them. Were the
+    // blocked items still in the EP order, they would sort near the top
+    // (priced against an empty off hand) and take the places.
+    const cap = 2;
     const ranking = await rankMage({
       gearFile: TWO_HAND_GEAR,
       candidateCap: cap,
@@ -251,49 +256,64 @@ describe("off-hand items while a two-hander is worn", () => {
   });
 });
 
-describe("one-hand weapons while a two-hander is worn (ticket 700)", () => {
-  // Each one-hander is priced alone in the main hand, so the off hand stays
-  // empty in its sim; one line says so.
+describe("one-handed weapons while a two-hander is worn (ticket 700)", () => {
+  // Priced alone, a one-hander would leave the off hand empty, so the run
+  // holds them out before ordering and says how many in one line.
   const lines = (r: Ranking | PartialRanking) =>
     r.substitutions.filter((s) => s.field === "one-hand candidates");
+  const oneHanderRows = (r: Ranking | PartialRanking) =>
+    r.items.filter((i) => ONE_HANDERS.includes(i.itemId));
 
-  it("says how many one-hand weapons were priced with the off hand empty", async () => {
+  it("ranks none of them, still ranks the two-hander, and says how many", async () => {
     const ranking = await rankMage({ gearFile: TWO_HAND_GEAR });
 
-    const oneHanderRows = ranking.items.filter((i) =>
-      ONE_HANDERS.includes(i.itemId)
-    );
-    expect(oneHanderRows).toHaveLength(ONE_HANDERS.length);
+    expect(oneHanderRows(ranking)).toEqual([]);
+    expect(ranking.items.some((i) => i.itemId === TWO_HANDER)).toBe(true);
     expect(lines(ranking)).toEqual([
       {
         field: "one-hand candidates",
         detail:
-          `${ONE_HANDERS.length} one-hand weapons were priced in the main hand ` +
-          `with the off hand empty: the worn main hand is a two-hander, and ` +
-          `this run prices one item at a time.`,
+          "2 one-handed weapons were not ranked, because you wear a two-handed weapon.",
       },
     ]);
   });
 
-  it("counts only the one-hand weapons a capped run priced", async () => {
-    // A cap of 4 keeps one of the two one-handers (EP order over this pool).
+  it("says weapon, not weapons, for one", async () => {
     const ranking = await rankMage({
       gearFile: TWO_HAND_GEAR,
-      candidateCap: 4,
+      omitFromPool: [ONE_HANDERS[1]!],
     });
-
-    const priced = ranking.items.filter((i) =>
-      ONE_HANDERS.includes(i.itemId)
-    ).length;
-    expect(priced).toBe(1);
-    expect(lines(ranking)).toHaveLength(1);
-    expect(lines(ranking)[0]!.detail.startsWith("1 one-hand weapons")).toBe(
-      true
-    );
+    expect(lines(ranking).map((l) => l.detail)).toEqual([
+      "1 one-handed weapon was not ranked, because you wear a two-handed weapon.",
+    ]);
   });
 
-  it("has no line beside a worn one-hander", async () => {
+  it("spends no candidate-cap places and leaves no Stop placeholder on them", async () => {
+    // Over this pool a cap of 4 kept Emerald Ripper before the hold-out (EP
+    // order: the head, the neck, the two-hander, then the one-handers). Now
+    // only 3 items can be placed, so the cap is not reached.
+    const capped = await rankMage({ gearFile: TWO_HAND_GEAR, candidateCap: 4 });
+    expect(capped.items).toHaveLength(3);
+    expect(oneHanderRows(capped)).toEqual([]);
+
+    const controller = new AbortController();
+    const sim = new SyntheticSimRunner((calls) => {
+      if (calls === 2) controller.abort();
+    });
+    const stopped = await rankMage({
+      gearFile: TWO_HAND_GEAR,
+      sim,
+      signal: controller.signal,
+    });
+    expect(stopped.complete).toBe(false);
+    expect(stopped.items.some((i) => i.simmed === false)).toBe(true);
+    expect(oneHanderRows(stopped)).toEqual([]);
+    expect(lines(stopped)).toHaveLength(1);
+  });
+
+  it("ranks them with no line beside a worn one-hander", async () => {
     const ranking = await rankMage({ gearFile: ONE_HAND_GEAR });
+    expect(oneHanderRows(ranking)).toHaveLength(ONE_HANDERS.length);
     expect(lines(ranking)).toEqual([]);
   });
 });
