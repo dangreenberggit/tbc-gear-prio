@@ -54,7 +54,12 @@ export function sha256Hex(text: string): string {
 // 9: the cutoff became one flat 3 DPS bar (ADR-0037). The cutoff is not a
 // hashed input, so this bump is what keeps a cached ranking from serving the
 // old 3.4/3.6-or-0.15% verdicts (ADR-0020).
-export const ENGINE_VERSION = 9;
+// 10: off-hand placement for every spec; slotChoice on weapon rows; two-hander
+// off-hand disclosure. A cached ranking from 9 lacks the off-hand rows and
+// the disclosure line.
+// 11: one-handed weapons held out while a two-hander is worn, with their own
+// disclosure line (ticket 700). A cached ranking from 10 has their rows.
+export const ENGINE_VERSION = 11;
 
 export type HashedGearItem = {
   id: number;

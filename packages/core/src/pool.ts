@@ -355,22 +355,21 @@ type _SimSlotNameKeepsOffhand = Assert<Extends<"offhand", SimSlotName>>;
 type _SimSlotNameKeepsRings = Assert<Extends<"finger2", SimSlotName>>;
 
 /**
- * Specs that put a weapon in the off hand.
+ * Specs that can put a one-handed *weapon* in the off hand.
  *
- * Membership is about what the spec *can* equip, not what its BiS set happens
- * to use: a fury warrior and a combat rogue always dual-wield, while a hunter
- * or an enhancement shaman may be playing a two-hander build this week. Listing
- * the latter two anyway is correct, because the per-item hand-type filter below
- * is what actually decides whether any given item can go there — a spec that
- * could dual-wield but currently holds a two-hander simply produces no offhand
- * candidates. Excluding them instead would hide real offhand upgrades from
- * every dual-wielding hunter.
+ * This mirrors wowsims' per-spec `canDualWield` flag, and the fork pins the two
+ * together with a test (`dual_wield_specs.test.ts`). Membership is about what
+ * the spec *can* equip, not what its BiS set happens to use: a hunter or an
+ * enhancement shaman may be playing a two-hander build this week, and the
+ * per-item hand-type filter below decides whether any given item fits.
  *
- * Ret and feral are absent deliberately: neither can put anything in the off
- * hand, so `"weapon"` keeps mapping to mainhand alone and their rankings are
- * bit-for-bit what they were.
+ * It governs one-handers only. A dedicated off-hand item (a shield, a held
+ * item, an off-hand-only weapon) goes to the off hand for every spec, so a spec
+ * missing here — ret, feral, the casters — cannot dual-wield, which is not the
+ * same as having no off hand. Which off-hand items a spec may wear at all is
+ * decided upstream, where the pool admits only what wowsims lets it equip.
  */
-const DUAL_WIELD_SPECS: ReadonlySet<SpecId> = new Set<SpecId>([
+export const DUAL_WIELD_SPECS: ReadonlySet<SpecId> = new Set<SpecId>([
   "rogue",
   "enh",
   "warrior",
@@ -409,7 +408,8 @@ function itemFitsSimSlot(itemId: number, slotName: SimSlotName): boolean {
 
 /**
  * Map pool slot → sim equipment slot name(s). Rings/trinkets try both; a
- * dual-wield spec's weapons try both hands.
+ * dual-wield spec's one-handers try both hands; a dedicated off-hand item goes
+ * to the off hand for every spec.
  *
  * Resolving the off hand here rather than adding an `offhand` member to
  * `ItemSlot` is deliberate: a new pool slot would duplicate every one-hander
@@ -434,6 +434,12 @@ export function simSlotsForPoolSlot(
       case "trinket":
         return ["trinket1", "trinket2"];
       case "weapon":
+        if (
+          itemId !== undefined &&
+          getItem(itemId)?.handType === HandType.HandTypeOffHand
+        ) {
+          return ["offhand"];
+        }
         return spec !== undefined && DUAL_WIELD_SPECS.has(spec)
           ? ["mainhand", "offhand"]
           : ["mainhand"];
@@ -444,4 +450,63 @@ export function simSlotsForPoolSlot(
 
   if (itemId === undefined) return placements;
   return placements.filter((slotName) => itemFitsSimSlot(itemId, slotName));
+}
+
+/**
+ * Whether a worn main hand leaves the off hand usable at all.
+ *
+ * A two-hander occupies both hands, so no off-hand candidate is legal
+ * beside it. An *empty* main hand counts as usable: nothing blocks the off
+ * hand, and a character with no weapon at all should still see off-hand
+ * rows rather than silently losing the slot.
+ */
+export function mainHandLeavesOffHandFree(
+  wornMainHandId: number | undefined
+): boolean {
+  if (!wornMainHandId) return true;
+  return getItem(wornMainHandId)?.handType !== HandType.HandTypeTwoHand;
+}
+
+/**
+ * The entries of `pool` that can only go in the off hand while the worn main
+ * hand is a two-hander, so placing one would be a two-item swap. A run holds
+ * them out before ordering (rank.ts), and the tab's candidate count leaves
+ * them out with the same rule.
+ */
+export function offHandBlockedEntries(
+  pool: readonly PoolEntry[],
+  spec: SpecId | undefined,
+  wornMainHandId: number | undefined
+): PoolEntry[] {
+  if (mainHandLeavesOffHandFree(wornMainHandId)) return [];
+  return pool.filter((e) => {
+    const placements = simSlotsForPoolSlot(e.slot, spec, e.itemId);
+    return placements.length === 1 && placements[0] === "offhand";
+  });
+}
+
+/**
+ * The one-handed weapons in `pool` while the worn main hand is a
+ * two-hander. A one-hander priced alone would leave the off hand empty: a
+ * dual-wielder sims with one weapon and a caster loses its off-hand item's
+ * stats, so the row would price a build nobody wears. A run holds them out
+ * before ordering, as it does the off-hand items above, and the tab's
+ * candidate count leaves them out with the same rule. Two-handers stay, and
+ * an item whose hand type the database does not give stays too.
+ */
+export function oneHandBlockedEntries(
+  pool: readonly PoolEntry[],
+  spec: SpecId | undefined,
+  wornMainHandId: number | undefined
+): PoolEntry[] {
+  if (mainHandLeavesOffHandFree(wornMainHandId)) return [];
+  return pool.filter((e) => {
+    if (e.slot !== "weapon") return false;
+    const handType = getItem(e.itemId)?.handType;
+    if (handType == null || handType === HandType.HandTypeTwoHand) {
+      return false;
+    }
+    const placements = simSlotsForPoolSlot(e.slot, spec, e.itemId);
+    return !(placements.length === 1 && placements[0] === "offhand");
+  });
 }

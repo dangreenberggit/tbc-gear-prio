@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { simSlotsForPoolSlot } from "../src/pool.js";
 import { getItem } from "../src/items.js";
-import { HandType } from "../src/proto/common_pb.js";
+import { HandType, WeaponType } from "../src/proto/common_pb.js";
 import { SIM_ORDER } from "../src/slots.js";
 
 /**
@@ -22,11 +22,29 @@ describe("simSlotsForPoolSlot placements", () => {
     expect(simSlotsForPoolSlot("ranged")).toEqual(["ranged"]);
   });
 
-  it("leaves ret and feral weapons in the main hand alone", () => {
-    // The whole point of gating on spec: neither can hold an offhand, so their
-    // rankings must be bit-for-bit what they were before offhand existed.
+  it("gives a non-dual-wield spec the main hand when no item is named", () => {
+    // Ret and feral cannot dual-wield, so with no item in hand the only
+    // weapon placement they have is the main hand.
     expect(simSlotsForPoolSlot("weapon", "ret")).toEqual(["mainhand"]);
     expect(simSlotsForPoolSlot("weapon", "feral")).toEqual(["mainhand"]);
+  });
+
+  it("puts an off-hand-only item in the off hand for a non-dual-wield spec", () => {
+    // Not dual-wielding is not the same as an empty off hand: a ret paladin
+    // can wear a shield and a feral druid a held-in-off-hand item. Mapping
+    // both to the main hand alone dropped every such item from the ranking.
+    const shield = findByHandType(
+      HandType.HandTypeOffHand,
+      WeaponType.WeaponTypeShield
+    )[0]!;
+    const held = findByHandType(
+      HandType.HandTypeOffHand,
+      WeaponType.WeaponTypeOffHand
+    )[0]!;
+    expect(shield).toBeDefined();
+    expect(held).toBeDefined();
+    expect(simSlotsForPoolSlot("weapon", "ret", shield)).toEqual(["offhand"]);
+    expect(simSlotsForPoolSlot("weapon", "feral", held)).toEqual(["offhand"]);
   });
 
   it("keeps the no-spec call mainhand-only", () => {
@@ -109,11 +127,14 @@ describe("per-item hand-type filter", () => {
   });
 });
 
-/** Scan the pinned index for ids carrying a given hand type. */
-function findByHandType(handType: HandType): number[] {
+/** Scan the pinned index for ids carrying a given hand (and weapon) type. */
+function findByHandType(handType: HandType, weaponType?: WeaponType): number[] {
   const found: number[] = [];
   for (let id = 1; id < 40000 && found.length < 3; id++) {
-    if (getItem(id)?.handType === handType) found.push(id);
+    const item = getItem(id);
+    if (item?.handType !== handType) continue;
+    if (weaponType !== undefined && item.weaponType !== weaponType) continue;
+    found.push(id);
   }
   return found;
 }

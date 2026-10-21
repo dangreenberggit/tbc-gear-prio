@@ -14,8 +14,8 @@ with `"fixture": "<name>"`.
 | `schemaVersion` | `1` |
 | `forkSha` | `vendor/tbc-new-fork` commit the run was made on |
 | `forkDirty` | always `false` here; the recorder refuses an uncommitted fork tree unless `--allow-dirty` is given (see below) |
-| `spec`, `phase` | engine spec id (`feral`, `ret`) and the page phase during the run |
-| `preset` or `gearUrl` | how the gear was loaded: `"<phase tab> / <Gear Sets chip>"`, or the page link |
+| `spec`, `phase` | engine spec id (`feral`, `ret`, `warlock`, `enh`) and the page phase during the run |
+| `preset` or `gearUrl` | how the gear was loaded: `"<phase tab> / <Gear Sets chip>"`, or `"<Gear Sets chip>"` when the page's preset picker has no phase tabs, or the page link |
 | `gear` | the worn gear as protojson `EquipmentSpec` |
 | `recordedAt`, `iterations` | when, and the tab's iterations setting |
 | `ranking` | the `Ranking` object the run produced, as JSON |
@@ -58,6 +58,20 @@ feral-p3-p2bis (587 candidates) did not finish inside the recorder's 25-minute
 limit, so use the backend for the larger lists. Run one recording at a time:
 two recorders on one backend slowed each other enough that page loads timed
 out ("no preset phase tab", "gear not loaded").
+On 2026-10-20 (fork `c89b0b912`, backend on `:3333`, one recorder at a time)
+the eight runs took 353–370 s for each feral-p3 fixture (733 ranked items),
+446 s for feral-p5 (1005), 225 s for ret-p3 (962), 246 s for feral-p2 (536),
+85 s for warlock-p3 (572) and 648 s for enh-p3 (931). A first feral-p2 run
+that day did not settle inside the 25-minute limit; the retry settled in
+246 s (cause not found). Later that day (fork `5ec8def25`, the one-hander
+hold-out of ticket 700) the recorder's wall times were 274–283 s for each feral-p3 fixture
+(667 ranked items), 403 s for feral-p5 (909), 195 s for ret-p3 (894),
+215 s for feral-p2 (487), 95 s for warlock-p3 (572) and 554 s for enh-p3
+(931). At fork `b908771dd` (the reworded off-hand line) they were 304–327 s
+for each feral-p3 fixture, 398 s for feral-p5, 196 s for ret-p3, 226 s for
+feral-p2, 95 s for warlock-p3 and 577 s for enh-p3. Earlier the same day a
+feral-p3-th-hands-legs run at fork
+`3797dd6b4` also did not settle; ticket 703 tracks these.
 Each fixture's command:
 
 ```sh
@@ -67,7 +81,13 @@ pnpm tab-fixtures:record --spec feral --phase 3 --name th-hands-legs --gear-url 
 pnpm tab-fixtures:record --spec ret --phase 3 --name p2 --preset-tab "Phase 2" --preset "P2" --expect-gear-file ui/specs/paladin/retribution/gear_sets/p2.gear.json
 pnpm tab-fixtures:record --spec feral --phase 2 --name malorne4 --preset-tab "Phase 1" --preset "Alt 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p1_alt_6p.gear.json
 pnpm tab-fixtures:record --spec feral --phase 5 --name th4pc --preset-tab "Phase 4" --preset "BiS 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p4_6p.gear.json
+pnpm tab-fixtures:record --spec warlock --phase 3 --name t5 --preset "T5" --expect-gear-file ui/specs/warlock/dps/gear_sets/t5.gear.json
+pnpm tab-fixtures:record --spec enh --phase 3 --name p2 --preset "P2 Preset" --expect-gear-file ui/specs/shaman/enhancement/gear_sets/p2.gear.json
 ```
+
+The warlock and enhancement presets declare no phase, so their Gear Sets
+picker has no phase tabs; those two commands leave out `--preset-tab`, and the
+recorder clicks the chip directly.
 
 `feral-p5-th4pc` wears Thunderheart 4pc (the Phase 4 "BiS 6%" preset) at
 page phase 5, so its ranking holds the phase-5 Thunderheart Wristguards,

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/chore-ticket-housekeeping.md (A3)
 Blocks: none
@@ -157,3 +157,22 @@ wontfix in `chore/ticket-housekeeping`; this ticket holds the tab half. The
 investigation behind this text ran on 2026-10-19 against
 tbc-new-fork@bc3cca6a1 (report in the main checkout's gitignored
 `.scratch/agent-reports/2026-10-19-general-task-ticket-699-bis-fallback.md`).
+
+## Closed, 2026-10-20 (stage dps-spec-coverage)
+
+Verified by: tbc-new-fork@047f128d1 (`ViewToggles.test.tsx`,
+`UpgradesResults.test.tsx`; `npm run test:locales` in the fork), and the mage
+phase-5 live run at tbc-new-fork@c89b0b912
+
+The plan chose one place: a notice line under the view toggles, shown only
+when the BiS tags come from an older phase than the ranked one, plus the
+"BiS only" tooltip naming that phase. The "BiS" badge is unchanged. The ten
+pairs in the table above all take this path: `bisTagPhaseFor` gives
+`tagsFromPhase < maxPhase` for each of them.
+
+Live run, mage at phase 5 with the Phase 3 "Arcane - Staff" preset worn: the
+tooltip read "Show only items on the phase's curated BiS list. Phase 3 (2.2 -
+T6) list", and the notice read "BiS list and default sets are from Phase 3
+(2.2 - T6): wowsims has no Phase 5 (2.4 - SWP) set for this spec." Record: the
+pair's gitignored `.scratch/agent-reports/2026-10-20-live-dps-spec-coverage.md`,
+section 4, with `mage/05-bis-tooltip-and-notice.png`.

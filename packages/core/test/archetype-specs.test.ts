@@ -22,6 +22,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { filterPoolByPhase, poolFromUniverse } from "../src/pool.js";
+import { HandType } from "../src/proto/common_pb.js";
 import { rankUpgrades, type Ranking } from "../src/rank.js";
 import { RecordedGearSource } from "../src/seams/gear-source.js";
 import type {
@@ -187,16 +188,40 @@ describe("shadow — a caster archetype", () => {
     expect(ranking.caps.expertise.rating).toBe(0);
   });
 
-  it("never places a candidate in the off hand", async () => {
-    // Shadow is not a dual-wield spec, so "weapon" must map to mainhand
-    // alone however many one-handers the universe carries.
+  it("discloses off-hand items it cannot place while a two-hander is worn", async () => {
+    // The shadow gear wears 32374 Zhar'doom (a two-hander) with the off hand
+    // empty, so every held-in-off-hand item in the universe would need a
+    // two-item swap. None may become a row (not even a placeholder), and one
+    // substitution line must say how many were left out.
     const ranking = await rankSpec({
       spec: "shadow",
       className: "ClassPriest",
       gearFile: "vendor/wowsims/shadow_p3.gear.json",
       maxPhase: 3,
     });
+    const itemIndex = loadJson<
+      Record<string, { name: string; handType: number | null }>
+    >("data/items/index.json");
+    const isOffHandOnly = (id: number) =>
+      itemIndex[String(id)]?.handType === HandType.HandTypeOffHand;
+    const universe = loadJson<{ entries: unknown[] }>(
+      "data/universes/shadow-p3.json"
+    );
+    const offHandInPool = filterPoolByPhase(
+      poolFromUniverse(universe as never),
+      3
+    ).filter((e) => isOffHandOnly(e.itemId)).length;
+    expect(offHandInPool).toBeGreaterThan(0);
+
     expect(slotsChosen(ranking).has("offhand")).toBe(false);
+    expect(ranking.items.filter((i) => isOffHandOnly(i.itemId))).toEqual([]);
+    const lines = ranking.substitutions.filter(
+      (s) => s.field === "off-hand candidates"
+    );
+    expect(lines).toHaveLength(1);
+    expect(lines[0]!.detail.startsWith(`${offHandInPool} off-hand items`)).toBe(
+      true
+    );
   });
 });
 
@@ -230,12 +255,12 @@ describe("rogue — a dual-wield melee archetype", () => {
       Record<string, { name: string; handType: number | null }>
     >("data/items/index.json");
     const HAND_TYPE_ONE_HAND = 2;
-    const HAND_TYPE_OFF_HAND = 3;
     const offenders = offhandRows
       .filter((i) => {
         const handType = itemIndex[String(i.itemId)]?.handType;
         return (
-          handType !== HAND_TYPE_ONE_HAND && handType !== HAND_TYPE_OFF_HAND
+          handType !== HAND_TYPE_ONE_HAND &&
+          handType !== HandType.HandTypeOffHand
         );
       })
       .map(

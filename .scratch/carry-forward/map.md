@@ -389,3 +389,7 @@ file contention, worker prompt. This file stays the chronological log.
 - 697 The CLI ranking can print tied items with their rank labels out of order (sim comparison 2026-10-18, feat/wsl-linux-support fix pass) 2026-10-19
 - 698 Two WSL distros with the same prompt make it easy to work in the wrong one (owner request, WSL move) 2026-10-19
 - 699 The tab's BiS tags can come from an older phase, noted only in the console (pre-merge review chore/ticket-housekeeping, A3) 2026-10-19
+- 700 With a two-hander worn, one-handers are priced next to an empty off hand and the page does not say so (pre-merge review feat/dps-spec-coverage, D1) 2026-10-20
+- 701 Check where Stop placeholders for rings and trinkets are filed (pre-merge review feat/dps-spec-coverage, A1 fix) 2026-10-20
+- 702 No test checks that the run panel's eligible count follows the worn weapon (pre-merge review feat/dps-spec-coverage, round 2 F1) 2026-10-20
+- 703 A tab fixture recording sometimes never settles, and a retry settles in about 5 minutes (feat/dps-spec-coverage fixture re-recording) 2026-10-20

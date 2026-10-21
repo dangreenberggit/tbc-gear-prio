@@ -390,6 +390,8 @@ export function startRunExpression() {
 export const PAGE_PATH_BY_SPEC = {
   ret: "/tbc/paladin/retribution/",
   feral: "/tbc/druid/feralcat/",
+  warlock: "/tbc/warlock/dps/",
+  enh: "/tbc/shaman/enhancement/",
 };
 export const FIXTURE_DEADLINE_MS = 30000;
 

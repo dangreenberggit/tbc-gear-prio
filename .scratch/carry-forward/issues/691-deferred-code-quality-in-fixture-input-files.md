@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: pre-merge review feat/tab-wowsims-items, CQ1-CQ7 deferred parts and round 2 R2-2
 Blocks: none
@@ -77,3 +77,21 @@ Still open:
   this round.
 - CQ7 (main part): the `fork-universes:*` script and gate names still say
   "universes" (80 tracked files mention them).
+
+## Closed, 2026-10-20 (stage dps-spec-coverage)
+
+Verified by: tbc-new-fork@c89b0b912 (CQ6), pinned by
+tbc-gear-prio@cf13cfd2; re-run `git -C <pair>/vendor/tbc-new-fork show --stat c89b0b912`
+
+- CQ6 done: `poolFor(host, presets, maxPhase)` takes the preset gear sets as
+  an argument. `run.ts`, `follow_phase.ts`, `assumptions.ts` and
+  `UpgradesResults.tsx` pass the page's presets; `useUpgradesSettings` passes
+  the phase-filled presets it already builds for `settingsOffer` and
+  `bisTagPhaseFor`. No behaviour change. `pnpm verify` and the full fork
+  vitest passed at that commit (stage execution report, chunk K3).
+- CQ7 main part ruled out: renaming the `fork-universes:*` scripts and gates
+  changes nothing the tab shows, the pool, or gate correctness, so it falls
+  outside the scope filter the owner set on 2026-10-17. `git grep -l
+  fork-universes | wc -l` gives 62 tracked files on this branch.
+- The six tab fixtures were re-recorded in the same stage, at the final fork
+  commit (Step 9 of `.scratch/stage-gate/dps-spec-coverage/plan.md`).
