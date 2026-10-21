@@ -213,7 +213,7 @@ for rings and trinkets worn in their second slot may name the first slot
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                 |
 | --- | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
 | A1  | Adversarial | fixed       | Placeholder weapon rows take the slotChoice a simmed row would get: fork e70eb013a, main 4023109b; core test fails without it                 |
-| D1  | Domain      | defer       | `.scratch/carry-forward/issues/700-two-hander-wearers-see-one-handers-priced-alone.md` — predates the branch                                  |
+| D1  | Domain      | fixed       | One-handers held out while a two-hander is worn: fork 5ec8def25, main 40ef2f34 and 060bb2cf; ticket 700 closed (addendum below)               |
 | D2  | Domain      | wontfix     | The count states what wowsims' `canEquipItem` lets the class wear; filtering it by stats would be a guess and a second source of item facts   |
 | S1  | Standards   | wontfix     | Subjects are 51-56 characters; fixing them rewrites fork commits whose SHAs the lock history names                                            |
 | S2  | Standards   | wontfix     | Owner scope filter: no effect on the tab, the pool or gates; the S3 fix removes one of the four declarations                                  |
@@ -229,3 +229,39 @@ for rings and trinkets worn in their second slot may name the first slot
 | --- | ------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | F1  | Focused check | fixed       | Hook-level test of the count after a weapon swap: fork 4bb8da4f2, re-pinned in main 5cc39958; ticket 702 closed (addendum below) |
 | F2  | Focused check | wontfix     | Owner scope filter: a test-only literal, no effect on the tab, the pool or gates                                                 |
+
+## Addendum, 2026-10-20: follow-ups after the review
+
+Final tips: main 060bb2cf for the code (fixtures bedb68e7), fork 5ec8def25.
+
+- **F1 fixed.** Fork 4bb8da4f2 adds
+  `hooks/useUpgradesSettings.offhand.test.tsx`: wearing a two-hander, then
+  a one-hander, then the two-hander again moves the eligible count. It fails
+  with the hook's `wornMainHandId` argument removed. Re-pinned in main
+  5cc39958; ticket 702 closed.
+- **701 fixed.** The slot was wrong: a Stop placeholder for a ring or
+  trinket worn in its second slot was filed under the first. It now takes
+  the slot a simmed row would (fork 3797dd6b4, main 9e12e390, re-pin
+  5cc39958); ticket 701 closed with the test as evidence.
+- **D1 fixed (ticket 700), by owner ruling.** While the worn main hand is a
+  two-hander, one-handed weapons are held out before ordering, as the
+  off-hand items are: no sim and no row, not in the run panel's eligible
+  count, and one line, "N one-handed weapons were not ranked, because you
+  wear a two-handed weapon." Fork 5ec8def25, main 40ef2f34 (core mirror and
+  tests), re-pin 060bb2cf; `ENGINE_VERSION` core 11, fork 8. An earlier
+  notice-only fix (fork 67d2d2074, main 1d6915a0, 28aa5fd7) was replaced
+  by these commits, not rewritten.
+- **Fixtures re-recorded** at fork 5ec8def25 (main bedb68e7); `python3 -I
+scripts/check_tab_fixtures.py` reports no changed inputs for all eight.
+  The six two-hander recordings lose exactly their one-handed weapon rows
+  and gain the line with the same count; every other row is unchanged apart
+  from `rank`. The Fists of Fury (set 719), whose two pieces are both
+  held-out weapons, leaves `setBonuses` in three feral recordings. Warlock
+  and enhancement differ only in `contentHash`.
+- **New ticket 703**: a fixture recording sometimes never settles (twice on
+  2026-10-20, both feral). `NEXT` was behind (it read 700); 703 was the
+  lowest free number and `NEXT` is now 704.
+
+Tickets, by the skill's two `git diff dev...HEAD` counts: filed 4 (700, 701,
+702, 703), closed 7 (365, 690, 691, 699, 700, 701, 702). Open from this
+branch: 703.

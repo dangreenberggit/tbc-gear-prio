@@ -63,7 +63,12 @@ the eight runs took 353–370 s for each feral-p3 fixture (733 ranked items),
 446 s for feral-p5 (1005), 225 s for ret-p3 (962), 246 s for feral-p2 (536),
 85 s for warlock-p3 (572) and 648 s for enh-p3 (931). A first feral-p2 run
 that day did not settle inside the 25-minute limit; the retry settled in
-246 s (cause not found).
+246 s (cause not found). Later that day (fork `5ec8def25`, the one-hander
+hold-out of ticket 700) the recorder's wall times were 274–283 s for each feral-p3 fixture
+(667 ranked items), 403 s for feral-p5 (909), 195 s for ret-p3 (894),
+215 s for feral-p2 (487), 95 s for warlock-p3 (572) and 554 s for enh-p3
+(931). Earlier the same day a feral-p3-th-hands-legs run at fork
+`3797dd6b4` also did not settle; ticket 703 tracks these.
 Each fixture's command:
 
 ```sh
