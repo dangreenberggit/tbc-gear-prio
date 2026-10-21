@@ -215,10 +215,19 @@ describe("off-hand items while a two-hander is worn", () => {
     expect(ranking.items.filter((i) => isOffHandOnly(i.itemId))).toEqual([]);
     expect(ranking.items.length).toBeGreaterThan(0);
     const lines = disclosures(ranking);
-    expect(lines).toHaveLength(1);
-    expect(lines[0]!.detail.startsWith(`${HELD.length} off-hand items`)).toBe(
-      true
-    );
+    expect(lines.map((l) => l.detail)).toEqual([
+      "3 off-hand items were not ranked, because you wear a two-handed weapon.",
+    ]);
+  });
+
+  it("says item, not items, for one", async () => {
+    const ranking = await rankMage({
+      gearFile: TWO_HAND_GEAR,
+      omitFromPool: HELD.slice(1),
+    });
+    expect(disclosures(ranking).map((l) => l.detail)).toEqual([
+      "1 off-hand item was not ranked, because you wear a two-handed weapon.",
+    ]);
   });
 
   it("spends no candidate-cap places on them", async () => {
