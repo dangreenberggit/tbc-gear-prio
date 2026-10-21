@@ -67,7 +67,10 @@ that day did not settle inside the 25-minute limit; the retry settled in
 hold-out of ticket 700) the recorder's wall times were 274–283 s for each feral-p3 fixture
 (667 ranked items), 403 s for feral-p5 (909), 195 s for ret-p3 (894),
 215 s for feral-p2 (487), 95 s for warlock-p3 (572) and 554 s for enh-p3
-(931). Earlier the same day a feral-p3-th-hands-legs run at fork
+(931). At fork `b908771dd` (the reworded off-hand line) they were 304–327 s
+for each feral-p3 fixture, 398 s for feral-p5, 196 s for ret-p3, 226 s for
+feral-p2, 95 s for warlock-p3 and 577 s for enh-p3. Earlier the same day a
+feral-p3-th-hands-legs run at fork
 `3797dd6b4` also did not settle; ticket 703 tracks these.
 Each fixture's command:
 

@@ -232,7 +232,7 @@ for rings and trinkets worn in their second slot may name the first slot
 
 ## Addendum, 2026-10-20: follow-ups after the review
 
-Final tips: main 060bb2cf for the code (fixtures bedb68e7), fork 5ec8def25.
+Final tips: main bcc06119 for the code (fixtures 6567c1cf), fork b908771dd.
 
 - **F1 fixed.** Fork 4bb8da4f2 adds
   `hooks/useUpgradesSettings.offhand.test.tsx`: wearing a two-hander, then
@@ -251,13 +251,24 @@ Final tips: main 060bb2cf for the code (fixtures bedb68e7), fork 5ec8def25.
   tests), re-pin 060bb2cf; `ENGINE_VERSION` core 11, fork 8. An earlier
   notice-only fix (fork 67d2d2074, main 1d6915a0, 28aa5fd7) was replaced
   by these commits, not rewritten.
-- **Fixtures re-recorded** at fork 5ec8def25 (main bedb68e7); `python3 -I
-scripts/check_tab_fixtures.py` reports no changed inputs for all eight.
-  The six two-hander recordings lose exactly their one-handed weapon rows
-  and gain the line with the same count; every other row is unchanged apart
-  from `rank`. The Fists of Fury (set 719), whose two pieces are both
-  held-out weapons, leaves `setBonuses` in three feral recordings. Warlock
-  and enhancement differ only in `contentHash`.
+- **Off-hand line reworded** to match the one-hand line, without its
+  advice: "N off-hand items were not ranked, because you wear a two-handed
+  weapon." ("1 off-hand item was not ranked, ..." for one). Fork 06372bfa7,
+  main 059c3d92, re-pin 21f13b1d.
+- **Post-review check findings fixed.** I1: `oneHandBlockedEntries` keeps a
+  weapon whose hand type is null, as its comment says (fork 6f4dd2c6d, main
+  7bc6d30d). L1: a hunter (dual-wield) test of the hold-out with a
+  main-hand-only weapon (main ea35041d). L2: a fork-level `rankUpgrades`
+  test of the 701 placeholder slots (fork b908771dd). Re-pin bcc06119.
+- **Fixtures re-recorded** at fork 5ec8def25 (main bedb68e7), then again at
+  fork b908771dd (main 6567c1cf); `python3 -I scripts/check_tab_fixtures.py`
+  reports no changed inputs for all eight. Against the review-time
+  recordings, the six two-hander recordings lose exactly their one-handed
+  weapon rows and gain the line with the same count; every other row is
+  unchanged. The Fists of Fury (set 719), whose two pieces are both
+  held-out weapons, leaves `setBonuses` in four feral recordings. The last
+  recording changed only the off-hand line's text. Warlock and enhancement
+  differ only in `contentHash`.
 - **New ticket 703**: a fixture recording sometimes never settles (twice on
   2026-10-20, both feral). `NEXT` was behind (it read 700); 703 was the
   lowest free number and `NEXT` is now 704.

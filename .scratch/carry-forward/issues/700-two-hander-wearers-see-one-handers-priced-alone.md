@@ -66,8 +66,7 @@ Red checks: the three new core tests fail on the notice-only code (main
 the `settings_pool.ts` change ("expected 2 to be 1").
 
 Fixtures: the six two-hander recordings lose exactly their one-handed weapon
-rows (feral P3 66 each, feral P2 49, feral P5 96, ret P3 68) and gain the line with the same N; every other row is unchanged
-apart from `rank`, in the same order. The only other change is that The
+rows (feral P3 66 each, feral P2 49, feral P5 96, ret P3 68) and gain the line with the same N; every other row is unchanged. The only other change is that The
 Fists of Fury (set 719) leaves `setBonuses` in the feral P3 and P5
 recordings: both of its pieces are held-out one-handed weapons. Warlock and
 enhancement (one-handers worn) are unchanged apart from `contentHash`
