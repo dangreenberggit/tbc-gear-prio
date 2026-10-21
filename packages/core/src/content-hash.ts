@@ -57,7 +57,9 @@ export function sha256Hex(text: string): string {
 // 10: off-hand placement for every spec; slotChoice on weapon rows; two-hander
 // off-hand disclosure. A cached ranking from 9 lacks the off-hand rows and
 // the disclosure line.
-export const ENGINE_VERSION = 10;
+// 11: one-hand disclosure beside a worn two-hander (ticket 700). A cached
+// ranking from 10 lacks the line.
+export const ENGINE_VERSION = 11;
 
 export type HashedGearItem = {
   id: number;

@@ -251,6 +251,53 @@ describe("off-hand items while a two-hander is worn", () => {
   });
 });
 
+describe("one-hand weapons while a two-hander is worn (ticket 700)", () => {
+  // Each one-hander is priced alone in the main hand, so the off hand stays
+  // empty in its sim; one line says so.
+  const lines = (r: Ranking | PartialRanking) =>
+    r.substitutions.filter((s) => s.field === "one-hand candidates");
+
+  it("says how many one-hand weapons were priced with the off hand empty", async () => {
+    const ranking = await rankMage({ gearFile: TWO_HAND_GEAR });
+
+    const oneHanderRows = ranking.items.filter((i) =>
+      ONE_HANDERS.includes(i.itemId)
+    );
+    expect(oneHanderRows).toHaveLength(ONE_HANDERS.length);
+    expect(lines(ranking)).toEqual([
+      {
+        field: "one-hand candidates",
+        detail:
+          `${ONE_HANDERS.length} one-hand weapons were priced in the main hand ` +
+          `with the off hand empty: the worn main hand is a two-hander, and ` +
+          `this run prices one item at a time.`,
+      },
+    ]);
+  });
+
+  it("counts only the one-hand weapons a capped run priced", async () => {
+    // A cap of 4 keeps one of the two one-handers (EP order over this pool).
+    const ranking = await rankMage({
+      gearFile: TWO_HAND_GEAR,
+      candidateCap: 4,
+    });
+
+    const priced = ranking.items.filter((i) =>
+      ONE_HANDERS.includes(i.itemId)
+    ).length;
+    expect(priced).toBe(1);
+    expect(lines(ranking)).toHaveLength(1);
+    expect(lines(ranking)[0]!.detail.startsWith("1 one-hand weapons")).toBe(
+      true
+    );
+  });
+
+  it("has no line beside a worn one-hander", async () => {
+    const ranking = await rankMage({ gearFile: ONE_HAND_GEAR });
+    expect(lines(ranking)).toEqual([]);
+  });
+});
+
 describe("Stop placeholders for rings and trinkets", () => {
   // ONE_HAND_GEAR wears these in finger1, finger2, trinket1 and trinket2.
   const WORN = {
