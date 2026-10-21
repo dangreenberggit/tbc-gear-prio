@@ -100,7 +100,10 @@ class SyntheticSimRunner implements SimRunner {
   }
 }
 
-function skeletonFor(gear: PresetGearFile): RaidSimRequest {
+function skeletonFor(
+  gear: PresetGearFile,
+  className = "ClassMage"
+): RaidSimRequest {
   return {
     raid: {
       parties: [
@@ -108,7 +111,7 @@ function skeletonFor(gear: PresetGearFile): RaidSimRequest {
           players: [
             {
               name: "synthetic",
-              class: "ClassMage",
+              class: className,
               talentsString: "0-0-0",
               equipment: { items: gear.items.map((i) => ({ ...i })) },
             },
@@ -127,7 +130,10 @@ async function rankMage(args: {
   signal?: AbortSignal;
   extraPool?: readonly number[];
   omitFromPool?: readonly number[];
+  /** Another spec: its class for the skeleton and the whole pool to rank. */
+  other?: { spec: "hunter"; className: string; pool: PoolEntry[] };
 }): Promise<Ranking | PartialRanking> {
+  const spec = args.other?.spec ?? "mage";
   const gear = loadJson<PresetGearFile>(args.gearFile);
   const ref = { region: "US" as const, realm: "synthetic", name: "syn-mage" };
   const fight = {
@@ -136,11 +142,11 @@ async function rankMage(args: {
     encounterName: "Synthetic mage",
   };
   const epWeights = loadJson<{ weights: Record<string, number> }>(
-    "data/presets/mage/fallback.ep-weights.json"
+    `data/presets/${spec}/fallback.ep-weights.json`
   ).weights;
   return rankUpgrades(
     {
-      spec: "mage",
+      spec,
       character: ref,
       maxPhase: 3,
       ...(args.candidateCap !== undefined
@@ -151,7 +157,7 @@ async function rankMage(args: {
       gear: new RecordedGearSource(
         syntheticOfflineRecordings({
           ref,
-          spec: "mage",
+          spec,
           presetGear: gear,
           fight,
         })
@@ -159,9 +165,9 @@ async function rankMage(args: {
       sim: args.sim ?? new SyntheticSimRunner(),
       store: new MemoryStore(),
       clock: () => new Date("2026-10-19T00:00:00Z"),
-      raidSimSkeleton: skeletonFor(gear),
+      raidSimSkeleton: skeletonFor(gear, args.other?.className),
       epWeights,
-      pool: pool(args.extraPool, args.omitFromPool),
+      pool: args.other?.pool ?? pool(args.extraPool, args.omitFromPool),
       ...(args.signal ? { concurrency: 1, signal: args.signal } : {}),
     }
   );
@@ -324,6 +330,45 @@ describe("one-handed weapons while a two-hander is worn (ticket 700)", () => {
     const ranking = await rankMage({ gearFile: ONE_HAND_GEAR });
     expect(oneHanderRows(ranking)).toHaveLength(ONE_HANDERS.length);
     expect(lines(ranking)).toEqual([]);
+  });
+});
+
+describe("one-handed weapons for a dual-wield spec wearing a two-hander (ticket 700)", () => {
+  // Hunter can dual-wield (DUAL_WIELD_SPECS), so a one-hander has two
+  // placements; a main-hand-only weapon has one. Both are held out beside a
+  // worn two-hander, and the two-hander candidate is still ranked.
+  const MAIN_HAND_ONLY = 32944; // Talon of the Phoenix
+  const ONE_HAND = 30881; // Blade of Infamy
+  const OFF_HAND_ONLY = 33734; // Vengeful Gladiator's Quickblade
+  const TWO_HAND = 32248; // Halberd of Desolation
+  const NECK = 32349;
+
+  it("holds out main-hand-only and one-hand weapons, and counts them in one line", async () => {
+    const ranking = await rankMage({
+      // Main hand 29993 Twinblade of the Phoenix (a two-hander), off hand empty.
+      gearFile: "vendor/wowsims/hunter_p2_bm_2h_6p.gear.json",
+      other: {
+        spec: "hunter",
+        className: "ClassHunter",
+        pool: [MAIN_HAND_ONLY, ONE_HAND, OFF_HAND_ONLY, TWO_HAND, NECK].map(
+          (id) => realPoolEntry(id, "hunter-p3")
+        ),
+      },
+    });
+
+    const ids = ranking.items.map((i) => i.itemId);
+    expect(ids).not.toContain(MAIN_HAND_ONLY);
+    expect(ids).not.toContain(ONE_HAND);
+    expect(ids).not.toContain(OFF_HAND_ONLY);
+    expect(ids).toContain(TWO_HAND);
+    expect(
+      ranking.substitutions
+        .filter((s) => s.field.endsWith("-hand candidates"))
+        .map((s) => s.detail)
+    ).toEqual([
+      "1 off-hand item was not ranked, because you wear a two-handed weapon.",
+      "2 one-handed weapons were not ranked, because you wear a two-handed weapon.",
+    ]);
   });
 });
 
