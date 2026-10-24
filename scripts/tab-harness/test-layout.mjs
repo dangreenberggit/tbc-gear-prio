@@ -10,8 +10,11 @@
 //         them; at 1280 they show and the button is hidden;
 //     (3) below `xl` the run card sits above the results;
 //     axe on the tab.
-//   on a recorded fixture (TBC_TAB_FIXTURE), at each width, in the open pane
-//   with its below-cutoff group open:
+//   then for each fixture -- every data/tab-fixtures/*.json (the made-up
+//   results from `pnpm tab-fixtures:mock`, one per UI difference between
+//   specs), or only the one `--fixture <name-or-path>` or TBC_TAB_FIXTURE
+//   names -- on that fixture's own spec page, at each width, in the open
+//   pane with its below-cutoff group open:
 //     (15) the open pane has result rows, so the checks below measured some
 //         (the fixture loader settles on a row anywhere on the page);
 //         only the rows in view are rendered (ticket 565), so the per-row
@@ -33,7 +36,8 @@
 //         left or below, inside the viewport either way (ticket 605; the
 //         ticket 495 ruling, kept by Q-606-popover-side);
 //     the A1 fact: how far each below-cutoff column sits from its head;
-//     axe once, at 653.
+//     axe once, at 653, on one fixture only (mock-set-bonus when it is
+//     rendered, else the first), as before the pass had more than one.
 //
 // An unbaselined critical or serious WCAG violation fails the gate
 // (TBC_A11Y_BASELINE holds the accepted debt). The verdict is one
@@ -76,20 +80,24 @@ const FIXTURE_DIR = path.resolve(
   "data",
   "tab-fixtures"
 );
-const DEFAULT_FIXTURE = "feral-p3-p2bis.json";
+const AXE_FIXTURE = "mock-set-bonus.json";
 
 class Unmeasured extends Error {}
 
 const results = [];
+// The fixture the post-run checks are measuring; null during the pre-run pass.
+let currentFixture = null;
 const check = (id, width, ok, detail) => {
   results.push({
     check: id,
     width,
     ok,
+    ...(currentFixture === null ? {} : { fixture: currentFixture }),
     ...(detail === undefined ? {} : { detail }),
   });
+  const where = currentFixture === null ? "" : ` [${currentFixture}]`;
   console.log(
-    `${ok ? "PASS" : "FAIL"} (${id}) @${width}${detail === undefined ? "" : ` ${JSON.stringify(detail)}`}`
+    `${ok ? "PASS" : "FAIL"} (${id}) @${width}${where}${detail === undefined ? "" : ` ${JSON.stringify(detail)}`}`
   );
 };
 
@@ -297,15 +305,40 @@ async function judgePopover(send, width) {
   });
 }
 
-function fixturePath() {
-  const asked = process.env.TBC_TAB_FIXTURE ?? DEFAULT_FIXTURE;
-  const candidates = [path.resolve(asked), path.join(FIXTURE_DIR, asked)];
-  const found = candidates.find((p) => fs.existsSync(p));
-  if (!found)
-    throw new Unmeasured(
-      `fixture ${asked} not found (looked in ${candidates.join(", ")})`
-    );
-  return found;
+// `--fixture <name-or-path>` beats TBC_TAB_FIXTURE: the sandbox lets the
+// harness run only as a bare command, so an env-var prefix is not available
+// there (check_layout_gate.py still passes the env var).
+function askedFixture(argv) {
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--fixture") {
+      if (!argv[i + 1]) throw new Unmeasured("--fixture needs a value");
+      return argv[i + 1];
+    }
+    if (argv[i].startsWith("--fixture=")) return argv[i].slice(10);
+  }
+  return process.env.TBC_TAB_FIXTURE || null;
+}
+
+function fixturePaths() {
+  const asked = askedFixture(process.argv.slice(2));
+  if (asked) {
+    const candidates = [path.resolve(asked), path.join(FIXTURE_DIR, asked)];
+    const found = candidates.find((p) => fs.existsSync(p));
+    if (!found)
+      throw new Unmeasured(
+        `fixture ${asked} not found (looked in ${candidates.join(", ")})`
+      );
+    return [found];
+  }
+  const files = fs.existsSync(FIXTURE_DIR)
+    ? fs
+        .readdirSync(FIXTURE_DIR)
+        .filter((f) => f.endsWith(".json"))
+        .sort()
+    : [];
+  if (files.length === 0)
+    throw new Unmeasured("no fixtures in data/tab-fixtures");
+  return files.map((f) => path.join(FIXTURE_DIR, f));
 }
 
 async function setWidth(send, width) {
@@ -318,10 +351,10 @@ async function setWidth(send, width) {
   await H.sleep(400);
 }
 
-async function loadFixture(send, base, text) {
+async function loadFixture(send, base, name, text) {
   const loaded = await H.loadFixturePage(send, base, text);
   if (loaded.error)
-    throw new Unmeasured(`fixture load failed: ${loaded.error}`);
+    throw new Unmeasured(`fixture ${name}: load failed: ${loaded.error}`);
 }
 
 function judgePreRun(width, m) {
@@ -344,7 +377,10 @@ function judgePreRun(width, m) {
 }
 
 function judgePostRun(width, m, facts) {
-  if (m.error) throw new Unmeasured(`post-run @${width}: ${m.error}`);
+  if (m.error)
+    throw new Unmeasured(
+      `fixture ${currentFixture}: post-run @${width}: ${m.error}`
+    );
   check(
     15,
     width,
@@ -397,6 +433,7 @@ function judgePostRun(width, m, facts) {
     });
   facts.push({
     fact: "a1-below-cutoff-column-offsets",
+    fixture: currentFixture,
     width,
     pane: m.pane,
     rows: m.rows,
@@ -407,8 +444,14 @@ function judgePostRun(width, m, facts) {
 async function main() {
   const startedAt = performance.now();
   const baseline = H.readA11yBaseline();
-  const fixture = fixturePath();
-  const fixtureText = fs.readFileSync(fixture, "utf8");
+  const fixtures = fixturePaths().map((p) => ({
+    name: path.basename(p),
+    text: fs.readFileSync(p, "utf8"),
+  }));
+  const axeFixture = fixtures.some((f) => f.name === AXE_FIXTURE)
+    ? AXE_FIXTURE
+    : fixtures[0].name;
+  const fixtureMs = {};
   const violations = [];
   const matched = new Set();
   const facts = [];
@@ -453,15 +496,23 @@ async function main() {
       await audit(send, "pre-run", width);
     }
     fixtureAt = performance.now();
-    await loadFixture(send, base, fixtureText);
-    for (const width of WIDTHS) {
-      await setWidth(send, width);
-      judgePostRun(width, await H.evaluate(send, postRunExpression), facts);
-      if (width === POST_RUN_AXE_WIDTH) await audit(send, "post-run", width);
-      // Last at each width: the open popover must not be in the page when
-      // the other checks measure it.
-      await judgePopover(send, width);
+    for (const { name, text } of fixtures) {
+      const t0 = performance.now();
+      currentFixture = name;
+      await loadFixture(send, base, name, text);
+      for (const width of WIDTHS) {
+        await setWidth(send, width);
+        judgePostRun(width, await H.evaluate(send, postRunExpression), facts);
+        if (width === POST_RUN_AXE_WIDTH && name === axeFixture)
+          await audit(send, "post-run", width);
+        // Last at each width: the open popover must not be in the page when
+        // the other checks measure it.
+        await judgePopover(send, width);
+      }
+      fixtureMs[name] = Math.round(performance.now() - t0);
+      console.log(`fixture ${name}: ${fixtureMs[name]} ms`);
     }
+    currentFixture = null;
     fixtureDoneAt = performance.now();
   } finally {
     client.close();
@@ -498,7 +549,8 @@ async function main() {
     failed,
     a11yFailed,
     widths: WIDTHS,
-    fixture: path.basename(fixture),
+    fixtures: fixtures.map((f) => f.name),
+    fixtureMs,
     checks: results,
     facts,
     violations: violations.map(
