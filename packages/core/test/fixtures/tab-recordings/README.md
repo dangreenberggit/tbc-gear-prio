@@ -25,6 +25,10 @@ Each file's `forkSha` field holds the full SHA. The files moved here from
 them; they render the made-up fixtures in `data/tab-fixtures/` instead.
 
 Nothing automatic re-records these files, and `pnpm verify` needs no sim.
+`pnpm tab-fixtures:check` (part of `pnpm verify`) fails a file here that is
+unreadable, fails the schema, is marked `madeUp`, or names an uncommitted fork
+tree (`forkDirty: true`). The recorder refuses `--allow-dirty` with an `--out`
+in this folder.
 
 ## When a rule changes on purpose
 

@@ -1,22 +1,26 @@
 #!/usr/bin/env python3
-"""Check the Upgrades tab's made-up fixtures under `data/tab-fixtures/`.
+"""Check the Upgrades tab's made-up fixtures and its frozen recordings.
 
-A fixture there is a small made-up `Ranking` written by
+A fixture under `data/tab-fixtures/` is a small made-up `Ranking` written by
 `packages/core/test/tab-fixtures/make-mock-fixtures.ts`
 (`pnpm tab-fixtures:mock`), one per UI difference between specs. The layout
 gate, `pnpm tab-review` and `pnpm tab-fixtures:smoke` render these files, so
-no page check needs a sim recording (stage tab-checks-without-sims). Real
-recordings live elsewhere: the frozen engine test data in
-`packages/core/test/fixtures/tab-recordings/`, or an `--out` folder of the
-by-hand recorder.
+no page check needs a sim recording (stage tab-checks-without-sims).
 
-This checks the schema only. The figures are made up, so a fixture cannot be
-stale against the fork, and the check needs neither git nor the fork clone.
-`pnpm tab-fixtures:check` first runs the generator's `--check`, which
-compares each file with what the generator writes.
+A recording under `packages/core/test/fixtures/tab-recordings/` is a real run,
+frozen as engine test data. It must not be marked `madeUp`, and must name a
+committed fork tree (`forkDirty: false`, a 40-hex `forkSha`), so a recording
+of uncommitted fork code cannot become test data (ticket 708). Whether that
+SHA is a commit in the fork is not checked: CI has no fork clone.
 
-Exits 1 when a file fails the schema, when a file is not marked
-`madeUp: true`, or when the folder holds no fixture.
+This checks the schema only, and needs neither git nor the fork clone.
+`pnpm tab-fixtures:check` first runs the generator's `--check`, which compares
+each made-up file with what the generator writes; without the fork clone that
+compare is skipped, so CI checks the schema only.
+
+Exits 1 when a file fails the schema, when a made-up file is not marked
+`madeUp: true` or a recording is, or when `data/tab-fixtures/` holds no
+fixture.
 
 Usage: python scripts/check_tab_fixtures.py
 Run by `pnpm verify` as part of `pnpm tab-fixtures:check`.
@@ -31,13 +35,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_DIR = ROOT / "data/tab-fixtures"
+RECORDING_DIR = ROOT / "packages/core/test/fixtures/tab-recordings"
 SCHEMA_VERSION = 1
 GEAR_SLOTS = 17
 
-NOT_MADE_UP = (
-    "data/tab-fixtures holds only made-up fixtures; recordings go to "
-    "packages/core/test/fixtures/tab-recordings/ or an --out folder"
-)
+# The recorder's own refusal (record.mjs) says where recordings go instead.
+NOT_MADE_UP = "not marked madeUp: true; only pnpm tab-fixtures:mock writes here"
+MADE_UP_RECORDING = "marked madeUp: true; this folder holds real recordings"
 
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
@@ -46,12 +50,18 @@ def _is_int(value: object) -> bool:
     return isinstance(value, int) and not isinstance(value, bool)
 
 
-def schema_errors(data: object) -> list[str]:
-    """Every way `data` fails the fixture schema; empty when it is valid."""
+def schema_errors(data: object, made_up: bool = True) -> list[str]:
+    """Every way `data` fails the fixture schema; empty when it is valid.
+
+    `made_up` says which folder it came from: a made-up fixture must be marked
+    `madeUp: true`, and a recording must not be.
+    """
     if not isinstance(data, dict):
         return ["not a JSON object"]
-    if data.get("madeUp") is not True:
+    if made_up and data.get("madeUp") is not True:
         return [NOT_MADE_UP]
+    if not made_up and "madeUp" in data:
+        return [MADE_UP_RECORDING]
     errors: list[str] = []
     if data.get("schemaVersion") != SCHEMA_VERSION:
         errors.append(f"schemaVersion is {data.get('schemaVersion')!r}, expected {SCHEMA_VERSION}")
@@ -79,22 +89,27 @@ def schema_errors(data: object) -> list[str]:
     return errors
 
 
-def check_fixture(path: Path) -> tuple[bool, str]:
+def check_fixture(path: Path, made_up: bool = True) -> tuple[bool, str]:
     """(readable, line) for one fixture. `line` is what gets printed."""
+    kind = "fixture" if made_up else "recording"
     name = path.stem
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as err:
-        return False, f"fixture {name}: ERROR unreadable ({err})"
-    errors = schema_errors(data)
+        return False, f"{kind} {name}: ERROR unreadable ({err})"
+    errors = schema_errors(data, made_up)
     if errors:
-        return False, f"fixture {name}: ERROR schema: {'; '.join(errors)}"
+        return False, f"{kind} {name}: ERROR schema: {'; '.join(errors)}"
     rows = len(data["ranking"]["items"])
-    return True, f"fixture {name}: ok ({data['spec']}, {rows} rows)"
+    return True, f"{kind} {name}: ok ({data['spec']}, {rows} rows)"
 
 
 def fixture_paths() -> list[Path]:
     return sorted(FIXTURE_DIR.glob("*.json")) if FIXTURE_DIR.is_dir() else []
+
+
+def recording_paths() -> list[Path]:
+    return sorted(RECORDING_DIR.glob("*.json")) if RECORDING_DIR.is_dir() else []
 
 
 def main() -> int:
@@ -106,8 +121,9 @@ def main() -> int:
         )
         return 1
     rc = 0
-    for path in paths:
-        ok, line = check_fixture(path)
+    checks = [(p, True) for p in paths] + [(p, False) for p in recording_paths()]
+    for path, made_up in checks:
+        ok, line = check_fixture(path, made_up)
         print(line)
         if not ok:
             rc = 1

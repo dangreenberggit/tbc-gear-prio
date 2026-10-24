@@ -12,7 +12,10 @@
 // load the gear, run the tab, wait for "Took", then read the finished Ranking
 // through the dev-only `window.__upgradesRanking()` hook and write it to
 // .scratch/tab-recordings/<spec>-p<phase>-<name>.json, or under --out.
-// Refuses an --out inside the made-up fixtures' folder (MOCK_DIR).
+// Refuses an --out inside the made-up fixtures' folder (MOCK_DIR), and
+// --allow-dirty with an --out inside the frozen recordings' folder
+// (RECORDING_DIR): engine tests read those files, and a recording of
+// uncommitted fork code names no commit (ticket 708).
 //
 // Refuses to record from an uncommitted fork tree: a recording names the fork
 // commit its figures came from, and a dirty tree has no such commit.
@@ -37,8 +40,20 @@ const ROOT = path.resolve(
 const FORK = path.join(ROOT, "vendor", "tbc-new-fork");
 const OUT_DIR = path.join(ROOT, ".scratch", "tab-recordings");
 const MOCK_DIR = path.join(ROOT, "data", "tab-fixtures");
+const RECORDING_DIR = path.join(
+  ROOT,
+  "packages",
+  "core",
+  "test",
+  "fixtures",
+  "tab-recordings"
+);
 const MOCK_DIR_REFUSAL =
-  "data/tab-fixtures holds only made-up fixtures; recordings go to packages/core/test/fixtures/tab-recordings/ or an --out folder";
+  "data/tab-fixtures holds only made-up fixtures; " +
+  "write recordings to packages/core/test/fixtures/tab-recordings/ or another --out folder";
+const DIRTY_RECORDING_REFUSAL =
+  "--allow-dirty cannot write to packages/core/test/fixtures/tab-recordings/: " +
+  "engine tests read those files, so record them from a committed fork tree";
 const PAGE_BY_SPEC = {
   feral: "/tbc/druid/feralcat/",
   ret: "/tbc/paladin/retribution/",
@@ -56,12 +71,16 @@ const USAGE = `usage: node scripts/tab-fixtures/record.mjs --spec feral|ret|warl
          [--out <dir> [--allow-dirty]]
 
 Writes .scratch/tab-recordings/<spec>-p<phase>-<name>.json, or the same name
-under --out (never inside the made-up fixtures' folder). A by-hand tool: no check runs it. Needs the fork dev server on :5173 (or TBC_FORK_PORT), served with WASM_WORKER=1 or with the backend on :3333, and a
-committed fork tree. --allow-dirty records an uncommitted fork tree; it
-stamps forkDirty: true and the sha256 of the fork's diff, and refuses to
-write if that diff changed during the run. --preset loads a chip from the page's "Gear Sets" presets, under the
-named phase tab when --preset-tab is given; leave --preset-tab out on a page
-whose picker has no phase tabs (warlock, enh). --gear-url opens a gear link. Either way the worn gear is
+under --out (never inside the made-up fixtures' folder). A by-hand tool: no
+check runs it. Needs the fork dev server on :5173 (or TBC_FORK_PORT), served
+with WASM_WORKER=1 or with the backend on :3333, and a committed fork tree.
+--allow-dirty records an uncommitted fork tree; it stamps forkDirty: true and
+the sha256 of the fork's diff, and refuses to write if that diff changed
+during the run. It cannot write to the frozen recordings' folder
+(packages/core/test/fixtures/tab-recordings). --preset loads a chip from the
+page's "Gear Sets" presets, under the named phase tab when --preset-tab is
+given; leave --preset-tab out on a page whose picker has no phase tabs
+(warlock, enh). --gear-url opens a gear link. Either way the worn gear is
 checked item by item before the run, and the run is refused on a mismatch.`;
 
 function parseArgs(argv) {
@@ -111,8 +130,12 @@ function validate(args) {
     return "--gear-url needs --expect-item-ids";
   args.outDir = args.out === undefined ? OUT_DIR : path.resolve(args.out);
   const fold = (p) => (process.platform === "win32" ? p.toLowerCase() : p);
-  const rel = path.relative(fold(MOCK_DIR), fold(args.outDir));
-  if (!rel.startsWith("..") && !path.isAbsolute(rel)) return MOCK_DIR_REFUSAL;
+  const inside = (dir) => {
+    const rel = path.relative(fold(dir), fold(args.outDir));
+    return !rel.startsWith("..") && !path.isAbsolute(rel);
+  };
+  if (inside(MOCK_DIR)) return MOCK_DIR_REFUSAL;
+  if (args.allowDirty && inside(RECORDING_DIR)) return DIRTY_RECORDING_REFUSAL;
   return null;
 }
 
