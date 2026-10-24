@@ -192,7 +192,7 @@ written then.
 | ID  | Axis             | Disposition | Ticket / note                                                                                                                                           |
 | --- | ---------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | D2  | Domain           | defer       | `.scratch/carry-forward/issues/705-baseline-meta-repair-ignores-hit-cap-without-a-note.md` — older behaviour; this branch only reworded the note        |
-| P4  | Standards + Spec | defer       | `.scratch/carry-forward/issues/706-candidates-labels-in-dropped-list.md` — title and labels are older than this branch                                  |
+| P4  | Standards + Spec | fixed       | Fixed on this branch in `tbc-new-fork@91bc01b8c` (re-pinned by `0f39a178`); ticket 706 is closed (Round 2 below)                                        |
 | D5  | Domain           | wontfix     | Same imprecision as the old text ("the sim failed"); to a player a sim that could not be set up is a failed sim, and the console line carries the error |
 | D6  | Domain           | wontfix     | `docs/verification-log.md` is a dated record of what an earlier gate run showed; rewriting it would misstate that run                                   |
 | P3  | Standards + Spec | wontfix     | Deliberate plan choice (`plan.md:64`, `:167` C19): the notes are written before any swap, and "If" keeps them true either way                           |
