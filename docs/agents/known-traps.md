@@ -270,16 +270,16 @@ engine-file edit reloads the page, dropping in-page run state and sometimes
 the browser tab id — re-drive the page rather than debugging the "lost" run.
 
 The layout gate (`pnpm layout-gate:check`) and `pnpm tab-review` need
-neither port: the harness serves its own built `dist/`. The layout gate runs
-no sim since ticket 520 — its post-run checks render a recorded fixture.
-`pnpm tab-review` runs the WASM in the browser only for a `post-run` entry
-that names no fixture.
+neither port: the harness serves its own built `dist/`. Neither runs a sim:
+the layout gate's post-run checks render the made-up fixtures in
+`data/tab-fixtures/` (`pnpm tab-fixtures:mock`), and `pnpm tab-review` refuses
+a `post-run` entry that names no fixture.
 
-Looking at a recorded tab fixture (`data/tab-fixtures/`, ticket 504) needs
+Looking at a tab fixture (`data/tab-fixtures/`, ticket 504) needs
 only `:5173`: open a link from `http://localhost:5173/tbc/tab-fixtures/`, or
 run `pnpm tab-fixtures:smoke`, which starts `:5173` when the port is free and
-stops only a server it started. Recording one needs both ports, because it is
-a real run. A fixture load never shows "Took": no run happened, so wait for
+stops only a server it started. Recording a real result by hand
+(`pnpm tab-fixtures:record`) needs both ports, because it is a real run. A fixture load never shows "Took": no run happened, so wait for
 result rows and no stale banner instead. See `data/tab-fixtures/README.md`.
 
 ## Before writing a `pnpm tab-review` manifest
