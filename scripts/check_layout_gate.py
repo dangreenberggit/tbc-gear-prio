@@ -239,8 +239,9 @@ MODULE_SUFFIXES = (".ts", ".tsx", ".css")
 # Files outside the fork source that decide what the gate measures, hashed by
 # ROOT-relative name (never through `_rel`, which is fork-relative). The
 # made-up tab fixtures (data/tab-fixtures/*.json, from `pnpm tab-fixtures:mock`)
-# are what the fixture pass renders, and the harness files are the assertions themselves: editing one changes the gate's
-# verdict without touching a line of tab source. `rows.mjs` is the row reader
+# are what the fixture pass renders, and the harness files are the assertions
+# themselves: editing one changes the gate's verdict without touching a line of
+# tab source. `rows.mjs` is the row reader
 # `test-layout.mjs` and `test-tab-harness.mjs` import (ticket 580).
 # `chromium.mjs` decides which browser the harness launches; the build it
 # resolves is hashed too (`_chromium_build`), because a `playwright` bump
@@ -699,9 +700,9 @@ def run_gate(fixture: Path | None = None) -> GateResult:
 
     rc is 0 (the gate ran green), 1 (the gate MEASURED and something is broken
     -- layout OR a11y; the gate script's own exit 1 covers both), or
-    GATE_UNMEASURED (it never measured a width, so it learned nothing about the
-    tab and nothing may be blamed on it -- and nothing may be recorded as tested
-    either).
+    GATE_UNMEASURED (it stopped before it measured the whole tab, and no check
+    it ran failed, so nothing may be blamed on it -- and nothing may be
+    recorded as tested either).
 
     Caller has checked prereqs.
     """
@@ -768,20 +769,23 @@ def run_gate(fixture: Path | None = None) -> GateResult:
         )
         return GateResult(1, None, None)
 
-    if v.get("outcome") == "unmeasured":
+    failed = v.get("failed") if isinstance(v.get("failed"), int) else None
+    # The harness reports "measured" whenever a check failed, but a verdict
+    # that says "unmeasured" and still counts failures is read as a failure
+    # too: a failure that was measured must never become a skip.
+    if v.get("outcome") == "unmeasured" and not failed:
         reason = v.get("reason") or "no reason reported"
         print(
             f"layout gate: SKIPPED -- test-layout.mjs exited {proc.returncode} "
-            "without measuring any width, so it learned nothing about the tab's "
-            f"layout. Reason: {reason}. This is a prereq/environment problem, "
+            "before it measured the whole tab, and no check it ran failed. "
+            f"Reason: {reason}. This is a prereq/environment problem, "
             "not a layout failure, and does not block the merge. The baseline "
             "is left where it is, so the gate stays armed for the next attempt."
         )
         return GateResult(GATE_UNMEASURED, None, None)
 
-    layout_failed = v.get("failed") if isinstance(v.get("failed"), int) else None
     a11y_failed = v.get("a11yFailed") if isinstance(v.get("a11yFailed"), int) else None
-    return GateResult(1, layout_failed, a11y_failed)
+    return GateResult(1, failed, a11y_failed)
 
 
 def _skip(msg: str) -> int:
@@ -974,6 +978,16 @@ def run(
         # Nothing was measured. Do not block, and do NOT advance the baseline:
         # recording an untested digest as tested would skip the gate forever.
         return 0
+    if result.rc == 0 and fixture is not None:
+        # The digest covers every file in data/tab-fixtures, and this run
+        # rendered one, so recording it would let the next merge skip the
+        # others (review finding A2).
+        print(
+            f"\nlayout gate: PASSED for {fixture.name} only. The baseline is not "
+            "advanced: it covers every fixture in data/tab-fixtures, so only a "
+            "run without --fixture advances it."
+        )
+        return 0
     if result.rc == 0:
         write_baseline(digest)
         print(
@@ -1032,7 +1046,9 @@ def main() -> int:
         default=None,
         help=(
             "one tab fixture for the fixture pass to render (default: every "
-            "made-up fixture in data/tab-fixtures/)"
+            "made-up fixture in data/tab-fixtures/). A green run with this "
+            "never advances the baseline, because the baseline covers every "
+            "fixture."
         ),
     )
     args = ap.parse_args()
