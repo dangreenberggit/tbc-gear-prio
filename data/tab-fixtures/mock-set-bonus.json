@@ -1,0 +1,632 @@
+{
+  "schemaVersion": 1,
+  "forkSha": "0000000000000000000000000000000000000000",
+  "forkDirty": false,
+  "madeUp": true,
+  "generator": "packages/core/test/tab-fixtures/make-mock-fixtures.ts",
+  "covers": "Set-bonus rows: pieces whose swap breaks a worn bonus, and one that completes a bonus.",
+  "spec": "feral",
+  "phase": 3,
+  "preset": "druid/feralcat/gear_sets/p2_6p.gear.json",
+  "gear": {
+    "items": [
+      {
+        "id": 8345,
+        "enchant": 3003
+      },
+      {
+        "id": 30017
+      },
+      {
+        "id": 29100,
+        "enchant": 2986,
+        "gems": [
+          24028,
+          24028
+        ]
+      },
+      {
+        "id": 29994,
+        "enchant": 368
+      },
+      {
+        "id": 29096,
+        "enchant": 2661,
+        "gems": [
+          24028,
+          24028,
+          24028
+        ]
+      },
+      {
+        "id": 29966,
+        "enchant": 2647,
+        "gems": [
+          24028
+        ]
+      },
+      {
+        "id": 29947,
+        "enchant": 2564
+      },
+      {
+        "id": 30106,
+        "gems": [
+          24028,
+          30549
+        ]
+      },
+      {
+        "id": 29995,
+        "enchant": 3012
+      },
+      {
+        "id": 28545,
+        "enchant": 2939,
+        "gems": [
+          24028,
+          24028
+        ]
+      },
+      {
+        "id": 29997,
+        "enchant": 2929
+      },
+      {
+        "id": 30052,
+        "enchant": 2929
+      },
+      {
+        "id": 30627
+      },
+      {
+        "id": 29383
+      },
+      {
+        "id": 32014,
+        "enchant": 2670
+      },
+      {},
+      {
+        "id": 32387
+      }
+    ]
+  },
+  "recordedAt": "1970-01-01T00:00:00.000Z",
+  "iterations": 0,
+  "ranking": {
+    "contentHash": "made-up:mock-set-bonus",
+    "cutoff": {
+      "absDps": 3
+    },
+    "fight": {
+      "reportCode": "made-up",
+      "fightId": 0,
+      "encounterName": "Made-up fixture",
+      "route": "report-events"
+    },
+    "baseline": {
+      "dps": 1900,
+      "stdev": 120,
+      "metaAdjusted": false
+    },
+    "assumptions": {
+      "maxPhase": 3,
+      "seeds": [
+        1,
+        2,
+        3
+      ],
+      "iterations": 0,
+      "race": "RaceNightElf",
+      "presetId": "feral/made-up",
+      "standing": []
+    },
+    "substitutions": [],
+    "caps": {
+      "hit": {
+        "rating": 83.31,
+        "capRating": 141.92,
+        "gap": 58.61,
+        "capUncertainty": 15.77,
+        "assumedRace": "RaceNightElf",
+        "talentHitAssumed": {
+          "talent": "Precision",
+          "points": 3,
+          "maxPoints": 3
+        }
+      },
+      "expertise": {
+        "rating": 95,
+        "capRating": null,
+        "gap": null
+      }
+    },
+    "items": [
+      {
+        "rank": 1,
+        "itemId": 8345,
+        "name": "Wolfshead Helm",
+        "slot": "head",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 39.5,
+        "deltaPct": 2.08,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 2,
+        "itemId": 28741,
+        "name": "Skulker's Greaves",
+        "slot": "legs",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Netherspite"
+        },
+        "deltaDps": 37.61,
+        "deltaPct": 1.98,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "sources": [
+          {
+            "kind": "raid",
+            "zone": "Karazhan",
+            "boss": "Netherspite"
+          },
+          {
+            "kind": "heroic",
+            "dungeon": "The Shattered Halls"
+          },
+          {
+            "kind": "pvp",
+            "via": "arena"
+          }
+        ]
+      },
+      {
+        "rank": 3,
+        "itemId": 28649,
+        "name": "Garona's Signet Ring",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "The Curator"
+        },
+        "deltaDps": 35.71,
+        "deltaPct": 1.88,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "owned": true
+      },
+      {
+        "rank": 4,
+        "itemId": 28750,
+        "name": "Girdle of Treachery",
+        "slot": "waist",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan"
+        },
+        "deltaDps": 33.82,
+        "deltaPct": 1.78,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [
+          "Alt"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 5,
+        "itemId": 28658,
+        "name": "Terestian's Stranglestaff",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Terestian Illhoof"
+        },
+        "deltaDps": 31.92,
+        "deltaPct": 1.68,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 6,
+        "itemId": 29248,
+        "name": "Shadowstep Striders",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "The Arcatraz",
+          "boss": "Harbinger Skyriss"
+        },
+        "deltaDps": 30.03,
+        "deltaPct": 1.58,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 7,
+        "itemId": 29099,
+        "name": "Greaves of Malorne",
+        "slot": "legs",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 28.13,
+        "deltaPct": 1.48,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 8,
+        "itemId": 29246,
+        "name": "Nightfall Wristguards",
+        "slot": "wrist",
+        "source": {
+          "kind": "raid",
+          "zone": "Old Hillsbrad Foothills",
+          "boss": "Epoch Hunter"
+        },
+        "deltaDps": 26.24,
+        "deltaPct": 1.38,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 9,
+        "itemId": 27531,
+        "name": "Wastewalker Gloves",
+        "slot": "hands",
+        "source": {
+          "kind": "raid",
+          "zone": "The Shattered Halls",
+          "boss": "Warchief Kargath Bladefist"
+        },
+        "deltaDps": 24.34,
+        "deltaPct": 1.28,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 659,
+          "setName": "Wastewalker Armor",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": null,
+          "crossesThreshold": false,
+          "singleBreaks": [
+            {
+              "setId": 640,
+              "setName": "Malorne Harness",
+              "threshold": 2,
+              "dps": 8.5
+            }
+          ],
+          "singleDeltaDps": 24.34
+        }
+      },
+      {
+        "rank": 10,
+        "itemId": 29097,
+        "name": "Gauntlets of Malorne",
+        "slot": "hands",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 22.45,
+        "deltaPct": 1.18,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 11,
+        "itemId": 29119,
+        "name": "Haramad's Bargain",
+        "slot": "neck",
+        "source": {
+          "kind": "rep",
+          "faction": "Faction 933",
+          "standing": "Friendly"
+        },
+        "deltaDps": 20.55,
+        "deltaPct": 1.08,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 12,
+        "itemId": 28264,
+        "name": "Wastewalker Tunic",
+        "slot": "chest",
+        "source": {
+          "kind": "raid",
+          "zone": "The Blood Furnace",
+          "boss": "Keli'dan the Breaker"
+        },
+        "deltaDps": 18.66,
+        "deltaPct": 0.98,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 659,
+          "setName": "Wastewalker Armor",
+          "piecesWornBefore": 1,
+          "piecesAfterSwap": 2,
+          "nextThreshold": 2,
+          "crossesThreshold": true
+        }
+      },
+      {
+        "rank": 13,
+        "itemId": 28672,
+        "name": "Drape of the Dark Reavers",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Shade of Aran"
+        },
+        "deltaDps": 16.76,
+        "deltaPct": 0.88,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 14,
+        "itemId": 27797,
+        "name": "Wastewalker Shoulderpads",
+        "slot": "shoulder",
+        "source": {
+          "kind": "raid",
+          "zone": "Auchenai Crypts",
+          "boss": "Avatar of the Martyred"
+        },
+        "deltaDps": 14.87,
+        "deltaPct": 0.78,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 659,
+          "setName": "Wastewalker Armor",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": null,
+          "crossesThreshold": false,
+          "singleBreaks": [
+            {
+              "setId": 640,
+              "setName": "Malorne Harness",
+              "threshold": 2,
+              "dps": 10.75
+            }
+          ],
+          "singleDeltaDps": 14.87
+        }
+      },
+      {
+        "rank": 15,
+        "itemId": 28034,
+        "name": "Hourglass of the Unraveller",
+        "slot": "trinket",
+        "slotChoice": "trinket1",
+        "source": {
+          "kind": "raid",
+          "zone": "The Black Morass",
+          "boss": "Temporus"
+        },
+        "deltaDps": 12.97,
+        "deltaPct": 0.68,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 16,
+        "itemId": 28545,
+        "name": "Edgewalker Longboots",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Moroes"
+        },
+        "deltaDps": 11.08,
+        "deltaPct": 0.58,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 17,
+        "itemId": 29100,
+        "name": "Mantle of Malorne",
+        "slot": "shoulder",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 9.18,
+        "deltaPct": 0.48,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 18,
+        "itemId": 27760,
+        "name": "Dunewind Sash",
+        "slot": "waist",
+        "source": {
+          "kind": "raid",
+          "zone": "The Underbog",
+          "boss": "Ghaz'an"
+        },
+        "deltaDps": 7.29,
+        "deltaPct": 0.38,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 19,
+        "itemId": 29247,
+        "name": "Girdle of the Deathdealer",
+        "slot": "waist",
+        "source": {
+          "kind": "raid",
+          "zone": "The Black Morass",
+          "boss": "Aeonus"
+        },
+        "deltaDps": 5.39,
+        "deltaPct": 0.28,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 20,
+        "itemId": 27837,
+        "name": "Wastewalker Leggings",
+        "slot": "legs",
+        "source": {
+          "kind": "raid",
+          "zone": "Mana-Tombs",
+          "boss": "Nexus-Prince Shaffar"
+        },
+        "deltaDps": 3.5,
+        "deltaPct": 0.18,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 659,
+          "setName": "Wastewalker Armor",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": null,
+          "crossesThreshold": false,
+          "singleBreaks": [
+            {
+              "setId": 640,
+              "setName": "Malorne Harness",
+              "threshold": 2,
+              "dps": 13
+            }
+          ],
+          "singleDeltaDps": 3.5
+        }
+      },
+      {
+        "rank": null,
+        "itemId": 28791,
+        "name": "Ring of the Recalcitrant",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 2.9,
+        "deltaPct": 0.15,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 21670,
+        "name": "Badge of the Swarmguard",
+        "slot": "trinket",
+        "slotChoice": "trinket1",
+        "source": {
+          "kind": "raid",
+          "zone": "Ahn'Qiraj",
+          "boss": "Battleguard Sartura"
+        },
+        "deltaDps": 1.57,
+        "deltaPct": 0.08,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 28506,
+        "name": "Gloves of Dexterous",
+        "slot": "hands",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Attumen the Huntsman"
+        },
+        "deltaDps": 0.23,
+        "deltaPct": 0.01,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29096,
+        "name": "Breastplate of Malorne",
+        "slot": "chest",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": -1.1,
+        "deltaPct": -0.06,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      }
+    ],
+    "complete": true,
+    "durationMs": 60000
+  }
+}

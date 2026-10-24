@@ -1,0 +1,604 @@
+{
+  "schemaVersion": 1,
+  "forkSha": "0000000000000000000000000000000000000000",
+  "forkDirty": false,
+  "madeUp": true,
+  "generator": "packages/core/test/tab-fixtures/make-mock-fixtures.ts",
+  "covers": "The ranged slot: bows, guns and crossbows ranked in their own slot.",
+  "spec": "hunter",
+  "phase": 3,
+  "preset": "hunter/dps/gear_sets/phase_2/bm/dw_6p.gear.json",
+  "gear": {
+    "items": [
+      {
+        "id": 30141,
+        "enchant": 3003,
+        "gems": [
+          28362,
+          32409
+        ]
+      },
+      {
+        "id": 30017
+      },
+      {
+        "id": 30143,
+        "enchant": 2717,
+        "gems": [
+          24028,
+          24028
+        ]
+      },
+      {
+        "id": 29994,
+        "enchant": 368
+      },
+      {
+        "id": 30139,
+        "enchant": 2661,
+        "gems": [
+          30549,
+          28363,
+          28119
+        ]
+      },
+      {
+        "id": 29966,
+        "enchant": 1593,
+        "gems": [
+          24028
+        ]
+      },
+      {
+        "id": 30140,
+        "enchant": 2564
+      },
+      {
+        "id": 30040,
+        "gems": [
+          24028,
+          24028
+        ]
+      },
+      {
+        "id": 29995,
+        "enchant": 3012
+      },
+      {
+        "id": 30104,
+        "enchant": 2657,
+        "gems": [
+          24055,
+          24028
+        ]
+      },
+      {
+        "id": 29997
+      },
+      {
+        "id": 28791
+      },
+      {
+        "id": 29383
+      },
+      {
+        "id": 28830
+      },
+      {
+        "id": 32944,
+        "enchant": 2564
+      },
+      {
+        "id": 29948,
+        "enchant": 2564
+      },
+      {
+        "id": 30105,
+        "enchant": 2724
+      }
+    ]
+  },
+  "recordedAt": "1970-01-01T00:00:00.000Z",
+  "iterations": 0,
+  "ranking": {
+    "contentHash": "made-up:mock-ranged",
+    "cutoff": {
+      "absDps": 3
+    },
+    "fight": {
+      "reportCode": "made-up",
+      "fightId": 0,
+      "encounterName": "Made-up fixture",
+      "route": "report-events"
+    },
+    "baseline": {
+      "dps": 1700,
+      "stdev": 120,
+      "metaAdjusted": false
+    },
+    "assumptions": {
+      "maxPhase": 3,
+      "seeds": [
+        1,
+        2,
+        3
+      ],
+      "iterations": 0,
+      "race": "RaceDwarf",
+      "presetId": "hunter/made-up",
+      "standing": []
+    },
+    "substitutions": [],
+    "caps": {
+      "hit": {
+        "rating": 83.31,
+        "capRating": 141.92,
+        "gap": 58.61,
+        "capUncertainty": 15.77,
+        "assumedRace": "RaceDwarf",
+        "talentHitAssumed": {
+          "talent": "Precision",
+          "points": 3,
+          "maxPoints": 3
+        }
+      },
+      "expertise": {
+        "rating": 95,
+        "capRating": null,
+        "gap": null
+      }
+    },
+    "items": [
+      {
+        "rank": 1,
+        "itemId": 27903,
+        "name": "Sonic Spear",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Shadow Labyrinth",
+          "boss": "Murmur"
+        },
+        "deltaDps": 39.5,
+        "deltaPct": 2.32,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 2,
+        "itemId": 30105,
+        "name": "Serpent Spine Longbow",
+        "slot": "ranged",
+        "source": {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Lady Vashj"
+        },
+        "deltaDps": 37.61,
+        "deltaPct": 2.21,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "sources": [
+          {
+            "kind": "raid",
+            "zone": "Serpentshrine Cavern",
+            "boss": "Lady Vashj"
+          },
+          {
+            "kind": "heroic",
+            "dungeon": "The Shattered Halls"
+          },
+          {
+            "kind": "pvp",
+            "via": "arena"
+          }
+        ]
+      },
+      {
+        "rank": 3,
+        "itemId": 28572,
+        "name": "Blade of the Unrequited",
+        "slot": "weapon",
+        "slotChoice": "offhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Romulo and Julianne"
+        },
+        "deltaDps": 35.71,
+        "deltaPct": 2.1,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "owned": true
+      },
+      {
+        "rank": 4,
+        "itemId": 25686,
+        "name": "Fel Leather Boots",
+        "slot": "feet",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 33.82,
+        "deltaPct": 1.99,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 573,
+          "setName": "Fel Skin",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": null,
+          "crossesThreshold": false,
+          "singleBreaks": [
+            {
+              "setId": 652,
+              "setName": "Rift Stalker Armor",
+              "threshold": 4,
+              "dps": 8.5
+            }
+          ],
+          "singleDeltaDps": 33.82
+        }
+      },
+      {
+        "rank": 5,
+        "itemId": 25697,
+        "name": "Felstalker Bracers",
+        "slot": "wrist",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 31.92,
+        "deltaPct": 1.88,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [
+          "Alt"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 6,
+        "itemId": 28228,
+        "name": "Beast Lord Cuirass",
+        "slot": "chest",
+        "source": {
+          "kind": "raid",
+          "zone": "The Botanica",
+          "boss": "Warp Splinter"
+        },
+        "deltaDps": 30.03,
+        "deltaPct": 1.77,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 7,
+        "itemId": 28649,
+        "name": "Garona's Signet Ring",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "The Curator"
+        },
+        "deltaDps": 28.13,
+        "deltaPct": 1.65,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 8,
+        "itemId": 29351,
+        "name": "Wrathtide Longbow",
+        "slot": "ranged",
+        "source": {
+          "kind": "raid",
+          "zone": "The Steamvault",
+          "boss": "Warlord Kalithresh"
+        },
+        "deltaDps": 26.24,
+        "deltaPct": 1.54,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 9,
+        "itemId": 28772,
+        "name": "Sunfury Bow of the Phoenix",
+        "slot": "ranged",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
+        },
+        "deltaDps": 24.34,
+        "deltaPct": 1.43,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 10,
+        "itemId": 30906,
+        "name": "Bristleblitz Striker",
+        "slot": "ranged",
+        "source": {
+          "kind": "raid",
+          "zone": "Hyjal Summit",
+          "boss": "Archimonde"
+        },
+        "deltaDps": 22.45,
+        "deltaPct": 1.32,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 11,
+        "itemId": 28509,
+        "name": "Worgen Claw Necklace",
+        "slot": "neck",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Attumen the Huntsman"
+        },
+        "deltaDps": 20.55,
+        "deltaPct": 1.21,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 12,
+        "itemId": 27474,
+        "name": "Beast Lord Handguards",
+        "slot": "hands",
+        "source": {
+          "kind": "raid",
+          "zone": "The Shattered Halls",
+          "boss": "Warchief Kargath Bladefist"
+        },
+        "deltaDps": 18.66,
+        "deltaPct": 1.1,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 13,
+        "itemId": 24259,
+        "name": "Vengeance Wrap",
+        "slot": "back",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 16.76,
+        "deltaPct": 0.99,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 14,
+        "itemId": 27801,
+        "name": "Beast Lord Mantle",
+        "slot": "shoulder",
+        "source": {
+          "kind": "raid",
+          "zone": "The Steamvault",
+          "boss": "Warlord Kalithresh"
+        },
+        "deltaDps": 14.87,
+        "deltaPct": 0.87,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 15,
+        "itemId": 28288,
+        "name": "Abacus of Violent Odds",
+        "slot": "trinket",
+        "slotChoice": "trinket2",
+        "source": {
+          "kind": "raid",
+          "zone": "The Mechanar",
+          "boss": "Pathaleon the Calculator"
+        },
+        "deltaDps": 12.97,
+        "deltaPct": 0.76,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 16,
+        "itemId": 28435,
+        "name": "Mooncleaver",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "crafted",
+          "profession": "Blacksmithing"
+        },
+        "deltaDps": 11.08,
+        "deltaPct": 0.65,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 17,
+        "itemId": 25562,
+        "name": "Earthen Mark of Razing",
+        "slot": "neck",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 9.18,
+        "deltaPct": 0.54,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 18,
+        "itemId": 28275,
+        "name": "Beast Lord Helm",
+        "slot": "head",
+        "source": {
+          "kind": "raid",
+          "zone": "The Mechanar",
+          "boss": "Pathaleon the Calculator"
+        },
+        "deltaDps": 7.29,
+        "deltaPct": 0.43,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 19,
+        "itemId": 28343,
+        "name": "Jagged Bark Pendant",
+        "slot": "neck",
+        "source": {
+          "kind": "raid",
+          "zone": "The Botanica",
+          "boss": "Warp Splinter"
+        },
+        "deltaDps": 5.39,
+        "deltaPct": 0.32,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 20,
+        "itemId": 28672,
+        "name": "Drape of the Dark Reavers",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Shade of Aran"
+        },
+        "deltaDps": 3.5,
+        "deltaPct": 0.21,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": null,
+        "itemId": 28545,
+        "name": "Edgewalker Longboots",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Moroes"
+        },
+        "deltaDps": 2.9,
+        "deltaPct": 0.17,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 28587,
+        "name": "Legacy",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "The Wizard of Oz"
+        },
+        "deltaDps": 1.57,
+        "deltaPct": 0.09,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 28506,
+        "name": "Gloves of Dexterous",
+        "slot": "hands",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Attumen the Huntsman"
+        },
+        "deltaDps": 0.23,
+        "deltaPct": 0.01,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 27846,
+        "name": "Claw of the Watcher",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Auchenai Crypts",
+          "boss": "Shirrak the Dead Watcher"
+        },
+        "deltaDps": -1.1,
+        "deltaPct": -0.06,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      }
+    ],
+    "complete": true,
+    "durationMs": 60000
+  }
+}
