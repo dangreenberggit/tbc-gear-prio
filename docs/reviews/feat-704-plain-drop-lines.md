@@ -196,3 +196,124 @@ written then.
 | D5  | Domain           | wontfix     | Same imprecision as the old text ("the sim failed"); to a player a sim that could not be set up is a failed sim, and the console line carries the error |
 | D6  | Domain           | wontfix     | `docs/verification-log.md` is a dated record of what an earlier gate run showed; rewriting it would misstate that run                                   |
 | P3  | Standards + Spec | wontfix     | Deliberate plan choice (`plan.md:64`, `:167` C19): the notes are written before any swap, and "If" keeps them true either way                           |
+
+## Round 2 (2026-10-24)
+
+Focused check of the round-1 fixes. Main-repo range `6ee9ae9f..0f39a178`;
+fork range `6324167c5..91bc01b8c`. One reviewer (`general-task`, Opus). It
+read the code and diffs and ran no tests and no `pnpm verify`; a separate
+agent runs verify in the pair. Line numbers are at `0f39a178` and `91bc01b8c`.
+
+### Round-1 findings
+
+| ID               | Verdict                                                     | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ---------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S6 (A1/D1/S1/P2) | fixed, no new defect                                        | The slot is data: `CandidateSkip.slot: SimSlotName` (fork `rank.ts:4096-4102`) is set from the loop's own `slotName` at both push sites (fork `rank.ts:1326-1347`) and copied to `Substitution.slot` (fork `disclosure.ts:41`, core `disclosure.ts:39`) by `candidateSkipSubstitution` (fork `rank.ts:4109`, core `rank.ts:2331`). The tab names it with `simSlotLabel` (fork `utils/format.ts:152-155`, `SubstitutionsList.tsx:23`); nothing parses a string. "This item was not ranked in this slot" stays true when the other slot ranked the item. Two failed ring tries show "(Ring 1)" and "(Ring 2)" (`SubstitutionsList.test.tsx:59-100`). The React key `field | detail`stays unique, because the console part of`detail` holds the slot. |
+| D3               | fixed in content; string fails the plain-sentence rule (N1) | The note now says that the gems are the meta-gem swaps, and that set-bonus hit was not counted against the hit cap (fork `rank.ts:4171-4180`). This is true: the note is written only when the build swapped gems (`!base.repaired` returns before the read, `rank.ts:1120-1126`), and the missed hit is the set-bonus hit (`rank.ts:1086-1097`). The sentence has 47 words in three chained clauses; see N1.                                                                                                                                                                                                                                                           |
+| D4 / P1          | fixed                                                       | Fork `candidate-gems.ts:266`, core `candidate-gems.ts:196`. "left empty", "candidate" and "priced" are gone. The text is true: `migrateGemsToItem` moves the worn gems, the meta gem among them, onto the new item (fork `migrate-gems.ts:21-56`). Still unreachable for every typed spec. Optional wording in N2.                                                                                                                                                                                                                                                                                                                                                      |
+| A2               | fixed                                                       | The comment now says the fixture is the crash text alone and not a whole engine line (core `rank-report.test.ts:3068-3071`). The new test "names the slot of a failed item try" (`:3100`) asserts that the engine's first line reaches the HTML report.                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| A3 / S3          | fixed                                                       | `SubstitutionsList.test.tsx:59-122` builds all 13 lines with the exported engine functions, including the two lines that were missing, and `RANKING_FIXTURE` is built with `candidateSkipSubstitution` (`testing/ranking_fixture.ts:31-37`). The comment matches what the test does.                                                                                                                                                                                                                                                                                                                                                                                    |
+| S2               | fixed                                                       | Three labels (fork `rank.ts:4147-4180`); tests filter by `field` (`fork-meta-repair.test.ts:1247-1253`, core `rank.test.ts:705`). The tests still compare the label text, so a label rewording breaks them; a sentence rewording does not.                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 706 (P4)         | fixed                                                       | Title `upgrades.json:166`; labels fork `rank.ts:4072`, `:4086`, core `rank.ts:2294`, `:2308`; ticket closed with a closing note.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+
+### Player-facing strings changed in the fix range
+
+| String                                                                                                                                                                                                                     | Verdict                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| Title "Items left out and other notes (N)"                                                                                                                                                                                 | passes                        |
+| Label "_item_ (_slot_)", for example "Violet Signet of the Master Assassin (Ring 2)"                                                                                                                                       | passes                        |
+| "This item was not ranked in this slot, because its sim failed."                                                                                                                                                           | passes                        |
+| "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped."                                                                                                                 | passes                        |
+| Labels "Meta gem swaps and the hit cap", "Meta gem swaps and your hit rating", "Set bonuses and the hit cap"                                                                                                               | pass                          |
+| Label "Meta gem for your spec"                                                                                                                                                                                             | passes                        |
+| Labels "One-handed weapons", "Off-hand items"                                                                                                                                                                              | pass                          |
+| "The gems swapped to turn your meta gem on were kept the same at every set piece count, so hit rating from set bonuses was not counted against the hit cap, because your hit rating at one piece count could not be read." | fails (N1)                    |
+| "The ranking does not know which meta gem your spec uses, so new items with a meta socket got the meta gem you wear, or an empty socket and no socket bonus if you wear none."                                             | passes; optional wording (N2) |
+
+### Upstream files
+
+`git -C vendor/tbc-new-fork merge-base 91bc01b8c upstream/master` prints
+`e804c29e8d615fcc6dcc632a1b0c782605e27d46`. `upstream/master` is
+`3d6042163`, 2 commits past it, and the fork has not merged those commits.
+`git diff --numstat --diff-filter=M e804c29e8 91bc01b8c` prints only
+`6 0 ui/app/SimTabsSection.tsx`. None of the 9 files the fix commit touches
+exists at `e804c29e8` or at `upstream/master` (`git cat-file -e`).
+
+### Stale labels in six tab fixtures
+
+Each of six fixtures has one "off-hand candidates" and one "one-hand
+candidates" label. They are the only `substitutions` the fixtures hold, all
+recorded at `b908771dd`. The fixtures with no labels are `enh-p3-p2` and
+`warlock-p3-t5`. The stale labels make no check fail, and no check measures
+the wrong thing because of them:
+
+- `pnpm tab-fixtures:check` exits 1 only for an unreadable fixture, a schema
+  error or an unknown `forkSha` (`scripts/check_tab_fixtures.py:151-183`,
+  `:198-206`). The schema does not read the label text (`:85-114`).
+- No test reads `substitutions` from a recorded fixture.
+  `fork-meta-repair.test.ts:340-344` loads fixtures for their gear. Its
+  note filters (`:1341`, `:1633`) run on fresh engine runs.
+- The layout gate renders `feral-p3-p2bis` (`check_layout_gate.py:257`), and
+  no check in it selects the left-out list (`grep -rn substitution
+scripts/tab-harness scripts/check_layout_gate.py`: no match). Each new
+  label is shorter than the old one, so any whole-page fit check measures
+  the wider text.
+- `merge_to_dev.py`, `check_merge_to_dev.py` and `check_merge_ready.py`
+  never mention tab fixtures (`grep -c`: 0 each).
+
+Leaving the labels is not a defect. Each fixture records what its
+`forkSha` produced, and a hand edit would make it show text that its commit
+did not write. The labels are covered by `SubstitutionsList.test.tsx:59` and
+core `offhand-disclosure.test.ts`. A re-record would run the slow sim again
+for ranking code that did not change. The owner's words that day were: "I
+want to test code that is changed I don't want to run long slow code to test
+code that isn't changed." The only effect: a person who loads one of these six
+fixtures sees the two old labels under the new title until the next
+re-record.
+
+### Lock
+
+`data/wowsims-fork.lock.json`: `commit` is
+`91bc01b8c92204085a979f929268b4dfb07d624e`, `branchedFrom` is `e804c29e8…`,
+and `pushed` is `false`. `git branch -r --contains 91bc01b8c` lists no
+remote branch. The `_comment` entry "2026-10-24, 91bc01b8c" is accurate
+about every change it names. It names the right engine files. Its
+upstream-file command matches the output above. Its sentence that the three
+PROVENANCE sha256 values moved is true: the sha256 of each of `rank.ts`,
+`disclosure.ts` and `candidate-gems.ts` at `91bc01b8c` appears once in
+`docs/fork-provenance/engine.md`. The N1 fix changes only the wording of
+one note, so this entry stays true; the fix's fork commit adds its own
+entry.
+
+### New findings
+
+- **N1 (fix before merge): the set-bonus hit note is three chained clauses
+  in 47 words.** Fork `rank.ts:4171-4180`. Proposed text, 28 words, still
+  true, and still matched by `fork-meta-repair.test.ts:1635`
+  (`/not counted against the hit cap/`):
+  "Hit rating from set bonuses was not counted against the hit cap when gems
+  were swapped to turn your meta gem on, because it could not be read."
+  Update the expected string in `SubstitutionsList.test.tsx` (the fourth
+  definition).
+- **N2 (minor, optional; no spec reaches it): the spec meta line has 33
+  words.** Fork `candidate-gems.ts:266`, core `:196`. Possible shorter
+  text: "The ranking does not know your spec's meta gem, so new helms got the
+  meta gem you wear, or an empty meta socket and no socket bonus if you wear
+  none." That meta sockets are found only on helms is a game fact this review
+  did not check against the item database (hypothesis, untested). Without
+  that check, keep "new items with a meta socket".
+- **N3 (record, no action):** the command-line HTML report shows the raw
+  sim slot, `Name (finger2)` (core `rank-report.ts:578`). This matches its
+  existing "Into finger2" (`:179`). The report is for engineers, and the tab
+  is not affected.
+
+### Round 2 disposition
+
+| ID  | Axis    | Disposition      | Ticket / note                                                           |
+| --- | ------- | ---------------- | ----------------------------------------------------------------------- |
+| N1  | Round 2 | fix before merge | Same fixer, same file; replacement text above                           |
+| N2  | Round 2 | wontfix          | Optional wording only. The current text is true and no spec reaches it. |
+| N3  | Round 2 | wontfix          | Engineer report, same form as the "Into" column                         |
+
+Round-1 open findings S6, D3, D4/P1, A2, A3/S3 and S2 are fixed. Ticket 706
+is fixed and closed. One new finding (N1) blocks the merge until it is fixed.
