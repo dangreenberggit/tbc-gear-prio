@@ -882,10 +882,14 @@ class Builder {
   }
 
   /**
-   * Each set row is a swap the game allows on the fixture's gear: it breaks
-   * only a bonus that is active and whose piece its slot holds, its piece
-   * counts are the gear's, and it crosses only a count where its set has a
-   * bonus. Checked from the output, apart from how the rows were picked.
+   * Each set row is a swap the game allows on the fixture's gear: its slot
+   * does not already hold a piece of its set, it breaks only a bonus that is
+   * active and whose piece its slot holds, its piece counts are the gear's,
+   * and it crosses only a count where its set has a bonus. Each future bonus
+   * is a count where the set has a bonus, reached by the row's piece plus its
+   * listed pieces of the same set, and breaks only an active bonus of
+   * another set that the swapped slots can drop. Checked from the output,
+   * apart from how the rows were picked.
    */
   private checkSetRows(n: FixtureName, fx: MockFixture): void {
     const worn = this.wornSets(fx.gear);
@@ -895,6 +899,11 @@ class Builder {
       const simSlot = r.slotChoice ?? (r.slot as SimOrderName);
       const displaced = this.setOf(
         fx.gear.items[SIM_ORDER.indexOf(simSlot)]?.id
+      );
+      this.rule(
+        n,
+        displaced?.setId !== ctx.setId,
+        `${r.name} (${simSlot}): the slot does not already hold a piece of ${ctx.setName}`
       );
       const before = worn.get(ctx.setId)?.count ?? 0;
       this.rule(
@@ -917,6 +926,32 @@ class Builder {
             this.countsOf(w).includes(b.threshold),
           `${r.name} (${simSlot}) breaks ${b.setName} ${b.threshold}pc only if that slot holds a piece of it and the bonus is active`
         );
+      }
+      for (const f of ctx.futureBonuses ?? []) {
+        const ids = f.pieces.map((q) => q.itemId);
+        this.rule(
+          n,
+          this.countsOf(ctx).includes(f.threshold) &&
+            f.threshold > ctx.piecesAfterSwap &&
+            f.piecesNeeded === f.threshold - before &&
+            ids.length === f.threshold - ctx.piecesAfterSwap &&
+            new Set([r.itemId, ...ids]).size === ids.length + 1 &&
+            ids.every((id) => this.setOf(id)?.setId === ctx.setId),
+          `${r.name}: future ${ctx.setName} ${f.threshold}pc is a bonus its listed pieces reach`
+        );
+        const swapped = 1 + ids.length;
+        for (const b of f.breaks ?? []) {
+          const w = worn.get(b.setId);
+          this.rule(
+            n,
+            b.setId !== ctx.setId &&
+              w !== undefined &&
+              this.countsOf(w).includes(b.threshold) &&
+              b.threshold <= w.count &&
+              b.threshold > w.count - swapped,
+            `${r.name}: future ${f.threshold}pc breaks ${b.setName} ${b.threshold}pc only if the bonus is active and ${swapped} swapped slots can drop it`
+          );
+        }
       }
     }
   }
