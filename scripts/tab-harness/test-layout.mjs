@@ -89,6 +89,19 @@ const AXE_FIXTURE = "mock-set-bonus.json";
 class Unmeasured extends Error {}
 
 const results = [];
+// Module-level, like `results`, so the crash handler sees a11y failures found
+// before the crash.
+const violations = [];
+const reportedViolations = () =>
+  violations.map(({ id, selector, impact, state, width, fail, baselined }) => ({
+    id,
+    selector,
+    impact,
+    state,
+    width,
+    fail: !!fail,
+    baselined: !!baselined,
+  }));
 // The fixture the post-run checks are measuring; null during the pre-run pass.
 let currentFixture = null;
 const check = (id, width, ok, detail) => {
@@ -458,7 +471,6 @@ async function main() {
     : fixtures[0].name;
   const fixtureMs = {};
   const unmeasuredFixtures = [];
-  const violations = [];
   const matched = new Set();
   const facts = [];
   const audit = async (send, state, width) => {
@@ -576,17 +588,7 @@ async function main() {
     unmeasuredFixtures,
     checks: results,
     facts,
-    violations: violations.map(
-      ({ id, selector, impact, state, width, fail, baselined }) => ({
-        id,
-        selector,
-        impact,
-        state,
-        width,
-        fail: !!fail,
-        baselined: !!baselined,
-      })
-    ),
+    violations: reportedViolations(),
     staleBaseline: stale,
   });
   return pass ? 0 : 1;
@@ -597,15 +599,19 @@ main().then(
   (err) => {
     console.error(`test-layout: ${err?.stack ?? err}`);
     const reason = String(err?.message ?? err);
-    // Checks that already failed are a measured failure, whatever stopped the
-    // run afterwards; reporting "unmeasured" would let the merge through.
+    // A layout check or an a11y audit that already failed is a measured
+    // failure, whatever stopped the run afterwards; reporting "unmeasured"
+    // would let the merge through.
     const failed = results.filter((r) => !r.ok).length;
-    if (failed > 0)
+    const a11yFailed = violations.filter((v) => v.fail).length;
+    if (failed > 0 || a11yFailed > 0)
       H.verdict("measured", {
         pass: false,
         failed,
+        a11yFailed,
         stoppedBy: reason,
         checks: results,
+        violations: reportedViolations(),
       });
     else H.verdict("unmeasured", { reason });
     process.exit(1);
