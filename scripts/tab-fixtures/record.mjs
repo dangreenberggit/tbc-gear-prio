@@ -1,19 +1,24 @@
-// Record an Upgrades-tab fixture from a real run (ticket 504).
+// Record an Upgrades-tab result from a real run, by hand (ticket 504). No
+// gate, check or `pnpm verify` step runs this: the automatic page checks
+// render made-up fixtures (`pnpm tab-fixtures:mock`).
+// Record a real result to look at a real render for an owner review (open it
+// with `pnpm tab-review` by its .json path), or to refresh the frozen engine
+// test data (`--out packages/core/test/fixtures/tab-recordings`; read that
+// folder's README first).
 //
 // Drives the fork's dev server (:5173, or TBC_FORK_PORT; WASM_WORKER=1 or the backend on :3333) in a
 // headless Chromium over CDP, the way the round-2b scenario captures did
 // (.scratch/.../set-rule-scenarios/tools/capture3.mjs): set the page phase,
 // load the gear, run the tab, wait for "Took", then read the finished Ranking
 // through the dev-only `window.__upgradesRanking()` hook and write it to
-// data/tab-fixtures/<spec>-p<phase>-<name>.json. Schema and re-record commands:
-// data/tab-fixtures/README.md.
+// .scratch/tab-recordings/<spec>-p<phase>-<name>.json, or under --out.
+// Refuses an --out inside the made-up fixtures' folder (MOCK_DIR).
 //
-// Refuses to record from an uncommitted fork tree: a fixture names the fork
+// Refuses to record from an uncommitted fork tree: a recording names the fork
 // commit its figures came from, and a dirty tree has no such commit.
-// `--allow-dirty` (only with an `--out` folder outside data/tab-fixtures)
-// records an uncommitted fork for review before it is committed, as the
-// ticket 502 owner render gate needs; the file then names the diff by hash
-// instead, and tab-fixtures:check would reject it (`forkDirty: true`).
+// `--allow-dirty` records an uncommitted fork for review before it is
+// committed, as the ticket 502 owner render gate needs; the file then names
+// the diff by hash instead (`forkDirty: true`).
 
 import { execFileSync } from "node:child_process";
 import crypto from "node:crypto";
@@ -30,7 +35,10 @@ const ROOT = path.resolve(
   "../.."
 );
 const FORK = path.join(ROOT, "vendor", "tbc-new-fork");
-const OUT_DIR = path.join(ROOT, "data", "tab-fixtures");
+const OUT_DIR = path.join(ROOT, ".scratch", "tab-recordings");
+const MOCK_DIR = path.join(ROOT, "data", "tab-fixtures");
+const MOCK_DIR_REFUSAL =
+  "data/tab-fixtures holds only made-up fixtures; recordings go to packages/core/test/fixtures/tab-recordings/ or an --out folder";
 const PAGE_BY_SPEC = {
   feral: "/tbc/druid/feralcat/",
   ret: "/tbc/paladin/retribution/",
@@ -47,12 +55,11 @@ const USAGE = `usage: node scripts/tab-fixtures/record.mjs --spec feral|ret|warl
          [--iterations 3000] [--base http://localhost:$TBC_FORK_PORT, default 5173]
          [--out <dir> [--allow-dirty]]
 
-Writes data/tab-fixtures/<spec>-p<phase>-<name>.json, or the same name under
---out. Needs the fork dev server on :5173 (or TBC_FORK_PORT), served with WASM_WORKER=1 or with the backend on :3333, and a
-committed fork tree. --allow-dirty records an uncommitted fork tree; it needs
-an --out folder other than data/tab-fixtures, stamps forkDirty: true and the
-sha256 of the fork's diff, and refuses to write if that diff changed during
-the run. --preset loads a chip from the page's "Gear Sets" presets, under the
+Writes .scratch/tab-recordings/<spec>-p<phase>-<name>.json, or the same name
+under --out (never inside the made-up fixtures' folder). A by-hand tool: no check runs it. Needs the fork dev server on :5173 (or TBC_FORK_PORT), served with WASM_WORKER=1 or with the backend on :3333, and a
+committed fork tree. --allow-dirty records an uncommitted fork tree; it
+stamps forkDirty: true and the sha256 of the fork's diff, and refuses to
+write if that diff changed during the run. --preset loads a chip from the page's "Gear Sets" presets, under the
 named phase tab when --preset-tab is given; leave --preset-tab out on a page
 whose picker has no phase tabs (warlock, enh). --gear-url opens a gear link. Either way the worn gear is
 checked item by item before the run, and the run is refused on a mismatch.`;
@@ -103,15 +110,9 @@ function validate(args) {
   if (viaUrl && !args.expectItemIds)
     return "--gear-url needs --expect-item-ids";
   args.outDir = args.out === undefined ? OUT_DIR : path.resolve(args.out);
-  const samePath = (a, b) =>
-    process.platform === "win32"
-      ? a.toLowerCase() === b.toLowerCase()
-      : a === b;
-  if (
-    args.allowDirty &&
-    (args.out === undefined || samePath(args.outDir, OUT_DIR))
-  )
-    return "--allow-dirty needs an --out folder other than data/tab-fixtures: a fixture there must name a real fork commit";
+  const fold = (p) => (process.platform === "win32" ? p.toLowerCase() : p);
+  const rel = path.relative(fold(MOCK_DIR), fold(args.outDir));
+  if (!rel.startsWith("..") && !path.isAbsolute(rel)) return MOCK_DIR_REFUSAL;
   return null;
 }
 
