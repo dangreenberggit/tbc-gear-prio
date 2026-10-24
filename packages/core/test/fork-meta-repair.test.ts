@@ -1632,7 +1632,9 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     expect(failed.statsRequests).toHaveLength(2);
     const notes = failed.ranking.substitutions.filter(isSetVersionNote);
     expect(notes).toHaveLength(1);
-    expect(notes[0]!.detail).toMatch(/not counted against the hit cap/);
+    expect(notes[0]!.detail).toMatch(
+      /did not count hit rating from set bonuses against the hit cap/
+    );
     expect(notes[0]!.detail).toMatch(/worker died/);
     expect(failed.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
     const { kept, setLess } = brVersions(failed.requests);
