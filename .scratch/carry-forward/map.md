@@ -394,3 +394,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 702 No test checks that the run panel's eligible count follows the worn weapon (pre-merge review feat/dps-spec-coverage, round 2 F1) 2026-10-20
 - 703 A tab fixture recording sometimes never settles, and a retry settles in about 5 minutes (feat/dps-spec-coverage fixture re-recording) 2026-10-20
 - 704 Lines in the tab's "Dropped candidates and substitutions" list read like engineering notes (owner remark after the feat/dps-spec-coverage live run) 2026-10-20
+- 705 The tab's meta-gem fix on the worn gear counts hit at full value and says nothing on a level-73 fight (pre-merge review feat/704-plain-drop-lines, D2) 2026-10-24
+- 706 The tab's dropped list still says "candidates" in its title and two labels (pre-merge review feat/704-plain-drop-lines, P4) 2026-10-24
