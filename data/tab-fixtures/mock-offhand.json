@@ -357,24 +357,7 @@
         "se": 0.4,
         "seMethod": "independent",
         "bisTags": [],
-        "belowCutoff": false,
-        "setContext": {
-          "setId": 737,
-          "setName": "Latro's Flurry",
-          "piecesWornBefore": 0,
-          "piecesAfterSwap": 1,
-          "nextThreshold": null,
-          "crossesThreshold": false,
-          "singleBreaks": [
-            {
-              "setId": 622,
-              "setName": "Deathmantle",
-              "threshold": 4,
-              "dps": 8.5
-            }
-          ],
-          "singleDeltaDps": 20.55
-        }
+        "belowCutoff": false
       },
       {
         "rank": 12,
@@ -391,7 +374,75 @@
         "se": 0.4,
         "seMethod": "independent",
         "bisTags": [],
-        "belowCutoff": false
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 659,
+          "setName": "Wastewalker Armor",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": 2,
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": 18.66,
+          "singleBreaks": [
+            {
+              "setId": 622,
+              "setName": "Deathmantle",
+              "threshold": 4,
+              "dps": 19.5
+            }
+          ],
+          "futureBonuses": [
+            {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 27797,
+                  "name": "Wastewalker Shoulderpads"
+                }
+              ],
+              "stepGearDps": 31.16,
+              "stepGearSe": 2
+            },
+            {
+              "threshold": 4,
+              "piecesNeeded": 4,
+              "dps": 33,
+              "sameGearDps": 33,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 27797,
+                  "name": "Wastewalker Shoulderpads"
+                },
+                {
+                  "itemId": 27837,
+                  "name": "Wastewalker Leggings"
+                },
+                {
+                  "itemId": 28224,
+                  "name": "Wastewalker Helm"
+                }
+              ],
+              "breaks": [
+                {
+                  "setId": 622,
+                  "setName": "Deathmantle",
+                  "threshold": 2,
+                  "dps": 14.5
+                }
+              ],
+              "stepGearDps": 37.16,
+              "stepGearSe": 2
+            }
+          ]
+        }
       },
       {
         "rank": 13,

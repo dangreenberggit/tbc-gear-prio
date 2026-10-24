@@ -15,18 +15,28 @@ The tab's automatic page checks render these files and no sim recording:
   `"fixture": "<name>"`;
 - `pnpm tab-fixtures:smoke` opens every file once.
 
-| File                     | Page                         | UI difference it covers                                                         |
-| ------------------------ | ---------------------------- | ------------------------------------------------------------------------------- |
-| `mock-offhand.json`      | `/tbc/rogue/dps/`            | off-hand rows beside main-hand rows                                             |
-| `mock-ranged.json`       | `/tbc/hunter/dps/`           | the ranged slot (bows, guns, crossbows)                                         |
-| `mock-long-names.json`   | `/tbc/mage/dps/`             | item names of 60–80 characters that must wrap only between words               |
-| `mock-set-bonus.json`    | `/tbc/druid/feralcat/`       | rows whose swap breaks a worn set bonus, and one that completes a bonus         |
-| `mock-many-rows.json`    | `/tbc/warrior/dps/`          | a table long enough that only part of it is rendered at once (89 rows)          |
-| `mock-dropped-list.json` | `/tbc/paladin/retribution/`  | a long "Items left out and other notes" list: two headings and ten item lines   |
+| File                     | Page                        | UI difference it covers                                                       |
+| ------------------------ | --------------------------- | ----------------------------------------------------------------------------- |
+| `mock-offhand.json`      | `/tbc/rogue/dps/`           | off-hand rows beside main-hand rows                                           |
+| `mock-ranged.json`       | `/tbc/hunter/dps/`          | the ranged slot (bows)                                                        |
+| `mock-long-names.json`   | `/tbc/mage/dps/`            | item names of 60–80 characters that must wrap only between words              |
+| `mock-set-bonus.json`    | `/tbc/warrior/dps/`         | rows whose swap breaks a worn set bonus, and one that completes a bonus       |
+| `mock-many-rows.json`    | `/tbc/druid/feralcat/`      | a table long enough that only part of it is rendered at once                  |
+| `mock-dropped-list.json` | `/tbc/paladin/retribution/` | a long "Items left out and other notes" list: two headings and ten item lines |
 
-Every file also holds at least one set-bonus row, one BiS row below the
-cutoff, one owned row and one row with three sources. Each file's `covers` field says the
-same thing as the table.
+Every file also holds at least one set-bonus row with a popover, one BiS row
+below the cutoff, one owned row and one row with three sources. Each file's
+`covers` field says the same thing as the table.
+
+The set-bonus rows are swaps the game allows on the file's gear: a row breaks
+only a bonus that is active, from a slot that holds a piece of that set; its
+piece counts are the gear's; and it crosses or reaches only a count at which
+its set has a bonus. The generator reads those counts from the fork's Go set
+definitions (`sim/**/*.go`). Every set row is marked as a step ranking, as on
+a real run, and a row that more pieces of its set would take to a bonus lists
+that bonus, so the popover shows the bonuses a row can reach.
+`mock-set-bonus` is on the warrior page because no feral preset wears a set
+one piece short of a bonus, and a crossing row needs that.
 
 ## The generator
 

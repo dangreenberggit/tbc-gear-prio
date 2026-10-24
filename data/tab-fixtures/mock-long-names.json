@@ -154,10 +154,48 @@
         "deltaPct": 2.47,
         "se": 0.5,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "belowCutoff": false
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 552,
+          "setName": "Wrath of Spellfire",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": 3,
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": 39.5,
+          "singleBreaks": [
+            {
+              "setId": 649,
+              "setName": "Tirisfal Regalia",
+              "threshold": 4,
+              "dps": 23
+            }
+          ],
+          "futureBonuses": [
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 21846,
+                  "name": "Spellfire Belt"
+                },
+                {
+                  "itemId": 21847,
+                  "name": "Spellfire Gloves"
+                }
+              ],
+              "stepGearDps": 52,
+              "stepGearSe": 2
+            }
+          ]
+        }
       },
       {
         "rank": 2,
@@ -172,21 +210,10 @@
         "deltaPct": 2.35,
         "se": 1,
         "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": false,
-        "sources": [
-          {
-            "kind": "unknown"
-          },
-          {
-            "kind": "heroic",
-            "dungeon": "The Shattered Halls"
-          },
-          {
-            "kind": "pvp",
-            "via": "arena"
-          }
-        ]
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": false
       },
       {
         "rank": 3,
@@ -203,23 +230,7 @@
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false,
-        "setContext": {
-          "setId": 552,
-          "setName": "Wrath of Spellfire",
-          "piecesWornBefore": 0,
-          "piecesAfterSwap": 1,
-          "nextThreshold": null,
-          "crossesThreshold": false,
-          "singleBreaks": [
-            {
-              "setId": 649,
-              "setName": "Tirisfal Regalia",
-              "threshold": 4,
-              "dps": 8.5
-            }
-          ],
-          "singleDeltaDps": 35.71
-        }
+        "owned": true
       },
       {
         "rank": 4,
@@ -255,7 +266,21 @@
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false,
-        "owned": true
+        "sources": [
+          {
+            "kind": "raid",
+            "zone": "Karazhan",
+            "boss": "Terestian Illhoof"
+          },
+          {
+            "kind": "heroic",
+            "dungeon": "The Shattered Halls"
+          },
+          {
+            "kind": "pvp",
+            "via": "arena"
+          }
+        ]
       },
       {
         "rank": 6,

@@ -4,91 +4,106 @@
   "forkDirty": false,
   "madeUp": true,
   "generator": "packages/core/test/tab-fixtures/make-mock-fixtures.ts",
-  "covers": "Set-bonus rows: pieces whose swap breaks a worn bonus, and one that completes a bonus.",
-  "spec": "feral",
+  "covers": "Set-bonus rows: pieces whose swap breaks a worn bonus, one that completes a bonus, and bonuses a row can reach with more pieces.",
+  "spec": "warrior",
   "phase": 3,
-  "preset": "druid/feralcat/gear_sets/p2_6p.gear.json",
+  "preset": "warrior/dps/gear_sets/p1_arms.gear.json",
   "gear": {
     "items": [
       {
-        "id": 8345,
-        "enchant": 3003
-      },
-      {
-        "id": 30017
-      },
-      {
-        "id": 29100,
-        "enchant": 2986,
+        "id": 29021,
+        "enchant": 3003,
         "gems": [
-          24028,
-          24028
+          32409,
+          28119
         ]
       },
       {
-        "id": 29994,
-        "enchant": 368
+        "id": 29349
       },
       {
-        "id": 29096,
+        "id": 33173,
+        "enchant": 2997,
+        "gems": [
+          30582,
+          30584
+        ]
+      },
+      {
+        "id": 24259,
+        "enchant": 368,
+        "gems": [
+          28362
+        ]
+      },
+      {
+        "id": 29019,
         "enchant": 2661,
         "gems": [
-          24028,
-          24028,
-          24028
+          24027,
+          24027,
+          24027
         ]
       },
       {
-        "id": 29966,
+        "id": 28795,
         "enchant": 2647,
         "gems": [
-          24028
+          30546,
+          24027
         ]
       },
       {
-        "id": 29947,
-        "enchant": 2564
-      },
-      {
-        "id": 30106,
+        "id": 28824,
+        "enchant": 684,
         "gems": [
-          24028,
-          30549
+          24027,
+          24027
         ]
       },
       {
-        "id": 29995,
-        "enchant": 3012
+        "id": 28779,
+        "gems": [
+          24027,
+          30602
+        ]
       },
       {
-        "id": 28545,
+        "id": 28741,
+        "enchant": 3012,
+        "gems": [
+          24027,
+          24027,
+          24027
+        ]
+      },
+      {
+        "id": 28608,
         "enchant": 2939,
         "gems": [
-          24028,
-          24028
+          24027,
+          28363
         ]
       },
       {
-        "id": 29997,
-        "enchant": 2929
+        "id": 30834
       },
       {
-        "id": 30052,
-        "enchant": 2929
+        "id": 28757
       },
       {
-        "id": 30627
+        "id": 21670
       },
       {
-        "id": 29383
+        "id": 28830
       },
       {
-        "id": 32014,
-        "enchant": 2670
+        "id": 28429,
+        "enchant": 2673
       },
       {},
       {
-        "id": 32387
+        "id": 28772
       }
     ]
   },
@@ -106,7 +121,7 @@
       "route": "report-events"
     },
     "baseline": {
-      "dps": 1900,
+      "dps": 1800,
       "stdev": 120,
       "metaAdjusted": false
     },
@@ -118,8 +133,8 @@
         3
       ],
       "iterations": 0,
-      "race": "RaceNightElf",
-      "presetId": "feral/made-up",
+      "race": "RaceHuman",
+      "presetId": "warrior/made-up",
       "standing": []
     },
     "substitutions": [],
@@ -129,7 +144,7 @@
         "capRating": 141.92,
         "gap": 58.61,
         "capUncertainty": 15.77,
-        "assumedRace": "RaceNightElf",
+        "assumedRace": "RaceHuman",
         "talentHitAssumed": {
           "talent": "Precision",
           "points": 3,
@@ -145,24 +160,6 @@
     "items": [
       {
         "rank": 1,
-        "itemId": 8345,
-        "name": "Wolfshead Helm",
-        "slot": "head",
-        "source": {
-          "kind": "crafted",
-          "profession": "Leatherworking"
-        },
-        "deltaDps": 39.5,
-        "deltaPct": 2.08,
-        "se": 0.5,
-        "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "belowCutoff": false
-      },
-      {
-        "rank": 2,
         "itemId": 28741,
         "name": "Skulker's Greaves",
         "slot": "legs",
@@ -171,17 +168,34 @@
           "zone": "Karazhan",
           "boss": "Netherspite"
         },
-        "deltaDps": 37.61,
-        "deltaPct": 1.98,
+        "deltaDps": 39.5,
+        "deltaPct": 2.19,
         "se": 1,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 2,
+        "itemId": 25686,
+        "name": "Fel Leather Boots",
+        "slot": "feet",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 37.61,
+        "deltaPct": 2.09,
+        "se": 0.7,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false,
         "sources": [
           {
-            "kind": "raid",
-            "zone": "Karazhan",
-            "boss": "Netherspite"
+            "kind": "crafted",
+            "profession": "Leatherworking"
           },
           {
             "kind": "heroic",
@@ -195,18 +209,18 @@
       },
       {
         "rank": 3,
-        "itemId": 28649,
-        "name": "Garona's Signet Ring",
+        "itemId": 28730,
+        "name": "Mithril Band of the Unscarred",
         "slot": "finger",
         "slotChoice": "finger1",
         "source": {
           "kind": "raid",
           "zone": "Karazhan",
-          "boss": "The Curator"
+          "boss": "Netherspite"
         },
         "deltaDps": 35.71,
-        "deltaPct": 1.88,
-        "se": 0.9,
+        "deltaPct": 1.98,
+        "se": 0.6,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false,
@@ -214,16 +228,16 @@
       },
       {
         "rank": 4,
-        "itemId": 28750,
-        "name": "Girdle of Treachery",
-        "slot": "waist",
+        "itemId": 23537,
+        "name": "Black Felsteel Bracers",
+        "slot": "wrist",
         "source": {
-          "kind": "raid",
-          "zone": "Karazhan"
+          "kind": "crafted",
+          "profession": "Blacksmithing"
         },
         "deltaDps": 33.82,
-        "deltaPct": 1.78,
-        "se": 0.5,
+        "deltaPct": 1.88,
+        "se": 0.7,
         "seMethod": "independent",
         "bisTags": [
           "Alt"
@@ -232,34 +246,33 @@
       },
       {
         "rank": 5,
-        "itemId": 28658,
-        "name": "Terestian's Stranglestaff",
-        "slot": "weapon",
-        "slotChoice": "mainhand",
+        "itemId": 28318,
+        "name": "Obsidian Clodstompers",
+        "slot": "feet",
         "source": {
           "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Terestian Illhoof"
+          "zone": "The Botanica",
+          "boss": "High Botanist Freywinn"
         },
         "deltaDps": 31.92,
-        "deltaPct": 1.68,
-        "se": 0.4,
+        "deltaPct": 1.77,
+        "se": 0.7,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false
       },
       {
         "rank": 6,
-        "itemId": 29248,
-        "name": "Shadowstep Striders",
-        "slot": "feet",
+        "itemId": 28772,
+        "name": "Sunfury Bow of the Phoenix",
+        "slot": "ranged",
         "source": {
           "kind": "raid",
-          "zone": "The Arcatraz",
-          "boss": "Harbinger Skyriss"
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
         },
         "deltaDps": 30.03,
-        "deltaPct": 1.58,
+        "deltaPct": 1.67,
         "se": 0.6,
         "seMethod": "independent",
         "bisTags": [],
@@ -267,308 +280,447 @@
       },
       {
         "rank": 7,
-        "itemId": 29099,
-        "name": "Greaves of Malorne",
-        "slot": "legs",
+        "itemId": 30972,
+        "name": "Onslaught Battle-Helm",
+        "slot": "head",
         "source": {
           "kind": "unknown"
         },
         "deltaDps": 28.13,
-        "deltaPct": 1.48,
-        "se": 0.4,
+        "deltaPct": 1.56,
+        "se": 0.8,
         "seMethod": "independent",
         "bisTags": [],
-        "belowCutoff": false
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 672,
+          "setName": "Onslaught Battlegear",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": 2,
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": 28.13,
+          "singleBreaks": [
+            {
+              "setId": 655,
+              "setName": "Warbringer Battlegear",
+              "threshold": 2,
+              "dps": 11
+            }
+          ],
+          "futureBonuses": [
+            {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 30969,
+                  "name": "Onslaught Gauntlets"
+                }
+              ],
+              "stepGearDps": 40.63,
+              "stepGearSe": 2
+            },
+            {
+              "threshold": 4,
+              "piecesNeeded": 4,
+              "dps": 33,
+              "sameGearDps": 33,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 30969,
+                  "name": "Onslaught Gauntlets"
+                },
+                {
+                  "itemId": 30975,
+                  "name": "Onslaught Breastplate"
+                },
+                {
+                  "itemId": 30979,
+                  "name": "Onslaught Shoulderblades"
+                }
+              ],
+              "stepGearDps": 46.63,
+              "stepGearSe": 2
+            }
+          ]
+        }
       },
       {
         "rank": 8,
-        "itemId": 29246,
-        "name": "Nightfall Wristguards",
-        "slot": "wrist",
+        "itemId": 27985,
+        "name": "Deathforge Girdle",
+        "slot": "waist",
         "source": {
           "kind": "raid",
-          "zone": "Old Hillsbrad Foothills",
-          "boss": "Epoch Hunter"
+          "zone": "Sethekk Halls",
+          "boss": "Talon King Ikiss"
         },
         "deltaDps": 26.24,
-        "deltaPct": 1.38,
-        "se": 0.4,
+        "deltaPct": 1.46,
+        "se": 1,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false
       },
       {
         "rank": 9,
-        "itemId": 27531,
-        "name": "Wastewalker Gloves",
-        "slot": "hands",
+        "itemId": 23522,
+        "name": "Ragesteel Breastplate",
+        "slot": "chest",
         "source": {
-          "kind": "raid",
-          "zone": "The Shattered Halls",
-          "boss": "Warchief Kargath Bladefist"
+          "kind": "crafted",
+          "profession": "Blacksmithing"
         },
         "deltaDps": 24.34,
-        "deltaPct": 1.28,
-        "se": 0.4,
+        "deltaPct": 1.35,
+        "se": 0.6,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false,
         "setContext": {
-          "setId": 659,
-          "setName": "Wastewalker Armor",
-          "piecesWornBefore": 0,
-          "piecesAfterSwap": 1,
+          "setId": 566,
+          "setName": "Burning Rage",
+          "piecesWornBefore": 1,
+          "piecesAfterSwap": 2,
           "nextThreshold": null,
-          "crossesThreshold": false,
+          "crossesThreshold": true,
+          "stepRanking": true,
+          "singleDeltaDps": 24.34,
           "singleBreaks": [
             {
-              "setId": 640,
-              "setName": "Malorne Harness",
+              "setId": 655,
+              "setName": "Warbringer Battlegear",
               "threshold": 2,
-              "dps": 8.5
+              "dps": 11
             }
-          ],
-          "singleDeltaDps": 24.34
+          ]
         }
       },
       {
         "rank": 10,
-        "itemId": 29097,
-        "name": "Gauntlets of Malorne",
-        "slot": "hands",
+        "itemId": 28757,
+        "name": "Ring of a Thousand Marks",
+        "slot": "finger",
+        "slotChoice": "finger2",
         "source": {
-          "kind": "unknown"
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
         },
         "deltaDps": 22.45,
-        "deltaPct": 1.18,
-        "se": 0.9,
+        "deltaPct": 1.25,
+        "se": 0.5,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false
       },
       {
         "rank": 11,
-        "itemId": 29119,
-        "name": "Haramad's Bargain",
-        "slot": "neck",
+        "itemId": 28439,
+        "name": "Dragonstrike",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
         "source": {
-          "kind": "rep",
-          "faction": "Faction 933",
-          "standing": "Friendly"
+          "kind": "crafted",
+          "profession": "Blacksmithing"
         },
         "deltaDps": 20.55,
-        "deltaPct": 1.08,
-        "se": 1,
+        "deltaPct": 1.14,
+        "se": 0.9,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false
       },
       {
         "rank": 12,
-        "itemId": 28264,
-        "name": "Wastewalker Tunic",
-        "slot": "chest",
+        "itemId": 24259,
+        "name": "Vengeance Wrap",
+        "slot": "back",
         "source": {
-          "kind": "raid",
-          "zone": "The Blood Furnace",
-          "boss": "Keli'dan the Breaker"
+          "kind": "crafted",
+          "profession": "Tailoring"
         },
         "deltaDps": 18.66,
-        "deltaPct": 0.98,
-        "se": 0.9,
+        "deltaPct": 1.04,
+        "se": 0.8,
         "seMethod": "independent",
         "bisTags": [],
-        "belowCutoff": false,
-        "setContext": {
-          "setId": 659,
-          "setName": "Wastewalker Armor",
-          "piecesWornBefore": 1,
-          "piecesAfterSwap": 2,
-          "nextThreshold": 2,
-          "crossesThreshold": true
-        }
+        "belowCutoff": false
       },
       {
         "rank": 13,
-        "itemId": 28672,
-        "name": "Drape of the Dark Reavers",
-        "slot": "back",
+        "itemId": 28779,
+        "name": "Girdle of the Endless Pit",
+        "slot": "waist",
         "source": {
           "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Shade of Aran"
+          "zone": "Magtheridon's Lair",
+          "boss": "Magtheridon"
         },
         "deltaDps": 16.76,
-        "deltaPct": 0.88,
-        "se": 0.4,
+        "deltaPct": 0.93,
+        "se": 0.6,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false
       },
       {
         "rank": 14,
-        "itemId": 27797,
-        "name": "Wastewalker Shoulderpads",
-        "slot": "shoulder",
+        "itemId": 28608,
+        "name": "Ironstriders of Urgency",
+        "slot": "feet",
         "source": {
           "kind": "raid",
-          "zone": "Auchenai Crypts",
-          "boss": "Avatar of the Martyred"
+          "zone": "Karazhan",
+          "boss": "Nightbane"
         },
         "deltaDps": 14.87,
-        "deltaPct": 0.78,
-        "se": 0.4,
+        "deltaPct": 0.83,
+        "se": 1,
         "seMethod": "independent",
         "bisTags": [],
-        "belowCutoff": false,
-        "setContext": {
-          "setId": 659,
-          "setName": "Wastewalker Armor",
-          "piecesWornBefore": 0,
-          "piecesAfterSwap": 1,
-          "nextThreshold": null,
-          "crossesThreshold": false,
-          "singleBreaks": [
-            {
-              "setId": 640,
-              "setName": "Malorne Harness",
-              "threshold": 2,
-              "dps": 10.75
-            }
-          ],
-          "singleDeltaDps": 14.87
-        }
+        "belowCutoff": false
       },
       {
         "rank": 15,
-        "itemId": 28034,
-        "name": "Hourglass of the Unraveller",
-        "slot": "trinket",
-        "slotChoice": "trinket1",
+        "itemId": 28729,
+        "name": "Spiteblade",
+        "slot": "weapon",
+        "slotChoice": "offhand",
         "source": {
           "kind": "raid",
-          "zone": "The Black Morass",
-          "boss": "Temporus"
+          "zone": "Karazhan",
+          "boss": "Netherspite"
         },
         "deltaDps": 12.97,
-        "deltaPct": 0.68,
-        "se": 1,
+        "deltaPct": 0.72,
+        "se": 0.5,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false
       },
       {
         "rank": 16,
-        "itemId": 28545,
-        "name": "Edgewalker Longboots",
-        "slot": "feet",
+        "itemId": 25685,
+        "name": "Fel Leather Gloves",
+        "slot": "hands",
         "source": {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Moroes"
+          "kind": "crafted",
+          "profession": "Leatherworking"
         },
         "deltaDps": 11.08,
-        "deltaPct": 0.58,
-        "se": 1,
+        "deltaPct": 0.62,
+        "se": 0.6,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false
       },
       {
         "rank": 17,
-        "itemId": 29100,
-        "name": "Mantle of Malorne",
-        "slot": "shoulder",
+        "itemId": 28830,
+        "name": "Dragonspine Trophy",
+        "slot": "trinket",
+        "slotChoice": "trinket2",
         "source": {
-          "kind": "unknown"
+          "kind": "raid",
+          "zone": "Gruul's Lair",
+          "boss": "Gruul the Dragonkiller"
         },
         "deltaDps": 9.18,
-        "deltaPct": 0.48,
-        "se": 0.5,
+        "deltaPct": 0.51,
+        "se": 0.8,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false
       },
       {
         "rank": 18,
-        "itemId": 27760,
-        "name": "Dunewind Sash",
-        "slot": "waist",
+        "itemId": 28795,
+        "name": "Bladespire Warbands",
+        "slot": "wrist",
         "source": {
           "kind": "raid",
-          "zone": "The Underbog",
-          "boss": "Ghaz'an"
+          "zone": "Gruul's Lair",
+          "boss": "High King Maulgar"
         },
         "deltaDps": 7.29,
-        "deltaPct": 0.38,
-        "se": 0.9,
+        "deltaPct": 0.41,
+        "se": 0.8,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false
       },
       {
         "rank": 19,
-        "itemId": 29247,
-        "name": "Girdle of the Deathdealer",
-        "slot": "waist",
+        "itemId": 30120,
+        "name": "Destroyer Battle-Helm",
+        "slot": "head",
         "source": {
-          "kind": "raid",
-          "zone": "The Black Morass",
-          "boss": "Aeonus"
+          "kind": "unknown"
         },
         "deltaDps": 5.39,
-        "deltaPct": 0.28,
-        "se": 0.5,
-        "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": false
-      },
-      {
-        "rank": 20,
-        "itemId": 27837,
-        "name": "Wastewalker Leggings",
-        "slot": "legs",
-        "source": {
-          "kind": "raid",
-          "zone": "Mana-Tombs",
-          "boss": "Nexus-Prince Shaffar"
-        },
-        "deltaDps": 3.5,
-        "deltaPct": 0.18,
-        "se": 0.9,
+        "deltaPct": 0.3,
+        "se": 1,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": false,
         "setContext": {
-          "setId": 659,
-          "setName": "Wastewalker Armor",
+          "setId": 657,
+          "setName": "Destroyer Battlegear",
           "piecesWornBefore": 0,
           "piecesAfterSwap": 1,
-          "nextThreshold": null,
+          "nextThreshold": 2,
           "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": 5.39,
           "singleBreaks": [
             {
-              "setId": 640,
-              "setName": "Malorne Harness",
+              "setId": 655,
+              "setName": "Warbringer Battlegear",
               "threshold": 2,
-              "dps": 13
+              "dps": 11
             }
           ],
-          "singleDeltaDps": 3.5
+          "futureBonuses": [
+            {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 30118,
+                  "name": "Destroyer Breastplate"
+                }
+              ],
+              "stepGearDps": 17.89,
+              "stepGearSe": 2
+            },
+            {
+              "threshold": 4,
+              "piecesNeeded": 4,
+              "dps": 33,
+              "sameGearDps": 33,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 30118,
+                  "name": "Destroyer Breastplate"
+                },
+                {
+                  "itemId": 30119,
+                  "name": "Destroyer Gauntlets"
+                },
+                {
+                  "itemId": 30122,
+                  "name": "Destroyer Shoulderblades"
+                }
+              ],
+              "stepGearDps": 23.89,
+              "stepGearSe": 2
+            }
+          ]
+        }
+      },
+      {
+        "rank": 20,
+        "itemId": 30118,
+        "name": "Destroyer Breastplate",
+        "slot": "chest",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 3.5,
+        "deltaPct": 0.19,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 657,
+          "setName": "Destroyer Battlegear",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": 2,
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": 3.5,
+          "singleBreaks": [
+            {
+              "setId": 655,
+              "setName": "Warbringer Battlegear",
+              "threshold": 2,
+              "dps": 11
+            }
+          ],
+          "futureBonuses": [
+            {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 30119,
+                  "name": "Destroyer Gauntlets"
+                }
+              ],
+              "stepGearDps": 16,
+              "stepGearSe": 2
+            },
+            {
+              "threshold": 4,
+              "piecesNeeded": 4,
+              "dps": 33,
+              "sameGearDps": 33,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 30119,
+                  "name": "Destroyer Gauntlets"
+                },
+                {
+                  "itemId": 30120,
+                  "name": "Destroyer Battle-Helm"
+                },
+                {
+                  "itemId": 30122,
+                  "name": "Destroyer Shoulderblades"
+                }
+              ],
+              "stepGearDps": 22,
+              "stepGearSe": 2
+            }
+          ]
         }
       },
       {
         "rank": null,
-        "itemId": 28791,
-        "name": "Ring of the Recalcitrant",
-        "slot": "finger",
-        "slotChoice": "finger1",
+        "itemId": 28429,
+        "name": "Lionheart Champion",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
         "source": {
-          "kind": "unknown"
+          "kind": "crafted",
+          "profession": "Blacksmithing"
         },
         "deltaDps": 2.9,
-        "deltaPct": 0.15,
-        "se": 0.4,
+        "deltaPct": 0.16,
+        "se": 0.6,
         "seMethod": "independent",
         "bisTags": [
           "BiS"
@@ -587,7 +739,7 @@
           "boss": "Battleguard Sartura"
         },
         "deltaDps": 1.57,
-        "deltaPct": 0.08,
+        "deltaPct": 0.09,
         "se": 0.9,
         "seMethod": "independent",
         "bisTags": [],
@@ -595,32 +747,34 @@
       },
       {
         "rank": null,
-        "itemId": 28506,
-        "name": "Gloves of Dexterous",
-        "slot": "hands",
+        "itemId": 28438,
+        "name": "Dragonmaw",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
         "source": {
-          "kind": "raid",
-          "zone": "Karazhan",
-          "boss": "Attumen the Huntsman"
+          "kind": "crafted",
+          "profession": "Blacksmithing"
         },
         "deltaDps": 0.23,
         "deltaPct": 0.01,
-        "se": 0.6,
+        "se": 0.8,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true
       },
       {
         "rank": null,
-        "itemId": 29096,
-        "name": "Breastplate of Malorne",
-        "slot": "chest",
+        "itemId": 28824,
+        "name": "Gauntlets of Martial",
+        "slot": "hands",
         "source": {
-          "kind": "unknown"
+          "kind": "raid",
+          "zone": "Gruul's Lair",
+          "boss": "Gruul the Dragonkiller"
         },
         "deltaDps": -1.1,
         "deltaPct": -0.06,
-        "se": 0.8,
+        "se": 0.9,
         "seMethod": "independent",
         "bisTags": [],
         "belowCutoff": true

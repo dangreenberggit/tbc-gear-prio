@@ -309,17 +309,28 @@
           "setName": "Burning Rage",
           "piecesWornBefore": 0,
           "piecesAfterSwap": 1,
-          "nextThreshold": null,
+          "nextThreshold": 2,
           "crossesThreshold": false,
-          "singleBreaks": [
+          "stepRanking": true,
+          "singleDeltaDps": 23.5,
+          "futureBonuses": [
             {
-              "setId": 629,
-              "setName": "Crystalforge Battlegear",
               "threshold": 2,
-              "dps": 8.5
+              "piecesNeeded": 2,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 33173,
+                  "name": "Ragesteel Shoulders"
+                }
+              ],
+              "stepGearDps": 36,
+              "stepGearSe": 2
             }
-          ],
-          "singleDeltaDps": 23.5
+          ]
         }
       },
       {

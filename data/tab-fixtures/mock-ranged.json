@@ -4,7 +4,7 @@
   "forkDirty": false,
   "madeUp": true,
   "generator": "packages/core/test/tab-fixtures/make-mock-fixtures.ts",
-  "covers": "The ranged slot: bows, guns and crossbows ranked in their own slot.",
+  "covers": "The ranged slot: bows ranked in their own slot.",
   "spec": "hunter",
   "phase": 3,
   "preset": "hunter/dps/gear_sets/phase_2/bm/dw_6p.gear.json",
@@ -233,25 +233,10 @@
         "deltaPct": 1.99,
         "se": 0.7,
         "seMethod": "independent",
-        "bisTags": [],
-        "belowCutoff": false,
-        "setContext": {
-          "setId": 573,
-          "setName": "Fel Skin",
-          "piecesWornBefore": 0,
-          "piecesAfterSwap": 1,
-          "nextThreshold": null,
-          "crossesThreshold": false,
-          "singleBreaks": [
-            {
-              "setId": 652,
-              "setName": "Rift Stalker Armor",
-              "threshold": 4,
-              "dps": 8.5
-            }
-          ],
-          "singleDeltaDps": 33.82
-        }
+        "bisTags": [
+          "Alt"
+        ],
+        "belowCutoff": false
       },
       {
         "rank": 5,
@@ -266,9 +251,7 @@
         "deltaPct": 1.88,
         "se": 0.4,
         "seMethod": "independent",
-        "bisTags": [
-          "Alt"
-        ],
+        "bisTags": [],
         "belowCutoff": false
       },
       {
@@ -389,7 +372,75 @@
         "se": 1,
         "seMethod": "independent",
         "bisTags": [],
-        "belowCutoff": false
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 650,
+          "setName": "Beast Lord Armor",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": 2,
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": 18.66,
+          "singleBreaks": [
+            {
+              "setId": 652,
+              "setName": "Rift Stalker Armor",
+              "threshold": 4,
+              "dps": 19.5
+            }
+          ],
+          "futureBonuses": [
+            {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 27801,
+                  "name": "Beast Lord Mantle"
+                }
+              ],
+              "stepGearDps": 31.16,
+              "stepGearSe": 2
+            },
+            {
+              "threshold": 4,
+              "piecesNeeded": 4,
+              "dps": 33,
+              "sameGearDps": 33,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 27801,
+                  "name": "Beast Lord Mantle"
+                },
+                {
+                  "itemId": 28228,
+                  "name": "Beast Lord Cuirass"
+                },
+                {
+                  "itemId": 28275,
+                  "name": "Beast Lord Helm"
+                }
+              ],
+              "breaks": [
+                {
+                  "setId": 652,
+                  "setName": "Rift Stalker Armor",
+                  "threshold": 2,
+                  "dps": 14.5
+                }
+              ],
+              "stepGearDps": 37.16,
+              "stepGearSe": 2
+            }
+          ]
+        }
       },
       {
         "rank": 13,

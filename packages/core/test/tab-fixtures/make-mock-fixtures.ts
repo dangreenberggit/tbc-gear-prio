@@ -8,14 +8,16 @@
  * The figures are made up. The rows are real: every row is an (item id, slot)
  * pair read from the spec's own preset gear files, so icons and quality
  * colours resolve, and the gear is a copy of one preset file. Item names come
- * from the fork's item database. The output is deterministic.
+ * from the fork's item database. The set rows are swaps the game allows on that
+ * gear: the piece counts come from the gear, and the bonus counts from the
+ * fork's Go set definitions. The output is deterministic.
  *
  *   pnpm tab-fixtures:mock            # write the six files
  *   pnpm tab-fixtures:mock --check    # exit 1 when a file differs or is missing
  *
  * Needs the fork clone (`vendor/` is gitignored); `--check` skips without it.
- * Run through `node --import tsx`: the `tsx` CLI cannot open its IPC pipe in
- * the agent sandbox.
+ * Run through `node --import tsx`: in the agent sandbox the `tsx` CLI stops
+ * with `listen EPERM` on its IPC pipe (`pnpm exec tsx <file>`, 2026-10-24).
  */
 
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -24,6 +26,7 @@ import { fileURLToPath } from "node:url";
 
 import type { Cutoff } from "../../src/cutoff.js";
 import type { Assumptions, Substitution } from "../../src/disclosure.js";
+import type { ItemSlot } from "../../src/items.js";
 import {
   SIM_ORDER,
   type SimOrderName,
@@ -34,6 +37,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
 const FORK = join(ROOT, "vendor/tbc-new-fork");
 const SPECS_DIR = join(FORK, "ui/specs");
 const DB_PATH = join(FORK, "assets/database/db.json");
+const SIM_DIR = join(FORK, "sim");
 const OUT_DIR = join(ROOT, "data/tab-fixtures");
 const GENERATOR = "packages/core/test/tab-fixtures/make-mock-fixtures.ts";
 
@@ -42,22 +46,6 @@ const GENERATOR = "packages/core/test/tab-fixtures/make-mock-fixtures.ts";
 // here (CI has no fork). Source: the fork's
 // `ui/features/upgrades/model/engine/rank.ts:303-343,604-675`; precedent:
 // `packages/core/test/feral-rank-fixture.ts:60-85`.
-type PoolSlot =
-  | "head"
-  | "neck"
-  | "shoulder"
-  | "back"
-  | "chest"
-  | "wrist"
-  | "hands"
-  | "waist"
-  | "legs"
-  | "feet"
-  | "finger"
-  | "trinket"
-  | "weapon"
-  | "ranged";
-
 type MockSource =
   | { kind: "raid"; zone: string; boss?: string }
   | { kind: "crafted"; profession: string }
@@ -73,6 +61,19 @@ type SetBreak = {
   dps?: number;
 };
 
+type MockFuture = {
+  threshold: number;
+  piecesNeeded: number;
+  dps: number;
+  sameGearDps: number;
+  sameGearSe: number;
+  partnerRule: "close-calls";
+  pieces: Array<{ itemId: number; name: string }>;
+  breaks?: SetBreak[];
+  stepGearDps: number;
+  stepGearSe: number;
+};
+
 type MockSetContext = {
   setId: number;
   setName: string;
@@ -80,15 +81,17 @@ type MockSetContext = {
   piecesAfterSwap: number;
   nextThreshold: number | null;
   crossesThreshold: boolean;
-  singleDeltaDps?: number;
+  stepRanking: true;
+  singleDeltaDps: number;
   singleBreaks?: SetBreak[];
+  futureBonuses?: MockFuture[];
 };
 
 type MockRow = {
   rank: number | null;
   itemId: number;
   name: string;
-  slot: PoolSlot;
+  slot: ItemSlot;
   slotChoice?: SimOrderName;
   source: MockSource;
   sources?: MockSource[];
@@ -164,12 +167,20 @@ type Db = {
 type Pair = {
   itemId: number;
   simSlot: SimOrderName;
-  slot: PoolSlot;
+  slot: ItemSlot;
   key: string;
 };
 
+type FixtureName =
+  | "mock-offhand"
+  | "mock-ranged"
+  | "mock-long-names"
+  | "mock-set-bonus"
+  | "mock-many-rows"
+  | "mock-dropped-list";
+
 type Spec = {
-  name: string;
+  name: FixtureName;
   spec: string;
   specDir: string;
   gearPreset: string;
@@ -178,12 +189,26 @@ type Spec = {
   covers: string;
   size: number | "all";
   belowCutoff: number;
+  /** Real names cut to 30 characters, or stretched to 60-80. */
+  names: "short" | "long";
+  /** How many rows break a worn bonus, and whether one more row crosses one. */
+  setRows: { breaks: number; crossing: boolean };
+  removesWornItem: boolean;
+  droppedList: boolean;
 };
 
 const CUTOFF_DPS = 3;
 
+const PLAIN = {
+  names: "short",
+  setRows: { breaks: 1, crossing: false },
+  removesWornItem: false,
+  droppedList: false,
+} as const;
+
 const FIXTURES: Spec[] = [
   {
+    ...PLAIN,
     name: "mock-offhand",
     spec: "rogue",
     specDir: "rogue/dps",
@@ -196,18 +221,19 @@ const FIXTURES: Spec[] = [
     belowCutoff: 4,
   },
   {
+    ...PLAIN,
     name: "mock-ranged",
     spec: "hunter",
     specDir: "hunter/dps",
     gearPreset: "gear_sets/phase_2/bm/dw_6p.gear.json",
     race: "RaceDwarf",
     baselineDps: 1700,
-    covers:
-      "The ranged slot: bows, guns and crossbows ranked in their own slot.",
+    covers: "The ranged slot: bows ranked in their own slot.",
     size: 24,
     belowCutoff: 4,
   },
   {
+    ...PLAIN,
     name: "mock-long-names",
     spec: "mage",
     specDir: "mage/dps",
@@ -218,32 +244,40 @@ const FIXTURES: Spec[] = [
       "Long item names (60-80 characters) that must wrap only between words, and a removes-worn-item line.",
     size: 24,
     belowCutoff: 4,
+    names: "long",
+    removesWornItem: true,
+  },
+  // Warrior, not feral: a crossing row needs a set worn one piece short of a
+  // bonus, and no feral preset wears one (each wears 2 or 4 of its set).
+  {
+    ...PLAIN,
+    name: "mock-set-bonus",
+    spec: "warrior",
+    specDir: "warrior/dps",
+    gearPreset: "gear_sets/p1_arms.gear.json",
+    race: "RaceHuman",
+    baselineDps: 1800,
+    covers:
+      "Set-bonus rows: pieces whose swap breaks a worn bonus, one that completes a bonus, and bonuses a row can reach with more pieces.",
+    size: 24,
+    belowCutoff: 4,
+    setRows: { breaks: 3, crossing: true },
   },
   {
-    name: "mock-set-bonus",
+    ...PLAIN,
+    name: "mock-many-rows",
     spec: "feral",
     specDir: "druid/feralcat",
     gearPreset: "gear_sets/p2_6p.gear.json",
     race: "RaceNightElf",
     baselineDps: 1900,
     covers:
-      "Set-bonus rows: pieces whose swap breaks a worn bonus, and one that completes a bonus.",
-    size: 24,
-    belowCutoff: 4,
-  },
-  {
-    name: "mock-many-rows",
-    spec: "warrior",
-    specDir: "warrior/dps",
-    gearPreset: "gear_sets/p2_fury.gear.json",
-    race: "RaceHuman",
-    baselineDps: 1800,
-    covers:
       "Many rows: a table long enough that only part of it is rendered at once, and a long below-cutoff group.",
     size: "all",
     belowCutoff: 20,
   },
   {
+    ...PLAIN,
     name: "mock-dropped-list",
     spec: "ret",
     specDir: "paladin/retribution",
@@ -254,6 +288,7 @@ const FIXTURES: Spec[] = [
       "A long 'Items left out and other notes' list: two headings and ten items that were not ranked.",
     size: 12,
     belowCutoff: 2,
+    droppedList: true,
   },
 ];
 
@@ -291,7 +326,7 @@ const LONG_WORDS = [
 
 const round2 = (x: number): number => Math.round(x * 100) / 100;
 
-function poolSlotFor(simSlot: SimOrderName): PoolSlot {
+function poolSlotFor(simSlot: SimOrderName): ItemSlot {
   if (simSlot === "finger1" || simSlot === "finger2") return "finger";
   if (simSlot === "trinket1" || simSlot === "trinket2") return "trinket";
   if (simSlot === "mainhand" || simSlot === "offhand") return "weapon";
@@ -360,16 +395,63 @@ function longName(name: string, index: number): string {
 /** A fixed shuffle so required rows do not all rank first. */
 const mixKey = (p: Pair): number => ((p.itemId * 2654435761) >>> 0) % 1000003;
 
+/**
+ * The piece counts at which each set has a bonus, by set name, read from the
+ * fork's Go set definitions (`core.NewItemSet(core.ItemSet{ Name, Bonuses })`
+ * under `sim/`). The item database names each item's set but not these counts.
+ */
+function setBonusCounts(): Map<string, number[]> {
+  const counts = new Map<string, number[]>();
+  const files = readdirSync(SIM_DIR, { recursive: true, encoding: "utf8" })
+    .filter((f) => f.endsWith(".go") && !f.endsWith("_test.go"))
+    .sort();
+  const block = /NewItemSet\((?:core\.)?ItemSet\{\n([\s\S]*?)\n\}\)/g;
+  for (const f of files) {
+    for (const m of readFileSync(join(SIM_DIR, f), "utf8").matchAll(block)) {
+      const body = m[1]!;
+      const name = /^\tName:\s*"([^"]+)"/m.exec(body)?.[1];
+      if (!name || counts.has(name)) continue;
+      const keys = [...body.matchAll(/^\t\t(\d+):/gm)].map((k) => Number(k[1]));
+      counts.set(
+        name,
+        keys.sort((a, b) => a - b)
+      );
+    }
+  }
+  return counts;
+}
+
+type SetRef = { setId: number; setName: string };
+type WornSets = Map<number, SetRef & { count: number }>;
+
+/** A made-up value of one set bonus, the same wherever that bonus appears. */
+const bonusDps = (setId: number, threshold: number): number =>
+  round2(6 + (setId % 5) * 1.75 + threshold * 2.5);
+
+const bonusKey = (b: { setId: number; threshold: number }): string =>
+  `${b.setId}:${b.threshold}`;
+
+/** What one set piece's swap shows about sets, and its context for a row figure. */
+type SetCandidate = {
+  pair: Pair;
+  breaks: boolean;
+  crosses: boolean;
+  futures: boolean;
+  context: (deltaDps: number) => MockSetContext;
+};
+
 class Builder {
   readonly errors: string[] = [];
   private readonly items: Map<number, DbItem & { sources?: DbSource[] }>;
   private readonly zones: Map<number, string>;
   private readonly npcs: Map<number, string>;
+  private readonly bonusCounts: Map<string, number[]>;
 
-  constructor(db: Db) {
+  constructor(db: Db, bonusCounts: Map<string, number[]>) {
     this.items = new Map(db.items.map((i) => [i.id, i]));
     this.zones = new Map(db.zones.map((z) => [z.id, z.name]));
     this.npcs = new Map(db.npcs.map((n) => [n.id, n.name]));
+    this.bonusCounts = bonusCounts;
   }
 
   item(id: number): DbItem & { sources?: DbSource[] } {
@@ -413,13 +495,17 @@ class Builder {
       join(SPECS_DIR, spec.specDir, spec.gearPreset)
     );
     const pairs = presetPairs(spec.specDir);
-    const required = this.requiredPairs(spec, pairs, gear);
+    const setRoles = this.setRoles(spec, pairs, gear);
+    const required = [
+      ...new Set([
+        ...this.requiredPairs(spec, pairs, gear),
+        ...pairs.filter((p) => setRoles.has(p.key)),
+      ]),
+    ];
     const rest = pairs.filter((p) => !required.includes(p));
     const size = spec.size === "all" ? pairs.length : spec.size;
     const chosen = [...required, ...rest].slice(0, size);
 
-    const wornSet = this.mostWornSet(gear);
-    const setRoles = this.setRoles(spec, chosen, wornSet);
     const mixed = [...chosen].sort(
       (a, b) => mixKey(a) - mixKey(b) || a.key.localeCompare(b.key)
     );
@@ -441,9 +527,7 @@ class Builder {
         rank: isBelow ? null : i + 1,
         itemId: p.itemId,
         name:
-          spec.name === "mock-long-names"
-            ? longName(realName, i)
-            : shortName(realName),
+          spec.names === "long" ? longName(realName, i) : shortName(realName),
         slot: p.slot,
         ...(p.simSlot !== p.slot ? { slotChoice: p.simSlot } : {}),
         source: this.source(p.itemId),
@@ -492,10 +576,7 @@ class Builder {
           presetId: `${spec.spec}/made-up`,
           standing: [],
         },
-        substitutions:
-          spec.name === "mock-dropped-list"
-            ? this.droppedList(pairs, chosen)
-            : [],
+        substitutions: spec.droppedList ? this.droppedList(pairs, chosen) : [],
         caps: {
           hit: {
             rating: 83.31,
@@ -526,103 +607,191 @@ class Builder {
         ];
       case "mock-ranged":
         return pairs.filter((p) => p.slot === "ranged");
-      case "mock-long-names": {
+      default: {
         const removed = this.removedItemsPair(spec, pairs, gear);
         return removed ? [removed.pair] : [];
       }
-      case "mock-set-bonus": {
-        const worn = this.mostWornSet(gear);
-        return pairs
-          .filter((p) => {
-            const setId = this.item(p.itemId).setId;
-            return setId !== undefined && setId !== worn?.setId;
-          })
-          .slice(0, 4);
-      }
-      default:
-        return [];
     }
   }
 
-  private mostWornSet(
-    gear: GearFile
-  ): { setId: number; setName: string; count: number } | undefined {
-    const counts = new Map<number, { setName: string; count: number }>();
+  private setOf(itemId: number | undefined): SetRef | undefined {
+    const item = itemId === undefined ? undefined : this.item(itemId);
+    return item?.setId !== undefined && item.setName
+      ? { setId: item.setId, setName: item.setName }
+      : undefined;
+  }
+
+  private countsOf(set: SetRef): number[] {
+    return this.bonusCounts.get(set.setName) ?? [];
+  }
+
+  private wornSets(gear: GearFile): WornSets {
+    const worn: WornSets = new Map();
     for (const entry of gear.items) {
-      const item = entry.id ? this.item(entry.id) : undefined;
-      if (item?.setId === undefined || !item.setName) continue;
-      const c = counts.get(item.setId) ?? { setName: item.setName, count: 0 };
-      c.count += 1;
-      counts.set(item.setId, c);
+      const set = this.setOf(entry.id);
+      if (!set) continue;
+      const w = worn.get(set.setId) ?? { ...set, count: 0 };
+      w.count += 1;
+      worn.set(set.setId, w);
     }
-    let best: { setId: number; setName: string; count: number } | undefined;
-    for (const [setId, c] of [...counts].sort((a, b) => a[0] - b[0]))
-      if (!best || c.count > best.count) best = { setId, ...c };
-    return best;
+    return worn;
   }
 
   /**
-   * The set rows, each in the shape of the fork's RANKING_FIXTURE row 10: a
-   * measured break of the most-worn set, so check 17 has a popover on every
-   * fixture. mock-set-bonus gets three of those and one crossing row.
+   * The worn bonuses lost when the items in `slots` are replaced by pieces of
+   * `added`: every bonus count a worn set falls below, sorted by set id, then
+   * highest count first.
+   */
+  private lostBonuses(
+    gear: GearFile,
+    worn: WornSets,
+    slots: SimOrderName[],
+    added: SetRef
+  ): SetBreak[] {
+    const after = new Map([...worn].map(([id, w]) => [id, w.count]));
+    for (const slot of slots) {
+      const set = this.setOf(gear.items[SIM_ORDER.indexOf(slot)]?.id);
+      if (set && set.setId !== added.setId)
+        after.set(set.setId, after.get(set.setId)! - 1);
+    }
+    const lost: SetBreak[] = [];
+    for (const w of [...worn.values()].sort((a, b) => a.setId - b.setId))
+      for (const t of [...this.countsOf(w)].reverse())
+        if (t <= w.count && t > after.get(w.setId)!)
+          lost.push({
+            setId: w.setId,
+            setName: w.setName,
+            threshold: t,
+            dps: bonusDps(w.setId, t),
+          });
+    return lost;
+  }
+
+  /**
+   * What swapping in the set piece `p` does on `gear`, in the fields the fork's
+   * `SetContext` uses on a step ranking: the bonuses the swap loses, whether
+   * it reaches a bonus, and the bonuses it reaches with more pieces of its set
+   * from the preset files. Undefined for an item in no set, or one that
+   * replaces a piece of its own set (the worn count does not change).
+   */
+  private setCandidate(
+    p: Pair,
+    pairs: Pair[],
+    gear: GearFile,
+    worn: WornSets
+  ): SetCandidate | undefined {
+    const own = this.setOf(p.itemId);
+    if (!own) return undefined;
+    const holdsOwn = (slot: SimOrderName) =>
+      this.setOf(gear.items[SIM_ORDER.indexOf(slot)]?.id)?.setId === own.setId;
+    if (holdsOwn(p.simSlot)) return undefined;
+    const before = worn.get(own.setId)?.count ?? 0;
+    const after = before + 1;
+    const counts = this.countsOf(own);
+    const singleBreaks = this.lostBonuses(gear, worn, [p.simSlot], own);
+    const ownBreaks = new Set(singleBreaks.map(bonusKey));
+    const partnerSlots = new Set<SimOrderName>();
+    const partners = pairs.filter((q) => {
+      if (q.itemId === p.itemId || q.simSlot === p.simSlot) return false;
+      if (this.setOf(q.itemId)?.setId !== own.setId || holdsOwn(q.simSlot))
+        return false;
+      if (partnerSlots.has(q.simSlot)) return false;
+      partnerSlots.add(q.simSlot);
+      return true;
+    });
+    const futures = counts
+      .filter((t) => t > after && t - after <= partners.length)
+      .map((t, k) => {
+        const path = partners.slice(0, t - after);
+        const slots = [p.simSlot, ...path.map((q) => q.simSlot)];
+        const breaks = this.lostBonuses(gear, worn, slots, own).filter(
+          (b) => !ownBreaks.has(bonusKey(b))
+        );
+        const value = round2(24 + 9 * k);
+        return {
+          threshold: t,
+          piecesNeeded: t - before,
+          value,
+          pieces: path.map((q) => ({
+            itemId: q.itemId,
+            name: shortName(this.item(q.itemId).name),
+          })),
+          breaks,
+          k,
+        };
+      });
+    const crosses = counts.includes(after);
+    if (singleBreaks.length === 0 && !crosses && futures.length === 0)
+      return undefined;
+    return {
+      pair: p,
+      breaks: singleBreaks.length > 0,
+      crosses,
+      futures: futures.length > 0,
+      context: (deltaDps) => ({
+        ...own,
+        piecesWornBefore: before,
+        piecesAfterSwap: after,
+        nextThreshold: counts.find((t) => t > after) ?? null,
+        crossesThreshold: crosses,
+        stepRanking: true,
+        singleDeltaDps: deltaDps,
+        ...(singleBreaks.length > 0 ? { singleBreaks } : {}),
+        ...(futures.length > 0
+          ? {
+              futureBonuses: futures.map((f) => ({
+                threshold: f.threshold,
+                piecesNeeded: f.piecesNeeded,
+                dps: f.value,
+                sameGearDps: f.value,
+                sameGearSe: 2.1,
+                partnerRule: "close-calls" as const,
+                pieces: f.pieces,
+                ...(f.breaks.length > 0 ? { breaks: f.breaks } : {}),
+                stepGearDps: round2(deltaDps + 12.5 + 6 * f.k),
+                stepGearSe: 2,
+              })),
+            }
+          : {}),
+      }),
+    };
+  }
+
+  /**
+   * The rows that have a set context, so check 17 has a popover on every
+   * fixture: `spec.setRows.breaks` rows that break a worn bonus, rows that can
+   * reach a bonus first, then a crossing row when asked for. With no possible
+   * break on the gear, one row that can reach a bonus.
    */
   private setRoles(
     spec: Spec,
-    chosen: Pair[],
-    worn: { setId: number; setName: string; count: number } | undefined
+    pairs: Pair[],
+    gear: GearFile
   ): Map<string, (deltaDps: number) => MockSetContext> {
-    const roles = new Map<string, (deltaDps: number) => MockSetContext>();
-    const ownSet = (p: Pair) => {
-      const item = this.item(p.itemId);
-      return item.setId !== undefined && item.setName
-        ? { setId: item.setId, setName: item.setName }
-        : undefined;
-    };
-    const candidates = [
-      ...chosen.filter((p) => {
-        const s = ownSet(p);
-        return s !== undefined && s.setId !== worn?.setId;
-      }),
-      ...chosen.filter((p) => ownSet(p) === undefined),
-    ];
-    const broken: SetBreak = worn
-      ? {
-          setId: worn.setId,
-          setName: worn.setName,
-          threshold: worn.count >= 4 ? 4 : 2,
-        }
-      : { setId: 0, setName: "Made-up Set", threshold: 2 };
-    const breakRows = spec.name === "mock-set-bonus" ? 3 : 1;
-    candidates.slice(0, breakRows).forEach((p, k) => {
-      const own = ownSet(p) ?? broken;
-      roles.set(p.key, (deltaDps) => ({
-        setId: own.setId,
-        setName: own.setName,
-        piecesWornBefore: 0,
-        piecesAfterSwap: 1,
-        nextThreshold: null,
-        crossesThreshold: false,
-        singleBreaks: [{ ...broken, dps: round2(8.5 + 2.25 * k) }],
-        singleDeltaDps: deltaDps,
-      }));
+    const worn = this.wornSets(gear);
+    const candidates = pairs.flatMap((p) => {
+      const c = this.setCandidate(p, pairs, gear, worn);
+      return c ? [c] : [];
     });
-    if (spec.name === "mock-set-bonus") {
-      const p = candidates[breakRows];
-      const own = p ? ownSet(p) : undefined;
-      if (p && own)
-        roles.set(p.key, () => ({
-          setId: own.setId,
-          setName: own.setName,
-          piecesWornBefore: 1,
-          piecesAfterSwap: 2,
-          nextThreshold: 2,
-          crossesThreshold: true,
-        }));
+    const crossing = spec.setRows.crossing
+      ? candidates.find((c) => c.crosses)
+      : undefined;
+    const breaking = candidates
+      .filter((c) => c.breaks && !c.crosses)
+      .sort((a, b) => Number(b.futures) - Number(a.futures))
+      .slice(0, spec.setRows.breaks);
+    const picked = [...breaking, ...(crossing ? [crossing] : [])];
+    if (picked.length === 0) {
+      const reaching = candidates.find((c) => c.futures);
+      if (reaching) picked.push(reaching);
     }
-    return roles;
+    return new Map(picked.map((c) => [c.pair.key, c.context]));
   }
 
-  /** A row that removes a worn item: an off-hand over a worn two-hander, else a main hand over the worn off-hand. */
+  /**
+   * A row that removes a worn item: an off-hand over a worn two-hander, else
+   * a main hand over the worn off-hand.
+   */
   private removedItemsPair(
     spec: Spec,
     pairs: Pair[],
@@ -630,7 +799,7 @@ class Builder {
   ):
     | { pair: Pair; removes: { itemId: number; slot: SimOrderName } }
     | undefined {
-    if (spec.name !== "mock-long-names") return undefined;
+    if (!spec.removesWornItem) return undefined;
     const mainhand = gear.items[SIM_ORDER.indexOf("mainhand")]?.id;
     const offhand = gear.items[SIM_ORDER.indexOf("offhand")]?.id;
     if (!offhand && mainhand) {
@@ -712,6 +881,46 @@ class Builder {
     return lines;
   }
 
+  /**
+   * Each set row is a swap the game allows on the fixture's gear: it breaks
+   * only a bonus that is active and whose piece its slot holds, its piece
+   * counts are the gear's, and it crosses only a count where its set has a
+   * bonus. Checked from the output, apart from how the rows were picked.
+   */
+  private checkSetRows(n: FixtureName, fx: MockFixture): void {
+    const worn = this.wornSets(fx.gear);
+    for (const r of fx.ranking.items) {
+      const ctx = r.setContext;
+      if (!ctx) continue;
+      const simSlot = r.slotChoice ?? (r.slot as SimOrderName);
+      const displaced = this.setOf(
+        fx.gear.items[SIM_ORDER.indexOf(simSlot)]?.id
+      );
+      const before = worn.get(ctx.setId)?.count ?? 0;
+      this.rule(
+        n,
+        ctx.piecesWornBefore === before && ctx.piecesAfterSwap === before + 1,
+        `${r.name}: piece counts ${ctx.piecesWornBefore} and ${ctx.piecesAfterSwap} match the gear`
+      );
+      this.rule(
+        n,
+        ctx.crossesThreshold ===
+          this.countsOf(ctx).includes(ctx.piecesAfterSwap),
+        `${r.name}: crosses only a count with a bonus`
+      );
+      for (const b of ctx.singleBreaks ?? []) {
+        const w = worn.get(b.setId);
+        this.rule(
+          n,
+          displaced?.setId === b.setId &&
+            w?.count === b.threshold &&
+            this.countsOf(w).includes(b.threshold),
+          `${r.name} (${simSlot}) breaks ${b.setName} ${b.threshold}pc only if that slot holds a piece of it and the bonus is active`
+        );
+      }
+    }
+  }
+
   private checkRules(spec: Spec, fx: MockFixture): void {
     const n = spec.name;
     const rows = fx.ranking.items;
@@ -731,9 +940,13 @@ class Builder {
       "belowCutoff matches the cutoff"
     );
     const measuredBreak = (r: MockRow) =>
-      (r.setContext?.singleBreaks ?? []).some((b) => b.dps !== undefined) &&
-      r.setContext?.singleDeltaDps !== undefined;
-    this.rule(n, rows.some(measuredBreak), "has a set-bonus row (C19 shape)");
+      (r.setContext?.singleBreaks ?? []).some((b) => b.dps !== undefined);
+    const opensPopover = (r: MockRow) =>
+      measuredBreak(r) ||
+      r.setContext?.crossesThreshold === true ||
+      (r.setContext?.futureBonuses ?? []).length > 0;
+    this.rule(n, rows.some(opensPopover), "has a set-bonus row with a popover");
+    this.checkSetRows(n, fx);
     this.rule(
       n,
       rows.some((r) => r.belowCutoff && r.bisTags.includes("BiS")),
@@ -749,7 +962,7 @@ class Builder {
       rows.some((r) => r.sources?.length === 3),
       "has a row with 3 sources"
     );
-    if (n !== "mock-long-names")
+    if (spec.names === "short")
       this.rule(
         n,
         rows.every((r) => r.name.length <= 30),
@@ -802,6 +1015,14 @@ class Builder {
           n,
           rows.filter(measuredBreak).length >= 3,
           "at least 3 measured-break rows"
+        );
+        // Check 17 hovers the first set-bonus figure, so this row decides
+        // which popover it opens.
+        this.rule(
+          n,
+          (rows.find((r) => r.setContext)?.setContext?.futureBonuses ?? [])
+            .length > 0,
+          "the first set-bonus row has bonuses it can reach"
         );
         this.rule(
           n,
@@ -859,7 +1080,7 @@ function main(argv: string[]): number {
     );
     return 1;
   }
-  const builder = new Builder(readJson<Db>(DB_PATH));
+  const builder = new Builder(readJson<Db>(DB_PATH), setBonusCounts());
   const outputs = FIXTURES.map((spec) => ({
     path: join(OUT_DIR, `${spec.name}.json`),
     text: render(builder.build(spec)),
