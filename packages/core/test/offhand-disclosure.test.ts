@@ -213,7 +213,7 @@ describe("off-hand items for a spec that cannot dual-wield", () => {
 
 describe("off-hand items while a two-hander is worn", () => {
   const disclosures = (r: Ranking | PartialRanking) =>
-    r.substitutions.filter((s) => s.field === "off-hand candidates");
+    r.substitutions.filter((s) => s.field === "Off-hand items");
 
   it("ranks none of them and says how many in one line", async () => {
     const ranking = await rankMage({ gearFile: TWO_HAND_GEAR });
@@ -275,7 +275,7 @@ describe("one-handed weapons while a two-hander is worn (ticket 700)", () => {
   // Priced alone, a one-hander would leave the off hand empty, so the run
   // holds them out before ordering and says how many in one line.
   const lines = (r: Ranking | PartialRanking) =>
-    r.substitutions.filter((s) => s.field === "one-hand candidates");
+    r.substitutions.filter((s) => s.field === "One-handed weapons");
   const oneHanderRows = (r: Ranking | PartialRanking) =>
     r.items.filter((i) => ONE_HANDERS.includes(i.itemId));
 
@@ -286,7 +286,7 @@ describe("one-handed weapons while a two-hander is worn (ticket 700)", () => {
     expect(ranking.items.some((i) => i.itemId === TWO_HANDER)).toBe(true);
     expect(lines(ranking)).toEqual([
       {
-        field: "one-hand candidates",
+        field: "One-handed weapons",
         detail:
           "2 one-handed weapons were not ranked, because you wear a two-handed weapon.",
       },
@@ -363,7 +363,9 @@ describe("one-handed weapons for a dual-wield spec wearing a two-hander (ticket 
     expect(ids).toContain(TWO_HAND);
     expect(
       ranking.substitutions
-        .filter((s) => s.field.endsWith("-hand candidates"))
+        .filter((s) =>
+          ["Off-hand items", "One-handed weapons"].includes(s.field)
+        )
         .map((s) => s.detail)
     ).toEqual([
       "1 off-hand item was not ranked, because you wear a two-handed weapon.",

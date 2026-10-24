@@ -1,5 +1,4 @@
 Status: open
-Serves: .scratch/plans/upgrades-tab-finish-line.md, follow-on of 610 (scope bucket for the orchestrator to set)
 Type: task
 Origin: pre-merge review of feat/tab-item-lists (docs/reviews/feat-tab-item-lists.md, finding A1), 2026-10-16
 Blocks: none
@@ -36,3 +35,7 @@ them the owner rules out of scope; `pnpm verify` rc 0.
 2026-10-18 (stage tab-wowsims-items): since ADR-0038 the tab reads none
 of the lists this gate checks; it builds its pool from wowsims' item
 database. The gate still guards this repo's universes, which feed the CLI.
+
+2026-10-24: `Serves:` line removed — since ADR-0038 this gate guards only
+the CLI's item lists (note of 2026-10-18 above); no plan covers the CLI;
+ticket 173 is the precedent.

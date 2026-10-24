@@ -880,13 +880,7 @@ export async function rankUpgrades(
      * it is one sentence's difference over an identical set of fields, which
      * is why these were two parallel arrays (ticket 136 item 3).
      */
-    const candidateSkips: {
-      kind: "sim" | "repair";
-      itemId: number;
-      name: string;
-      slot: string;
-      reason: string;
-    }[] = [];
+    const candidateSkips: CandidateSkip[] = [];
     /**
      * Every candidate's winning single-swap delta, by item id — the input
      * `selectPackage` (set-value.ts §2.2 step 1) needs to rank same-set
@@ -1413,19 +1407,10 @@ export async function rankUpgrades(
         ...metaPreferenceDisclosure(gems.spec),
         ...offHandBlockedDisclosure(blockedOffHand.length),
         ...oneHandBlockedDisclosure(blockedOneHand.length),
-        ...candidateSkips.map((s) => ({
-          field: `candidate ${s.itemId} (${s.slot})`,
-          detail:
-            `${s.name} was dropped from the ranking: ` +
-            (s.kind === "sim"
-              ? `the sim failed on this swap — ${s.reason}`
-              : `gem repair could not activate its meta — ${s.reason}`),
-        })),
+        ...candidateSkips.map(candidateSkipSubstitution),
         ...packageSimSkips.map((s) => ({
-          field: `${s.setName} ${s.threshold}pc completion package`,
-          detail:
-            `the ${s.setName} ${s.threshold}pc completion package could not ` +
-            `be measured: ${s.reason}`,
+          field: `${s.setName} ${s.threshold}-piece set bonus`,
+          detail: `The ${s.setName} ${s.threshold}-piece set bonus was not measured, because ${s.reason}`,
         })),
       ],
       items: ranked,
@@ -1738,7 +1723,7 @@ async function buildSetBonuses(
           setId,
           setName: label,
           threshold,
-          reason: `gem repair could not activate its meta — ${err.message}`,
+          reason: `no gem swap could turn your meta gem on.\n${err.message}`,
         });
         results.push({
           setId,
@@ -1767,7 +1752,7 @@ async function buildSetBonuses(
             setId,
             setName: label,
             threshold,
-            reason: `the sim failed — ${
+            reason: `its sim failed.\n${
               err instanceof Error ? err.message : String(err)
             }`,
           });
@@ -2295,7 +2280,7 @@ function metaPreferenceDisclosure(
   spec: DetectedSpecId | undefined
 ): Substitution[] {
   const note = missingMetaPreferenceNote(spec);
-  return note ? [{ field: "gems.meta-preference", detail: note }] : [];
+  return note ? [{ field: "Meta gem for your spec", detail: note }] : [];
 }
 
 /**
@@ -2306,7 +2291,7 @@ function oneHandBlockedDisclosure(count: number): Substitution[] {
   if (count === 0) return [];
   return [
     {
-      field: "one-hand candidates",
+      field: "One-handed weapons",
       detail:
         count === 1
           ? "1 one-handed weapon was not ranked, because you wear a two-handed weapon."
@@ -2320,13 +2305,39 @@ function offHandBlockedDisclosure(count: number): Substitution[] {
   if (count === 0) return [];
   return [
     {
-      field: "off-hand candidates",
+      field: "Off-hand items",
       detail:
         count === 1
           ? "1 off-hand item was not ranked, because you wear a two-handed weapon."
           : `${count} off-hand items were not ranked, because you wear a two-handed weapon.`,
     },
   ];
+}
+
+/** One item in one slot that the run could not price. */
+export type CandidateSkip = {
+  kind: "sim" | "repair";
+  itemId: number;
+  name: string;
+  slot: SimSlotName;
+  reason: string;
+};
+
+/**
+ * A ring, trinket or one-hander is tried once per slot, so a failed try says
+ * only "this slot" and carries the slot as data for the reader to name: the
+ * same item can still rank from its other slot.
+ */
+export function candidateSkipSubstitution(skip: CandidateSkip): Substitution {
+  return {
+    field: skip.name,
+    slot: skip.slot,
+    detail:
+      (skip.kind === "sim"
+        ? "This item was not ranked in this slot, because its sim failed."
+        : "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.") +
+      `\nitem ${skip.itemId}, slot ${skip.slot}: ${skip.reason}`,
+  };
 }
 
 function fillOptsForSwap(

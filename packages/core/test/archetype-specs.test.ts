@@ -216,7 +216,7 @@ describe("shadow — a caster archetype", () => {
     expect(slotsChosen(ranking).has("offhand")).toBe(false);
     expect(ranking.items.filter((i) => isOffHandOnly(i.itemId))).toEqual([]);
     const lines = ranking.substitutions.filter(
-      (s) => s.field === "off-hand candidates"
+      (s) => s.field === "Off-hand items"
     );
     expect(lines).toHaveLength(1);
     expect(lines[0]!.detail.startsWith(`${offHandInPool} off-hand items`)).toBe(

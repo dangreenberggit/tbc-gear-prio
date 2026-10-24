@@ -72,3 +72,13 @@ Hotspot inventory is from a bounded grep on 2026-09-19 — re-run
 `grep -rliE "feralcat|retribution|/druid/feral|/paladin/retribution" scripts/`
 before acting. Since 2026-10-08 the tab harness is under `scripts/tab-harness/`,
 so that grep covers it; the fork's own `ui/` code is not covered.
+
+2026-10-24: `feat/dps-spec-coverage` (merged to dev `12bce63d`, 2026-10-20)
+served this epic: off-hand and shield rows for balance, mage, shadow,
+elemental, warlock, ret and feral; the two-hander hold-out and its drop lines;
+separate keys for hunter/warrior same-name gear sets; 8 fixtures recorded at
+fork `b908771dd` (ret, 5 feral, warlock, enhancement). The recorder's
+`PAGE_PATH_BY_SPEC` now also maps warlock and enh (`5a8f337e`), so the
+sentence above about ret and feral only is out of date. Owner ruling
+2026-10-24: tab page checks use made-up results and no sim recordings; that
+work runs as stage `tab-checks-without-sims`. Scope unchanged.

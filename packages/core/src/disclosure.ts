@@ -5,6 +5,7 @@
 
 import type { ContentPhase, Race } from "./types.js";
 import type { MetaRepairSwap } from "./meta-repair.js";
+import type { SimOrderName } from "./slots.js";
 import type { TalentHitAssumption } from "./caps.js";
 
 export type StandingAssumptionId =
@@ -31,6 +32,11 @@ export type Assumptions = {
 export type Substitution = {
   field: string;
   detail: string;
+  /**
+   * The slot a failed item try was for. Set only on item lines, because the
+   * same ring, trinket or one-hander is tried once per slot.
+   */
+  slot?: SimOrderName;
 };
 
 export function buildStandingAssumptions(race: Race): StandingAssumption[] {
@@ -221,10 +227,14 @@ export function substitutionsFromMetaRepair(
   if (swaps.length === 0) return [];
   return [
     {
-      field: "gems.meta-repair",
-      detail: `Meta inactive — repaired with ${swaps.length} min-EP gem swap(s): ${swaps
-        .map((s) => `${s.from}→${s.to}@item ${s.itemId}`)
-        .join(", ")}.`,
+      field: "Meta gem",
+      detail:
+        `Your meta gem was not active, so the ranking swapped ${
+          swaps.length === 1 ? "1 gem" : `${swaps.length} gems`
+        } in its own copy of your gear to turn it on; your gear itself was not changed.\n` +
+        `swaps: ${swaps
+          .map((s) => `gem ${s.from} -> gem ${s.to} on item ${s.itemId}`)
+          .join(", ")}`,
     },
   ];
 }

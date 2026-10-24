@@ -50,9 +50,9 @@ describe("disclosure", () => {
       ])
     ).toEqual([
       {
-        field: "gems.meta-repair",
+        field: "Meta gem",
         detail:
-          "Meta inactive — repaired with 1 min-EP gem swap(s): 10→20@item 1.",
+          "Your meta gem was not active, so the ranking swapped 1 gem in its own copy of your gear to turn it on; your gear itself was not changed.\nswaps: gem 10 -> gem 20 on item 1",
       },
     ]);
     expect(substitutionsFromMetaRepair([])).toEqual([]);
