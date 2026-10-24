@@ -80,3 +80,77 @@ no reason to restart; models, tools, the no-`model` spawn and the
 | --- | ----------------------------------------------------------------- |
 | S1  | Replace "stay on their own lanes" with a plain "not for" sentence |
 | S2  | Name the "T3 Code provider card"                                  |
+
+## Focused check (round 2)
+
+Reviewed range: `a13c89b124215574f4add9bdcb193d369e00e556..59db34e873d12b8157e0a14e8826ccaec7a3f872`
+
+Fork range: none. `git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json`
+exits 0, so the branch never moves the fork pin and condition 3 holds.
+
+One fresh `general-task` agent on Opus (effort `high`) ran the four checks.
+
+1. **Conditions 1–3: hold.** `445c655a` changes only this review file;
+   `59db34e8` names A1a, A3, A4, A5, P1, S1 and S2 (code quality) and S3.
+   Every changed line in `docs/agents/model-policy.md` is at a place one of
+   those findings cites. No fork range.
+2. **Each change does only what its finding asks: yes.** The A3 source was
+   re-checked (`show 20388fad:src/extract.ts` in pattern-text-extractor); A5
+   restates lines 81–84 and adds no rule; the `§ GLM worker types` and
+   `§ Three lanes` references match real headings.
+3. **New tests: none** (docs only).
+4. **Tests touched: none.** Prettier covers the file and passes
+   (`node_modules/.bin/prettier --check docs/agents/model-policy.md`, rc 0).
+   The fixer's `TBC_VERIFY_WITHOUT_FORK=1 pnpm --config.verify-deps-before-run=false verify`
+   returned rc 0 at `59db34e8`.
+
+- **R2-1** (lines 382–384): the agent said the S3 sentence's cause is
+  probably wrong, because the global `credential.helper` is Git Credential
+  Manager, not `gh`. Checked and not a defect: `git config --global
+--get-regexp credential` shows `credential.https://github.com.helper`
+  reset to empty and then set to `!/usr/bin/gh auth git-credential`, so a
+  push to `https://github.com/...` does use `gh`, whose `~/.config/gh` the
+  router card denies.
+
+## Disposition (round 2)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                |
+| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------ |
+| A1a  | Adversarial   | fixed       | `59db34e8`: line 99 now names the GLM exception                                                              |
+| A3   | Adversarial   | fixed       | `59db34e8`: only the new test name is cited                                                                  |
+| A4   | Adversarial   | fixed       | `59db34e8`: cost marked as not yet measured                                                                  |
+| A5   | Adversarial   | fixed       | `59db34e8`: says a job that hits a wall does not move to GLM                                                 |
+| S1   | Standards     | fixed       | `59db34e8`: plain "Not for" sentence (code quality)                                                          |
+| S2   | Standards     | fixed       | `59db34e8`: "T3 Code provider card" (code quality)                                                           |
+| S3   | Standards     | fixed       | `59db34e8`: `git push` failure marked untested                                                               |
+| P1   | Spec          | fixed       | `59db34e8`: fallback keyed to the harness not listing the types                                              |
+| R2-1 | Focused check | wontfix     | Not a defect: github.com pushes use `gh auth git-credential` (`git config --global --get-regexp credential`) |
+
+## Summary
+
+Round 1 (small-change lane) found eleven issues; eight were fixed in
+`59db34e8` and round 2 passed. Round 2's one concern (R2-1) was checked and
+is not a defect.
+
+**Blocking the merge (no Disposition row until the owner decides).** Each is
+a gap this branch opened, and step 3 makes such a gap block the merge unless
+the owner allows a deferral:
+
+- **A1b:** `AGENTS.md` lines 163 and 179 still say "name the model on every
+  spawn" with no GLM exception. This branch's brief forbade AGENTS.md
+  edits, and any AGENTS.md edit needs the owner's approval of the exact
+  text. Mitigation already in place: each GLM agent file's description,
+  which the harness shows at spawn time, says "Spawn with no model
+  argument".
+- **A2:** the "Always `general-task`" list (`data/`, regens, pins, fork
+  code, `scripts/`, agent files, `parallel-phase` workers) does not cover
+  the GLM types, and the shared GLM agent files do not carry it.
+- **A6:** the policy does not say what a caller does when a GLM type returns
+  `NEEDS_JUDGMENT`.
+
+Tickets filed by this branch: 0. Closed: 0.
+
+Not checked: whether the owner said the exact words "optional … not a lane
+of their own" attributed to "(owner, 2026-10-23)"; the facts file gives that
+policy under the owner's request but quotes only "add our model policy to
+the two mentioned repos" (hypothesis, untested).
