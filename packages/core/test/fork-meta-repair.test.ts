@@ -1243,16 +1243,14 @@ const S_POOL = [
   { itemId: 30907, slot: "chest" }, // Mail of Fevered Pursuit, under it
 ];
 
-/**
- * The `substitutions` notes that say repair could not use the hit cap. Both
- * share one field, so the detail's opening words tell them apart.
- */
-const HIT_CAP_FIELD = "Meta gem and hit rating";
+/** The `substitutions` notes that say repair could not use the hit cap. */
+const HIT_CAP_FIELDS = [
+  "Meta gem swaps and the hit cap",
+  "Meta gem swaps and your hit rating",
+];
 type Note = { field: string; detail: string };
-const isHitCapNote = (s: Note) =>
-  s.field === HIT_CAP_FIELD && s.detail.startsWith("If gems were swapped");
-const isSetVersionNote = (s: Note) =>
-  s.field === HIT_CAP_FIELD && s.detail.startsWith("The set-bonus sims");
+const isHitCapNote = (s: Note) => HIT_CAP_FIELDS.includes(s.field);
+const isSetVersionNote = (s: Note) => s.field === "Set bonuses and the hit cap";
 
 describe.skipIf(!forkPresent)(
   "rankUpgrades reads the baseline hit (535)",
@@ -1342,6 +1340,7 @@ describe.skipIf(!forkPresent)(
       }
       const notes = failed.ranking.substitutions.filter(isHitCapNote);
       expect(notes).toHaveLength(1);
+      expect(notes[0]!.field).toBe("Meta gem swaps and your hit rating");
       expect(notes[0]!.detail).toMatch(/always useful/);
       expect(notes[0]!.detail).toMatch(/worker died/);
 
@@ -1371,6 +1370,7 @@ describe.skipIf(!forkPresent)(
       }
       const notes = run.ranking.substitutions.filter(isHitCapNote);
       expect(notes).toHaveLength(1);
+      expect(notes[0]!.field).toBe("Meta gem swaps and the hit cap");
       expect(notes[0]!.detail).toMatch(/always useful/);
       expect(notes[0]!.detail).toMatch(/level 73/);
     });
@@ -1632,6 +1632,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     expect(failed.statsRequests).toHaveLength(2);
     const notes = failed.ranking.substitutions.filter(isSetVersionNote);
     expect(notes).toHaveLength(1);
+    expect(notes[0]!.detail).toMatch(/not counted against the hit cap/);
     expect(notes[0]!.detail).toMatch(/worker died/);
     expect(failed.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
     const { kept, setLess } = brVersions(failed.requests);

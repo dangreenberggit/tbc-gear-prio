@@ -4,7 +4,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import { CUTOFF } from "../src/cutoff.js";
-import type { RankedItem, Ranking } from "../src/rank.js";
+import {
+  candidateSkipSubstitution,
+  type RankedItem,
+  type Ranking,
+} from "../src/rank.js";
 import {
   formatItemSource,
   groupBySlot,
@@ -3061,10 +3065,10 @@ describe("Set potential presentation (grouping and order)", () => {
  * so only the HTML rendering trims.
  */
 describe("substitutions drawer (ticket 123)", () => {
-  // The crash text arrives with the newlines written out as backslash-n
-  // character pairs (the sim's error object is stringified into the detail),
-  // so in this fixture "\\n" is the two characters backslash and n — exactly
-  // what the artifact holds.
+  // A Go crash's text alone, with its line breaks written out as
+  // backslash-n character pairs ("\\n" here is the two characters backslash
+  // and n), as a stringified sim error writes them. An engine item line puts
+  // its own sentence before such text, so this is not a whole engine line.
   const goCrashDetail =
     'sim error: {"type":"ErrorOutcomeError","message":' +
     '"interface conversion: *retribution.RetributionPaladin is not ' +
@@ -3091,6 +3095,27 @@ describe("substitutions drawer (ticket 123)", () => {
     );
     expect(html).toContain("first line of the error");
     expect(html).not.toContain("second line the reader can skip");
+  });
+
+  it("names the slot of a failed item try", () => {
+    const html = renderRankHtml(
+      {
+        ...ranking([]),
+        substitutions: [
+          candidateSkipSubstitution({
+            kind: "sim",
+            itemId: 29283,
+            name: "Violet Signet of the Master Assassin",
+            slot: "finger2",
+            reason: "panic: runtime error",
+          }),
+        ],
+      },
+      meta()
+    );
+    expect(html).toContain(
+      "<code>Violet Signet of the Master Assassin (finger2)</code> This item was not ranked in this slot, because its sim failed."
+    );
   });
 
   it("leaves a one-line detail exactly as it was", () => {

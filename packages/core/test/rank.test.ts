@@ -702,11 +702,7 @@ describe("rankUpgrades", () => {
     expect(ranking.baseline.metaAdjusted).toBe(true);
 
     // Disclosed as a this-run substitution, not silently swallowed.
-    const repair = ranking.substitutions.find(
-      (s) =>
-        s.field === "Meta gem" &&
-        s.detail.startsWith("Your meta gem was not active")
-    );
+    const repair = ranking.substitutions.find((s) => s.field === "Meta gem");
     expect(repair).toBeDefined();
     expect(repair!.detail).toMatch(/gem \d+ -> gem \d+ on item \d+/);
 
@@ -3433,8 +3429,9 @@ describe("rankUpgrades — cross-class candidate whose sim crashes (ticket 122)"
       (s) => s.field === "Beast-tamer's Shoulders"
     );
     expect(sub).toBeDefined();
+    expect(sub!.slot).toBe("shoulder");
     expect(sub!.detail).toContain(
-      "A sim of this item failed, so that try was left out of the ranking."
+      "This item was not ranked in this slot, because its sim failed."
     );
     expect(sub!.detail).toContain(`item ${CROSS_CLASS_ID}, slot shoulder:`);
     expect(sub!.detail).toContain(GO_PANIC);
@@ -3517,8 +3514,9 @@ describe("rankUpgrades — candidate whose meta repair is infeasible", () => {
       (s) => s.field === "Furious Gizmatic Goggles"
     );
     expect(sub).toBeDefined();
+    expect(sub!.slot).toBe("head");
     expect(sub!.detail).toContain(
-      "No gem swap could turn your meta gem on with this item equipped, so that try was left out of the ranking."
+      "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped."
     );
     expect(sub!.detail).toContain(`item ${META_SOCKET_HEAD_ID}, slot head:`);
   });
@@ -3633,9 +3631,7 @@ describe("rankUpgrades per-spec meta preference", () => {
     // the assertion that matters: a bug threading `undefined` (or the wrong
     // spec) would surface as this note appearing on a ret run.
     expect(
-      ranking.substitutions.some((s) =>
-        s.detail.includes("No meta gem is known for your spec")
-      )
+      ranking.substitutions.some((s) => s.field === "Meta gem for your spec")
     ).toBe(false);
   });
 
@@ -3710,9 +3706,7 @@ describe("rankUpgrades per-spec meta preference", () => {
     expect(row).toBeDefined();
     expect(row?.emptyMetaSocket).toBeFalsy();
     expect(
-      ranking.substitutions.some((s) =>
-        s.detail.includes("No meta gem is known for your spec")
-      )
+      ranking.substitutions.some((s) => s.field === "Meta gem for your spec")
     ).toBe(false);
   });
 });

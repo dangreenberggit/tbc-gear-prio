@@ -84,3 +84,8 @@ no live run for a text change; the check is the component test.
 Verified by: `tbc-new-fork@6324167c5`, `tbc-gear-prio@6d027406`, and
 `pnpm fork-tests:check` (the SubstitutionsList test "shows every engine line
 as one plain sentence").
+
+2026-10-24, review round 1 (`docs/reviews/feat-704-plain-drop-lines.md`):
+the S2 to S5 labels and the S4, S5 and S6 texts above changed again at
+`tbc-new-fork@91bc01b8c`. The SubstitutionsList test "shows every engine
+line as one plain sentence" lists the current text of every line.

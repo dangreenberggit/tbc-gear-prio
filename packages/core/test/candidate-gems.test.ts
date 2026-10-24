@@ -295,10 +295,10 @@ describe("preferred metas", () => {
       "spec: unlisted-future-spec"
     );
     expect(missingMetaPreferenceNote(unlistedSpec)).toContain(
-      "No meta gem is known for your spec"
+      "The ranking does not know which meta gem your spec uses"
     );
     expect(missingMetaPreferenceNote(unlistedSpec)).toContain(
-      "without their socket bonus"
+      "an empty socket and no socket bonus"
     );
     expect(missingMetaPreferenceNote("ret")).toBeUndefined();
     expect(missingMetaPreferenceNote("feral")).toBeUndefined();

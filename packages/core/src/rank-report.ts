@@ -575,7 +575,7 @@ export function renderRankHtml(ranking: Ranking, meta: RankReportMeta): string {
   <ul>${ranking.substitutions
     .map(
       (s) =>
-        `<li><code>${esc(s.field)}</code> ${esc(firstLineOf(s.detail))}</li>`
+        `<li><code>${esc(s.field)}${s.slot ? ` (${esc(s.slot)})` : ""}</code> ${esc(firstLineOf(s.detail))}</li>`
     )
     .join("\n")}</ul>
 </details>`;
