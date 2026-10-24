@@ -96,9 +96,9 @@ cheaper model for implementation correctness unless the user says so.
 A worker’s lane follows the **worker’s** job. A mechanical implementation
 slice is workhorse whether its manager is workhorse, review, or design.
 
-Name the model on every spawn, and give it an effort the way your
-harness section says (Claude Code: an agent type whose definition sets
-it). The harness default is
+Name the model on every spawn (except the GLM types, § GLM worker types),
+and give it an effort the way your harness section says (Claude Code: an
+agent type whose definition sets it). The harness default is
 **inherit**: an unnamed worker runs its parent’s model at its parent’s
 price, so a design-lane manager fanning out unnamed workers buys a fan-out of
 design-lane workers. Observed 2026-08-11: a Fable-low director fanned out five
@@ -344,11 +344,14 @@ A `discrete-task` run that records any model other than
 
 #### GLM worker types
 
-Two more agent types exist only when the session runs on the T3 card
-"Claude + GLM workers" (instance `claudeAgent_claude_glm_workers`). Their
-agent files are in `~/.claude_router/agents/`, outside this repo. They are
-an optional, cheaper fill for narrow workhorse jobs, not a lane of their
-own (owner, 2026-10-23).
+Two more agent types exist only when the session runs on the T3 Code
+provider card "Claude + GLM workers" (instance
+`claudeAgent_claude_glm_workers`). Their agent files are in
+`~/.claude_router/agents/`, outside this repo. They are an optional fill
+for narrow workhorse jobs, not a lane of their own (owner, 2026-10-23).
+They are meant to cost less than Opus, but the cost per task is not yet
+measured. They are not a peer fill: a job that hits a wall does not move
+to them (§ Three lanes).
 
 | Agent type       | Model                | Use for                                                                                                                      |
 | ---------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -360,25 +363,25 @@ own (owner, 2026-10-23).
   GLM with Claude (the agent files' descriptions). Send GLM work through
   these types, not through T3's `delegate_task` or the "GLM via
   OpenRouter" card.
-- **Review, design, planning, debugging and judgment** stay on their own
-  lanes. § Three lanes' rule against a weaker model for a review job
-  applies.
+- **Not for** review, design, planning, debugging or judgment: spawn the
+  types in the agent-type table above for these. § Three lanes' rule
+  against a weaker model for a review job applies.
 - **Check every result** before you relay it or build on it, as for the
   trial types: when the caller is the interactive session, a
   `general-task` verifier does it. Check the worker's claims as well as
   its tests. In the first real use (pattern-text-extractor, 2026-10-23),
-  151 of 151 tests passed, and a later review still found a code comment
-  and a test name that claimed more than the data supports
-  (pattern-text-extractor `docs/reviews/feat-test-gaps-04-05.md`, ticket
-  57).
-- **On every other card** ("Claude", "GLM via OpenRouter", Codex) these
-  types do not exist. Use the types in the agent-type table above. A
-  missing GLM type is not a wall and is no reason to restart the session.
+  151 of 151 tests passed, and a later review still found that a new test
+  name claimed more than the data supports (pattern-text-extractor
+  `docs/reviews/feat-test-gaps-04-05.md`, ticket 57).
+- **If the harness does not list these types** (every card except
+  "Claude + GLM workers", such as "Claude", "GLM via OpenRouter" and
+  Codex), use the types in the agent-type table above. A missing GLM type
+  is not a wall and is no reason to restart the session.
 - **Card limits.** GLM workers install no packages (owner, 2026-10-23), so
   give them a checkout whose packages are installed. Sessions on this
-  card cannot `git push` or run `gh`, because
-  `~/.claude_router/settings.json` denies reads of `~/.config/gh`. Push
-  from the "Claude" card.
+  card cannot run `gh`, and `git push` to GitHub is expected to fail too
+  (untested), because `~/.claude_router/settings.json` denies reads of
+  `~/.config/gh`. Push from the "Claude" card.
 
 #### Stage-gate seats
 
