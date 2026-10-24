@@ -6,7 +6,13 @@ Blocks: none
 Blocked by: none
 Related: 684
 
-# A tab fixture recording sometimes never settles, and a retry of the same fixture settles in about 5 minutes
+# A tab run started from the page sometimes never settles; a retry settles in about 5 minutes
+
+The recorder presses Run on the real tab the same way a player does, so the
+hang may reach a player (hypothesis, untested: it has been seen only through
+the recorder). Since stage `tab-checks-without-sims`, no gate and no
+`pnpm verify` step records a result: the page checks render made-up fixtures.
+A hang therefore costs only the person recording by hand.
 
 ## What happens
 
@@ -43,3 +49,12 @@ right after `feral-p3-th-hands-legs` finished.
 The cause is found from logs kept for a failing run (the page's console, the
 recorder's CDP trace and the backend's log), and a recording either settles
 or fails with a message that names what stopped.
+
+## Notes
+
+2026-10-24, stage `tab-checks-without-sims`: the recorder is now a by-hand
+tool (`scripts/tab-fixtures/record.mjs` writes to `.scratch/tab-recordings/`
+by default), and the layout gate, `pnpm tab-review` and
+`pnpm tab-fixtures:smoke` read no recording. The `data/tab-fixtures/README.md`
+paragraph cited above was removed in that stage; read it with
+`git show 26d7dace:data/tab-fixtures/README.md`.
