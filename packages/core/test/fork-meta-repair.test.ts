@@ -91,7 +91,8 @@ describe.skipIf(!forkPresent)("repair hit budget (535)", () => {
   });
 
   it("535-B2: without Improved Faerie Fire the budget is the readout's cap minus the gear and Precision", async () => {
-    // 141.92 (`ranking.caps.hit.capRating` in data/tab-fixtures/ret-p3-p2.json)
+    // 141.92 (`ranking.caps.hit.capRating` in
+    // test/fixtures/tab-recordings/ret-p3-p2.json)
     // − 52 − 47.31 = 42.62.
     const m = await load();
     for (const ff of [undefined, "TristateEffectRegular"]) {
@@ -339,7 +340,10 @@ const holdsGem = (equipment: readonly SimItemSpec[], gemId: number) =>
 
 function loadFixture(name: string): Fixture {
   return JSON.parse(
-    readFileSync(join(root, "data/tab-fixtures", `${name}.json`), "utf8")
+    readFileSync(
+      join(root, "packages/core/test/fixtures/tab-recordings", `${name}.json`),
+      "utf8"
+    )
   ) as Fixture;
 }
 

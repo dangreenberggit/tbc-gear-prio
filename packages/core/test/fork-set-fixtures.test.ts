@@ -1,19 +1,22 @@
 /**
- * Set potential on the recorded Upgrades-tab fixtures (ticket 502).
+ * Set potential on the frozen Upgrades-tab recordings (ticket 502).
  *
  * fork-set-net checks the credit rule on a controlled additive sim. This suite
- * checks the shipped fork `view.ts` against every row of the five recorded
- * fixtures, so a wrong figure on a row no render captured, or one below the
- * popover's 0.1 DPS resolution, still fails. The reference walk below is
- * written from the rule's statement (design.md §1 of the 502 stage, ADR-0034),
- * not from `view.ts`. A step ranking (ticket 511: rows carry
- * `setContext.stepRanking`) is checked against `referenceStep`, written from
- * plan 511-512-set-credit's rule for one row, instead.
+ * checks the shipped fork `view.ts` against every row of the six real sim
+ * recordings in `fixtures/tab-recordings/`, so a wrong figure on a row no
+ * render captured, or one below the popover's 0.1 DPS resolution, still fails.
+ * The reference walk below is written from the rule's statement (design.md §1
+ * of the 502 stage, ADR-0034), not from `view.ts`. A step ranking (ticket 511:
+ * rows carry `setContext.stepRanking`) is checked against `referenceStep`,
+ * written from plan 511-512-set-credit's rule for one row, instead.
  *
- * `TAB_FIXTURE_DIR` points the suite at another folder with the same file
- * names, such as uncommitted stage recordings; the default is the committed
- * `data/tab-fixtures`. Skips when the fork clone is absent (`vendor/` is
- * gitignored), like the other fork-gated suites.
+ * The recordings are frozen test data: nothing automatic re-records them, and
+ * the tab's page checks no longer read them (stage tab-checks-without-sims).
+ * `fixtures/tab-recordings/README.md` says how to update them when a rule
+ * changes on purpose. `TAB_FIXTURE_DIR` points the suite at another folder
+ * with the same file names, such as uncommitted stage recordings. Skips when
+ * the fork clone is absent (`vendor/` is gitignored), like the other
+ * fork-gated suites.
  */
 
 import { readFileSync } from "node:fs";
@@ -24,9 +27,9 @@ import { describe, expect, it } from "vitest";
 
 import { forkPresent, importForkUpgrades } from "./fork-engine-harness.js";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const fixtureDir =
-  process.env.TAB_FIXTURE_DIR ?? join(root, "data/tab-fixtures");
+  process.env.TAB_FIXTURE_DIR ??
+  join(dirname(fileURLToPath(import.meta.url)), "fixtures/tab-recordings");
 
 type Break = {
   setId: number;
