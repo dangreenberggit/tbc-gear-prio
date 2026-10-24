@@ -1,4 +1,4 @@
-// Open every recorded fixture's ?upgrades-fixture link on the fork dev server
+// Open every made-up fixture's ?upgrades-fixture link on the fork dev server
 // (ticket 520). TBC_FORK_PORT picks the port (default 5173), so a second
 // checkout's fork can serve on its own port (ticket 558).
 import { spawn, spawnSync } from "node:child_process";

@@ -279,8 +279,9 @@ Looking at a tab fixture (`data/tab-fixtures/`, ticket 504) needs
 only `:5173`: open a link from `http://localhost:5173/tbc/tab-fixtures/`, or
 run `pnpm tab-fixtures:smoke`, which starts `:5173` when the port is free and
 stops only a server it started. Recording a real result by hand
-(`pnpm tab-fixtures:record`) needs both ports, because it is a real run. A fixture load never shows "Took": no run happened, so wait for
-result rows and no stale banner instead. See `data/tab-fixtures/README.md`.
+(`pnpm tab-fixtures:record`) needs both ports, because it is a real run. A
+fixture load never shows "Took": no run happened, so wait for result rows and
+no stale banner instead. See `data/tab-fixtures/README.md`.
 
 ## Before writing a `pnpm tab-review` manifest
 

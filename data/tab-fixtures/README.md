@@ -52,7 +52,8 @@ pnpm tab-fixtures:mock --check    # exit 1 when a file differs, is missing, or i
 Do not edit a file here by hand: change the generator and run
 `pnpm tab-fixtures:mock`. `pnpm tab-fixtures:check` (part of `pnpm verify`)
 runs `--check`, then `scripts/check_tab_fixtures.py`, which fails any file
-here that is not made up.
+here that is not made up. Without the fork clone (as in CI) `--check` skips
+its compare, so only the schema is checked there.
 
 ## Schema (`schemaVersion` 1)
 
