@@ -2,6 +2,8 @@
 
 Reviewed range: `aa3810d912dfa9739d00d14978124b4e3bbb543b..eb9547d36b317c46a54ef1d4747d85af3bd27e9f`
 
+Reviewed range: `eb9547d36b317c46a54ef1d4747d85af3bd27e9f..de5cef6ff3c4b8ea70ab46698ddfdac4631768f2`
+
 Dispatch: full axes (31 files, 6584 insertions and 44821 deletions; paths under
 `data/`). `codex` is not on `PATH`, so each axis ran as a fresh `general-task`
 agent on Opus (review lane), all four in one parallel batch. The domain axis
@@ -209,15 +211,218 @@ D4, P5, K1) get their rows after their fixes, in round 2.
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                               |
 | --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | A3  | Adversarial | wontfix     | `pnpm verify` refuses a checkout with no fork, so the byte compare runs before every push; CI checks the schema only by design. The missing doc line is Q6. |
-| A4  | Adversarial | defer       | `.scratch/carry-forward/issues/708-frozen-tab-recordings-are-not-checked.md` — nothing checks the moved recordings for `forkDirty`                          |
+| A4  | Adversarial | fixed       | Superseded in round 2: `scripts/check_tab_fixtures.py:111` checks every recording (no `madeUp`, `forkDirty: false`); ticket 708 closed                      |
 | A5  | Adversarial | wontfix     | Checked, not a defect: prettier reformat only; JSON content equal to dev in all six; both engine suites pass                                                |
-| D1  | Domain      | defer       | `.scratch/carry-forward/issues/707-made-up-set-bonus-rows-are-impossible.md` — break rows from slots with no worn piece                                     |
-| D2  | Domain      | defer       | `.scratch/carry-forward/issues/707-made-up-set-bonus-rows-are-impossible.md` — crossing row piece count                                                     |
-| D3  | Domain      | defer       | `.scratch/carry-forward/issues/707-made-up-set-bonus-rows-are-impossible.md` — no `stepRanking` or `futureBonuses` popover in the mocks                     |
+| D1  | Domain      | fixed       | Superseded in round 2: breaks come from the copied gear (`make-mock-fixtures.ts:645`, `:687`); ticket 707 closed                                            |
+| D2  | Domain      | fixed       | Superseded in round 2: `piecesWornBefore` is the gear's count (checked at `make-mock-fixtures.ts:902`); ticket 707 closed                                   |
+| D3  | Domain      | fixed       | Superseded in round 2: every set row has `stepRanking: true`, 8 of 9 have `futureBonuses`; ticket 707 closed                                                |
 | D5  | Domain      | wontfix     | The tab renders neither the hit-cap nor the talent field; made-up values are never shown                                                                    |
 | S1  | Standards   | wontfix     | Same finding as A2; disposed with A2                                                                                                                        |
 | S3  | Standards   | wontfix     | The branch is unpushed, but a rebase of nine commits for a 3-character overrun costs more than it fixes                                                     |
-| P1  | Spec        | defer       | `.scratch/carry-forward/issues/708-frozen-tab-recordings-are-not-checked.md` — recorder accepts `--allow-dirty` into the frozen folder                      |
+| P1  | Spec        | fixed       | Superseded in round 2: `scripts/tab-fixtures/record.mjs:138` refuses `--allow-dirty` into the recordings folder; ticket 708 closed                          |
 | P2  | Spec        | wontfix     | Reading item names from the fork's wowsims item data follows ADR-0029; a rename fails `tab-fixtures:check` loudly, not silently                             |
 | P3  | Spec        | wontfix     | Planned (plan C24); no sim runs; `packages/core/test/fixtures/tab-recordings/README.md:29` says how to update the values                                    |
 | P4  | Spec        | wontfix     | Bookkeeping in a stage-gate artifact; the corrected Goal (`brief.md:30-37`) is what the plan and the diff follow                                            |
+
+## Focused check (round 2)
+
+Main range: `eb9547d3..de5cef6f`. Commit `8d7d977d` only records round 1
+(this file and tickets 707 and 708); the fixes are `8d7d977d..de5cef6f`, six
+commits. Fork range: none. `git diff --quiet dev...HEAD --
+data/wowsims-fork.lock.json` exits 0, the fork is at the lock's commit
+`7024ba6d`, and `git -C vendor/tbc-new-fork status --porcelain` prints
+nothing. Dispatch: the orchestrator ran this check as one fresh `general-task`
+agent on Opus (review lane), which also wrote this section. It did not run the
+layout harness or the gate.
+
+Which finding each commit fixes. The commit messages name no finding ID, so
+this table is the record (from the fixer's report, checked against each diff):
+
+| Commit     | Fixes                                                     |
+| ---------- | --------------------------------------------------------- |
+| `7572a254` | 707 (D1, D2, D3), Q3, Q4, part of Q2, Q6 and Q7           |
+| `cf09ed47` | A1, A2 (= S1), part of Q2 and Q7                          |
+| `d263e557` | 708 (A4, P1), Q5, part of Q6 and Q7                       |
+| `2ebced26` | Q1 (K1, P5), part of Q6 (D4, S7) and Q7                   |
+| `9c097c85` | the layout lock, advanced by the gate run after the fixes |
+| `de5cef6f` | closes tickets 707 and 708; two `map.md` lines            |
+
+### Check 1: the three conditions
+
+- **Condition 1 holds in substance, not in letter.** Every commit's diff is a
+  fix for a round-1 finding, the lock advance those fixes force, or ticket
+  bookkeeping. But no commit message names a finding ID or a ticket, and the
+  skill asks for one of those. Tickets 707 and 708 name `7572a254` and
+  `d263e557`; nothing durable named `cf09ed47` or `2ebced26` until the table
+  above. Finding N3.
+- **Condition 2 holds, with one judged exception.** The changed code is at the
+  places the findings cite. The exception: `mock-set-bonus` moved from feral
+  to warrior (`p1_arms`) and `mock-many-rows` from warrior to feral
+  (`p2_6p`). D2's fix needs a crossing row, and a crossing row needs a set worn
+  one piece short of a bonus. Ticket 707's closing note says no feral preset
+  has that. This review did not re-check that claim (hypothesis, untested).
+  The swap keeps the plan's intent, "one per UI difference ... each loaded on
+  one spec page that has that difference" (`plan.md:5`). Warrior has set rows.
+  Feral still gives 76 rows, 20 below the cutoff, against the plan's "≥ 60" and
+  "≥ 15" (`plan.md:79`). The post-run axe scan follows `mock-set-bonus` to the
+  warrior page; it scanned one page before and still scans one.
+- **Condition 3 holds:** the branch does not move the fork pin.
+
+### Check 2: each fix changes only what its finding asks for
+
+- **A1: fixed.** `scripts/tab-harness/test-layout.mjs:508-523` catches an
+  `Unmeasured` per fixture, names the fixture and goes on. `:556` reports
+  "unmeasured" only when no layout check and no a11y check failed. Otherwise
+  the verdict is "measured", `pass: false`, and the exit is 1 (`:566-592`).
+  The crash handler at `:602-610` reports "measured" when a layout check had
+  failed. `scripts/check_layout_gate.py:776` reads an "unmeasured" verdict
+  with a nonzero `failed` as FAIL. In the case the review asked about, a
+  fixture fails to load after a check on an earlier fixture failed: the catch
+  at `:519` keeps the loop going, `failed` counts the earlier failure, and
+  `:592` gives exit 1, so the gate returns 1. Reading the code is enough for
+  this case. The path is about 15 lines in one function, and an end-to-end
+  test would need a browser and a broken fixture page. The gate's Python side
+  is different (N4).
+- **A2: fixed.** `check_layout_gate.py:981-990` returns 0 without
+  `write_baseline` when `fixture` is set. A full run (`fixture is None`)
+  still reaches `write_baseline(digest)` at `:991-992`. `merge_to_dev.py:494`
+  calls `run()` with no fixture, and `run_gate` drops an inherited
+  `TBC_TAB_FIXTURE` when no fixture is given, so the merge path always
+  renders all six fixtures and can still advance the baseline.
+- **707 (D1-D3): fixed.** A check script written for this review
+  (`$TMPDIR/r2/chk.py`, not committed) reads the fork's `db.json` and the Go
+  `NewItemSet` blocks itself. It checks all 9 set rows in the six files:
+  - each row's set matches its item;
+  - its slot holds no piece of its own set;
+  - `piecesWornBefore` and `piecesAfterSwap` equal the copied gear's count and
+    that count plus one;
+  - `crossesThreshold` is true only at a count where the set has a bonus;
+  - a break exists only when the slot holds a piece of the broken set and the
+    worn count equals the broken threshold;
+  - every future bonus's pieces belong to the set and its piece counts add up.
+
+  Result: 0 bad rows. All 9 rows have `stepRanking: true`; 8 have
+  `futureBonuses`. The first set row of `mock-set-bonus` (Onslaught
+  Battle-Helm) has two future bonuses. The generator reads the fork
+  (`ui/specs`, `assets/database/db.json`, `sim/**/*.go`) and writes only
+  `data/tab-fixtures/` (`make-mock-fixtures.ts:1085-1095`). The fork's
+  `git status --porcelain` is empty.
+
+- **708 (A4, P1): fixed.** `pnpm tab-fixtures:check` exits 0 in 0.9 s wall
+  time, including the generator's `--check`. It prints `recording <name>: ok`
+  for all six recordings. It is in `pnpm verify` (`package.json:15`
+  `verify:steps` → `tab-fixtures:check`, `:76`) and runs no sim and no browser.
+  `node scripts/tab-fixtures/record.mjs ... --allow-dirty --out
+packages/core/test/fixtures/tab-recordings` exits 2 with the refusal. A
+  subfolder gives the same result. The refusal is in `validate()`
+  (`record.mjs:138`), before any git call or page load. The refusal is
+  correct: a clean fork can still record into that folder, and a dirty fork
+  can still record anywhere else.
+- **Q1-Q7: done, Q3 by the alternative that the row offers.**
+  - Q1: no "recorded" left in `smoke.mjs`, `tab_fixtures.mjs` or
+    `test-review.mjs`.
+  - Q2: the generator names a command (`make-mock-fixtures.ts:19-20`), and
+    `test-layout.mjs:54-57` and `:312-315` say "hypothesis, untested".
+  - Q3: `name` is now the `FixtureName` union (`make-mock-fixtures.ts:174`),
+    and per-fixture flags on `Spec` replace six name branches. The row
+    offered "or type `name` as a union". Two exhaustive `switch`es remain.
+  - Q4: `ItemSlot` is imported (`:29`).
+  - Q5: the two messages now differ in their words.
+  - Q6: the README says "(bows)" and that the compare skips without a fork,
+    and "(89 rows)" is gone.
+  - Q7: no "carries" or "shape" left in the two files. `check_layout_gate.py`
+    lines 242-244 are wrapped.
+
+### Check 3: new tests
+
+No test was added. None of the findings asked for one. The fixer checked A1
+and A2 with an uncommitted probe that stubbed `run_gate`. For 707 it changed
+the generator and saw `--check` fail, then undid the change (fixer's report;
+not re-run here). The generator's own `checkSetRows` (`:890`) is a check that
+runs in `pnpm verify` (N2).
+
+### Check 4: tests that the fixes touch
+
+`pnpm tab-fixtures:check` rc 0. `pnpm exec vitest run
+packages/core/test/fork-set-fixtures.test.ts
+packages/core/test/fork-meta-repair.test.ts` gives 37 passed. `pnpm typecheck`
+rc 0. `python scripts/check_layout_gate.py --preview-skip` prints "unchanged
+since the last green run (digest a2caeb33c72f...)", so the lock matches the
+tree at `de5cef6f`. The gate run that advanced it is the fixer's (not re-run
+here).
+
+### New findings
+
+- **N1 (minor; a gap the branch did not add; needs a ticket).** An a11y failure
+  is still lost when the run crashes afterwards. The crash handler counts only
+  layout checks: `test-layout.mjs:602` reads the module-level `results`, and
+  the a11y `violations` live inside `main()`. Two paths reach it:
+  - a pre-run `Unmeasured` (the tab does not open at a later width,
+    `test-layout.mjs:497-500`) after a pre-run axe failure at an earlier
+    width;
+  - any error that is not `Unmeasured` during the fixture pass, for example a
+    CDP timeout or a page eval that throws (`test-tab-harness.mjs:310`,
+    `:350`).
+
+  In both cases the verdict is "unmeasured" with no `failed` count, and the
+  gate prints SKIPPED and lets the merge through. Dev behaved the same way, so
+  the fix did not add this. But the new comment at `:600-601`, "Checks that
+  already failed are a measured failure", covers only layout checks. Found by
+  reading the code; not run.
+
+- **N2 (minor).** `checkSetRows` (`make-mock-fixtures.ts:890-922`) does not
+  reject a set row whose slot already holds a piece of its own set. For such
+  a row, `piecesAfterSwap === before + 1` would be wrong in the game but pass
+  the check. It also does not check `futureBonuses`. The generator never
+  writes such a row today (`:687`), and the check script above found none.
+  Only a later generator edit could add one.
+- **N3 (bookkeeping).** The fix commits name no finding IDs (Check 1). The
+  table above records the map.
+- **N4 (minor; needs a ticket).** Nothing tests `check_layout_gate.py`'s
+  verdict handling or its baseline write. No test file covers the script
+  (`git ls-files` shows none). The A1 rule at `:776` and the A2 rule at
+  `:981` could be undone with no failing check. The fixer's probe shows that
+  a stub harness that prints a verdict line is enough to test both.
+
+## Summary (round 2)
+
+Round 2 was the focused check. A1 and A2 are fixed: a run in which a layout
+check failed now ends as FAIL even when a later fixture fails to load, and a
+`--fixture` run no longer advances the baseline. Tickets 707 and 708 are
+fixed and closed with `Verified by:` lines. Q1-Q7 are done.
+
+The check found no fix that is wrong. It found three minor gaps that need a
+decision from the orchestrator: N1 (an a11y failure followed by a crash still
+reads as a skip; dev did the same), N2 (the set-row check misses one
+impossible case) and N4 (no test covers the gate script). They have no
+Disposition rows here. This agent could write only this file, and a `defer`
+row needs an open ticket. Commit messages without finding IDs (N3) are
+bookkeeping, recorded above.
+
+Tickets: this branch filed 2 (707, 708) and closed 2
+(`git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`;
+the `Status: closed` grep from the skill).
+
+## Disposition (round 2)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                     |
+| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | `cf09ed47`: per-fixture catch (`test-layout.mjs:508-523`); "unmeasured" only with no failure (`:556`); crash handler keeps layout failures (`:602-610`); gate reads failures as FAIL (`check_layout_gate.py:776`) |
+| A2  | Adversarial | fixed       | `cf09ed47`: a green `--fixture` run returns 0 without writing the baseline (`check_layout_gate.py:981-990`); a full run still advances it                                                                         |
+| Q1  | Standards   | fixed       | `2ebced26`: "recorded" replaced in `smoke.mjs`, `tab_fixtures.mjs`, `test-review.mjs` (also K1, P5)                                                                                                               |
+| Q2  | Standards   | fixed       | `7572a254`, `cf09ed47`: the generator names a command; `test-layout.mjs:54-57`, `:312-315` say "hypothesis, untested" (S2)                                                                                        |
+| Q3  | Standards   | fixed       | `7572a254`: `FixtureName` union and per-fixture flags on `Spec`; two exhaustive switches remain, as the row allowed (S4)                                                                                          |
+| Q4  | Standards   | fixed       | `7572a254`: `PoolSlot` removed, `ItemSlot` imported (S5)                                                                                                                                                          |
+| Q5  | Standards   | fixed       | `d263e557`: the Python message is a different, short sentence (S6)                                                                                                                                                |
+| Q6  | Standards   | fixed       | `7572a254`, `d263e557`, `2ebced26`: the docstring and README say the compare skips without a fork, the ranged rows are bows, and "(89 rows)" is gone (S7, A3 doc line, D4)                                        |
+| Q7  | Standards   | fixed       | `cf09ed47`, `d263e557`, `2ebced26`: long lines wrapped; "carries" and "shape" replaced (S8)                                                                                                                       |
+| S2  | Standards   | fixed       | See Q2                                                                                                                                                                                                            |
+| S4  | Standards   | fixed       | See Q3                                                                                                                                                                                                            |
+| S5  | Standards   | fixed       | See Q4                                                                                                                                                                                                            |
+| S6  | Standards   | fixed       | See Q5                                                                                                                                                                                                            |
+| S7  | Standards   | fixed       | See Q6                                                                                                                                                                                                            |
+| S8  | Standards   | fixed       | See Q7                                                                                                                                                                                                            |
+| D4  | Domain      | fixed       | See Q6                                                                                                                                                                                                            |
+| P5  | Spec        | fixed       | See Q1                                                                                                                                                                                                            |
+| K1  | Spec        | fixed       | See Q1                                                                                                                                                                                                            |
+| N3  | Focused     | wontfix     | Bookkeeping: rewording six unpushed commits costs a rebase; the commit-to-finding table in "Focused check (round 2)" records the map                                                                              |
