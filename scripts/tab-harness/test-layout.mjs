@@ -43,6 +43,10 @@
 //
 // Server: test-tab-harness.mjs `serveTab` (TBC_FORK_PORT reuses a running
 // server; otherwise the fixture-enabled bundle is built into dist/ and served).
+//
+// The run prints its own wall time (and the verdict carries wallMs) because
+// the gate's time budget is checked from that line, and the sandbox lets the
+// harness run only as a bare command, with no `time` around it.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -401,6 +405,7 @@ function judgePostRun(width, m, facts) {
 }
 
 async function main() {
+  const startedAt = performance.now();
   const baseline = H.readA11yBaseline();
   const fixture = fixturePath();
   const fixtureText = fs.readFileSync(fixture, "utf8");
@@ -425,12 +430,16 @@ async function main() {
       );
   };
 
+  let preRunAt = startedAt;
+  let fixtureAt = startedAt;
+  let fixtureDoneAt = startedAt;
   const { base, stop } = await H.serveTab();
   const chrome = await H.launchChrome();
   const client = H.cdp(chrome.wsUrl, { callTimeoutMs: 120000 });
   try {
     await client.ready;
     const { send } = await H.attachPage(client);
+    preRunAt = performance.now();
     for (const width of WIDTHS) {
       await setWidth(send, width);
       await send("Page.navigate", { url: `${base}${H.PAGE_PATH}` });
@@ -443,6 +452,7 @@ async function main() {
       judgePreRun(width, await H.evaluate(send, preRunExpression(width)));
       await audit(send, "pre-run", width);
     }
+    fixtureAt = performance.now();
     await loadFixture(send, base, fixtureText);
     for (const width of WIDTHS) {
       await setWidth(send, width);
@@ -452,6 +462,7 @@ async function main() {
       // the other checks measure it.
       await judgePopover(send, width);
     }
+    fixtureDoneAt = performance.now();
   } finally {
     client.close();
     chrome.kill();
@@ -468,8 +479,22 @@ async function main() {
   const failed = results.filter((r) => !r.ok).length;
   const a11yFailed = violations.filter((v) => v.fail).length;
   const pass = failed === 0 && a11yFailed === 0;
+  const wallMs = Math.round(performance.now() - startedAt);
+  const phaseMs = {
+    setup: Math.round(preRunAt - startedAt),
+    preRun: Math.round(fixtureAt - preRunAt),
+    fixtures: Math.round(fixtureDoneAt - fixtureAt),
+  };
+  console.log(
+    `layout harness: phases setup ${(phaseMs.setup / 1000).toFixed(1)} s, ` +
+      `pre-run ${(phaseMs.preRun / 1000).toFixed(1)} s, ` +
+      `fixtures ${(phaseMs.fixtures / 1000).toFixed(1)} s`
+  );
+  console.log(`layout harness: wall time ${(wallMs / 1000).toFixed(1)} s`);
   H.verdict("measured", {
     pass,
+    wallMs,
+    phaseMs,
     failed,
     a11yFailed,
     widths: WIDTHS,
