@@ -396,3 +396,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 704 Lines in the tab's "Dropped candidates and substitutions" list read like engineering notes (owner remark after the feat/dps-spec-coverage live run) 2026-10-20
 - 705 The tab's meta-gem fix on the worn gear counts hit at full value and says nothing on a level-73 fight (pre-merge review feat/704-plain-drop-lines, D2) 2026-10-24
 - 706 The tab's dropped list still says "candidates" in its title and two labels (pre-merge review feat/704-plain-drop-lines, P4) 2026-10-24
+- 707 The made-up tab fixtures show set-bonus rows that cannot happen (pre-merge review feat/tab-checks-without-sims, D1 D2 D3) 2026-10-24
+- 708 Nothing checks the frozen tab recordings, and the recorder can write a dirty one there (pre-merge review feat/tab-checks-without-sims, A4 P1) 2026-10-24
