@@ -292,10 +292,10 @@ describe("preferred metas", () => {
       typeof missingMetaPreferenceNote
     >[0];
     expect(missingMetaPreferenceNote(unlistedSpec)).toContain(
-      "unlisted-future-spec"
+      "spec: unlisted-future-spec"
     );
     expect(missingMetaPreferenceNote(unlistedSpec)).toContain(
-      "no meta preference recorded"
+      "No meta gem is known for your spec"
     );
     expect(missingMetaPreferenceNote(unlistedSpec)).toContain(
       "without their socket bonus"

@@ -703,11 +703,12 @@ describe("rankUpgrades", () => {
 
     // Disclosed as a this-run substitution, not silently swallowed.
     const repair = ranking.substitutions.find(
-      (s) => s.field === "gems.meta-repair"
+      (s) =>
+        s.field === "Meta gem" &&
+        s.detail.startsWith("Your meta gem was not active")
     );
     expect(repair).toBeDefined();
-    expect(repair!.detail).toContain("Meta inactive");
-    expect(repair!.detail).toMatch(/\d+→\d+@item \d+/);
+    expect(repair!.detail).toMatch(/gem \d+ -> gem \d+ on item \d+/);
 
     // And it is a run substitution rather than a standing assumption — the
     // two tiers must not blur (§9 R7).
@@ -3022,7 +3023,7 @@ describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
     // Finding 5: the failure names the whole package (set + threshold), not
     // one arbitrary added piece, and no field carries a raw set id where an
     // item id would be expected.
-    expect(sub!.field).toContain("4pc");
+    expect(sub!.field).toContain("4-piece set bonus");
     expect(sub!.field).not.toBe(String(626));
   });
 
@@ -3081,10 +3082,10 @@ describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
 
     // The prose reason and the machine-readable tag must agree.
     const sub = ranking.substitutions.find((s) =>
-      s.detail.includes("gem repair could not activate its meta")
+      s.detail.includes("no gem swap could turn your meta gem on")
     );
     expect(sub).toBeDefined();
-    expect(sub!.field).toContain("4pc");
+    expect(sub!.field).toContain("4-piece set bonus");
   });
 
   it("names the whole package on failure, never a set id standing in for an item id (finding 5)", async () => {
@@ -3108,7 +3109,7 @@ describe("rankUpgrades — set-bonus prospective value (Slice B)", () => {
       expect(sub.field).not.toMatch(/^candidate 626\b/);
     }
     const packageSub = ranking.substitutions.find((s) =>
-      s.field.includes("Justicar Battlegear 4pc")
+      s.field.includes("Justicar Battlegear 4-piece set bonus")
     );
     expect(packageSub).toBeDefined();
   });
@@ -3429,12 +3430,13 @@ describe("rankUpgrades — cross-class candidate whose sim crashes (ticket 122)"
     expect(ranking.items.some((i) => i.itemId === 29381)).toBe(true);
 
     const sub = ranking.substitutions.find(
-      (s) => s.field === `candidate ${CROSS_CLASS_ID} (shoulder)`
+      (s) => s.field === "Beast-tamer's Shoulders"
     );
     expect(sub).toBeDefined();
     expect(sub!.detail).toContain(
-      "Beast-tamer's Shoulders was dropped from the ranking"
+      "A sim of this item failed, so that try was left out of the ranking."
     );
+    expect(sub!.detail).toContain(`item ${CROSS_CLASS_ID}, slot shoulder:`);
     expect(sub!.detail).toContain(GO_PANIC);
   });
 });
@@ -3512,13 +3514,13 @@ describe("rankUpgrades — candidate whose meta repair is infeasible", () => {
     expect(ranking.items.some((i) => i.itemId === 29381)).toBe(true);
 
     const sub = ranking.substitutions.find(
-      (s) => s.field === `candidate ${META_SOCKET_HEAD_ID} (head)`
+      (s) => s.field === "Furious Gizmatic Goggles"
     );
     expect(sub).toBeDefined();
     expect(sub!.detail).toContain(
-      "Furious Gizmatic Goggles was dropped from the ranking"
+      "No gem swap could turn your meta gem on with this item equipped, so that try was left out of the ranking."
     );
-    expect(sub!.detail).toContain("gem repair could not activate its meta");
+    expect(sub!.detail).toContain(`item ${META_SOCKET_HEAD_ID}, slot head:`);
   });
 });
 
@@ -3632,7 +3634,7 @@ describe("rankUpgrades per-spec meta preference", () => {
     // spec) would surface as this note appearing on a ret run.
     expect(
       ranking.substitutions.some((s) =>
-        s.detail.includes("no meta preference recorded")
+        s.detail.includes("No meta gem is known for your spec")
       )
     ).toBe(false);
   });
@@ -3709,7 +3711,7 @@ describe("rankUpgrades per-spec meta preference", () => {
     expect(row?.emptyMetaSocket).toBeFalsy();
     expect(
       ranking.substitutions.some((s) =>
-        s.detail.includes("no meta preference recorded")
+        s.detail.includes("No meta gem is known for your spec")
       )
     ).toBe(false);
   });

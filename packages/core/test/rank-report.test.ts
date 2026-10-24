@@ -3066,15 +3066,14 @@ describe("substitutions drawer (ticket 123)", () => {
   // so in this fixture "\\n" is the two characters backslash and n — exactly
   // what the artifact holds.
   const goCrashDetail =
-    "Beast-tamer's Shoulders was dropped from the ranking: the sim failed " +
-    'on this swap — sim error: {"type":"ErrorOutcomeError","message":' +
+    'sim error: {"type":"ErrorOutcomeError","message":' +
     '"interface conversion: *retribution.RetributionPaladin is not ' +
     "hunter.HunterAgent: missing method GetHunter\\nStack Trace:\\n" +
     "goroutine 54 [running]:\\nruntime/debug.Stack()\\n\\t/opt/go/stack.go:26";
 
   const withSubs = (detail: string): Ranking => ({
     ...ranking([]),
-    substitutions: [{ field: "candidate 30892 (shoulder)", detail }],
+    substitutions: [{ field: "Beast-tamer's Shoulders", detail }],
   });
 
   it("shows only the first line of a crash trace, with a pointer to the full text", () => {

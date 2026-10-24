@@ -1243,9 +1243,16 @@ const S_POOL = [
   { itemId: 30907, slot: "chest" }, // Mail of Fevered Pursuit, under it
 ];
 
-/** The `substitutions` fields that say repair could not use the hit cap. */
-const HIT_CAP_NOTE = "gems.meta-repair-hit-cap";
-const SET_VERSION_NOTE = "gems.meta-repair-set-versions";
+/**
+ * The `substitutions` notes that say repair could not use the hit cap. Both
+ * share one field, so the detail's opening words tell them apart.
+ */
+const HIT_CAP_FIELD = "Meta gem and hit rating";
+type Note = { field: string; detail: string };
+const isHitCapNote = (s: Note) =>
+  s.field === HIT_CAP_FIELD && s.detail.startsWith("If gems were swapped");
+const isSetVersionNote = (s: Note) =>
+  s.field === HIT_CAP_FIELD && s.detail.startsWith("The set-bonus sims");
 
 describe.skipIf(!forkPresent)(
   "rankUpgrades reads the baseline hit (535)",
@@ -1333,20 +1340,16 @@ describe.skipIf(!forkPresent)(
       } finally {
         warn.mockRestore();
       }
-      const notes = failed.ranking.substitutions.filter(
-        (s) => s.field === HIT_CAP_NOTE
-      );
+      const notes = failed.ranking.substitutions.filter(isHitCapNote);
       expect(notes).toHaveLength(1);
-      expect(notes[0]!.detail).toMatch(/full weight/);
+      expect(notes[0]!.detail).toMatch(/always useful/);
       expect(notes[0]!.detail).toMatch(/worker died/);
 
       const good = await runRet({
         pool: S_POOL,
         computeStats: baselineReadOnce(),
       });
-      expect(
-        good.ranking.substitutions.filter((s) => s.field === HIT_CAP_NOTE)
-      ).toEqual([]);
+      expect(good.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
     });
 
     it("535-S5: a target that is not level 73 gives no budget, and the ranking says repair used full weight", async () => {
@@ -1366,11 +1369,9 @@ describe.skipIf(!forkPresent)(
           expect(c).toEqual([`${BOLD}->${RIGID}`, `${BOLD}->${RIGID}`]);
         }
       }
-      const notes = run.ranking.substitutions.filter(
-        (s) => s.field === HIT_CAP_NOTE
-      );
+      const notes = run.ranking.substitutions.filter(isHitCapNote);
       expect(notes).toHaveLength(1);
-      expect(notes[0]!.detail).toMatch(/full weight/);
+      expect(notes[0]!.detail).toMatch(/always useful/);
       expect(notes[0]!.detail).toMatch(/level 73/);
     });
   }
@@ -1629,14 +1630,10 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     }
     expect(failed.ranking.complete).toBe(true);
     expect(failed.statsRequests).toHaveLength(2);
-    const notes = failed.ranking.substitutions.filter(
-      (s) => s.field === SET_VERSION_NOTE
-    );
+    const notes = failed.ranking.substitutions.filter(isSetVersionNote);
     expect(notes).toHaveLength(1);
     expect(notes[0]!.detail).toMatch(/worker died/);
-    expect(
-      failed.ranking.substitutions.filter((s) => s.field === HIT_CAP_NOTE)
-    ).toEqual([]);
+    expect(failed.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
     const { kept, setLess } = brVersions(failed.requests);
     expect(kept.length).toBeGreaterThan(0);
     for (const k of kept) {
