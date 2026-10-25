@@ -559,7 +559,7 @@ def pair(args: argparse.Namespace) -> int:
         if args.fork_detached:
             run(["git", "-C", str(fork), "worktree", "add", "--detach", str(fork_target), pin])
         elif args.new_fork_branch:
-            run(["git", "-C", str(fork), "worktree", "add", "--no-track", "-b", args.fork_branch,
+            run(["git", "-C", str(fork), "worktree", "add", "-b", args.fork_branch,
                  str(fork_target), pin])
         else:
             run(["git", "-C", str(fork), "worktree", "add", str(fork_target), args.fork_branch])
