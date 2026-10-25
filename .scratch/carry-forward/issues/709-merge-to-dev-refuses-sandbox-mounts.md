@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: merge attempt of feat/sandbox-safe-pair-and-rank inside the agent sandbox, 2026-10-25
 Blocks: none
@@ -49,3 +49,26 @@ sandbox in the same way (not checked):
 not have these mounts).
 
 Whether a pair under `tbc-wt/` gets the same mounts is untested.
+
+## Resolution
+
+Fixed in `tbc-gear-prio@fcb8de41`. Both clean-tree checks in
+`scripts/merge_to_dev.py` (`worktree_problem` for the branch worktree and
+its fork, and the no-branch check in `main`) now go through `has_changes`,
+which drops an untracked (`??`) entry when `os.lstat` says it is a
+character or block device. Every other untracked, modified or staged entry
+still refuses, and a tracked path that became a device still counts.
+
+Verified by: `python scripts/check_merge_to_dev.py` (rc 0, 10 checks,
+including `check_untracked_devices_are_not_work`) at `tbc-gear-prio@fcb8de41`,
+and `pnpm merge-to-dev --check-only --no-verify` from the main checkout in the
+sandbox, which no longer prints "(working tree dirty — allowed for
+--check-only)" with the 17 mounts present.
+
+Left alone: `scripts/worktree_pair.py:778` (`unsaved_work`) checks only the
+pair being removed, and `unpair` refuses to run from inside it; the existing
+pairs under `tbc-wt/` had no mounts when checked from a main-checkout
+session (`stat .bashrc` there: no such file). `scripts/tab-fixtures/record.mjs`
+checks the fork, whose `git status --porcelain` was empty in the sandbox.
+`scripts/tab-harness/test-review.mjs:428` records the fork's dirty flag in its
+output and refuses nothing.
