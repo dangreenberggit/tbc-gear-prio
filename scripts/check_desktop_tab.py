@@ -110,19 +110,21 @@ START_PRESET = {"ret": {4: ("Phase 3", "P3")}}
 # builds the ret-p4 pool at run time from the wowsims db
 # (<fork>/ui/features/upgrades/model/pool_source.ts, ADR-0038). Its size is
 # pinned per heroic five-man policy in the fork's
-# model/pool_source.cells.fixture.json ("ret-p4": exclude 1121, include 1178),
+# model/pool_source.cells.fixture.json ("ret-p4": exclude 1118, include 1175),
 # which pool_source.test.ts checks against db.json; the fixture's _comment
 # names the script that measured it. The policy is include-unticked: the pool
-# holds the 1178 items, but the Sources dialog's "Heroic dungeon" entry starts
+# holds the 1175 items, but the Sources dialog's "Heroic dungeon" entry starts
 # unticked, and the eligible count beside Run applies that exclusion
 # (hooks/useUpgradesSettings.ts effectiveExcludedSources). So a run with the
-# tab's default settings reports eligibleCount 1121 (the exclude size), and
-# 1178 is the upper bound with every source ticked. A desktop run at fork
-# f06772929 read eligibleCount 1121. If a run reads another number, explain the filter
-# responsible before changing this; a change to the pool rule or the db must
-# re-measure both.
-EXPECTED_ELIGIBLE = {"ret": {4: 1121}}
-POOL_CAP = {"ret": {4: 1178}}
+# tab's default settings reports eligibleCount 1118 (the exclude size), and
+# 1175 is the upper bound with every source ticked. A desktop run at fork
+# f06772929 read eligibleCount 1121, the exclude size before the 2026-10-25
+# wowsims catch-up (cec2a7b68) took 7 Hallow's End items out of db.json and
+# put 4 re-issued ones in; the fixture's _comment lists them. If a run reads
+# another number, explain the filter responsible before changing this; a
+# change to the pool rule or the db must re-measure both.
+EXPECTED_ELIGIBLE = {"ret": {4: 1118}}
+POOL_CAP = {"ret": {4: 1175}}
 
 # Measured full-pool row count for the --full branch of assertion (e): an
 # uncapped run lands fewer rows than eligible candidates, because screened-out

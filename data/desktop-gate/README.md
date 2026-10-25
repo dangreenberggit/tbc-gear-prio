@@ -21,12 +21,14 @@ golden is `golden-ret-p4-cap40.json`.
   Q-560-desktop-phase). The phase-5 golden was removed; phase 5 is not gated.
 - **Pinned counts.** Since ticket 505 the tab builds the ret-p4 pool at run
   time from the wowsims db (`<fork>/ui/features/upgrades/model/pool_source.ts`,
-  ADR-0038). `POOL_CAP["ret"][4]` in `scripts/check_desktop_tab.py` is 1178,
+  ADR-0038). `POOL_CAP["ret"][4]` in `scripts/check_desktop_tab.py` is 1175,
   the pool with every source ticked, and `EXPECTED_ELIGIBLE["ret"][4]` is
-  1121, the pool with the Sources dialog's "Heroic dungeon" entry unticked,
+  1118, the pool with the Sources dialog's "Heroic dungeon" entry unticked,
   which is the tab's default. Both sizes are pinned in the fork's
-  `model/pool_source.cells.fixture.json` (`"ret-p4"`: include 1178, exclude
-  1121), which `pool_source.test.ts` checks against db.json. Before ticket 505
+  `model/pool_source.cells.fixture.json` (`"ret-p4"`: include 1175, exclude
+  1118), which `pool_source.test.ts` checks against db.json. They were 1178
+  and 1121 until the 2026-10-25 wowsims catch-up to `cec2a7b68` changed the
+  Hallow's End items in db.json. Before ticket 505
   both constants were 917, the entry count of the bundled ret-p4 universe
   file, which no longer exists.
   `FULL_ROWS` has no phase-4 entry: the gate runs capped, and a capped run
