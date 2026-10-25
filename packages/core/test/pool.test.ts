@@ -426,7 +426,7 @@ describe("data/universes/ret-p2.json", () => {
     // flag stops it rewriting the tracked data/weapon-type-exclusions.json,
     // so if `git status` then shows that file changed, run
     // `git checkout -- data/weapon-type-exclusions.json`.
-    expect(entries.length).toBe(541);
+    expect(entries.length).toBe(535);
     for (const e of entries) {
       expect(e.source, `${e.itemId} ${e.name}`).toBeTruthy();
       expect(e.source.kind).toBeTruthy();

@@ -46,7 +46,9 @@ A pipe reports the **last** command's status, so append
    It fetches `upstream/master`, then prints the commits behind and the
    dry-run conflicts by type. Content conflicts only: continue. Any location
    or modify/delete conflict means upstream moved something the fork builds
-   on: stop here and plan that merge as its own piece of work.
+   on: stop here and plan that merge as its own piece of work. On git older
+   than 2.38 it stops with `exited 129` (rc 2); run §1's `read-tree` dry run
+   in its place.
 
 2. Record the unit-test result on the fork tip before merging
    (`npm --prefix <fork> run test:unit`), so step 4 has a baseline. Then merge
@@ -141,6 +143,47 @@ git -C <fork> merge-tree --write-tree --name-only HEAD <TARGET_SHA>
 without touching the working tree. Record the conflicted set before merging;
 anything conflicting outside it later is a stop-and-report.
 
+`merge-tree --write-tree` needs git 2.38 or newer (git's
+`Documentation/RelNotes/2.38.0.adoc`); older git exits 129. WSL Ubuntu's git
+was 2.34.1 on 2026-10-25 (`git --version`). On older git, run the dry run
+below instead, with `<OLD_PIN>` the fork lock's `branchedFrom` (next
+paragraph). It writes only the temporary index file, never the working tree
+or the real index:
+
+```bash
+GIT_INDEX_FILE=$TMPDIR/catchup.idx git -C <fork> read-tree -m --aggressive <OLD_PIN> HEAD <TARGET_SHA>
+GIT_INDEX_FILE=$TMPDIR/catchup.idx git -C <fork> ls-files -u | awk -F'\t' '
+  { split($1, f, " "); s[$2] = s[$2] f[3] }
+  END { k["123"] = "content"; k["12"] = "modify/delete (upstream deleted it)"
+        k["13"] = "modify/delete (fork deleted it)"; k["23"] = "add/add"
+        for (p in s) print ((s[p] in k) ? k[s[p]] : "stages " s[p]) "\t" p }' | sort
+rm $TMPDIR/catchup.idx
+git -C <fork> diff --name-status -M --diff-filter=R <OLD_PIN> <TARGET_SHA>
+```
+
+The second command prints one line per path that the merge cannot settle
+without looking inside the file: a label, a tab, then the path. `ls-files -u`
+gives each such path one row per stage (1 is `<OLD_PIN>`, 2 the fork, 3
+upstream), and the label names the set of stages present:
+
+- `content`: both sides changed the file, in different ways. A real merge may
+  still resolve it line by line.
+- `modify/delete (upstream deleted it)` or `modify/delete (fork deleted it)`:
+  one side deleted the file and the other side changed it.
+- `add/add`: both sides added the file with different content.
+- `stages <digits>`: any other set.
+
+`--aggressive` settles a path that one side deleted and the other side left
+unchanged, so such a path is not printed. If every label is `content`,
+continue. Any other label is a stop, as the routine section's step 1 says for
+`pnpm fork:upstream-status`. The dry run does not detect renames, so the last
+line lists upstream's. A file the fork added
+(`git -C <fork> diff --name-only --diff-filter=A <OLD_PIN> HEAD`) in a folder
+that upstream renamed is a location conflict: stop, as the routine section's
+step 1 says. `pnpm fork:upstream-status` (that step 1) calls
+`merge-tree --write-tree` too, so on older git it stops with rc 2 and names
+git's exit 129; use these lines in its place.
+
 `<OLD_PIN>` is the fork lock's `branchedFrom`: the last upstream commit the
 fork merged. Check that `git -C <fork> merge-base HEAD <TARGET_SHA>` prints
 it. If it prints another commit, stop and report: the lock's `branchedFrom` is
@@ -178,8 +221,6 @@ pnpm -C <pair> fetch:protos
 pnpm -C <pair> proto:generate
 pnpm -C <pair> data:items:generate
 pnpm -C <pair> sim-defaults:build
-pnpm -C <pair> universe:assemble --spec <spec> --max-phase <N> --report data/universes/<spec>-p<N>.report.json
-python <pair>/scripts/check_pool_completeness.py
 ```
 
 Run the `--unwatch-ref` line only when `watchedRefs` in
@@ -188,8 +229,12 @@ branch upstream deleted. It exits 2 when the ref is not in `watchedRefs`, and
 `--watch-ref --ref master` exits 2 while another ref is still watched
 (`scripts/sync_wowsims.py`, `do_unwatch_ref` and `do_watch_ref`).
 
-The last line runs once per `(spec, phase)` pair present under
-`<pair>/data/universes/`.
+The universes and pool listings are rebuilt in §5, not here.
+`scripts/assemble_universe.py` admits only ids listed in
+`data/equip-eligibility.json` and drops the ids listed as stub-only in
+`data/sim-implemented-effects.json`, and §5 regenerates both from the merged
+fork, so a sweep run here cannot add the items that the new upstream commit
+makes equippable.
 
 **Pin a commit sha, never a branch name** — a slash in `lock["tag"]` nests the
 `vendor/wowsimcli-<tag>-<platform>` directory. The branch belongs in
@@ -348,11 +393,15 @@ Edit `<pair>/data/wowsims-fork.lock.json`: `commit` → the new fork tip,
 git -C <fork> merge-base HEAD <TARGET_SHA>
 ```
 
-It must return `<TARGET_SHA>` itself. Then regenerate and check:
+It must return `<TARGET_SHA>` itself. Then regenerate the two inputs of the
+universe builder, rebuild the universes and pool listings on them, and check:
 
 ```bash
 pnpm -C <pair> sim-implemented-effects:generate
+(cd <fork> && node --import file://<pair>/node_modules/tsx/dist/loader.mjs --import ./ui/features/upgrades/tools/register.mjs ./ui/features/upgrades/tools/export_equip_eligibility.mts <pair>/data/equip-eligibility.json)
 pnpm -C <pair> equip-eligibility:check
+pnpm -C <pair> universe:assemble --spec <spec> --max-phase <N> --report data/universes/<spec>-p<N>.report.json
+python <pair>/scripts/check_pool_completeness.py
 pnpm -C <pair> meta-conditions:check
 pnpm -C <pair> ep-presets:check
 pnpm -C <pair> fork-lint:check
@@ -362,6 +411,27 @@ pnpm -C <pair> verify
 
 The five `require_pinned_fork` gates exit 2 between the fork commit and this lock
 edit — **red by design**, read the message rather than chasing it.
+
+The exporter line must run in the fork's folder: tsx resolves the fork's
+`@sim/...` imports from that folder's `tsconfig.json`
+(`<fork>/ui/features/upgrades/tools/README.md`). The `universe:assemble` line
+runs once per `(spec, phase)` pair present under `<pair>/data/universes/`.
+Each run also rewrites the tracked `<pair>/data/weapon-type-exclusions.json`
+for every spec (`write_exclusions_manifest` in
+`<pair>/scripts/assemble_universe.py`). For each spec,
+`excluded_weapon_types_for` lists every weapon type that some db.json item has
+and that no item in the spec's `data/equip-eligibility.json` list has, plus
+the spec's policy exclusions in `SPEC_PROFILES`. So a catch-up changes the
+file when db.json gains or loses a weapon type, or when the regenerated
+eligibility file gives a spec its first item of a weapon type or takes away
+its last one. If the file changes, say in the commit body which spec and
+weapon type moved and which db.json or eligibility change caused it.
+Reconcile the changed universes, reports and listings against the §2
+prediction as §3 says. Tests
+that pin a universe's size, such as `packages/core/test/pool.test.ts` and
+`pool-hardening.test.ts`, then fail on a membership change: re-pin them in the
+commit that rebuilds the universes, and say in that commit's body which ids
+moved and why, as their comments ask.
 
 The three artifacts are made two ways. `<pair>/data/equip-eligibility.json` is
 **generated** by the fork's exporter. `<pair>/data/gems/meta-conditions.json`

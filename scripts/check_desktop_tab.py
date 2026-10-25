@@ -110,19 +110,26 @@ START_PRESET = {"ret": {4: ("Phase 3", "P3")}}
 # builds the ret-p4 pool at run time from the wowsims db
 # (<fork>/ui/features/upgrades/model/pool_source.ts, ADR-0038). Its size is
 # pinned per heroic five-man policy in the fork's
-# model/pool_source.cells.fixture.json ("ret-p4": exclude 1121, include 1178),
+# model/pool_source.cells.fixture.json ("ret-p4": exclude 1118, include 1175),
 # which pool_source.test.ts checks against db.json; the fixture's _comment
 # names the script that measured it. The policy is include-unticked: the pool
-# holds the 1178 items, but the Sources dialog's "Heroic dungeon" entry starts
+# holds the 1175 items, but the Sources dialog's "Heroic dungeon" entry starts
 # unticked, and the eligible count beside Run applies that exclusion
-# (hooks/useUpgradesSettings.ts effectiveExcludedSources). So a run with the
-# tab's default settings reports eligibleCount 1121 (the exclude size), and
-# 1178 is the upper bound with every source ticked. A desktop run at fork
-# f06772929 read eligibleCount 1121. If a run reads another number, explain the filter
-# responsible before changing this; a change to the pool rule or the db must
-# re-measure both.
-EXPECTED_ELIGIBLE = {"ret": {4: 1121}}
-POOL_CAP = {"ret": {4: 1178}}
+# (hooks/useUpgradesSettings.ts effectiveExcludedSources), which leaves the
+# exclude pool of 1118. 1175 is the upper bound with every source ticked.
+# The count then applies the worn-gear hand rule the fixture does not: while
+# the main hand is a two-hander it leaves out the off-hand-only items and the
+# one-handed weapons, as a run does (model/settings_pool.ts eligibleCount,
+# model/engine/rank.ts). The P3 start preset wears 32332 Torch of the Damned,
+# a two-hander, so the gate reads 1118 - 30 off-hand-only - 74 one-handers =
+# 1014. The rule came in with fork commits 213fc11db (off-hand, -30) and
+# 5ec8def25 (one-handers, -74). The 1118 itself is 1121 - 7 + 4: the current
+# db.json replaced the old Hallow's End item ids (the fixture's _comment lists
+# them). If a run reads another number, explain the filter responsible before
+# changing this; a change to the pool rule, the hand rule, the start preset or
+# the db must re-measure it.
+EXPECTED_ELIGIBLE = {"ret": {4: 1014}}
+POOL_CAP = {"ret": {4: 1175}}
 
 # Measured full-pool row count for the --full branch of assertion (e): an
 # uncapped run lands fewer rows than eligible candidates, because screened-out

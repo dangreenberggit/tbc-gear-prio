@@ -14,15 +14,15 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 3609,
-  "excludedNoSource": 1111,
-  "universeTotal": 541,
+  "d7EligibleTotal": 3606,
+  "excludedNoSource": 1115,
+  "universeTotal": 535,
   "listOnlyMembership": 13,
   "perSlot": {
     "back": 36,
     "chest": 41,
     "feet": 58,
-    "finger": 64,
+    "finger": 58,
     "hands": 33,
     "head": 45,
     "legs": 40,
@@ -37,7 +37,7 @@
   "sourceRecordAdds": {
     "atlasloot": 303,
     "curated": 4,
-    "db": 2365,
+    "db": 2358,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 10
@@ -45,10 +45,10 @@
   "membershipByOrigin": {
     "arenaSource": 38,
     "curated": 14,
-    "dbPhase": 180,
+    "dbPhase": 174,
     "itemHasOrigin:atlasloot": 69,
     "itemHasOrigin:curated": 4,
-    "itemHasOrigin:db": 482,
+    "itemHasOrigin:db": 476,
     "itemHasOrigin:two-hop": 10,
     "itemHasOrigin:wowhead": 10,
     "listOnly": 13,
@@ -57,7 +57,7 @@
     "zoneMatch": 259
   },
   "exclusivePrimaryOrigin": {
-    "db": 482,
+    "db": 476,
     "atlasloot-only": 35,
     "wowhead-only": 10,
     "two-hop": 10,
@@ -67,13 +67,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 541,
-    "casterOnlyReject": 241,
+    "total": 535,
+    "casterOnlyReject": 237,
     "epFloorReject": 15,
-    "combinedReject": 256,
-    "combinedKeep": 285,
-    "casterRejectPct": 44.5,
-    "combinedRejectPct": 47.3,
+    "combinedReject": 252,
+    "combinedKeep": 283,
+    "casterRejectPct": 44.3,
+    "combinedRejectPct": 47.1,
     "applied": false
   },
   "wowheadListIds": 86,
@@ -506,10 +506,6 @@
     {
       "itemId": 33077,
       "name": "Merciless Gladiator's Libram of Justice"
-    },
-    {
-      "itemId": 33808,
-      "name": "The Horseman's Helm"
     },
     {
       "itemId": 34430,

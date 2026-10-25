@@ -4787,6 +4787,22 @@
       "curationHint": 80.28
     },
     {
+      "itemId": 281907,
+      "name": "Ring of Ghoulish Delight",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 80.0
+    },
+    {
       "itemId": 31326,
       "name": "Truestrike Ring",
       "slot": "finger",
@@ -4819,38 +4835,6 @@
         }
       ],
       "curationHint": 60.06
-    },
-    {
-      "itemId": 33959,
-      "name": "Ring of Ghoulish Delight",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 60.0
-    },
-    {
-      "itemId": 34075,
-      "name": "Ring of Ghoulish Delight",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 60.0
     },
     {
       "itemId": 33055,
@@ -4887,6 +4871,22 @@
         }
       ],
       "curationHint": 40.11
+    },
+    {
+      "itemId": 281911,
+      "name": "The Horseman's Signet Ring",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 24.86
     },
     {
       "itemId": 32527,
@@ -5037,38 +5037,6 @@
         }
       ],
       "curationHint": 18.7
-    },
-    {
-      "itemId": 33958,
-      "name": "The Horseman's Signet Ring",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 18.5
-    },
-    {
-      "itemId": 34073,
-      "name": "The Horseman's Signet Ring",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 18.5
     },
     {
       "itemId": 33497,
@@ -5486,6 +5454,22 @@
       "curationHint": 14.0
     },
     {
+      "itemId": 281915,
+      "name": "Witches Band",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 13.46
+    },
+    {
       "itemId": 30110,
       "name": "Coral Band of the Revived",
       "slot": "finger",
@@ -5888,38 +5872,6 @@
     {
       "itemId": 29373,
       "name": "Band of Halos",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 9.78
-    },
-    {
-      "itemId": 33957,
-      "name": "Witches Band",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 9.78
-    },
-    {
-      "itemId": 34074,
-      "name": "Witches Band",
       "slot": "finger",
       "armorType": null,
       "handType": null,
@@ -11696,6 +11648,32 @@
       "curationHint": 0.0
     },
     {
+      "itemId": 33507,
+      "name": "Stonebreaker's Totem",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 4,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "curated"
+        }
+      ],
+      "curationHint": 0.0,
+      "curatedSets": [
+        "p4",
+        "p5"
+      ],
+      "bisTags": [
+        "BiS"
+      ],
+      "bisSets": [
+        "p5"
+      ]
+    },
+    {
       "itemId": 34195,
       "name": "Shoulderpads of Vehemence",
       "slot": "shoulder",
@@ -17091,7 +17069,7 @@
       "name": "Mallet of the Tides",
       "slot": "weapon",
       "armorType": null,
-      "handType": 1,
+      "handType": 2,
       "quality": 4,
       "phase": 2,
       "sources": [
@@ -17384,7 +17362,7 @@
       "name": "Fool's Bane",
       "slot": "weapon",
       "armorType": null,
-      "handType": 1,
+      "handType": 2,
       "quality": 4,
       "phase": 1,
       "sources": [

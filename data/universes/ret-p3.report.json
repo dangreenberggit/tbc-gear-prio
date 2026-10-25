@@ -19,15 +19,15 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 3609,
+  "d7EligibleTotal": 3606,
   "excludedNoSource": 1042,
-  "universeTotal": 794,
+  "universeTotal": 791,
   "listOnlyMembership": 21,
   "perSlot": {
     "back": 44,
     "chest": 60,
     "feet": 83,
-    "finger": 93,
+    "finger": 90,
     "hands": 44,
     "head": 60,
     "legs": 60,
@@ -42,7 +42,7 @@
   "sourceRecordAdds": {
     "atlasloot": 303,
     "curated": 4,
-    "db": 2432,
+    "db": 2429,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 12
@@ -50,10 +50,10 @@
   "membershipByOrigin": {
     "arenaSource": 56,
     "curated": 12,
-    "dbPhase": 225,
+    "dbPhase": 222,
     "itemHasOrigin:atlasloot": 98,
     "itemHasOrigin:curated": 4,
-    "itemHasOrigin:db": 712,
+    "itemHasOrigin:db": 709,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 12,
     "listOnly": 21,
@@ -63,7 +63,7 @@
     "zoneMatch": 397
   },
   "exclusivePrimaryOrigin": {
-    "db": 712,
+    "db": 709,
     "atlasloot-only": 51,
     "wowhead-only": 12,
     "two-hop": 15,
@@ -73,13 +73,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 794,
-    "casterOnlyReject": 360,
+    "total": 791,
+    "casterOnlyReject": 358,
     "epFloorReject": 26,
-    "combinedReject": 386,
-    "combinedKeep": 408,
+    "combinedReject": 384,
+    "combinedKeep": 407,
     "casterRejectPct": 45.3,
-    "combinedRejectPct": 48.6,
+    "combinedRejectPct": 48.5,
     "applied": false
   },
   "wowheadListIds": 123,
@@ -562,10 +562,6 @@
       "name": "Vengeful Gladiator's Scaled Gauntlets"
     },
     {
-      "itemId": 33808,
-      "name": "The Horseman's Helm"
-    },
-    {
       "itemId": 33842,
       "name": "Vengeful Gladiator's Libram of Justice"
     },
@@ -632,6 +628,10 @@
     {
       "itemId": 38506,
       "name": "Don Carlos' Famous Hat"
+    },
+    {
+      "itemId": 281919,
+      "name": "The Horseman's Helm"
     }
   ],
   "bisTagProvenance": {

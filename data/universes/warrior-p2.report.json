@@ -14,15 +14,15 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 4384,
-  "excludedNoSource": 1364,
-  "universeTotal": 644,
+  "d7EligibleTotal": 4381,
+  "excludedNoSource": 1369,
+  "universeTotal": 638,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 35,
     "chest": 32,
     "feet": 58,
-    "finger": 64,
+    "finger": 58,
     "hands": 35,
     "head": 37,
     "legs": 31,
@@ -37,7 +37,7 @@
   "sourceRecordAdds": {
     "atlasloot": 378,
     "curated": 3,
-    "db": 2867,
+    "db": 2859,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 9
@@ -45,10 +45,10 @@
   "membershipByOrigin": {
     "arenaSource": 60,
     "curated": 15,
-    "dbPhase": 202,
+    "dbPhase": 196,
     "itemHasOrigin:atlasloot": 81,
     "itemHasOrigin:curated": 1,
-    "itemHasOrigin:db": 579,
+    "itemHasOrigin:db": 573,
     "itemHasOrigin:two-hop": 10,
     "itemHasOrigin:wowhead": 9,
     "recipeMatch": 18,
@@ -56,7 +56,7 @@
     "zoneMatch": 310
   },
   "exclusivePrimaryOrigin": {
-    "db": 579,
+    "db": 573,
     "atlasloot-only": 45,
     "wowhead-only": 9,
     "two-hop": 10,
@@ -66,13 +66,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 644,
-    "casterOnlyReject": 254,
+    "total": 638,
+    "casterOnlyReject": 250,
     "epFloorReject": 2,
-    "combinedReject": 256,
-    "combinedKeep": 388,
-    "casterRejectPct": 39.4,
-    "combinedRejectPct": 39.8,
+    "combinedReject": 252,
+    "combinedKeep": 386,
+    "casterRejectPct": 39.2,
+    "combinedRejectPct": 39.5,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -435,10 +435,6 @@
       "name": "Airman's Ribbon of Gallantry"
     },
     {
-      "itemId": 33808,
-      "name": "The Horseman's Helm"
-    },
-    {
       "itemId": 34430,
       "name": "Glimmering Naaru Sliver"
     },
@@ -485,10 +481,6 @@
     {
       "itemId": 35751,
       "name": "Assassin's Alchemist Stone"
-    },
-    {
-      "itemId": 38175,
-      "name": "The Horseman's Blade"
     },
     {
       "itemId": 38506,

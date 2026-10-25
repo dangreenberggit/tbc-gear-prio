@@ -20,15 +20,15 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 4384,
+  "d7EligibleTotal": 4381,
   "excludedNoSource": 1216,
-  "universeTotal": 1092,
+  "universeTotal": 1089,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 52,
     "chest": 61,
     "feet": 95,
-    "finger": 99,
+    "finger": 96,
     "hands": 56,
     "head": 60,
     "legs": 59,
@@ -43,7 +43,7 @@
   "sourceRecordAdds": {
     "atlasloot": 378,
     "curated": 3,
-    "db": 3013,
+    "db": 3010,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 11
@@ -51,10 +51,10 @@
   "membershipByOrigin": {
     "arenaSource": 98,
     "curated": 16,
-    "dbPhase": 312,
+    "dbPhase": 309,
     "itemHasOrigin:atlasloot": 134,
     "itemHasOrigin:curated": 2,
-    "itemHasOrigin:db": 1003,
+    "itemHasOrigin:db": 1000,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 11,
     "recipeMatch": 34,
@@ -63,7 +63,7 @@
     "zoneMatch": 559
   },
   "exclusivePrimaryOrigin": {
-    "db": 1003,
+    "db": 1000,
     "other": 2,
     "atlasloot-only": 61,
     "wowhead-only": 11,
@@ -73,11 +73,11 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 1092,
-    "casterOnlyReject": 457,
+    "total": 1089,
+    "casterOnlyReject": 455,
     "epFloorReject": 2,
-    "combinedReject": 459,
-    "combinedKeep": 633,
+    "combinedReject": 457,
+    "combinedKeep": 632,
     "casterRejectPct": 41.8,
     "combinedRejectPct": 42.0,
     "applied": false
@@ -442,10 +442,6 @@
       "name": "Airman's Ribbon of Gallantry"
     },
     {
-      "itemId": 33808,
-      "name": "The Horseman's Helm"
-    },
-    {
       "itemId": 34430,
       "name": "Glimmering Naaru Sliver"
     },
@@ -494,12 +490,16 @@
       "name": "Assassin's Alchemist Stone"
     },
     {
-      "itemId": 38175,
-      "name": "The Horseman's Blade"
-    },
-    {
       "itemId": 38506,
       "name": "Don Carlos' Famous Hat"
+    },
+    {
+      "itemId": 281919,
+      "name": "The Horseman's Helm"
+    },
+    {
+      "itemId": 281923,
+      "name": "The Horseman's Blade"
     }
   ],
   "bisTagProvenance": {

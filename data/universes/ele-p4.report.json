@@ -20,20 +20,20 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 3635,
+  "d7EligibleTotal": 3632,
   "excludedNoSource": 1036,
-  "universeTotal": 912,
+  "universeTotal": 910,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 51,
     "chest": 59,
     "feet": 72,
-    "finger": 99,
+    "finger": 96,
     "hands": 41,
     "head": 57,
     "legs": 58,
     "neck": 55,
-    "ranged": 2,
+    "ranged": 3,
     "shoulder": 56,
     "trinket": 48,
     "waist": 68,
@@ -43,7 +43,7 @@
   "sourceRecordAdds": {
     "atlasloot": 305,
     "curated": 6,
-    "db": 2465,
+    "db": 2462,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 8
@@ -51,10 +51,10 @@
   "membershipByOrigin": {
     "arenaSource": 84,
     "curated": 13,
-    "dbPhase": 293,
+    "dbPhase": 291,
     "itemHasOrigin:atlasloot": 115,
     "itemHasOrigin:curated": 6,
-    "itemHasOrigin:db": 829,
+    "itemHasOrigin:db": 827,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 8,
     "recipeMatch": 24,
@@ -63,7 +63,7 @@
     "zoneMatch": 438
   },
   "exclusivePrimaryOrigin": {
-    "db": 829,
+    "db": 827,
     "atlasloot-only": 54,
     "other": 6,
     "wowhead-only": 8,
@@ -73,13 +73,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 912,
-    "casterOnlyReject": 476,
+    "total": 910,
+    "casterOnlyReject": 474,
     "epFloorReject": 26,
-    "combinedReject": 502,
+    "combinedReject": 500,
     "combinedKeep": 410,
-    "casterRejectPct": 52.2,
-    "combinedRejectPct": 55.0,
+    "casterRejectPct": 52.1,
+    "combinedRejectPct": 54.9,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -484,10 +484,6 @@
     {
       "itemId": 33505,
       "name": "Totem of Living Water"
-    },
-    {
-      "itemId": 33507,
-      "name": "Stonebreaker's Totem"
     },
     {
       "itemId": 33707,

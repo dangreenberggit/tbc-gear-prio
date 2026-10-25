@@ -19,15 +19,15 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 2978,
+  "d7EligibleTotal": 2975,
   "excludedNoSource": 895,
-  "universeTotal": 664,
+  "universeTotal": 661,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 43,
     "chest": 26,
     "feet": 50,
-    "finger": 93,
+    "finger": 90,
     "hands": 21,
     "head": 26,
     "legs": 27,
@@ -42,7 +42,7 @@
   "sourceRecordAdds": {
     "atlasloot": 267,
     "curated": 0,
-    "db": 1962,
+    "db": 1959,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 9
@@ -50,9 +50,9 @@
   "membershipByOrigin": {
     "arenaSource": 69,
     "curated": 10,
-    "dbPhase": 194,
+    "dbPhase": 191,
     "itemHasOrigin:atlasloot": 90,
-    "itemHasOrigin:db": 588,
+    "itemHasOrigin:db": 585,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 9,
     "recipeMatch": 18,
@@ -61,7 +61,7 @@
     "zoneMatch": 313
   },
   "exclusivePrimaryOrigin": {
-    "db": 588,
+    "db": 585,
     "atlasloot-only": 52,
     "wowhead-only": 9,
     "two-hop": 15
@@ -70,13 +70,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 664,
-    "casterOnlyReject": 290,
+    "total": 661,
+    "casterOnlyReject": 288,
     "epFloorReject": 6,
-    "combinedReject": 296,
-    "combinedKeep": 368,
-    "casterRejectPct": 43.7,
-    "combinedRejectPct": 44.6,
+    "combinedReject": 294,
+    "combinedKeep": 367,
+    "casterRejectPct": 43.6,
+    "combinedRejectPct": 44.5,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -409,12 +409,12 @@
       "name": "Assassin's Alchemist Stone"
     },
     {
-      "itemId": 38175,
-      "name": "The Horseman's Blade"
-    },
-    {
       "itemId": 38506,
       "name": "Don Carlos' Famous Hat"
+    },
+    {
+      "itemId": 281923,
+      "name": "The Horseman's Blade"
     }
   ],
   "bisTagProvenance": {
