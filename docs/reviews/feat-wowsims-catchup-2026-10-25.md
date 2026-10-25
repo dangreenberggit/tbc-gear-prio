@@ -167,3 +167,92 @@ explained, since the ret-p4 pool shrank by 3.
 | ID  | Where                                  | Row                                                                                                                                                                                                                                                                                                                                               |
 | --- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | CQ1 | `scripts/check_desktop_tab.py:119-123` | The new sentence gives the database's change as "7 Hallow's End items out of db.json and 4 re-issued ones in" (D2: those are ret's pool counts, db.json lost 8 and gained 5) and adds dated change history to a code comment (S3). Rewrite it to say only why the recorded desktop reading (1121) differs from the constant, with correct counts. |
+
+## Focused check (round 2)
+
+Main range `e7e355ae..53b83746`; fork range empty (fork HEAD still
+`119b9f676`). Conditions 1 to 3 held before dispatch: every commit is a fix
+naming its IDs (`954d5adb` P1/P3, `cabcacc2` A2/P4), the code-quality pass
+(`4d8f3f2b` CQ1), or a review-file change (`f40ae2df`, `53b83746`); the only
+non-doc change is a comment in `scripts/check_desktop_tab.py`; the fork is
+unchanged. One fresh `general-task` agent on Opus (effort high) ran the four
+checks.
+
+1. Conditions hold: **pass**.
+2. Each fix changes only what its finding asks: **pass**. `954d5adb` also
+   documents the replacement for `pnpm fork:upstream-status` (P2) without
+   naming P2; the script is unchanged.
+3. New tests: none; every fix is a doc or a comment.
+4. Tests the fixes touch: **pass**. `desktop-gate:unit:check` rc 0 (7
+   cases). The doc commands give the stated outputs: the `read-tree` dry run
+   (rc 0, 0 unmerged, 0 renames), the exporter line (output `cmp`-identical
+   to `data/equip-eligibility.json`), every command in
+   `docs/fork-upstream-touchpoints.md` at `119b9f676` / `cec2a7b68`, and the
+   counts in the new `check_desktop_tab.py` comment (db.json −8/+5; ret
+   −7/+4; 1121 − 7 + 4 = 1118).
+
+The check reported two findings in lines the P1 and P3 fix wrote:
+
+- **F1 (fix for P1).** `docs/agents/upstream-catch-up.md:160-161` says the
+  `read-tree` dry run lists paths "changed differently, or that one side
+  deleted and the other changed". It also lists paths that one side deleted
+  and the other left unchanged (a scratch repo: upstream deletes `gone`, the
+  fork leaves it; `ls-files -u` lists `gone`). And `cut -f2` drops the stage
+  column, so the output cannot tell a content conflict from a modify/delete
+  conflict, which is the difference the routine section's step 1 stop rule
+  reads. The check suggested `--aggressive` and keeping the stage column.
+- **F2 (fix for P3).** `docs/agents/upstream-catch-up.md:401-404` says
+  `assemble_universe.py` rewrites `data/weapon-type-exclusions.json` from
+  the builder's spec profiles, "so a catch-up leaves that file unchanged".
+  `excluded_weapon_types_for` (`scripts/assemble_universe.py`, near line 736)
+  also derives it from db.json weapon types and `equip_eligible_ids`, both of
+  which move on a catch-up. Confirmed by the agent that handles this review, which also wrote the fix
+  (`grep -n 'def excluded_weapon_types_for' -A30 scripts/assemble_universe.py`).
+
+Both are wrong statements in a doc an agent follows, so they are not
+bookkeeping. Under the skill's "Round limit" the review stops here: no
+round 3, no Disposition table, no `merge-to-dev --check-only`.
+
+## Summary
+
+Round 1 found no correctness defect, no test theatre and no domain
+contradiction. Every re-pinned number (core tests 535 and 791, the fork's 44
+fixture cells, the desktop gate's 1118 and 1175) follows from upstream's
+db.json change (adversarial axis). No fork commit after the merge edits an
+existing wowsims file, and the merge commit holds no hand edits.
+
+The review stopped at round 2 on F1 and F2 above. Likely cause: the agent
+that wrote the P1 text checked the `read-tree` dry run only on this merge,
+which has no deletes and no overlap, and wrote the P3 sentence from
+`assemble_universe.py`'s docstring without reading `excluded_weapon_types_for`
+(both measured by that agent: the first from its own commands, the second by
+the grep above).
+
+Outcomes proposed for the round 1 findings, not yet written as Disposition
+rows because the review stopped:
+
+- A2, P4, D2, S3, CQ1: fixed (`cabcacc2`, `4d8f3f2b`), passed round 2.
+- P1, P3: fixed in `954d5adb`, but round 2 found F1 and F2 in that fix.
+- A1, S2 (red commits `1a368e3e`, `d0cdbc3b`) and S1 (`74a712a8` does not say
+  which route moved the numbers): wontfix. Only a history rewrite fixes
+  them; the tip is green. For the record, the route: ret-p2 541 → 535 is the
+  six old Hallow's End rings (33957-33959, 34073-34075) leaving db.json at
+  the engine pin move; ret-p3 794 → 791 is those six out and the three
+  re-issued rings (281907, 281911, 281915) in through db-phase admission at
+  phase 3, after the eligibility regen. P3's doc fix stops the next catch-up
+  repeating the order.
+- D1 (21 weapons one-hand at phase 3): wontfix. The tab takes item facts from
+  wowsims (ADR-0029, ADR-0038); the hand type is upstream's data.
+- P2 (`fork_upstream_status.py` fails on git older than 2.38): wontfix. The
+  procedure doc now gives the replacement commands, and the script does not
+  touch what the tab shows, the pool or gate correctness.
+
+Tickets filed: 0. Tickets closed: 0.
+
+Not counted against the branch: the desktop gate and the layout gate could
+not run in the agent sandbox. Before `dev` receives the re-pin, the procedure
+(§5) needs the desktop gate hand-run with its lines (a)-(f) and (h) pasted
+into a commit body or `desktop-gate.md`; a red gate blocks the re-pin, and
+(h) may need `--update-golden` with the diff explained, since ret's p4 pool
+shrank by 3. The layout gate is not required by `merge-to-dev` when tab
+source is unchanged.
