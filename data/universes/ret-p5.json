@@ -5682,6 +5682,22 @@
       "curationHint": 35.24
     },
     {
+      "itemId": 281907,
+      "name": "Ring of Ghoulish Delight",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 33.6
+    },
+    {
       "itemId": 31326,
       "name": "Truestrike Ring",
       "slot": "finger",
@@ -5714,6 +5730,22 @@
         }
       ],
       "curationHint": 21.0
+    },
+    {
+      "itemId": 281911,
+      "name": "The Horseman's Signet Ring",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 7.52
     },
     {
       "itemId": 32247,
@@ -6468,6 +6500,22 @@
           "kind": "raid",
           "zone": "Sunwell Plateau",
           "boss": "M'uru",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 3.52
+    },
+    {
+      "itemId": 281915,
+      "name": "Witches Band",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],

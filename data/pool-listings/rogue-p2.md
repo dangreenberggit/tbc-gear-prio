@@ -12,7 +12,7 @@ Wowsims DB: `wowsims/tbc-new` commit `cec2a7b687f985c7dcbb94b3620e9cf7885f0323`,
 
 | Rule | Wearable epics |
 | --- | --- |
-| P-stub | 63 |
+| P-stub | 64 |
 | P-season-closed | 54 |
 | E-arena | 42 |
 | E-token | 10 |
@@ -22,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `cec2a7b687f985c7dcbb94b3620e9cf7885f0323`,
 | E-rep | 37 |
 | E-recipe | 10 |
 | E-sourceless | 153 |
-| P-later-phase | 436 |
+| P-later-phase | 439 |
 | P-vanilla | 201 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 203 |
@@ -31,11 +31,11 @@ Wowsims DB: `wowsims/tbc-new` commit `cec2a7b687f985c7dcbb94b3620e9cf7885f0323`,
 | P-crafted-no-raid-pattern | 89 |
 | uncovered | 0 |
 | present in the list | 448 |
-| absent from the list | 1155 |
+| absent from the list | 1159 |
 
 ## Absent, by policy
 
-### P-stub (63)
+### P-stub (64)
 
 the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its figure would be wrong.
 
@@ -102,6 +102,7 @@ the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its f
 - 35749 Sorcerer's Alchemist Stone
 - 35750 Redeemer's Alchemist Stone
 - 35751 Assassin's Alchemist Stone
+- 281923 The Horseman's Blade
 
 ### P-season-closed (54)
 
@@ -162,7 +163,7 @@ arena gear of a season that opens after this phase (owner, 2026-10-16: only whil
 - 35102 Brutal Gladiator's Spellblade
 - 35108 Brutal Gladiator's War Edge
 
-### P-later-phase (436)
+### P-later-phase (439)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -602,6 +603,9 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 281893 Balebrew Charm
 - 281895 Brightbrew Charm
 - 281903 Direbrew's Shanker
+- 281907 Ring of Ghoulish Delight
+- 281911 The Horseman's Signet Ring
+- 281915 Witches Band
 
 ### P-vanilla (201)
 

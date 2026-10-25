@@ -14,8 +14,8 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 3672,
-  "excludedNoSource": 1193,
+  "d7EligibleTotal": 3675,
+  "excludedNoSource": 1196,
   "universeTotal": 562,
   "listOnlyMembership": 0,
   "perSlot": {
@@ -474,10 +474,6 @@
     {
       "itemId": 33078,
       "name": "Merciless Gladiator's Totem of the Third Wind"
-    },
-    {
-      "itemId": 33507,
-      "name": "Stonebreaker's Totem"
     },
     {
       "itemId": 33939,

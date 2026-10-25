@@ -2992,6 +2992,22 @@
       "curationHint": 62.51
     },
     {
+      "itemId": 281911,
+      "name": "The Horseman's Signet Ring",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 60.57
+    },
+    {
       "itemId": 29302,
       "name": "Band of Eternity",
       "slot": "finger",
@@ -3290,6 +3306,22 @@
         }
       ],
       "curationHint": 40.13
+    },
+    {
+      "itemId": 281915,
+      "name": "Witches Band",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 40.1
     },
     {
       "itemId": 31339,
@@ -4501,6 +4533,22 @@
     {
       "itemId": 33919,
       "name": "Vindicator's Band of Triumph",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 281907,
+      "name": "Ring of Ghoulish Delight",
       "slot": "finger",
       "armorType": null,
       "handType": null,

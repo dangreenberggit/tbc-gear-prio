@@ -22,15 +22,15 @@
     1012,
     1077
   ],
-  "d7EligibleTotal": 2248,
+  "d7EligibleTotal": 2252,
   "excludedNoSource": 604,
-  "universeTotal": 710,
+  "universeTotal": 713,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 55,
     "chest": 35,
     "feet": 37,
-    "finger": 112,
+    "finger": 115,
     "hands": 20,
     "head": 30,
     "legs": 33,
@@ -45,7 +45,7 @@
   "sourceRecordAdds": {
     "atlasloot": 215,
     "curated": 6,
-    "db": 1535,
+    "db": 1539,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 5
@@ -53,11 +53,11 @@
   "membershipByOrigin": {
     "arenaSource": 71,
     "curated": 22,
-    "dbPhase": 211,
+    "dbPhase": 214,
     "heroicMatch": 9,
     "itemHasOrigin:atlasloot": 92,
     "itemHasOrigin:curated": 6,
-    "itemHasOrigin:db": 624,
+    "itemHasOrigin:db": 627,
     "itemHasOrigin:sunmote": 5,
     "itemHasOrigin:two-hop": 18,
     "itemHasOrigin:wowhead": 5,
@@ -67,7 +67,7 @@
     "zoneMatch": 322
   },
   "exclusivePrimaryOrigin": {
-    "db": 624,
+    "db": 627,
     "atlasloot-only": 52,
     "wowhead-only": 5,
     "other": 11,
@@ -77,11 +77,11 @@
   "tierPiecesPresent": 18,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 710,
-    "casterOnlyReject": 448,
+    "total": 713,
+    "casterOnlyReject": 450,
     "epFloorReject": 8,
-    "combinedReject": 456,
-    "combinedKeep": 254,
+    "combinedReject": 458,
+    "combinedKeep": 255,
     "casterRejectPct": 63.1,
     "combinedRejectPct": 64.2,
     "applied": false
@@ -420,6 +420,10 @@
     {
       "itemId": 38506,
       "name": "Don Carlos' Famous Hat"
+    },
+    {
+      "itemId": 281923,
+      "name": "The Horseman's Blade"
     }
   ],
   "bisTagProvenance": {

@@ -405,7 +405,7 @@ describe("data/universes/ret-p3.json hardening", () => {
     // flag stops it rewriting the tracked data/weapon-type-exclusions.json,
     // so if `git status` then shows that file changed, run
     // `git checkout -- data/weapon-type-exclusions.json`.
-    expect(universeP3.length).toBe(794);
+    expect(universeP3.length).toBe(791);
     // Non-emptiness is not enough: poolEntryFromUniverse takes sources[0] and
     // callers switch on `kind`, so a row whose source cannot be discriminated
     // is as unusable as one with no source. assemble_universe.py fails the

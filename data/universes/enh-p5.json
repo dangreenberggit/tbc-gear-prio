@@ -4787,6 +4787,22 @@
       "curationHint": 80.28
     },
     {
+      "itemId": 281907,
+      "name": "Ring of Ghoulish Delight",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 80.0
+    },
+    {
       "itemId": 31326,
       "name": "Truestrike Ring",
       "slot": "finger",
@@ -4855,6 +4871,22 @@
         }
       ],
       "curationHint": 40.11
+    },
+    {
+      "itemId": 281911,
+      "name": "The Horseman's Signet Ring",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 24.86
     },
     {
       "itemId": 32527,
@@ -5420,6 +5452,22 @@
         }
       ],
       "curationHint": 14.0
+    },
+    {
+      "itemId": 281915,
+      "name": "Witches Band",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 13.46
     },
     {
       "itemId": 30110,
@@ -11598,6 +11646,32 @@
         }
       ],
       "curationHint": 0.0
+    },
+    {
+      "itemId": 33507,
+      "name": "Stonebreaker's Totem",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 4,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "curated"
+        }
+      ],
+      "curationHint": 0.0,
+      "curatedSets": [
+        "p4",
+        "p5"
+      ],
+      "bisTags": [
+        "BiS"
+      ],
+      "bisSets": [
+        "p5"
+      ]
     },
     {
       "itemId": 34195,

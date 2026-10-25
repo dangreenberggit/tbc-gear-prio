@@ -12,7 +12,7 @@ Wowsims DB: `wowsims/tbc-new` commit `cec2a7b687f985c7dcbb94b3620e9cf7885f0323`,
 
 | Rule | Wearable epics |
 | --- | --- |
-| P-stub | 107 |
+| P-stub | 106 |
 | P-season-closed | 62 |
 | E-arena | 54 |
 | E-token | 10 |
@@ -22,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `cec2a7b687f985c7dcbb94b3620e9cf7885f0323`,
 | E-rep | 32 |
 | E-recipe | 14 |
 | E-sourceless | 193 |
-| P-later-phase | 540 |
+| P-later-phase | 544 |
 | P-vanilla | 222 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 232 |
@@ -31,11 +31,11 @@ Wowsims DB: `wowsims/tbc-new` commit `cec2a7b687f985c7dcbb94b3620e9cf7885f0323`,
 | P-crafted-no-raid-pattern | 119 |
 | uncovered | 0 |
 | present in the list | 544 |
-| absent from the list | 1407 |
+| absent from the list | 1410 |
 
 ## Absent, by policy
 
-### P-stub (107)
+### P-stub (106)
 
 the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its figure would be wrong.
 
@@ -118,7 +118,6 @@ the sim implements only a TODO stub for its effect (`stubOnlyItemIds`), so its f
 - 32771 Airman's Ribbon of Gallantry
 - 33078 Merciless Gladiator's Totem of the Third Wind
 - 33505 Totem of Living Water
-- 33507 Stonebreaker's Totem
 - 33707 Vengeful Gladiator's Linked Gauntlets
 - 33712 Vengeful Gladiator's Mail Gauntlets
 - 33739 Vengeful Gladiator's Ringmail Gauntlets
@@ -214,7 +213,7 @@ arena gear of a season that opens after this phase (owner, 2026-10-16: only whil
 - 37739 Brutal Gladiator's Blade of Alacrity
 - 37740 Brutal Gladiator's Swift Judgement
 
-### P-later-phase (540)
+### P-later-phase (544)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -460,6 +459,7 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 33499 Signet of the Last Defender
 - 33500 Signet of Eternal Life
 - 33506 Skycall Totem
+- 33507 Stonebreaker's Totem
 - 33527 Shifting Camouflage Pants
 - 33528 Gauntlets of Sniping
 - 33529 Steadying Bracers
@@ -758,6 +758,9 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 281893 Balebrew Charm
 - 281895 Brightbrew Charm
 - 281903 Direbrew's Shanker
+- 281907 Ring of Ghoulish Delight
+- 281911 The Horseman's Signet Ring
+- 281915 Witches Band
 
 ### P-vanilla (222)
 

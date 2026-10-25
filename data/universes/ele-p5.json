@@ -4478,6 +4478,22 @@
       ]
     },
     {
+      "itemId": 281911,
+      "name": "The Horseman's Signet Ring",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 52.75
+    },
+    {
       "itemId": 29302,
       "name": "Band of Eternity",
       "slot": "finger",
@@ -4863,6 +4879,22 @@
         }
       ],
       "curationHint": 30.5
+    },
+    {
+      "itemId": 281915,
+      "name": "Witches Band",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 29.25
     },
     {
       "itemId": 30110,
@@ -6180,6 +6212,22 @@
           "kind": "raid",
           "zone": "Sunwell Plateau",
           "boss": "M'uru",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 281907,
+      "name": "Ring of Ghoulish Delight",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],
@@ -11487,6 +11535,22 @@
     {
       "itemId": 33506,
       "name": "Skycall Totem",
+      "slot": "ranged",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 4,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 33507,
+      "name": "Stonebreaker's Totem",
       "slot": "ranged",
       "armorType": null,
       "handType": null,

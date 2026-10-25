@@ -2673,6 +2673,22 @@
       "curationHint": 58.78
     },
     {
+      "itemId": 281911,
+      "name": "The Horseman's Signet Ring",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 55.74
+    },
+    {
       "itemId": 30109,
       "name": "Ring of Endless Coils",
       "slot": "finger",
@@ -3003,6 +3019,22 @@
         }
       ],
       "curationHint": 38.12
+    },
+    {
+      "itemId": 281915,
+      "name": "Witches Band",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 35.63
     },
     {
       "itemId": 29308,
@@ -4416,6 +4448,22 @@
           "kind": "raid",
           "zone": "Sunwell Plateau",
           "boss": "M'uru",
+          "origin": "db"
+        }
+      ],
+      "curationHint": 0.0
+    },
+    {
+      "itemId": 281907,
+      "name": "Ring of Ghoulish Delight",
+      "slot": "finger",
+      "armorType": null,
+      "handType": null,
+      "quality": 4,
+      "phase": 3,
+      "sources": [
+        {
+          "kind": "unknown",
           "origin": "db"
         }
       ],

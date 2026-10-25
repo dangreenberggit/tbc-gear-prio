@@ -20,15 +20,15 @@
     990,
     1012
   ],
-  "d7EligibleTotal": 3602,
+  "d7EligibleTotal": 3606,
   "excludedNoSource": 972,
-  "universeTotal": 911,
+  "universeTotal": 914,
   "listOnlyMembership": 23,
   "perSlot": {
     "back": 53,
     "chest": 73,
     "feet": 95,
-    "finger": 93,
+    "finger": 96,
     "hands": 54,
     "head": 71,
     "legs": 71,
@@ -43,7 +43,7 @@
   "sourceRecordAdds": {
     "atlasloot": 303,
     "curated": 4,
-    "db": 2493,
+    "db": 2497,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 14
@@ -51,10 +51,10 @@
   "membershipByOrigin": {
     "arenaSource": 56,
     "curated": 12,
-    "dbPhase": 286,
+    "dbPhase": 289,
     "itemHasOrigin:atlasloot": 112,
     "itemHasOrigin:curated": 4,
-    "itemHasOrigin:db": 827,
+    "itemHasOrigin:db": 830,
     "itemHasOrigin:two-hop": 15,
     "itemHasOrigin:wowhead": 14,
     "listOnly": 23,
@@ -64,7 +64,7 @@
     "zoneMatch": 451
   },
   "exclusivePrimaryOrigin": {
-    "db": 827,
+    "db": 830,
     "atlasloot-only": 51,
     "wowhead-only": 14,
     "two-hop": 15,
@@ -74,13 +74,13 @@
   "tierPiecesPresent": 15,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 911,
-    "casterOnlyReject": 424,
+    "total": 914,
+    "casterOnlyReject": 426,
     "epFloorReject": 30,
-    "combinedReject": 454,
-    "combinedKeep": 457,
-    "casterRejectPct": 46.5,
-    "combinedRejectPct": 49.8,
+    "combinedReject": 456,
+    "combinedKeep": 458,
+    "casterRejectPct": 46.6,
+    "combinedRejectPct": 49.9,
     "applied": false
   },
   "wowheadListIds": 130,
@@ -633,6 +633,10 @@
     {
       "itemId": 38506,
       "name": "Don Carlos' Famous Hat"
+    },
+    {
+      "itemId": 281919,
+      "name": "The Horseman's Helm"
     }
   ],
   "bisTagProvenance": {

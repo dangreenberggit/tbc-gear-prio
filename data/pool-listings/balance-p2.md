@@ -22,7 +22,7 @@ Wowsims DB: `wowsims/tbc-new` commit `cec2a7b687f985c7dcbb94b3620e9cf7885f0323`,
 | E-rep | 31 |
 | E-recipe | 10 |
 | E-sourceless | 177 |
-| P-later-phase | 433 |
+| P-later-phase | 436 |
 | P-vanilla | 200 |
 | P-rep-below-floor | 0 |
 | P-vanilla-zone | 195 |
@@ -31,7 +31,7 @@ Wowsims DB: `wowsims/tbc-new` commit `cec2a7b687f985c7dcbb94b3620e9cf7885f0323`,
 | P-crafted-no-raid-pattern | 84 |
 | uncovered | 0 |
 | present in the list | 471 |
-| absent from the list | 1156 |
+| absent from the list | 1159 |
 
 ## Absent, by policy
 
@@ -192,7 +192,7 @@ arena gear of a season that opens after this phase (owner, 2026-10-16: only whil
 - 37739 Brutal Gladiator's Blade of Alacrity
 - 37740 Brutal Gladiator's Swift Judgement
 
-### P-later-phase (432)
+### P-later-phase (435)
 
 every route it has (raid, faction, recipe, or its own phase) opens after this phase.
 
@@ -628,6 +628,9 @@ every route it has (raid, faction, recipe, or its own phase) opens after this ph
 - 281893 Balebrew Charm
 - 281895 Brightbrew Charm
 - 281903 Direbrew's Shanker
+- 281907 Ring of Ghoulish Delight
+- 281911 The Horseman's Signet Ring
+- 281915 Witches Band
 
 ### P-vanilla (200)
 
