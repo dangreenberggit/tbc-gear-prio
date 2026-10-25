@@ -398,3 +398,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 706 The tab's dropped list still says "candidates" in its title and two labels (pre-merge review feat/704-plain-drop-lines, P4) 2026-10-24
 - 707 The made-up tab fixtures show set-bonus rows that cannot happen (pre-merge review feat/tab-checks-without-sims, D1 D2 D3) 2026-10-24
 - 708 Nothing checks the frozen tab recordings, and the recorder can write a dirty one there (pre-merge review feat/tab-checks-without-sims, A4 P1) 2026-10-24
+- 709 `pnpm merge-to-dev` cannot run inside the agent sandbox, which mounts /dev/null over 17 repo paths (merge attempt of feat/sandbox-safe-pair-and-rank) 2026-10-25
