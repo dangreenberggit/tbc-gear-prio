@@ -1,208 +1,132 @@
 #!/usr/bin/env python3
-"""Check the Upgrades tab's recorded fixtures (ticket 504) and report staleness.
+"""Check the Upgrades tab's made-up fixtures and its frozen recordings.
 
-A fixture under `data/tab-fixtures/` is a finished `Ranking` recorded from a
-real tab run at one fork commit (`forkSha`). The layout gate and
-`pnpm tab-review` render it instead of running the sim. See
-`data/tab-fixtures/README.md` for the schema and the re-record commands.
+A fixture under `data/tab-fixtures/` is a small made-up `Ranking` written by
+`packages/core/test/tab-fixtures/make-mock-fixtures.ts`
+(`pnpm tab-fixtures:mock`), one per UI difference between specs. The layout
+gate, `pnpm tab-review` and `pnpm tab-fixtures:smoke` render these files, so
+no page check needs a sim recording (stage tab-checks-without-sims).
 
-Two kinds of problem, treated differently:
+A recording under `packages/core/test/fixtures/tab-recordings/` is a real run,
+frozen as engine test data. It must not be marked `madeUp`, and must name a
+committed fork tree (`forkDirty: false`, a 40-hex `forkSha`), so a recording
+of uncommitted fork code cannot become test data (ticket 708). Whether that
+SHA is a commit in the fork is not checked: CI has no fork clone.
 
-  - A fixture that cannot be read -- a schema error, or a `forkSha` the fork
-    clone does not know -- exits 1. Nothing can say what that file shows.
-  - A fixture recorded before a change to the code that produces a Ranking
-    prints a warning and exits 0. The owner chose warn-only: a stale figure
-    in a layout fixture still lays out, and a blocking rule would force a
-    ~5-minute re-record per fixture on every engine edit.
+This checks the schema only, and needs neither git nor the fork clone.
+`pnpm tab-fixtures:check` first runs the generator's `--check`, which compares
+each made-up file with what the generator writes; without the fork clone that
+compare is skipped, so CI checks the schema only.
 
-The inputs are the fork paths that can change a Ranking, under
-`ui/features/upgrades/`: the engine (`model/engine/**`, except `view.ts`,
-which only shapes a recorded Ranking for display, and the engine's own
-test `fixtures/`), the adapters, `model/data/` (`data.ts` and the bundled
-copies), `model/pool_source.ts` (it builds the candidate pool from the
-wowsims db, ticket 505), `utils/item_sources.ts` (it writes each candidate's
-`sources`, which a Ranking row carries) and `utils/item_source.ts` (its
-`overrunNpcKey` names a source's boss), `run.ts` (it builds the engine's
-input, as the old tab's `run()` did) and `settings_pool.ts` (its
-`effectivePool` builds the pool `run.ts` hands the engine).
-
-Since ticket 505 the pool is built at run time from upstream wowsims files,
-so these are inputs too (pre-merge review A3): the item database
-(`assets/database/`, and `ui/sim/proto/database.ts`, which loads it and adds
-the leftover db when worn gear needs it); each spec's `spec.ts` (which
-presets the page offers), `presets.ts` and `gear_sets/` (the preset items
-that decide BiS tags and phase), with `ui/app/preset_utils.ts` and
-`ui/sim/constants/other.ts` (a preset's phase); `missing_effects_auto_gen.ts`
-(stub-only effects); `ui/sim/proto/items.ts` (`canEquipItem`, `isPVPItem`)
-with the class and spec definitions under `ui/sim/player/` that
-`canEquipItem` reads; and `ui/sim/proto/names.ts` (profession and reputation
-names in sources). What this cannot see -- the Go sim / WASM and the proto
-sources -- is named in the README.
-
-Skips with a note (exit 0) when the fork clone is absent, like the other
-fork-derived checks: `vendor/` is gitignored, so CI and fresh clones have
-none.
+Exits 1 when a file fails the schema, when a made-up file is not marked
+`madeUp: true` or a recording is, or when `data/tab-fixtures/` holds no
+fixture.
 
 Usage: python scripts/check_tab_fixtures.py
-Run by `pnpm verify` as `pnpm tab-fixtures:check`.
+Run by `pnpm verify` as part of `pnpm tab-fixtures:check`.
 """
 
 from __future__ import annotations
 
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-FORK_ROOT = ROOT / "vendor/tbc-new-fork"
 FIXTURE_DIR = ROOT / "data/tab-fixtures"
+RECORDING_DIR = ROOT / "packages/core/test/fixtures/tab-recordings"
 SCHEMA_VERSION = 1
+GEAR_SLOTS = 17
 
-_MODEL = "ui/features/upgrades/model"
-ENGINE = f"{_MODEL}/engine"
-INPUT_PATHS = (
-    ENGINE,
-    f"{_MODEL}/adapters",
-    f"{_MODEL}/data",
-    f"{_MODEL}/pool_source.ts",
-    "ui/features/upgrades/utils/item_sources.ts",
-    "ui/features/upgrades/utils/item_source.ts",
-    f"{_MODEL}/run.ts",
-    f"{_MODEL}/settings_pool.ts",
-    # Upstream wowsims files the run-time pool reads to decide membership,
-    # BiS tags and sources (ticket 505; pre-merge review A3). Git pathspec
-    # globs: `*` also matches `/`.
-    "assets/database",
-    "ui/sim/proto/database.ts",
-    "ui/specs/*/*/spec.ts",
-    "ui/specs/*/*/presets.ts",
-    "ui/specs/*/*/gear_sets/*",
-    "ui/app/preset_utils.ts",
-    "ui/sim/constants/other.ts",
-    "ui/sim/constants/missing_effects_auto_gen.ts",
-    "ui/sim/proto/items.ts",
-    "ui/sim/proto/names.ts",
-    "ui/sim/player/classes",
-    "ui/sim/player/specs",
-    "ui/sim/player/player_class.ts",
-    "ui/sim/player/player_spec.ts",
-)
-ENGINE_EXCLUDED = (
-    f"{ENGINE}/view.ts",
-)
-ENGINE_EXCLUDED_DIRS = (f"{ENGINE}/fixtures/",)
-UPSTREAM_EXCLUDED = ("ui/sim/player/specs/spec_index.test.ts",)
+# The recorder's own refusal (record.mjs) says where recordings go instead.
+NOT_MADE_UP = "not marked madeUp: true; only pnpm tab-fixtures:mock writes here"
+MADE_UP_RECORDING = "marked madeUp: true; this folder holds real recordings"
 
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 
 
-def schema_errors(data: object) -> list[str]:
-    """Every way `data` fails the fixture schema; empty when it is valid."""
+def _is_int(value: object) -> bool:
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def schema_errors(data: object, made_up: bool = True) -> list[str]:
+    """Every way `data` fails the fixture schema; empty when it is valid.
+
+    `made_up` says which folder it came from: a made-up fixture must be marked
+    `madeUp: true`, and a recording must not be.
+    """
     if not isinstance(data, dict):
         return ["not a JSON object"]
+    if made_up and data.get("madeUp") is not True:
+        return [NOT_MADE_UP]
+    if not made_up and "madeUp" in data:
+        return [MADE_UP_RECORDING]
     errors: list[str] = []
     if data.get("schemaVersion") != SCHEMA_VERSION:
         errors.append(f"schemaVersion is {data.get('schemaVersion')!r}, expected {SCHEMA_VERSION}")
     sha = data.get("forkSha")
     if not isinstance(sha, str) or not _SHA_RE.match(sha):
-        errors.append("forkSha is not a 40-hex commit sha")
+        errors.append("forkSha is not 40 hex characters")
     if data.get("forkDirty") is not False:
-        errors.append("forkDirty is not false (recorded from an uncommitted fork tree)")
-    for key in ("spec", "recordedAt"):
-        if not isinstance(data.get(key), str) or not data.get(key):
-            errors.append(f"{key} missing")
+        errors.append("forkDirty is not false")
+    if not isinstance(data.get("spec"), str) or not data.get("spec"):
+        errors.append("spec missing")
     for key in ("phase", "iterations"):
-        if not isinstance(data.get(key), int) or isinstance(data.get(key), bool):
+        if not _is_int(data.get(key)):
             errors.append(f"{key} is not an integer")
+    gear = data.get("gear")
+    items = gear.get("items") if isinstance(gear, dict) else None
+    if not isinstance(items, list) or len(items) != GEAR_SLOTS:
+        errors.append(f"gear.items is not a list of {GEAR_SLOTS}")
+    ranking = data.get("ranking")
+    if not isinstance(ranking, dict) or not isinstance(ranking.get("items"), list):
+        errors.append("ranking.items missing")
     has_preset = isinstance(data.get("preset"), str)
     has_url = isinstance(data.get("gearUrl"), str)
     if has_preset == has_url:
         errors.append("exactly one of preset / gearUrl must be set")
-    if not isinstance(data.get("gear"), dict):
-        errors.append("gear missing")
-    ranking = data.get("ranking")
-    if not isinstance(ranking, dict) or not isinstance(ranking.get("items"), list):
-        errors.append("ranking.items missing")
     return errors
 
 
-def _git(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run(
-        ["git", "-C", str(FORK_ROOT), *args],
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
-
-
-def _is_input(path: str) -> bool:
-    if path in ENGINE_EXCLUDED or path in UPSTREAM_EXCLUDED:
-        return False
-    return not any(path.startswith(d) for d in ENGINE_EXCLUDED_DIRS)
-
-
-def changed_inputs(fork_sha: str) -> list[str]:
-    """Input paths that differ between `fork_sha` and the clone's HEAD."""
-    res = _git("diff", "--name-only", fork_sha, "HEAD", "--", *INPUT_PATHS)
-    if res.returncode != 0:
-        raise RuntimeError(res.stderr.strip() or f"git diff exited {res.returncode}")
-    return [p for p in res.stdout.split() if _is_input(p)]
-
-
-def check_fixture(path: Path) -> tuple[bool, str]:
-    """(readable, line) for one fixture. `line` is what gets printed.
-
-    readable is False for a schema error or an unknown forkSha -- the two
-    blocking cases. A stale fixture is readable; its line names the inputs.
-    """
+def check_fixture(path: Path, made_up: bool = True) -> tuple[bool, str]:
+    """(readable, line) for one fixture. `line` is what gets printed."""
+    kind = "fixture" if made_up else "recording"
     name = path.stem
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as err:
-        return False, f"fixture {name}: ERROR unreadable ({err})"
-    errors = schema_errors(data)
+        return False, f"{kind} {name}: ERROR unreadable ({err})"
+    errors = schema_errors(data, made_up)
     if errors:
-        return False, f"fixture {name}: ERROR schema: {'; '.join(errors)}"
-    sha = data["forkSha"]
-    if _git("cat-file", "-e", f"{sha}^{{commit}}").returncode != 0:
-        return False, (
-            f"fixture {name}: ERROR forkSha {sha[:12]} is not a commit in "
-            "vendor/tbc-new-fork -- re-record it (see data/tab-fixtures/README.md)"
-        )
-    try:
-        changed = changed_inputs(sha)
-    except RuntimeError as err:
-        return False, f"fixture {name}: ERROR could not diff inputs ({err})"
-    listed = ", ".join(changed) if changed else "none"
-    return True, f"fixture {name}: recorded at {sha[:12]}; inputs changed since: {listed}"
+        return False, f"{kind} {name}: ERROR schema: {'; '.join(errors)}"
+    rows = len(data["ranking"]["items"])
+    return True, f"{kind} {name}: ok ({data['spec']}, {rows} rows)"
 
 
 def fixture_paths() -> list[Path]:
     return sorted(FIXTURE_DIR.glob("*.json")) if FIXTURE_DIR.is_dir() else []
 
 
+def recording_paths() -> list[Path]:
+    return sorted(RECORDING_DIR.glob("*.json")) if RECORDING_DIR.is_dir() else []
+
+
 def main() -> int:
     paths = fixture_paths()
-    if not FORK_ROOT.is_dir():
-        print(
-            f"tab-fixtures: skipped -- vendor/tbc-new-fork is absent, so the "
-            f"{len(paths)} fixture(s) cannot be checked against the fork."
-        )
-        return 0
     if not paths:
-        print("tab-fixtures: FAILED -- no fixtures found in data/tab-fixtures.")
+        print(
+            "tab-fixtures: FAILED -- no fixtures in data/tab-fixtures "
+            "(run pnpm tab-fixtures:mock)."
+        )
         return 1
     rc = 0
-    for path in paths:
-        ok, line = check_fixture(path)
+    checks = [(p, True) for p in paths] + [(p, False) for p in recording_paths()]
+    for path, made_up in checks:
+        ok, line = check_fixture(path, made_up)
         print(line)
         if not ok:
             rc = 1
-    stale = "warning only; see data/tab-fixtures/README.md to re-record"
-    print(f"tab-fixtures: {len(paths)} fixtures checked ({stale})")
     return rc
 
 

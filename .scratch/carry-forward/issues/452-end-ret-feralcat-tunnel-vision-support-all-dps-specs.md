@@ -82,3 +82,8 @@ fork `b908771dd` (ret, 5 feral, warlock, enhancement). The recorder's
 sentence above about ret and feral only is out of date. Owner ruling
 2026-10-24: tab page checks use made-up results and no sim recordings; that
 work runs as stage `tab-checks-without-sims`. Scope unchanged.
+
+2026-10-24, stage `tab-checks-without-sims`: the 8 recordings above are no longer
+gate inputs; six are frozen engine test data under
+`packages/core/test/fixtures/tab-recordings/`, two were deleted; the gate
+renders six made-up fixtures from `pnpm tab-fixtures:mock`.

@@ -10,8 +10,11 @@
 //         them; at 1280 they show and the button is hidden;
 //     (3) below `xl` the run card sits above the results;
 //     axe on the tab.
-//   on a recorded fixture (TBC_TAB_FIXTURE), at each width, in the open pane
-//   with its below-cutoff group open:
+//   then for each fixture -- every data/tab-fixtures/*.json (the made-up
+//   results from `pnpm tab-fixtures:mock`, one per UI difference between
+//   specs), or only the one `--fixture <name-or-path>` or TBC_TAB_FIXTURE
+//   names -- on that fixture's own spec page, at each width, in the open
+//   pane with its below-cutoff group open:
 //     (15) the open pane has result rows, so the checks below measured some
 //         (the fixture loader settles on a row anywhere on the page);
 //         only the rows in view are rendered (ticket 565), so the per-row
@@ -33,16 +36,25 @@
 //         left or below, inside the viewport either way (ticket 605; the
 //         ticket 495 ruling, kept by Q-606-popover-side);
 //     the A1 fact: how far each below-cutoff column sits from its head;
-//     axe once, at 653.
+//     axe once, at 653, on one fixture only (mock-set-bonus when it is
+//     rendered, else the first), as before the pass had more than one.
 //
 // An unbaselined critical or serious WCAG violation fails the gate
 // (TBC_A11Y_BASELINE holds the accepted debt). The verdict is one
 // LAYOUT_GATE_VERDICT line (test-tab-harness.mjs `verdict`) that
-// scripts/check_layout_gate.py parses: "measured" when every width ran,
-// "unmeasured" with a reason when a prerequisite stopped it.
+// scripts/check_layout_gate.py parses: "measured" when every width ran, or
+// when any check failed; "unmeasured" with a reason when a prerequisite
+// stopped it before any check failed. A fixture that cannot be loaded or
+// measured is skipped and named, and the other fixtures still run, so a
+// failure measured on one fixture is never lost to a later one's load error.
 //
 // Server: test-tab-harness.mjs `serveTab` (TBC_FORK_PORT reuses a running
 // server; otherwise the fixture-enabled bundle is built into dist/ and served).
+//
+// The run prints its own wall time (and the verdict holds wallMs) because the
+// gate's time budget is checked from that line. An agent may be able to run
+// the harness only as a bare command, with no `time` around it (the agent
+// sandbox's permission rule; hypothesis, untested).
 
 import fs from "node:fs";
 import path from "node:path";
@@ -72,20 +84,37 @@ const FIXTURE_DIR = path.resolve(
   "data",
   "tab-fixtures"
 );
-const DEFAULT_FIXTURE = "feral-p3-p2bis.json";
+const AXE_FIXTURE = "mock-set-bonus.json";
 
 class Unmeasured extends Error {}
 
 const results = [];
+// Module-level, like `results`, so the crash handler sees a11y failures found
+// before the crash.
+const violations = [];
+const reportedViolations = () =>
+  violations.map(({ id, selector, impact, state, width, fail, baselined }) => ({
+    id,
+    selector,
+    impact,
+    state,
+    width,
+    fail: !!fail,
+    baselined: !!baselined,
+  }));
+// The fixture the post-run checks are measuring; null during the pre-run pass.
+let currentFixture = null;
 const check = (id, width, ok, detail) => {
   results.push({
     check: id,
     width,
     ok,
+    ...(currentFixture === null ? {} : { fixture: currentFixture }),
     ...(detail === undefined ? {} : { detail }),
   });
+  const where = currentFixture === null ? "" : ` [${currentFixture}]`;
   console.log(
-    `${ok ? "PASS" : "FAIL"} (${id}) @${width}${detail === undefined ? "" : ` ${JSON.stringify(detail)}`}`
+    `${ok ? "PASS" : "FAIL"} (${id}) @${width}${where}${detail === undefined ? "" : ` ${JSON.stringify(detail)}`}`
   );
 };
 
@@ -293,15 +322,41 @@ async function judgePopover(send, width) {
   });
 }
 
-function fixturePath() {
-  const asked = process.env.TBC_TAB_FIXTURE ?? DEFAULT_FIXTURE;
-  const candidates = [path.resolve(asked), path.join(FIXTURE_DIR, asked)];
-  const found = candidates.find((p) => fs.existsSync(p));
-  if (!found)
-    throw new Unmeasured(
-      `fixture ${asked} not found (looked in ${candidates.join(", ")})`
-    );
-  return found;
+// `--fixture <name-or-path>` beats TBC_TAB_FIXTURE, for a caller that cannot
+// put an env-var prefix before the command (an agent sandbox that allows the
+// harness only as a bare command; hypothesis, untested).
+// check_layout_gate.py still passes the env var.
+function askedFixture(argv) {
+  for (let i = 0; i < argv.length; i++) {
+    if (argv[i] === "--fixture") {
+      if (!argv[i + 1]) throw new Unmeasured("--fixture needs a value");
+      return argv[i + 1];
+    }
+    if (argv[i].startsWith("--fixture=")) return argv[i].slice(10);
+  }
+  return process.env.TBC_TAB_FIXTURE || null;
+}
+
+function fixturePaths() {
+  const asked = askedFixture(process.argv.slice(2));
+  if (asked) {
+    const candidates = [path.resolve(asked), path.join(FIXTURE_DIR, asked)];
+    const found = candidates.find((p) => fs.existsSync(p));
+    if (!found)
+      throw new Unmeasured(
+        `fixture ${asked} not found (looked in ${candidates.join(", ")})`
+      );
+    return [found];
+  }
+  const files = fs.existsSync(FIXTURE_DIR)
+    ? fs
+        .readdirSync(FIXTURE_DIR)
+        .filter((f) => f.endsWith(".json"))
+        .sort()
+    : [];
+  if (files.length === 0)
+    throw new Unmeasured("no fixtures in data/tab-fixtures");
+  return files.map((f) => path.join(FIXTURE_DIR, f));
 }
 
 async function setWidth(send, width) {
@@ -314,10 +369,10 @@ async function setWidth(send, width) {
   await H.sleep(400);
 }
 
-async function loadFixture(send, base, text) {
+async function loadFixture(send, base, name, text) {
   const loaded = await H.loadFixturePage(send, base, text);
   if (loaded.error)
-    throw new Unmeasured(`fixture load failed: ${loaded.error}`);
+    throw new Unmeasured(`fixture ${name}: load failed: ${loaded.error}`);
 }
 
 function judgePreRun(width, m) {
@@ -340,7 +395,10 @@ function judgePreRun(width, m) {
 }
 
 function judgePostRun(width, m, facts) {
-  if (m.error) throw new Unmeasured(`post-run @${width}: ${m.error}`);
+  if (m.error)
+    throw new Unmeasured(
+      `fixture ${currentFixture}: post-run @${width}: ${m.error}`
+    );
   check(
     15,
     width,
@@ -393,6 +451,7 @@ function judgePostRun(width, m, facts) {
     });
   facts.push({
     fact: "a1-below-cutoff-column-offsets",
+    fixture: currentFixture,
     width,
     pane: m.pane,
     rows: m.rows,
@@ -401,10 +460,17 @@ function judgePostRun(width, m, facts) {
 }
 
 async function main() {
+  const startedAt = performance.now();
   const baseline = H.readA11yBaseline();
-  const fixture = fixturePath();
-  const fixtureText = fs.readFileSync(fixture, "utf8");
-  const violations = [];
+  const fixtures = fixturePaths().map((p) => ({
+    name: path.basename(p),
+    text: fs.readFileSync(p, "utf8"),
+  }));
+  const axeFixture = fixtures.some((f) => f.name === AXE_FIXTURE)
+    ? AXE_FIXTURE
+    : fixtures[0].name;
+  const fixtureMs = {};
+  const unmeasuredFixtures = [];
   const matched = new Set();
   const facts = [];
   const audit = async (send, state, width) => {
@@ -425,12 +491,16 @@ async function main() {
       );
   };
 
+  let preRunAt = startedAt;
+  let fixtureAt = startedAt;
+  let fixtureDoneAt = startedAt;
   const { base, stop } = await H.serveTab();
   const chrome = await H.launchChrome();
   const client = H.cdp(chrome.wsUrl, { callTimeoutMs: 120000 });
   try {
     await client.ready;
     const { send } = await H.attachPage(client);
+    preRunAt = performance.now();
     for (const width of WIDTHS) {
       await setWidth(send, width);
       await send("Page.navigate", { url: `${base}${H.PAGE_PATH}` });
@@ -443,15 +513,31 @@ async function main() {
       judgePreRun(width, await H.evaluate(send, preRunExpression(width)));
       await audit(send, "pre-run", width);
     }
-    await loadFixture(send, base, fixtureText);
-    for (const width of WIDTHS) {
-      await setWidth(send, width);
-      judgePostRun(width, await H.evaluate(send, postRunExpression), facts);
-      if (width === POST_RUN_AXE_WIDTH) await audit(send, "post-run", width);
-      // Last at each width: the open popover must not be in the page when
-      // the other checks measure it.
-      await judgePopover(send, width);
+    fixtureAt = performance.now();
+    for (const { name, text } of fixtures) {
+      const t0 = performance.now();
+      currentFixture = name;
+      try {
+        await loadFixture(send, base, name, text);
+        for (const width of WIDTHS) {
+          await setWidth(send, width);
+          judgePostRun(width, await H.evaluate(send, postRunExpression), facts);
+          if (width === POST_RUN_AXE_WIDTH && name === axeFixture)
+            await audit(send, "post-run", width);
+          // Last at each width: the open popover must not be in the page when
+          // the other checks measure it.
+          await judgePopover(send, width);
+        }
+      } catch (err) {
+        if (!(err instanceof Unmeasured)) throw err;
+        unmeasuredFixtures.push({ fixture: name, reason: err.message });
+        console.log(`UNMEASURED [${name}] ${err.message}`);
+      }
+      fixtureMs[name] = Math.round(performance.now() - t0);
+      console.log(`fixture ${name}: ${fixtureMs[name]} ms`);
     }
+    currentFixture = null;
+    fixtureDoneAt = performance.now();
   } finally {
     client.close();
     chrome.kill();
@@ -467,26 +553,42 @@ async function main() {
     );
   const failed = results.filter((r) => !r.ok).length;
   const a11yFailed = violations.filter((v) => v.fail).length;
+  const wallMs = Math.round(performance.now() - startedAt);
+  const phaseMs = {
+    setup: Math.round(preRunAt - startedAt),
+    preRun: Math.round(fixtureAt - preRunAt),
+    fixtures: Math.round(fixtureDoneAt - fixtureAt),
+  };
+  console.log(
+    `layout harness: phases setup ${(phaseMs.setup / 1000).toFixed(1)} s, ` +
+      `pre-run ${(phaseMs.preRun / 1000).toFixed(1)} s, ` +
+      `fixtures ${(phaseMs.fixtures / 1000).toFixed(1)} s`
+  );
+  console.log(`layout harness: wall time ${(wallMs / 1000).toFixed(1)} s`);
+  if (failed === 0 && a11yFailed === 0 && unmeasuredFixtures.length > 0) {
+    H.verdict("unmeasured", {
+      reason: unmeasuredFixtures
+        .map((u) => `fixture ${u.fixture}: ${u.reason}`)
+        .join("; "),
+      wallMs,
+      unmeasuredFixtures,
+    });
+    return 1;
+  }
   const pass = failed === 0 && a11yFailed === 0;
   H.verdict("measured", {
     pass,
+    wallMs,
+    phaseMs,
     failed,
     a11yFailed,
     widths: WIDTHS,
-    fixture: path.basename(fixture),
+    fixtures: fixtures.map((f) => f.name),
+    fixtureMs,
+    unmeasuredFixtures,
     checks: results,
     facts,
-    violations: violations.map(
-      ({ id, selector, impact, state, width, fail, baselined }) => ({
-        id,
-        selector,
-        impact,
-        state,
-        width,
-        fail: !!fail,
-        baselined: !!baselined,
-      })
-    ),
+    violations: reportedViolations(),
     staleBaseline: stale,
   });
   return pass ? 0 : 1;
@@ -496,7 +598,22 @@ main().then(
   (code) => process.exit(code),
   (err) => {
     console.error(`test-layout: ${err?.stack ?? err}`);
-    H.verdict("unmeasured", { reason: String(err?.message ?? err) });
+    const reason = String(err?.message ?? err);
+    // A layout check or an a11y audit that already failed is a measured
+    // failure, whatever stopped the run afterwards; reporting "unmeasured"
+    // would let the merge through.
+    const failed = results.filter((r) => !r.ok).length;
+    const a11yFailed = violations.filter((v) => v.fail).length;
+    if (failed > 0 || a11yFailed > 0)
+      H.verdict("measured", {
+        pass: false,
+        failed,
+        a11yFailed,
+        stoppedBy: reason,
+        checks: results,
+        violations: reportedViolations(),
+      });
+    else H.verdict("unmeasured", { reason });
     process.exit(1);
   }
 );

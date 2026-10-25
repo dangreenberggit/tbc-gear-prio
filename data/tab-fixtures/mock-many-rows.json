@@ -1,0 +1,1484 @@
+{
+  "schemaVersion": 1,
+  "forkSha": "0000000000000000000000000000000000000000",
+  "forkDirty": false,
+  "madeUp": true,
+  "generator": "packages/core/test/tab-fixtures/make-mock-fixtures.ts",
+  "covers": "Many rows: a table long enough that only part of it is rendered at once, and a long below-cutoff group.",
+  "spec": "feral",
+  "phase": 3,
+  "preset": "druid/feralcat/gear_sets/p2_6p.gear.json",
+  "gear": {
+    "items": [
+      {
+        "id": 8345,
+        "enchant": 3003
+      },
+      {
+        "id": 30017
+      },
+      {
+        "id": 29100,
+        "enchant": 2986,
+        "gems": [
+          24028,
+          24028
+        ]
+      },
+      {
+        "id": 29994,
+        "enchant": 368
+      },
+      {
+        "id": 29096,
+        "enchant": 2661,
+        "gems": [
+          24028,
+          24028,
+          24028
+        ]
+      },
+      {
+        "id": 29966,
+        "enchant": 2647,
+        "gems": [
+          24028
+        ]
+      },
+      {
+        "id": 29947,
+        "enchant": 2564
+      },
+      {
+        "id": 30106,
+        "gems": [
+          24028,
+          30549
+        ]
+      },
+      {
+        "id": 29995,
+        "enchant": 3012
+      },
+      {
+        "id": 28545,
+        "enchant": 2939,
+        "gems": [
+          24028,
+          24028
+        ]
+      },
+      {
+        "id": 29997,
+        "enchant": 2929
+      },
+      {
+        "id": 30052,
+        "enchant": 2929
+      },
+      {
+        "id": 30627
+      },
+      {
+        "id": 29383
+      },
+      {
+        "id": 32014,
+        "enchant": 2670
+      },
+      {},
+      {
+        "id": 32387
+      }
+    ]
+  },
+  "recordedAt": "1970-01-01T00:00:00.000Z",
+  "iterations": 0,
+  "ranking": {
+    "contentHash": "made-up:mock-many-rows",
+    "cutoff": {
+      "absDps": 3
+    },
+    "fight": {
+      "reportCode": "made-up",
+      "fightId": 0,
+      "encounterName": "Made-up fixture",
+      "route": "report-events"
+    },
+    "baseline": {
+      "dps": 1900,
+      "stdev": 120,
+      "metaAdjusted": false
+    },
+    "assumptions": {
+      "maxPhase": 3,
+      "seeds": [
+        1,
+        2,
+        3
+      ],
+      "iterations": 0,
+      "race": "RaceNightElf",
+      "presetId": "feral/made-up",
+      "standing": []
+    },
+    "substitutions": [],
+    "caps": {
+      "hit": {
+        "rating": 83.31,
+        "capRating": 141.92,
+        "gap": 58.61,
+        "capUncertainty": 15.77,
+        "assumedRace": "RaceNightElf",
+        "talentHitAssumed": {
+          "talent": "Precision",
+          "points": 3,
+          "maxPoints": 3
+        }
+      },
+      "expertise": {
+        "rating": 95,
+        "capRating": null,
+        "gap": null
+      }
+    },
+    "items": [
+      {
+        "rank": 1,
+        "itemId": 32366,
+        "name": "Shadowmaster's Boots",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Mother Shahraz"
+        },
+        "deltaDps": 39.5,
+        "deltaPct": 2.08,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 2,
+        "itemId": 29947,
+        "name": "Gloves of the Searing Grip",
+        "slot": "hands",
+        "source": {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Al'ar"
+        },
+        "deltaDps": 38.85,
+        "deltaPct": 2.04,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "sources": [
+          {
+            "kind": "raid",
+            "zone": "Tempest Keep",
+            "boss": "Al'ar"
+          },
+          {
+            "kind": "heroic",
+            "dungeon": "The Shattered Halls"
+          },
+          {
+            "kind": "pvp",
+            "via": "arena"
+          }
+        ]
+      },
+      {
+        "rank": 3,
+        "itemId": 31048,
+        "name": "Thunderheart Pauldrons",
+        "slot": "shoulder",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 38.19,
+        "deltaPct": 2.01,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "owned": true
+      },
+      {
+        "rank": 4,
+        "itemId": 29390,
+        "name": "Everbloom Idol",
+        "slot": "ranged",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 37.54,
+        "deltaPct": 1.98,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [
+          "Alt"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 5,
+        "itemId": 30230,
+        "name": "Nordrassil Feral-Mantle",
+        "slot": "shoulder",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 36.88,
+        "deltaPct": 1.94,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 6,
+        "itemId": 30627,
+        "name": "Tsunami Talisman",
+        "slot": "trinket",
+        "slotChoice": "trinket1",
+        "source": {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Leotheras the Blind"
+        },
+        "deltaDps": 36.23,
+        "deltaPct": 1.91,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 7,
+        "itemId": 8345,
+        "name": "Wolfshead Helm",
+        "slot": "head",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 35.57,
+        "deltaPct": 1.87,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 8,
+        "itemId": 28741,
+        "name": "Skulker's Greaves",
+        "slot": "legs",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Netherspite"
+        },
+        "deltaDps": 34.92,
+        "deltaPct": 1.84,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 9,
+        "itemId": 34397,
+        "name": "Bladed Chaos Tunic",
+        "slot": "chest",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 34.26,
+        "deltaPct": 1.8,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 10,
+        "itemId": 28649,
+        "name": "Garona's Signet Ring",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "The Curator"
+        },
+        "deltaDps": 33.61,
+        "deltaPct": 1.77,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 11,
+        "itemId": 28750,
+        "name": "Girdle of Treachery",
+        "slot": "waist",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan"
+        },
+        "deltaDps": 32.95,
+        "deltaPct": 1.73,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 12,
+        "itemId": 31044,
+        "name": "Thunderheart Leggings",
+        "slot": "legs",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 32.3,
+        "deltaPct": 1.7,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 13,
+        "itemId": 34189,
+        "name": "Band of Ruinous Delight",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Eredar Twins"
+        },
+        "deltaDps": 31.65,
+        "deltaPct": 1.67,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 14,
+        "itemId": 33496,
+        "name": "Signet of Primal Wrath",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "raid",
+          "zone": "Zul'Aman"
+        },
+        "deltaDps": 30.99,
+        "deltaPct": 1.63,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 15,
+        "itemId": 28658,
+        "name": "Terestian's Stranglestaff",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Terestian Illhoof"
+        },
+        "deltaDps": 30.34,
+        "deltaPct": 1.6,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 16,
+        "itemId": 34472,
+        "name": "Shard of Contempt",
+        "slot": "trinket",
+        "slotChoice": "trinket1",
+        "source": {
+          "kind": "raid",
+          "zone": "Magisters' Terrace",
+          "boss": "Priestess Delrissa"
+        },
+        "deltaDps": 29.68,
+        "deltaPct": 1.56,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 17,
+        "itemId": 32235,
+        "name": "Cursed Vision of Sargeras",
+        "slot": "head",
+        "source": {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Illidan Stormrage"
+        },
+        "deltaDps": 29.03,
+        "deltaPct": 1.53,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 18,
+        "itemId": 29248,
+        "name": "Shadowstep Striders",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "The Arcatraz",
+          "boss": "Harbinger Skyriss"
+        },
+        "deltaDps": 28.37,
+        "deltaPct": 1.49,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 19,
+        "itemId": 31042,
+        "name": "Thunderheart Chestguard",
+        "slot": "chest",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 27.72,
+        "deltaPct": 1.46,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 20,
+        "itemId": 34198,
+        "name": "Stanchion of Primal Instinct",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Eredar Twins"
+        },
+        "deltaDps": 27.06,
+        "deltaPct": 1.42,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 21,
+        "itemId": 34573,
+        "name": "Thunderheart Treads",
+        "slot": "feet",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 26.41,
+        "deltaPct": 1.39,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 22,
+        "itemId": 29099,
+        "name": "Greaves of Malorne",
+        "slot": "legs",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 25.75,
+        "deltaPct": 1.36,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 23,
+        "itemId": 32323,
+        "name": "Shadowmoon Destroyer's Drape",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Teron Gorefiend"
+        },
+        "deltaDps": 25.1,
+        "deltaPct": 1.32,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 24,
+        "itemId": 29246,
+        "name": "Nightfall Wristguards",
+        "slot": "wrist",
+        "source": {
+          "kind": "raid",
+          "zone": "Old Hillsbrad Foothills",
+          "boss": "Epoch Hunter"
+        },
+        "deltaDps": 24.45,
+        "deltaPct": 1.29,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 25,
+        "itemId": 27531,
+        "name": "Wastewalker Gloves",
+        "slot": "hands",
+        "source": {
+          "kind": "raid",
+          "zone": "The Shattered Halls",
+          "boss": "Warchief Kargath Bladefist"
+        },
+        "deltaDps": 23.79,
+        "deltaPct": 1.25,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 26,
+        "itemId": 30676,
+        "name": "Lurker's Grasp",
+        "slot": "waist",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Hyakiss the Lurker"
+        },
+        "deltaDps": 23.14,
+        "deltaPct": 1.22,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 27,
+        "itemId": 29382,
+        "name": "Blood Knight War Cloak",
+        "slot": "back",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 22.48,
+        "deltaPct": 1.18,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 28,
+        "itemId": 29097,
+        "name": "Gauntlets of Malorne",
+        "slot": "hands",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 21.83,
+        "deltaPct": 1.15,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 29,
+        "itemId": 30222,
+        "name": "Nordrassil Chestplate",
+        "slot": "chest",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 21.17,
+        "deltaPct": 1.11,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 30,
+        "itemId": 29994,
+        "name": "Thalassian Wildercloak",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Kael'thas Sunstrider"
+        },
+        "deltaDps": 20.52,
+        "deltaPct": 1.08,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 31,
+        "itemId": 30834,
+        "name": "Shapeshifter's Signet",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 19.86,
+        "deltaPct": 1.05,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 32,
+        "itemId": 29119,
+        "name": "Haramad's Bargain",
+        "slot": "neck",
+        "source": {
+          "kind": "rep",
+          "faction": "Faction 933",
+          "standing": "Friendly"
+        },
+        "deltaDps": 19.21,
+        "deltaPct": 1.01,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 33,
+        "itemId": 29301,
+        "name": "Band of the Eternal Champion",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 18.55,
+        "deltaPct": 0.98,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 34,
+        "itemId": 32014,
+        "name": "Merciless Gladiator's Maul",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 17.9,
+        "deltaPct": 0.94,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 35,
+        "itemId": 30106,
+        "name": "Belt of One-Hundred Deaths",
+        "slot": "waist",
+        "source": {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Lady Vashj"
+        },
+        "deltaDps": 17.25,
+        "deltaPct": 0.91,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 36,
+        "itemId": 34444,
+        "name": "Thunderheart Wristguards",
+        "slot": "wrist",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 16.59,
+        "deltaPct": 0.87,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 37,
+        "itemId": 30685,
+        "name": "Ravager's Wrist-Wraps",
+        "slot": "wrist",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Rokad the Ravager"
+        },
+        "deltaDps": 15.94,
+        "deltaPct": 0.84,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 38,
+        "itemId": 34887,
+        "name": "Angelista's Revenge",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 15.28,
+        "deltaPct": 0.8,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 39,
+        "itemId": 33716,
+        "name": "Vengeful Gladiator's Staff",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 14.63,
+        "deltaPct": 0.77,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 40,
+        "itemId": 34556,
+        "name": "Thunderheart Waistguard",
+        "slot": "waist",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 13.97,
+        "deltaPct": 0.74,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 41,
+        "itemId": 30229,
+        "name": "Nordrassil Feral-Kilt",
+        "slot": "legs",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 13.32,
+        "deltaPct": 0.7,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 42,
+        "itemId": 32387,
+        "name": "Idol of the Raven Goddess",
+        "slot": "ranged",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 12.66,
+        "deltaPct": 0.67,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 43,
+        "itemId": 30365,
+        "name": "Overseer's Signet",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 12.01,
+        "deltaPct": 0.63,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 44,
+        "itemId": 28264,
+        "name": "Wastewalker Tunic",
+        "slot": "chest",
+        "source": {
+          "kind": "raid",
+          "zone": "The Blood Furnace",
+          "boss": "Keli'dan the Breaker"
+        },
+        "deltaDps": 11.35,
+        "deltaPct": 0.6,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 45,
+        "itemId": 28672,
+        "name": "Drape of the Dark Reavers",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Shade of Aran"
+        },
+        "deltaDps": 10.7,
+        "deltaPct": 0.56,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 46,
+        "itemId": 32260,
+        "name": "Choker of Endless Nightmares",
+        "slot": "neck",
+        "source": {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Supremus"
+        },
+        "deltaDps": 10.05,
+        "deltaPct": 0.53,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 47,
+        "itemId": 27797,
+        "name": "Wastewalker Shoulderpads",
+        "slot": "shoulder",
+        "source": {
+          "kind": "raid",
+          "zone": "Auchenai Crypts",
+          "boss": "Avatar of the Martyred"
+        },
+        "deltaDps": 9.39,
+        "deltaPct": 0.49,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 659,
+          "setName": "Wastewalker Armor",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": 2,
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": 9.39,
+          "singleBreaks": [
+            {
+              "setId": 640,
+              "setName": "Malorne Harness",
+              "threshold": 2,
+              "dps": 11
+            }
+          ],
+          "futureBonuses": [
+            {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 27531,
+                  "name": "Wastewalker Gloves"
+                }
+              ],
+              "stepGearDps": 21.89,
+              "stepGearSe": 2
+            },
+            {
+              "threshold": 4,
+              "piecesNeeded": 4,
+              "dps": 33,
+              "sameGearDps": 33,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 27531,
+                  "name": "Wastewalker Gloves"
+                },
+                {
+                  "itemId": 27837,
+                  "name": "Wastewalker Leggings"
+                },
+                {
+                  "itemId": 28264,
+                  "name": "Wastewalker Tunic"
+                }
+              ],
+              "stepGearDps": 27.89,
+              "stepGearSe": 2
+            }
+          ]
+        }
+      },
+      {
+        "rank": 48,
+        "itemId": 31034,
+        "name": "Thunderheart Gauntlets",
+        "slot": "hands",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 8.74,
+        "deltaPct": 0.46,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 49,
+        "itemId": 29966,
+        "name": "Vambraces of Ending",
+        "slot": "wrist",
+        "source": {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "High Astromancer Solarian"
+        },
+        "deltaDps": 8.08,
+        "deltaPct": 0.43,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 50,
+        "itemId": 28034,
+        "name": "Hourglass of the Unraveller",
+        "slot": "trinket",
+        "slotChoice": "trinket1",
+        "source": {
+          "kind": "raid",
+          "zone": "The Black Morass",
+          "boss": "Temporus"
+        },
+        "deltaDps": 7.43,
+        "deltaPct": 0.39,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 51,
+        "itemId": 28545,
+        "name": "Edgewalker Longboots",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Moroes"
+        },
+        "deltaDps": 6.77,
+        "deltaPct": 0.36,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 52,
+        "itemId": 32497,
+        "name": "Stormrage Signet Ring",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Illidan Stormrage"
+        },
+        "deltaDps": 6.12,
+        "deltaPct": 0.32,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 53,
+        "itemId": 34370,
+        "name": "Gloves of Immortal Dusk",
+        "slot": "hands",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 5.46,
+        "deltaPct": 0.29,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 54,
+        "itemId": 34177,
+        "name": "Clutch of Demise",
+        "slot": "neck",
+        "source": {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Brutallus"
+        },
+        "deltaDps": 4.81,
+        "deltaPct": 0.25,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 55,
+        "itemId": 29100,
+        "name": "Mantle of Malorne",
+        "slot": "shoulder",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 4.15,
+        "deltaPct": 0.22,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 56,
+        "itemId": 34427,
+        "name": "Blackened Naaru Sliver",
+        "slot": "trinket",
+        "slotChoice": "trinket2",
+        "source": {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "M'uru"
+        },
+        "deltaDps": 3.5,
+        "deltaPct": 0.18,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": null,
+        "itemId": 27760,
+        "name": "Dunewind Sash",
+        "slot": "waist",
+        "source": {
+          "kind": "raid",
+          "zone": "The Underbog",
+          "boss": "Ghaz'an"
+        },
+        "deltaDps": 2.9,
+        "deltaPct": 0.15,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 34188,
+        "name": "Leggings of the Immortal Night",
+        "slot": "legs",
+        "source": {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Felmyst"
+        },
+        "deltaDps": 2.69,
+        "deltaPct": 0.14,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 33881,
+        "name": "Vindicator's Dragonhide",
+        "slot": "wrist",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 2.48,
+        "deltaPct": 0.13,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29247,
+        "name": "Girdle of the Deathdealer",
+        "slot": "waist",
+        "source": {
+          "kind": "raid",
+          "zone": "The Black Morass",
+          "boss": "Aeonus"
+        },
+        "deltaDps": 2.27,
+        "deltaPct": 0.12,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29997,
+        "name": "Band of the Ranger-General",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Kael'thas Sunstrider"
+        },
+        "deltaDps": 2.06,
+        "deltaPct": 0.11,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29383,
+        "name": "Bloodlust Brooch",
+        "slot": "trinket",
+        "slotChoice": "trinket2",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 1.85,
+        "deltaPct": 0.1,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 30223,
+        "name": "Nordrassil Handgrips",
+        "slot": "hands",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 1.64,
+        "deltaPct": 0.09,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29995,
+        "name": "Leggings of Murderous Intent",
+        "slot": "legs",
+        "source": {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Kael'thas Sunstrider"
+        },
+        "deltaDps": 1.43,
+        "deltaPct": 0.08,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29359,
+        "name": "Feral Staff of Lashing",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "raid",
+          "zone": "The Botanica",
+          "boss": "Warp Splinter"
+        },
+        "deltaDps": 1.22,
+        "deltaPct": 0.06,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 28791,
+        "name": "Ring of the Recalcitrant",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 1.01,
+        "deltaPct": 0.05,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 32335,
+        "name": "Unstoppable Aggressor's Ring",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Gurtogg Bloodboil"
+        },
+        "deltaDps": 0.79,
+        "deltaPct": 0.04,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 30052,
+        "name": "Ring of Lethality",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "raid",
+          "zone": "Serpentshrine Cavern",
+          "boss": "Hydross the Unstable"
+        },
+        "deltaDps": 0.58,
+        "deltaPct": 0.03,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 21670,
+        "name": "Badge of the Swarmguard",
+        "slot": "trinket",
+        "slotChoice": "trinket1",
+        "source": {
+          "kind": "raid",
+          "zone": "Ahn'Qiraj",
+          "boss": "Battleguard Sartura"
+        },
+        "deltaDps": 0.37,
+        "deltaPct": 0.02,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 27837,
+        "name": "Wastewalker Leggings",
+        "slot": "legs",
+        "source": {
+          "kind": "raid",
+          "zone": "Mana-Tombs",
+          "boss": "Nexus-Prince Shaffar"
+        },
+        "deltaDps": 0.16,
+        "deltaPct": 0.01,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 30017,
+        "name": "Telonicus's Pendant of Mayhem",
+        "slot": "neck",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": -0.05,
+        "deltaPct": 0,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29381,
+        "name": "Choker of Vile Intent",
+        "slot": "neck",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": -0.26,
+        "deltaPct": -0.01,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 28506,
+        "name": "Gloves of Dexterous",
+        "slot": "hands",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Attumen the Huntsman"
+        },
+        "deltaDps": -0.47,
+        "deltaPct": -0.02,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 34241,
+        "name": "Cloak of Unforgivable Sin",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Sunwell Plateau",
+          "boss": "Kil'jaeden"
+        },
+        "deltaDps": -0.68,
+        "deltaPct": -0.04,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29096,
+        "name": "Breastplate of Malorne",
+        "slot": "chest",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": -0.89,
+        "deltaPct": -0.05,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 33831,
+        "name": "Berserker's Call",
+        "slot": "trinket",
+        "slotChoice": "trinket2",
+        "source": {
+          "kind": "raid",
+          "zone": "Zul'Aman",
+          "boss": "Zul'jin"
+        },
+        "deltaDps": -1.1,
+        "deltaPct": -0.06,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      }
+    ],
+    "complete": true,
+    "durationMs": 60000
+  }
+}

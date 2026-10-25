@@ -17,7 +17,10 @@ directory.
   bump that changes the build makes `pnpm layout-gate:check` re-measure.
 - `test-layout.mjs`, `test-review.mjs`, `test-stop.mjs`: the layout gate, the
   per-ticket visual capture and the Stop check. `scripts/check_layout_gate.py`
-  and `scripts/check_tab_review.py` run the first two.
+  and `scripts/check_tab_review.py` run the first two. The layout gate renders
+  the ret page before a run, then each made-up fixture in `data/tab-fixtures/`
+  (`pnpm tab-fixtures:mock`) on its own spec's page; `--fixture <name-or-path>`
+  renders one file only.
 - `tab_fixtures.mjs` and `vite.config.mjs`: the dev server's fixture index and
   autoload, added to upstream's Vite config without editing it.
 - `run-tab-cdp.mjs`: the desktop-transport gate's driver, below.

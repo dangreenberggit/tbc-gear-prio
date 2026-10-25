@@ -8,10 +8,10 @@ import {
 } from "./test-tab-harness.mjs";
 
 /**
- * Dev-server-only index and loader for the recorded Upgrades-tab fixtures (ticket 520).
+ * Dev-server-only index and loader for the made-up Upgrades-tab fixtures (ticket 520).
  * `/tbc/tab-fixtures/` lists them and `/tbc/tab-fixtures/<name>.json` serves one, which is
  * where the tab's replay runner fetches it (`ui/features/upgrades/utils/fixture.ts`);
- * `<spec page>?upgrades-fixture=<name>` opens the Upgrades tab on that recorded result
+ * `<spec page>?upgrades-fixture=<name>` opens the Upgrades tab on that made-up result
  * without a run. The fixtures live in the main repo. `apply: 'serve'` keeps all of this
  * out of every build.
  */

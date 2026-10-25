@@ -1,24 +1,74 @@
-# Upgrades tab fixtures
+# Upgrades tab fixtures (made up)
 
-Each `*.json` file here is a finished Upgrades-tab result, recorded from a real
-run, that the tab can render again in seconds with no backend and no sim run
-(ticket 504). The layout gate (`pnpm layout-gate:check`) renders
-`feral-p3-p2bis.json` for all of its post-run checks and runs no live sim
-(ticket 520). `pnpm tab-review` renders any fixture a manifest entry names
-with `"fixture": "<name>"`.
+Each `*.json` file here is a made-up Upgrades-tab result. The tab renders it
+in seconds with no backend and no sim run (ticket 504). The figures are made
+up and mean nothing; the rows are real items from the spec's own preset gear
+files, so icons and quality colours resolve. Each file covers one UI
+difference we expect between specs, and loads on one spec page that has it.
+
+The tab's automatic page checks render these files and no sim recording:
+
+- the layout gate (`pnpm layout-gate:check`) runs its before-run checks on the
+  ret page at four widths, then renders every file here on its own spec's
+  page;
+- `pnpm tab-review` renders the file a manifest entry names with
+  `"fixture": "<name>"`;
+- `pnpm tab-fixtures:smoke` opens every file once.
+
+| File                     | Page                        | UI difference it covers                                                       |
+| ------------------------ | --------------------------- | ----------------------------------------------------------------------------- |
+| `mock-offhand.json`      | `/tbc/rogue/dps/`           | off-hand rows beside main-hand rows                                           |
+| `mock-ranged.json`       | `/tbc/hunter/dps/`          | the ranged slot (bows)                                                        |
+| `mock-long-names.json`   | `/tbc/mage/dps/`            | item names of 60–80 characters that must wrap only between words              |
+| `mock-set-bonus.json`    | `/tbc/warrior/dps/`         | rows whose swap breaks a worn set bonus, and one that completes a bonus       |
+| `mock-many-rows.json`    | `/tbc/druid/feralcat/`      | a table long enough that only part of it is rendered at once                  |
+| `mock-dropped-list.json` | `/tbc/paladin/retribution/` | a long "Items left out and other notes" list: two headings and ten item lines |
+
+Every file also holds at least one set-bonus row with a popover, one BiS row
+below the cutoff, one owned row and one row with three sources. Each file's
+`covers` field says the same thing as the table.
+
+The set-bonus rows are swaps the game allows on the file's gear: a row breaks
+only a bonus that is active, from a slot that holds a piece of that set; its
+piece counts are the gear's; and it crosses or reaches only a count at which
+its set has a bonus. The generator reads those counts from the fork's Go set
+definitions (`sim/**/*.go`). Every set row is marked as a step ranking, as on
+a real run, and a row that more pieces of its set would take to a bonus lists
+that bonus, so the popover shows the bonuses a row can reach.
+`mock-set-bonus` is on the warrior page because no feral preset wears a set
+one piece short of a bonus, and a crossing row needs that.
+
+## The generator
+
+`packages/core/test/tab-fixtures/make-mock-fixtures.ts` writes all six files.
+It is deterministic and needs the fork clone (`vendor/tbc-new-fork`), because
+it reads the preset gear files and the item database there.
+
+```sh
+pnpm tab-fixtures:mock            # write the six files
+pnpm tab-fixtures:mock --check    # exit 1 when a file differs, is missing, or is not one it writes
+```
+
+Do not edit a file here by hand: change the generator and run
+`pnpm tab-fixtures:mock`. `pnpm tab-fixtures:check` (part of `pnpm verify`)
+runs `--check`, then `scripts/check_tab_fixtures.py`, which fails any file
+here that is not made up. Without the fork clone (as in CI) `--check` skips
+its compare, so only the schema is checked there.
 
 ## Schema (`schemaVersion` 1)
 
-| Field | Meaning |
-| --- | --- |
-| `schemaVersion` | `1` |
-| `forkSha` | `vendor/tbc-new-fork` commit the run was made on |
-| `forkDirty` | always `false` here; the recorder refuses an uncommitted fork tree unless `--allow-dirty` is given (see below) |
-| `spec`, `phase` | engine spec id (`feral`, `ret`, `warlock`, `enh`) and the page phase during the run |
-| `preset` or `gearUrl` | how the gear was loaded: `"<phase tab> / <Gear Sets chip>"`, or `"<Gear Sets chip>"` when the page's preset picker has no phase tabs, or the page link |
-| `gear` | the worn gear as protojson `EquipmentSpec` |
-| `recordedAt`, `iterations` | when, and the tab's iterations setting |
-| `ranking` | the `Ranking` object the run produced, as JSON |
+| Field                  | Meaning                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------- |
+| `schemaVersion`        | `1`                                                                             |
+| `madeUp`               | always `true` here                                                              |
+| `generator`, `covers`  | the generator's path, and one sentence naming the UI difference                 |
+| `forkSha`, `forkDirty` | 40 zeros and `false`: no fork commit produced these figures                     |
+| `spec`, `phase`        | engine spec id (the page the file loads on) and the page phase                  |
+| `preset`               | the preset gear file `gear` is copied from, under the fork's `ui/specs/`        |
+| `gear`                 | the worn gear as protojson `EquipmentSpec`                                      |
+| `recordedAt`           | `1970-01-01T00:00:00.000Z` (the files are not recorded)                         |
+| `iterations`           | `0` (no sim ran)                                                                |
+| `ranking`              | a `Ranking` object holding the fields the tab reads                             |
 
 Loading a fixture sets the page phase, then the gear, then shows the ranking as
 a finished, current run. The page must be on the fixture's spec. "Took" never
@@ -29,9 +79,9 @@ results table has rows and there is no stale banner.
 
 - **By hand.** Start `:5173` (the `wowsims-fork` entry in `.claude/launch.json`, or `npx vite serve --config ../../scripts/tab-harness/vite.config.mjs --port 5173` in `vendor/tbc-new-fork`; no backend) and open `http://localhost:5173/tbc/tab-fixtures/`. Each link opens the Upgrades tab on that fixture; `<html data-upgrades-fixture>` becomes `loaded` or `failed`.
 - **Smoke.** `pnpm tab-fixtures:smoke` opens every link. It starts `:5173` only when the port is free, prints one line per fixture, writes PNGs to `.scratch/tab-fixtures-smoke/`, and exits 0 or 1. To use another port, set `TBC_FORK_PORT` (for example `TBC_FORK_PORT=5174 pnpm tab-fixtures:smoke`); `record.mjs` reads it too. A second checkout with its own fork, such as a port worktree, needs this, because two fork dev servers cannot share `:5173`.
-- **Timing.** 1.4–5.6 s per fixture on a warm server; the first load after a server start took up to about 30 s (`pnpm tab-fixtures:smoke`, ticket 520).
-- **What it proves:** the fork's working tree, uncommitted edits included, renders the recorded result.
-- **What it does not prove:** that a run would give these figures today, fixed-width layout, or accessibility. Use `pnpm layout-gate:check` and `pnpm tab-review` for those.
+- **Timing.** 1.4–5.6 s per fixture on a warm server; the first load after a server start took up to about 30 s (`pnpm tab-fixtures:smoke`, ticket 520, measured on the recordings this folder held before).
+- **What it proves:** the fork's working tree, uncommitted edits included, renders the made-up result.
+- **What it does not prove:** that a run would give any figures like these, fixed-width layout, or accessibility. Use `pnpm layout-gate:check` and `pnpm tab-review` for those.
 - **Without a backend** the `:3333` calls are refused and the left Stats panel shows zeros. The results table is not affected.
 - **Other ways.** `?upgrades-dev` still shows a **Load fixture** file input, for a fixture kept outside this folder. A script can call `await window.__upgradesFixture(<parsed JSON>)`, which returns `{ ok: true, rows }` or `{ ok: false, reason }`.
 
@@ -43,140 +93,23 @@ run with `--config ../../scripts/tab-harness/vite.config.mjs`. **The local
 `vendor/tbc-new-fork/dist/` that the layout gate and `pnpm tab-review` build
 therefore contains the loader, and must not be served as a user build.**
 
-## Re-recording
+## Real results, by hand
 
-Recording needs a fork dev server that can run the sim: either
-`WASM_WORKER=1 node node_modules/vite/bin/vite.js serve --port 5173 --strictPort`
-in `vendor/tbc-new-fork` (the sim runs in the page; build it first with
-`make -C vendor/tbc-new-fork wasm`), or the plain dev server with the backend on
-`:3333`. It also needs a committed fork tree. With the backend on `:3333`, on
-2026-10-16 (fork `8cd8d1c80`, one recorder at a time) a run took 291–299 s for
-each feral-p3 fixture (686 candidates), 398 s for feral-p5 (962), 176 s for
-ret-p3 (794) and 200 s for feral-p2 (479); the recorder reports the time as
-`ranking.durationMs`. On the same day a `WASM_WORKER=1` run of
-feral-p3-p2bis (587 candidates) did not finish inside the recorder's 25-minute
-limit, so use the backend for the larger lists. Run one recording at a time:
-two recorders on one backend slowed each other enough that page loads timed
-out ("no preset phase tab", "gear not loaded").
-On 2026-10-20 (fork `c89b0b912`, backend on `:3333`, one recorder at a time)
-the eight runs took 353–370 s for each feral-p3 fixture (733 ranked items),
-446 s for feral-p5 (1005), 225 s for ret-p3 (962), 246 s for feral-p2 (536),
-85 s for warlock-p3 (572) and 648 s for enh-p3 (931). A first feral-p2 run
-that day did not settle inside the 25-minute limit; the retry settled in
-246 s (cause not found). Later that day (fork `5ec8def25`, the one-hander
-hold-out of ticket 700) the recorder's wall times were 274–283 s for each feral-p3 fixture
-(667 ranked items), 403 s for feral-p5 (909), 195 s for ret-p3 (894),
-215 s for feral-p2 (487), 95 s for warlock-p3 (572) and 554 s for enh-p3
-(931). At fork `b908771dd` (the reworded off-hand line) they were 304–327 s
-for each feral-p3 fixture, 398 s for feral-p5, 196 s for ret-p3, 226 s for
-feral-p2, 95 s for warlock-p3 and 577 s for enh-p3. Earlier the same day a
-feral-p3-th-hands-legs run at fork
-`3797dd6b4` also did not settle; ticket 703 tracks these.
-Each fixture's command:
+To look at a real render, for example for an owner review, record a real run
+with `pnpm tab-fixtures:record`. No gate, check or `pnpm verify` step runs the
+recorder. It writes to `.scratch/tab-recordings/<spec>-p<phase>-<name>.json`
+(gitignored), or under `--out <dir>`, and refuses an `--out` inside this
+folder. A recording needs a fork dev server that can run the sim (the backend
+on `:3333`, or `WASM_WORKER=1`) and a committed fork tree unless
+`--allow-dirty` is given; `node scripts/tab-fixtures/record.mjs --help` lists
+the flags. A run takes several minutes; ticket 703 tracks runs that never
+settle.
 
-```sh
-pnpm tab-fixtures:record --spec feral --phase 3 --name p2bis --preset-tab "Phase 2" --preset "BiS 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p2_6p.gear.json
-pnpm tab-fixtures:record --spec feral --phase 3 --name nordrassil4 --preset-tab "Phase 2" --preset "Alt 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p2_alt_6p.gear.json
-pnpm tab-fixtures:record --spec feral --phase 3 --name th-hands-legs --gear-url "<this fixture's gearUrl>" --expect-item-ids 8345,30017,29994,29966,30106,28545,29997,30052,30627,29383,32014,32387,30055,30101,31034,31044
-pnpm tab-fixtures:record --spec ret --phase 3 --name p2 --preset-tab "Phase 2" --preset "P2" --expect-gear-file ui/specs/paladin/retribution/gear_sets/p2.gear.json
-pnpm tab-fixtures:record --spec feral --phase 2 --name malorne4 --preset-tab "Phase 1" --preset "Alt 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p1_alt_6p.gear.json
-pnpm tab-fixtures:record --spec feral --phase 5 --name th4pc --preset-tab "Phase 4" --preset "BiS 6%" --expect-gear-file ui/specs/druid/feralcat/gear_sets/p4_6p.gear.json
-pnpm tab-fixtures:record --spec warlock --phase 3 --name t5 --preset "T5" --expect-gear-file ui/specs/warlock/dps/gear_sets/t5.gear.json
-pnpm tab-fixtures:record --spec enh --phase 3 --name p2 --preset "P2 Preset" --expect-gear-file ui/specs/shaman/enhancement/gear_sets/p2.gear.json
-```
+Render a recording with `pnpm tab-review` by naming its `.json` path in the
+manifest entry (`"fixture": ".scratch/tab-recordings/<file>.json"`), or open
+it through the **Load fixture** input above. Never copy one into this folder:
+`pnpm tab-fixtures:check` fails it.
 
-The warlock and enhancement presets declare no phase, so their Gear Sets
-picker has no phase tabs; those two commands leave out `--preset-tab`, and the
-recorder clicks the chip directly.
-
-`feral-p5-th4pc` wears Thunderheart 4pc (the Phase 4 "BiS 6%" preset) at
-page phase 5, so its ranking holds the phase-5 Thunderheart Wristguards,
-Waistguard and Treads (34444, 34556, 34573) as candidates (ticket 500).
-
-Test gear is the previous phase's preset at the next page phase, as for every
-live run and capture in this repo, with one exception: `th-hands-legs` wears
-Thunderheart Gauntlets and Leggings (31034, 31044), which are phase 3 items, at
-page phase 3. The recorder loads the preset or gear link, opens the Upgrades
-tab, and then sets the phase in the tab's own Phase selector.
-
-**Port worktree: `TBC_FORK_PORT=5174`.** A second checkout with its own fork
-runs its dev server on another port and sets `TBC_FORK_PORT` for every command
-above, for example `TBC_FORK_PORT=5174 pnpm tab-fixtures:record …`.
-
-**`th-hands-legs` is recorded from a gear link**, the `gearUrl` stored in the
-fixture, which names `localhost:5173`. With `TBC_FORK_PORT` set, the recorder
-opens the same link on that port instead and logs the rewritten link. The link
-was made on the old (pre-React) page. `--expect-item-ids` is the check that the
-React page decoded it: the recorder refuses to run when the worn gear lacks any
-of those 16 items. The fixture was re-recorded on the React tab
-(`recordedAt` 2026-10-07, `forkSha` 43e3963d), and its `gear.items` holds all
-16, so the React page decoded the old-page link at that fork commit.
-
-### Recording uncommitted fork code for review
-
-Two flags record a fork change before it is committed, for example so the owner
-can judge renders of it first:
-
-- `--out <dir>` writes the file to `<dir>` instead of this folder.
-- `--allow-dirty` records from an uncommitted fork tree. It is accepted only
-  with an `--out` folder other than `data/tab-fixtures`. The file gets
-  `forkDirty: true` and `forkDiffSha256`, the sha256 of the fork's
-  `git diff --binary HEAD` at the start of the run. The recorder refuses to
-  write if that diff, the fork's `git status` listing, or its HEAD changed
-  during the run.
-
-`pnpm tab-review` renders such a file when a manifest entry names it by its
-`.json` path. **Never copy one into `data/tab-fixtures/`**:
-`pnpm tab-fixtures:check` fails any fixture whose `forkDirty` is not `false`,
-because it names no commit that produced its figures. After the fork change is
-committed, re-record with the commands above.
-
-## Staleness: a warning, never a block
-
-`pnpm tab-fixtures:check` (part of `pnpm verify`) prints, for each fixture:
-
-```
-fixture <name>: recorded at <sha>; inputs changed since: <paths|none>
-```
-
-The inputs are the fork paths that can change a `Ranking`
-(`INPUT_PATHS` in `scripts/check_tab_fixtures.py`). Under
-`ui/features/upgrades/model/`: `engine/**` (except `view.ts` and the engine's
-test `fixtures/`), `adapters/**`, `data/**`, `pool_source.ts`, which builds the
-candidate pool from the wowsims db (ticket 505), `run.ts`, which builds the
-engine's input, and `settings_pool.ts`, whose `effectivePool` builds the pool
-`run.ts` hands the engine. Under `ui/features/upgrades/utils/`:
-`item_sources.ts`, which writes each candidate's `sources`, and
-`item_source.ts`, whose `overrunNpcKey` names a source's boss.
-
-The pool is built at run time from upstream wowsims files (ticket 505), so
-these upstream paths are inputs too:
-
-- `assets/database/**`, the item database, and `ui/sim/proto/database.ts`,
-  which loads it (and the leftover db when worn gear needs it).
-- `ui/specs/*/*/spec.ts`, `presets.ts` and `gear_sets/**`: which presets the
-  page offers and their items, which decide BiS tags and preset phases;
-  `ui/app/preset_utils.ts` and `ui/sim/constants/other.ts` set a preset's
-  phase.
-- `ui/sim/constants/missing_effects_auto_gen.ts`, the stub-only effects.
-- `ui/sim/proto/items.ts` (`canEquipItem`, `isPVPItem`) and what
-  `canEquipItem` reads: `ui/sim/player/classes/**`, `ui/sim/player/specs/**`
-  (except `spec_index.test.ts`), `player_class.ts` and `player_spec.ts`.
-- `ui/sim/proto/names.ts`, the profession and reputation names in sources.
-
-A listed path means
-the fixture may no longer match what a run would produce now. Read the diff and
-re-record when it changes what a run computes; a change that only affects
-rendering does not need one.
-
-The check fails (exit 1) only when a fixture cannot be read: a schema error, or
-a `forkSha` that the fork clone does not contain. It never fails on staleness.
-The fixtures exist to test layout, and a figure that is a few DPS out of date
-still lays out the same. A blocking rule would force a re-record of every
-fixture on every engine edit.
-
-**What the check cannot see.** A `Ranking` also depends on inputs outside those
-paths: the Go sim and the WASM built from it, and the proto sources (`proto/`,
-from which `ui/generated/proto/` is built; the pool reads enums such as item
-quality and dungeon difficulty from it). A change to any of these is not
-reported. Re-record by hand after one of them moves.
+The six real recordings that two engine tests read are frozen test data in
+`packages/core/test/fixtures/tab-recordings/`; its README says how they were
+recorded and how to update them.

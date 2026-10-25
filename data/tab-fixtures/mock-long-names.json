@@ -1,0 +1,611 @@
+{
+  "schemaVersion": 1,
+  "forkSha": "0000000000000000000000000000000000000000",
+  "forkDirty": false,
+  "madeUp": true,
+  "generator": "packages/core/test/tab-fixtures/make-mock-fixtures.ts",
+  "covers": "Long item names (60-80 characters) that must wrap only between words, and a removes-worn-item line.",
+  "spec": "mage",
+  "phase": 3,
+  "preset": "mage/dps/gear_sets/p2Arcane.gear.json",
+  "gear": {
+    "items": [
+      {
+        "id": 30206,
+        "enchant": 3002,
+        "gems": [
+          34220,
+          24047
+        ]
+      },
+      {
+        "id": 30015
+      },
+      {
+        "id": 30210,
+        "enchant": 2982,
+        "gems": [
+          24047,
+          28118
+        ]
+      },
+      {
+        "id": 29992,
+        "enchant": 2621
+      },
+      {
+        "id": 30196,
+        "enchant": 2661,
+        "gems": [
+          24047,
+          30551,
+          30600
+        ]
+      },
+      {
+        "id": 29918,
+        "enchant": 2650
+      },
+      {
+        "id": 29987,
+        "enchant": 2937
+      },
+      {
+        "id": 30038,
+        "gems": [
+          30586,
+          24047
+        ]
+      },
+      {
+        "id": 30207,
+        "enchant": 2748,
+        "gems": [
+          24047
+        ]
+      },
+      {
+        "id": 30067,
+        "enchant": 2940
+      },
+      {
+        "id": 29287
+      },
+      {
+        "id": 29302
+      },
+      {
+        "id": 30720
+      },
+      {
+        "id": 29370
+      },
+      {
+        "id": 29988,
+        "enchant": 2671
+      },
+      {},
+      {
+        "id": 28783
+      }
+    ]
+  },
+  "recordedAt": "1970-01-01T00:00:00.000Z",
+  "iterations": 0,
+  "ranking": {
+    "contentHash": "made-up:mock-long-names",
+    "cutoff": {
+      "absDps": 3
+    },
+    "fight": {
+      "reportCode": "made-up",
+      "fightId": 0,
+      "encounterName": "Made-up fixture",
+      "route": "report-events"
+    },
+    "baseline": {
+      "dps": 1600,
+      "stdev": 120,
+      "metaAdjusted": false
+    },
+    "assumptions": {
+      "maxPhase": 3,
+      "seeds": [
+        1,
+        2,
+        3
+      ],
+      "iterations": 0,
+      "race": "RaceGnome",
+      "presetId": "mage/made-up",
+      "standing": []
+    },
+    "substitutions": [],
+    "caps": {
+      "hit": {
+        "rating": 83.31,
+        "capRating": 141.92,
+        "gap": 58.61,
+        "capUncertainty": 15.77,
+        "assumedRace": "RaceGnome",
+        "talentHitAssumed": {
+          "talent": "Precision",
+          "points": 3,
+          "maxPoints": 3
+        }
+      },
+      "expertise": {
+        "rating": 95,
+        "capRating": null,
+        "gap": null
+      }
+    },
+    "items": [
+      {
+        "rank": 1,
+        "itemId": 21848,
+        "name": "Spellfire Robe of the Sun-Forged Ancient Vanguard Eternal Watcher",
+        "slot": "chest",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 39.5,
+        "deltaPct": 2.47,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 552,
+          "setName": "Wrath of Spellfire",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": 3,
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": 39.5,
+          "singleBreaks": [
+            {
+              "setId": 649,
+              "setName": "Tirisfal Regalia",
+              "threshold": 4,
+              "dps": 23
+            }
+          ],
+          "futureBonuses": [
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 21846,
+                  "name": "Spellfire Belt"
+                },
+                {
+                  "itemId": 21847,
+                  "name": "Spellfire Gloves"
+                }
+              ],
+              "stepGearDps": 52,
+              "stepGearSe": 2
+            }
+          ]
+        }
+      },
+      {
+        "rank": 2,
+        "itemId": 29287,
+        "name": "Violet Signet of the Archmage of the Sun-Forged Vanguard Eternal",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 37.61,
+        "deltaPct": 2.35,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 3,
+        "itemId": 21846,
+        "name": "Spellfire Belt of the Sun-Forged Eternal Watcher Crimson Legion",
+        "slot": "waist",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 35.71,
+        "deltaPct": 2.23,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "owned": true
+      },
+      {
+        "rank": 4,
+        "itemId": 28410,
+        "name": "General's Silk Footguards of the Sun-Forged Watcher Crimson Legion",
+        "slot": "feet",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 33.82,
+        "deltaPct": 2.11,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [
+          "Alt"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 5,
+        "itemId": 28785,
+        "name": "The Lightning Capacitor of the Sun-Forged Crimson Legion Twilight",
+        "slot": "trinket",
+        "slotChoice": "trinket2",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Terestian Illhoof"
+        },
+        "deltaDps": 31.92,
+        "deltaPct": 2,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "sources": [
+          {
+            "kind": "raid",
+            "zone": "Karazhan",
+            "boss": "Terestian Illhoof"
+          },
+          {
+            "kind": "heroic",
+            "dungeon": "The Shattered Halls"
+          },
+          {
+            "kind": "pvp",
+            "via": "arena"
+          }
+        ]
+      },
+      {
+        "rank": 6,
+        "itemId": 29079,
+        "name": "Pauldrons of the Aldor of the Sun-Forged Legion Twilight Sentinel",
+        "slot": "shoulder",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 30.03,
+        "deltaPct": 1.88,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 7,
+        "itemId": 28783,
+        "name": "Eredar Wand of Obliteration of the Sun-Forged Twilight Sentinel",
+        "slot": "ranged",
+        "source": {
+          "kind": "raid",
+          "zone": "Magtheridon's Lair",
+          "boss": "Magtheridon"
+        },
+        "deltaDps": 28.13,
+        "deltaPct": 1.76,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 8,
+        "itemId": 28770,
+        "name": "Nathrezim Mindblade of the Sun-Forged Sentinel Ascendant Kingdom",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
+        },
+        "deltaDps": 26.24,
+        "deltaPct": 1.64,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 9,
+        "itemId": 28134,
+        "name": "Brooch of Heightened Potential of the Sun-Forged Ascendant Kingdom",
+        "slot": "neck",
+        "source": {
+          "kind": "raid",
+          "zone": "Shadow Labyrinth",
+          "boss": "Blackheart the Inciter"
+        },
+        "deltaDps": 24.34,
+        "deltaPct": 1.52,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 10,
+        "itemId": 28766,
+        "name": "Ruby Drape of the Mysticant of the Sun-Forged Kingdom Starlight",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
+        },
+        "deltaDps": 22.45,
+        "deltaPct": 1.4,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 11,
+        "itemId": 28411,
+        "name": "General's Silk Cuffs of the Sun-Forged Starlight Warden Ancient",
+        "slot": "wrist",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 20.55,
+        "deltaPct": 1.28,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 12,
+        "itemId": 25777,
+        "name": "Ogre Slayer's Cover of the Sun-Forged Warden Ancient Vanguard",
+        "slot": "back",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 18.66,
+        "deltaPct": 1.17,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 13,
+        "itemId": 29172,
+        "name": "Ashyen's Gift of the Sun-Forged Ancient Vanguard Eternal Watcher",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "rep",
+          "faction": "Faction 942",
+          "standing": "Friendly"
+        },
+        "deltaDps": 16.76,
+        "deltaPct": 1.05,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 14,
+        "itemId": 21847,
+        "name": "Spellfire Gloves of the Sun-Forged Vanguard Eternal Watcher Crimson",
+        "slot": "hands",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 14.87,
+        "deltaPct": 0.93,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 15,
+        "itemId": 28762,
+        "name": "Adornment of Stolen Souls of the Sun-Forged Eternal Watcher Crimson",
+        "slot": "neck",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
+        },
+        "deltaDps": 12.97,
+        "deltaPct": 0.81,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 16,
+        "itemId": 27683,
+        "name": "Quagmirran's Eye of the Sun-Forged Watcher Crimson Legion Twilight",
+        "slot": "trinket",
+        "slotChoice": "trinket2",
+        "source": {
+          "kind": "raid",
+          "zone": "The Slave Pens",
+          "boss": "Quagmirran"
+        },
+        "deltaDps": 11.08,
+        "deltaPct": 0.69,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 17,
+        "itemId": 28227,
+        "name": "Sparking Arcanite Ring of the Sun-Forged Crimson Legion Twilight",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "raid",
+          "zone": "Old Hillsbrad Foothills",
+          "boss": "Epoch Hunter"
+        },
+        "deltaDps": 9.18,
+        "deltaPct": 0.57,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 18,
+        "itemId": 29271,
+        "name": "Talisman of Kalecgos of the Sun-Forged Legion Twilight Sentinel",
+        "slot": "weapon",
+        "slotChoice": "offhand",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 7.29,
+        "deltaPct": 0.46,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "removedItems": [
+          {
+            "itemId": 29988,
+            "slot": "mainhand"
+          }
+        ]
+      },
+      {
+        "rank": 19,
+        "itemId": 29078,
+        "name": "Legwraps of the Aldor of the Sun-Forged Twilight Sentinel Ascendant",
+        "slot": "legs",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 5.39,
+        "deltaPct": 0.34,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 20,
+        "itemId": 24262,
+        "name": "Spellstrike Pants of the Sun-Forged Sentinel Ascendant Kingdom",
+        "slot": "legs",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 3.5,
+        "deltaPct": 0.22,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": null,
+        "itemId": 29076,
+        "name": "Collar of the Aldor of the Sun-Forged Ascendant Kingdom Starlight",
+        "slot": "head",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 2.9,
+        "deltaPct": 0.18,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 28793,
+        "name": "Band of Crimson Fury of the Sun-Forged Kingdom Starlight Warden",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 1.57,
+        "deltaPct": 0.1,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29155,
+        "name": "Stormcaller of the Sun-Forged Starlight Warden Ancient Vanguard",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "rep",
+          "faction": "Faction 947",
+          "standing": "Friendly"
+        },
+        "deltaDps": 0.23,
+        "deltaPct": 0.01,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 28517,
+        "name": "Boots of Foretelling of the Sun-Forged Warden Ancient Vanguard",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Maiden of Virtue"
+        },
+        "deltaDps": -1.1,
+        "deltaPct": -0.07,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      }
+    ],
+    "complete": true,
+    "durationMs": 60000
+  }
+}

@@ -382,9 +382,12 @@ export function startRunExpression() {
 }
 
 // ---------------------------------------------------------------------------
-// Recorded fixtures (ticket 504): a finished Ranking recorded from a real run
-// in the main repo (data/tab-fixtures/). The page's loader exists only on the
-// dev server and in builds made with VITE_TBC_TAB_FIXTURES=1.
+// Tab fixtures: a finished Ranking the page loads without a run. The files in
+// data/tab-fixtures/ are made up by `pnpm tab-fixtures:mock`, one per UI
+// difference between specs, each loaded on its own spec's page; a recording
+// made by hand (`pnpm tab-fixtures:record`) loads the same way. The page's
+// loader exists only on the dev server and in builds made with
+// VITE_TBC_TAB_FIXTURES=1.
 // ---------------------------------------------------------------------------
 
 export const PAGE_PATH_BY_SPEC = {
@@ -392,6 +395,10 @@ export const PAGE_PATH_BY_SPEC = {
   feral: "/tbc/druid/feralcat/",
   warlock: "/tbc/warlock/dps/",
   enh: "/tbc/shaman/enhancement/",
+  rogue: "/tbc/rogue/dps/",
+  hunter: "/tbc/hunter/dps/",
+  mage: "/tbc/mage/dps/",
+  warrior: "/tbc/warrior/dps/",
 };
 export const FIXTURE_DEADLINE_MS = 30000;
 

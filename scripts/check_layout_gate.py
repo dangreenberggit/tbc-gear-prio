@@ -95,7 +95,7 @@ Exit codes: 0 = ok (ran green, or skipped for any reason above); 1 = the gate
 ran and MEASURED a failure -- a broken layout OR an unbaselined critical/serious
 accessibility violation (test-layout.mjs exits 1 for either, and this
 script blocks on any measured nonzero exit, so the a11y ratchet needs no branch
-here), or the gate would run but its tab fixture is missing or unreadable; 2 = a
+here), or the gate would run but a tab fixture is missing or unreadable; 2 = a
 real error (could not read a tracked source file that the record
 expects, or could not read the harness's Chromium build).
 
@@ -118,7 +118,7 @@ from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import NamedTuple
 
-from check_tab_fixtures import FIXTURE_DIR, check_fixture
+from check_tab_fixtures import FIXTURE_DIR, check_fixture, fixture_paths
 
 ROOT = Path(__file__).resolve().parents[1]
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
@@ -238,9 +238,10 @@ MODULE_SUFFIXES = (".ts", ".tsx", ".css")
 
 # Files outside the fork source that decide what the gate measures, hashed by
 # ROOT-relative name (never through `_rel`, which is fork-relative). The
-# recorded tab fixtures (ticket 504) are what the fixture pass renders, and the
-# harness files are the assertions themselves: editing one changes the gate's
-# verdict without touching a line of tab source. `rows.mjs` is the row reader
+# made-up tab fixtures (data/tab-fixtures/*.json, from `pnpm tab-fixtures:mock`)
+# are what the fixture pass renders, and the harness files are the assertions
+# themselves: editing one changes the gate's verdict without touching a line of
+# tab source. `rows.mjs` is the row reader
 # `test-layout.mjs` and `test-tab-harness.mjs` import (ticket 580).
 # `chromium.mjs` decides which browser the harness launches; the build it
 # resolves is hashed too (`_chromium_build`), because a `playwright` bump
@@ -252,9 +253,6 @@ ROOT_GATE_FILES = (
     "scripts/tab-harness/test-tab-harness.mjs",
     "scripts/tab-harness/test-review.mjs",
 )
-# The fixture the fixture pass renders unless `--fixture` names another: feral
-# on the Phase 2 BiS preset at page phase 3, which has set rows.
-DEFAULT_FIXTURE = FIXTURE_DIR / "feral-p3-p2bis.json"
 
 
 def _iter_root_gate_files() -> list[Path]:
@@ -433,8 +431,8 @@ def write_baseline(digest: str) -> None:
         "It also covers, by repo-relative name, the gate's own harness "
         "(scripts/tab-harness/chromium.mjs, rows.mjs, test-layout.mjs, "
         "test-tab-harness.mjs, test-review.mjs; rows.mjs by ticket 580), the "
-        "recorded tab fixtures the fixture pass renders (data/tab-fixtures/*.json, "
-        "ticket 504), and the Chromium build the harness launches: the chromium "
+        "made-up tab fixtures the fixture pass renders (data/tab-fixtures/*.json, "
+        "from `pnpm tab-fixtures:mock`), and the Chromium build the harness launches: the chromium "
         "entry of the browsers.json in the playwright-core that the pinned "
         "playwright resolves (`chromium.mjs --build`), so a playwright bump "
         "that changes the browser moves the digest. "
@@ -702,9 +700,9 @@ def run_gate(fixture: Path | None = None) -> GateResult:
 
     rc is 0 (the gate ran green), 1 (the gate MEASURED and something is broken
     -- layout OR a11y; the gate script's own exit 1 covers both), or
-    GATE_UNMEASURED (it never measured a width, so it learned nothing about the
-    tab and nothing may be blamed on it -- and nothing may be recorded as tested
-    either).
+    GATE_UNMEASURED (it stopped before it measured the whole tab, and no check
+    it ran failed, so nothing may be blamed on it -- and nothing may be
+    recorded as tested either).
 
     Caller has checked prereqs.
     """
@@ -727,7 +725,10 @@ def run_gate(fixture: Path | None = None) -> GateResult:
     env = dict(os.environ)
     if A11Y_BASELINE_PATH.is_file():
         env["TBC_A11Y_BASELINE"] = str(A11Y_BASELINE_PATH)
-    # The fixture pass (ticket 504) runs only when a fixture is handed down.
+    # With no fixture handed down the harness renders every file in
+    # data/tab-fixtures, which is what the digest covers, so an inherited
+    # TBC_TAB_FIXTURE must not narrow it to one.
+    env.pop("TBC_TAB_FIXTURE", None)
     if fixture is not None:
         env["TBC_TAB_FIXTURE"] = str(fixture)
     # stdout is teed rather than buffered: each line is echoed as it arrives so
@@ -768,20 +769,23 @@ def run_gate(fixture: Path | None = None) -> GateResult:
         )
         return GateResult(1, None, None)
 
-    if v.get("outcome") == "unmeasured":
+    failed = v.get("failed") if isinstance(v.get("failed"), int) else None
+    # The harness reports "measured" whenever a check failed, but a verdict
+    # that says "unmeasured" and still counts failures is read as a failure
+    # too: a failure that was measured must never become a skip.
+    if v.get("outcome") == "unmeasured" and not failed:
         reason = v.get("reason") or "no reason reported"
         print(
             f"layout gate: SKIPPED -- test-layout.mjs exited {proc.returncode} "
-            "without measuring any width, so it learned nothing about the tab's "
-            f"layout. Reason: {reason}. This is a prereq/environment problem, "
+            "before it measured the whole tab, and no check it ran failed. "
+            f"Reason: {reason}. This is a prereq/environment problem, "
             "not a layout failure, and does not block the merge. The baseline "
             "is left where it is, so the gate stays armed for the next attempt."
         )
         return GateResult(GATE_UNMEASURED, None, None)
 
-    layout_failed = v.get("failed") if isinstance(v.get("failed"), int) else None
     a11y_failed = v.get("a11yFailed") if isinstance(v.get("a11yFailed"), int) else None
-    return GateResult(1, layout_failed, a11y_failed)
+    return GateResult(1, failed, a11y_failed)
 
 
 def _skip(msg: str) -> int:
@@ -944,25 +948,28 @@ def run(
             f"(recorded {baseline[:12]}..., now {digest[:12]}...) -- running the gate."
         )
 
-    # Defaulted here, not in main(), so `merge_to_dev.py`'s direct call gets the
-    # fixture pass too.
-    if fixture is None and DEFAULT_FIXTURE.is_file():
-        fixture = DEFAULT_FIXTURE
-    # A missing or unreadable fixture fails rather than skips: the fixture pass
-    # is what measures the result rows, so a green run without it would record
-    # an untested digest as tested (review round 10, finding A1).
-    if fixture is None:
+    # Read here, not in main(), so `merge_to_dev.py`'s direct call gets the
+    # fixture pass too. No fixture, or an unreadable one, fails rather than
+    # skips: the fixture pass is what measures the result rows, so a green run
+    # without it would record an untested digest as tested (review round 10,
+    # finding A1).
+    files = [fixture] if fixture is not None else fixture_paths()
+    if not files:
         print(
-            "layout gate: FAILED -- no tab fixture on disk, so the post-run "
-            "checks cannot run; the baseline is not advanced."
+            "layout gate: FAILED -- no made-up fixtures in data/tab-fixtures "
+            "(run pnpm tab-fixtures:mock); the baseline is not advanced."
         )
         return 1
-    fixture_readable, fixture_line = check_fixture(fixture)
-    print(f"layout gate: {fixture_line}")
-    if not fixture_readable:
+    unreadable = 0
+    for path in files:
+        fixture_readable, fixture_line = check_fixture(path)
+        print(f"layout gate: {fixture_line}")
+        if not fixture_readable:
+            unreadable += 1
+    if unreadable:
         print(
-            "layout gate: FAILED -- the tab fixture is unreadable; the baseline "
-            "is not advanced."
+            f"layout gate: FAILED -- {unreadable} tab fixture(s) unreadable; the "
+            "baseline is not advanced."
         )
         return 1
 
@@ -970,6 +977,16 @@ def run(
     if result.rc == GATE_UNMEASURED:
         # Nothing was measured. Do not block, and do NOT advance the baseline:
         # recording an untested digest as tested would skip the gate forever.
+        return 0
+    if result.rc == 0 and fixture is not None:
+        # The digest covers every file in data/tab-fixtures, and this run
+        # rendered one, so recording it would let the next merge skip the
+        # others (review finding A2).
+        print(
+            f"\nlayout gate: PASSED for {fixture.name} only. The baseline is not "
+            "advanced: it covers every fixture in data/tab-fixtures, so only a "
+            "run without --fixture advances it."
+        )
         return 0
     if result.rc == 0:
         write_baseline(digest)
@@ -1028,8 +1045,10 @@ def main() -> int:
         type=Path,
         default=None,
         help=(
-            "the recorded tab fixture the fixture pass renders (default: "
-            "data/tab-fixtures/feral-p3-p2bis.json when it exists)"
+            "one tab fixture for the fixture pass to render (default: every "
+            "made-up fixture in data/tab-fixtures/). A green run with this "
+            "never advances the baseline, because the baseline covers every "
+            "fixture."
         ),
     )
     args = ap.parse_args()

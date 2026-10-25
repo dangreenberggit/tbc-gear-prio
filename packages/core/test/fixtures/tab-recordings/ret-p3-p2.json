@@ -10,10 +10,7 @@
       {
         "id": 32461,
         "enchant": 3003,
-        "gems": [
-          32409,
-          30546
-        ]
+        "gems": [32409, 30546]
       },
       {
         "id": 30022
@@ -21,9 +18,7 @@
       {
         "id": 30055,
         "enchant": 2986,
-        "gems": [
-          24027
-        ]
+        "gems": [24027]
       },
       {
         "id": 30098,
@@ -32,19 +27,12 @@
       {
         "id": 30129,
         "enchant": 2661,
-        "gems": [
-          24027,
-          30584,
-          28363
-        ]
+        "gems": [24027, 30584, 28363]
       },
       {
         "id": 28795,
         "enchant": 2647,
-        "gems": [
-          31118,
-          28362
-        ]
+        "gems": [31118, 28362]
       },
       {
         "id": 29947,
@@ -52,10 +40,7 @@
       },
       {
         "id": 30106,
-        "gems": [
-          24027,
-          24027
-        ]
+        "gems": [24027, 24027]
       },
       {
         "id": 30257,
@@ -64,10 +49,7 @@
       {
         "id": 30104,
         "enchant": 2657,
-        "gems": [
-          24027,
-          24027
-        ]
+        "gems": [24027, 24027]
       },
       {
         "id": 30061
@@ -112,13 +94,7 @@
     },
     "assumptions": {
       "maxPhase": 3,
-      "seeds": [
-        11,
-        3011,
-        6011,
-        9011,
-        12011
-      ],
+      "seeds": [11, 3011, 6011, 9011, 12011],
       "iterations": 3000,
       "race": "RaceBloodElf",
       "presetId": "ret/current-page-settings",
@@ -185,17 +161,9 @@
         "deltaPct": 2.131471599488819,
         "se": 0.9870011642880834,
         "seMethod": "paired-replicate",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": false,
         "sources": [
           {
@@ -266,17 +234,9 @@
         "deltaPct": 0.9745702749933971,
         "se": 0.1165726409511946,
         "seMethod": "paired-replicate",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": false,
         "sources": [
           {
@@ -299,15 +259,9 @@
         "deltaPct": 0.7765572112954078,
         "se": 0.05954483647021386,
         "seMethod": "paired-replicate",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "Bulwark"
-        ],
-        "bisSets": [
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["Bulwark"],
+        "bisSets": ["Bulwark"],
         "belowCutoff": false,
         "sources": [
           {
@@ -330,17 +284,9 @@
         "deltaPct": 0.6492178286171374,
         "se": 2.2021008551009653,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": false,
         "sources": [
           {
@@ -363,17 +309,9 @@
         "deltaPct": 0.5493917218324214,
         "se": 2.206682426443714,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": false,
         "sources": [
           {
@@ -403,17 +341,9 @@
         "deltaPct": 0.5252046772971299,
         "se": 1.2593624573226274,
         "seMethod": "paired-replicate",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": false,
         "sources": [
           {
@@ -682,17 +612,9 @@
         "deltaPct": 0.30556723204752534,
         "se": 2.253408116840057,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": false,
         "sources": [
           {
@@ -813,15 +735,9 @@
         "deltaPct": 0.15833773087624653,
         "se": 2.1907414729366055,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P3"
-        ],
-        "bisSets": [
-          "P3"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P3"],
+        "bisSets": ["P3"],
         "belowCutoff": false,
         "sources": [
           {
@@ -1127,19 +1043,9 @@
         "deltaPct": 0,
         "se": 2.1905250800374607,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P1",
-          "P2",
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P1", "P2", "P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1163,20 +1069,9 @@
         "deltaPct": 0,
         "se": 2.1905250800374607,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "Pre-raid",
-          "P1",
-          "P2",
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["Pre-raid", "P1", "P2", "P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1200,18 +1095,9 @@
         "deltaPct": 0,
         "se": 2.1905250800374607,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P2",
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P2", "P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1235,18 +1121,9 @@
         "deltaPct": 0,
         "se": 2.1905250800374607,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P2",
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P2", "P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1270,18 +1147,9 @@
         "deltaPct": 0,
         "se": 2.1905250800374607,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P2",
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P2", "P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1306,18 +1174,9 @@
         "deltaPct": 0,
         "se": 2.1905250800374607,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P2",
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P2", "P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1340,20 +1199,9 @@
         "deltaPct": 0,
         "se": 2.1905250800374607,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "Pre-raid",
-          "P1",
-          "P2",
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["Pre-raid", "P1", "P2", "P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1377,9 +1225,7 @@
         "se": 2.1905250800374607,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P2"
-        ],
+        "curatedSets": ["P2"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1405,10 +1251,7 @@
         "se": 2.1905250800374607,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P1",
-          "P2"
-        ],
+        "curatedSets": ["P1", "P2"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1434,9 +1277,7 @@
         "se": 2.1905250800374607,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P2"
-        ],
+        "curatedSets": ["P2"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1463,9 +1304,7 @@
         "se": 2.1905250800374607,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P2"
-        ],
+        "curatedSets": ["P2"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1491,9 +1330,7 @@
         "se": 2.1905250800374607,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P2"
-        ],
+        "curatedSets": ["P2"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1521,9 +1358,7 @@
         "se": 2.1905250800374607,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P2"
-        ],
+        "curatedSets": ["P2"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1559,11 +1394,7 @@
         "se": 2.1905250800374607,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid",
-          "P1",
-          "P2"
-        ],
+        "curatedSets": ["Pre-raid", "P1", "P2"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1586,9 +1417,7 @@
         "se": 2.1905250800374607,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P2"
-        ],
+        "curatedSets": ["P2"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1611,17 +1440,9 @@
         "deltaPct": -0.008077198942869138,
         "se": 2.1905987037197883,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "P3",
-          "Bulwark"
-        ],
-        "bisSets": [
-          "P3",
-          "Bulwark"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["P3", "Bulwark"],
+        "bisSets": ["P3", "Bulwark"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1808,10 +1629,7 @@
         "se": 2.187801139302875,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid",
-          "P1"
-        ],
+        "curatedSets": ["Pre-raid", "P1"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1955,9 +1773,7 @@
         "se": 2.1883385665678503,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P1"
-        ],
+        "curatedSets": ["P1"],
         "belowCutoff": true,
         "sources": [
           {
@@ -2074,9 +1890,7 @@
         "se": 2.1866496741634003,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid"
-        ],
+        "curatedSets": ["Pre-raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -2100,9 +1914,7 @@
         "se": 2.1855373093142445,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P1"
-        ],
+        "curatedSets": ["P1"],
         "belowCutoff": true,
         "sources": [
           {
@@ -2304,9 +2116,7 @@
         "se": 2.1844844129089744,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid"
-        ],
+        "curatedSets": ["Pre-raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -3051,9 +2861,7 @@
         "se": 2.1793570693313535,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P1"
-        ],
+        "curatedSets": ["P1"],
         "belowCutoff": true,
         "sources": [
           {
@@ -3154,9 +2962,7 @@
         "se": 2.181685077862516,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid"
-        ],
+        "curatedSets": ["Pre-raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -3264,9 +3070,7 @@
         "se": 2.178807451525339,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid"
-        ],
+        "curatedSets": ["Pre-raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -3468,9 +3272,7 @@
         "se": 2.146590839557686,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P1"
-        ],
+        "curatedSets": ["P1"],
         "belowCutoff": true,
         "sources": [
           {
@@ -4813,9 +4615,7 @@
         "se": 2.107805424645425,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid"
-        ],
+        "curatedSets": ["Pre-raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -5055,9 +4855,7 @@
         "se": 2.1725218771692494,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid"
-        ],
+        "curatedSets": ["Pre-raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -5684,9 +5482,7 @@
         "se": 2.1258685511604334,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P1"
-        ],
+        "curatedSets": ["P1"],
         "belowCutoff": true,
         "sources": [
           {
@@ -5721,9 +5517,7 @@
         "se": 2.165258734116662,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid"
-        ],
+        "curatedSets": ["Pre-raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -6110,9 +5904,7 @@
         "se": 2.170920686774097,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P1"
-        ],
+        "curatedSets": ["P1"],
         "belowCutoff": true,
         "sources": [
           {
@@ -6217,9 +6009,7 @@
         "se": 2.1714560398140614,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid"
-        ],
+        "curatedSets": ["Pre-raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -9841,10 +9631,7 @@
         "se": 2.147433471001539,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid",
-          "P1"
-        ],
+        "curatedSets": ["Pre-raid", "P1"],
         "belowCutoff": true,
         "sources": [
           {
@@ -10191,9 +9978,7 @@
         "se": 2.129533481817637,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid"
-        ],
+        "curatedSets": ["Pre-raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -11519,9 +11304,7 @@
         "se": 2.176429890873741,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P1"
-        ],
+        "curatedSets": ["P1"],
         "belowCutoff": true,
         "sources": [
           {
@@ -12064,9 +11847,7 @@
         "se": 2.1939813667764967,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "P1"
-        ],
+        "curatedSets": ["P1"],
         "belowCutoff": true,
         "sources": [
           {
@@ -15082,9 +14863,7 @@
         "se": 2.1795312041812025,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-raid"
-        ],
+        "curatedSets": ["Pre-raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -23088,9 +22867,7 @@
         "setName": "Crystalforge Battlegear",
         "threshold": 2,
         "piecesWorn": 1,
-        "packageItemIds": [
-          30132
-        ],
+        "packageItemIds": [30132],
         "packageDeltaDps": 0,
         "unmeasured": "unmeasurable-at-this-worn-count"
       },
@@ -23099,10 +22876,7 @@
         "setName": "Crystalforge Battlegear",
         "threshold": 3,
         "piecesWorn": 1,
-        "packageItemIds": [
-          30131,
-          30132
-        ],
+        "packageItemIds": [30131, 30132],
         "packageDeltaDps": 0,
         "sameGearDps": 0,
         "sameGearSe": 3.1560857719905324,
@@ -23113,11 +22887,7 @@
         "setName": "Crystalforge Battlegear",
         "threshold": 4,
         "piecesWorn": 1,
-        "packageItemIds": [
-          30131,
-          30133,
-          30132
-        ],
+        "packageItemIds": [30131, 30133, 30132],
         "packageDeltaDps": 0,
         "sameGearDps": 1.462204087714781,
         "sameGearSe": 3.1697966020413944,
@@ -23128,12 +22898,7 @@
         "setName": "Crystalforge Battlegear",
         "threshold": 5,
         "piecesWorn": 1,
-        "packageItemIds": [
-          30131,
-          30133,
-          30130,
-          30132
-        ],
+        "packageItemIds": [30131, 30133, 30130, 30132],
         "packageDeltaDps": 0,
         "sameGearDps": 0,
         "sameGearSe": 3.2032340877431182,
@@ -23162,10 +22927,7 @@
         "setName": "Lightbringer Battlegear",
         "threshold": 2,
         "piecesWorn": 0,
-        "packageItemIds": [
-          30990,
-          30993
-        ],
+        "packageItemIds": [30990, 30993],
         "packageDeltaDps": 0,
         "sameGearDps": -1.8329410471405936,
         "sameGearSe": 3.177603272481864,
@@ -23176,11 +22938,7 @@
         "setName": "Lightbringer Battlegear",
         "threshold": 3,
         "piecesWorn": 0,
-        "packageItemIds": [
-          30997,
-          30990,
-          30993
-        ],
+        "packageItemIds": [30997, 30990, 30993],
         "packageDeltaDps": 0,
         "sameGearDps": 0,
         "sameGearSe": 3.2384151207364997,
@@ -23191,12 +22949,7 @@
         "setName": "Lightbringer Battlegear",
         "threshold": 4,
         "piecesWorn": 0,
-        "packageItemIds": [
-          30989,
-          30997,
-          30990,
-          30993
-        ],
+        "packageItemIds": [30989, 30997, 30990, 30993],
         "packageDeltaDps": 0,
         "sameGearDps": 0,
         "sameGearSe": 3.202436580799247,
@@ -23207,13 +22960,7 @@
         "setName": "Lightbringer Battlegear",
         "threshold": 5,
         "piecesWorn": 0,
-        "packageItemIds": [
-          30989,
-          30997,
-          30990,
-          30982,
-          30993
-        ],
+        "packageItemIds": [30989, 30997, 30990, 30982, 30993],
         "packageDeltaDps": 0,
         "sameGearDps": 0,
         "sameGearSe": 3.282218513576462,
@@ -23478,11 +23225,7 @@
           "setId": 552,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            21848,
-            21847,
-            21846
-          ],
+          "packageItemIds": [21848, 21847, 21846],
           "pair": {
             "dps": 2.349283474129379,
             "pairedSe": 0.01396762468428291
@@ -23496,11 +23239,7 @@
           "setId": 553,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            21869,
-            21871,
-            21870
-          ],
+          "packageItemIds": [21869, 21871, 21870],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -23514,11 +23253,7 @@
           "setId": 554,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            21874,
-            21875,
-            21873
-          ],
+          "packageItemIds": [21874, 21875, 21873],
           "pair": {
             "dps": 1.3047691573533484,
             "pairedSe": 4.657598870436302
@@ -23532,11 +23267,7 @@
           "setId": 557,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            21864,
-            21865,
-            21863
-          ],
+          "packageItemIds": [21864, 21865, 21863],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -23550,10 +23281,7 @@
           "setId": 559,
           "worn": 0,
           "reach": 2,
-          "packageItemIds": [
-            24266,
-            24262
-          ],
+          "packageItemIds": [24266, 24262],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -23567,10 +23295,7 @@
           "setId": 566,
           "worn": 0,
           "reach": 2,
-          "packageItemIds": [
-            33173,
-            23522
-          ],
+          "packageItemIds": [33173, 23522],
           "pair": {
             "dps": 7.172647722987222,
             "pairedSe": 2.4362573968651327
@@ -23584,10 +23309,7 @@
           "setId": 571,
           "worn": 0,
           "reach": 2,
-          "packageItemIds": [
-            24264,
-            24261
-          ],
+          "packageItemIds": [24264, 24261],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -23601,10 +23323,7 @@
           "setId": 572,
           "worn": 0,
           "reach": 2,
-          "packageItemIds": [
-            24267,
-            24263
-          ],
+          "packageItemIds": [24267, 24263],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -23618,12 +23337,7 @@
           "setId": 582,
           "worn": 0,
           "reach": 4,
-          "packageItemIds": [
-            33697,
-            33699,
-            33695,
-            33698
-          ],
+          "packageItemIds": [33697, 33699, 33695, 33698],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -23637,12 +23351,7 @@
           "setId": 583,
           "worn": 0,
           "reach": 4,
-          "packageItemIds": [
-            33751,
-            33753,
-            33749,
-            33752
-          ],
+          "packageItemIds": [33751, 33753, 33749, 33752],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -23656,11 +23365,7 @@
           "setId": 616,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            29515,
-            29517,
-            29516
-          ],
+          "packageItemIds": [29515, 29517, 29516],
           "pair": {
             "dps": 34.05504281939238,
             "pairedSe": 7.160305221434404
@@ -23674,11 +23379,7 @@
           "setId": 617,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            29519,
-            29521,
-            29520
-          ],
+          "packageItemIds": [29519, 29521, 29520],
           "pair": {
             "dps": 3.1944169084908935,
             "pairedSe": 0.017707322144865395
@@ -23692,11 +23393,7 @@
           "setId": 618,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            29522,
-            29523,
-            29524
-          ],
+          "packageItemIds": [29522, 29523, 29524],
           "pair": {
             "dps": 3.494402496717612,
             "pairedSe": 4.1314119386474895
@@ -23710,11 +23407,7 @@
           "setId": 619,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            29525,
-            29527,
-            29526
-          ],
+          "packageItemIds": [29525, 29527, 29526],
           "pair": {
             "dps": 14.175553138427631,
             "pairedSe": 0.04888720006751172
@@ -23728,13 +23421,7 @@
           "setId": 624,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            29061,
-            29064,
-            29062,
-            29065,
-            29063
-          ],
+          "packageItemIds": [29061, 29064, 29062, 29065, 29063],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -23748,13 +23435,7 @@
           "setId": 625,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            29068,
-            29070,
-            29066,
-            29067,
-            29069
-          ],
+          "packageItemIds": [29068, 29070, 29066, 29067, 29069],
           "pair": {
             "dps": 40.76114748834607,
             "pairedSe": 0.19681237139725832
@@ -23768,13 +23449,7 @@
           "setId": 626,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            29073,
-            29075,
-            29071,
-            29072,
-            29074
-          ],
+          "packageItemIds": [29073, 29075, 29071, 29072, 29074],
           "pair": {
             "dps": -0.493893918572212,
             "pairedSe": 0.30888070690324243
@@ -23788,13 +23463,7 @@
           "setId": 627,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            30136,
-            30138,
-            30134,
-            30135,
-            30137
-          ],
+          "packageItemIds": [30136, 30138, 30134, 30135, 30137],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -23808,13 +23477,7 @@
           "setId": 628,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            30125,
-            30127,
-            30123,
-            30124,
-            30126
-          ],
+          "packageItemIds": [30125, 30127, 30123, 30124, 30126],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -23828,12 +23491,7 @@
           "setId": 629,
           "worn": 1,
           "reach": 5,
-          "packageItemIds": [
-            30131,
-            30133,
-            30130,
-            30132
-          ],
+          "packageItemIds": [30131, 30133, 30130, 30132],
           "pair": {
             "dps": -3.5968941774217456,
             "pairedSe": 9.838486860763732
@@ -23847,10 +23505,7 @@
           "setId": 667,
           "worn": 0,
           "reach": 2,
-          "packageItemIds": [
-            31338,
-            31339
-          ],
+          "packageItemIds": [31338, 31339],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -23864,13 +23519,7 @@
           "setId": 679,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            30987,
-            30998,
-            30991,
-            30985,
-            30995
-          ],
+          "packageItemIds": [30987, 30998, 30991, 30985, 30995],
           "pair": {
             "dps": 1.427040049183006,
             "pairedSe": 2.3046728229883566
@@ -23884,13 +23533,7 @@
           "setId": 680,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            30989,
-            30997,
-            30990,
-            30982,
-            30993
-          ],
+          "packageItemIds": [30989, 30997, 30990, 30982, 30993],
           "pair": {
             "dps": -18.050443672720576,
             "pairedSe": 9.975499974723993
@@ -23904,13 +23547,7 @@
           "setId": 681,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            30988,
-            30996,
-            30992,
-            30983,
-            30994
-          ],
+          "packageItemIds": [30988, 30996, 30992, 30983, 30994],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -23924,12 +23561,7 @@
           "setId": 690,
           "worn": 0,
           "reach": 4,
-          "packageItemIds": [
-            33724,
-            33726,
-            33722,
-            33725
-          ],
+          "packageItemIds": [33724, 33726, 33722, 33725],
           "pair": {
             "dps": 0,
             "pairedSe": 0

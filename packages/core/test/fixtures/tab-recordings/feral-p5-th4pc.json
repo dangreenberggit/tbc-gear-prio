@@ -17,10 +17,7 @@
       {
         "id": 31048,
         "enchant": 2986,
-        "gems": [
-          32194,
-          32194
-        ]
+        "gems": [32194, 32194]
       },
       {
         "id": 29994,
@@ -29,47 +26,31 @@
       {
         "id": 31042,
         "enchant": 2661,
-        "gems": [
-          32194,
-          32194,
-          32194
-        ]
+        "gems": [32194, 32194, 32194]
       },
       {
         "id": 33881,
         "enchant": 2647,
-        "gems": [
-          32194
-        ]
+        "gems": [32194]
       },
       {
         "id": 31034,
         "enchant": 2564,
-        "gems": [
-          32194
-        ]
+        "gems": [32194]
       },
       {
         "id": 30106,
-        "gems": [
-          32194,
-          32194
-        ]
+        "gems": [32194, 32194]
       },
       {
         "id": 31044,
         "enchant": 3012,
-        "gems": [
-          32194
-        ]
+        "gems": [32194]
       },
       {
         "id": 32366,
         "enchant": 2939,
-        "gems": [
-          32194,
-          32194
-        ]
+        "gems": [32194, 32194]
       },
       {
         "id": 29301,
@@ -116,13 +97,7 @@
     },
     "assumptions": {
       "maxPhase": 5,
-      "seeds": [
-        11,
-        3011,
-        6011,
-        9011,
-        12011
-      ],
+      "seeds": [11, 3011, 6011, 9011, 12011],
       "iterations": 3000,
       "race": "RaceNightElf",
       "presetId": "feral/current-page-settings",
@@ -184,15 +159,9 @@
         "deltaPct": 5.017946091699067,
         "se": 1.0561991337457903,
         "seMethod": "paired-replicate",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": false,
         "sources": [
           {
@@ -294,15 +263,9 @@
         "deltaPct": 0.8325753400346704,
         "se": 0.7297847298753479,
         "seMethod": "paired-replicate",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": false,
         "sources": [
           {
@@ -352,15 +315,9 @@
         "deltaPct": 0.5496972251221602,
         "se": 0.7319220691081845,
         "seMethod": "paired-replicate",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": false,
         "sources": [
           {
@@ -382,15 +339,9 @@
         "deltaPct": 0.4215245586168952,
         "se": 0.0028591322761564028,
         "seMethod": "paired-replicate",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": false,
         "sources": [
           {
@@ -415,15 +366,9 @@
         "deltaPct": 0.4078560364909954,
         "se": 1.5342644376138894,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": false,
         "sources": [
           {
@@ -459,15 +404,9 @@
         "deltaPct": 0.4026540280866251,
         "se": 1.509871213037127,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": false,
         "sources": [
           {
@@ -558,15 +497,9 @@
         "deltaPct": 0.14300038157645856,
         "se": 1.5118060121222474,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": false,
         "sources": [
           {
@@ -593,15 +526,9 @@
         "deltaPct": 0.11947175183864966,
         "se": 1.4761327139554383,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": false,
         "sources": [
           {
@@ -668,19 +595,9 @@
         "deltaPct": 0,
         "se": 1.5052308469305005,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "BiS 6%",
-          "BiS 9%",
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS 6%", "BiS 9%", "BiS 6%", "BiS 9%", "BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": true,
         "sources": [
           {
@@ -715,9 +632,7 @@
         "deltaPct": 0,
         "se": 1.5052308469305005,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
         "curatedSets": [
           "BiS 6%",
           "BiS 9%",
@@ -729,9 +644,7 @@
           "BiS 9%",
           "BiS"
         ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisSets": ["BiS"],
         "belowCutoff": true,
         "sources": [
           {
@@ -793,11 +706,7 @@
         "se": 1.5052308469305005,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "BiS 6%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "BiS 6%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -822,12 +731,7 @@
         "se": 1.5052308469305005,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "Alt 6%",
-          "BiS 6%",
-          "BiS 6%"
-        ],
+        "curatedSets": ["BiS 6%", "Alt 6%", "BiS 6%", "BiS 6%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -926,12 +830,7 @@
         "se": 1.5052308469305005,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -971,12 +870,7 @@
         "se": 1.5052308469305005,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1016,12 +910,7 @@
         "se": 1.5052308469305005,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1059,12 +948,7 @@
         "se": 1.5052308469305005,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1090,12 +974,7 @@
         "se": 1.5052308469305005,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1120,10 +999,7 @@
         "se": 1.5052308469305005,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1148,12 +1024,7 @@
         "se": 1.5052308469305005,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1179,10 +1050,7 @@
         "se": 1.5052308469305005,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1207,12 +1075,7 @@
         "se": 1.5052308469305005,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1236,15 +1099,9 @@
         "deltaPct": -0.08772135317349522,
         "se": 1.4557890450875395,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1506,15 +1363,9 @@
         "deltaPct": -0.3900588097609711,
         "se": 1.5199570953677628,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1537,11 +1388,7 @@
         "se": 1.5020737481975341,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Realistic 9%",
-          "BiS 9%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["Realistic 9%", "BiS 9%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1635,9 +1482,7 @@
         "se": 1.4934975382254339,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%"
-        ],
+        "curatedSets": ["BiS 6%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1702,15 +1547,9 @@
         "deltaPct": -0.4712267125483827,
         "se": 1.4708299221981571,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1801,10 +1640,7 @@
         "se": 1.5016804323312687,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 9%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 9%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -1827,9 +1663,7 @@
         "se": 1.5014053297873708,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-Raid"
-        ],
+        "curatedSets": ["Pre-Raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -2008,12 +1842,7 @@
         "se": 1.5237563276029122,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "Alt 6%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "Alt 6%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -2036,12 +1865,7 @@
         "se": 1.5169231201406954,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "Alt 6%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "Alt 6%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -2064,15 +1888,9 @@
         "deltaPct": -0.5967102334135252,
         "se": 1.4446513082527126,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": true,
         "sources": [
           {
@@ -2189,10 +2007,7 @@
         "se": 1.4988886655943534,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Realistic 6%",
-          "BiS 6%"
-        ],
+        "curatedSets": ["Realistic 6%", "BiS 6%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -2376,12 +2191,7 @@
         "se": 1.4981349244473954,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "Alt 6%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "Alt 6%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -2538,12 +2348,7 @@
         "se": 1.5147084943970566,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-Raid",
-          "Realistic 6%",
-          "BiS 6%",
-          "Alt 6%"
-        ],
+        "curatedSets": ["Pre-Raid", "Realistic 6%", "BiS 6%", "Alt 6%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -2745,11 +2550,7 @@
         "se": 1.4922683204045422,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -2821,15 +2622,9 @@
         "deltaPct": -0.9027389719495065,
         "se": 1.539361852306216,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": true,
         "sources": [
           {
@@ -2866,10 +2661,7 @@
         "se": 1.4971620058110309,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 9%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 9%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -3094,12 +2886,7 @@
         "se": 1.4946055082511516,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Realistic 9%",
-          "BiS 9%",
-          "Alt 6%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["Realistic 9%", "BiS 9%", "Alt 6%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -3220,9 +3007,7 @@
         "se": 1.507311064812797,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-Raid"
-        ],
+        "curatedSets": ["Pre-Raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -3866,10 +3651,7 @@
         "se": 1.4855164450339844,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -4173,11 +3955,7 @@
         "se": 1.5214711261066522,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Realistic 6%",
-          "Realistic 9%",
-          "Alt 6%"
-        ],
+        "curatedSets": ["Realistic 6%", "Realistic 9%", "Alt 6%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -4623,12 +4401,7 @@
         "se": 1.4742598557603999,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%",
-          "Alt 6%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%", "Alt 6%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -6073,15 +5846,9 @@
         "deltaPct": -2.2826178992592547,
         "se": 1.614580993826322,
         "seMethod": "independent",
-        "bisTags": [
-          "BiS"
-        ],
-        "curatedSets": [
-          "BiS"
-        ],
-        "bisSets": [
-          "BiS"
-        ],
+        "bisTags": ["BiS"],
+        "curatedSets": ["BiS"],
+        "bisSets": ["BiS"],
         "belowCutoff": true,
         "sources": [
           {
@@ -11302,10 +11069,7 @@
         "se": 1.4565039239076538,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -11826,10 +11590,7 @@
         "se": 1.4221016091081724,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -11921,12 +11682,7 @@
         "se": 1.4316178935223058,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Realistic 6%",
-          "Realistic 9%",
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["Realistic 6%", "Realistic 9%", "BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -11954,10 +11710,7 @@
         "se": 1.4405517411790276,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Alt 6%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["Alt 6%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -12606,10 +12359,7 @@
         "se": 1.4390953162997466,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Alt 6%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["Alt 6%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -12969,9 +12719,7 @@
         "se": 1.4291747049935395,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Pre-Raid"
-        ],
+        "curatedSets": ["Pre-Raid"],
         "belowCutoff": true,
         "sources": [
           {
@@ -13103,10 +12851,7 @@
         "se": 1.44254904434464,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Alt 6%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["Alt 6%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -13173,9 +12918,7 @@
         "se": 1.4659720222650565,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%"
-        ],
+        "curatedSets": ["BiS 6%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -13269,10 +13012,7 @@
         "se": 1.4451897694736324,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Alt 6%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["Alt 6%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -14161,10 +13901,7 @@
         "se": 1.4380364053943007,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Alt 6%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["Alt 6%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -15044,10 +14781,7 @@
         "se": 1.4808087989289143,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "BiS 6%",
-          "BiS 9%"
-        ],
+        "curatedSets": ["BiS 6%", "BiS 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -15888,10 +15622,7 @@
         "se": 1.454991783861872,
         "seMethod": "independent",
         "bisTags": [],
-        "curatedSets": [
-          "Alt 6%",
-          "Alt 9%"
-        ],
+        "curatedSets": ["Alt 6%", "Alt 9%"],
         "belowCutoff": true,
         "sources": [
           {
@@ -24334,11 +24065,7 @@
           "setId": 552,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            21848,
-            21847,
-            21846
-          ],
+          "packageItemIds": [21848, 21847, 21846],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24352,11 +24079,7 @@
           "setId": 553,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            21869,
-            21871,
-            21870
-          ],
+          "packageItemIds": [21869, 21871, 21870],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24370,11 +24093,7 @@
           "setId": 554,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            21874,
-            21875,
-            21873
-          ],
+          "packageItemIds": [21874, 21875, 21873],
           "pair": {
             "dps": -3.1940725926024243,
             "pairedSe": 3.3109307831590353
@@ -24388,11 +24107,7 @@
           "setId": 557,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            21864,
-            21865,
-            21863
-          ],
+          "packageItemIds": [21864, 21865, 21863],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24406,10 +24121,7 @@
           "setId": 559,
           "worn": 0,
           "reach": 2,
-          "packageItemIds": [
-            24266,
-            24262
-          ],
+          "packageItemIds": [24266, 24262],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24423,10 +24135,7 @@
           "setId": 571,
           "worn": 0,
           "reach": 2,
-          "packageItemIds": [
-            24264,
-            24261
-          ],
+          "packageItemIds": [24264, 24261],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24440,10 +24149,7 @@
           "setId": 572,
           "worn": 0,
           "reach": 2,
-          "packageItemIds": [
-            24267,
-            24263
-          ],
+          "packageItemIds": [24267, 24263],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24457,12 +24163,7 @@
           "setId": 584,
           "worn": 0,
           "reach": 4,
-          "packageItemIds": [
-            34999,
-            35001,
-            35002,
-            35000
-          ],
+          "packageItemIds": [34999, 35001, 35002, 35000],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24476,12 +24177,7 @@
           "setId": 585,
           "worn": 0,
           "reach": 4,
-          "packageItemIds": [
-            35112,
-            35114,
-            33771,
-            33769
-          ],
+          "packageItemIds": [35112, 35114, 33771, 33769],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24495,11 +24191,7 @@
           "setId": 618,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            29522,
-            29523,
-            29524
-          ],
+          "packageItemIds": [29522, 29523, 29524],
           "pair": {
             "dps": -2.1873501151967503,
             "pairedSe": 2.5851310905801435
@@ -24513,11 +24205,7 @@
           "setId": 619,
           "worn": 0,
           "reach": 3,
-          "packageItemIds": [
-            29525,
-            29527,
-            29526
-          ],
+          "packageItemIds": [29525, 29527, 29526],
           "pair": {
             "dps": 13.673453753625836,
             "pairedSe": 0.023241975205480506
@@ -24531,13 +24219,7 @@
           "setId": 638,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            29086,
-            29089,
-            29087,
-            29090,
-            29088
-          ],
+          "packageItemIds": [29086, 29089, 29087, 29090, 29088],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24551,13 +24233,7 @@
           "setId": 639,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            29093,
-            29095,
-            29091,
-            29092,
-            29094
-          ],
+          "packageItemIds": [29093, 29095, 29091, 29092, 29094],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24571,13 +24247,7 @@
           "setId": 640,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            29098,
-            29100,
-            29096,
-            29097,
-            29099
-          ],
+          "packageItemIds": [29098, 29100, 29096, 29097, 29099],
           "pair": {
             "dps": 116.05185079051489,
             "pairedSe": 7.041890503271106
@@ -24591,13 +24261,7 @@
           "setId": 641,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            30228,
-            30230,
-            30222,
-            30223,
-            30229
-          ],
+          "packageItemIds": [30228, 30230, 30222, 30223, 30229],
           "pair": {
             "dps": 37.25586841014865,
             "pairedSe": 0.15719371863853732
@@ -24611,13 +24275,7 @@
           "setId": 642,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            30219,
-            30221,
-            30216,
-            30217,
-            30220
-          ],
+          "packageItemIds": [30219, 30221, 30216, 30217, 30220],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24631,13 +24289,7 @@
           "setId": 643,
           "worn": 0,
           "reach": 5,
-          "packageItemIds": [
-            30233,
-            30235,
-            30231,
-            30232,
-            30234
-          ],
+          "packageItemIds": [30233, 30235, 30231, 30232, 30234],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24651,10 +24303,7 @@
           "setId": 667,
           "worn": 0,
           "reach": 2,
-          "packageItemIds": [
-            31338,
-            31339
-          ],
+          "packageItemIds": [31338, 31339],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24668,12 +24317,7 @@
           "setId": 676,
           "worn": 4,
           "reach": 8,
-          "packageItemIds": [
-            31039,
-            34444,
-            34556,
-            34573
-          ],
+          "packageItemIds": [31039, 34444, 34556, 34573],
           "pair": {
             "dps": 0,
             "pairedSe": 0
@@ -24688,14 +24332,7 @@
           "worn": 0,
           "reach": 8,
           "packageItemIds": [
-            31040,
-            31049,
-            31043,
-            34446,
-            31035,
-            34555,
-            31046,
-            34572
+            31040, 31049, 31043, 34446, 31035, 34555, 31046, 34572
           ],
           "pair": {
             "dps": 0,
@@ -24711,14 +24348,7 @@
           "worn": 0,
           "reach": 8,
           "packageItemIds": [
-            31037,
-            31047,
-            31041,
-            34445,
-            31032,
-            34554,
-            31045,
-            34571
+            31037, 31047, 31041, 34445, 31032, 34554, 31045, 34571
           ],
           "pair": {
             "dps": 0,
@@ -24733,12 +24363,7 @@
           "setId": 685,
           "worn": 0,
           "reach": 4,
-          "packageItemIds": [
-            35023,
-            33693,
-            31379,
-            31377
-          ],
+          "packageItemIds": [35023, 33693, 31379, 31377],
           "pair": {
             "dps": 0,
             "pairedSe": 0

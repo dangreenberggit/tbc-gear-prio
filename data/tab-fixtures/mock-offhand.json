@@ -1,0 +1,654 @@
+{
+  "schemaVersion": 1,
+  "forkSha": "0000000000000000000000000000000000000000",
+  "forkDirty": false,
+  "madeUp": true,
+  "generator": "packages/core/test/tab-fixtures/make-mock-fixtures.ts",
+  "covers": "Off-hand rows: weapons ranked for the off-hand slot beside main-hand rows.",
+  "spec": "rogue",
+  "phase": 3,
+  "preset": "rogue/dps/gear_sets/p2.gear.json",
+  "gear": {
+    "items": [
+      {
+        "id": 30146,
+        "enchant": 3003,
+        "gems": [
+          32409,
+          33131
+        ]
+      },
+      {
+        "id": 29381
+      },
+      {
+        "id": 30149,
+        "enchant": 2986,
+        "gems": [
+          24051,
+          24051
+        ]
+      },
+      {
+        "id": 28672,
+        "enchant": 368
+      },
+      {
+        "id": 30101,
+        "enchant": 2661,
+        "gems": [
+          24051,
+          24051,
+          31118
+        ]
+      },
+      {
+        "id": 29966,
+        "enchant": 1593,
+        "gems": [
+          24051
+        ]
+      },
+      {
+        "id": 30145,
+        "enchant": 2564
+      },
+      {
+        "id": 30106,
+        "gems": [
+          30553,
+          30549
+        ]
+      },
+      {
+        "id": 30148,
+        "enchant": 3012,
+        "gems": [
+          24051
+        ]
+      },
+      {
+        "id": 28545,
+        "enchant": 2939,
+        "gems": [
+          30556,
+          24051
+        ]
+      },
+      {
+        "id": 30052
+      },
+      {
+        "id": 29997
+      },
+      {
+        "id": 28830
+      },
+      {
+        "id": 30450
+      },
+      {
+        "id": 30082,
+        "enchant": 2673
+      },
+      {
+        "id": 32027,
+        "enchant": 2673
+      },
+      {
+        "id": 29949
+      }
+    ]
+  },
+  "recordedAt": "1970-01-01T00:00:00.000Z",
+  "iterations": 0,
+  "ranking": {
+    "contentHash": "made-up:mock-offhand",
+    "cutoff": {
+      "absDps": 3
+    },
+    "fight": {
+      "reportCode": "made-up",
+      "fightId": 0,
+      "encounterName": "Made-up fixture",
+      "route": "report-events"
+    },
+    "baseline": {
+      "dps": 1850,
+      "stdev": 120,
+      "metaAdjusted": false
+    },
+    "assumptions": {
+      "maxPhase": 3,
+      "seeds": [
+        1,
+        2,
+        3
+      ],
+      "iterations": 0,
+      "race": "RaceHuman",
+      "presetId": "rogue/made-up",
+      "standing": []
+    },
+    "substitutions": [],
+    "caps": {
+      "hit": {
+        "rating": 83.31,
+        "capRating": 141.92,
+        "gap": 58.61,
+        "capUncertainty": 15.77,
+        "assumedRace": "RaceHuman",
+        "talentHitAssumed": {
+          "talent": "Precision",
+          "points": 3,
+          "maxPoints": 3
+        }
+      },
+      "expertise": {
+        "rating": 95,
+        "capRating": null,
+        "gap": null
+      }
+    },
+    "items": [
+      {
+        "rank": 1,
+        "itemId": 27925,
+        "name": "Ravenclaw Band",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "raid",
+          "zone": "Sethekk Halls",
+          "boss": "Talon King Ikiss"
+        },
+        "deltaDps": 39.5,
+        "deltaPct": 2.14,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 2,
+        "itemId": 28741,
+        "name": "Skulker's Greaves",
+        "slot": "legs",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Netherspite"
+        },
+        "deltaDps": 37.61,
+        "deltaPct": 2.03,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "sources": [
+          {
+            "kind": "raid",
+            "zone": "Karazhan",
+            "boss": "Netherspite"
+          },
+          {
+            "kind": "heroic",
+            "dungeon": "The Shattered Halls"
+          },
+          {
+            "kind": "pvp",
+            "via": "arena"
+          }
+        ]
+      },
+      {
+        "rank": 3,
+        "itemId": 25686,
+        "name": "Fel Leather Boots",
+        "slot": "feet",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 35.71,
+        "deltaPct": 1.93,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "owned": true
+      },
+      {
+        "rank": 4,
+        "itemId": 28649,
+        "name": "Garona's Signet Ring",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "The Curator"
+        },
+        "deltaDps": 33.82,
+        "deltaPct": 1.83,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [
+          "Alt"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 5,
+        "itemId": 32838,
+        "name": "Warglaive of Azzinoth",
+        "slot": "weapon",
+        "slotChoice": "offhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Black Temple",
+          "boss": "Illidan Stormrage"
+        },
+        "deltaDps": 31.92,
+        "deltaPct": 1.73,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 6,
+        "itemId": 28772,
+        "name": "Sunfury Bow of the Phoenix",
+        "slot": "ranged",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
+        },
+        "deltaDps": 30.03,
+        "deltaPct": 1.62,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 7,
+        "itemId": 29044,
+        "name": "Netherblade Facemask",
+        "slot": "head",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 28.13,
+        "deltaPct": 1.52,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 8,
+        "itemId": 24114,
+        "name": "Braided Eternium Chain",
+        "slot": "neck",
+        "source": {
+          "kind": "crafted",
+          "profession": "Jewelcrafting"
+        },
+        "deltaDps": 26.24,
+        "deltaPct": 1.42,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 9,
+        "itemId": 28224,
+        "name": "Wastewalker Helm",
+        "slot": "head",
+        "source": {
+          "kind": "raid",
+          "zone": "Old Hillsbrad Foothills",
+          "boss": "Epoch Hunter"
+        },
+        "deltaDps": 24.34,
+        "deltaPct": 1.32,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 10,
+        "itemId": 28757,
+        "name": "Ring of a Thousand Marks",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
+        },
+        "deltaDps": 22.45,
+        "deltaPct": 1.21,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 11,
+        "itemId": 28189,
+        "name": "Latro's Shifting Sword",
+        "slot": "weapon",
+        "slotChoice": "offhand",
+        "source": {
+          "kind": "raid",
+          "zone": "The Black Morass",
+          "boss": "Aeonus"
+        },
+        "deltaDps": 20.55,
+        "deltaPct": 1.11,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 12,
+        "itemId": 27531,
+        "name": "Wastewalker Gloves",
+        "slot": "hands",
+        "source": {
+          "kind": "raid",
+          "zone": "The Shattered Halls",
+          "boss": "Warchief Kargath Bladefist"
+        },
+        "deltaDps": 18.66,
+        "deltaPct": 1.01,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 659,
+          "setName": "Wastewalker Armor",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": 2,
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": 18.66,
+          "singleBreaks": [
+            {
+              "setId": 622,
+              "setName": "Deathmantle",
+              "threshold": 4,
+              "dps": 19.5
+            }
+          ],
+          "futureBonuses": [
+            {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 27797,
+                  "name": "Wastewalker Shoulderpads"
+                }
+              ],
+              "stepGearDps": 31.16,
+              "stepGearSe": 2
+            },
+            {
+              "threshold": 4,
+              "piecesNeeded": 4,
+              "dps": 33,
+              "sameGearDps": 33,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 27797,
+                  "name": "Wastewalker Shoulderpads"
+                },
+                {
+                  "itemId": 27837,
+                  "name": "Wastewalker Leggings"
+                },
+                {
+                  "itemId": 28224,
+                  "name": "Wastewalker Helm"
+                }
+              ],
+              "breaks": [
+                {
+                  "setId": 622,
+                  "setName": "Deathmantle",
+                  "threshold": 2,
+                  "dps": 14.5
+                }
+              ],
+              "stepGearDps": 37.16,
+              "stepGearSe": 2
+            }
+          ]
+        }
+      },
+      {
+        "rank": 13,
+        "itemId": 24259,
+        "name": "Vengeance Wrap",
+        "slot": "back",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 16.76,
+        "deltaPct": 0.91,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 14,
+        "itemId": 32027,
+        "name": "Merciless Gladiator's",
+        "slot": "weapon",
+        "slotChoice": "offhand",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 14.87,
+        "deltaPct": 0.8,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 15,
+        "itemId": 28288,
+        "name": "Abacus of Violent Odds",
+        "slot": "trinket",
+        "slotChoice": "trinket1",
+        "source": {
+          "kind": "raid",
+          "zone": "The Mechanar",
+          "boss": "Pathaleon the Calculator"
+        },
+        "deltaDps": 12.97,
+        "deltaPct": 0.7,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 16,
+        "itemId": 28264,
+        "name": "Wastewalker Tunic",
+        "slot": "chest",
+        "source": {
+          "kind": "raid",
+          "zone": "The Blood Furnace",
+          "boss": "Keli'dan the Breaker"
+        },
+        "deltaDps": 11.08,
+        "deltaPct": 0.6,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 17,
+        "itemId": 28672,
+        "name": "Drape of the Dark Reavers",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Shade of Aran"
+        },
+        "deltaDps": 9.18,
+        "deltaPct": 0.5,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 18,
+        "itemId": 25685,
+        "name": "Fel Leather Gloves",
+        "slot": "hands",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 7.29,
+        "deltaPct": 0.39,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 19,
+        "itemId": 27797,
+        "name": "Wastewalker Shoulderpads",
+        "slot": "shoulder",
+        "source": {
+          "kind": "raid",
+          "zone": "Auchenai Crypts",
+          "boss": "Avatar of the Martyred"
+        },
+        "deltaDps": 5.39,
+        "deltaPct": 0.29,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 20,
+        "itemId": 28830,
+        "name": "Dragonspine Trophy",
+        "slot": "trinket",
+        "slotChoice": "trinket1",
+        "source": {
+          "kind": "raid",
+          "zone": "Gruul's Lair",
+          "boss": "Gruul the Dragonkiller"
+        },
+        "deltaDps": 3.5,
+        "deltaPct": 0.19,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": null,
+        "itemId": 28545,
+        "name": "Edgewalker Longboots",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Moroes"
+        },
+        "deltaDps": 2.9,
+        "deltaPct": 0.16,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29124,
+        "name": "Vindicator's Brand",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 1.57,
+        "deltaPct": 0.08,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 28295,
+        "name": "Gladiator's Slicer",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 0.23,
+        "deltaPct": 0.01,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 27837,
+        "name": "Wastewalker Leggings",
+        "slot": "legs",
+        "source": {
+          "kind": "raid",
+          "zone": "Mana-Tombs",
+          "boss": "Nexus-Prince Shaffar"
+        },
+        "deltaDps": -1.1,
+        "deltaPct": -0.06,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      }
+    ],
+    "complete": true,
+    "durationMs": 60000
+  }
+}

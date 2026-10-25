@@ -11,7 +11,7 @@
 // Manifest: { entries: [ {
 //   ticket:       string, unique per entry (it names the PNG files);
 //   state:        "pre-run" (the retribution page, no run) |
-//                 "post-run" (a recorded fixture loaded, no sim);
+//                 "post-run" (a made-up fixture loaded, no sim);
 //   fixture:      post-run only: a name in TBC_TAB_FIXTURE_DIR, or a .json path;
 //   widths:       number[];
 //   interactions: [ {click: sel} | {hover: sel} | {wait: ms} | {snapshot: label} ]
