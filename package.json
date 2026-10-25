@@ -19,7 +19,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "rank": "tsx packages/core/src/cli.ts",
+    "rank": "node --import tsx packages/core/src/cli.ts",
     "web:dev": "pnpm -C apps/web dev",
     "tab:dev": "node scripts/dev-tab.mjs both",
     "tab:backend": "node scripts/dev-tab.mjs backend",
