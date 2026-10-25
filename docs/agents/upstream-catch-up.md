@@ -151,16 +151,33 @@ paragraph). It writes only the temporary index file, never the working tree
 or the real index:
 
 ```bash
-GIT_INDEX_FILE=$TMPDIR/catchup.idx git -C <fork> read-tree -m <OLD_PIN> HEAD <TARGET_SHA>
-GIT_INDEX_FILE=$TMPDIR/catchup.idx git -C <fork> ls-files -u | cut -f2 | sort -u
+GIT_INDEX_FILE=$TMPDIR/catchup.idx git -C <fork> read-tree -m --aggressive <OLD_PIN> HEAD <TARGET_SHA>
+GIT_INDEX_FILE=$TMPDIR/catchup.idx git -C <fork> ls-files -u | awk -F'\t' '
+  { split($1, f, " "); s[$2] = s[$2] f[3] }
+  END { k["123"] = "content"; k["12"] = "modify/delete (upstream deleted it)"
+        k["13"] = "modify/delete (fork deleted it)"; k["23"] = "add/add"
+        for (p in s) print ((s[p] in k) ? k[s[p]] : "stages " s[p]) "\t" p }' | sort
 rm $TMPDIR/catchup.idx
 git -C <fork> diff --name-status -M --diff-filter=R <OLD_PIN> <TARGET_SHA>
 ```
 
-The second line lists every path that the two sides changed differently, or
-that one side deleted and the other changed, including paths that a content
-merge would resolve. It does not detect renames, so the last line lists
-upstream's. A file the fork added
+The second command prints one line per path that the merge cannot settle
+without looking inside the file: a label, a tab, then the path. `ls-files -u`
+gives each such path one row per stage (1 is `<OLD_PIN>`, 2 the fork, 3
+upstream), and the label names the set of stages present:
+
+- `content`: both sides changed the file, in different ways. A real merge may
+  still resolve it line by line.
+- `modify/delete (upstream deleted it)` or `modify/delete (fork deleted it)`:
+  one side deleted the file and the other side changed it.
+- `add/add`: both sides added the file with different content.
+- `stages <digits>`: any other set.
+
+`--aggressive` settles a path that one side deleted and the other side left
+unchanged, so such a path is not printed. If every label is `content`,
+continue. Any other label is a stop, as the routine section's step 1 says for
+`pnpm fork:upstream-status`. The dry run does not detect renames, so the last
+line lists upstream's. A file the fork added
 (`git -C <fork> diff --name-only --diff-filter=A <OLD_PIN> HEAD`) in a folder
 that upstream renamed is a location conflict: stop, as the routine section's
 step 1 says. `pnpm fork:upstream-status` (that step 1) calls
@@ -398,10 +415,17 @@ edit — **red by design**, read the message rather than chasing it.
 The exporter line must run in the fork's folder: tsx resolves the fork's
 `@sim/...` imports from that folder's `tsconfig.json`
 (`<fork>/ui/features/upgrades/tools/README.md`). The `universe:assemble` line
-runs once per `(spec, phase)` pair present under `<pair>/data/universes/`. It
-rewrites the tracked `<pair>/data/weapon-type-exclusions.json` from the
-builder's own spec profiles (`scripts/assemble_universe.py`, docstring), so a
-catch-up leaves that file unchanged; a change there is a finding to explain.
+runs once per `(spec, phase)` pair present under `<pair>/data/universes/`.
+Each run also rewrites the tracked `<pair>/data/weapon-type-exclusions.json`
+for every spec (`write_exclusions_manifest` in
+`<pair>/scripts/assemble_universe.py`). For each spec,
+`excluded_weapon_types_for` lists every weapon type that some db.json item has
+and that no item in the spec's `data/equip-eligibility.json` list has, plus
+the spec's policy exclusions in `SPEC_PROFILES`. So a catch-up changes the
+file when db.json gains or loses a weapon type, or when the regenerated
+eligibility file gives a spec its first item of a weapon type or takes away
+its last one. If the file changes, say in the commit body which spec and
+weapon type moved and which db.json or eligibility change caused it.
 Reconcile the changed universes, reports and listings against the §2
 prediction as §3 says. Tests
 that pin a universe's size, such as `packages/core/test/pool.test.ts` and
