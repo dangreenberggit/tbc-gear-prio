@@ -1,10 +1,13 @@
 #!/usr/bin/env node
-// `format:check` over the files git tracks, not `prettier --check .`. A
-// sandboxed Claude Code session mounts unreadable stand-ins for untracked
+// `format:check` over the top-level entries git tracks, not `prettier --check
+// .`. A sandboxed Claude Code session mounts unreadable stand-ins for untracked
 // dotfiles (.bashrc, .idea, .mcp.json, ...) in the folder it starts in, and
 // `prettier --check .` fails on them with EACCES (seen 2026-10-24 in the main
-// checkout). Trade-off: untracked files are no longer checked here; lint-staged
-// (.lintstagedrc) still formats every staged file at commit.
+// checkout). Prettier still walks each tracked folder, so untracked files inside
+// one are checked, as before. Untracked entries at the repo root, where the
+// mounts are, are not; lint-staged (.lintstagedrc) still formats every staged
+// file at commit. Passing every tracked file instead checks the same 492 files
+// but took 6.2 s against 2.1 s (warm cache, main checkout, 2026-10-24).
 import { spawnSync } from "node:child_process";
 import { lstatSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -18,11 +21,20 @@ if (listed.error || listed.status !== 0) {
   process.exit(1);
 }
 
-// A tracked file deleted in the working tree is not an error here, but prettier
-// exits 2 on an explicit path that does not exist.
-const files = listed.stdout.split("\0").filter((path) => {
+// A tracked entry deleted in the working tree is not an error here, but
+// prettier exits 2 on an explicit path that does not exist.
+const topLevel = [
+  ...new Set(
+    listed.stdout
+      .split("\0")
+      .filter(Boolean)
+      .map((path) => path.split("/")[0])
+  ),
+];
+const entries = topLevel.filter((entry) => {
   try {
-    return lstatSync(path).isFile();
+    const stat = lstatSync(entry);
+    return stat.isFile() || stat.isDirectory();
   } catch {
     return false;
   }
@@ -34,34 +46,15 @@ const prettierBin = join(
   "bin/prettier.cjs"
 );
 
-// Windows caps a command line at 32,767 characters and the tracked paths add up
-// to far more, so batch there. Elsewhere one run is faster: 6.7 s against 8.2 s
-// for 30,000-character batches, warm cache, 2026-10-24.
-const MAX_CHARS = process.platform === "win32" ? 30_000 : Infinity;
-const batches = [];
-let chars = 0;
-for (const path of files) {
-  if (batches.length === 0 || chars + path.length + 1 > MAX_CHARS) {
-    batches.push([]);
-    chars = 0;
-  }
-  batches.at(-1).push(path);
-  chars += path.length + 1;
-}
-
-let worst = 0;
-for (const batch of batches) {
-  const run = spawnSync(
-    process.execPath,
-    [prettierBin, "--cache", "--check", "--ignore-unknown", ...batch],
-    { stdio: "inherit" }
+const run = spawnSync(
+  process.execPath,
+  [prettierBin, "--cache", "--check", "--ignore-unknown", ...entries],
+  { stdio: "inherit" }
+);
+if (run.error) {
+  console.error(
+    `format_check_tracked: could not run prettier: ${run.error.message}`
   );
-  if (run.error) {
-    console.error(
-      `format_check_tracked: could not run prettier: ${run.error.message}`
-    );
-    process.exit(1);
-  }
-  worst = Math.max(worst, run.status ?? 1);
+  process.exit(1);
 }
-process.exit(worst);
+process.exit(run.status ?? 1);
