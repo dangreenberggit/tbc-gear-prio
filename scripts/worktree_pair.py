@@ -548,14 +548,23 @@ def pair(args: argparse.Namespace) -> int:
     warnings: list[str] = []
     target.parent.mkdir(exist_ok=True)
     try:
+        # --no-track: from a remote-tracking start point (`--base origin/dev`),
+        # `-b` writes branch.<name>.remote/merge into .git/config. A sandboxed
+        # Claude Code session started in the main checkout mounts that file
+        # read-only, and there `git worktree add -b x <path> origin/dev` fails
+        # with "Unable to write upstream branch configuration" (seen
+        # 2026-10-24; the same call with --no-track succeeds). The fork call
+        # needs no flag: it starts from a SHA, which never sets up tracking.
         if args.b:
-            run(["git", "-C", str(main_dir), "worktree", "add", "-b", args.main_branch, str(target), ref])
+            run(["git", "-C", str(main_dir), "worktree", "add", "--no-track", "-b", args.main_branch,
+                 str(target), ref])
         else:
             run(["git", "-C", str(main_dir), "worktree", "add", str(target), args.main_branch])
         if args.fork_detached:
             run(["git", "-C", str(fork), "worktree", "add", "--detach", str(fork_target), pin])
         elif args.new_fork_branch:
-            run(["git", "-C", str(fork), "worktree", "add", "-b", args.fork_branch, str(fork_target), pin])
+            run(["git", "-C", str(fork), "worktree", "add", "-b", args.fork_branch,
+                 str(fork_target), pin])
         else:
             run(["git", "-C", str(fork), "worktree", "add", str(fork_target), args.fork_branch])
 
