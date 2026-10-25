@@ -127,10 +127,19 @@ new defect. The 4a change (`format:check` over tracked files) is correct but
 cannot pass round 2: it fixes no finding named in this file (condition 1),
 and it adds a performance cost that this branch introduced and that a
 cheaper form avoids (**R2-P1**, below). Under "Round limit" the review stops
-here. **Blocking the merge:** R2-P1, until it is fixed or the owner allows a
-`defer`. Because the owner ruled out a third round, the owner decides how the
-fix is reviewed, for example a fresh round 1 for the 4a work. Tickets filed by
-this branch: 0; closed: 0.
+here.
+
+R2-P1 is fixed in `3eef8341`: `scripts/format_check_tracked.mjs` passes
+prettier the 36 tracked top-level entries in place of every tracked file.
+Measured in the main checkout with the sandbox mounts in place: the
+`--log-level debug` file list is the same 492 files as `3229d5ab`'s script
+(`diff`: no output); a mis-formatted tracked file gives rc 1, a clean tree
+rc 0 with no EACCES; two warm runs take 2.09 s and 2.09 s against 6.19 s and
+6.34 s for `3229d5ab`'s script and 2.01 s and 2.06 s for
+`prettier --cache --check .`; `pnpm verify` rc 0, `gates: 1561 ran, 0
+skipped`. Nothing open in this file blocks the merge. Because the owner ruled
+out a third round, the owner decides whether this fix gets its own review.
+Tickets filed by this branch: 0; closed: 0.
 
 ## Disposition
 
@@ -247,9 +256,10 @@ component of each tracked path, keep the existence filter on that entry
 
 ## Disposition (round 2)
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                    |
-| --- | ----------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | fixed       | `96d2f250`: `scripts/set_hooks_path.mjs:24-28` prints `could not run git: <error>` to stderr and exits 1; re-run with `PATH=/nonexistent` shows the message.                     |
-| S2  | Standards   | fixed       | `64c2fad9`: fork-side `--no-track` dropped (`scripts/worktree_pair.py:562`); `57315d69` comment says why the fork call needs no flag.                                            |
-| S3  | Standards   | fixed       | `57315d69`: both comments name the re-runnable case and error text (`scripts/set_hooks_path.mjs:2-8`, `scripts/worktree_pair.py:551-557`).                                       |
-| 4a  | Session     | fixed       | `3229d5ab`: prettier EACCES on untracked sandbox mounts (reproduced in round 1) fixed by `scripts/format_check_tracked.mjs`; correct for tracked files. Its cost is R2-P1 above. |
+| ID    | Axis        | Disposition | Ticket / note                                                                                                                                                                                         |
+| ----- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1    | Adversarial | fixed       | `96d2f250`: `scripts/set_hooks_path.mjs:24-28` prints `could not run git: <error>` to stderr and exits 1; re-run with `PATH=/nonexistent` shows the message.                                          |
+| S2    | Standards   | fixed       | `64c2fad9`: fork-side `--no-track` dropped (`scripts/worktree_pair.py:562`); `57315d69` comment says why the fork call needs no flag.                                                                 |
+| S3    | Standards   | fixed       | `57315d69`: both comments name the re-runnable case and error text (`scripts/set_hooks_path.mjs:2-8`, `scripts/worktree_pair.py:551-557`).                                                            |
+| 4a    | Session     | fixed       | `3229d5ab`: prettier EACCES on untracked sandbox mounts (reproduced in round 1) fixed by `scripts/format_check_tracked.mjs`; correct for tracked files. Its cost is R2-P1 above.                      |
+| R2-P1 | Performance | fixed       | `3eef8341`: `scripts/format_check_tracked.mjs` passes the 36 tracked top-level entries; same 492 files as `3229d5ab` (`diff` of the `--log-level debug` lists: none), warm run 2.09 s against 6.19 s. |
