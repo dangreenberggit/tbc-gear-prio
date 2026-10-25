@@ -57,8 +57,10 @@ from __future__ import annotations
 import argparse
 import os
 import shutil
+import stat
 import subprocess
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -128,6 +130,32 @@ def parse_porcelain_z(text: str) -> list[tuple[str, str]]:
                 out.append((xy, fields[i]))
             i += 1
     return out
+
+
+def is_device(path: Path) -> bool:
+    try:
+        mode = os.lstat(path).st_mode
+    except OSError:
+        return False
+    return stat.S_ISCHR(mode) or stat.S_ISBLK(mode)
+
+
+def real_changes(
+    entries: list[tuple[str, str]], device: Callable[[str], bool]
+) -> list[tuple[str, str]]:
+    """`entries` without the untracked ones that are devices.
+
+    The agent sandbox mounts /dev/null over denied paths that do not exist,
+    and git lists each mount as untracked (ticket 709). git cannot track a
+    device, so such an entry holds no work. The paths depend on the sandbox
+    settings, which is why this tests the file type and not a list of names.
+    """
+    return [(xy, path) for xy, path in entries if not (xy == "??" and device(path))]
+
+
+def has_changes(cwd: Path) -> bool:
+    status = git_out("status", "--porcelain", "-z", cwd=cwd)
+    return bool(real_changes(parse_porcelain_z(status), lambda p: is_device(cwd / p)))
 
 
 def merge_blockers(entries: list[tuple[str, str]], touched: set[str]) -> list[str]:
@@ -267,10 +295,10 @@ def worktree_problem(wt: Path, target: str, head: str) -> str | None:
     tree's status does not show its edits; the fork gates read it, so it
     must be clean too.
     """
-    if git_out("status", "--porcelain", cwd=wt).strip():
+    if has_changes(wt):
         return f"{wt} has uncommitted or untracked files; commit them there first"
     fork = wt / "vendor" / "tbc-new-fork"
-    if (fork / ".git").exists() and git_out("status", "--porcelain", cwd=fork).strip():
+    if (fork / ".git").exists() and has_changes(fork):
         return f"{fork} has uncommitted or untracked files; commit them there first"
     if git_out("branch", "--show-current", cwd=wt).strip() != target:
         return f"{wt} no longer has {target} checked out"
@@ -448,12 +476,10 @@ def main() -> int:
             "or name one: pnpm merge-to-dev <branch>"
         )
 
-    dirty = run(["git", "status", "--porcelain"], capture_output=True, text=True)
-    if dirty.returncode != 0:
-        die("git status failed")
-    if dirty.stdout.strip() and not args.check_only:
+    dirty = has_changes(ROOT)
+    if dirty and not args.check_only:
         die("working tree not clean — commit or stash first")
-    if dirty.stdout.strip() and args.check_only:
+    if dirty and args.check_only:
         print("(working tree dirty — allowed for --check-only)")
     if args.expect_head:
         head = rev_parse("HEAD")

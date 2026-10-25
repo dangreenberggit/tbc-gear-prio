@@ -13,6 +13,7 @@ Exit 0 ok, 1 a check failed.
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
@@ -78,6 +79,39 @@ def check_touched_paths_match_whatever_the_case() -> list[str]:
     return []
 
 
+def check_untracked_devices_are_not_work() -> list[str]:
+    """The agent sandbox mounts /dev/null over denied paths that do not
+    exist, and git lists each one as untracked (ticket 709). git cannot
+    track a device, so the clean-tree checks must not count it; a tracked
+    path that turned into a device is still a change."""
+    devices = {".bashrc", ".claude/settings.local.json", "dev-typechange"}
+    entries = [
+        ("??", ".bashrc"),
+        ("??", ".claude/settings.local.json"),
+        ("??", "notes.md"),
+        (" M", "a.txt"),
+        (" T", "dev-typechange"),
+    ]
+    got = m.real_changes(entries, lambda p: p in devices)
+    want = [("??", "notes.md"), (" M", "a.txt"), (" T", "dev-typechange")]
+    if got != want:
+        return [f"real_changes gave {got}, want {want}"]
+    return []
+
+
+def check_device_test_reads_the_file_type() -> list[str]:
+    if os.name != "posix":
+        return []
+    problems = []
+    if not m.is_device(Path("/dev/null")):
+        problems.append("/dev/null must count as a device")
+    if m.is_device(Path(__file__)):
+        problems.append(f"{__file__} must not count as a device")
+    if m.is_device(Path(__file__).with_name("no-such-file-709")):
+        problems.append("a missing path must not count as a device")
+    return problems
+
+
 def check_named_merge_runs_only_on_dev() -> list[str]:
     problems = []
     if m.named_mode_problem("dev", "feat/x") is not None:
@@ -115,6 +149,8 @@ CHECKS = (
     check_staged_change_blocks_anywhere,
     check_ignored_files_never_block,
     check_touched_paths_match_whatever_the_case,
+    check_untracked_devices_are_not_work,
+    check_device_test_reads_the_file_type,
 )
 
 
