@@ -3968,38 +3968,6 @@
       "curationHint": 32.13
     },
     {
-      "itemId": 33959,
-      "name": "Ring of Ghoulish Delight",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 25.2
-    },
-    {
-      "itemId": 34075,
-      "name": "Ring of Ghoulish Delight",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 25.2
-    },
-    {
       "itemId": 33055,
       "name": "Band of Vile Aggression",
       "slot": "finger",
@@ -4093,38 +4061,6 @@
         }
       ],
       "curationHint": 5.92
-    },
-    {
-      "itemId": 33958,
-      "name": "The Horseman's Signet Ring",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 5.6
-    },
-    {
-      "itemId": 34073,
-      "name": "The Horseman's Signet Ring",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 5.6
     },
     {
       "itemId": 29126,
@@ -4759,38 +4695,6 @@
           "kind": "raid",
           "zone": "Serpentshrine Cavern",
           "boss": "Morogrim Tidewalker",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 2.56
-    },
-    {
-      "itemId": 33957,
-      "name": "Witches Band",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 2.56
-    },
-    {
-      "itemId": 34074,
-      "name": "Witches Band",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
           "origin": "db"
         }
       ],

@@ -5498,38 +5498,6 @@
       "curationHint": 28.82
     },
     {
-      "itemId": 33959,
-      "name": "Ring of Ghoulish Delight",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 27.0
-    },
-    {
-      "itemId": 34075,
-      "name": "Ring of Ghoulish Delight",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 27.0
-    },
-    {
       "itemId": 33055,
       "name": "Band of Vile Aggression",
       "slot": "finger",
@@ -6693,70 +6661,6 @@
       "handType": null,
       "quality": 4,
       "phase": 3,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 33957,
-      "name": "Witches Band",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 33958,
-      "name": "The Horseman's Signet Ring",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 34073,
-      "name": "The Horseman's Signet Ring",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 34074,
-      "name": "Witches Band",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
       "sources": [
         {
           "kind": "unknown",
@@ -20622,7 +20526,7 @@
       "name": "Mallet of the Tides",
       "slot": "weapon",
       "armorType": null,
-      "handType": 1,
+      "handType": 2,
       "quality": 4,
       "phase": 2,
       "sources": [
@@ -20712,7 +20616,7 @@
       "name": "Fool's Bane",
       "slot": "weapon",
       "armorType": null,
-      "handType": 1,
+      "handType": 2,
       "quality": 4,
       "phase": 1,
       "sources": [
@@ -20820,7 +20724,7 @@
       "name": "Dragonstrike",
       "slot": "weapon",
       "armorType": null,
-      "handType": 1,
+      "handType": 2,
       "quality": 4,
       "phase": 2,
       "sources": [
@@ -21098,7 +21002,7 @@
       "name": "Dragonmaw",
       "slot": "weapon",
       "armorType": null,
-      "handType": 1,
+      "handType": 2,
       "quality": 4,
       "phase": 1,
       "sources": [

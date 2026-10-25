@@ -14,15 +14,15 @@
     "World Bosses"
   ],
   "phaseRepFactions": [],
-  "d7EligibleTotal": 2978,
+  "d7EligibleTotal": 2971,
   "excludedNoSource": 960,
-  "universeTotal": 458,
+  "universeTotal": 452,
   "listOnlyMembership": 0,
   "perSlot": {
     "back": 35,
     "chest": 18,
     "feet": 35,
-    "finger": 64,
+    "finger": 58,
     "hands": 17,
     "head": 20,
     "legs": 18,
@@ -37,7 +37,7 @@
   "sourceRecordAdds": {
     "atlasloot": 267,
     "curated": 0,
-    "db": 1901,
+    "db": 1894,
     "sunmote": 23,
     "two-hop": 18,
     "wowhead": 5
@@ -45,9 +45,9 @@
   "membershipByOrigin": {
     "arenaSource": 42,
     "curated": 10,
-    "dbPhase": 157,
+    "dbPhase": 151,
     "itemHasOrigin:atlasloot": 60,
-    "itemHasOrigin:db": 407,
+    "itemHasOrigin:db": 401,
     "itemHasOrigin:two-hop": 10,
     "itemHasOrigin:wowhead": 5,
     "recipeMatch": 10,
@@ -55,7 +55,7 @@
     "zoneMatch": 205
   },
   "exclusivePrimaryOrigin": {
-    "db": 407,
+    "db": 401,
     "atlasloot-only": 36,
     "wowhead-only": 5,
     "two-hop": 10
@@ -64,13 +64,13 @@
   "tierPiecesPresent": 10,
   "tierPiecesMissing": [],
   "junkFilter": {
-    "total": 458,
-    "casterOnlyReject": 201,
+    "total": 452,
+    "casterOnlyReject": 197,
     "epFloorReject": 5,
-    "combinedReject": 206,
-    "combinedKeep": 252,
-    "casterRejectPct": 43.9,
-    "combinedRejectPct": 45.0,
+    "combinedReject": 202,
+    "combinedKeep": 250,
+    "casterRejectPct": 43.6,
+    "combinedRejectPct": 44.7,
     "applied": false
   },
   "wowheadListIds": 0,
@@ -397,10 +397,6 @@
     {
       "itemId": 35751,
       "name": "Assassin's Alchemist Stone"
-    },
-    {
-      "itemId": 38175,
-      "name": "The Horseman's Blade"
     },
     {
       "itemId": 38506,

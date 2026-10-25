@@ -1559,38 +1559,6 @@
       "curationHint": 43.84
     },
     {
-      "itemId": 33958,
-      "name": "The Horseman's Signet Ring",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 41.46
-    },
-    {
-      "itemId": 34073,
-      "name": "The Horseman's Signet Ring",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 41.46
-    },
-    {
       "itemId": 28510,
       "name": "Spectral Band of Innervation",
       "slot": "finger",
@@ -1750,38 +1718,6 @@
     {
       "itemId": 29373,
       "name": "Band of Halos",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 25.72
-    },
-    {
-      "itemId": 33957,
-      "name": "Witches Band",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 25.72
-    },
-    {
-      "itemId": 34074,
-      "name": "Witches Band",
       "slot": "finger",
       "armorType": null,
       "handType": null,
@@ -2431,38 +2367,6 @@
       "handType": null,
       "quality": 4,
       "phase": 2,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 33959,
-      "name": "Ring of Ghoulish Delight",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.0
-    },
-    {
-      "itemId": 34075,
-      "name": "Ring of Ghoulish Delight",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
       "sources": [
         {
           "kind": "unknown",

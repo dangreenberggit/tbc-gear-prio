@@ -3267,38 +3267,6 @@
       "curationHint": 28.76
     },
     {
-      "itemId": 33959,
-      "name": "Ring of Ghoulish Delight",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 27.6
-    },
-    {
-      "itemId": 34075,
-      "name": "Ring of Ghoulish Delight",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 27.6
-    },
-    {
       "itemId": 29282,
       "name": "Violet Signet",
       "slot": "finger",
@@ -3883,38 +3851,6 @@
       "curationHint": 0.21
     },
     {
-      "itemId": 33957,
-      "name": "Witches Band",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.21
-    },
-    {
-      "itemId": 34074,
-      "name": "Witches Band",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.21
-    },
-    {
       "itemId": 32527,
       "name": "Ring of Ancient Knowledge",
       "slot": "finger",
@@ -4000,38 +3936,6 @@
       "handType": null,
       "quality": 4,
       "phase": 2,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.17
-    },
-    {
-      "itemId": 33958,
-      "name": "The Horseman's Signet Ring",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
-      "sources": [
-        {
-          "kind": "unknown",
-          "origin": "db"
-        }
-      ],
-      "curationHint": 0.17
-    },
-    {
-      "itemId": 34073,
-      "name": "The Horseman's Signet Ring",
-      "slot": "finger",
-      "armorType": null,
-      "handType": null,
-      "quality": 4,
-      "phase": 1,
       "sources": [
         {
           "kind": "unknown",
