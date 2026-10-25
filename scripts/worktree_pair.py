@@ -548,14 +548,19 @@ def pair(args: argparse.Namespace) -> int:
     warnings: list[str] = []
     target.parent.mkdir(exist_ok=True)
     try:
+        # --no-track: from a remote-tracking start point (`--base origin/dev`),
+        # `-b` writes branch.<name>.remote/merge into .git/config, which the
+        # Claude Code sandbox mounts read-only in the folder a session starts in.
         if args.b:
-            run(["git", "-C", str(main_dir), "worktree", "add", "-b", args.main_branch, str(target), ref])
+            run(["git", "-C", str(main_dir), "worktree", "add", "--no-track", "-b", args.main_branch,
+                 str(target), ref])
         else:
             run(["git", "-C", str(main_dir), "worktree", "add", str(target), args.main_branch])
         if args.fork_detached:
             run(["git", "-C", str(fork), "worktree", "add", "--detach", str(fork_target), pin])
         elif args.new_fork_branch:
-            run(["git", "-C", str(fork), "worktree", "add", "-b", args.fork_branch, str(fork_target), pin])
+            run(["git", "-C", str(fork), "worktree", "add", "--no-track", "-b", args.fork_branch,
+                 str(fork_target), pin])
         else:
             run(["git", "-C", str(fork), "worktree", "add", str(fork_target), args.fork_branch])
 
