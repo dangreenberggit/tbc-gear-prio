@@ -118,11 +118,12 @@ START_PRESET = {"ret": {4: ("Phase 3", "P3")}}
 # (hooks/useUpgradesSettings.ts effectiveExcludedSources). So a run with the
 # tab's default settings reports eligibleCount 1118 (the exclude size), and
 # 1175 is the upper bound with every source ticked. A desktop run at fork
-# f06772929 read eligibleCount 1121, the exclude size before the 2026-10-25
-# wowsims catch-up (cec2a7b68) took 7 Hallow's End items out of db.json and
-# put 4 re-issued ones in; the fixture's _comment lists them. If a run reads
-# another number, explain the filter responsible before changing this; a
-# change to the pool rule or the db must re-measure both.
+# f06772929 read eligibleCount 1121 because its db.json still had the old
+# Hallow's End item ids. The current db.json replaces those 8 items with 5
+# re-issued ids; ret's pool loses 7 of the old ids and gains 4 of the new
+# ones, so 1121 - 7 + 4 = 1118. The fixture's _comment lists the ids. If a
+# run reads another number, explain the filter responsible before changing
+# this; a change to the pool rule or the db must re-measure both.
 EXPECTED_ELIGIBLE = {"ret": {4: 1118}}
 POOL_CAP = {"ret": {4: 1175}}
 
