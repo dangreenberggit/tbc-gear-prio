@@ -213,6 +213,66 @@ Both are wrong statements in a doc an agent follows, so they are not
 bookkeeping. Under the skill's "Round limit" the review stops here: no
 round 3, no Disposition table, no `merge-to-dev --check-only`.
 
+## F1 and F2 fixed
+
+Both are fixed in `d0b1e832` ("Fix catch-up dry run and exclusions note").
+`pnpm verify` at that commit: rc 0.
+
+- **F1.** The dry run now uses `read-tree -m --aggressive`, and keeps the
+  stage column: an `awk` step labels each path by its set of stages
+  (`content`, `modify/delete (upstream deleted it)`,
+  `modify/delete (fork deleted it)`, `add/add`, else `stages <digits>`). The
+  text says `--aggressive` settles a path that one side deleted and the other
+  left unchanged, and that any label other than `content` is a stop. Test: the
+  doc's block, copied from the file with only the placeholders replaced, run
+  in a scratch repo under `$TMPDIR`. Upstream changed `both` and `clean`,
+  deleted `md` and `gone`, changed `dm` and `uponly`, made the same change to `same` as the
+  fork, and added `added`. The fork changed `both` and `clean` (different
+  lines from upstream in `clean`), changed `md`, deleted `dm`, and added
+  `added` with other content. Output (label, tab, path):
+
+  ```text
+  add/add	added
+  content	both
+  content	clean
+  modify/delete (fork deleted it)	dm
+  modify/delete (upstream deleted it)	md
+  ```
+
+  The old command printed `added`, `both`, `clean`, `dm`, `gone`, `md`, with
+  no way to tell them apart. A real `git merge` in the same repo reported
+  conflicts in `added` (add/add), `both` (content), `dm` and `md`
+  (modify/delete), and merged `clean` cleanly. The same block on this
+  branch's fork merge (`e804c29e8`, `7024ba6d2`, `cec2a7b68`) prints nothing,
+  rc 0.
+
+- **F2.** The doc now says each `universe:assemble` run rewrites
+  `data/weapon-type-exclusions.json` for every spec, from db.json's weapon
+  types, the spec's list in `data/equip-eligibility.json`, and its policy
+  exclusions (`excluded_weapon_types_for`,
+  `scripts/assemble_universe.py:733-749`). So a catch-up changes the file when
+  db.json gains or loses a weapon type or the regenerated eligibility gives a
+  spec its first, or takes its last, item of a type.
+
+## Disposition
+
+| ID  | Axis          | Disposition | Ticket / note                                                                                                     |
+| --- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial   | wontfix     | red commits `1a368e3e`, `d0cdbc3b` stay in history; only a history rewrite fixes them, and the tip is green       |
+| S2  | Standards     | wontfix     | same commits as A1; only a history rewrite fixes them                                                             |
+| A2  | Adversarial   | fixed       | `cabcacc2`: `docs/fork-upstream-touchpoints.md` moved to `cec2a7b68`; passed round 2                              |
+| P4  | Spec          | fixed       | same as A2, `cabcacc2`                                                                                            |
+| D1  | Domain        | wontfix     | the hand type is wowsims data; the tab takes item facts from wowsims (ADR-0029, ADR-0038)                         |
+| D2  | Domain        | fixed       | `4d8f3f2b`: the `check_desktop_tab.py` comment gives db.json −8/+5 and ret −7/+4; passed round 2                  |
+| S3  | Standards     | fixed       | `4d8f3f2b`: the comment now says only why the desktop reading (1121) differs from the constant                    |
+| CQ1 | Code quality  | fixed       | `4d8f3f2b`, covers D2 and S3                                                                                      |
+| S1  | Standards     | wontfix     | only a history rewrite fixes `74a712a8`'s subject; the route that moved the numbers is in this file's Summary     |
+| P1  | Spec          | fixed       | `954d5adb` documents the `read-tree` dry run; its F1 error fixed in `d0b1e832`                                    |
+| P2  | Spec          | wontfix     | the procedure doc gives the replacement commands; the script does not touch the tab, the pool or gate correctness |
+| P3  | Spec          | fixed       | `954d5adb` moves the universe sweep to §5; its F2 error fixed in `d0b1e832`                                       |
+| F1  | Focused check | fixed       | `d0b1e832`: dry run uses `--aggressive` and labels each path by stage set; test output above                      |
+| F2  | Focused check | fixed       | `d0b1e832`: exclusions file described from `excluded_weapon_types_for`, not the docstring                         |
+
 ## Summary
 
 Round 1 found no correctness defect, no test theatre and no domain
@@ -228,11 +288,12 @@ which has no deletes and no overlap, and wrote the P3 sentence from
 (both measured by that agent: the first from its own commands, the second by
 the grep above).
 
-Outcomes proposed for the round 1 findings, not yet written as Disposition
-rows because the review stopped:
+Outcomes for the round 1 findings, now written as rows in the Disposition
+table above:
 
 - A2, P4, D2, S3, CQ1: fixed (`cabcacc2`, `4d8f3f2b`), passed round 2.
-- P1, P3: fixed in `954d5adb`, but round 2 found F1 and F2 in that fix.
+- P1, P3: fixed in `954d5adb`; round 2 found F1 and F2 in that fix, both
+  fixed in `d0b1e832`.
 - A1, S2 (red commits `1a368e3e`, `d0cdbc3b`) and S1 (`74a712a8` does not say
   which route moved the numbers): wontfix. Only a history rewrite fixes
   them; the tip is green. For the record, the route: ret-p2 541 → 535 is the
