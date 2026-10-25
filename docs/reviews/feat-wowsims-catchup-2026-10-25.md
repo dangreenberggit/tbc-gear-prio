@@ -76,8 +76,10 @@ the same treatment the old 33808 and 38175 had.
   warrior. That is right only if the 2.5.6.70006 client is live at phase 3.
 - **D2.** `scripts/check_desktop_tab.py:122` says the catch-up "took 7
   Hallow's End items out of db.json and put 4 re-issued ones in". db.json lost
-  8 and gained 5; 7 and 4 are the counts for ret's pool only (ret cannot use
-  the blade 38175/281923). The pinned numbers 1118 and 1175 are right.
+  8 and gained 5; 7 and 4 are the counts for ret's pool only. The blade
+  (38175, re-issued as 281923) is in no pool, because upstream lists its
+  effect as missing (the fork fixture's `_comment`). The pinned numbers 1118
+  and 1175 are right.
 
 Unexamined: `data/items/index.json` line by line (checked by id counts only);
 upstream's Go changes; the `Test*.results` goldens.
