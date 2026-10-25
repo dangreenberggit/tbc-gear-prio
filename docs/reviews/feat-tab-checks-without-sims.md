@@ -391,13 +391,12 @@ check failed now ends as FAIL even when a later fixture fails to load, and a
 `--fixture` run no longer advances the baseline. Tickets 707 and 708 are
 fixed and closed with `Verified by:` lines. Q1-Q7 are done.
 
-The check found no fix that is wrong. It found three minor gaps that need a
-decision from the orchestrator: N1 (an a11y failure followed by a crash still
-reads as a skip; dev did the same), N2 (the set-row check misses one
-impossible case) and N4 (no test covers the gate script). They have no
-Disposition rows here. This agent could write only this file, and a `defer`
-row needs an open ticket. Commit messages without finding IDs (N3) are
-bookkeeping, recorded above.
+The check found no fix that is wrong. It found three minor gaps: N1 (an a11y
+failure followed by a crash still reads as a skip; dev did the same), N2 (the
+set-row check misses one impossible case) and N4 (no test covers the gate
+script). All three were fixed after the check, in `1d2262d9` (N1), `c2e9e13b`
+(N2) and `0900056b` (N4); their rows are in the Disposition table below.
+Commit messages without finding IDs (N3) are bookkeeping, recorded above.
 
 Tickets: this branch filed 2 (707, 708) and closed 2
 (`git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`;
