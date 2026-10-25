@@ -1,9 +1,11 @@
 #!/usr/bin/env node
-// The root `prepare` script. In a linked worktree, `git config` writes the
-// main checkout's .git/config, which the agent sandbox mounts read-only, so
-// `pnpm install` there failed even though the value was already right. Write
-// only when the value differs; a fresh clone (unset) and a wrong value are
-// still set to .githooks.
+// The root `prepare` script. A sandboxed Claude Code session started in the
+// main checkout mounts .git/config read-only; there `git config
+// core.hooksPath .githooks` fails with "could not lock config file
+// .git/config" even when the value is already set (seen 2026-10-24). A linked
+// worktree writes that same file, so `pnpm install` failed in both. Write only
+// when the value differs; a fresh clone (unset) and a wrong value are still
+// set to .githooks.
 import { spawnSync } from "node:child_process";
 
 const WANTED = ".githooks";
