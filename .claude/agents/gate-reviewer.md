@@ -117,15 +117,24 @@ copies this section into the run log by its exact heading. It does not
 count toward any line limit on your final message, wherever that limit
 is set.
 
+## Re-review rounds
+
+On a re-review round your prompt names the claims and steps that the
+latest revision changed or added, and the earlier findings that the
+revision was asked to fix, each as `R<m>-<id>`: `<m>` is the number in
+the `# Round <m>` heading of the `plan-review.md` section that holds
+the finding. Review only those claims and steps, using § What to hunt.
+For each named finding that `plan.md` still does not fix, add a row to
+your `## Findings` table with a new ID and that finding's severity, and
+start its `What breaks` cell with `Not fixed: R<m>-<id>.` The named
+findings are the only earlier findings you check. In
+`## Register verdicts`, give each claim you did not review the verdict
+that the latest earlier `# Round` section gave it, and write
+`Round <m>` in its Evidence cell, where `<m>` is that section's number.
+
 ## Done when
 
 Every register row has a verdict, every finding has evidence or is
 labeled `judgment`, the `# Round <n>` section of `plan-review.md` holds
 the review with the `VERDICT:` line first after the heading, and your
 final message has the parts that § Report lists.
-
-On a re-review round your prompt names the claims and steps that the
-latest revision changed or added. Review only those, using § What to
-hunt, and give a verdict on every finding in the earlier `# Round`
-sections of `plan-review.md`. Do not review the rest of the plan: carry
-its register verdicts forward by round and ID.

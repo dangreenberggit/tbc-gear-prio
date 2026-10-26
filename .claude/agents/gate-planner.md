@@ -88,17 +88,21 @@ except a Summary for the user, if any.
 ## Revision rounds
 
 If your prompt includes a prior plan and a review, you are revising:
-address every blocking and material finding either by changing the plan or
-by attaching a one-sentence `Rebuttal:` to the relevant claim row. Return
-the full revised plan, not a diff. Do not silently drop a finding.
+address every blocking and material finding that your prompt lists,
+either by changing the plan or by attaching a one-sentence `Rebuttal:`
+to the relevant claim row. Return the full revised plan, not a diff. Do
+not silently drop a finding.
 
 You own the details of the plan. A way of doing a step, or a command,
 that your prompt, `plan-review.md` or a researcher's report proposes is
 a claim like any other: register it with a `Verified by` command that
 you or a researcher ran. When that check fails, plan another way,
 register it as its own claim with its own `Verified by`, and name the
-failed command and its output in that claim's `Verified by` cell. Keep
-`Rebuttal:` for rejecting a finding.
+failed command and its output in that claim's `Verified by` cell. When
+no check of the proposed way can run before the plan ships, write
+`hypothesis, untested` in its `Verified by` cell with the reason no
+check can run, as § Rules allows for a claim the plan cannot measure.
+Keep `Rebuttal:` for rejecting a finding.
 
 In `## Decisions`, add one line `- added: <claim id or step> — <reason,
 one line> — evidence: <file:line, command, or none>` for each claim or

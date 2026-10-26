@@ -29,8 +29,9 @@ def rewrite(data):
     tool_input = data.get("tool_input")
     if not isinstance(tool_input, dict):
         return None
-    # A call that omits the field also runs in the background, so only an
-    # explicit False is left alone.
+    # The Agent tool's own description says "Subagents run in the
+    # background by default", so a call that omits the field also runs in
+    # the background. Only an explicit False is left alone.
     if tool_input.get("run_in_background") is False:
         return None
     updated = dict(tool_input)

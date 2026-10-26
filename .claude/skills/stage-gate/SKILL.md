@@ -188,8 +188,10 @@ In these steps, "you" and "the session" are the same agent.
    planner (`SendMessage` it, or respawn it in the same mode with the
    answers). There is one round of answers.
 
-   When a `gate-planner`'s final message is none of these — a plan with
-   every section of `plan-template.md`; a message that starts with
+   When a `gate-planner`'s final message is none of these — a plan,
+   meaning a message with at least one `##` heading of
+   `plan-template.md` (Gate A, not this rule, handles a plan with a
+   missing section); a message that starts with
    `DECISION:`, with `WRONG_MODEL:`, or with the plan file's line count
    (`parts.md` § When you write files here); a message that lists "Open
    questions" — no agent is working on that `gate-planner`'s job. The
@@ -238,18 +240,31 @@ In these steps, "you" and "the session" are the same agent.
    split run, `decomposition.md`, all in `.scratch/stage-gate/<slug>/`.
    Every round after the first is a **re-review**. Its spawn prompt also
    names the claims and steps that the latest revision changed or added,
-   and says that the review covers only those claims and steps and the
-   findings in the earlier `# Round` sections of `plan-review.md`, and
-   does not review the rest of the plan.
+   and the `blocking` and `material` findings that the latest revision
+   prompt listed, each by its `row` id `R<m>-<id>` (step 1). The prompt
+   says that the review checks only those claims and steps and whether
+   `plan.md` now fixes each of those findings, and does not review the
+   rest of the plan.
    The `gate-reviewer` writes its review into `plan-review.md` under the
    heading `# Round <n>` (`.claude/agents/gate-reviewer.md` § Report).
    The session writes nothing to `plan-review.md`. After the
-   `gate-reviewer`'s final message arrives, the session reads the
-   `# Round <n>` section of `plan-review.md` and judges Gate B from that
-   section. When that section is missing or has no `VERDICT:` line, the
-   session sends that `gate-reviewer` (same agent id) a `SendMessage`
-   that asks it to write the `# Round <n>` section. Same clean-tree
-   check.
+   `gate-reviewer`'s final message arrives, the session acts in this
+   order:
+   - When the final message starts with `WRONG_MODEL:`, the session
+     spawns a new `gate-reviewer` with the same prompt and round number
+     and the model that the § Seats table names.
+   - Otherwise the session reads the last section of `plan-review.md`
+     headed `# Round <n>`. When that section is missing or has no
+     `VERDICT:` line, the session sends that `gate-reviewer` (same agent
+     id) one `SendMessage` that asks it to write the `# Round <n>`
+     section. When the tool result has `"success":true`, the session
+     logs `resumed` in `decision-log.md`. When the tool result lacks
+     `"success":true`, or the section is still missing or has no
+     `VERDICT:` line after that `gate-reviewer`'s next final message,
+     the session stops and tells the user.
+   - The session runs Gate A's clean-tree check
+     (`git status --porcelain` is still empty), then judges Gate B
+     (step 4) from that section.
 
 4. **Gate B (judgment — yours).** Reconcile each finding against the
    brief's intent — a finding can be correct about the plan and wrong
@@ -262,13 +277,8 @@ In these steps, "you" and "the session" are the same agent.
      re-review after the first loop-back has a `blocking` finding or a
      refuted load-bearing claim. After the revision of the second
      loop-back, the session spawns one more `gate-reviewer` for a
-     re-review. When that review
-     has a `blocking` finding or a refuted load-bearing claim, the
-     session stops and gives the user the open findings, with any
-     contradiction between seats stated, not resolved. When that review
-     has `material` findings only, the session spawns one `gate-planner`
-     revision for them, runs Gate A, and spawns no further
-     `gate-reviewer`.
+     re-review. That re-review is round 3, and the bullet "Round 3 is
+     the last review" below says what the session does next.
    - No `blocking` finding and no refuted load-bearing claim, but one or
      more `material` findings need a change to `plan.md` → the session
      spawns one `gate-planner` revision with brief + plan + review, then
@@ -282,10 +292,15 @@ In these steps, "you" and "the session" are the same agent.
      toward the two. When it has `material` findings only, the session
      spawns one `gate-planner` revision for them, runs Gate A, and spawns
      no further `gate-reviewer`.
-   - The session spawns no `gate-reviewer` with a round number above 3.
-     This limit holds over every other rule in this step: where a rule
-     would start round 4, the session stops and gives the user the open
-     findings and the `- added:` lines that round would have covered.
+   - Round 3 is the last review. The session spawns no `gate-reviewer`
+     with a round number above 3, and this bullet holds over every other
+     rule in this step. When the `# Round 3` section of `plan-review.md`
+     has a `blocking` finding or a refuted load-bearing claim, the
+     session spawns no revision: it stops and gives the user the open
+     findings, with any contradiction between seats stated, not
+     resolved. When that section has `material` findings only, the
+     session spawns one `gate-planner` revision for them, runs Gate A,
+     and spawns no further `gate-reviewer`.
    - After Gate A passes on a revision that no re-review follows, the
      session checks `plan.md` against the result the revision prompt
      stated for each `material` finding and logs each one `fixed`, with

@@ -197,7 +197,7 @@ What each finding's fix is:
 
 1. **Stranded planner, false status.** A new PreToolUse hook,
    `.claude/hooks/subagent-foreground-helpers.py` (with its test, its
-   `.claude/settings.json` entry and `pnpm hooks:check` in
+   `.claude/settings.json` entry and `pnpm foreground-hook:check` in
    `verify:steps`), sets `run_in_background` to false on every Agent call
    made inside a subagent. `gate-planner.md` tells the planner to run its
    researchers in the foreground. In `SKILL.md`, the `spawn` log line
@@ -234,9 +234,9 @@ What each finding's fix is:
    run subagents in the foreground.
 
 Branch `feat/subagent-foreground-helpers`: only its hook, the hook's
-test, the settings entry and the `hooks:check` script were ported, with
-a new hook docstring. Its ticket 550, its `NEXT` change, its review file
-and its text edits were not taken.
+test, the settings entry and the `foreground-hook:check` script were
+ported, with a new hook docstring. Its ticket 550, its `NEXT` change,
+its review file and its text edits were not taken.
 
 Open items (not fixed by this change):
 
@@ -272,5 +272,5 @@ Open items (not fixed by this change):
   `hypothesis, untested` option), P4 (a revision planner is not told
   which round's findings to address), and code-quality rows S4 and S5.
   The fix is the owner patch
-  `.scratch/agent-reports/2026-10-26-712-review-fixes.patch`. Remove this
+  `.scratch/agent-reports/2026-10-26-712-review-fixes-r2.patch`. Remove this
   item when round 2 of that review passes.
