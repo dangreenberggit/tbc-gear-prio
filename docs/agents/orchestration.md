@@ -115,7 +115,9 @@ fork gets a pair (AGENTS.md § The forked tab repo). The skill holds the
 rest: disjointness is a claim to verify before spawning, isolation per
 slice, merge onto the feature branch, teardown, `pnpm verify` on the
 integrated tip, `pre-merge-review`, then ask before `pnpm merge-to-dev`.
-Never merge each worker into `dev`.
+Never merge each worker into `dev`. Without isolation, readers share the
+writers' index too: a read-only agent sees your uncommitted edits and
+cannot tell them from a stray worker's.
 
 ## Stage-gate features
 

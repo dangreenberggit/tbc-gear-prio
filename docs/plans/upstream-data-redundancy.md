@@ -298,7 +298,8 @@ fuzzy-match.
    `getPresetEncounter(path)` / `getAllPresetEncounters()`
    (`ui/core/proto_utils/database.ts:361,367`), over the already-vendored
    `db.json`. This is a pure function over vendored data — no new architectural
-   seam, so AGENTS.md § Testing's three-port rule is untouched, and it is
+   seam, so the three-port rule (docs/workflow.md § Testing: seams and where
+   tests go) is untouched, and it is
    directly unit-testable.
 3. **Re-root the skeleton.** `scripts/compose_slamaltman_raid_sim.py` reads
    `Default/Raid Target` from `db.json` instead of carrying the target inline,

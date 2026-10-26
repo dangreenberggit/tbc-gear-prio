@@ -522,7 +522,7 @@ as off by default on the browser path as it already is on the CLI.
 
 ## 7. Test plan
 
-Rules: `AGENTS.md` § Testing — primary tests at `rankUpgrades` through recorded/derived adapters; pure functions unit-tested directly; nothing asserts on stage internals. Every test red before the code that greens it (`tdd`). **Order below is the order they go red.** Each row says what it forces.
+Rules: `docs/workflow.md` § Testing: seams and where tests go — primary tests at `rankUpgrades` through recorded/derived adapters; pure functions unit-tested directly; nothing asserts on stage internals. Every test red before the code that greens it (`tdd`). **Order below is the order they go red.** Each row says what it forces.
 
 Test runners: recorded full-iteration observations stay as they are. Screening observations come from a **derived runner** — recorded full-iteration truth plus deterministic seeded noise scaled by `1/sqrt(iterations)` (F12's `respondingSim` shape) — so `screenIterations` can change without re-recording, and recall can be run over many draws. One real screening recording, pinned, as a smoke test only.
 

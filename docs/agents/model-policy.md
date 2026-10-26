@@ -283,11 +283,11 @@ exactly, and small or modest coding (§ Trial types, "Modest"). In session
 or plain reads, and spawned nothing
 (`.scratch/agent-reports/2026-10-26-general-task-opus-did-worker-jobs.md` § 2).
 
-| Job                                                                          | When the harness lists the GLM types | Otherwise                                     |
-| ---------------------------------------------------------------------------- | ------------------------------------ | --------------------------------------------- |
-| Searches, reads, named runs that write no tracked file, measurements         | `glm-flash-task`                     | `discrete-task`; `simple-task` for one action |
-| An edit whose exact text the prompt states                                   | `glm-task`                           | `discrete-task`                               |
-| Small or modest coding (§ Trial types, "Modest"), and the larger worker jobs | `glm-task`                           | `modest-task`                                 |
+| Job                                                                  | When the harness lists the GLM types | Otherwise                                     |
+| -------------------------------------------------------------------- | ------------------------------------ | --------------------------------------------- |
+| Searches, reads, named runs that write no tracked file, measurements | `glm-flash-task`                     | `discrete-task`; `simple-task` for one action |
+| An edit whose exact text the prompt states                           | `glm-task`                           | `discrete-task`                               |
+| Small or modest coding (§ Trial types, "Modest")                     | `glm-task`                           | `modest-task`                                 |
 
 `glm-flash-task` has no Edit or Write tool (its agent file in
 `~/.claude_router/agents/`), so every edit on the GLM card goes to
