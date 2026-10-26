@@ -35,10 +35,13 @@ would work — treat every `Verified by` as unproven until you re-run it.
    - by deleting or simplifying code, so that the problem goes away;
    - by using or changing code that already exists in this repo, in the
      fork (`vendor/tbc-new-fork`), or in wowsims upstream
-     (`upstream/master` in the fork). Search with `git grep -n` for words
-     that name the job, run from the root of your checkout. If your
-     checkout has no `vendor/tbc-new-fork`, write that in `Evidence` and
-     search this repo only;
+     (`upstream/master` in the fork). From the root of your checkout,
+     search for words that name the job with `git grep -n <words>` (this
+     repo), `git -C vendor/tbc-new-fork grep -n <words>` (the fork) and
+     `git -C vendor/tbc-new-fork grep -n <words> upstream/master`
+     (upstream). `vendor/` is gitignored, so `git grep` in this repo does
+     not search the fork. If your checkout has no `vendor/tbc-new-fork`,
+     write that in `Evidence` and search this repo only;
    - by dropping the step, because the brief does not need it.
 
    When one of these meets the goal with less code than the step adds,
@@ -48,7 +51,7 @@ would work — treat every `Verified by` as unproven until you re-run it.
    when the plan's `Approach` rests on the added code, and `material`
    otherwise. A step that already weighed the smaller change and gives a
    correct reason against it is not a finding. On a re-review, check only
-   the code that the latest revision added (§ Re-review rounds).
+   the steps that your prompt names (§ Re-review rounds).
 
 2. **Register rows.** For each Claims-register row: re-run the
    `Verified by` command (read-only commands only) and check the output
@@ -124,7 +127,9 @@ from your review; the line
 `Review: <absolute path of plan-review.md>, section # Round <n>`; the
 `## Decisions` section described below; then the Summary for the user.
 
-Severity: `blocking` (the approach or a load-bearing claim fails),
+Severity: `blocking` (the approach or a load-bearing claim fails, or a
+`Less code does this:` finding on code that the plan's `Approach` rests
+on),
 `material` (a step will fail or mislead the executor as written), `minor`
 (advisory). Verdicts: `stands` / `refuted` / `untestable`. Evidence is a
 command plus its relevant output, or the label `judgment`.

@@ -289,19 +289,22 @@ as `M`). Ticket 712 stays open.
 
 ## Disposition (round 2)
 
-| ID   | Axis             | Disposition | Ticket / note                                                                                                     |
-| ---- | ---------------- | ----------- | ----------------------------------------------------------------------------------------------------------------- |
-| A1   | Adversarial      | fixed       | 7448ad4b: `SKILL.md:250-267` respawns on `WRONG_MODEL:`, sends one `SendMessage`, stops for the user on failure   |
-| A2   | Adversarial      | fixed       | 7448ad4b: `SKILL.md:241-247`, `gate-reviewer.md:142-155` re-file unfixed named findings as `Not fixed: R<m>-<id>` |
-| A3   | Adversarial      | fixed       | 7448ad4b: `SKILL.md:295-303` "Round 3 is the last review" holds over every other rule                             |
-| A4   | Adversarial      | fixed       | 7448ad4b: `SKILL.md:191-194` a message with a template heading is a plan; a missing section goes to Gate A        |
-| A5   | Adversarial      | fixed       | 7448ad4b: `gate-planner.md:101-105` allows `hypothesis, untested` when no check can run before the plan ships     |
-| S1   | Standards + Spec | fixed       | Same gap as A3; fixed by 7448ad4b                                                                                 |
-| S2   | Standards + Spec | fixed       | Same gap as A2; fixed by 7448ad4b                                                                                 |
-| S3   | Standards + Spec | fixed       | Same gap as A1; fixed by 7448ad4b                                                                                 |
-| S4   | Standards + Spec | fixed       | 7448ad4b: hook comment quotes "Subagents run in the background by default"                                        |
-| S5   | Standards + Spec | fixed       | 7448ad4b: script renamed `foreground-hook:check` (`package.json:15`, `:68`)                                       |
-| P1   | Standards + Spec | fixed       | Same gap as A3; fixed by 7448ad4b                                                                                 |
-| P2   | Standards + Spec | fixed       | Same gap as A2; fixed by 7448ad4b                                                                                 |
-| P4   | Standards + Spec | fixed       | 7448ad4b: `gate-planner.md:91` "that your prompt lists"                                                           |
-| R2-4 | Focused check    | fixed       | Ticket 712 per-chunk ruling now names this branch's step 3 numbering and step 4 cap                               |
+| ID   | Axis             | Disposition | Ticket / note                                                                                                                     |
+| ---- | ---------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| A1   | Adversarial      | fixed       | 7448ad4b: `SKILL.md:250-267` respawns on `WRONG_MODEL:`, sends one `SendMessage`, stops for the user on failure                   |
+| A2   | Adversarial      | fixed       | 7448ad4b: `SKILL.md:241-247`, `gate-reviewer.md:142-155` re-file unfixed named findings as `Not fixed: R<m>-<id>`                 |
+| A3   | Adversarial      | fixed       | 7448ad4b: `SKILL.md:295-303` "Round 3 is the last review" holds over every other rule                                             |
+| A4   | Adversarial      | fixed       | 7448ad4b: `SKILL.md:191-194` a message with a template heading is a plan; a missing section goes to Gate A                        |
+| A5   | Adversarial      | fixed       | 7448ad4b: `gate-planner.md:101-105` allows `hypothesis, untested` when no check can run before the plan ships                     |
+| S1   | Standards + Spec | fixed       | Same gap as A3; fixed by 7448ad4b                                                                                                 |
+| S2   | Standards + Spec | fixed       | Same gap as A2; fixed by 7448ad4b                                                                                                 |
+| S3   | Standards + Spec | fixed       | Same gap as A1; fixed by 7448ad4b                                                                                                 |
+| S4   | Standards + Spec | fixed       | 7448ad4b: hook comment quotes "Subagents run in the background by default"                                                        |
+| S5   | Standards + Spec | fixed       | 7448ad4b: script renamed `foreground-hook:check` (`package.json:15`, `:68`)                                                       |
+| P1   | Standards + Spec | fixed       | Same gap as A3; fixed by 7448ad4b                                                                                                 |
+| P2   | Standards + Spec | fixed       | Same gap as A2; fixed by 7448ad4b                                                                                                 |
+| P4   | Standards + Spec | fixed       | 7448ad4b: `gate-planner.md:91` "that your prompt lists"                                                                           |
+| R2-4 | Focused check    | fixed       | Ticket 712 per-chunk ruling now names this branch's step 3 numbering and step 4 cap                                               |
+| R2-1 | Focused check    | fixed       | Commit "Fix 712 round-2 findings R2-1 to R2-3": `gate-reviewer.md:38-44` searches this repo, the fork and `upstream/master`       |
+| R2-2 | Focused check    | fixed       | Commit "Fix 712 round-2 findings R2-1 to R2-3": `gate-reviewer.md:130-132` Severity line names the `blocking` "Less code" finding |
+| R2-3 | Focused check    | fixed       | Commit "Fix 712 round-2 findings R2-1 to R2-3": `gate-reviewer.md:54` "check only the steps that your prompt names"               |

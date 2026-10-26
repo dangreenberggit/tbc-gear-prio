@@ -263,21 +263,6 @@ Open items (not fixed by this change):
   only): this change redid its fix. The hook, its test, the settings
   entry and the check script were ported; the rest was not taken.
   Whether to delete the remote branch is not decided.
-- Pre-merge review round 2 (`docs/reviews/feat-712-stage-gate-loops.md`)
-  found three problems in the "Less code" item of
-  `.claude/agents/gate-reviewer.md` (commit 75a0faf4), all still open and
-  blocking the merge: R2-1 (the search line runs `git grep` from the main
-  checkout, which does not search the gitignored fork or upstream, so a
-  reviewer can miss existing code and file nothing), R2-2 (a "Less code"
-  finding is `blocking` when `Approach` rests on the added code, but the
-  Severity line defines `blocking` as "the approach or a load-bearing
-  claim fails"), and R2-3 (the re-review sentence says "the code that
-  the latest revision added"; § Re-review rounds says "changed or
-  added"). The proposed fix is the owner patch
-  `.scratch/agent-reports/2026-10-26-712-review-round2-fixes.patch`
-  (gitignored, owner's checkout; `git apply --check` passes on 75a0faf4).
-  Remove this item when the patch is committed or the owner allows the
-  deferral.
 
 ### 2026-10-26: review rounds count per chunk
 
