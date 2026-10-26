@@ -253,3 +253,9 @@ Open items (not fixed by this change):
 - `- added:` lines list only new claims and steps. A claim the planner
   changed without a finding asking for it is not listed, so a re-review
   prompt may not name it (hypothesis, untested).
+- `gate-executor.md:43` applies only to a `minor` finding "whose `Where`
+  names a step" of the executor's chunk. No rule says what an executor
+  does with a `minor` finding whose `Where` names no step (for example
+  the whole plan), so no executor applies it or writes its `advisory`
+  ledger row. Source: the patch-build report,
+  `.scratch/agent-reports/2026-10-26-general-task-712-patch-build.md:60`.
