@@ -259,3 +259,7 @@ Open items (not fixed by this change):
   the whole plan), so no executor applies it or writes its `advisory`
   ledger row. Source: the patch-build report,
   `.scratch/agent-reports/2026-10-26-general-task-712-patch-build.md:60`.
+- Branch `feat/subagent-foreground-helpers` (on the `windows` remote
+  only): this change redid its fix. The hook, its test, the settings
+  entry and the check script were ported; the rest was not taken.
+  Whether to delete the remote branch is not decided.
