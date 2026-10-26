@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: owner's `pnpm merge-to-dev` run of feat/712-stage-gate-loops, 2026-10-26
 Blocks: none
@@ -70,3 +70,23 @@ Not done: adding the 17 names to `.gitignore`. That would also quiet the
 other scripts that read `git status`, but it would hide a real `.mcp.json`
 or `.gitmodules` that a branch adds on purpose, with content, and the 709
 fix chose not to depend on ignore rules.
+
+## Resolution
+
+Fixed in `tbc-gear-prio@b24185a4`. `has_changes` now asks
+`holds_no_work` about each untracked entry. It keeps the 709 rule (a
+device at any path holds no work) and adds one: an empty regular file at
+one of the 17 paths in `SANDBOX_STUBS` holds no work. A stub with content,
+an empty file at any other path, and every modified or staged entry still
+count.
+
+Verified by: `python scripts/check_merge_to_dev.py` (rc 0, 11 checks,
+including `check_empty_sandbox_stubs_are_not_work`) at
+`tbc-gear-prio@b24185a4`. A scratch git repo with `.claude/` tracked and
+the 17 paths touched as empty files gave `has_changes` False at
+`b24185a4` and True on the code before it; adding an empty `notes.md`, or
+writing one byte to `.bashrc`, gave True.
+
+Limit: when a checkout tracks no file under `.claude/`, git lists the
+folder as one `?? .claude/` entry and the rule does not skip it. This repo
+tracks `.claude/`, so the main checkout and its pairs are not affected.
