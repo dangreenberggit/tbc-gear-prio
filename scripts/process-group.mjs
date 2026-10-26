@@ -6,6 +6,7 @@
 // `detached: USE_PROCESS_GROUPS` so it leads its own process group, and stop
 // it with killTree, which signals the whole group.
 import { spawnSync } from "node:child_process";
+import os from "node:os";
 
 export const USE_PROCESS_GROUPS = process.platform !== "win32";
 
@@ -33,4 +34,16 @@ export function killGroup(pgid) {
     if (err.code !== "ESRCH") throw err;
     return false;
   }
+}
+
+// A signal ends node without running its "exit" handlers, so the processes
+// those handlers stop (Chrome, a server) would outlive it. Turning the signal
+// into process.exit runs them. A script that starts a process it must stop
+// calls this once; later calls do nothing.
+let exitingOnSignals = false;
+export function exitOnSignals() {
+  if (exitingOnSignals) return;
+  exitingOnSignals = true;
+  for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"])
+    process.on(sig, () => process.exit(128 + os.constants.signals[sig]));
 }

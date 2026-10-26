@@ -3,11 +3,14 @@
 // checkout's fork can serve on its own port (ticket 558).
 import { spawn } from "node:child_process";
 import fs from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { USE_PROCESS_GROUPS, killTree } from "../process-group.mjs";
+import {
+  USE_PROCESS_GROUPS,
+  exitOnSignals,
+  killTree,
+} from "../process-group.mjs";
 const ROOT = path.resolve(fileURLToPath(import.meta.url), "../../..");
 const FORK = path.join(ROOT, "vendor/tbc-new-fork");
 const FIXDIR = path.join(ROOT, "data/tab-fixtures");
@@ -31,10 +34,7 @@ const until = async (fn, ms, t = Date.now()) => {
   return fn();
 };
 const up = () => fetch(`${BASE}/tbc/`).catch(() => null);
-// A signal skips the "exit" handlers that stop vite (below) and Chrome
-// (test-tab-harness.mjs) unless it is turned into an exit.
-for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"])
-  process.on(sig, () => process.exit(128 + os.constants.signals[sig]));
+exitOnSignals();
 let vite = null;
 if (!(await up())) {
   // Our config wraps upstream's and adds the fixture plugin; cwd stays the

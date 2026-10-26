@@ -62,6 +62,7 @@ import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
+import { exitOnSignals, killTree } from "../process-group.mjs";
 import { findChromium } from "./chromium.mjs";
 import { RESULT_ROW, ROW_HELPERS } from "./rows.mjs";
 
@@ -152,6 +153,9 @@ async function launchChrome() {
     ],
     { stdio: "ignore" }
   );
+  // main's finally also stops Chrome, but a signal skips it (ticket 710).
+  process.on("exit", () => killTree(proc));
+  exitOnSignals();
   const deadline = Date.now() + 20000;
   let wsUrl;
   while (Date.now() < deadline) {
