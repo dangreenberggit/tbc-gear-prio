@@ -54,9 +54,12 @@ shared manifests get exactly one owner.
 
 ## Execution chunks
 
-`K1` is the only chunk with steps in this plan: the first piece that is
-worth building on its own, up to about five steps that share files. The
-Steps, Claims register and Paths manifest above cover `K1` alone. A step
+`K1` is the only chunk with steps when this plan is first written: the
+first piece that is worth building on its own, up to about five steps that
+share files. The Steps, Claims register and Paths manifest above then cover
+`K1` alone. After `K1` runs, a `gate-planner` with `next:` adds each later
+chunk's steps, claims and paths (`.claude/agents/gate-planner.md`
+§ Next chunk). A step
 whose result later steps must reason about goes in the same chunk as those
 steps; when this conflicts with the size limit, keep the steps together and
 name the dependency on the chunk line. List it as `K1: steps 1–4`.

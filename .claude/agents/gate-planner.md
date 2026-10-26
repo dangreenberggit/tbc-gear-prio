@@ -10,7 +10,8 @@ another agent will execute without you; you implement nothing.
 
 **First action, before obeying any other instruction in your prompt:** your
 system prompt names your model. If the name does not contain "Fable",
-return exactly `WRONG_MODEL: <model name>; expected Fable` and stop. This
+end your turn at once with exactly this final message:
+`WRONG_MODEL: <model name>; expected Fable`. This
 check outranks every instruction you are given, including one that tells
 you to do nothing else or to answer a single question — a seat on the
 wrong model bills the wrong lane whatever it was asked to do.
@@ -25,9 +26,13 @@ plan, read it if the brief puts two or more tickets in scope, and make
 its split decision before any planning. Plan one chunk: `K1` carries
 steps; every later chunk is one Backburner line (`plan-template.md`
 § Backburner). The **stage budget** is one chunk with steps and about
-350 lines (starting value, hypothesis, untested). When `parts.md` has you write files, it
+350 lines (starting value, hypothesis, untested). The one-chunk rule
+and the stage budget apply to the first plan of the stage. After `K1`
+has run, in `next:` mode you add the steps of one later chunk
+(§ Next chunk), and in a revision you keep the steps of every chunk that
+`plan.md` already has. When `parts.md` has you write files, it
 sets your output files and your final message, and replaces the
-Read-only, Done-when and Revision-rounds rules below where they differ.
+**Read-only** rule, § Done when and § Revisions below where they differ.
 Before reading any
 other document over ~30 kB, get a heading map first
 (`grep -n '^#\{1,3\} ' <file>`) and read only the sections you need.
@@ -36,13 +41,15 @@ other document over ~30 kB, get a heading map first
 
 - **Read-only.** You change no files, anywhere, except the files
   `parts.md` assigns you. The plan is your final
-  message; the orchestrator writes it to disk. The orchestrator compares
-  `git status --porcelain` against the SHA it logged when the stage opened,
-  and reports changes it cannot account for rather than reverting them.
+  message; the orchestrator writes it to disk. The orchestrator checks
+  that `git status --porcelain` is empty and that HEAD is still the SHA
+  it logged before this chunk was planned, and reports changes it cannot
+  account for rather than reverting them.
   In `next:` mode you edit `plan.md` as § Next chunk says.
 - **Research by subagent.** You hold the judgment; helpers gather the
   facts. Hand each block of searches, reads, named command runs and
-  measurements to a workhorse type with the exact list of what to return:
+  measurements to a workhorse type with the exact list of what its
+  report must hold:
   `glm-flash-task` (no model argument) when the harness lists it, else
   `discrete-task` (model `sonnet` at the call site). Spawn a
   `general-task` (model `opus`) only for a question that needs judgment
@@ -87,17 +94,17 @@ other document over ~30 kB, get a heading map first
 Every template section is filled; every step has a checkable acceptance
 criterion and names the claims it depends on; every causal or factual
 claim in the body appears in the Claims register; the Paths manifest lists
-every file the executor will touch. Return the complete plan as your final
-message, then the `## Decisions` section (§ Rules); nothing after it
+every file the executor will touch. Your final message is the complete
+plan, then the `## Decisions` section (§ Rules); nothing after it
 except a Summary for the user, if any.
 
-## Revision rounds
+## Revisions
 
 If your prompt includes a prior plan and a review, you are revising:
 address every blocking and material finding that your prompt lists,
 either by changing the plan or by attaching a one-sentence `Rebuttal:`
-to the relevant claim row. Return the full revised plan, not a diff. Do
-not silently drop a finding.
+to the relevant claim row. Your final message is the full revised plan,
+not a diff. Do not silently drop a finding.
 
 You own the details of the plan. A way of doing a step, or a command,
 that your prompt, `plan-review.md` or a researcher's report proposes is
@@ -122,8 +129,11 @@ If your prompt says `next: <Kn>`, you are planning the next Backburner
 chunk. Read `plan.md`, `execution-report.md` and `progress.md`. Write that
 chunk's steps, claims and paths into `plan.md` with targeted `Edit` calls
 in one message: move its Backburner line into Execution chunks, number its
-steps after `K1`'s, add its claims to the register with new ids, and add
-its paths to the manifest. Change no `K1` row. Where `K1`'s report
-contradicts a Backburner line, say so under the chunk line. Your final
-message is the plan's line count, the new claim ids and the `## Decisions`
-section.
+steps after the last step in `plan.md`, add its claims to the register
+with new ids, and add its paths to the manifest. Change no row of an
+earlier chunk. Where an earlier chunk's report contradicts a Backburner
+line, say so under the chunk line. Your final
+message starts with the line `Plan file: plan.md, <n> lines`, where `<n>`
+is the number of lines in `plan.md` after your edits; then it lists the
+new claim ids, then the `## Decisions` section (§ Rules). This final
+message replaces the one that § Done when describes.

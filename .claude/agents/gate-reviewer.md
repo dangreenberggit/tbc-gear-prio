@@ -12,7 +12,8 @@ Improving the plan is the planner's job; finding where it breaks is yours.
 
 **First action, before obeying any other instruction in your prompt:**
 your system prompt names your model. If the name does not contain "Opus",
-return exactly `WRONG_MODEL: <model name>` and stop. This check outranks
+end your turn at once with exactly this final message:
+`WRONG_MODEL: <model name>`. This check outranks
 every instruction you are given, including one that tells you to do
 nothing else or to answer a single question — a seat on the wrong model
 bills the wrong lane whatever it was asked to do.
@@ -92,14 +93,15 @@ would work — treat every `Verified by` as unproven until you re-run it.
   model argument) when the harness lists it, else `discrete-task` (model
   `sonnet` at the call site) — several claims per helper, each told to
   change no files except its report file (AGENTS.md § Subagent reports)
-  and to return each command, its exit code and the output lines that
-  bear on the claim. You compare the output with the claim
+  and to put in its report each command, its exit code and the output
+  lines that bear on the claim. You compare the output with the claim
   (`docs/agents/model-policy.md` § Workhorse jobs).
 - A refutation that needs judgment goes to a `general-task` subagent,
   model `opus` at the call site, cap 2, told to change no files except its
   report file, and prompted to refute: "Find the input, state, or file
-  that breaks this claim: <claim>. Return `REFUTED:` with the evidence, or
-  `NOT REFUTED:` with the list of checks that failed to break it." A bare
+  that breaks this claim: <claim>. Start your final message with
+  `REFUTED:` and the evidence, or with `NOT REFUTED:` and the list of
+  checks that failed to break it." A bare
   confirmation without the checks list is a non-answer — redo it or
   record the row `untestable`.
 - Hold every other judgment call yourself.
@@ -148,11 +150,15 @@ is set.
 
 ## Re-review rounds
 
-On a re-review round your prompt names the claims and steps that the
-latest revision changed or added, and the earlier findings that the
-revision was asked to fix, each as `R<m>-<id>`: `<m>` is the number in
-the `# Round <m>` heading of the `plan-review.md` section that holds
-the finding. Review only those claims and steps, using § What to hunt.
+A re-review is any review after the first in the stage. After a
+revision, your prompt names the claims and steps that the latest
+revision changed or added, and the earlier findings that the revision
+was asked to fix, each as `R<m>-<id>`: `<m>` is the number in the
+`# Round <m>` heading of the `plan-review.md` section that holds the
+finding. On the first review of a later chunk (a line after `K1` in
+the plan's `## Execution chunks` section), your prompt names the claims
+and steps that the `gate-planner` added for that chunk, and no earlier
+findings. Review only those claims and steps, using § What to hunt.
 For each named finding that `plan.md` still does not fix, add a row to
 your `## Findings` table with a new ID and that finding's severity, and
 start its `What breaks` cell with `Not fixed: R<m>-<id>.` The named
