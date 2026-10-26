@@ -140,22 +140,64 @@ def is_device(path: Path) -> bool:
     return stat.S_ISCHR(mode) or stat.S_ISBLK(mode)
 
 
-def real_changes(
-    entries: list[tuple[str, str]], device: Callable[[str], bool]
-) -> list[tuple[str, str]]:
-    """`entries` without the untracked ones that are devices.
+# The paths the agent sandbox leaves as empty files, from the 17 seen in
+# tickets 709 and 713. They name Claude Code's write-protected paths, so a
+# Claude Code update can add one; the merge then refuses again, naming no
+# lost work, and the fix is to add the name here.
+SANDBOX_STUBS = frozenset(
+    {
+        ".bash_profile",
+        ".bashrc",
+        ".gitconfig",
+        ".gitmodules",
+        ".idea",
+        ".mcp.json",
+        ".profile",
+        ".ripgreprc",
+        ".vscode",
+        ".zprofile",
+        ".zshrc",
+        ".claude/commands",
+        ".claude/loop.md",
+        ".claude/output-styles",
+        ".claude/routines",
+        ".claude/settings.local.json",
+        ".claude/workflows",
+    }
+)
 
-    The agent sandbox mounts /dev/null over denied paths that do not exist,
-    and git lists each mount as untracked (ticket 709). git cannot track a
-    device, so such an entry holds no work. The paths depend on the sandbox
-    settings, which is why this tests the file type and not a list of names.
+
+def holds_no_work(root: Path, rel: str) -> bool:
+    """Whether untracked `rel` under `root` is a sandbox mount and not work.
+
+    Inside the agent sandbox each mount is a device (ticket 709); git cannot
+    track a device, so any path counts. Outside it the mount point is left
+    as an empty regular file (ticket 713). An empty file can be work, such
+    as a new `.gitkeep`, so only the known stub paths count.
     """
-    return [(xy, path) for xy, path in entries if not (xy == "??" and device(path))]
+    path = root / rel
+    if is_device(path):
+        return True
+    if rel not in SANDBOX_STUBS:
+        return False
+    try:
+        st = os.lstat(path)
+    except OSError:
+        return False
+    return stat.S_ISREG(st.st_mode) and st.st_size == 0
+
+
+def real_changes(
+    entries: list[tuple[str, str]], no_work: Callable[[str], bool]
+) -> list[tuple[str, str]]:
+    """`no_work` is a parameter so check_merge_to_dev.py can test this without
+    real sandbox mounts; `has_changes` passes `holds_no_work`."""
+    return [(xy, path) for xy, path in entries if not (xy == "??" and no_work(path))]
 
 
 def has_changes(cwd: Path) -> bool:
     status = git_out("status", "--porcelain", "-z", cwd=cwd)
-    return bool(real_changes(parse_porcelain_z(status), lambda p: is_device(cwd / p)))
+    return bool(real_changes(parse_porcelain_z(status), lambda p: holds_no_work(cwd, p)))
 
 
 def merge_blockers(entries: list[tuple[str, str]], touched: set[str]) -> list[str]:
