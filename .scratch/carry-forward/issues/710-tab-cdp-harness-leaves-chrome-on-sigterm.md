@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: pre-merge review feat/headless-run-no-orphans, P1, 2026-10-25
 Blocks: none
@@ -30,3 +30,21 @@ Each of those scripts turns SIGINT, SIGTERM and SIGHUP into `process.exit`,
 and `run-tab-cdp.mjs`'s Chrome has an `exit` handler. Check: start the
 driver in one Bash call, send it SIGTERM once Chrome is up, and
 `ps -eo pid,args | grep -E 'chrome'` in the same call prints nothing.
+
+## Resolution
+
+Fixed in `tbc-gear-prio@af44b109` on `feat/headless-run-no-orphans`.
+`scripts/process-group.mjs` gained `exitOnSignals()`, which turns SIGINT,
+SIGTERM and SIGHUP into `process.exit` once per process. `test-tab-harness.mjs`
+calls it where it registers the `exit` handlers for Chrome and http-server, so
+every script that launches through it is covered; `run-tab-cdp.mjs`'s own
+`launchChrome` now also stops Chrome in an `exit` handler and calls it;
+`smoke.mjs` uses it in place of its own loop.
+
+Verified by: `tbc-gear-prio@af44b109`, `docs/reviews/feat-headless-run-no-orphans.md`, and
+`bash /home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-10-25-headless-review/signal-tests.sh`
+(untracked, in the main checkout). With the fix, SIGTERM to
+`run-tab-cdp.mjs` and to a script that calls `test-tab-harness.mjs`'s
+`launchChrome` left 0 Chrome processes (7 were running); with the code before
+the fix (stashed), 7 and 6 Chrome processes survived. Review:
+`docs/reviews/feat-headless-run-no-orphans.md`.

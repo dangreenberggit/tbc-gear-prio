@@ -150,26 +150,57 @@ it: `smoke.mjs` and the `both` wrappers spawn `process.execPath`, and
 `serve` exits on the child's `error` event. Suggested fix: `if (child.pid
 === undefined) return;` at the top of `killTree`.
 
+## After round 2
+
+The review stopped on R1 under "Round limit". The orchestrating session then
+decided (its message, 2026-10-25): apply the one-line R1 fix with a node test
+and no third round, and close tickets 710 and 711 on this branch if each fix
+is a few lines and a local signal test proves it. These commits were not read
+by a review round:
+
+- 34da9a06 "Fix review finding R1": `killTree` returns when `child.pid` is
+  undefined. Test: a child spawned from `/nonexistent-binary-r1`
+  (`pid=undefined exitCode=-2`); `killTree` returns quietly at 34da9a06 and
+  threw `ERR_INVALID_ARG_TYPE` with the change stashed.
+- af44b109 "Stop Chrome and wowsimtbc when a script is signalled" (P1, P2):
+  `exitOnSignals()` in `scripts/process-group.mjs`, called from
+  `test-tab-harness.mjs` where it registers its Chrome and http-server `exit`
+  handlers, and from `run-tab-cdp.mjs`'s `launchChrome`, which now also stops
+  Chrome in an `exit` handler; `smoke.mjs` uses it in place of its own loop.
+  `check_desktop_tab.py` raises `SystemExit(128 + signum)` on SIGTERM and
+  SIGHUP so `main`'s `finally` stops the server. Signal test, one Bash call
+  (script in the ticket files): with the fix, SIGTERM left 0 Chrome processes
+  for `run-tab-cdp.mjs` and for a script using `test-tab-harness.mjs`'s
+  `launchChrome`, and the Python `try/finally` stopped its child; with the
+  code before the fix, 7 and 6 Chrome processes and the child survived. The
+  desktop gate itself was not run. Smoke after the change: 6 of 6 `ok` in
+  29.3 s, `ps` empty.
+
 ## Summary
 
-Round 1 (small-change lane, one reviewer) found A1-A4, S1-S3 and P1-P3.
-7331b9ab fixed A1, A2, A4, S1, S2, S3 and P3. P1 and P2 predate this
-branch and are filed as tickets 710 and 711. A3 is a trade-off the branch
-accepts (proposed `wontfix`: the signal path is covered by smoke's
-signal-to-exit handlers, and a SIGKILL to smoke alone left vite running
-before this branch too).
+Round 1 (small-change lane) found A1-A4, S1-S3 and P1-P3; 7331b9ab fixed
+A1, A2, A4, S1, S2, S3 and P3. Round 2 passed its four checks and found R1,
+fixed in 34da9a06 by the orchestrator's decision above. P1 and P2 were filed
+as tickets 710 and 711 and closed in af44b109. A3 is a trade-off the branch
+accepts.
 
-Round 2 passed its four checks but reported R1, a finding other than
-bookkeeping in the lines the fixes wrote. Under the skill's "Round limit"
-the review stops here: R1 is not fixed on the branch, no Disposition table
-is written, and `pnpm merge-to-dev --check-only` was not run. The owner
-decides the next step (for example: allow the one-line R1 fix without a
-further round, or defer R1 to a ticket).
+Smoke fixtures: 6 of 6 pass once the pair's `dist/tbc` is built, and no
+`tsc`, `vite`, `wowsimtbc` or `chrome` process survives.
 
-Smoke fixtures: 6 of 6 pass with the pair's `dist/tbc` built, and no
-`tsc`, `vite`, `wowsimtbc` or `chrome` process survives (section "Smoke
-fixtures" above). `pnpm -C <pair> verify` at 8dd1970f: rc=0, "gates: 1561
-ran, 0 skipped".
+Tickets: filed 2 (710, 711), closed 2 (710, 711).
 
-Tickets: filed 2 (710, 711), closed 0. More are filed than closed because
-P1 and P2 are gaps from before this branch that the spec names.
+## Disposition
+
+| ID  | Axis          | Disposition | Ticket / note                                                                                                                                          |
+| --- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A1  | Adversarial   | fixed       | 7331b9ab: `killTree` signals the group even after the leader exits                                                                                     |
+| A2  | Adversarial   | fixed       | 7331b9ab: `killTree` defaults to the group kill, with a plain-kill fallback                                                                            |
+| A3  | Adversarial   | wontfix     | Trade-off: smoke turns SIGINT/SIGTERM/SIGHUP into an exit that stops its vite group; a SIGKILL to smoke alone left vite running before this branch too |
+| A4  | Adversarial   | fixed       | 7331b9ab: harness config throws a named error when the checker plugin is missing                                                                       |
+| S1  | Standards     | fixed       | 7331b9ab: comment and known-traps say only what was seen                                                                                               |
+| S2  | Standards     | fixed       | 7331b9ab: `GROUPS` renamed `USE_PROCESS_GROUPS`                                                                                                        |
+| S3  | Standards     | fixed       | 7331b9ab: known-traps names `detached: USE_PROCESS_GROUPS` and `killTree(child)`                                                                       |
+| P1  | Spec          | fixed       | af44b109, closes `.scratch/carry-forward/issues/710-tab-cdp-harness-leaves-chrome-on-sigterm.md`                                                       |
+| P2  | Spec          | fixed       | af44b109, closes `.scratch/carry-forward/issues/711-desktop-gate-leaves-wowsimtbc-on-sigterm.md`                                                       |
+| P3  | Spec          | fixed       | 7331b9ab: `dev-tab.mjs frontend` keeps a caller's `TBC_TAB_TYPE_CHECKER`                                                                               |
+| R1  | Focused check | fixed       | 34da9a06: `killTree` returns when `child.pid` is undefined                                                                                             |
