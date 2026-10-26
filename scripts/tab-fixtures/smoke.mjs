@@ -1,10 +1,13 @@
 // Open every made-up fixture's ?upgrades-fixture link on the fork dev server
 // (ticket 520). TBC_FORK_PORT picks the port (default 5173), so a second
 // checkout's fork can serve on its own port (ticket 558).
-import { spawn, spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+
+import { GROUPS, killTree } from "../process-group.mjs";
 const ROOT = path.resolve(fileURLToPath(import.meta.url), "../../..");
 const FORK = path.join(ROOT, "vendor/tbc-new-fork");
 const FIXDIR = path.join(ROOT, "data/tab-fixtures");
@@ -28,6 +31,10 @@ const until = async (fn, ms, t = Date.now()) => {
   return fn();
 };
 const up = () => fetch(`${BASE}/tbc/`).catch(() => null);
+// A signal skips the "exit" handlers that stop vite (below) and Chrome
+// (test-tab-harness.mjs) unless it is turned into an exit.
+for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"])
+  process.on(sig, () => process.exit(128 + os.constants.signals[sig]));
 let vite = null;
 if (!(await up())) {
   // Our config wraps upstream's and adds the fixture plugin; cwd stays the
@@ -35,12 +42,9 @@ if (!(await up())) {
   const config = path.join(ROOT, "scripts/tab-harness/vite.config.mjs");
   const args = ["node_modules/vite/bin/vite.js", "serve", "--config", config];
   args.push("--port", PORT, "--strictPort");
-  const opts = { cwd: FORK, stdio: "ignore" };
+  const opts = { cwd: FORK, stdio: "ignore", detached: GROUPS };
   vite = spawn(process.execPath, args, opts);
-  const kill = ["/PID", String(vite.pid), "/T", "/F"];
-  process.on("exit", () =>
-    process.platform === "win32" ? spawnSync("taskkill", kill) : vite.kill()
-  );
+  process.on("exit", () => killTree(vite, GROUPS));
   if (!(await until(up, 60000))) fail(`dev server: did not start on :${PORT}`);
 }
 console.log(`dev server ${vite ? "started" : "reused"} in ${secs(t0)}s`);

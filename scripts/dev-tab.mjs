@@ -13,7 +13,7 @@
 //   backend   build ./sim/web and serve dist/ live from disk (--usefs=true),
 //             so a frontend rebuild shows without rebuilding the binary.
 //   frontend  vite with scripts/tab-harness/vite.config.mjs (upstream's config
-//             plus the tab-fixture plugin).
+//             plus the tab-fixture plugin), with upstream's type checker on.
 //   desktop   `make wowsimtbc` and run the packaged binary WITHOUT --usefs, so
 //             it serves its embedded net_worker.js: the HTTP transport that
 //             `pnpm desktop-gate:check` verifies.
@@ -26,6 +26,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { GROUPS, killGroup, killTree } from "./process-group.mjs";
 
 const SELF = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(SELF), "..");
@@ -58,30 +60,6 @@ function parseArgs(argv) {
 
 const log = (msg) => console.log(`[dev-tab] ${msg}`);
 
-// A server leaves children of its own (vite's type checker runs `tsc
-// --watch`), and killing only the server orphans them. On Windows taskkill /T
-// ends the tree; elsewhere the server runs in its own process group (see
-// serve) and the whole group is signalled.
-function killTree(child, group = false) {
-  if (child.exitCode !== null || child.signalCode !== null) return;
-  if (process.platform === "win32")
-    spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
-      stdio: "ignore",
-    });
-  else if (group) killGroup(child.pid);
-  else child.kill("SIGTERM");
-}
-
-// The group outlives its leader: when the server exits on its own, its
-// children (tsc --watch) are still running in it.
-function killGroup(pgid) {
-  try {
-    process.kill(-pgid, "SIGTERM");
-  } catch (err) {
-    if (err.code !== "ESRCH") throw err;
-  }
-}
-
 // A signal death has no exit code; 128 + its number is the shell's convention.
 const signalExitCode = (signal) => 128 + (os.constants.signals[signal] ?? 0);
 
@@ -95,15 +73,18 @@ function runSync(cmd, args, env = process.env) {
 // A server that ends without this script stopping it, even with code 0 or by
 // a signal from outside, is a failure the caller (a terminal, a launcher, or
 // `both` mode) must be able to see.
-function serve(cmd, args) {
+// The server runs in its own process group so that stopping it also stops
+// what it started (scripts/process-group.mjs).
+function serve(cmd, args, env = process.env) {
   // stdin is ignored because a process outside the terminal's foreground
   // group is stopped (SIGTTIN) when it reads the terminal, and both servers
   // read it for interactive commands this script does not need.
-  const detached = process.platform !== "win32";
+  const detached = GROUPS;
   const child = spawn(cmd, args, {
     cwd: FORK,
     stdio: ["ignore", "inherit", "inherit"],
     detached,
+    env,
   });
   let stopRequested = false;
   const stop = () => {
@@ -176,15 +157,21 @@ function desktop(port) {
 function frontend(port) {
   log(`starting vite on :${port}...`);
   // cwd stays the fork: upstream's vite config resolves some paths against it.
-  serve(process.execPath, [
-    path.join(FORK, "node_modules", "vite", "bin", "vite.js"),
-    "serve",
-    "--config",
-    VITE_CONFIG,
-    "--port",
-    String(port),
-    "--strictPort",
-  ]);
+  // This is the one launcher that turns the type checker back on, because
+  // serve stops its `tsc --watch` with the server.
+  serve(
+    process.execPath,
+    [
+      path.join(FORK, "node_modules", "vite", "bin", "vite.js"),
+      "serve",
+      "--config",
+      VITE_CONFIG,
+      "--port",
+      String(port),
+      "--strictPort",
+    ],
+    { ...process.env, TBC_TAB_TYPE_CHECKER: "1" }
+  );
 }
 
 function prefixLines(stream, tag, out) {
