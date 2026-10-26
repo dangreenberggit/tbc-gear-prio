@@ -53,9 +53,9 @@ extremely simple slice, `general-task` for every other slice.
 Name the model on every spawn, even though each seat's frontmatter sets
 its model. A call-site name outranks frontmatter, so a wrong name
 there is the one way a seat runs on the wrong model. Every
-seat self-checks and returns `WRONG_MODEL: <name>` on a mismatch: respawn
-with the model the seat table names, not the model the return says it
-expected (a session started before a seat file changed may hold the old
+seat self-checks and ends with the final message `WRONG_MODEL: <name>` on
+a mismatch: respawn with the model the seat table names, not the model
+that message says it expected (a session started before a seat file changed may hold the old
 check). A `subagent_type` the harness does not recognize has no
 registered agent definition. First check that a file under
 `.claude/agents/` sets that exact value as its `name:`. If it does and the
@@ -83,7 +83,11 @@ not` list below.
    conclusion. You judge the result; you don't author it. A question
    between gates goes to a seat, or to a `general-task` / `simple-task`
    agent. The only commands you run are the gate checks that AGENTS.md
-   § The session delegates lists.
+   § The session delegates lists. Tell the user that an agent is working
+   only when the last `spawn` line in `decision-log.md` with that agent's
+   id is `started` or `resumed` (step 1). When the agent's last
+   notification says it is waiting on its own background work, tell the
+   user that it has stopped and may resume on its own.
 4. **Let open issues block end-of-line moves like merge.** When a phase
    produces open tickets — a correctness gap, a test hole, a half-delivered
    feature — the honest next step is to close that work. "No blocking review
@@ -98,6 +102,8 @@ not` list below.
    of those is not a re-ask; deciding it silently is the failure.
 
 ## Steps
+
+In these steps, "you" and "the session" are the same agent.
 
 1. **Open the stage.** Pick `<slug>`; create `.scratch/stage-gate/<slug>/`;
    write `brief.md` — goal, the tickets in scope, constraints, and what
@@ -129,17 +135,37 @@ not` list below.
 
        <time> | <session> | gate <A, B, C, or chunk id> | <outcome> | round <n> | <reason, one line>
        <time> | <session> | row <finding or ledger id> | <fixed, accepted, rejected, advisory, rework, or escalate> | <reason, one line> | evidence: <file:line, command, or none>
-       <time> | <session> | spawn <subagent_type> (<model>) | <started or returned> | agent <agent id or n/a> | subagent_tokens <n or n/a> | <mode, part id or chunk id>
+       <time> | <session> | spawn <subagent_type> (<model>) | <started, resumed, or returned (<status>)> | agent <agent id> | subagent_tokens <n or n/a> | <mode, part id or chunk id>
        <time> | <session> | note <sha, question, or tickets> | <the SHA, the question and its answer, or the ticket ids> | <reason, one line>
 
    - `gate`: each gate outcome.
-   - `row`: each Gate B finding (`advisory` for a `minor` finding that
-     rides along) and each Gate C ledger row, non-`success` status and
-     out-of-manifest path.
-   - `spawn`: a `returned` line for every spawn you make, with the
-     `subagent_tokens` figure its result reports, or `n/a` if it shows
-     none. A `started` line goes before a spawn only where a step asks
-     for one; it has `agent n/a` and `subagent_tokens n/a`.
+   - `row`: each Gate B finding, with the id `R<n>-<id>`, where `<n>` is
+     the number in the `# Round <n>` heading of the `plan-review.md`
+     section the finding came from (`advisory` for each `minor` finding);
+     and each Gate C ledger row,
+     non-`success` status and out-of-manifest path.
+   - `spawn`: one line per event below, for every agent the session
+     spawns. The session spawns every agent in the background (leave
+     `run_in_background` unset). The harness then sends the session a
+     `<task-notification>` each time the turn of that agent ends, so one
+     agent can have several `returned` lines.
+     - `started`: the Agent call's tool result gave the new agent's id
+       (the line `agentId: <id>`). The line has that agent id and
+       `subagent_tokens n/a`.
+     - `resumed`: the session sent the agent a `SendMessage`, and the
+       tool result has `"success":true`.
+     - `returned (<status>)`: a `<task-notification>` whose `<task-id>`
+       is the agent id arrived. Write the text of its `<status>` tag in
+       the brackets (seen: `completed`, `failed`, `killed`). Copy the
+       number in its `<subagent_tokens>` tag, or write `n/a` when it has
+       none.
+     An agent is **working** when the last `spawn` line with its agent id
+     is `started` or `resumed`. An agent's **final message** is the
+     `<result>` of a `<task-notification>` with
+     `<status>completed</status>` whose `<summary>` does not say the
+     agent `is waiting on its own background work`. When the `<summary>`
+     does say that, the `<result>` may be interim: log the `returned`
+     line and act on nothing else in that notification.
    - `note`: the SHAs that steps 1 and 5 record, each question and
      answer of step 5, and filed ticket ids with the new HEAD.
 
@@ -149,18 +175,33 @@ not` list below.
 2. **Plan.** Every `gate-planner` spawn (`model: "fable"`) names the
    absolute paths of `brief.md`,
    `.claude/skills/stage-gate/plan-template.md` and the stage folder.
-   Spawn one. When it returns a plan, write it to `plan.md` verbatim.
+   Spawn one. When a `gate-planner`'s final message is a plan, write it
+   to `plan.md` verbatim.
    When its final message starts with `DECISION:`, it has split the
    brief and written its files itself: this is a **split run**, marked
    by a `decomposition.md` in the stage folder. When the Parts table
    there has more than one part, spawn one `gate-planner` with
    `part: <id>` for each part after `P1`, in order and one at a time;
-   then one with `reconcile`, which writes `plan.md`. Write a `started`
-   line before every `gate-planner` spawn.
+   then one with `reconcile`, which writes `plan.md`.
    When a planner's final message lists "Open questions", put them to
    the user before the next spawn and send the answers back to that
    planner (`SendMessage` it, or respawn it in the same mode with the
    answers). There is one round of answers.
+
+   When a `gate-planner`'s final message is none of these — a plan with
+   every section of `plan-template.md`; a message that starts with
+   `DECISION:`, with `WRONG_MODEL:`, or with the plan file's line count
+   (`parts.md` § When you write files here); a message that lists "Open
+   questions" — no agent is working on that `gate-planner`'s job. The
+   session sends that `gate-planner` a `SendMessage` to its agent id with
+   this text: "Your final message was not the final message your
+   instructions ask for. If you started researchers, read their report
+   files. Then end your turn with that final message." The session logs
+   `resumed`. When the `SendMessage` tool result lacks
+   `"success":true`, the session respawns the `gate-planner` in the
+   same mode. When the next final message of the resumed or respawned
+   `gate-planner` is again none of these, the session stops and tells
+   the user.
 
    **Gate A (mechanical):** every template section present; Claims
    register nonempty; Paths manifest present; every open question in the
@@ -190,9 +231,25 @@ not` list below.
    `re-split: ruling` and the ruling; it rewrites `plan.md` itself, and
    that is one revision round.
 
-3. **Review.** Spawn `gate-reviewer` (`model: "opus"`) with the paths of
-   `brief.md`, `plan.md` and, on a split run, `decomposition.md`. Write
-   its final message to `plan-review.md`. Same clean-tree check.
+3. **Review.** The session spawns `gate-reviewer` (`model: "opus"`).
+   The session's spawn prompt gives the round number `<n>` (1 for the
+   stage's first review, then 1 higher for each later review) and the
+   absolute paths of `brief.md`, `plan.md`, `plan-review.md` and, on a
+   split run, `decomposition.md`, all in `.scratch/stage-gate/<slug>/`.
+   Every round after the first is a **re-review**. Its spawn prompt also
+   names the claims and steps that the latest revision changed or added,
+   and says that the review covers only those claims and steps and the
+   findings in the earlier `# Round` sections of `plan-review.md`, and
+   does not review the rest of the plan.
+   The `gate-reviewer` writes its review into `plan-review.md` under the
+   heading `# Round <n>` (`.claude/agents/gate-reviewer.md` § Report).
+   The session writes nothing to `plan-review.md`. After the
+   `gate-reviewer`'s final message arrives, the session reads the
+   `# Round <n>` section of `plan-review.md` and judges Gate B from that
+   section. When that section is missing or has no `VERDICT:` line, the
+   session sends that `gate-reviewer` (same agent id) a `SendMessage`
+   that asks it to write the `# Round <n>` section. Same clean-tree
+   check.
 
 4. **Gate B (judgment — yours).** Reconcile each finding against the
    brief's intent — a finding can be correct about the plan and wrong
@@ -200,12 +257,45 @@ not` list below.
    reviewer's.
    - A `blocking` finding, or a refuted load-bearing claim → loop back:
      respawn `gate-planner` with brief + plan + review for a revision,
-     then `gate-reviewer` on the changed claims only. **One revision
-     round is the norm.** Loop back again only while a `blocking` finding
-     still stands after the revision. When a `blocking` finding still
-     stands after the second loop-back, the session stops and gives the
-     user the open findings, with any contradiction between seats stated,
-     not resolved.
+     then spawn a `gate-reviewer` for a re-review (step 3). **One
+     revision round is the norm.** Loop back a second time only when the
+     re-review after the first loop-back has a `blocking` finding or a
+     refuted load-bearing claim. After the revision of the second
+     loop-back, the session spawns one more `gate-reviewer` for a
+     re-review. When that review
+     has a `blocking` finding or a refuted load-bearing claim, the
+     session stops and gives the user the open findings, with any
+     contradiction between seats stated, not resolved. When that review
+     has `material` findings only, the session spawns one `gate-planner`
+     revision for them, runs Gate A, and spawns no further
+     `gate-reviewer`.
+   - No `blocking` finding and no refuted load-bearing claim, but one or
+     more `material` findings need a change to `plan.md` → the session
+     spawns one `gate-planner` revision with brief + plan + review, then
+     runs Gate A. This revision is not a loop-back and does not count
+     toward the two loop-backs above. The session spawns a
+     `gate-reviewer` for a re-review (step 3) only when the
+     `## Decisions` section of that `gate-planner`'s final message has
+     lines that start with `- added:`. When that re-review has a
+     `blocking` finding or a refuted load-bearing claim, the session
+     loops back as the bullet above says, and that loop-back counts
+     toward the two. When it has `material` findings only, the session
+     spawns one `gate-planner` revision for them, runs Gate A, and spawns
+     no further `gate-reviewer`.
+   - The session spawns no `gate-reviewer` with a round number above 3.
+     This limit holds over every other rule in this step: where a rule
+     would start round 4, the session stops and gives the user the open
+     findings and the `- added:` lines that round would have covered.
+   - After Gate A passes on a revision that no re-review follows, the
+     session checks `plan.md` against the result the revision prompt
+     stated for each `material` finding and logs each one `fixed`, with
+     the plan step as evidence. A `material` finding that `plan.md` does
+     not meet goes to the user.
+   - In every revision prompt, the session states, for each `blocking`
+     and `material` finding, the result `plan.md` must reach. When a
+     revision prompt repeats a way of doing a step, or a command, that a
+     `gate-reviewer` or a researcher's report suggested, the session
+     marks it `hypothesis, untested` in that prompt.
    - On a split run, when a `blocking` or `material` finding has
      `Where: decomposition`, the round's revision is one `gate-planner`
      (`model: "fable"`) with `plan-review.md` and `re-split: review`. It
@@ -214,7 +304,10 @@ not` list below.
      the `## Seams` section.
    - Proceed when: no blocking finding stands; every `material` finding is
      fixed in the plan or accepted in `decision-log.md` with a reason;
-     `minor` findings ride along to the executor as advisories.
+     every `minor` finding has a `row R<n>-<id> | advisory` line in
+     `decision-log.md`. A revision prompt lists `blocking` and `material`
+     findings only. The `gate-executor` reads the `minor` findings in
+     `plan-review.md` (`.claude/agents/gate-executor.md` § Inputs).
    - A seat contradiction you cannot settle by having a subagent re-run a
      command is the user's call. Log every gate outcome.
    - When `decomposition.md` lists deferred parts, after Gate B passes
@@ -244,10 +337,12 @@ not` list below.
    and log the chunk id, its base SHA and the executor's agent id in
    `decision-log.md`. A fresh executor per chunk keeps each context small.
    A chunk whose handoff `Status` is not `success`, or whose ledger has a
-   `flag` or `stop` row, goes to Gate C before the next chunk starts. A
-   `NEEDS_PRIOR_CONTEXT` return is not a handoff.
+   `flag` or `stop` row, goes to Gate C before the next chunk starts; an
+   `advisory` row waits for the final Gate C. A final message that
+   starts with `NEEDS_PRIOR_CONTEXT` is not a handoff.
 
-   An executor that returns `NEEDS_PRIOR_CONTEXT: <question>` has hit a
+   An executor whose final message starts with
+   `NEEDS_PRIOR_CONTEXT: <question>` has hit a
    gap that `progress.md` and the earlier reports do not answer. Append
    its message (the question and its ledger so far) to
    `execution-report.md` under the chunk id. Find in `decision-log.md`
@@ -289,8 +384,9 @@ not` list below.
    dispositioned like the rest. `progress.md`, the executor's resume
    file, is not an out-of-manifest path.
 
-   A Gate C between chunks covers that chunk's rows and status. Step 5
-   goes on to the next chunk only when all of them are `accepted`. The
+   A Gate C between chunks covers that chunk's rows other than
+   `advisory` rows, and its status. Step 5 goes on to the next chunk only
+   when all of them are `accepted`. The
    final Gate C covers the remaining rows and statuses and runs the diff
    check.
 
@@ -315,8 +411,9 @@ fresh SHA, and name any dirty paths in the prompt as probably the
 earlier executor's unfinished work. Every stage artifact is on disk the
 moment its stage ends, so a fresh session resumes from
 `decision-log.md`: the last logged gate is where you are. In a fresh
-session, a planner spawn with a `started` line and no `returned` line
-after it was cut off: respawn it in the same mode.
+session, a `gate-planner` with no final message after its last
+`started` or `resumed` line was cut off: respawn that `gate-planner` in
+the same mode.
 
 ## Run log (Claude Code)
 

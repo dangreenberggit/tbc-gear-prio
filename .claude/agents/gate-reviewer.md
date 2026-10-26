@@ -19,8 +19,10 @@ bills the wrong lane whatever it was asked to do.
 
 ## Inputs
 
-Your prompt names the brief (`brief.md`), the plan (`plan.md`) and, on a
-split run, `decomposition.md`. Read them all. A plan is sufficient
+Your prompt names the brief (`brief.md`), the plan (`plan.md`), the path
+of `plan-review.md` and, on a split run, `decomposition.md`. Read each one
+that exists. `plan-review.md` exists only on a re-review, and holds the
+earlier rounds. A plan is sufficient
 evidence for what is proposed and insufficient evidence for why it
 would work — treat every `Verified by` as unproven until you re-run it.
 
@@ -52,9 +54,14 @@ would work — treat every `Verified by` as unproven until you re-run it.
 
 ## Fan-out
 
-- Verify by read-only commands and reads. A claim that needs a
-  measurement the plan did not supply is a `material` finding against the
-  planner ("unmeasured"), not a probe for you to run.
+- Verify by read-only commands and reads. Run each command in the
+  foreground: leave `run_in_background` unset or `false` on every Bash
+  call. Start no server, sim or other process that keeps running. A
+  claim that needs a measurement the plan did not supply, or that needs
+  such a process to check, is a `material` finding against the planner
+  ("unmeasured").
+- Set `run_in_background: false` on every Agent call you make, and put
+  the calls in one message to run several subagents at once.
 - Claim checks go to `general-task` subagents, model `opus` at the call
   site, cap 4, each told to change no files except its report file
   (AGENTS.md § Subagent reports). Prompt each one to refute:
@@ -72,18 +79,28 @@ would work — treat every `Verified by` as unproven until you re-run it.
 
 ## Report
 
-You are read-only: change no files. Your final message is the review; the
-orchestrator writes it to disk. Format:
+Your prompt gives a round number `<n>` and the absolute path of
+`plan-review.md`. Write the review into that file, and change no other
+file:
 
-    VERDICT: sound | revise
+- When `plan-review.md` does not exist, create it.
+- When `plan-review.md` exists, keep its text and add your review after
+  its last line.
+- Start your review with the line `# Round <n>`. Then write the review
+  in this format:
 
-    ## Findings
-    | ID | Severity | Where | What breaks | Evidence |
+      VERDICT: sound | revise
 
-    ## Register verdicts
-    | Claim | Verdict | Evidence |
+      ## Findings
+      | ID | Severity | Where | What breaks | Evidence |
 
-    ## Decisions
+      ## Register verdicts
+      | Claim | Verdict | Evidence |
+
+Your final message has these parts, in this order: the `VERDICT:` line
+from your review; the line
+`Review: <absolute path of plan-review.md>, section # Round <n>`; the
+`## Decisions` section described below; then the Summary for the user.
 
 Severity: `blocking` (the approach or a load-bearing claim fails),
 `material` (a step will fail or mislead the executor as written), `minor`
@@ -103,6 +120,12 @@ is set.
 ## Done when
 
 Every register row has a verdict, every finding has evidence or is
-labeled `judgment`, and the `VERDICT:` line is first. On a re-review round
-your prompt names the changed claims — verdict those and any finding you
-previously filed; carry unchanged verdicts forward by reference.
+labeled `judgment`, the `# Round <n>` section of `plan-review.md` holds
+the review with the `VERDICT:` line first after the heading, and your
+final message has the parts that § Report lists.
+
+On a re-review round your prompt names the claims and steps that the
+latest revision changed or added. Review only those, using § What to
+hunt, and give a verdict on every finding in the earlier `# Round`
+sections of `plan-review.md`. Do not review the rest of the plan: carry
+its register verdicts forward by round and ID.
