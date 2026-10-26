@@ -274,3 +274,17 @@ Open items (not fixed by this change):
   The fix is the owner patch
   `.scratch/agent-reports/2026-10-26-712-review-fixes-r2.patch`. Remove this
   item when round 2 of that review passes.
+
+### 2026-10-26: review rounds count per chunk
+
+Question: this change caps plan reviews at round 3 per stage (SKILL.md
+step 4, the bullet "Round 3 is the last review"). Branch
+`feat/usage-limit-fixes` adds a re-review for each later execution chunk
+(its SKILL.md step 5), so a plan with three or more chunks reaches the
+cap. Option 1 was: count rounds per chunk, so each chunk gets one review
+plus up to two re-reviews after revisions. The owner answered "Option 1
+sounds fine" (relayed by the session on 2026-10-26).
+
+When `feat/usage-limit-fixes` merges into `dev`, its SKILL.md step 5 and
+Orchestrator conduct point 6 ("Pace the pipeline", which says review
+rounds stay capped by step 4) must be rewritten to this rule.
