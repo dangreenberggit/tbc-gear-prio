@@ -263,17 +263,21 @@ Open items (not fixed by this change):
   only): this change redid its fix. The hook, its test, the settings
   entry and the check script were ported; the rest was not taken.
   Whether to delete the remote branch is not decided.
-- Pre-merge review round 1 (`docs/reviews/feat-712-stage-gate-loops.md`)
-  found these rule problems, all still open: A1 (reviewer
-  re-ask has no limit and ignores `WRONG_MODEL:`), A2 (a re-review judges
-  every earlier finding, and an unfixed `blocking` finding has no place
-  to count), A3 (round-3 handling can be read two ways), A4 (a plan
-  missing a section matches two rules), A5 (a proposed method has no
-  `hypothesis, untested` option), P4 (a revision planner is not told
-  which round's findings to address), and code-quality rows S4 and S5.
-  The fix is the owner patch
-  `.scratch/agent-reports/2026-10-26-712-review-fixes-r2.patch`. Remove this
-  item when round 2 of that review passes.
+- Pre-merge review round 2 (`docs/reviews/feat-712-stage-gate-loops.md`)
+  found three problems in the "Less code" item of
+  `.claude/agents/gate-reviewer.md` (commit 75a0faf4), all still open and
+  blocking the merge: R2-1 (the search line runs `git grep` from the main
+  checkout, which does not search the gitignored fork or upstream, so a
+  reviewer can miss existing code and file nothing), R2-2 (a "Less code"
+  finding is `blocking` when `Approach` rests on the added code, but the
+  Severity line defines `blocking` as "the approach or a load-bearing
+  claim fails"), and R2-3 (the re-review sentence says "the code that
+  the latest revision added"; § Re-review rounds says "changed or
+  added"). The proposed fix is the owner patch
+  `.scratch/agent-reports/2026-10-26-712-review-round2-fixes.patch`
+  (gitignored, owner's checkout; `git apply --check` passes on 75a0faf4).
+  Remove this item when the patch is committed or the owner allows the
+  deferral.
 
 ### 2026-10-26: review rounds count per chunk
 
@@ -287,4 +291,8 @@ sounds fine" (relayed by the session on 2026-10-26).
 
 When `feat/usage-limit-fixes` merges into `dev`, its SKILL.md step 5 and
 Orchestrator conduct point 6 ("Pace the pipeline", which says review
-rounds stay capped by step 4) must be rewritten to this rule.
+rounds stay capped by step 4) must be rewritten to this rule. This
+branch's SKILL.md step 3 round numbering ("1 for the stage's first
+review, then 1 higher for each later review") and the step 4 bullet
+"Round 3 is the last review" must be rewritten too, keeping each
+`# Round <n>` heading and `R<n>-<id>` id unique within `plan-review.md`.
