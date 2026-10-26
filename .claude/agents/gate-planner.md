@@ -21,10 +21,11 @@ Your prompt names two paths: the brief (`brief.md`) and the plan template
 (`plan-template.md`). Read both before anything else. Then read
 `.claude/skills/stage-gate/parts.md` when your prompt names a part id,
 `reconcile` or `re-split`. When it names none of these and no prior
-plan, read it if the brief puts two or more tickets in scope or the
-plan would exceed the **stage budget** (5 execution chunks or 700
-lines; starting values, hypothesis, untested), and make its split
-decision before any planning. When `parts.md` has you write files, it
+plan, read it if the brief puts two or more tickets in scope, and make
+its split decision before any planning. Plan one chunk: `K1` carries
+steps; every later chunk is one Backburner line (`plan-template.md`
+§ Backburner). The **stage budget** is one chunk with steps and about
+350 lines (starting value, hypothesis, untested). When `parts.md` has you write files, it
 sets your output files and your final message, and replaces the
 Read-only, Done-when and Revision-rounds rules below where they differ.
 Before reading any
@@ -38,6 +39,7 @@ other document over ~30 kB, get a heading map first
   message; the orchestrator writes it to disk. The orchestrator compares
   `git status --porcelain` against the SHA it logged when the stage opened,
   and reports changes it cannot account for rather than reverting them.
+  In `next:` mode you edit `plan.md` as § Next chunk says.
 - **Research by subagent.** You hold the judgment; helpers gather the
   facts. Hand each block of searches, reads, named command runs and
   measurements to a workhorse type with the exact list of what to return:
@@ -89,3 +91,15 @@ If your prompt includes a prior plan and a review, you are revising:
 address every blocking and material finding either by changing the plan or
 by attaching a one-sentence `Rebuttal:` to the relevant claim row. Return
 the full revised plan, not a diff. Do not silently drop a finding.
+
+## Next chunk
+
+If your prompt says `next: <Kn>`, you are planning the next Backburner
+chunk. Read `plan.md`, `execution-report.md` and `progress.md`. Write that
+chunk's steps, claims and paths into `plan.md` with targeted `Edit` calls
+in one message: move its Backburner line into Execution chunks, number its
+steps after `K1`'s, add its claims to the register with new ids, and add
+its paths to the manifest. Change no `K1` row. Where `K1`'s report
+contradicts a Backburner line, say so under the chunk line. Your final
+message is the plan's line count, the new claim ids and the `## Decisions`
+section.

@@ -99,6 +99,16 @@ not` list below.
    this is the limit. Intent, priorities, spending, and anything irreversible
    are the user's call, not yours to decide because you could. Surfacing one
    of those is not a re-ask; deciding it silently is the failure.
+6. **Pace the pipeline.** Hold at most two stages between step 2 and
+   step 4 (planning or review) at once, and run one executor at a time
+   across all stages; a further feature waits with its `brief.md`
+   written and nothing spawned. Review rounds stay capped by step 4: one
+   revision is the norm, a second is the limit, then the user. On
+   2026-10-25 five stages ran at once, 12 planner and 8 reviewer runs
+   went to 2 executor runs, and the session hit the 5-hour limit in 59
+   minutes (`.scratch/agent-reports/2026-10-25-general-task-usage-limit-burn.md`).
+   This pacing is for this pipeline only: a plain request for a plan,
+   outside stage-gate, is planned whole.
 
 ## Steps
 
@@ -165,8 +175,9 @@ not` list below.
    planner (`SendMessage` it, or respawn it in the same mode with the
    answers). There is one round of answers.
 
-   **Gate A (mechanical):** every template section present; Claims
-   register nonempty; Paths manifest present; every open question in the
+   **Gate A (mechanical):** every template section present, Backburner
+   included ("none" allowed); steps for `K1` only; Claims register
+   nonempty; Paths manifest present; every open question in the
    brief answered with its three items, or assigned to a deferred part;
    `git status --porcelain` still empty. Compare against the SHA logged in step 1.
    New changes mean the seat edited files: **stop and report them to the
@@ -180,11 +191,11 @@ not` list below.
    every planned part has its `parts/<id>/plan.md` and `plan.md` has a
    Seams section; every deferred part has its `parts/<id>/ticket.md`.
 
-   When `plan.md` is over the stage budget (more than 5 execution chunks
-   or 700 lines; starting values, hypothesis, untested), spawn
+   When `plan.md` has steps for more than one chunk, or is over about
+   350 lines (starting value, hypothesis, untested), spawn
    `gate-planner` once per stage, before the review, with
-   `re-split: over budget`; it rewrites `plan.md` itself. Then run Gate
-   A on the result.
+   `re-split: over budget`; it rewrites `plan.md` itself, moving every
+   chunk after `K1` to the Backburner. Then run Gate A on the result.
 
    Deferrals made at the first split stand, and the reviewer checks
    them. A deferral made by a re-split, and any open question of the
@@ -226,9 +237,15 @@ not` list below.
      ticket per `docs/agents/issue-tracker.md` and commit them. Log
      their ids and the new `git rev-parse HEAD`.
 
-5. **Execute.** Run one `gate-executor` (`model: "opus"`) per execution
-   chunk, in order. A plan whose `Execution chunks` section is missing or
-   says "none" is one chunk, `K1`, covering every step. For each chunk:
+5. **Execute.** Run one `gate-executor` (`model: "opus"`) for `K1`. When
+   its Gate C passes and the Backburner is not "none", spawn
+   `gate-planner` (`model: "fable"`) with `next: <first Backburner id>`
+   and the paths of `plan.md`, `execution-report.md` and `progress.md`;
+   it writes that chunk's steps into `plan.md`. Then `gate-reviewer` on
+   the new claims only (as a re-review), Gate B with its one-revision
+   norm, and the next executor. Repeat until the Backburner is empty. A
+   plan whose `Execution chunks` section is missing or says "none" is one
+   chunk, `K1`, covering every step. For each chunk:
    resolve the base SHA fresh (`git rev-parse HEAD` — paste command
    output, never hand-typed), then spawn the executor with the paths of
    `plan.md`, `plan-review.md` and `execution-report.md` (the earlier
@@ -306,7 +323,8 @@ not` list below.
    before `pnpm merge-to-dev`. Stage artifacts stay in
    `.scratch/stage-gate/<slug>/`. Name any deferred-part tickets in the
    reply, and say they are visible from `dev` only after this branch
-   merges.
+   merges. Backburner lines still open when the stage ends become
+   tickets, filed like deferred parts (step 4, last bullet).
 
 ## Recovery
 

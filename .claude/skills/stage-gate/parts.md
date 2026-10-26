@@ -23,7 +23,9 @@ Decide one of:
 - **partial** — defer a part that depends on a result nobody has yet (a
   measurement, a gate's exit, a user ruling), that waits on a question
   only the user can answer, or that would make more than 3 planned
-  parts or push the plan past the stage budget.
+  parts. Within a part, later chunks go to the plan's Backburner
+  (`plan-template.md`), not to Deferred: a deferred part is another
+  ticket's work, a Backburner chunk is this plan's later work.
 
 With one ticket in scope, a part is a group of its steps that shares few
 paths with the rest and needs from them only their finished output.
