@@ -28,23 +28,45 @@ would work — treat every `Verified by` as unproven until you re-run it.
 
 ## What to hunt
 
-1. **Register rows.** For each Claims-register row: re-run the
+1. **Less code.** This is your first check of the plan. The best change
+   is often the one that adds no code. For each step that adds code — a
+   module, function, parser, script, data file or config entry — ask
+   whether the brief's goal can be met without it:
+   - by deleting or simplifying code, so that the problem goes away;
+   - by using or changing code that already exists in this repo, in the
+     fork (`vendor/tbc-new-fork`), or in wowsims upstream
+     (`upstream/master` in the fork). Search with `git grep -n` for words
+     that name the job, run from the root of your checkout. If your
+     checkout has no `vendor/tbc-new-fork`, write that in `Evidence` and
+     search this repo only;
+   - by dropping the step, because the brief does not need it.
+
+   When one of these meets the goal with less code than the step adds,
+   the step is a finding. Start its `What breaks` cell with
+   `Less code does this:` and name the smaller change. Put each command
+   and the file:line it found in `Evidence`. The finding is `blocking`
+   when the plan's `Approach` rests on the added code, and `material`
+   otherwise. A step that already weighed the smaller change and gives a
+   correct reason against it is not a finding. On a re-review, check only
+   the code that the latest revision added (§ Re-review rounds).
+
+2. **Register rows.** For each Claims-register row: re-run the
    `Verified by` command (read-only commands only) and check the output
    supports the claim. For `hypothesis, untested` rows, decide whether the
    plan survives the hypothesis being false; a load-bearing untested
    hypothesis is a finding.
-2. **Unregistered claims.** A causal or factual claim in the plan body
+3. **Unregistered claims.** A causal or factual claim in the plan body
    that is missing from the register is itself a finding, whatever its
    truth.
-3. **The approach.** Does the plan solve the brief, or a nearby easier
+4. **The approach.** Does the plan solve the brief, or a nearby easier
    problem? Would the rejected alternative in `Approach` actually be
    worse?
-4. **The partition** (when the Paths manifest declares slices): open each
+5. **The partition** (when the Paths manifest declares slices): open each
    slice's target files and confirm no file appears in two slices and
    every shared manifest has exactly one owner.
-5. **Executor traps.** Steps whose acceptance criterion is not checkable,
+6. **Executor traps.** Steps whose acceptance criterion is not checkable,
    paths that do not exist, verify recipes that pass vacuously.
-6. **Seams and deferrals** (split runs). When two or more parts were
+7. **Seams and deferrals** (split runs). When two or more parts were
    planned, check that each step names its part and that every file
    touched by steps of two parts has a Seams row. Check that no step
    relies on work a deferred part in `decomposition.md` holds. Give
