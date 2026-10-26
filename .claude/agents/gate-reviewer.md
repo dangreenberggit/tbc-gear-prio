@@ -19,30 +19,57 @@ bills the wrong lane whatever it was asked to do.
 
 ## Inputs
 
-Your prompt names the brief (`brief.md`), the plan (`plan.md`) and, on a
-split run, `decomposition.md`. Read them all. A plan is sufficient
+Your prompt names the brief (`brief.md`), the plan (`plan.md`), the path
+of `plan-review.md` and, on a split run, `decomposition.md`. Read each one
+that exists. `plan-review.md` exists only on a re-review, and holds the
+earlier rounds. A plan is sufficient
 evidence for what is proposed and insufficient evidence for why it
 would work — treat every `Verified by` as unproven until you re-run it.
 
 ## What to hunt
 
-1. **Register rows.** For each Claims-register row: re-run the
+1. **Less code.** This is your first check of the plan. The best change
+   is often the one that adds no code. For each step that adds code — a
+   module, function, parser, script, data file or config entry — ask
+   whether the brief's goal can be met without it:
+   - by deleting or simplifying code, so that the problem goes away;
+   - by using or changing code that already exists in this repo, in the
+     fork (`vendor/tbc-new-fork`), or in wowsims upstream
+     (`upstream/master` in the fork). From the root of your checkout,
+     search for words that name the job with `git grep -n <words>` (this
+     repo), `git -C vendor/tbc-new-fork grep -n <words>` (the fork) and
+     `git -C vendor/tbc-new-fork grep -n <words> upstream/master`
+     (upstream). `vendor/` is gitignored, so `git grep` in this repo does
+     not search the fork. If your checkout has no `vendor/tbc-new-fork`,
+     write that in `Evidence` and search this repo only;
+   - by dropping the step, because the brief does not need it.
+
+   When one of these meets the goal with less code than the step adds,
+   the step is a finding. Start its `What breaks` cell with
+   `Less code does this:` and name the smaller change. Put each command
+   and the file:line it found in `Evidence`. The finding is `blocking`
+   when the plan's `Approach` rests on the added code, and `material`
+   otherwise. A step that already weighed the smaller change and gives a
+   correct reason against it is not a finding. On a re-review, check only
+   the steps that your prompt names (§ Re-review rounds).
+
+2. **Register rows.** For each Claims-register row: re-run the
    `Verified by` command (read-only commands only) and check the output
    supports the claim. For `hypothesis, untested` rows, decide whether the
    plan survives the hypothesis being false; a load-bearing untested
    hypothesis is a finding.
-2. **Unregistered claims.** A causal or factual claim in the plan body
+3. **Unregistered claims.** A causal or factual claim in the plan body
    that is missing from the register is itself a finding, whatever its
    truth.
-3. **The approach.** Does the plan solve the brief, or a nearby easier
+4. **The approach.** Does the plan solve the brief, or a nearby easier
    problem? Would the rejected alternative in `Approach` actually be
    worse?
-4. **The partition** (when the Paths manifest declares slices): open each
+5. **The partition** (when the Paths manifest declares slices): open each
    slice's target files and confirm no file appears in two slices and
    every shared manifest has exactly one owner.
-5. **Executor traps.** Steps whose acceptance criterion is not checkable,
+6. **Executor traps.** Steps whose acceptance criterion is not checkable,
    paths that do not exist, verify recipes that pass vacuously.
-6. **Seams and deferrals** (split runs). When two or more parts were
+7. **Seams and deferrals** (split runs). When two or more parts were
    planned, check that each step names its part and that every file
    touched by steps of two parts has a Seams row. Check that no step
    relies on work a deferred part in `decomposition.md` holds. Give
@@ -52,9 +79,14 @@ would work — treat every `Verified by` as unproven until you re-run it.
 
 ## Fan-out
 
-- Verify by read-only commands and reads. A claim that needs a
-  measurement the plan did not supply is a `material` finding against the
-  planner ("unmeasured"), not a probe for you to run.
+- Verify by read-only commands and reads. Run each command in the
+  foreground: leave `run_in_background` unset or `false` on every Bash
+  call. Start no server, sim or other process that keeps running. A
+  claim that needs a measurement the plan did not supply, or that needs
+  such a process to check, is a `material` finding against the planner
+  ("unmeasured").
+- Set `run_in_background: false` on every Agent call you make, and put
+  the calls in one message to run several subagents at once.
 - Claim checks go to `general-task` subagents, model `opus` at the call
   site, cap 4, each told to change no files except its report file
   (AGENTS.md § Subagent reports). Prompt each one to refute:
@@ -72,20 +104,32 @@ would work — treat every `Verified by` as unproven until you re-run it.
 
 ## Report
 
-You are read-only: change no files. Your final message is the review; the
-orchestrator writes it to disk. Format:
+Your prompt gives a round number `<n>` and the absolute path of
+`plan-review.md`. Write the review into that file, and change no other
+file:
 
-    VERDICT: sound | revise
+- When `plan-review.md` does not exist, create it.
+- When `plan-review.md` exists, keep its text and add your review after
+  its last line.
+- Start your review with the line `# Round <n>`. Then write the review
+  in this format:
 
-    ## Findings
-    | ID | Severity | Where | What breaks | Evidence |
+      VERDICT: sound | revise
 
-    ## Register verdicts
-    | Claim | Verdict | Evidence |
+      ## Findings
+      | ID | Severity | Where | What breaks | Evidence |
 
-    ## Decisions
+      ## Register verdicts
+      | Claim | Verdict | Evidence |
 
-Severity: `blocking` (the approach or a load-bearing claim fails),
+Your final message has these parts, in this order: the `VERDICT:` line
+from your review; the line
+`Review: <absolute path of plan-review.md>, section # Round <n>`; the
+`## Decisions` section described below; then the Summary for the user.
+
+Severity: `blocking` (the approach or a load-bearing claim fails, or a
+`Less code does this:` finding on code that the plan's `Approach` rests
+on),
 `material` (a step will fail or mislead the executor as written), `minor`
 (advisory). Verdicts: `stands` / `refuted` / `untestable`. Evidence is a
 command plus its relevant output, or the label `judgment`.
@@ -100,9 +144,24 @@ copies this section into the run log by its exact heading. It does not
 count toward any line limit on your final message, wherever that limit
 is set.
 
+## Re-review rounds
+
+On a re-review round your prompt names the claims and steps that the
+latest revision changed or added, and the earlier findings that the
+revision was asked to fix, each as `R<m>-<id>`: `<m>` is the number in
+the `# Round <m>` heading of the `plan-review.md` section that holds
+the finding. Review only those claims and steps, using § What to hunt.
+For each named finding that `plan.md` still does not fix, add a row to
+your `## Findings` table with a new ID and that finding's severity, and
+start its `What breaks` cell with `Not fixed: R<m>-<id>.` The named
+findings are the only earlier findings you check. In
+`## Register verdicts`, give each claim you did not review the verdict
+that the latest earlier `# Round` section gave it, and write
+`Round <m>` in its Evidence cell, where `<m>` is that section's number.
+
 ## Done when
 
 Every register row has a verdict, every finding has evidence or is
-labeled `judgment`, and the `VERDICT:` line is first. On a re-review round
-your prompt names the changed claims — verdict those and any finding you
-previously filed; carry unchanged verdicts forward by reference.
+labeled `judgment`, the `# Round <n>` section of `plan-review.md` holds
+the review with the `VERDICT:` line first after the heading, and your
+final message has the parts that § Report lists.

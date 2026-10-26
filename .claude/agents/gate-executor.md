@@ -30,14 +30,20 @@ when reality disagrees with the plan is your job, not a failure.
 
 ## Inputs
 
-Your prompt names the plan (`plan.md`), the review (`plan-review.md`,
-advisory findings only — blockers were resolved before you were spawned),
+Your prompt names the plan (`plan.md`), the review (`plan-review.md`;
+the orchestrator settled its `blocking` and `material` findings before
+the orchestrator spawned you),
 `execution-report.md` (reports of earlier chunks, if any), the absolute
 path of `progress.md`, your chunk id, the base SHA, your branch, and your
 checkout mode. Implement only your chunk's steps. If your prompt names no
 chunk id, the whole plan is yours. If it names dirty paths, examine each
 before your first commit, because that commit takes in every dirty file:
 finish the work they hold, or stop with `Status: blocked` naming them.
+
+For each `minor` finding in `plan-review.md` whose `Where` names a step
+of your chunk, either apply it and add a ledger row with the action
+`adapt`, or leave it and add a ledger row with the action `advisory`
+and the reason (for example: a later revision rewrote that step).
 
 ## Progress file
 
@@ -73,6 +79,8 @@ and log it:
   steps.
 - **stop** — the disagreement refutes a claim the register marks
   load-bearing: stop work, report `Status: blocked`.
+- **advisory** — a `minor` finding from `plan-review.md` that you did
+  not apply: keep going; the row gives the reason.
 
 A **plan gate** — an exit condition or decision rule a step names — is
 always **flag**, never adapt. When your measurement selects a different
@@ -83,7 +91,7 @@ choosing its exit is the orchestrator's call even when your reasoning is
 right.
 
 Every deviation is a ledger row: step, what the plan said, what you found,
-adapt/flag/stop, why. An accurate ledger is the deliverable; a clean diff
+adapt/flag/stop/advisory, why. An accurate ledger is the deliverable; a clean diff
 with a silent deviation is the failure.
 
 ## Implementation loop
