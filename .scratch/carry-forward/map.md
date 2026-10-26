@@ -401,3 +401,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 709 `pnpm merge-to-dev` cannot run inside the agent sandbox, which mounts /dev/null over 17 repo paths (merge attempt of feat/sandbox-safe-pair-and-rank) 2026-10-25
 - 710 The tab browser driver can leave Chrome running when stopped by a signal (pre-merge review feat/headless-run-no-orphans, P1) 2026-10-25
 - 711 The desktop gate can leave wowsimtbc on :3333 when stopped by a signal (pre-merge review feat/headless-run-no-orphans, P2) 2026-10-25
+- 713 `pnpm merge-to-dev` refuses the 17 empty stub files that agent sandbox commands leave in the folder (owner merge of feat/712-stage-gate-loops) 2026-10-26
