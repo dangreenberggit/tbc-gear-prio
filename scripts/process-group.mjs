@@ -13,6 +13,8 @@ export const USE_PROCESS_GROUPS = process.platform !== "win32";
 // (tsc --watch) are still running in it. A child that was not started
 // detached leads no group, so it falls back to a plain kill.
 export function killTree(child, group = USE_PROCESS_GROUPS) {
+  // A child that failed to spawn has no pid and nothing to stop.
+  if (child.pid === undefined) return;
   if (process.platform !== "win32" && group && killGroup(child.pid)) return;
   if (child.exitCode !== null || child.signalCode !== null) return;
   if (process.platform === "win32")
