@@ -399,3 +399,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 707 The made-up tab fixtures show set-bonus rows that cannot happen (pre-merge review feat/tab-checks-without-sims, D1 D2 D3) 2026-10-24
 - 708 Nothing checks the frozen tab recordings, and the recorder can write a dirty one there (pre-merge review feat/tab-checks-without-sims, A4 P1) 2026-10-24
 - 709 `pnpm merge-to-dev` cannot run inside the agent sandbox, which mounts /dev/null over 17 repo paths (merge attempt of feat/sandbox-safe-pair-and-rank) 2026-10-25
+- 710 The tab browser driver can leave Chrome running when stopped by a signal (pre-merge review feat/headless-run-no-orphans, P1) 2026-10-25
+- 711 The desktop gate can leave wowsimtbc on :3333 when stopped by a signal (pre-merge review feat/headless-run-no-orphans, P2) 2026-10-25

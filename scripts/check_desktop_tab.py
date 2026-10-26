@@ -53,6 +53,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import signal
 import socket
 import statistics
 import subprocess
@@ -743,5 +744,14 @@ def main() -> int:
             server.kill()
 
 
+def exit_on_signal(signum: int, _frame: object) -> None:
+    # Python skips `finally` when a signal ends it, so main would leave the
+    # wowsimtbc server on :3333 running (ticket 711). An exception runs it.
+    raise SystemExit(128 + signum)
+
+
 if __name__ == "__main__":
+    for name in ("SIGTERM", "SIGHUP"):
+        if hasattr(signal, name):
+            signal.signal(getattr(signal, name), exit_on_signal)
     raise SystemExit(main())

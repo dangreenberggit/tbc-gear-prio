@@ -256,7 +256,8 @@ swallowed into it).
 
 **Symptom when armed:** a dev server will not start because its port is
 held — 3333 by a stray `wowsimtbc`, or 5173 by another session's vite
-(`pnpm tab:dev` exits; `preview_start` refuses).
+(`pnpm tab:dev` exits; `preview_start` refuses); or the load climbs with
+leftover `tsc --noEmit --watch`, `vite` or `chrome` processes.
 
 Each port's server builds and serves the fork of the folder that started it,
 so first find that folder (`docs/agents/paired-worktrees.md`, "Live tab").
@@ -282,6 +283,20 @@ stops only a server it started. Recording a real result by hand
 (`pnpm tab-fixtures:record`) needs both ports, because it is a real run. A
 fixture load never shows "Took": no run happened, so wait for result rows and
 no stale banner instead. See `data/tab-fixtures/README.md`.
+
+**A script or batch that starts the servers** stops each one with its whole
+process group: spawn it with `detached: USE_PROCESS_GROUPS` and stop it with
+`killTree(child)`, both from `scripts/process-group.mjs`, or start `node
+scripts/dev-tab.mjs frontend|backend` and send that SIGTERM. A plain
+`kill <server pid>` leaves the server's children running (vite's
+`tsc --noEmit --watch` when `TBC_TAB_TYPE_CHECKER=1`, which `dev-tab.mjs
+frontend` sets unless the caller sets it to `0`). Wrap every backgrounded
+batch in `timeout` (`timeout 3h bash batch.sh`): when the subagent that
+started it stops (usage limit, crash), the batch runs on with nobody to stop
+it. On 2026-10-25 one such batch ran unattended for hours, leaving a
+`tsc --watch` behind for each run. To find
+leftovers, run `ps -eo pid,ppid,etime,args | grep -E 'tsc|vite|wowsimtbc|chrome'`
+outside the sandbox: a sandboxed Bash call sees only its own processes.
 
 ## Before writing a `pnpm tab-review` manifest
 

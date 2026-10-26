@@ -20,6 +20,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { exitOnSignals } from "../process-group.mjs";
 import { findChromium } from "./chromium.mjs";
 import { documentRowCountExpression, RESULT_ROW } from "./rows.mjs";
 
@@ -143,6 +144,7 @@ export async function startServer() {
     }
   );
   process.on("exit", () => p.kill());
+  exitOnSignals();
   const deadline = Date.now() + 15000;
   while (Date.now() < deadline) {
     try {
@@ -224,6 +226,7 @@ export async function launchChrome() {
     else proc.kill();
   };
   process.on("exit", kill);
+  exitOnSignals();
   const deadline = Date.now() + 20000;
   let wsUrl;
   while (Date.now() < deadline) {
