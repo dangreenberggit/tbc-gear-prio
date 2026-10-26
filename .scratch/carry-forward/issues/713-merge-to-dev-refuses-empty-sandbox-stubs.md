@@ -87,6 +87,17 @@ the 17 paths touched as empty files gave `has_changes` False at
 `b24185a4` and True on the code before it; adding an empty `notes.md`, or
 writing one byte to `.bashrc`, gave True.
 
+Review A1 (docs/reviews/feat-713-merge-skip-empty-stubs.md) added
+`check_clean_tree_check_skips_stubs_in_a_real_repo`, which runs that
+scratch-repo test inside the check script (12 checks at
+`tbc-gear-prio@c61d478b`). With the fix reverted in `has_changes`, it
+fails with "has_changes counts the 17 empty sandbox stubs as work"; with
+the device line removed from `holds_no_work`, the 709 row fails.
+
 Limit: when a checkout tracks no file under `.claude/`, git lists the
-folder as one `?? .claude/` entry and the rule does not skip it. This repo
-tracks `.claude/`, so the main checkout and its pairs are not affected.
+folder as one `?? .claude/` entry and the rule does not skip it. The main
+checkout and the main side of each pair track `.claude/`. A pair's fork
+worktree tracks nothing there (`git -C <pair>/vendor/tbc-new-fork ls-files
+.claude` prints nothing), and `worktree_problem` checks it too, so stubs at
+the fork's root would still make a named-branch merge refuse. Whether the
+sandbox ever leaves stubs there is untested.
