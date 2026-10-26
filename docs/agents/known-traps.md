@@ -285,14 +285,16 @@ fixture load never shows "Took": no run happened, so wait for result rows and
 no stale banner instead. See `data/tab-fixtures/README.md`.
 
 **A script or batch that starts the servers** stops each one with its whole
-process group: start it with `detached: true` and stop it with `killTree`
-from `scripts/process-group.mjs`, or start `node scripts/dev-tab.mjs
-frontend|backend` and send that SIGTERM. A plain `kill <server pid>` leaves
-the server's children running (vite's `tsc --noEmit --watch` when
-`TBC_TAB_TYPE_CHECKER=1`). Wrap every backgrounded batch in `timeout`
-(`timeout 3h bash batch.sh`): when the subagent that started it stops (usage
-limit, crash), the batch runs on with nobody to stop it. On 2026-10-25 one
-such batch ran unattended for hours and slowed the whole machine. To find
+process group: spawn it with `detached: USE_PROCESS_GROUPS` and stop it with
+`killTree(child)`, both from `scripts/process-group.mjs`, or start `node
+scripts/dev-tab.mjs frontend|backend` and send that SIGTERM. A plain
+`kill <server pid>` leaves the server's children running (vite's
+`tsc --noEmit --watch` when `TBC_TAB_TYPE_CHECKER=1`, which `dev-tab.mjs
+frontend` sets unless the caller sets it to `0`). Wrap every backgrounded
+batch in `timeout` (`timeout 3h bash batch.sh`): when the subagent that
+started it stops (usage limit, crash), the batch runs on with nobody to stop
+it. On 2026-10-25 one such batch ran unattended for hours, leaving a
+`tsc --watch` behind for each run. To find
 leftovers, run `ps -eo pid,ppid,etime,args | grep -E 'tsc|vite|wowsimtbc|chrome'`
 outside the sandbox: a sandboxed Bash call sees only its own processes.
 

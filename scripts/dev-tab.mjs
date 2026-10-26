@@ -27,7 +27,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { GROUPS, killGroup, killTree } from "./process-group.mjs";
+import { USE_PROCESS_GROUPS, killGroup, killTree } from "./process-group.mjs";
 
 const SELF = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(SELF), "..");
@@ -79,7 +79,7 @@ function serve(cmd, args, env = process.env) {
   // stdin is ignored because a process outside the terminal's foreground
   // group is stopped (SIGTTIN) when it reads the terminal, and both servers
   // read it for interactive commands this script does not need.
-  const detached = GROUPS;
+  const detached = USE_PROCESS_GROUPS;
   const child = spawn(cmd, args, {
     cwd: FORK,
     stdio: ["ignore", "inherit", "inherit"],
@@ -158,7 +158,8 @@ function frontend(port) {
   log(`starting vite on :${port}...`);
   // cwd stays the fork: upstream's vite config resolves some paths against it.
   // This is the one launcher that turns the type checker back on, because
-  // serve stops its `tsc --watch` with the server.
+  // serve stops its `tsc --watch` with the server. A batch that starts it can
+  // set TBC_TAB_TYPE_CHECKER=0 to skip the watcher it does not need.
   serve(
     process.execPath,
     [
@@ -170,7 +171,10 @@ function frontend(port) {
       String(port),
       "--strictPort",
     ],
-    { ...process.env, TBC_TAB_TYPE_CHECKER: "1" }
+    {
+      ...process.env,
+      TBC_TAB_TYPE_CHECKER: process.env.TBC_TAB_TYPE_CHECKER ?? "1",
+    }
   );
 }
 

@@ -7,7 +7,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { GROUPS, killTree } from "../process-group.mjs";
+import { USE_PROCESS_GROUPS, killTree } from "../process-group.mjs";
 const ROOT = path.resolve(fileURLToPath(import.meta.url), "../../..");
 const FORK = path.join(ROOT, "vendor/tbc-new-fork");
 const FIXDIR = path.join(ROOT, "data/tab-fixtures");
@@ -42,9 +42,9 @@ if (!(await up())) {
   const config = path.join(ROOT, "scripts/tab-harness/vite.config.mjs");
   const args = ["node_modules/vite/bin/vite.js", "serve", "--config", config];
   args.push("--port", PORT, "--strictPort");
-  const opts = { cwd: FORK, stdio: "ignore", detached: GROUPS };
+  const opts = { cwd: FORK, stdio: "ignore", detached: USE_PROCESS_GROUPS };
   vite = spawn(process.execPath, args, opts);
-  process.on("exit", () => killTree(vite, GROUPS));
+  process.on("exit", () => killTree(vite));
   if (!(await until(up, 60000))) fail(`dev server: did not start on :${PORT}`);
 }
 console.log(`dev server ${vite ? "started" : "reused"} in ${secs(t0)}s`);
