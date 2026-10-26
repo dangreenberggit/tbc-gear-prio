@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -112,6 +113,36 @@ def check_device_test_reads_the_file_type() -> list[str]:
     return problems
 
 
+def check_empty_sandbox_stubs_are_not_work() -> list[str]:
+    """Outside the sandbox its mount points are plain empty files, so the
+    owner's terminal saw 17 of them as untracked (ticket 713). Only an
+    empty file at a known stub path is skipped: a new empty file elsewhere,
+    such as a `.gitkeep`, can be the change itself."""
+    problems = []
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".claude").mkdir()
+        (root / "docs").mkdir()
+        (root / ".vscode").mkdir()
+        for empty in (".bashrc", ".claude/settings.local.json", "docs/.gitkeep", "notes.md"):
+            (root / empty).write_bytes(b"")
+        (root / ".mcp.json").write_text("{}\n")
+        want = {
+            ".bashrc": True,
+            ".claude/settings.local.json": True,
+            "docs/.gitkeep": False,
+            "notes.md": False,
+            ".mcp.json": False,
+            ".vscode": False,
+            ".zshrc": False,
+        }
+        for rel, expected in want.items():
+            got = m.holds_no_work(root, rel)
+            if got != expected:
+                problems.append(f"holds_no_work({rel!r}) gave {got}, want {expected}")
+    return problems
+
+
 def check_named_merge_runs_only_on_dev() -> list[str]:
     problems = []
     if m.named_mode_problem("dev", "feat/x") is not None:
@@ -151,6 +182,7 @@ CHECKS = (
     check_touched_paths_match_whatever_the_case,
     check_untracked_devices_are_not_work,
     check_device_test_reads_the_file_type,
+    check_empty_sandbox_stubs_are_not_work,
 )
 
 
