@@ -95,6 +95,9 @@ Locally, `pnpm verify` fails when any of them skips (`skipGuard`,
 green local verify without `TBC_VERIFY_WITHOUT_FORK=1` ran them all: its
 tail line reads `gates: N ran, 0 skipped` (ticket 478, item A5).
 
+Do not run interactive `pnpm approve-builds`; declare builds via
+`pnpm.onlyBuiltDependencies`.
+
 ## Before any scripted or generated file edit
 
 **Symptom when armed:** `git diff --stat` shows hundreds of changed lines
@@ -122,6 +125,12 @@ changed. Use `newline="\n"` when your code builds the text
 (`generate_item_gem_index.py:281`), `newline=""` when you hand the handle
 to `json.dump` or a `csv` writer (`sync_wowsims.py:493`). Both give LF.
 Scratch and tempdir writes need neither, and `"wb"` cannot take one.
+
+When changing committed **generated** artifacts: regenerate from the
+committed sources with the pinned toolchain; the working tree must match
+`HEAD` (or you must document which side is wrong) before commit. For CI
+byte-compare gates, read a real CI run; do not predict from a local story
+about another OS.
 
 ## Before editing a ported engine file
 
@@ -169,6 +178,12 @@ the directory. The branch belongs in `watchedRefs`, via a separate
 `pnpm -C <repo> exec python scripts/sync_wowsims.py --watch-ref --ref <branch>`
 — `--update` carries the old `watchedRefs` forward unchanged, so skipping it
 leaves the watched entry stale while the pin moves (ADR-0030).
+
+"Our pin is an ancestor of that branch" and "we do not have that feature"
+are both claims about one ref; neither is evidence until the other
+candidates are measured the same way. `watchedRefs` in
+`data/wowsims.lock.json` is tracked because a feature was twice called
+missing while live on a branch this repo already watched.
 
 `--update --ref` writes `currentPhase` **and** `defaultMaxPhase` in the same
 run, both from upstream's `CURRENT_PHASE`, so a tier move lands in the pin

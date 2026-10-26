@@ -85,7 +85,7 @@ not` list below.
    next, and what's blocked. Delegate the detail and keep the one-paragraph
    conclusion. You judge the result; you don't author it. A question
    between gates goes to a seat, or to a `general-task` / `simple-task`
-   agent. The only commands you run are the gate checks that AGENTS.md
+   agent. The only commands you run are the gate checks that `docs/agents/orchestration.md`
    § The session delegates lists.
 4. **Let open issues block end-of-line moves like merge.** When a phase
    produces open tickets — a correctness gap, a test hole, a half-delivered
@@ -256,7 +256,7 @@ not` list below.
    free (the seat's base-SHA assertion is what makes worktree mode safe on
    a feature branch). A plan with more than one chunk uses the shared
    checkout, so each chunk starts from the commits of the one before.
-   When AGENTS.md "Fork and tab edits run in a pair" applies, have a
+   When AGENTS.md § The forked tab repo says the work needs a pair, have a
    subagent make the pair with `pnpm wt:pair`, use it as the shared
    checkout for every chunk, pass its path, and run this step's git
    checks with `git -C <pair>`; `isolation: worktree` has no fork.

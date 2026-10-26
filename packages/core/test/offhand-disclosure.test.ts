@@ -12,7 +12,7 @@
  * slot, as its simmed row would.
  *
  * Driven at the `rankUpgrades` seam with a hand-built pool of real mage-p3
- * universe rows and a synthetic sim (AGENTS.md § Testing). Nothing here asserts
+ * universe rows and a synthetic sim (docs/workflow.md § Testing). Nothing here asserts
  * on a DPS number.
  */
 import { readFileSync } from "node:fs";

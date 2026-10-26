@@ -131,8 +131,8 @@ rc=2
 
 Direction (c) is why `SpecId` is generated rather than hand-written: a JSON
 import widens every string to `string`, so a union derived from one accepts any
-string and an `extends` assertion against it passes vacuously (`AGENTS.md`
-§ Types from JSON — this repo has been burned twice). The generator emits
+string and an `extends` assertion against it passes vacuously (`docs/workflow.md`
+§ Never derive a type from a JSON import — this repo has been burned twice). The generator emits
 committed `as const` code, gated by `--check` in `pnpm verify`.
 
 A direct `as Readonly<Record<…>>` on a literal missing `warlock` does **not**

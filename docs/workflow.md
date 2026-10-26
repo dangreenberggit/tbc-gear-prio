@@ -26,7 +26,7 @@ because that would need updating every time a tool changes.
 
 ## The loop
 
-1. Branch off `dev`.
+1. Branch off `dev`: `feat/<slug>`, or `phase-N/<slug>` for a PLAN.md phase.
 2. Red → green, one slice at a time (see the `tdd` skill). Commit regularly
    as you accomplish work — a commit per green slice, not one commit at the
    end, and not only when asked.
@@ -53,6 +53,10 @@ because that would need updating every time a tool changes.
    only links it. See [`docs/agents/issue-tracker.md`](agents/issue-tracker.md).
    List anytime: `pnpm issues:open`.
 
+   Launch mini-loops for the new tickets a review files unless there is a
+   stated reason to defer them: delegate to a planner, then the plan to an
+   executor, then an independent reviewer.
+
 5. **Ask the user, then `pnpm merge-to-dev`.** Agents must not merge into
    `dev` unless the user explicitly asks **after** the review file exists
    and they have seen the summary. “Review and merge” in one message means
@@ -63,8 +67,9 @@ because that would need updating every time a tool changes.
    `--ack-open-blockers` (or close / re-block them first). Check without
    merging: `pnpm merge-to-dev --check-only` (or `pnpm merge-ready`).
 
-6. When a gate (phase or Stage 3T) closes, merge `dev` → `main` and tag it
-   (`phase-N`, or `tab-1` for Stage 3T).
+6. `main` receives a merge from `dev` only when a PLAN.md §14 gate (a
+   phase or Stage 3T) is fully checked off in `docs/verification-log.md`;
+   tag it (`phase-N`, or `tab-1` for Stage 3T).
 
 ### Parallel fan-out (optional)
 
@@ -196,6 +201,61 @@ JSON, and `pnpm verify` fails if they drift.
 
 If you find yourself writing a comment explaining why an assertion is safe
 despite the widening, generate the type instead.
+
+## Comment policy
+
+Comments explain **why**, never **what**. If a comment restates the code,
+delete it. If the code needs a comment to be readable, rename something
+first. Keep only comments that carry weight: a non-obvious constraint, an
+external-system quirk, why a slower or uglier path was deliberately chosen,
+or a pointer to the finding or ADR that forced the shape. Nothing lints
+this: it is a pre-merge review item.
+
+## Testing: seams and where tests go
+
+Invoke the `tdd` skill for any red/green work. The word **seam** means two
+different things across the docs; this section fixes both.
+
+**Architectural seams are three and only three**: `GearSource`,
+`SimRunner`, `Store` (PLAN.md §5), each with a recorded adapter, so the
+engine runs deterministically offline from committed fixtures. Do not
+introduce a fourth port without agreeing it first. That is a rule about
+adapters, not about test placement.
+
+**Where tests go.** The primary test is at the module interface
+(`rankUpgrades`) through the recorded adapters; that is what `tdd`'s
+"test at the seam" means here. Pure functions are also unit-tested
+directly, no agreement needed, where the logic is intricate and
+independently valuable: the gem solver, the ranking statistics, the 19→17
+slot mapping, `applyView` (PLAN.md §6). They touch no port and need no
+adapter. What is banned is asserting on stage internals: the eight stages
+must stay reorganisable without touching a test.
+
+## Parking WIP
+
+When you stash WIP, say what you parked and what tip is missing because of
+it. Name the pieces (files or jobs), not a vibe. If tip still needs any of
+that to be correct or complete, write that down before you start the next
+work. "Restore later if needed" is not enough.
+
+## Editing agent-facing documents
+
+Review means a second pass over your finished draft, revising it against
+the `writing-for-agents` skill: the skill is the rubric, and citing it is
+not the same as having applied it.
+
+Before adding anything to a skill file, ask: does this belong to this
+skill's job and nature? A skill has a personality (game-domain SME,
+pipeline debugging, TDD). Put engineering rules in engineering skills and
+docs, game rules in game skills; what does not fit goes elsewhere or is
+left out. See `writing-great-skills` (relevance) and `dont-be-stupid`.
+
+Subagents receive the root `CLAUDE.md` / `AGENTS.md` text from when the
+parent session started, so an edit to those files reaches subagents only
+in a new session. An uncommitted token audit reported this, and on
+2026-09-26 a review subagent received an `AGENTS.md` older than the file on
+disk. A `CLAUDE.md` in another directory, such as a worktree, was loaded
+from disk when a subagent read a file there; this was seen once.
 
 ## CI
 
