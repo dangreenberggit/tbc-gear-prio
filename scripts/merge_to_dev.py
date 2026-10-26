@@ -190,8 +190,8 @@ def holds_no_work(root: Path, rel: str) -> bool:
 def real_changes(
     entries: list[tuple[str, str]], no_work: Callable[[str], bool]
 ) -> list[tuple[str, str]]:
-    """`entries` without the untracked ones that `no_work` says are sandbox
-    mounts (see `holds_no_work`)."""
+    """`no_work` is a parameter so check_merge_to_dev.py can test this without
+    real sandbox mounts; `has_changes` passes `holds_no_work`."""
     return [(xy, path) for xy, path in entries if not (xy == "??" and no_work(path))]
 
 
