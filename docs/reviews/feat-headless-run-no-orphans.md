@@ -113,3 +113,63 @@ No dev-code comparison was needed.
 | ID  | Row                                   |
 | --- | ------------------------------------- |
 | S2  | `GROUPS` renamed `USE_PROCESS_GROUPS` |
+
+## Focused check (round 2)
+
+Reviewed range: `39b0c3fe154e399af619fe4c290b81176741bd9f..8dd1970f2f2799ae594b7158ce2b14dcad11cc8d`
+
+Fork range: none. `git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json`
+exits 0, so the branch never moves the fork pin; condition 3 holds.
+
+One fresh `general-task` agent on Opus (review lane), told it writes nothing.
+
+1. Conditions 1 to 3 hold: PASS. 7331b9ab names its finding IDs;
+   8dd1970f changes only this file, tickets 710 and 711, `NEXT` and
+   `map.md`; every changed code line is at a place A1, A2, A4, S2 or P3
+   cites.
+2. The diff changes only what each finding asks for: PASS.
+3. New tests: none added; the agent judged probes enough (its probes: a
+   detached leader that exits leaving a child, a live and an exited
+   non-detached child, a live leader with a child; harness config loaded for
+   `serve` and `build` with the variable unset, `0` and `1`, no throw unless
+   the checker is missing): PASS.
+4. Tests the fixes touch: none exist (grep for `process-group|dev-tab|tab-harness/vite\.config`
+   in `*.test.*` and `*.spec.*` files finds nothing): PASS.
+
+PID or PGID reuse after the leader exits: checked, not a finding (the same
+pattern was already in `dev-tab.mjs`'s exit handler; a wrong kill needs the
+PID counter to wrap through `pid_max` 4194304 within that window).
+
+**R1 (low, loud failure in the lines the fixes wrote).** `killTree` now calls
+`killGroup(child.pid)` before its "already exited" check. For a child whose
+spawn failed, Node leaves `pid` undefined and sets `exitCode` -2, so
+`process.kill(NaN)` throws `ERR_INVALID_ARG_TYPE` and `killGroup` rethrows
+it (agent's probe case 5; `scripts/process-group.mjs:16`, `:28`). At
+39b0c3fe `killTree` returned quietly in that case. No current caller reaches
+it: `smoke.mjs` and the `both` wrappers spawn `process.execPath`, and
+`serve` exits on the child's `error` event. Suggested fix: `if (child.pid
+=== undefined) return;` at the top of `killTree`.
+
+## Summary
+
+Round 1 (small-change lane, one reviewer) found A1-A4, S1-S3 and P1-P3.
+7331b9ab fixed A1, A2, A4, S1, S2, S3 and P3. P1 and P2 predate this
+branch and are filed as tickets 710 and 711. A3 is a trade-off the branch
+accepts (proposed `wontfix`: the signal path is covered by smoke's
+signal-to-exit handlers, and a SIGKILL to smoke alone left vite running
+before this branch too).
+
+Round 2 passed its four checks but reported R1, a finding other than
+bookkeeping in the lines the fixes wrote. Under the skill's "Round limit"
+the review stops here: R1 is not fixed on the branch, no Disposition table
+is written, and `pnpm merge-to-dev --check-only` was not run. The owner
+decides the next step (for example: allow the one-line R1 fix without a
+further round, or defer R1 to a ticket).
+
+Smoke fixtures: 6 of 6 pass with the pair's `dist/tbc` built, and no
+`tsc`, `vite`, `wowsimtbc` or `chrome` process survives (section "Smoke
+fixtures" above). `pnpm -C <pair> verify` at 8dd1970f: rc=0, "gates: 1561
+ran, 0 skipped".
+
+Tickets: filed 2 (710, 711), closed 0. More are filed than closed because
+P1 and P2 are gaps from before this branch that the spec names.
