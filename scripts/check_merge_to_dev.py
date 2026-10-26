@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Checks for the pure logic in scripts/merge_to_dev.py: no git, no writes.
+"""Checks for the pure logic in scripts/merge_to_dev.py, plus one that runs
+`has_changes` on a throwaway git repo under the temp folder.
 
 Follows the check_worktree_pair.py convention -- a standalone script of
 small checks, not a pytest suite (this repo has no pytest infra). The git
@@ -14,6 +15,7 @@ Exit 0 ok, 1 a check failed.
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -140,7 +142,38 @@ def check_empty_sandbox_stubs_are_not_work() -> list[str]:
             got = m.holds_no_work(root, rel)
             if got != expected:
                 problems.append(f"holds_no_work({rel!r}) gave {got}, want {expected}")
+    if os.name == "posix" and not m.holds_no_work(Path("/"), "dev/null"):
+        problems.append("a device must hold no work at any path (ticket 709)")
     return problems
+
+
+def check_clean_tree_check_skips_stubs_in_a_real_repo() -> list[str]:
+    """`has_changes` is what the merge runs, so drive it through git: the
+    17 stubs alone are clean, and one more empty file is not."""
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".claude").mkdir()
+        (root / ".claude" / "tracked.md").write_text("x\n")
+
+        def git(*args: str) -> None:
+            subprocess.run(
+                ["git", "-c", "user.name=t", "-c", "user.email=t@t", *args],
+                cwd=root,
+                check=True,
+                capture_output=True,
+            )
+
+        git("init", "-q")
+        git("add", ".")
+        git("commit", "-q", "-m", "init")
+        for stub in m.SANDBOX_STUBS:
+            (root / stub).write_bytes(b"")
+        if m.has_changes(root):
+            return ["has_changes counts the 17 empty sandbox stubs as work"]
+        (root / "notes.md").write_bytes(b"")
+        if not m.has_changes(root):
+            return ["has_changes skips an empty notes.md, which can be work"]
+    return []
 
 
 def check_named_merge_runs_only_on_dev() -> list[str]:
@@ -183,6 +216,7 @@ CHECKS = (
     check_untracked_devices_are_not_work,
     check_device_test_reads_the_file_type,
     check_empty_sandbox_stubs_are_not_work,
+    check_clean_tree_check_skips_stubs_in_a_real_repo,
 )
 
 
