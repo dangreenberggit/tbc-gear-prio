@@ -32,29 +32,20 @@ and have it return the review file's path and its summary.
 
 ## Who spawns whom
 
-AGENTS.md § Spawning gives the rule; this is the detail. The guard on
-delegation is the **job type**, not the depth of the chain:
+AGENTS.md § Spawning gives the rule. The guard on delegation is the
+**job type**, not the depth of the chain: an overseer spawns another
+overseer when the delegated piece is itself judgment, and an executor
+that delegates oversight of a chunk to another Opus agent is the
+intended case. What a block is, when a block is worth a helper, and how
+the overseer judges each workhorse result: model-policy § Workhorse
+jobs.
 
-- An **overseer** (Opus or Fable: a planner, a reviewer, an executor, an
-  investigation that needs judgment, an agent doing hard implementation)
-  hands workhorse jobs to the workhorse lane in blocks (model-policy
-  § Workhorse jobs: what a block is, when a block is worth a helper). It
-  may spawn another overseer when the delegated piece is itself
-  judgment: a review axis, one chunk of a plan, oversight of a worker
-  set. An executor that delegates oversight of a chunk to another Opus
-  agent is the intended case.
-- A **workhorse agent** does one block whose result the prompt fixes or
-  names, and spawns nothing. Its `not found` is one input to a conclusion
-  of absence, never the conclusion; the overseer judges every result
-  against the sources the agent names.
-
-Pick each subagent's type from your harness section of `model-policy.md`
-and name the model on every spawn (the GLM types excepted):
+Pick each subagent's type from your harness section of `model-policy.md`:
 
 - **Claude Code:** `general-task` for lead-lane work; the workhorse types
   for workhorse jobs (model-policy § Workhorse jobs); `design-task` for a
   plan or an architecture call outside stage-gate. Run `pre-merge-review`
-  on a `general-task`, and run nothing on Haiku. The session sends every
+  on a `general-task`. The session sends every
   `modest-task`, `discrete-task` or GLM-type result to a `general-task`
   check before it relays or builds on it; for a trial type the check's
   prompt asks for a `TRIAL-REJECT <type>: <why>` line when it rejects or
