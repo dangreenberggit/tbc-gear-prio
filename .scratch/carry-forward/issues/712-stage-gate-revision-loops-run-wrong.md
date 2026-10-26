@@ -175,3 +175,109 @@ Each of findings 1-6 has a rule change the owner approved and applied, or
 an owner ruling not to change it, recorded here. For finding 1, that
 includes a decision on `feat/subagent-foreground-helpers` (merge, redo or
 drop).
+
+## Comments
+
+### 2026-10-26: owner rulings and the fix
+
+The owner approved the drafted change on 2026-10-26 with these words:
+"712 "go"". On the third review after a second loop-back, the owner chose
+option D2 with these words: "712 third review d2: i want reviews to cover
+what they should cover, not expand to everything over and over for all
+eternity".
+
+Drafts: `.scratch/agent-reports/2026-10-26-general-task-712-stage-gate-loop-fix-r3.md`
+and the wording check
+`.scratch/agent-reports/2026-10-26-general-task-712-wording-check-r3.md`
+(both gitignored, owner's checkout). The fix is on branch
+`feat/712-stage-gate-loops`. The SKILL.md changes are mirrored in
+`.agents/skills/stage-gate/SKILL.md`.
+
+What each finding's fix is:
+
+1. **Stranded planner, false status.** A new PreToolUse hook,
+   `.claude/hooks/subagent-foreground-helpers.py` (with its test, its
+   `.claude/settings.json` entry and `pnpm foreground-hook:check` in
+   `verify:steps`), sets `run_in_background` to false on every Agent call
+   made inside a subagent. `gate-planner.md` tells the planner to run its
+   researchers in the foreground. In `SKILL.md`, the `spawn` log line
+   records `started`, `resumed` or `returned (<status>)`; an agent is
+   working only while its last line is `started` or `resumed`, and
+   conduct point 3 ties what the session tells the user to that. Step 1
+   defines an agent's final message. Step 2 adds one `SendMessage` to a
+   planner whose final message is not one its instructions ask for, then
+   a stop for the user. Recovery covers a planner with no final message.
+2. **Unchecked fixes passed as rulings.** Each revision prompt states the
+   result `plan.md` must reach for each `blocking` and `material` finding,
+   and marks any repeated method or command from a reviewer or researcher
+   `hypothesis, untested`. `gate-planner.md` makes such a method a claim
+   with its own `Verified by`, and adds `- added:` lines for new claims or
+   steps no finding asked for.
+3. **Re-review not called for.** Gate B now has a path for `material`
+   findings without a `blocking` one: one revision and Gate A, not a
+   loop-back, with a re-review only when the revision has `- added:`
+   lines. After a second loop-back, one more re-review runs (D2); a
+   `blocking` finding there stops the stage for the owner. No stage runs
+   a review round above 3. Step 3 and `gate-reviewer.md` scope every
+   re-review to the claims and steps the latest revision changed or
+   added and the findings of the earlier rounds, and say it does not
+   review the rest of the plan.
+4. **Minor findings became rework.** Each `minor` finding is logged
+   `advisory` and is left out of revision prompts. The executor applies
+   it (an `adapt` ledger row) or leaves it with an `advisory` row and a
+   reason. An `advisory` row waits for the final Gate C.
+5. **Summarised reviews.** The reviewer writes its own review into
+   `plan-review.md` under `# Round <n>`; the session writes nothing to
+   that file and checks that the section is there.
+6. **Reviewer started a server.** `gate-reviewer.md` § Fan-out: run every
+   command in the foreground, start no process that keeps running, and
+   run subagents in the foreground.
+
+Branch `feat/subagent-foreground-helpers`: only its hook, the hook's
+test, the settings entry and the `foreground-hook:check` script were
+ported, with a new hook docstring. Its ticket 550, its `NEXT` change,
+its review file and its text edits were not taken.
+
+Open items (not fixed by this change):
+
+- A notification that says the agent "is waiting on its own background
+  work" makes the session log it and act on nothing else in it. No rule
+  moves the stage on when the harness never resumes that agent; the
+  session only tells the user the agent "has stopped and may resume on
+  its own". With the hook, a subagent's Agent helpers run in the
+  foreground, so this case should need a background Bash call
+  (hypothesis, untested).
+- `- added:` lines in a revision that no re-review follows (the revision
+  after a re-review that found `material` findings only) go to the
+  executor unreviewed, and no rule shows them to the owner.
+- `- added:` lines list only new claims and steps. A claim the planner
+  changed without a finding asking for it is not listed, so a re-review
+  prompt may not name it (hypothesis, untested).
+- `gate-executor.md:43` applies only to a `minor` finding "whose `Where`
+  names a step" of the executor's chunk. No rule says what an executor
+  does with a `minor` finding whose `Where` names no step (for example
+  the whole plan), so no executor applies it or writes its `advisory`
+  ledger row. Source: the patch-build report,
+  `.scratch/agent-reports/2026-10-26-general-task-712-patch-build.md:60`.
+- Branch `feat/subagent-foreground-helpers` (on the `windows` remote
+  only): this change redid its fix. The hook, its test, the settings
+  entry and the check script were ported; the rest was not taken.
+  Whether to delete the remote branch is not decided.
+
+### 2026-10-26: review rounds count per chunk
+
+Question: this change caps plan reviews at round 3 per stage (SKILL.md
+step 4, the bullet "Round 3 is the last review"). Branch
+`feat/usage-limit-fixes` adds a re-review for each later execution chunk
+(its SKILL.md step 5), so a plan with three or more chunks reaches the
+cap. Option 1 was: count rounds per chunk, so each chunk gets one review
+plus up to two re-reviews after revisions. The owner answered "Option 1
+sounds fine" (relayed by the session on 2026-10-26).
+
+When `feat/usage-limit-fixes` merges into `dev`, its SKILL.md step 5 and
+Orchestrator conduct point 6 ("Pace the pipeline", which says review
+rounds stay capped by step 4) must be rewritten to this rule. This
+branch's SKILL.md step 3 round numbering ("1 for the stage's first
+review, then 1 higher for each later review") and the step 4 bullet
+"Round 3 is the last review" must be rewritten too, keeping each
+`# Round <n>` heading and `R<n>-<id>` id unique within `plan-review.md`.
