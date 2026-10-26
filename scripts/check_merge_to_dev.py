@@ -149,7 +149,20 @@ def check_empty_sandbox_stubs_are_not_work() -> list[str]:
 
 def check_clean_tree_check_skips_stubs_in_a_real_repo() -> list[str]:
     """`has_changes` is what the merge runs, so drive it through git: the
-    17 stubs alone are clean, and one more empty file is not."""
+    17 stubs alone are clean, and one more empty file is not.
+
+    git hooks export GIT_DIR and friends, and `pnpm verify` runs from the
+    pre-push hook; left set, they would point both this check's git calls
+    and `has_changes` at the real checkout.
+    """
+    saved = {k: os.environ.pop(k) for k in list(os.environ) if k.startswith("GIT_")}
+    try:
+        return _stub_repo_problems()
+    finally:
+        os.environ.update(saved)
+
+
+def _stub_repo_problems() -> list[str]:
     with tempfile.TemporaryDirectory() as tmp:
         root = Path(tmp)
         (root / ".claude").mkdir()
