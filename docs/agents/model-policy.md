@@ -96,9 +96,9 @@ cheaper model for implementation correctness unless the user says so.
 A worker’s lane follows the **worker’s** job. A mechanical implementation
 slice is workhorse whether its manager is workhorse, review, or design.
 
-Name the model on every spawn, and give it an effort the way your
-harness section says (Claude Code: an agent type whose definition sets
-it). The harness default is
+Name the model on every spawn (except the GLM types, § GLM worker types),
+and give it an effort the way your harness section says (Claude Code: an
+agent type whose definition sets it). The harness default is
 **inherit**: an unnamed worker runs its parent’s model at its parent’s
 price, so a design-lane manager fanning out unnamed workers buys a fan-out of
 design-lane workers. Observed 2026-08-11: a Fable-low director fanned out five
@@ -216,6 +216,7 @@ before (ticket 252). Spawn these types in place of the built-in
 set the built-ins' effort, and whether they pin an effort of their own
 is unverified. If the harness does not recognize one of these
 types, restart the session rather than falling back to a built-in.
+The GLM types are the exception (§ GLM worker types).
 
 > **Changed 2026-09-25.** Before this date the repo preferred Opus at effort
 > `medium`, reserved `high` and above for a single narrow adversarial review
@@ -235,7 +236,8 @@ types, restart the session rather than falling back to a built-in.
 harness, above Opus. The owner may run the interactive session on Fable,
 and a subagent whose agent type names no model inherits the session's
 model and bills at that tier. Name the model on every spawn, including
-for agent types whose frontmatter already names one. A Fable planner
+for agent types whose frontmatter already names one, except the GLM
+types (§ GLM worker types). A Fable planner
 names `opus` on every `general-task` it spawns for research.
 
 Prefer this harness when a review-lane reviewer from a different vendor than the
@@ -339,6 +341,47 @@ A `discrete-task` run that records any model other than
 `claude-sonnet-5-5` also stops that type until the harness is fixed.
 `sonnet` resolves to Sonnet 5.5 only on Claude Code v2.1.284 or later
 (https://code.claude.com/docs/en/model-config).
+
+#### GLM worker types
+
+Two more agent types exist only when the session runs on the T3 Code
+provider card "Claude + GLM workers" (instance
+`claudeAgent_claude_glm_workers`). Their agent files are in
+`~/.claude_router/agents/`, outside this repo. They are an optional fill
+for narrow workhorse jobs, not a lane of their own (owner, 2026-10-23).
+They are meant to cost less than Opus, but the cost per task is not yet
+measured. They are not a peer fill: a job that hits a wall does not move
+to them (§ Three lanes).
+
+| Agent type       | Model                | Use for                                                                                                                      |
+| ---------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `glm-flash-task` | `z-ai/glm-5.3-flash` | A lookup with a named target, or named commands that change nothing, run and reported. It has no Edit or Write tool          |
+| `glm-task`       | `z-ai/glm-5.3`       | A planned edit whose files, behaviour and check command the prompt names: a test from a clear ticket, or a mechanical change |
+
+- **Spawn** with the Agent tool, `subagent_type: "glm-task"` or
+  `"glm-flash-task"`, and no `model` argument: a call-site model replaces
+  GLM with Claude (the agent files' descriptions). Send GLM work through
+  these types, not through T3's `delegate_task` or the "GLM via
+  OpenRouter" card.
+- **Not for** review, design, planning, debugging or judgment: spawn the
+  types in the agent-type table above for these. § Three lanes' rule
+  against a weaker model for a review job applies.
+- **Check every result** before you relay it or build on it, as for the
+  trial types: when the caller is the interactive session, a
+  `general-task` verifier does it. Check the worker's claims as well as
+  its tests. In the first real use (pattern-text-extractor, 2026-10-23),
+  151 of 151 tests passed, and a later review still found that a new test
+  name claimed more than the data supports (pattern-text-extractor
+  `docs/reviews/feat-test-gaps-04-05.md`, ticket 57).
+- **If the harness does not list these types** (every card except
+  "Claude + GLM workers", such as "Claude", "GLM via OpenRouter" and
+  Codex), use the types in the agent-type table above. A missing GLM type
+  is not a wall and is no reason to restart the session.
+- **Card limits.** GLM workers install no packages (owner, 2026-10-23), so
+  give them a checkout whose packages are installed. Sessions on this
+  card cannot run `gh`, and `git push` to GitHub is expected to fail too
+  (untested), because `~/.claude_router/settings.json` denies reads of
+  `~/.config/gh`. Push from the "Claude" card.
 
 #### Stage-gate seats
 
