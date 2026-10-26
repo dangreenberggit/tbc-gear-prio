@@ -402,3 +402,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 710 The tab browser driver can leave Chrome running when stopped by a signal (pre-merge review feat/headless-run-no-orphans, P1) 2026-10-25
 - 711 The desktop gate can leave wowsimtbc on :3333 when stopped by a signal (pre-merge review feat/headless-run-no-orphans, P2) 2026-10-25
 - 713 `pnpm merge-to-dev` refuses the 17 empty stub files that agent sandbox commands leave in the folder (owner merge of feat/712-stage-gate-loops) 2026-10-26
+- 717 The stage-gate rules for later plan chunks have three gaps: a Gate C that may never run, a review count lost on restart, no planner size self-check (r4 wording review of feat/usage-limit-fixes, owner comment) 2026-10-26
