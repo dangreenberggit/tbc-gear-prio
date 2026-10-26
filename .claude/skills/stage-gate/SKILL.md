@@ -48,7 +48,10 @@ plans are underspecified and it decides adapt-vs-flag-vs-stop on every
 step where reality disagrees with the plan — the failure mode is a silent
 paper-over, which is a judgment failure, not a throughput one. Its
 `parallel-phase` workers are a separate call: `simple-task` for an
-extremely simple slice, `general-task` for every other slice.
+extremely simple slice, `general-task` for every other slice. Every seat
+hands its workhorse jobs — searches, plain reads, named runs,
+measurements — to the workhorse types in blocks (model-policy
+§ Workhorse jobs).
 
 Name the model on every spawn, even though each seat's frontmatter sets
 its model. A call-site name outranks frontmatter, so a wrong name

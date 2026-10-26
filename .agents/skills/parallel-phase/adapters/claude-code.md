@@ -6,7 +6,8 @@ Same contract as [agnostic.md](agnostic.md). Prefer these conveniences when runn
 
 Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents/model-policy.md) § Claude Code, which defines each agent type):
 
-- **Workhorse:** Opus at effort `high` — parallel implement workers. Spawn each as `general-task` with `model: "opus"`. An extremely simple slice (see `simple-task`) may go to `simple-task` with `model: "sonnet"`.
+- **Lead:** Opus at effort `high` — parallel implement workers. Spawn each as `general-task` with `model: "opus"`. An extremely simple slice (see `simple-task`) may go to `simple-task` with `model: "sonnet"`.
+- **Workhorse:** the cheap worker types (`glm-flash-task` and `glm-task` when the harness lists them, else `discrete-task` and `modest-task`). A worker hands its blocks of searches, reads, named runs and measurements to them (model-policy § Workhorse jobs); a `parallel-phase` slice itself never goes to them.
 - **Review:** Opus at effort `high` — pre-merge axes, adversarial and domain judgment. One spawn per review axis; never split one axis across N workers.
 - **Design:** Fable at effort `low` — planning and architecture (`gate-planner`, `design-task`). Never a worker.
 

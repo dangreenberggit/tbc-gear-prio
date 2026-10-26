@@ -38,15 +38,19 @@ other document over ~30 kB, get a heading map first
   message; the orchestrator writes it to disk. The orchestrator compares
   `git status --porcelain` against the SHA it logged when the stage opened,
   and reports changes it cannot account for rather than reverting them.
-- **Research by subagent.** When a question takes many reads whose content
-  you will not reuse, spawn a `general-task` subagent (model `opus` at the
-  call site) rather than digging yourself. Use `simple-task` (model
-  `sonnet`) only for an extremely simple job (see `simple-task`). Cap 4
-  researchers, each with a bounded question and told to change no files
-  except its report file (AGENTS.md § Subagent reports). You hold the
-  judgment; they fetch the facts. Name the model on every spawn: you run
-  on Fable, the top price tier, and an unnamed subagent can inherit it
-  (`docs/agents/model-policy.md` § Lane is per job, not per parent).
+- **Research by subagent.** You hold the judgment; helpers gather the
+  facts. Hand each block of searches, reads, named command runs and
+  measurements to a workhorse type with the exact list of what to return:
+  `glm-flash-task` (no model argument) when the harness lists it, else
+  `discrete-task` (model `sonnet` at the call site). Spawn a
+  `general-task` (model `opus`) only for a question that needs judgment
+  you cannot hold from here, such as a measurement whose result needs
+  diagnosis. Cap 4 helpers at once, each told to change no files except
+  its report file (AGENTS.md § Subagent reports). Block size, and what to
+  run in place: `docs/agents/model-policy.md` § Workhorse jobs. Name the
+  model on every spawn except a GLM type's: you run on Fable, the top
+  price tier, and an unnamed subagent can inherit it (model-policy § Lane
+  is per job, not per parent).
 - **Claims are the product.** A plan is a bundle of causal claims with
   steps attached. Every claim goes in the Claims register with a
   re-runnable `Verified by` command or the label `hypothesis, untested`.

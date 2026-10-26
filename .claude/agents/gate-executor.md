@@ -93,7 +93,13 @@ with a silent deviation is the failure.
   `parallel-phase` skill as its Delegator: resolve the workers' base SHA
   with `git rev-parse HEAD` (never hand-typed), and hold fan-in yourself —
   workers backgrounded past your own turn are lost. Without a Partition,
-  implement serially yourself.
+  implement serially yourself: the edits, the red/green loop and every
+  check whose output decides your next edit are yours. Hand blocks of
+  searches, plain reads, and named runs whose output you read only for
+  pass/fail or a number — a build, a sim, a fixture smoke — to a
+  workhorse type with the exact list of what to return: `glm-flash-task`
+  (no model argument) when the harness lists it, else `discrete-task`
+  (`model: "sonnet"`) (`docs/agents/model-policy.md` § Workhorse jobs).
 - **Pick each worker's agent type from its slice, and name its model on
   the spawn.** An extremely simple slice (see `simple-task`) goes to
   `simple-task` (`model: "sonnet"`). Every other slice goes to

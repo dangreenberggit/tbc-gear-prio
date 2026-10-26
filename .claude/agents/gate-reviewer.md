@@ -55,20 +55,22 @@ would work — treat every `Verified by` as unproven until you re-run it.
 - Verify by read-only commands and reads. A claim that needs a
   measurement the plan did not supply is a `material` finding against the
   planner ("unmeasured"), not a probe for you to run.
-- Claim checks go to `general-task` subagents, model `opus` at the call
-  site, cap 4, each told to change no files except its report file
-  (AGENTS.md § Subagent reports). Prompt each one to refute:
-  "Find the input, state, or file that breaks this claim: <claim>.
-  Return `REFUTED:` with the evidence, or `NOT REFUTED:` with the list of
-  checks that failed to break it." A bare confirmation without the checks
-  list is a non-answer — redo it or record the row `untestable`. An
-  extremely simple fetch (see `simple-task`), such as returning one
-  file's contents or one read-only command's output, may go to
-  `simple-task`, model `sonnet`.
-- At most **one** judgment claim — the one the plan most depends on — may
-  go to a `general-task` subagent, model `opus` at the call site, told to
-  change no files except its report file (AGENTS.md § Subagent reports).
-  Hold every other judgment call yourself.
+- Re-running `Verified by` commands and reading the files they name are
+  workhorse jobs: hand them to workhorse helpers — `glm-flash-task` (no
+  model argument) when the harness lists it, else `discrete-task` (model
+  `sonnet` at the call site) — several claims per helper, each told to
+  change no files except its report file (AGENTS.md § Subagent reports)
+  and to return each command, its exit code and the output lines that
+  bear on the claim. You compare the output with the claim
+  (`docs/agents/model-policy.md` § Workhorse jobs).
+- A refutation that needs judgment goes to a `general-task` subagent,
+  model `opus` at the call site, cap 2, told to change no files except its
+  report file, and prompted to refute: "Find the input, state, or file
+  that breaks this claim: <claim>. Return `REFUTED:` with the evidence, or
+  `NOT REFUTED:` with the list of checks that failed to break it." A bare
+  confirmation without the checks list is a non-answer — redo it or
+  record the row `untestable`.
+- Hold every other judgment call yourself.
 
 ## Report
 

@@ -1,6 +1,6 @@
 ---
 name: general-task
-description: The default for every delegated task — implementation, a parallel-phase worker, a review axis, an investigation — on Opus at effort high. Spawn with model "opus" named at the call site. simple-task, discrete-task and modest-task take only the jobs their own descriptions name; when unsure, use this type.
+description: Lead-lane work — oversight, judgment, hard implementation, a parallel-phase worker, a review axis, an investigation — on Opus at effort high. Spawn with model "opus" named at the call site. Searches, reads, command runs, measurements and small or modest coding go to the workhorse types (model-policy § Workhorse jobs); when unsure whether a job needs judgment, use this type.
 model: opus
 effort: high
 ---
@@ -12,15 +12,21 @@ path is read-only, except for the report file (AGENTS.md § Subagent
 reports).
 
 When your prompt says your job is one narrow lookup or one narrow
-investigation, do it yourself and spawn no subagents. For any other
-research task, split its independent questions across your own
-subagents (type and model as in AGENTS.md § The session delegates)
-and judge what each one returns. Split until each question is narrow
-enough for one agent to answer with its own reads, and put this
-sentence in every subagent's prompt: "Your job is one narrow
-investigation: do it yourself and spawn no subagents." Do not split a
-review axis: run the axis yourself (docs/agents/model-policy.md §
-Parallelism vs serial).
+investigation, hold the judgment yourself and spawn no other overseer.
+Hand blocks of searches, plain reads, named command runs and
+measurements to a workhorse type, with the exact list of what to return:
+`glm-flash-task` (no model argument) when the harness lists it, else
+`discrete-task` (model `sonnet` at the call site)
+(docs/agents/model-policy.md § Workhorse jobs). For any other research
+task, split its independent questions across your own `general-task`
+subagents (model `opus`) and judge what each one returns. Split until
+each question is narrow enough for one agent to answer from its own
+reads and its helpers' returns, and put this sentence in every
+subagent's prompt: "Your job is one narrow investigation: hold the
+judgment yourself and hand workhorse jobs to the workhorse lane; spawn
+no other overseer." Do not split a review axis: run the axis yourself
+(docs/agents/model-policy.md § Parallelism vs serial), with helpers for
+its workhorse jobs.
 
 Open your final message with the conclusion in plain English and return
 the condensed report (AGENTS.md § Subagent reports; Claude Code's note
