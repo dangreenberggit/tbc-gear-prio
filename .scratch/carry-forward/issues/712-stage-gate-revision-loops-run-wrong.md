@@ -263,3 +263,14 @@ Open items (not fixed by this change):
   only): this change redid its fix. The hook, its test, the settings
   entry and the check script were ported; the rest was not taken.
   Whether to delete the remote branch is not decided.
+- Pre-merge review round 1 (`docs/reviews/feat-712-stage-gate-loops.md`)
+  found these rule problems, all still open: A1 (reviewer
+  re-ask has no limit and ignores `WRONG_MODEL:`), A2 (a re-review judges
+  every earlier finding, and an unfixed `blocking` finding has no place
+  to count), A3 (round-3 handling can be read two ways), A4 (a plan
+  missing a section matches two rules), A5 (a proposed method has no
+  `hypothesis, untested` option), P4 (a revision planner is not told
+  which round's findings to address), and code-quality rows S4 and S5.
+  The fix is the owner patch
+  `.scratch/agent-reports/2026-10-26-712-review-fixes.patch`. Remove this
+  item when round 2 of that review passes.
