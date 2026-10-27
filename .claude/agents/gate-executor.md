@@ -111,7 +111,7 @@ with a silent deviation is the failure.
   pass/fail or a number — a build, a sim, a fixture smoke — to a
   workhorse type with the exact list of what to return: `glm-flash-task`
   (no model argument) when the harness lists it, except a read that could reach
-  secrets, session transcripts (`~/.claude/projects/`), `~/.claude*` or
+  secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
   `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
   types, Private data), else `discrete-task`
   (`model: "sonnet"`) (`docs/agents/model-policy.md` § Workhorse jobs).

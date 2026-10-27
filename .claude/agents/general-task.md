@@ -16,7 +16,7 @@ investigation, hold the judgment yourself and spawn no other overseer.
 Hand blocks of searches, plain reads, named command runs and
 measurements to a workhorse type, with the exact list of what to return:
 `glm-flash-task` (no model argument) when the harness lists it, except a read that could reach
-secrets, session transcripts (`~/.claude/projects/`), `~/.claude*` or
+secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
 `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
 types, Private data), else
 `discrete-task` (model `sonnet` at the call site)

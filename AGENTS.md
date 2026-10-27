@@ -141,10 +141,14 @@ a `grep`. Pick the type by the job (model-policy § Claude Code):
   small or modest coding) to the workhorse lane in blocks. It spawns
   another overseer only for judgment work it delegates: a review axis, a
   chunk of a plan, oversight of a worker set.
-- The **workhorse lane** (model-policy § Workhorse jobs: `glm-flash-task`
-  and `glm-task` when the harness lists them, else `discrete-task`,
-  `modest-task` and `simple-task`) does one block whose result the
-  prompt fixes or names, and spawns nothing.
+- The **workhorse lane** does one block whose result the prompt fixes
+  or names, and spawns nothing (model-policy § Workhorse jobs). When the
+  harness lists the GLM types, `glm-flash-task` is the default workhorse
+  type, `glm-task` takes larger planned edits, and the Sonnet types
+  (`discrete-task`, `simple-task`) take only jobs z-ai must not see,
+  such as reads that could reach secrets or session logs; Sonnet is
+  otherwise not used there. Else the workhorse types are
+  `discrete-task`, `modest-task` and `simple-task`.
 
 Nothing runs on Haiku. A helper's `not found` is one input to a
 conclusion of absence, never the conclusion.

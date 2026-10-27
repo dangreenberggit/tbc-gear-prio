@@ -91,7 +91,7 @@ would work — treat every `Verified by` as unproven until you re-run it.
 - Re-running `Verified by` commands and reading the files they name are
   workhorse jobs: hand them to workhorse helpers — `glm-flash-task` (no
   model argument) when the harness lists it, except a read that could reach
-  secrets, session transcripts (`~/.claude/projects/`), `~/.claude*` or
+  secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
   `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
   types, Private data), else `discrete-task` (model
   `sonnet` at the call site) — several claims per helper, each told to
