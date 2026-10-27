@@ -184,12 +184,12 @@ Three peers. Read only the one you are running on.
 
 ### Claude Code
 
-| Lane          | Fill it with                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Workhorse** | On the T3 Code card "Claude + GLM workers": **`glm-flash-task`** (GLM Flash), the default workhorse type, and **`glm-task`** (GLM) for larger planned edits; Sonnet there only for jobs z-ai must not see (§ GLM worker types, "Private data"). Where the harness does not list the GLM types: **`discrete-task`** (Sonnet 5.5, effort `high`), **`modest-task`** (Opus, effort `medium`) and **`simple-task`** (Sonnet, effort `high`). Which job goes to which: § Workhorse jobs |
-| **Lead**      | **Opus at effort `high`** (`general-task`)                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| **Review**    | **Opus at effort `high`**                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| **Design**    | **Fable at effort `low`** — used only for planning and architecture (`gate-planner`, `design-task`)                                                                                                                                                                                                                                                                                                                                                                                |
+| Lane          | Fill it with                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Workhorse** | On the T3 Code card "Claude + GLM workers": **`glm-flash-task`** (GLM Flash) for every workhorse job, small or modest coding included; a job it hands back as `NEEDS_JUDGMENT` goes to a bigger agent (§ Workhorse jobs). The Sonnet types there take only a job z-ai must not see, or a retry when a GLM type hits a usage wall (§ GLM worker types, "Private data"). Where the harness does not list the GLM types: **`discrete-task`** (Sonnet 5.5, effort `high`), **`modest-task`** (Opus, effort `medium`) and **`simple-task`** (Sonnet, effort `high`). Which job goes to which: § Workhorse jobs |
+| **Lead**      | **Opus at effort `high`** (`general-task`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **Review**    | **Opus at effort `high`**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **Design**    | **Fable at effort `low`** — used only for planning and architecture (`gate-planner`, `design-task`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 The **model** and the **effort level** are separate controls
 ([model config](https://code.claude.com/docs/en/model-config#adjust-effort-level),
@@ -219,10 +219,11 @@ The spawning agent decides which type to use (§ Trial types, "Which type
 takes a small job"; § Workhorse jobs). When unsure whether the job needs
 judgment, spawn `general-task`; when it is a workhorse job whose result
 the prompt can fix or name, spawn the workhorse type § Workhorse jobs
-names. A `simple-task`, `discrete-task`, `modest-task`, `glm-task` or
-`glm-flash-task` that returns
-`NEEDS_JUDGMENT`, or a `discrete-task` that returns `WRONG_MODEL`, is
-respawned on `general-task` with the same prompt. A `design-task` that
+names. A `simple-task`, `discrete-task`, `modest-task` or `glm-task` that
+returns `NEEDS_JUDGMENT`, or a `discrete-task` that returns `WRONG_MODEL`,
+is respawned on `general-task` with the same prompt. A `glm-flash-task`
+that returns `NEEDS_JUDGMENT` goes to the bigger agent § Workhorse jobs
+names. A `design-task` that
 returns `WRONG_MODEL` is respawned on `design-task` with the model the
 agent-type table above names, not the model the return says it
 expected: a session started before an agent file changed may hold the
@@ -290,12 +291,11 @@ or plain reads, and spawned nothing
 (`.scratch/agent-reports/2026-10-26-general-task-opus-did-worker-jobs.md` § 2;
 gitignored; main checkout only).
 
-| Job                                                                                                                                  | When the harness lists the GLM types | Otherwise                                     |
-| ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ | --------------------------------------------- |
-| Searches, reads, named runs that write no tracked file, measurements                                                                 | `glm-flash-task`                     | `discrete-task`; `simple-task` for one action |
-| An edit whose exact text the prompt states                                                                                           | `glm-flash-task`                     | `discrete-task`                               |
-| Small or modest coding (§ Trial types, "Modest")                                                                                     | `glm-flash-task`                     | `modest-task`                                 |
-| A larger planned edit inside the "Modest" bounds, such as a test from a clear ticket or a mechanical change across up to three files | `glm-task`                           | `modest-task`                                 |
+| Job                                                                  | When the harness lists the GLM types | Otherwise                                     |
+| -------------------------------------------------------------------- | ------------------------------------ | --------------------------------------------- |
+| Searches, reads, named runs that write no tracked file, measurements | `glm-flash-task`                     | `discrete-task`; `simple-task` for one action |
+| An edit whose exact text the prompt states                           | `glm-flash-task`                     | `discrete-task`                               |
+| Small or modest coding (§ Trial types, "Modest")                     | `glm-flash-task`                     | `modest-task`                                 |
 
 On the "Claude + GLM workers" card, `glm-flash-task` is the default
 workhorse type. The owner ruled on 2026-10-26: "Flash should be used
@@ -305,11 +305,16 @@ be used for workhorse tasks", and earlier that day "small or even
 modest coding tasks shuld be fine glm flash"
 (`.scratch/agent-reports/2026-10-26-session-usage-limit-investigation.md`;
 gitignored; main checkout only). On that card the Sonnet types
-(`discrete-task`, `simple-task`) take only the jobs z-ai must not see
-(§ GLM worker types, "Private data"), and a retry when a GLM type hits a
-wall (§ Four lanes, peer fills). Sonnet is otherwise not used there.
+(`discrete-task`, `simple-task`) take only a job z-ai must not see
+(§ GLM worker types, "Private data"), or a retry when a GLM type hits a
+usage wall (§ Four lanes, peer fills). Sonnet is otherwise not used there.
 On every other card the Sonnet and Opus-medium trial types stay the
 workhorse fill, as the "Otherwise" column says.
+
+A job `glm-flash-task` hands back as `NEEDS_JUDGMENT` goes to a bigger
+agent. Whether that agent is `glm-task` or Opus `general-task` is an open
+owner question (`.scratch/carry-forward/issues/719-who-takes-a-glm-flash-handback.md`);
+until it is settled, the caller decides per job.
 
 An edit larger than the "Modest" bounds is hard implementation and goes
 to `general-task`, on every card (§ Four lanes). The jobs on § Trial
@@ -358,8 +363,9 @@ result the prompt states.
   `modest-task`.
 - Anything else, or unsure → `general-task`.
 
-When the harness lists the GLM types, § Workhorse jobs replaces the
-first three picks with them.
+When the harness lists the GLM types, § Workhorse jobs replaces each of
+the first three picks with `glm-flash-task`, except a job z-ai must not
+see (§ GLM worker types, "Private data").
 
 For code this means: a rename whose old and new names the prompt gives, a
 block moved without change, or text the prompt gives word for word is
@@ -456,10 +462,10 @@ says which job goes to which. They are meant to cost less than Opus, but
 the cost per task is not yet measured. A lead, review or design job that
 hits a wall does not move to them (§ Four lanes).
 
-| Agent type       | Model                | Use for                                                                                                                                                                |
-| ---------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `glm-flash-task` | `z-ai/glm-5.3-flash` | The default workhorse type: searches, reads, named commands run and reported, measurements, an edit whose exact text the prompt states, and small or modest coding     |
-| `glm-task`       | `z-ai/glm-5.3`       | A larger planned edit inside § Trial types' "Modest" bounds whose files, behaviour and check command the prompt names: a test from a clear ticket, a mechanical change |
+| Agent type       | Model                | Use for                                                                                                                                                            |
+| ---------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `glm-flash-task` | `z-ai/glm-5.3-flash` | The default workhorse type: searches, reads, named commands run and reported, measurements, an edit whose exact text the prompt states, and small or modest coding |
+| `glm-task`       | `z-ai/glm-5.3`       | A candidate for a job `glm-flash-task` hands back as `NEEDS_JUDGMENT`; whether it or `general-task` takes such a job is open (§ Workhorse jobs)                    |
 
 - **Spawn** with the Agent tool, `subagent_type: "glm-task"` or
   `"glm-flash-task"`, and no `model` argument: a call-site model replaces
@@ -476,8 +482,10 @@ hits a wall does not move to them (§ Four lanes).
   `.githooks/`, `scripts/`, agent docs or `parallel-phase` workers. Their agent files
   in `~/.claude_router/agents/` should hold the short form of the list,
   as the trial files do; the owner keeps them in step, because they are
-  outside this repo. A GLM type that returns `NEEDS_JUDGMENT` is
-  respawned on `general-task` with the same prompt (§ Claude Code).
+  outside this repo. A `glm-task` that returns `NEEDS_JUDGMENT` is
+  respawned on `general-task` with the same prompt (§ Claude Code); a
+  `glm-flash-task` that returns it goes to the bigger agent § Workhorse
+  jobs names.
 - **Private data.** z-ai receives everything a GLM worker sees: its
   prompt, every file it reads, and every command output (global
   `AGENTS.md` § Secrets and GLM workers, staged in

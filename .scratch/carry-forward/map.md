@@ -407,3 +407,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 716 The GLM agent files outside the repo need two owner edits (pre-merge review feat/usage-limit-fixes, P3) 2026-10-26; CLOSED 2026-10-26, both edits made in `~/.claude_router/agents/` (backups in `.scratch/glm-agent-files-backup-2026-10-26/`); § Workhorse jobs moved edits and small coding to `glm-flash-task` in e5a80126
 - 717 The stage-gate rules for later plan chunks have three gaps: a Gate C that may never run, a review count lost on restart, no planner size self-check (r4 wording review of feat/usage-limit-fixes, owner comment) 2026-10-26
 - 718 Stopping a trial type leaves no named workhorse type on cards without GLM (pre-merge review feat/usage-limit-fixes, A5) 2026-10-26
+- 719 Who takes a job GLM Flash hands back as NEEDS_JUDGMENT: glm-task or Opus general-task; open owner question, review scheduled 2026-11-02 (pre-merge review feat/usage-limit-fixes, round 2, R2-3) 2026-10-26

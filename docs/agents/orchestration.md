@@ -45,8 +45,9 @@ Pick each subagent's type from your harness section of `model-policy.md`:
 - **Claude Code:** `general-task` for lead-lane and review-lane work
   (model-policy § Four lanes); the workhorse types
   for workhorse jobs (model-policy § Workhorse jobs: on the "Claude + GLM
-  workers" card `glm-flash-task` by default, `glm-task` for larger planned
-  edits, and a Sonnet type only for a job z-ai must not see); `design-task` for a
+  workers" card `glm-flash-task` for every workhorse job, and a Sonnet
+  type only for a job z-ai must not see, or a retry when a GLM type hits
+  a usage wall); `design-task` for a
   plan or an architecture call outside stage-gate. Run `pre-merge-review`
   on a `general-task`. The session sends every
   `modest-task`, `discrete-task` or GLM-type result to a `general-task`

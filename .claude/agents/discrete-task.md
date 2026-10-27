@@ -1,6 +1,6 @@
 ---
 name: discrete-task
-description: TRIAL. One discrete job whose result the prompt fixes — a named-target lookup, named commands that write no tracked file run and reported, or an edit whose exact text the prompt states — on Sonnet 5.5 at effort high (model-policy § Trial types). Not for regens, data/ edits, generated files, pins, fork edits, scripts, hooks, agent docs, reviews or debugging. Spawn with model "sonnet" named at the call site. When unsure, use general-task. When the harness lists glm-flash-task, use this type only for a job z-ai must not see (anything that could reach secrets, session logs, ~/.claude* or ~/.t3); Sonnet is otherwise not used there.
+description: TRIAL. One discrete job whose result the prompt fixes — a named-target lookup, named commands that write no tracked file run and reported, or an edit whose exact text the prompt states — on Sonnet 5.5 at effort high (model-policy § Trial types). Not for regens, data/ edits, generated files, pins, fork edits, scripts, hooks, agent docs, reviews or debugging. Spawn with model "sonnet" named at the call site. When unsure, use general-task. When the harness lists glm-flash-task, use this type only for a job z-ai must not see (anything that could reach secrets, session logs, ~/.claude* or ~/.t3), or a retry when a GLM type hits a usage wall; Sonnet is otherwise not used there.
 model: sonnet
 effort: high
 ---

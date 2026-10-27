@@ -1,6 +1,6 @@
 ---
 name: modest-task
-description: TRIAL. One modest job on Opus at effort medium — a small change (at most 3 files, 150 lines) where the worker writes the code or text to a result the prompt names, checked before it is accepted (model-policy § Trial types). Not for data/ edits, generated files, regens, pins, fork edits, scripts, hooks, agent docs, reviews, planning or debugging. Spawn with model "opus" named at the call site. When unsure, use general-task. When the harness lists glm-flash-task, small or modest coding goes there instead, except a job z-ai must not see.
+description: TRIAL. One modest job on Opus at effort medium — a small change (at most 3 files, 150 lines) where the worker writes the code or text to a result the prompt names, checked before it is accepted (model-policy § Trial types). Not for data/ edits, generated files, regens, pins, fork edits, scripts, hooks, agent docs, reviews, planning or debugging. Spawn with model "opus" named at the call site. When unsure, use general-task. When the harness lists glm-flash-task, small or modest coding goes there instead, except a job z-ai must not see, or a retry when a GLM type hits a usage wall.
 model: opus
 effort: medium
 ---
