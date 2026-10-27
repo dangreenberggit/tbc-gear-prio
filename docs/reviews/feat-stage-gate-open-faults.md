@@ -1,6 +1,7 @@
 # Pre-merge review — feat/stage-gate-open-faults
 
 Reviewed range: `8a59f35def47c4f5b8428e16f2e1e5b64b71a331..2b9ed795b202bdc41037d7a6dbf6c8f63ad0b1ee`
+Reviewed range: `2b9ed795b202bdc41037d7a6dbf6c8f63ad0b1ee..f50cc3c7a692e5205a128148c8cbff6fd8a779c7`
 
 ## Dispatch note
 
@@ -201,6 +202,11 @@ commit for each finding. Round 2 (focused check) runs on
 Step 4 (`pnpm merge-to-dev --check-only`) has not run: the review is not
 finished until round 2. Tickets filed and closed are counted then.
 
+Round 2 found two problems in the fixes (R2-1, R2-2 in
+`## Focused check (round 2)`), so the review stops there, as step 2
+"Round limit" says: no round-2 Disposition table, no step 4, and the
+owner decides what happens next.
+
 ## Disposition
 
 | ID  | Axis             | Disposition | Ticket / note                                                                                                                                                                                 |
@@ -225,3 +231,145 @@ finished until round 2. Tickets filed and closed are counted then.
 | P4  | Standards + Spec | fixed       | `4e75a9ea`: ticket 712's `Related:` names 720                                                                                                                                                 |
 | P5  | Standards + Spec | fixed       | `4e75a9ea`: ticket 712 § Comments records the approvals as relayed by the session, and the review reports each later fix commit applies                                                       |
 | S4  | Standards + Spec | wontfix     | The name is how each rule that applies the check links to it; one rule defines it (`SKILL.md:384`) and the others name it, so a rename touching each mention is expected, not scattered logic |
+
+## Focused check (round 2)
+
+Range: `2b9ed795..f50cc3c7` (9 commits: 7 rule fixes `12ca28fb` to
+`3c9d7ee2`, the ticket fixes `4e75a9ea`, and the review commits
+`c35fbd6f`, `f50cc3c7`). Fork range: none.
+`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json` exits 0,
+so the branch never moves the fork pin.
+
+Who ran it: one fresh `general-task` agent on `model: "opus"`, which
+wrote none of the fixes. `codex` is still not on `PATH`. It ran the
+check itself and wrote only this section and the lines that point to it.
+Scope: only the lines that `2b9ed795..f50cc3c7` changes, and the rules
+those lines touch (owner, ticket 712: "i want reviews to cover what
+they should cover, not expand to everything over and over for all
+eternity"). Line numbers below are at `f50cc3c7`. `SKILL.md` means
+`.claude/skills/stage-gate/SKILL.md`; the `.agents/` mirror is
+identical (`python3 scripts/check_skill_mirrors.py`: "skill mirrors
+match", rc 0).
+
+### Conditions
+
+1. **Every commit is a fix, a review-file change or a ticket change:
+   holds, with one gap in form (R2-3).** The Disposition table above
+   names the commit for every round-1 finding, and each commit touches
+   only the files of its findings
+   (`git show --name-only --format= <sha>` for each). No commit message
+   names a finding ID, and none names a ticket; the step reads the IDs
+   only from this file's table.
+2. **Every changed line is at a place a fixed finding cites: holds.**
+   Each hunk is at a line round 1 cites: A1 (`SKILL.md:251-254`,
+   `:425-433`), A2 (`plan-template.md:57-63`, `gate-planner.md:26-30`),
+   A3 (`SKILL.md:170-174`), A4 (`SKILL.md:189-210`), A7
+   (`gate-executor.md:43-49`), S3 (`SKILL.md:93-95`, `:112-114`), S2/S5
+   (`SKILL.md:362-364`, `:384-390`), S6 (`plan-template.md:72-73`). The
+   one hunk outside a cited line, the `note` bullet (`SKILL.md:216-218`),
+   is the log entry that A1's Gate A check reads.
+3. **The wowsims-file check gives the same output: holds.** The fork pin
+   does not move (above).
+
+### The four checks
+
+1. Conditions 1 to 3: hold (above).
+2. **The diff changes only what each finding asks for: fails for A1 and
+   A7** (R2-1, R2-2). A2, A3, A4, A5, A6, P4, P5, S2, S3, S5, S6 and S7
+   do what their findings ask, and contradict no other rule in the
+   edited files.
+3. Each new test asserts its finding: no test was added; the branch
+   changes only rule text and tickets.
+4. The tests the fixes touch pass: the fixes touch no test.
+   `python3 scripts/check_skill_mirrors.py` passes (rc 0).
+
+### Findings
+
+- **R2-1. Gate A's new count disagrees with the planner's rule for a
+  next chunk** (fix `12ca28fb`, for A1). `SKILL.md:260-262`: "after a
+  `gate-planner` with `next: <id>`, `## Execution chunks` has the lines
+  that step 5 logged before that spawn, unchanged, and one more line,
+  for chunk `<id>`". `.claude/agents/gate-planner.md:139-143` tells
+  that planner to "move its Backburner line into Execution chunks ...
+  Where an earlier chunk's report contradicts a Backburner line, say so
+  under the chunk line". A planner that writes that note adds two lines,
+  so Gate A fails a plan that follows its rules; the session respawns
+  the planner once and then stops and asks the user. The planner text
+  is older than the fix (`git show 2b9ed795:.claude/agents/gate-planner.md`,
+  line 143). Effect: a loud failure this branch introduced. How often an
+  earlier chunk's report contradicts a Backburner line: hypothesis,
+  untested. Smallest fix: in `SKILL.md:261-262`, write "one more chunk
+  line, for chunk `<id>`, and any note under it
+  (`.claude/agents/gate-planner.md` § Next chunk)".
+- **R2-2. A `minor` finding that names no step, raised after `K1` has
+  run, now reaches no executor** (fix `f8603807`, for A7).
+  `gate-executor.md:43-45`: "For each `minor` finding in
+  `plan-review.md` whose `Where` names a step of your chunk, or, when
+  your chunk is `K1`, names no step". The first review of a later chunk
+  runs after `K1` has run (`SKILL.md:430-443`) and adds its own
+  `# Round <n>` section to `plan-review.md`. A `minor` finding there
+  whose `Where` names no step (for example the Claims register or the
+  whole plan) matches no later executor's rule, and `K1`'s executor has
+  already finished. So it gets no ledger row, and the final Gate C, which
+  works from ledger rows (`SKILL.md:504-524`), never sees it. The
+  session's Gate B `advisory` line (`SKILL.md:415-420`) still records
+  it. Before the fix, every chunk's executor handled it, so this gap
+  came with the fix. Effect: a gap against the fault-7 spec that this
+  branch introduced; small, because such findings are advisory, and how
+  often a later chunk's review writes one is hypothesis, untested.
+  Smallest fix, in `gate-executor.md` only: replace "or, when your chunk
+  is `K1`, names no step (for example the whole plan)" with "or names
+  no step (for example the whole plan) and has no ledger row in an
+  earlier chunk's report in `execution-report.md`", and add one
+  sentence: "Start the reason of each ledger row for a `minor` finding
+  with its id `R<n>-<id>`, where `<n>` is the number in its
+  `# Round <n>` heading." The executor already reads
+  `execution-report.md` (`gate-executor.md:36`), so `K1` still handles
+  first-plan findings, later chunks handle later ones, and no finding is
+  handled twice. Not tried on a run: hypothesis, untested.
+- **R2-3 (bookkeeping). The fix commits name no finding ID.** Condition
+  1 asks for the ID "in the commit message or in the ticket it names".
+  The commit messages are subject lines only
+  (`git log --format='%h %s%n%b' 2b9ed795..f50cc3c7`), so this check
+  read the IDs from the Disposition table instead. Suggested
+  disposition: `wontfix`, because changing it would mean rewriting
+  commits; later fixes name their IDs in the message.
+- **Q-1 (code quality). One rewritten sentence is still long and
+  hard to follow.** `SKILL.md:201-204` is one sentence of about 45
+  words, with "for an agent that has not had the message" placed after
+  the log file it qualifies. Suggested: "When an agent that has not had
+  the message is **waiting**, the session starts a timer: ...", with
+  the fresh-session case as its own sentence. The rest of the new
+  wording is plain. Three changed lines (`SKILL.md:263`, `:372`, `:400`)
+  are longer than the lines around them; that is line wrapping only.
+
+Checked and not defects:
+
+- A1 by a revision: a revision of a later chunk is not covered by the
+  new Gate A count, so it could also move a Backburner line. But its
+  re-review covers every step on its `- added:` lines
+  (`SKILL.md:296-301`); a step a planner changes without listing it is
+  a limit of every focused re-review, and older than this branch.
+- A2: "`K1` has steps" (`SKILL.md:258`) agrees with
+  `plan-template.md:59` and `gate-planner.md:29`.
+- A3: Recovery counts "the `gate-reviewer` `spawn` lines that name that
+  chunk" (`SKILL.md:547-550`), which now works for `K1 K2 round 1`.
+- A4: **working**, **waiting** and "has had it" (`SKILL.md:185-199`) are
+  read from the log alone, so a fresh session can apply them; Recovery
+  (`SKILL.md:535-539`) and `orchestration.md:21-24` agree.
+- Ticket 712's `Verified by:` cites `3c9d7ee2`; no commit after it
+  touches `.claude` or `.agents`
+  (`git diff --quiet 3c9d7ee2 HEAD -- .claude .agents`, rc 0).
+
+### Result
+
+Round 2 reports two findings that are not bookkeeping (R2-1, R2-2) and
+one code-quality finding (Q-1). Step 2 "Round limit" says the review
+stops here: this file is committed as it stands, no round-2 Disposition
+table is written, step 4 (`pnpm merge-to-dev --check-only`) does not
+run, and the owner decides what happens next. Both R2-1 and R2-2 block
+the merge until fixed, or until the owner allows a `defer` row. Likely
+cause of both: each fix was written against its own finding's text and
+did not check the other rules that read the same lines (R2-1:
+`gate-planner.md` § Next chunk; R2-2: reviews that run after `K1`).
+Hypothesis, untested.
