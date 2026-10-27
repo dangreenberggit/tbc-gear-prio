@@ -51,7 +51,7 @@ first.
   sits behind the spawning trigger. A session that finishes an
   investigation without spawning never opens the file. The Standards axis
   found the same (its item 5).
-- **A5 (defer, 713).** Stopping a trial type (model-policy § Trial types,
+- **A5 (defer, 718).** Stopping a trial type (model-policy § Trial types,
   "Stopping and review") leaves no named workhorse type on a card without
   GLM. The stop is not silent: the finder tells the owner.
 - **A6 (fixed).** Lost rule: "Readers share that index too: a read-only
@@ -265,7 +265,7 @@ Blocking the merge, with no Disposition row yet: A1, A2b, A3, A4, A7b, P4
 runs after approval), and P8a (Q-lead-name, an addition the owner did
 not ask for).
 
-Tickets filed by this review: 713, 714, 715, 716 (all open). The
+Tickets filed by this review: 714, 715, 716, 718 (all open). The
 filed/closed counts for the branch are written when the last Disposition
 table is written.
 
@@ -274,7 +274,7 @@ table is written.
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                  |
 | --- | ----------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | A2a | Adversarial | fixed       | Removed "and the larger worker jobs" from the § Workhorse jobs table row in `docs/agents/model-policy.md`                                                                                                                                                                                                      |
-| A5  | Adversarial | defer       | `.scratch/carry-forward/issues/713-trial-stop-names-no-workhorse-fallback.md` — no named fallback when a trial type is stopped                                                                                                                                                                                 |
+| A5  | Adversarial | defer       | `.scratch/carry-forward/issues/718-trial-stop-names-no-workhorse-fallback.md` — no named fallback when a trial type is stopped                                                                                                                                                                                 |
 | A6  | Adversarial | fixed       | Restored the "readers share the index" sentence in `docs/agents/orchestration.md` § Parallel agents                                                                                                                                                                                                            |
 | A7a | Adversarial | fixed       | Pointers in `docs/adr/0032`, `docs/plans/wowsims-tab/candidate-pool.md:525`, `docs/plans/upstream-data-redundancy.md:301` now name the `docs/workflow.md` sections; dated plan text naming "AGENTS.md \"The loop\"" (`docs/plans/wowsims-tab/orchestration.md:68,80`) describes the file at its date and stays |
 | A8  | Adversarial | defer       | `.scratch/carry-forward/issues/714-simple-task-parallel-phase-slice-contradiction.md` — existed on `dev`                                                                                                                                                                                                       |
