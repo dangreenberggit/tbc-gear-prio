@@ -292,9 +292,11 @@ In these steps, "you" and "the session" are the same agent.
    split run, `decomposition.md`, all in `.scratch/stage-gate/<slug>/`.
    Every review after the first in the stage is a **re-review**. Its
    spawn prompt also names what the review checks. After a revision, it
-   names the claims and steps that the latest revision changed or added,
-   and the `blocking` and `material` findings that the latest revision
-   prompt listed, each by its `row` id `R<m>-<id>` (step 1). On the
+   names the claims and steps that the latest revision changed or added
+   (those the listed findings asked for, and those on the revision's
+   `- added:` and `- changed:` lines), and the `blocking` and `material`
+   findings that the latest revision prompt listed, each by its `row` id
+   `R<m>-<id>` (step 1). On the
    first review of a later chunk (step 5), it names the claims and steps
    that the `gate-planner` with `next:` added for that chunk, and no
    earlier findings. For an **Added-lines check** (step 4), it names only
@@ -346,8 +348,9 @@ In these steps, "you" and "the session" are the same agent.
      toward the two loop-backs that **Loop back** allows. The session
      spawns a `gate-reviewer` for a re-review (step 3) only when the
      `## Decisions` section of that `gate-planner`'s final message has
-     lines that start with `- added:`. When that re-review has a
-     `blocking` finding or a refuted load-bearing claim, the session
+     lines that start with `- added:` or `- changed:`. When that
+     re-review has a `blocking` finding or a refuted load-bearing claim,
+     the session
      loops back as **Loop back** above says, and that loop-back counts
      toward the two. When it has `material` findings only, the session
      spawns one `gate-planner` revision for them, runs Gate A, and spawns

@@ -123,8 +123,13 @@ Keep `Rebuttal:` for rejecting a finding.
 In `## Decisions`, add one line `- added: <claim id or step> — <reason,
 one line> — evidence: <file:line, command, or none>` for each claim or
 step that is new in this revision and that no finding in the latest
-`# Round` section of `plan-review.md` asked for. These lines do not
-count toward the 10-line limit.
+`# Round` section of `plan-review.md` asked for. Add one line
+`- changed: <claim id or step> — <reason, one line> — evidence:
+<file:line, command, or none>` for each claim or step whose meaning this
+revision changed (what the claim says, what the step does, or its
+acceptance criterion) and that no such finding asked for. Renumbering
+and rewording are not changes. These lines do not count toward the
+10-line limit.
 
 ## Next chunk
 
