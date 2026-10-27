@@ -87,8 +87,11 @@ _taller_ model is not a fix either: it spends the top price tier on work that
 did not ask for it.
 
 Workhorse jobs **may** retry on the peer fill your harness section names
-for workhorse, when it names one. On Claude Code a GLM type and its Claude
-counterpart are peer fills (§ Workhorse jobs). A lead, review or design
+for workhorse, when it names one. On Claude Code a job on a GLM type that
+hits a usage wall may retry on its Claude counterpart, the type in the
+"Otherwise" column of § Workhorse jobs. A job never moves from a Claude
+type to a GLM type, so a job z-ai must not see never moves onto a GLM
+type. A lead, review or design
 job that hits a wall waits or serialises and stays on its model; it never
 moves to a workhorse type. A job never moves to a cheaper model for
 implementation correctness unless the user says so.
