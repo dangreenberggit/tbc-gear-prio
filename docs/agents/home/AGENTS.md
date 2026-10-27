@@ -33,6 +33,8 @@ A reply has these parts, in this order:
 
 **Decisions** go in **Needed from you**. Give each one a label that is unique in the session — a ticket id, or `Q-<name>` — so a later list cannot reuse it; list numbers that restart at 1 make the user answer the wrong item. For each decision, write plain paragraphs: what happens today, what each option does and costs, and what you recommend and why. A structured-question picker is an addition to the reply, and the reasoning stays in the reply text.
 
+**Open items carry forward.** A request — an answer, a permission, a decision, a manual step, a command or a prompt to paste — that an earlier message gave the user stays open until the user's messages show it is done or dropped, or until the agent checks and sees that it is done. Every reply restates every open item in full in its **Needed from you** section, even when an earlier reply already gave it and even when this reply is about something else. Never point to an earlier message; the user may not find it. A reply that ends a piece of work also puts in **Needed from you** every step still left for the user, including optional ones such as a push; each one is then an open item.
+
 **Text between tool calls** is outside the reply. Anything the user needs from that text goes in the reply as well.
 
 **A direct question asked mid-task** gets its answer at once, under its own title; then continue working. That answer is text between tool calls, so the turn's final reply repeats it in one sentence in its first section.
@@ -69,3 +71,32 @@ Six lines is a soft maximum, not a target. A body that needs to exist is usually
 Past six lines, an independent subagent decides whether the length is necessary. Give it the diff and the proposed message. Do not tell it the length is justified, do not explain why you wrote what you wrote, and do not ask it to confirm. Ask which lines record something the diff cannot show, and have it return the ones that fail that test. Cut those. If the reviewer says the body should be shorter, it is shorter. If no reviewer can be reached, cut the body to six lines.
 
 Write the body as prose that stands on its own. Say what a reader needs, once, and stop — no process narration, no "Summary:" or "Changes:" headings, no confidence claims about untested behaviour.
+
+# Don't cut your own connection
+
+The user often reaches this machine from a phone: Tailscale on Windows
+forwards to the t3 server in WSL on port 3773. These actions lock the
+phone out until someone is at the PC, so never run them. Say what the
+action would do, and give the user the command instead:
+
+- shutting down or restarting WSL (`wsl --shutdown`, `wsl --terminate`)
+- stopping Tailscale, or changing its `tailscale serve` setup
+- restarting, shutting down or signing out of Windows
+
+Restarting the t3 service (`systemctl --user restart t3code.service`)
+is allowed, because it comes back within 5 seconds. Tell the user
+before you do it, because it may end running sessions.
+
+# Secrets and GLM workers
+
+No agent reads secrets: API keys, tokens, passwords, credentials files,
+`.env` files, or environment variable output. To check that a secret
+file exists, use `test -f`.
+
+The `glm-task` and `glm-flash-task` agents exist only in a session started
+on the T3 Code card "Claude + GLM workers"; on every other card they are
+absent, which is not a fault. They run on z-ai models, and z-ai receives
+everything they see: their prompt, every file they read, and every command
+output. Do not give them a job that includes or could reach private data,
+or anything a project's `AGENTS.md` keeps private. If unsure, use a Claude
+agent.

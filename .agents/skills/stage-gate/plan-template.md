@@ -54,12 +54,24 @@ shared manifests get exactly one owner.
 
 ## Execution chunks
 
-Group the numbered steps into chunks that one executor can finish in one
-sitting: one ticket, or up to about five steps that share files. List each
-chunk as `K1: steps 1–4` and so on. A step whose result later steps must
-reason about goes in the same chunk as those steps; when this conflicts
-with the size limit, keep the steps together and name the dependency on
-the chunk line. One chunk is fine for a small plan.
+`K1` is the only chunk with steps when this plan is first written: the
+first piece that is worth building on its own, up to about five steps that
+share files. The Steps, Claims register and Paths manifest above then cover
+`K1` alone. After `K1` runs, a `gate-planner` with `next:` adds each later
+chunk's steps, claims and paths (`.claude/agents/gate-planner.md`
+§ Next chunk). A step
+whose result later steps must reason about goes in the same chunk as those
+steps; when this conflicts with the size limit, keep the steps together and
+name the dependency on the chunk line. List it as `K1: steps 1–4`.
+
+## Backburner
+
+Every later chunk, one line each, to be planned from `K1`'s execution
+report: `K2: <goal in one sentence> — needs from K1: <result or file> —
+open: <what must be learned or ruled first, or none>`. A line here is not a
+step. The reviewer checks that no `K1` step depends on a Backburner line
+and that the lines together still solve the brief. Write "none" when the
+brief fits in `K1`.
 
 ## Verify recipe
 

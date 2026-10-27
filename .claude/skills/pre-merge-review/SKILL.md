@@ -253,7 +253,9 @@ Sort each finding by what it does, whatever label the reviewer gave it:
   never starts a round of its own; round 2, which checks round 1's fixes,
   also reads the code-quality pass. Before round 2, the agent that handles this
   review's findings sends every `## Code quality` row to one fresh
-  workhorse-lane agent, which fixes them all in one pass. The pass
+  agent, which fixes them all in one pass: a workhorse type when the rows
+  fit `docs/agents/model-policy.md` § Trial types, "Modest", else
+  `general-task`. The pass
   changes no behaviour, and `pnpm verify` passes after it. Each row then
   gets a Disposition row: `fixed`, or `defer` with a ticket.
 - **Bookkeeping** (wording in this review file or in tickets, process

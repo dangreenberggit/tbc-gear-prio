@@ -21,12 +21,20 @@ final message is the condensed report.
 your system prompt names your model. If the name does not contain "Fable",
 return exactly `WRONG_MODEL: <model name>; expected Fable` and stop.
 
-When a question takes many reads whose content you will not reuse, spawn
-a `general-task` subagent (model `opus` at the call site), told to change
-no files except its report file (AGENTS.md § Subagent reports). Hold the
-judgment yourself. Name the model on every spawn: you run on Fable, the
-top price tier, and an unnamed subagent can inherit it
-(`docs/agents/model-policy.md` § Lane is per job, not per parent).
+Hold the judgment yourself. Hand blocks of searches, reads, named command
+runs and measurements to a workhorse type with the exact list of what to
+return: `glm-flash-task` (no model argument) when the harness lists it, except a job that could reach
+secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
+`~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
+types, Private data),
+else `discrete-task` (model `sonnet` at the call site). Spawn a
+`general-task` (model `opus`) only for a question that needs judgment you
+cannot hold from here. Each helper is told to change no files except its
+report file (AGENTS.md § Subagent reports). Block size, and what to run in
+place: `docs/agents/model-policy.md` § Workhorse jobs. Name the model on
+every spawn except a GLM type's: you run on Fable, the top price tier, and
+an unnamed subagent can inherit it (model-policy § Lane is per job, not
+per parent).
 
 Open your final message with the recommendation in plain English. Give
 each causal or factual claim either the command that verifies it or the

@@ -1,6 +1,6 @@
 ---
 name: simple-task
-description: Extremely simple delegated jobs only — one lookup, one search with a known target, or one edit whose exact text the prompt gives — on Sonnet at effort high. Spawn with model "sonnet" named at the call site. Every other job goes to general-task, or to a trial type whose description names it.
+description: Extremely simple delegated jobs only — one lookup, one search with a known target, or one edit whose exact text the prompt gives — on Sonnet at effort high. Spawn with model "sonnet" named at the call site. Every other job goes to general-task, or to a trial type whose description names it. When the harness lists glm-flash-task, use this type only for a job z-ai must not see (anything that could reach secrets, session logs, ~/.claude* or ~/.t3), or a retry when a GLM type hits a usage wall; Sonnet is otherwise not used there.
 model: sonnet
 effort: high
 ---

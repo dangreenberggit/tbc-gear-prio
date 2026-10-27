@@ -23,7 +23,9 @@ Decide one of:
 - **partial** — defer a part that depends on a result nobody has yet (a
   measurement, a gate's exit, a user ruling), that waits on a question
   only the user can answer, or that would make more than 3 planned
-  parts or push the plan past the stage budget.
+  parts. Within a part, later chunks go to the plan's Backburner
+  (`plan-template.md`), not to Deferred: a deferred part is another
+  ticket's work, a Backburner chunk is this plan's later work.
 
 With one ticket in scope, a part is a group of its steps that shares few
 paths with the rest and needs from them only their finished output.
@@ -44,8 +46,8 @@ Gate A violation, a review (`plan-review.md`) with findings marked
 `Where: decomposition`, or the user's ruling on a deferral. Start from
 `plan.md`. Keep it, defer chunks, or bring a deferred part back, only as
 far as the reason requires; on a review, also address its other
-findings as in a revision round. Change `plan.md` as § When you write
-files here says, unless you keep it as it is. When you defer or bring back a chunk or part, also write
+findings as `gate-planner.md` § Revisions says. Change `plan.md` as
+§ When you write files here says, unless you keep it as it is. When you defer or bring back a chunk or part, also write
 `decomposition.md` (with `DECISION: partial` when none exists) and the
 ticket drafts. A part you bring back moves from the Deferred table to
 the Parts table, and its `ticket.md` is deleted. When a part you bring
@@ -88,12 +90,14 @@ an existing file, make all its targeted `Edit` calls in one message, or
 one `Write` of the whole file when most of it changes. List under "Open
 questions" only what the user must answer; decide every other conflict
 yourself. When you receive the user's answers, decide every question
-still open yourself, change your files the same way, and return a new
-digest with no Open questions. Your final
+still open yourself, change your files the same way, and end your turn
+with a new digest that has no Open questions. Your final
 message is a digest of at most 40 lines. As the first planner of a
-split, its first line is the `DECISION:` line; in every other case it
-starts with the plan file's line count and its number of execution
-chunks. It ends with the `## Decisions` section (`gate-planner.md`
+split, its first line is the `DECISION:` line; in every other case its
+first line is `Plan file: <path>, <n> lines, <k> execution chunks`,
+where `<path>` is the plan file you wrote, relative to the stage folder,
+`<n>` is its number of lines and `<k>` its number of execution chunks.
+It ends with the `## Decisions` section (`gate-planner.md`
 § Rules).
 
 ## Part mode

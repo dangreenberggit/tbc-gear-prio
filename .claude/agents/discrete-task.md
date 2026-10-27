@@ -1,6 +1,6 @@
 ---
 name: discrete-task
-description: TRIAL. One discrete job whose result the prompt fixes — a named-target lookup, named commands that write no tracked file run and reported, or an edit whose exact text the prompt states — on Sonnet 5.5 at effort high (model-policy § Trial types). Not for regens, data/, generated files, pins, fork code, scripts, hooks, agent docs, reviews or debugging. Spawn with model "sonnet" named at the call site. When unsure, use general-task.
+description: TRIAL. One discrete job whose result the prompt fixes — a named-target lookup, named commands that write no tracked file run and reported, or an edit whose exact text the prompt states — on Sonnet 5.5 at effort high (model-policy § Trial types). Not for regens, data/ edits, generated files, pins, fork edits, scripts, hooks, agent docs, reviews or debugging. Spawn with model "sonnet" named at the call site. When unsure, use general-task. When the harness lists glm-flash-task, use this type only for a job z-ai must not see (anything that could reach secrets, session logs, ~/.claude* or ~/.t3), or a retry when a GLM type hits a usage wall; Sonnet is otherwise not used there.
 model: sonnet
 effort: high
 ---
@@ -38,14 +38,14 @@ the command you report, an edit against the result the prompt states.
   needs a choice the prompt did not make (what code or text to write,
   whether something is correct, why a command failed), or needs any of:
   a generator re-run or any other command that rewrites a committed file;
-  a file under `data/`; a generated file; `vendor/tbc-new-fork`;
-  `.githooks/`; `scripts/`; `AGENTS.md`, `CLAUDE.md`, a skill or an agent
+  an edit under `data/`; a generated file; an edit under
+  `vendor/tbc-new-fork`; `.githooks/`; `scripts/`; `AGENTS.md`, `CLAUDE.md`, a skill or an agent
   file; a `sed` or script write to a tracked file. The caller respawns it
   on `general-task`.
 
 This list is a short form of model-policy § Trial types, "Always
-`general-task`"; change it, that list and the one in `modest-task.md`
-together.
+`general-task`"; change it, that list, the one in `modest-task.md` and
+the GLM agent files' lists together.
 
 Open your final message with the result. Name every file you changed. Give
 each fact with its absolute file path and line, or the exact command that

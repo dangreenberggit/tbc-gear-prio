@@ -2,7 +2,7 @@
 
 **Status:** accepted; amended 2026-10-11 by [ADR-0037](0037-the-cutoff-is-one-flat-3-dps-bar.md) (the registry has no `cutoff` field: one bar serves every spec)
 **Date:** 2026-09-11
-**Related:** [`ADR-0029`](0029-borrow-the-decision-derive-with-a-gate-or-justify-the-copy.md), [`ADR-0031`](0031-the-raid-sim-skeleton-is-a-cli-harness-input-not-a-product-input.md), `AGENTS.md` § Types from JSON; tickets `.scratch/carry-forward/issues/377-fork-clone-head-is-behind-the-lockfile-pin.md`, `367-generated-local-dev-skeleton-set-has-no-consumer.md`, `376-*` (ret/feral allow-lists), `159` (EP-weights map)
+**Related:** [`ADR-0029`](0029-borrow-the-decision-derive-with-a-gate-or-justify-the-copy.md), [`ADR-0031`](0031-the-raid-sim-skeleton-is-a-cli-harness-input-not-a-product-input.md), `docs/workflow.md` § Never derive a type from a JSON import; tickets `.scratch/carry-forward/issues/377-fork-clone-head-is-behind-the-lockfile-pin.md`, `367-generated-local-dev-skeleton-set-has-no-consumer.md`, `376-*` (ret/feral allow-lists), `159` (EP-weights map)
 
 ## Context
 
@@ -131,8 +131,8 @@ rc=2
 
 Direction (c) is why `SpecId` is generated rather than hand-written: a JSON
 import widens every string to `string`, so a union derived from one accepts any
-string and an `extends` assertion against it passes vacuously (`AGENTS.md`
-§ Types from JSON — this repo has been burned twice). The generator emits
+string and an `extends` assertion against it passes vacuously (`docs/workflow.md`
+§ Never derive a type from a JSON import — this repo has been burned twice). The generator emits
 committed `as const` code, gated by `--check` in `pnpm verify`.
 
 A direct `as Readonly<Record<…>>` on a literal missing `warlock` does **not**

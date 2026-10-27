@@ -22,6 +22,14 @@ pnpm wt:pair <name> <main-branch> <fork-branch>
 pnpm wt:pair <name> <main-branch> --fork-detached
 ```
 
+Add `-b` to create the main branch from `dev` and `--new-fork-branch` to
+create the fork branch at the lock's commit; a branch checked out in
+another folder cannot be used. Make a pair without asking the owner,
+through a subagent like any `pnpm` call. Subagents start in the folder
+they were spawned from, not the pair: give each one the pair's path, and
+have it use `git -C <pair>`, `pnpm -C <pair>` and absolute paths under the
+pair.
+
 `<name>` is 1-23 characters of a-z, 0-9 and `-`, starting with a letter or
 digit. Flags: `python scripts/worktree_pair.py pair --help`. The pair is made
 at `<parent of the main checkout>/tbc-wt/<name>`, outside the repo. The
@@ -41,6 +49,18 @@ If the fork branch's HEAD is not the commit the pair's
 it. The command prints a note when that is the case. See `known-traps.md`,
 "Before moving the wowsims engine pin".
 
+## Re-pin after a fork change
+
+A fork change is always two steps: commit inside the fork
+(`git -C <pair>/vendor/tbc-new-fork ...`), then in the pair's main-repo
+worktree bump `data/wowsims-fork.lock.json`'s `commit` to the new fork SHA,
+run `pnpm sim-implemented-effects:generate` (it refuses until the lock
+names the fork's HEAD, so bump the lock first), and `pnpm verify`. Read the
+lock file's `_comment` history before touching it: it is the log of what
+each fork commit changed and why. The PROVENANCE cycle for ported engine
+files: `known-traps.md` § Before editing a ported engine file and § Before
+moving the wowsims engine pin.
+
 ## Work in it
 
 - **Memory.** Memory is kept per folder, so a session opened in the pair
@@ -55,7 +75,7 @@ it. The command prints a note when that is the case. See `known-traps.md`,
   on 2026-10-10 it failed on that pair's missing `constants_auto_gen.ts`,
   which the main checkout's fork has.
 - **Fork commits.** Commit with `git -C <pair>/vendor/tbc-new-fork`, then
-  re-pin the pair's lock. AGENTS.md "The forked tab repo" has the full cycle.
+  re-pin the pair's lock. § Re-pin after a fork change has the full cycle.
 - **Live tab.** One session at a time runs it. In `.claude/launch.json` and
   `pnpm tab:dev`, vite
   must have port 5173 (`--strictPort`) and the backend port 3333
@@ -94,7 +114,7 @@ it. The command prints a note when that is the case. See `known-traps.md`,
 ## Land it on dev
 
 The merge into `dev` runs from the main folder, and only when the owner asks
-(AGENTS.md "The loop", step 6). The pair stays in place.
+(AGENTS.md § Commits and merges). The pair stays in place.
 
 1. **Pair folder: commit.** Commit everything on both branches. Done when
    `git -C <pair> status --porcelain` and

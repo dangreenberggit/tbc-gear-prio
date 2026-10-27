@@ -8,7 +8,7 @@
  * holding a two-hander *and* an off-hand item — gear the game cannot equip.
  *
  * Driven at the `rankUpgrades` seam through the recorded gear adapter and a
- * capturing `SimRunner`, never at a stage internal (AGENTS.md § Testing). The
+ * capturing `SimRunner`, never at a stage internal (docs/workflow.md § Testing: seams and where tests go). The
  * one exception is T2, which calls the exported pure functions
  * `candidateSwapWithRepairs` and `statDeltaBetween` directly — they are the
  * composition and the stat-diff, and the delta arithmetic is the readable

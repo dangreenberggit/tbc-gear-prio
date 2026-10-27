@@ -18,7 +18,7 @@ export interface EpWeightsByPhaseEntry {
   byPhase: Record<string, string>;
 }
 
-// JSON imports widen every string to `string` (AGENTS.md "Types from JSON"),
+// JSON imports widen every string to `string` (docs/workflow.md "Never derive a type from a JSON import"),
 // so this is read as a plain value, never as a type source.
 export type EpWeightsByPhaseFile = Record<string, EpWeightsByPhaseEntry>;
 

@@ -24,9 +24,8 @@ Each seat's report carries a plain-English summary alongside its detail,
 so that when something does reach you, it reaches you in language you can
 act on.
 
-A sequential pipeline of distinct seats — Planner → Reviewer → Executor —
-with the **session as orchestrator**: it routes, judges at the gates, and
-implements nothing; its only writes are the stage artifacts below.
+The seats run in sequence — Planner → Reviewer → Executor — and the
+session that runs them is the **orchestrator**.
 Complementary to `parallel-phase` (which partitions one phase into
 parallel slices): stage-gate sequences different kinds of work, and its
 Executor may run `parallel-phase` inside its own stage. `pre-merge-review`
@@ -39,16 +38,19 @@ that one reviews the diff after.
 | --- | --- | --- | --- | --- |
 | Planner | `gate-planner` | `fable` | `low` | design |
 | Reviewer | `gate-reviewer` | `opus` | `high` | review |
-| Executor | `gate-executor` | `opus` | `high` | review |
+| Executor | `gate-executor` | `opus` | `high` | lead |
 | SME | `gate-sme` | `opus` | `high` | review |
 | Visual | `gate-visual` | `opus` | `high` | review |
 
-The Executor is on the review lane, not the workhorse lane, because
-plans are underspecified and it decides adapt-vs-flag-vs-stop on every
+The Executor runs on Opus at effort `high` because plans are
+underspecified and it decides adapt-vs-flag-vs-stop on every
 step where reality disagrees with the plan — the failure mode is a silent
 paper-over, which is a judgment failure, not a throughput one. Its
 `parallel-phase` workers are a separate call: `simple-task` for an
-extremely simple slice, `general-task` for every other slice.
+extremely simple slice, `general-task` for every other slice. Every seat
+hands its workhorse jobs — searches, plain reads, named runs,
+measurements — to the workhorse types, with several jobs in each
+helper's prompt (model-policy § Workhorse jobs).
 
 Name the model on every spawn, even though each seat's frontmatter sets
 its model. A call-site name outranks frontmatter, so a wrong name
@@ -81,8 +83,9 @@ not` list below.
 3. **Route detail outward; keep the judgment.** Track what's done, what's
    next, and what's blocked. Delegate the detail and keep the one-paragraph
    conclusion. You judge the result; you don't author it. A question
-   between gates goes to a seat, or to a `general-task` / `simple-task`
-   agent. The only commands you run are the gate checks that AGENTS.md
+   between gates goes to a seat or to a `general-task` agent; a workhorse
+   job goes to the type `docs/agents/model-policy.md` § Workhorse jobs
+   names. The only commands you run are the gate checks that `docs/agents/orchestration.md`
    § The session delegates lists. Tell the user that an agent is working
    only when the last `spawn` line in `decision-log.md` with that agent's
    id is `started` or `resumed` (step 1). When the agent's last
@@ -100,6 +103,18 @@ not` list below.
    this is the limit. Intent, priorities, spending, and anything irreversible
    are the user's call, not yours to decide because you could. Surfacing one
    of those is not a re-ask; deciding it silently is the failure.
+6. **Pace the pipeline.** Hold at most two stages between step 2 and
+   step 4 (planning or review) at once, and run one executor at a time
+   across all stages; a further feature waits with its `brief.md`
+   written and nothing spawned. The session spawns at most three
+   reviews for each chunk, a group of plan steps that one
+   `gate-executor` runs (step 4, **Review limit per chunk**). On
+   2026-10-25 five stages ran at once, 12 planner and 8 reviewer runs
+   went to 2 executor runs, and the session hit the 5-hour limit in 59
+   minutes (`.scratch/agent-reports/2026-10-25-general-task-usage-limit-burn.md`;
+   gitignored; main checkout only).
+   This pacing is for this pipeline only: a plain request for a plan,
+   outside stage-gate, is planned whole.
 
 ## Steps
 
@@ -186,14 +201,15 @@ In these steps, "you" and "the session" are the same agent.
    When a planner's final message lists "Open questions", put them to
    the user before the next spawn and send the answers back to that
    planner (`SendMessage` it, or respawn it in the same mode with the
-   answers). There is one round of answers.
+   answers). That planner receives the user's answers once.
 
    When a `gate-planner`'s final message is none of these — a plan,
    meaning a message with at least one `##` heading of
    `plan-template.md` (Gate A, not this rule, handles a plan with a
    missing section); a message that starts with
-   `DECISION:`, with `WRONG_MODEL:`, or with the plan file's line count
-   (`parts.md` § When you write files here); a message that lists "Open
+   `DECISION:`, with `WRONG_MODEL:`, or with `Plan file:`
+   (`parts.md` § When you write files here,
+   `.claude/agents/gate-planner.md` § Next chunk); a message that lists "Open
    questions" — no agent is working on that `gate-planner`'s job. The
    session sends that `gate-planner` a `SendMessage` to its agent id with
    this text: "Your final message was not the final message your
@@ -205,10 +221,16 @@ In these steps, "you" and "the session" are the same agent.
    `gate-planner` is again none of these, the session stops and tells
    the user.
 
-   **Gate A (mechanical):** every template section present; Claims
-   register nonempty; Paths manifest present; every open question in the
+   **Gate A (mechanical):** every template section present, Backburner
+   included ("none" allowed); steps only for `K1`
+   (`plan-template.md` § Execution chunks) and for each later chunk that
+   a `gate-planner` with `next:` has added (step 5); Claims register
+   nonempty; Paths manifest present; every open question in the
    brief answered with its three items, or assigned to a deferred part;
-   `git status --porcelain` still empty. Compare against the SHA logged in step 1.
+   `git status --porcelain` still empty; `git rev-parse HEAD` still the
+   SHA logged in step 1 or, once `K1` has run, the SHA in the `note`
+   line that step 5 logged before it spawned the `gate-planner` with
+   `next:` for the chunk being planned.
    New changes mean the seat edited files: **stop and report them to the
    user** — never revert, because another agent's live work looks identical
    from here (ticket 261). Respawn once with the violation named (on a
@@ -220,31 +242,37 @@ In these steps, "you" and "the session" are the same agent.
    every planned part has its `parts/<id>/plan.md` and `plan.md` has a
    Seams section; every deferred part has its `parts/<id>/ticket.md`.
 
-   When `plan.md` is over the stage budget (more than 5 execution chunks
-   or 700 lines; starting values, hypothesis, untested), spawn
-   `gate-planner` once per stage, before the review, with
-   `re-split: over budget`; it rewrites `plan.md` itself. Then run Gate
-   A on the result.
+   Before the first review in the stage, when `plan.md` has steps for
+   more than one chunk, or is over about 350 lines (starting value,
+   hypothesis, untested), spawn `gate-planner` once with
+   `re-split: over budget`; it rewrites `plan.md` itself, moving every
+   chunk after `K1` to the Backburner. Then run Gate A on the result.
 
    Deferrals made at the first split stand, and the reviewer checks
    them. A deferral made by a re-split, and any open question of the
    brief assigned to a deferred part, goes to the user before Gate B
    passes. If the user rejects one, spawn `gate-planner` with
    `re-split: ruling` and the ruling; it rewrites `plan.md` itself, and
-   that is one revision round.
+   that rewrite is a revision of the chunk being planned (step 4,
+   **Review limit per chunk**).
 
 3. **Review.** The session spawns `gate-reviewer` (`model: "opus"`).
    The session's spawn prompt gives the round number `<n>` (1 for the
-   stage's first review, then 1 higher for each later review) and the
+   first review in the stage, then 1 higher for each later review,
+   whichever chunk it reviews, so that no two `# Round` headings in
+   `plan-review.md` share a number) and the
    absolute paths of `brief.md`, `plan.md`, `plan-review.md` and, on a
    split run, `decomposition.md`, all in `.scratch/stage-gate/<slug>/`.
-   Every round after the first is a **re-review**. Its spawn prompt also
+   Every review after the first in the stage is a **re-review**. Its
+   spawn prompt also names what the review checks. After a revision, it
    names the claims and steps that the latest revision changed or added,
    and the `blocking` and `material` findings that the latest revision
-   prompt listed, each by its `row` id `R<m>-<id>` (step 1). The prompt
-   says that the review checks only those claims and steps and whether
-   `plan.md` now fixes each of those findings, and does not review the
-   rest of the plan.
+   prompt listed, each by its `row` id `R<m>-<id>` (step 1). On the
+   first review of a later chunk (step 5), it names the claims and steps
+   that the `gate-planner` with `next:` added for that chunk, and no
+   earlier findings. The prompt says that the review checks only those
+   claims and steps and whether `plan.md` now fixes each named finding,
+   and does not review the rest of the plan.
    The `gate-reviewer` writes its review into `plan-review.md` under the
    heading `# Round <n>` (`.claude/agents/gate-reviewer.md` § Report).
    The session writes nothing to `plan-review.md`. After the
@@ -268,39 +296,50 @@ In these steps, "you" and "the session" are the same agent.
 
 4. **Gate B (judgment — yours).** Reconcile each finding against the
    brief's intent — a finding can be correct about the plan and wrong
-   about the goal; that reconciliation is this seat's job, not the
-   reviewer's.
-   - A `blocking` finding, or a refuted load-bearing claim → loop back:
-     respawn `gate-planner` with brief + plan + review for a revision,
-     then spawn a `gate-reviewer` for a re-review (step 3). **One
-     revision round is the norm.** Loop back a second time only when the
+   about the goal; that reconciliation is the session's job, not the
+   reviewer's. A **refuted load-bearing claim** is a Claims-register row
+   whose `Load-bearing` cell is `yes` (`plan-template.md` § Claims
+   register) and whose verdict in the `## Register verdicts` table of the
+   review is `refuted`.
+   - **Loop back.** A `blocking` finding, or a refuted load-bearing
+     claim → loop back: respawn `gate-planner` with brief + plan + review
+     for a revision, then spawn a `gate-reviewer` for a re-review
+     (step 3). Loop back a second time only when the
      re-review after the first loop-back has a `blocking` finding or a
      refuted load-bearing claim. After the revision of the second
      loop-back, the session spawns one more `gate-reviewer` for a
-     re-review. That re-review is round 3, and the bullet "Round 3 is
-     the last review" below says what the session does next.
+     re-review. That re-review is the chunk's third review, and
+     **Review limit per chunk** below says what the session does next.
    - No `blocking` finding and no refuted load-bearing claim, but one or
      more `material` findings need a change to `plan.md` → the session
      spawns one `gate-planner` revision with brief + plan + review, then
      runs Gate A. This revision is not a loop-back and does not count
-     toward the two loop-backs above. The session spawns a
-     `gate-reviewer` for a re-review (step 3) only when the
+     toward the two loop-backs that **Loop back** allows. The session
+     spawns a `gate-reviewer` for a re-review (step 3) only when the
      `## Decisions` section of that `gate-planner`'s final message has
      lines that start with `- added:`. When that re-review has a
      `blocking` finding or a refuted load-bearing claim, the session
-     loops back as the bullet above says, and that loop-back counts
+     loops back as **Loop back** above says, and that loop-back counts
      toward the two. When it has `material` findings only, the session
      spawns one `gate-planner` revision for them, runs Gate A, and spawns
-     no further `gate-reviewer`.
-   - Round 3 is the last review. The session spawns no `gate-reviewer`
-     with a round number above 3, and this bullet holds over every other
-     rule in this step. When the `# Round 3` section of `plan-review.md`
-     has a `blocking` finding or a refuted load-bearing claim, the
-     session spawns no revision: it stops and gives the user the open
-     findings, with any contradiction between seats stated, not
-     resolved. When that section has `material` findings only, the
-     session spawns one `gate-planner` revision for them, runs Gate A,
-     and spawns no further `gate-reviewer`.
+     no further `gate-reviewer` for that chunk.
+   - **Review limit per chunk.** A chunk is a group of plan steps that
+     one `gate-executor` runs (`plan-template.md` § Execution chunks):
+     `K1`, then each Backburner line that step 5 plans. Each chunk gets
+     its first review (step 3 for `K1`, step 5 for each later chunk) and
+     at most two more, each after a revision of that chunk. The session
+     spawns no fourth `gate-reviewer` for a chunk. The session counts
+     the reviews and the loop-backs of each chunk separately; the round
+     number `<n>` counts every review in the stage, so it is not this
+     count. Where another rule in step 4 says otherwise, this rule wins.
+     When the third review of a chunk (its `# Round <n>` section in
+     `plan-review.md`) has a `blocking` finding or a refuted
+     load-bearing claim, the session spawns no revision: it stops, gives
+     the user the open findings, and states any contradiction between
+     seats without resolving it. When that review has `material`
+     findings only, the session spawns one `gate-planner` revision for
+     them, runs Gate A, and spawns no further `gate-reviewer` for that
+     chunk.
    - After Gate A passes on a revision that no re-review follows, the
      session checks `plan.md` against the result the revision prompt
      stated for each `material` finding and logs each one `fixed`, with
@@ -325,15 +364,28 @@ In these steps, "you" and "the session" are the same agent.
      `plan-review.md` (`.claude/agents/gate-executor.md` § Inputs).
    - A seat contradiction you cannot settle by having a subagent re-run a
      command is the user's call. Log every gate outcome.
-   - When `decomposition.md` lists deferred parts, after Gate B passes
-     spawn one `general-task` (`model: "opus"`) to file the
+   - **File deferred parts.** When `decomposition.md` lists deferred
+     parts, after `K1`'s Gate B passes spawn one `general-task`
+     (`model: "opus"`) to file the
      `parts/<id>/ticket.md` of each part in the Deferred table as a
      ticket per `docs/agents/issue-tracker.md` and commit them. Log
      their ids and the new `git rev-parse HEAD`.
 
-5. **Execute.** Run one `gate-executor` (`model: "opus"`) per execution
-   chunk, in order. A plan whose `Execution chunks` section is missing or
-   says "none" is one chunk, `K1`, covering every step. For each chunk:
+5. **Execute.** Run one `gate-executor` (`model: "opus"`) for `K1`. When
+   its Gate C passes and the Backburner is not "none", log
+   `git rev-parse HEAD` in a `note` line (Gate A compares against it),
+   then spawn
+   `gate-planner` (`model: "fable"`) with `next: <first Backburner id>`
+   and the paths of `plan.md`, `execution-report.md` and `progress.md`;
+   it writes that chunk's steps into `plan.md`. The session runs Gate A
+   (step 2) on `plan.md`, then spawns
+   a `gate-reviewer` for a re-review of that chunk (step 3); that
+   re-review is the chunk's first review (step 4, **Review limit per
+   chunk**). Then the session judges Gate B (step 4) for that chunk and
+   runs the chunk's `gate-executor` as the rest of this step says.
+   Repeat until the Backburner is empty. A
+   plan whose `Execution chunks` section is missing or says "none" is one
+   chunk, `K1`, covering every step. For each chunk:
    resolve the base SHA fresh (`git rev-parse HEAD` — paste command
    output, never hand-typed), then spawn the executor with the paths of
    `plan.md`, `plan-review.md` and `execution-report.md` (the earlier
@@ -344,7 +396,7 @@ In these steps, "you" and "the session" are the same agent.
    free (the seat's base-SHA assertion is what makes worktree mode safe on
    a feature branch). A plan with more than one chunk uses the shared
    checkout, so each chunk starts from the commits of the one before.
-   When AGENTS.md "Fork and tab edits run in a pair" applies, have a
+   When AGENTS.md § The forked tab repo says the work needs a pair, have a
    subagent make the pair with `pnpm wt:pair`, use it as the shared
    checkout for every chunk, pass its path, and run this step's git
    checks with `git -C <pair>`; `isolation: worktree` has no fork.
@@ -414,7 +466,8 @@ In these steps, "you" and "the session" are the same agent.
    before `pnpm merge-to-dev`. Stage artifacts stay in
    `.scratch/stage-gate/<slug>/`. Name any deferred-part tickets in the
    reply, and say they are visible from `dev` only after this branch
-   merges.
+   merges. Backburner lines still open when the stage ends become
+   tickets, filed like deferred parts (step 4, **File deferred parts**).
 
 ## Recovery
 
@@ -446,8 +499,7 @@ never stops a run; say so in the hand-off reply.
 
 ## Do not
 
-- Implement plan steps yourself between gates — this seat writes only the
-  stage artifacts.
+- Implement plan steps yourself between gates.
 - Spawn any seat without naming its model at the call site.
 - Resolve a judgment-level contradiction between seats by silently picking
   a side — have a subagent re-run the command that settles it, or hand it
