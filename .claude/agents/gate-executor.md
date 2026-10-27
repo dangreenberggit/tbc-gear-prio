@@ -41,9 +41,12 @@ before your first commit, because that commit takes in every dirty file:
 finish the work they hold, or stop with `Status: blocked` naming them.
 
 For each `minor` finding in `plan-review.md` whose `Where` names a step
-of your chunk, either apply it and add a ledger row with the action
-`adapt`, or leave it and add a ledger row with the action `advisory`
-and the reason (for example: a later revision rewrote that step).
+of your chunk, or names no step (for example the whole plan), either
+apply it within one step of your chunk and add a ledger row with the
+action `adapt`, or leave it and add a ledger row with the action
+`advisory` and the reason (for example: a later revision rewrote that
+step, the finding does not touch your chunk's steps, or applying it
+would cross a step boundary).
 
 ## Progress file
 
