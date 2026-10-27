@@ -460,7 +460,7 @@ rows each needed a ticket.
 
 Update, 2026-10-26: the owner approved the round-2 fixes ("fixes:
 sure"), with rulings on R2-1, R2-3 and R2-4 that the rows below name.
-They are made in `9c0b18ea..4bc59bef`; `## Disposition (round 2)` below
+They are made in `53eb6e44..4bc59bef`; `## Disposition (round 2)` below
 records each one. A separate checker reviews these fixes; this file
 records no verdict on them.
 
