@@ -420,13 +420,13 @@ In these steps, "you" and "the session" are the same agent.
      ticket per `docs/agents/issue-tracker.md` and commit them. Log
      their ids and the new `git rev-parse HEAD`.
 
-5. **Execute.** Run one `gate-executor` (`model: "opus"`) for each chunk
-   that has steps, in order. When the next chunk may start after the
-   last of them (**Gate C between chunks** below)
-   and the Backburner is not "none", log
+5. **Execute.** Run the chunks in the order of their ids (`K1`, `K2`,
+   ...), one `gate-executor` (`model: "opus"`) for each. When the next
+   chunk is still a Backburner line and may start (**Gate C between
+   chunks** below), log
    `git rev-parse HEAD` in a `note` line (Gate A compares against it),
    then spawn
-   `gate-planner` (`model: "fable"`) with `next: <first Backburner id>`
+   `gate-planner` (`model: "fable"`) with `next: <that chunk's id>`
    and the paths of `plan.md`, `execution-report.md` and `progress.md`;
    it writes that chunk's steps into `plan.md`. The session runs Gate A
    (step 2) on `plan.md`, then spawns
@@ -434,7 +434,7 @@ In these steps, "you" and "the session" are the same agent.
    re-review is the chunk's first review (step 4, **Review limit per
    chunk**). Then the session judges Gate B (step 4) for that chunk and
    runs the chunk's `gate-executor` as the rest of this step says.
-   Repeat until the Backburner is empty. A
+   Repeat until every chunk has run. A
    plan whose `Execution chunks` section is missing or says "none" is one
    chunk, `K1`, covering every step. For each chunk:
    resolve the base SHA fresh (`git rev-parse HEAD` — paste command
