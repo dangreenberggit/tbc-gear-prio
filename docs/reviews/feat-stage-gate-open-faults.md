@@ -207,6 +207,9 @@ Round 2 found two problems in the fixes (R2-1, R2-2 in
 "Round limit" says: no round-2 Disposition table, no step 4, and the
 owner decides what happens next.
 
+The owner then chose "Option 1" (2026-10-27); `## Disposition (round 2)`
+records it and the two fixes.
+
 ## Disposition
 
 | ID  | Axis             | Disposition | Ticket / note                                                                                                                                                                                 |
@@ -373,3 +376,14 @@ cause of both: each fix was written against its own finding's text and
 did not check the other rules that read the same lines (R2-1:
 `gate-planner.md` § Next chunk; R2-2: reviews that run after `K1`).
 Hypothesis, untested.
+
+## Disposition (round 2)
+
+The owner chose "Option 1" on 2026-10-27 (relayed by the session): a
+fresh agent makes the fixes for R2-1 and R2-2, and a second fresh agent
+then checks only those two edits.
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                                                        |
+| ---- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R2-1 | Focused check | fixed       | `bcf50b5a`: after a `next: <id>` planner, Gate A allows one more chunk line, for chunk `<id>`, and any note under it; the lines step 5 logged must still be unchanged (owner, "Option 1")            |
+| R2-2 | Focused check | fixed       | `9fa66f25`: an executor takes a `minor` finding that names no step when no earlier chunk's report has a ledger row for its id, and starts each such row's `Why` with `R<n>-<id>` (owner, "Option 1") |
