@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Checks for the pure logic in scripts/merge_to_dev.py: no git, no writes.
+"""Checks for the pure logic in scripts/merge_to_dev.py, plus one that runs
+`has_changes` on a throwaway git repo under the temp folder.
 
 Follows the check_worktree_pair.py convention -- a standalone script of
 small checks, not a pytest suite (this repo has no pytest infra). The git
@@ -14,7 +15,9 @@ Exit 0 ok, 1 a check failed.
 from __future__ import annotations
 
 import os
+import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -112,6 +115,80 @@ def check_device_test_reads_the_file_type() -> list[str]:
     return problems
 
 
+def check_empty_sandbox_stubs_are_not_work() -> list[str]:
+    """Outside the sandbox its mount points are plain empty files, so the
+    owner's terminal saw 17 of them as untracked (ticket 713). Only an
+    empty file at a known stub path is skipped: a new empty file elsewhere,
+    such as a `.gitkeep`, can be the change itself."""
+    problems = []
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".claude").mkdir()
+        (root / "docs").mkdir()
+        (root / ".vscode").mkdir()
+        for empty in (".bashrc", ".claude/settings.local.json", "docs/.gitkeep", "notes.md"):
+            (root / empty).write_bytes(b"")
+        (root / ".mcp.json").write_text("{}\n")
+        want = {
+            ".bashrc": True,
+            ".claude/settings.local.json": True,
+            "docs/.gitkeep": False,
+            "notes.md": False,
+            ".mcp.json": False,
+            ".vscode": False,
+            ".zshrc": False,
+        }
+        for rel, expected in want.items():
+            got = m.holds_no_work(root, rel)
+            if got != expected:
+                problems.append(f"holds_no_work({rel!r}) gave {got}, want {expected}")
+    if os.name == "posix" and not m.holds_no_work(Path("/"), "dev/null"):
+        problems.append("a device must hold no work at any path (ticket 709)")
+    return problems
+
+
+def check_clean_tree_check_skips_stubs_in_a_real_repo() -> list[str]:
+    """`has_changes` is what the merge runs, so drive it through git: the
+    17 stubs alone are clean, and one more empty file is not.
+
+    git hooks export GIT_DIR and friends, and `pnpm verify` runs from the
+    pre-push hook; left set, they would point both this check's git calls
+    and `has_changes` at the real checkout.
+    """
+    saved = {k: os.environ.pop(k) for k in list(os.environ) if k.startswith("GIT_")}
+    try:
+        return _stub_repo_problems()
+    finally:
+        os.environ.update(saved)
+
+
+def _stub_repo_problems() -> list[str]:
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / ".claude").mkdir()
+        (root / ".claude" / "tracked.md").write_text("x\n")
+
+        def git(*args: str) -> None:
+            subprocess.run(
+                ["git", "-c", "user.name=t", "-c", "user.email=t@t", *args],
+                cwd=root,
+                check=True,
+                capture_output=True,
+            )
+
+        git("init", "-q")
+        git("add", ".")
+        git("commit", "-q", "-m", "init")
+        for stub in m.SANDBOX_STUBS:
+            (root / stub).write_bytes(b"")
+        if m.has_changes(root):
+            return ["has_changes counts the 17 empty sandbox stubs as work"]
+        (root / "notes.md").write_bytes(b"")
+        if not m.has_changes(root):
+            return ["has_changes skips an empty notes.md, which can be work"]
+    return []
+
+
 def check_named_merge_runs_only_on_dev() -> list[str]:
     problems = []
     if m.named_mode_problem("dev", "feat/x") is not None:
@@ -151,6 +228,8 @@ CHECKS = (
     check_touched_paths_match_whatever_the_case,
     check_untracked_devices_are_not_work,
     check_device_test_reads_the_file_type,
+    check_empty_sandbox_stubs_are_not_work,
+    check_clean_tree_check_skips_stubs_in_a_real_repo,
 )
 
 
