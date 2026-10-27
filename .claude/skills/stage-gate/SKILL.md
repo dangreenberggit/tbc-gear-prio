@@ -38,7 +38,7 @@ that one reviews the diff after.
 | --- | --- | --- | --- | --- |
 | Planner | `gate-planner` | `fable` | `low` | design |
 | Reviewer | `gate-reviewer` | `opus` | `high` | review |
-| Executor | `gate-executor` | `opus` | `high` | review |
+| Executor | `gate-executor` | `opus` | `high` | lead |
 | SME | `gate-sme` | `opus` | `high` | review |
 | Visual | `gate-visual` | `opus` | `high` | review |
 

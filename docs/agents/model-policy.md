@@ -534,8 +534,8 @@ hits a wall does not move to them (§ Four lanes).
 #### Stage-gate seats
 
 The `stage-gate` skill fills its seats from these lanes: Planner = design
-(Fable at effort `low`), Reviewer, Executor and SME = review
-(Opus at effort `high`). Each seat's agent definition sets its model and
+(Fable at effort `low`), Executor = lead (Opus at effort `high`), and
+Reviewer and SME = review (Opus at effort `high`). Each seat's agent definition sets its model and
 its effort in frontmatter.
 
 The Executor runs on Opus at effort `high` because of the kind of work
