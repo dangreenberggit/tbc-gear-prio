@@ -247,12 +247,12 @@ In these steps, "you" and "the session" are the same agent.
    session sends that `gate-planner` a `SendMessage` to its agent id with
    this text: "Your final message was not the final message your
    instructions ask for. If you started researchers, read their report
-   files. Then end your turn with that final message." The session logs
-   `resumed`. When the `SendMessage` tool result lacks
-   `"success":true`, the session respawns the `gate-planner` in the
-   same mode. When the next final message of the resumed or respawned
-   `gate-planner` is again none of these, the session stops and tells
-   the user.
+   files. Then end your turn with that final message." When the
+   `SendMessage` tool result has `"success":true`, the session logs
+   `resumed` in `decision-log.md`. When it lacks `"success":true`, the
+   session respawns the `gate-planner` in the same mode. When the next
+   final message of the resumed or respawned `gate-planner` is again
+   none of these, the session stops and tells the user.
 
    **Gate A (mechanical):** every template section present, Backburner
    included ("none" allowed); `K1` has steps; every step in a chunk that
