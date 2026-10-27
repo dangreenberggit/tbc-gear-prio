@@ -23,12 +23,12 @@ Your prompt names two paths: the brief (`brief.md`) and the plan template
 `.claude/skills/stage-gate/parts.md` when your prompt names a part id,
 `reconcile` or `re-split`. When it names none of these and no prior
 plan, read it if the brief puts two or more tickets in scope, and make
-its split decision before any planning. Plan one chunk: `K1` has
-steps; every later chunk is one Backburner line (`plan-template.md`
-§ Backburner). The **stage budget** is one chunk with steps and about
-350 lines (starting value, hypothesis, untested). The one-chunk rule
-and the stage budget apply to the first plan of the stage. After `K1`
-has run, in `next:` mode you add the steps of one later chunk
+its split decision before any planning. **Whole job first.** Before
+you write a step, work out the broad plan for the whole brief: the
+chunks it needs, in order, and what each needs from the chunks before
+it. From that plan, decide which chunks get steps now and which wait as
+Backburner lines (`plan-template.md` § Execution chunks, § Backburner).
+After a chunk has run, in `next:` mode you add the steps of one later chunk
 (§ Next chunk), and in a revision you keep the steps of every chunk that
 `plan.md` already has. When `parts.md` has you write files, it
 sets your output files and your final message, and replaces the

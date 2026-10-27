@@ -54,24 +54,24 @@ shared manifests get exactly one owner.
 
 ## Execution chunks
 
-`K1` is the only chunk with steps when this plan is first written: the
-first piece that is worth building on its own, up to about five steps that
-share files. The Steps, Claims register and Paths manifest above then cover
-`K1` alone. After `K1` runs, a `gate-planner` with `next:` adds each later
-chunk's steps, claims and paths (`.claude/agents/gate-planner.md`
-§ Next chunk). A step
-whose result later steps must reason about goes in the same chunk as those
-steps; when this conflicts with the size limit, keep the steps together and
-name the dependency on the chunk line. List it as `K1: steps 1–4`.
+Each chunk is a piece worth building on its own, which one
+`gate-executor` builds after the chunks before it. List each chunk that
+has steps in this plan, as `K1: steps 1–4`. The planner decides from its
+plan of the whole job which chunks get steps now
+(`.claude/agents/gate-planner.md` § Inputs). The Steps, Claims register
+and Paths manifest above cover those chunks only. A step whose result
+later steps must reason about goes in the same chunk as those steps.
 
 ## Backburner
 
-Every later chunk, one line each, to be planned from `K1`'s execution
-report: `K2: <goal in one sentence> — needs from K1: <result or file> —
-open: <what must be learned or ruled first, or none>`. A line here is not a
-step. The reviewer checks that no `K1` step depends on a Backburner line
-and that the lines together still solve the brief. Write "none" when the
-brief fits in `K1`.
+Every chunk without steps, one line each. After the chunks before it
+run, a `gate-planner` with `next:` adds its steps, claims and paths from
+their execution reports (`.claude/agents/gate-planner.md` § Next chunk):
+`K3: <goal in one sentence> — needs from K2: <result or file> — open:
+<what must be learned or ruled first, or none>`. A line here is not a
+step. The reviewer checks that no step depends on a Backburner line and
+that the chunks and lines together still solve the brief. Write "none"
+when every chunk has steps.
 
 ## Verify recipe
 

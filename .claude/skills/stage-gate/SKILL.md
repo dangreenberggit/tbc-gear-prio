@@ -249,9 +249,9 @@ In these steps, "you" and "the session" are the same agent.
    the user.
 
    **Gate A (mechanical):** every template section present, Backburner
-   included ("none" allowed); steps only for `K1`
-   (`plan-template.md` § Execution chunks) and for each later chunk that
-   a `gate-planner` with `next:` has added (step 5); Claims register
+   included ("none" allowed); every step in a chunk that
+   `## Execution chunks` lists, and no steps for a Backburner line
+   (`plan-template.md` § Execution chunks); Claims register
    nonempty; Paths manifest present; every open question in the
    brief answered with its three items, or assigned to a deferred part;
    `git status --porcelain` still empty; `git rev-parse HEAD` still the
@@ -268,12 +268,6 @@ In these steps, "you" and "the session" are the same agent.
    `DECISION:` line and a Why; when two or more parts were planned,
    every planned part has its `parts/<id>/plan.md` and `plan.md` has a
    Seams section; every deferred part has its `parts/<id>/ticket.md`.
-
-   Before the first review in the stage, when `plan.md` has steps for
-   more than one chunk, or is over about 350 lines (starting value,
-   hypothesis, untested), spawn `gate-planner` once with
-   `re-split: over budget`; it rewrites `plan.md` itself, moving every
-   chunk after `K1` to the Backburner. Then run Gate A on the result.
 
    Deferrals made at the first split stand, and the reviewer checks
    them. A deferral made by a re-split, and any open question of the
@@ -357,8 +351,10 @@ In these steps, "you" and "the session" are the same agent.
      no further `gate-reviewer` for that chunk.
    - **Review limit per chunk.** A chunk is a group of plan steps that
      one `gate-executor` runs (`plan-template.md` § Execution chunks):
-     `K1`, then each Backburner line that step 5 plans. Each chunk gets
-     its first review (step 3 for `K1`, step 5 for each later chunk) and
+     each chunk that the first plan gives steps, then each Backburner
+     line that step 5 plans. Each chunk gets its first review (step 3 for
+     a chunk the first plan gives steps, step 5 for a chunk that step 5
+     plans) and
      at most two more, each after a revision of that chunk. The session
      spawns no fourth `gate-reviewer` for a chunk. The **Unasked-changes
      check** below is not one of these reviews: it does not count toward
@@ -424,8 +420,9 @@ In these steps, "you" and "the session" are the same agent.
      ticket per `docs/agents/issue-tracker.md` and commit them. Log
      their ids and the new `git rev-parse HEAD`.
 
-5. **Execute.** Run one `gate-executor` (`model: "opus"`) for `K1`. When
-   the next chunk may start after `K1` (**Gate C between chunks** below)
+5. **Execute.** Run one `gate-executor` (`model: "opus"`) for each chunk
+   that has steps, in order. When the next chunk may start after the
+   last of them (**Gate C between chunks** below)
    and the Backburner is not "none", log
    `git rev-parse HEAD` in a `note` line (Gate A compares against it),
    then spawn

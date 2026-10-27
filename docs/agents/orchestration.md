@@ -131,8 +131,9 @@ cannot tell them from a stray worker's.
 When a wrong plan would be expensive, run the `stage-gate` skill: Planner
 (Fable, effort low) → adversarial Plan-Reviewer (Opus, effort high) →
 fresh-context Executor (Opus, effort high), with judged gates and a
-capped loop-back. Inside this flow the planner plans one chunk in detail
-and lists the rest on the plan's Backburner, and the session runs at most
+capped loop-back. Inside this flow the planner plans the whole job,
+gives steps to the chunks it chooses, and lists the rest on the plan's
+Backburner, and the session runs at most
 two stages in planning or review at once (SKILL.md § Orchestrator
 conduct). That pacing belongs to the stage-gate flow only: a plain
 request for a plan is planned whole. `pre-merge-review` still runs after.
