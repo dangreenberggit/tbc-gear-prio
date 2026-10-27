@@ -69,9 +69,8 @@ run, a `gate-planner` with `next:` adds its steps, claims and paths from
 their execution reports (`.claude/agents/gate-planner.md` § Next chunk):
 `K3: <goal in one sentence> — needs from K2: <result or file> — open:
 <what must be learned or ruled first, or none>`. A line here is not a
-step. The reviewer checks that no step relies on a chunk that has no
-steps yet, only a Backburner line. Write "none" when every chunk has
-steps.
+step. The reviewer checks that no step needs a result or file that only
+a Backburner chunk will make. Write "none" when every chunk has steps.
 
 ## Verify recipe
 
