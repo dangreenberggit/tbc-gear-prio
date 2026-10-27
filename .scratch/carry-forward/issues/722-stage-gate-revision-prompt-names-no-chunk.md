@@ -20,9 +20,8 @@ brief + plan + review") list what a revision prompt holds, and the chunk
 id is not in either list. After `K1` has run, `plan.md` holds the steps
 of several chunks, so a revision planner must work out which chunk it
 revises from the review. Rules that depend on that chunk ("keep the
-steps of every chunk", `.claude/agents/gate-planner.md:32-33`; the
-fault-3 size check in ticket 712, if the owner approves it, "the chunk
-you planned or revised") then rest on a guess (hypothesis, untested that
+steps of every chunk", `.claude/agents/gate-planner.md:32-33`) then
+rest on a guess (hypothesis, untested that
 a planner guesses wrong).
 
 Fix: add the chunk id to both lists.

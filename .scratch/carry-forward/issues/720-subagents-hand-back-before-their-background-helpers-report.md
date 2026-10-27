@@ -8,7 +8,7 @@ Related: 712
 # Subagents hand back before their background helpers report
 
 The hook part of the fix reached `dev` in merge `b5022cb8` (see "Copied
-to dev 2026-10-27" below).
+from the old branch 2026-10-27" below).
 
 ## What is wrong
 
@@ -231,7 +231,7 @@ read 545. `feat/round-11-followups` files tickets 545 and 546
 When the two branches' `NEXT` values conflict at merge, keep the higher
 one.
 
-## Copied to dev 2026-10-27
+## Copied from the old branch 2026-10-27
 
 This ticket was 550 on branch `feat/subagent-foreground-helpers` (tip
 `870e88d0`, on the `windows` remote only). Dev already has a different

@@ -3,7 +3,7 @@ Type: process
 Origin: audit `.scratch/agent-reports/2026-10-25-general-task-stage-gate-revision-audit.md` (§ Q3 "What looks plainly wrong in how the loop was run", § Q4; gitignored, owner's checkout) of stage-gate session 895dc2f0, 2026-10-25 19:33-20:33Z
 Blocks: none
 Blocked by: none
-Related: 550 on unmerged branch `feat/subagent-foreground-helpers` (not dev's 550; see "Related unmerged fix")
+Related: 720 (ticket 550 on unmerged branch `feat/subagent-foreground-helpers`; see "Related unmerged fix")
 
 # Stage-gate revision loops were run wrong in six ways
 
@@ -335,6 +335,29 @@ fix left are applied on `feat/stage-gate-open-faults`, which is not yet
 merged into `dev`. The remote delete is not done: the owner runs it.
 
 Verified by: `tbc-gear-prio@b5022cb8` (findings 1-6);
-`tbc-gear-prio@98356b7f` (the four open items, on
-`feat/stage-gate-open-faults`); `python3 scripts/check_skill_mirrors.py`
-(rc 0 at `98356b7f`).
+`tbc-gear-prio@3c9d7ee2` (the four open items, on
+`feat/stage-gate-open-faults`, after the later changes in the comment
+below); `python3 scripts/check_skill_mirrors.py` (rc 0 at `3c9d7ee2`).
+
+### 2026-10-27: owner approval of the later wording
+
+The session reports (2026-10-27) that the owner approved each change on
+this branch by choosing an option, and asked for a fresh review of each
+applied change. The later fix commits apply what those reviews found:
+
+- `f3f47db2` and `3883082e` fix findings F4-1, F4-2 and F5-1 of
+  `.scratch/agent-reports/2026-10-27-general-task-fault-4-5-applied-review.md`.
+- `1808a79c`, `d22fe9fd` and `2b9ed795` fix findings B1, M1-M4 and M5 of
+  `.scratch/agent-reports/2026-10-27-general-task-fault-3-applied-review.md`.
+- `90b61b8e` adds the Backburner check to the reviewer. The draft the
+  owner accepted,
+  `.scratch/agent-reports/2026-10-27-general-task-chunk-size-planner-led-draft.md`,
+  left the choice open: delete the template sentence or add the check
+  to the reviewer.
+
+The pre-merge review `docs/reviews/feat-stage-gate-open-faults.md`
+(round 1) found more gaps. The owner approved all its fixes on
+2026-10-27 (relayed by the session: "have a subagent do all of the fixes
+now"). They are `12ca28fb` through `3c9d7ee2`; the review's Disposition
+table names the commit for each finding. The report files above are
+gitignored, in the owner's checkout.
