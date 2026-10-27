@@ -311,6 +311,10 @@ usage wall (§ Four lanes, peer fills). Sonnet is otherwise not used there.
 On every other card the Sonnet and Opus-medium trial types stay the
 workhorse fill, as the "Otherwise" column says.
 
+A `parallel-phase` slice that is small or modest coding may run on the
+type this table names for that job. A hard slice runs on the lead lane
+(`general-task`).
+
 A job `glm-flash-task` hands back as `NEEDS_JUDGMENT` goes to a bigger
 agent. Whether that agent is `glm-task` or Opus `general-task` is an open
 owner question (`.scratch/carry-forward/issues/719-who-takes-a-glm-flash-handback.md`);
@@ -418,7 +422,8 @@ to a tracked file, and any command that rewrites tracked files outside
 the allowed paths, such as `pnpm format`; any edit under `data/`, any generated file or regen, and any pin move; any edit under
 `vendor/tbc-new-fork` (reads there are workhorse jobs like any other);
 `.githooks/` and `scripts/`; `AGENTS.md`, `CLAUDE.md`, skills and agent
-files; any stage-gate seat; any `parallel-phase` worker; and any job
+files; any stage-gate seat; any `parallel-phase` worker on a hard slice
+(§ Workhorse jobs); and any job
 moved off `general-task` because of a wall (§ Four lanes). A seat's
 helpers are not seats: they take the type their job gives them
 (§ Workhorse jobs). The trial and GLM agent files repeat a short form of
@@ -479,7 +484,7 @@ hits a wall does not move to them (§ Four lanes).
   `discrete-task` and `modest-task`; `glm-task` takes those of
   `modest-task` (§ Trial types, "Always `general-task`"): no `data/`
   edits, generated files, regens, pins, `vendor/tbc-new-fork` edits,
-  `.githooks/`, `scripts/`, agent docs or `parallel-phase` workers. Their agent files
+  `.githooks/`, `scripts/`, agent docs or a hard `parallel-phase` slice. Their agent files
   in `~/.claude_router/agents/` should hold the short form of the list,
   as the trial files do; the owner keeps them in step, because they are
   outside this repo. A `glm-task` that returns `NEEDS_JUDGMENT` is
