@@ -167,7 +167,11 @@ In these steps, "you" and "the session" are the same agent.
      spawns. The session spawns every agent in the background (leave
      `run_in_background` unset). The harness then sends the session a
      `<task-notification>` each time the turn of that agent ends, so one
-     agent can have several `returned` lines.
+     agent can have several `returned` lines. On every `spawn` line of a
+     `gate-reviewer`, the last field is the chunk id that the review
+     covers and its round number, for example `K2 round 4`. For an
+     **Added-lines check** (step 4), add `added-lines`, for example
+     `K2 round 6 added-lines`.
      - `started`: the Agent call's tool result gave the new agent's id
        (the line `agentId: <id>`). The line has that agent id and
        `subagent_tokens n/a`.
@@ -533,7 +537,12 @@ moment its stage ends, so a fresh session resumes from
 `decision-log.md`: the last logged gate is where you are. In a fresh
 session, a `gate-planner` with no final message after its last
 `started` or `resumed` line was cut off: respawn that `gate-planner` in
-the same mode.
+the same mode. A fresh session counts a chunk's reviews (step 4,
+**Review limit per chunk**) as the number of different round numbers on
+the `gate-reviewer` `spawn` lines that name that chunk, leaving out
+the lines marked `added-lines`. It needs no loop-back count: each
+loop-back is followed by a review, so the review limit also limits the
+loop-backs.
 
 ## Run log (Claude Code)
 
