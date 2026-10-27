@@ -109,9 +109,10 @@ not` list below.
    step 4 (planning or review) at once, and run one executor at a time
    across all stages; a further feature waits with its `brief.md`
    written and nothing spawned. The session spawns at most three
-   reviews, plus at most one **Added-lines check**, for each chunk, a
-   group of plan steps that one `gate-executor` runs (step 4, **Review
-   limit per chunk**). On
+   reviews, plus at most one review of the lines a chunk's last revision
+   added (step 4, **Added-lines check**), for each chunk, a group of plan
+   steps that one `gate-executor` runs (step 4, **Review limit per
+   chunk**). On
    2026-10-25 five stages ran at once, 12 planner and 8 reviewer runs
    went to 2 executor runs, and the session hit the 5-hour limit in 59
    minutes (`.scratch/agent-reports/2026-10-25-general-task-usage-limit-burn.md`;
@@ -292,7 +293,9 @@ In these steps, "you" and "the session" are the same agent.
    prompt listed, each by its `row` id `R<m>-<id>` (step 1). On the
    first review of a later chunk (step 5), it names the claims and steps
    that the `gate-planner` with `next:` added for that chunk, and no
-   earlier findings. The prompt says that the review checks only those
+   earlier findings. For an **Added-lines check** (step 4), it names only
+   the claims and steps on the `- added:` lines of the latest revision,
+   and no findings. The prompt says that the review checks only those
    claims and steps and whether `plan.md` now fixes each named finding,
    and does not review the rest of the plan.
    The `gate-reviewer` writes its review into `plan-review.md` under the
@@ -350,10 +353,13 @@ In these steps, "you" and "the session" are the same agent.
      `K1`, then each Backburner line that step 5 plans. Each chunk gets
      its first review (step 3 for `K1`, step 5 for each later chunk) and
      at most two more, each after a revision of that chunk. The session
-     spawns no fourth `gate-reviewer` for a chunk. The one exception is
-     the **Added-lines check** below: it checks only claims and steps
-     that no review has seen, and no revision follows it, so it cannot
-     lead to another review. The session counts
+     spawns no fourth `gate-reviewer` for a chunk. The **Added-lines
+     check** below is not one of these reviews: it does not count toward
+     the three, this bullet's rules for a third review do not apply to
+     it, and the session runs it at most once for each chunk. It is the
+     one exception because it checks only claims and steps that no
+     review has seen, and no revision follows it, so it cannot lead to
+     another review. The session counts
      the reviews and the loop-backs of each chunk separately; the round
      number `<n>` counts every review in the stage, so it is not this
      count. Where another rule in step 4 says otherwise, this rule wins.
@@ -370,18 +376,21 @@ In these steps, "you" and "the session" are the same agent.
      stated for each `material` finding and logs each one `fixed`, with
      the plan step as evidence. A `material` finding that `plan.md` does
      not meet goes to the user.
-   - **Added-lines check.** After a revision that is followed by "no
-     further `gate-reviewer` for that chunk", when the `## Decisions`
+   - **Added-lines check.** After a revision that step 4 follows with no
+     further `gate-reviewer` for that chunk (the revision for the
+     `material` findings of a re-review that itself followed a revision
+     for `material` findings, and the revision for the `material`
+     findings of a chunk's third review), when the `## Decisions`
      section of that `gate-planner`'s final message has lines that start
      with `- added:`, the session spawns one `gate-reviewer` (step 3)
-     once Gate A passes. Its spawn prompt names only the claims and
-     steps on those lines, and no findings. No revision follows this
+     once Gate A passes. Its spawn prompt is the one step 3 gives for
+     it. Before it spawns this review, the session checks that
+     revision's `material` findings against `plan.md`, as it does for a
+     revision that no re-review follows. No revision follows this
      review. When it has a `blocking` finding or a refuted load-bearing
      claim, the session stops and gives the user the open findings. Each
      `material` finding goes to the user. Each `minor` finding gets a
-     `row R<n>-<id> | advisory` line in `decision-log.md`. The session
-     also checks that revision's `material` findings against `plan.md`,
-     as it does for a revision that no re-review follows.
+     `row R<n>-<id> | advisory` line in `decision-log.md`.
    - In every revision prompt, the session states, for each `blocking`
      and `material` finding, the result `plan.md` must reach. When a
      revision prompt repeats a way of doing a step, or a command, that a
