@@ -281,3 +281,37 @@ branch's SKILL.md step 3 round numbering ("1 for the stage's first
 review, then 1 higher for each later review") and the step 4 bullet
 "Round 3 is the last review" must be rewritten too, keeping each
 `# Round <n>` heading and `R<n>-<id>` id unique within `plan-review.md`.
+
+### 2026-10-27: owner rulings on two open items and the old branch
+
+The owner's rulings, relayed by the session on 2026-10-27, on the
+options in
+`.scratch/agent-reports/2026-10-27-general-task-stage-gate-fault-drafts-v2.md`
+(gitignored, owner's checkout). Applied on branch
+`feat/stage-gate-open-faults`, not yet merged into `dev`:
+
+- No rule moves the stage on when a waiting agent is never resumed
+  (fault 4 in the drafts). Option B, a 30-minute background timer and
+  then one `SendMessage`. Owner: "B sounds ok". Applied as drafted
+  (edits 4B-a, 4B-b, 4B-c) in `2517440b`.
+- `- added:` lines in a chunk's last revision reach the executor
+  unreviewed (fault 5). Option B, one narrow `gate-reviewer` pass on
+  those lines only. Owner: "sure". `6eb1037d` adds the bullet
+  **Added-lines check** to `SKILL.md` step 4 and names it as the one
+  exception in **Review limit per chunk**.
+- Branch `feat/subagent-foreground-helpers` on the `windows` remote
+  (tip `870e88d0`). Owner: "ok" to copying its ticket and review file
+  onto this branch and then deleting the remote branch. `2dfe8d21`
+  copies the ticket as 720 (dev already has a 550) and
+  `docs/reviews/feat-subagent-foreground-helpers.md`. The delete,
+  `git push windows --delete feat/subagent-foreground-helpers`, was
+  refused for the agent by the `agent-guard` hook ("git push to windows
+  (windows) is not a dangreenberggit GitHub repo. The owner can run it
+  in their own terminal."), so the owner runs it. Check:
+  `git ls-remote windows feat/subagent-foreground-helpers` prints
+  nothing once it is gone.
+
+Still open: a claim the planner changed without being asked may not be
+named in a re-review (fault 6), and no executor rule covers a `minor`
+finding whose `Where` names no step (fault 7). The same review found two
+faults in unchanged text, filed as 721 and 722.

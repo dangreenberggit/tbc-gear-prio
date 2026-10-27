@@ -242,7 +242,7 @@ the `foreground-hook:check` script, and reached `dev` in merge
 edits were not taken (ticket 712, § Comments, "2026-10-26: owner rulings
 and the fix"). This ticket and the review file
 `docs/reviews/feat-subagent-foreground-helpers.md` were copied from the
-branch before the owner had it deleted (ticket 712, § Comments,
+branch so that it can be deleted (owner ruling in ticket 712, § Comments,
 2026-10-27). The items under "What stays untested" are still untested.
 
 Verified by: `tbc-gear-prio@b5022cb8`; on `dev` at `8a59f35d`,
