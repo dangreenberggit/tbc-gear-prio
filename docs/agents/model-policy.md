@@ -461,8 +461,15 @@ hits a wall does not move to them (§ Four lanes).
   `AGENTS.md` § Secrets and GLM workers, staged in
   `docs/agents/home/AGENTS.md`). Give a GLM type no job that could reach
   secrets, session transcripts (`~/.claude/projects/`), or the config
-  folders `~/.claude*` and `~/.t3`; such a job goes to its Claude
-  counterpart in § Workhorse jobs.
+  folders `~/.claude*` and `~/.t3`. A read of that kind goes to
+  `discrete-task` (`model: "sonnet"`); any other such job goes to its
+  Claude counterpart in § Workhorse jobs. On the "Claude + GLM workers"
+  card, `model: "sonnet"` stays Claude Sonnet, and GLM runs only through
+  `glm-task` and `glm-flash-task`. On 2026-10-26 a `discrete-task` and a
+  `simple-task` spawned on that card with model "sonnet" showed in the
+  card's router log as `claude-sonnet-5-5 ANTHROPIC`, with no `z-ai/`
+  request (`.scratch/agent-reports/2026-10-26-session-usage-limit-investigation.md`,
+  gitignored, main checkout only).
 - **Check every result** before you relay it or build on it, as for the
   trial types: when the caller is the interactive session, a
   `general-task` verifier does it. Check the worker's claims as well as

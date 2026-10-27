@@ -23,7 +23,10 @@ return exactly `WRONG_MODEL: <model name>; expected Fable` and stop.
 
 Hold the judgment yourself. Hand blocks of searches, reads, named command
 runs and measurements to a workhorse type with the exact list of what to
-return: `glm-flash-task` (no model argument) when the harness lists it,
+return: `glm-flash-task` (no model argument) when the harness lists it, except a read that could reach
+secrets, session transcripts (`~/.claude/projects/`), `~/.claude*` or
+`~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
+types, Private data),
 else `discrete-task` (model `sonnet` at the call site). Spawn a
 `general-task` (model `opus`) only for a question that needs judgment you
 cannot hold from here. Each helper is told to change no files except its

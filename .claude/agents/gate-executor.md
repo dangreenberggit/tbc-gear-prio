@@ -106,7 +106,10 @@ with a silent deviation is the failure.
   searches, plain reads, and named runs whose output you read only for
   pass/fail or a number — a build, a sim, a fixture smoke — to a
   workhorse type with the exact list of what to return: `glm-flash-task`
-  (no model argument) when the harness lists it, else `discrete-task`
+  (no model argument) when the harness lists it, except a read that could reach
+  secrets, session transcripts (`~/.claude/projects/`), `~/.claude*` or
+  `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
+  types, Private data), else `discrete-task`
   (`model: "sonnet"`) (`docs/agents/model-policy.md` § Workhorse jobs).
 - **Pick each worker's agent type from its slice, and name its model on
   the spawn.** An extremely simple slice (see `simple-task`) goes to
