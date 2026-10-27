@@ -85,13 +85,14 @@ not` list below.
    conclusion. You judge the result; you don't author it. A question
    between gates goes to a seat or to a `general-task` agent; a workhorse
    job goes to the type `docs/agents/model-policy.md` § Workhorse jobs
-   names. The only commands you run are the gate checks that `docs/agents/orchestration.md`
+   names. The only commands you run are the ones that `docs/agents/orchestration.md`
    § The session delegates lists. Tell the user that an agent is working
    only when the last `spawn` line in `decision-log.md` with that agent's
    id is `started` or `resumed` (step 1). When the agent's last
    notification says it is waiting on its own background work, tell the
-   user that it has stopped and may resume on its own, and that when the
-   timer in step 1 ends, the session sends it one message.
+   user that it has stopped and may resume on its own, and that if it is
+   still waiting 30 minutes after that notification, the session sends it
+   one message (step 1 **Open the stage**, the `spawn` lines).
 4. **Let open issues block end-of-line moves like merge.** When a phase
    produces open tickets — a correctness gap, a test hole, a half-delivered
    feature — the honest next step is to close that work. "No blocking review
@@ -182,17 +183,23 @@ In these steps, "you" and "the session" are the same agent.
      `<status>completed</status>` whose `<summary>` does not say the
      agent `is waiting on its own background work`. When the `<summary>`
      does say that, the `<result>` may be interim: log the `returned`
-     line and act on nothing else in that notification. Then start a
+     line and act on nothing else in that notification. When the session
+     has not yet sent this agent the message below, it then starts a
      timer: one Bash call `sleep 1800` with `run_in_background: true` and
      `timeout: 1900000`. When it ends, its notification starts a turn of
-     the session. On each later turn of the session, from the timer or
-     from anything else, when that `returned` line is still the last
-     `spawn` line with that agent id and is at least 30 minutes old (the
-     timer's length; starting value, hypothesis, untested), the session
-     sends that agent one `SendMessage`: "Read the output of your
-     background work. When it has finished, end your turn with the final
-     message your instructions ask for." This holds for a `gate-executor`
-     at any tool-call count. When the tool result has `"success":true`,
+     the session; that notification does not say which agent the timer
+     is for. On each later turn of the session, from a timer or from
+     anything else, the session gets the time with
+     `date -u +%Y-%m-%dT%H:%MZ` and checks every agent whose last
+     notification said it is waiting on its own background work. When
+     that notification's `returned` line is still the last `spawn` line
+     with that agent id and is at least 30 minutes old (30 minutes is a
+     first guess, not measured: hypothesis, untested), and the session
+     has not yet sent that agent this message, the session sends it one
+     `SendMessage`: "Read the output of your background work. When it
+     has finished, end your turn with the final message your
+     instructions ask for." This holds for a `gate-executor` at any
+     tool-call count. When the tool result has `"success":true`,
      the session logs `resumed`. When it lacks `"success":true`, or the
      agent's next notification again says it is waiting on its own
      background work, the session stops and tells the user.
@@ -503,7 +510,9 @@ In these steps, "you" and "the session" are the same agent.
 
 A dead or cut-off seat retains its context — `SendMessage` it to resume
 before respawning. An executor past about 25 tool calls is respawned for
-its chunk instead, and resumes from `progress.md`. Before any executor
+its chunk instead, and resumes from `progress.md`; the one message to a
+waiting agent (step 1 **Open the stage**, the `spawn` lines) is the
+exception. Before any executor
 respawn, run `git status --porcelain` and `git rev-parse HEAD`: pass the
 fresh SHA, and name any dirty paths in the prompt as probably the
 earlier executor's unfinished work. Every stage artifact is on disk the

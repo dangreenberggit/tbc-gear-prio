@@ -18,9 +18,10 @@ The session makes only these tool calls itself:
   verbatim from a seat's final message
 - the short gate checks: `git status --porcelain`, `git rev-parse HEAD`,
   `git diff --stat`, and `date -u +%Y-%m-%dT%H:%MZ` for `decision-log.md`
-  times
+  times and for the age of a waiting agent's `returned` line
 - a background `sleep 1800` timer for an agent that is waiting on its own
-  background work (`.claude/skills/stage-gate/SKILL.md` step 1)
+  background work (`.claude/skills/stage-gate/SKILL.md` step 1 **Open the
+  stage**, the `spawn` lines)
 - reading the stage-gate artifacts under `.scratch/stage-gate/<slug>/`
   and `.claude/skills/stage-gate/plan-template.md`
 - reading a subagent's report file (AGENTS.md § Subagent reports) for a
