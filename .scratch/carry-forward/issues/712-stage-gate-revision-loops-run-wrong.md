@@ -317,7 +317,13 @@ gitignored, owner's checkout) led to `f3f47db2` and `3883082e`. On
 2026-10-27 the owner approved faults 6 and 7 with the words "plain fixes
 approved": `86fd3681` adds `- changed:` lines (fault 6) and `98356b7f`
 covers a `minor` finding whose `Where` names no step (fault 7). The same
-review found two faults in unchanged text, filed as 721 and 722.
+review found two faults in unchanged text, filed as 721 and 722. With
+fault 6 applied, a chunk's last revision could still pass `- changed:`
+lines to the executor unreviewed. Asked whether the same single check
+should also cover unasked changes, the owner answered "sure"
+(2026-10-27): `c8737b8a` makes it run on `- added:` or `- changed:`
+lines and renames it **Unasked-changes check** (spawn-line marker
+`unasked-changes`).
 
 ### 2026-10-27: closed
 

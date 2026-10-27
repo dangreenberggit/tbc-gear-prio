@@ -91,7 +91,8 @@ edits 1a, 1b, 2a and 2b in
   **Added-lines check** reviewer is marked `added-lines`, and a fresh
   session leaves those lines out of a chunk's review count, because that
   check does not count toward the three reviews (**Review limit per
-  chunk**).
+  chunk**). `c8737b8a` renamed the check **Unasked-changes check** and
+  its marker `unasked-changes` (ticket 712, § Comments, 2026-10-27).
 
 Item 3 is still open. The owner rejected measuring a plan's work in
 lines (relayed by the session on 2026-10-27), so the drafted fault 3
