@@ -59,8 +59,9 @@ lane it does not belong to.
 **Hard implementation** is any change that is not a workhorse job: one
 where the agent chooses the approach, one larger than § Trial types,
 "Modest", allows, or one on that section's "Always `general-task`" list.
-An agent in the lead, review or design lane is an **overseer**: it holds
-the judgment and hands workhorse jobs down (§ Workhorse jobs).
+An agent in the lead, review or design lane is an **overseer**, as
+`AGENTS.md` § Spawning defines it; § Workhorse jobs says what it hands
+down.
 
 **Read the fill out of your harness section — do not derive it.** There is no
 "pick the strongest available" rule here, in any lane. The harness tables below
@@ -205,7 +206,7 @@ frontmatter, so spawn through a type that pins both:
 | Agent type      | Model                          | Effort                       | Use for                                                                                                                |
 | --------------- | ------------------------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `simple-task`   | `sonnet`                       | `high`                       | An **extremely simple** job: one lookup, one search with a known target, or one edit whose exact text the prompt gives |
-| `general-task`  | `opus`                         | `high`                       | Lead-lane jobs: oversight, judgment, hard implementation, `parallel-phase` workers, review axes, investigations        |
+| `general-task`  | `opus`                         | `high`                       | Lead-lane jobs (oversight, judgment, hard implementation, `parallel-phase` workers, investigations) and review axes    |
 | `modest-task`   | `opus`                         | `medium`                     | Trial: a modest job where the worker writes the code or text, as § Trial types defines it                              |
 | `discrete-task` | `sonnet`                       | `high`                       | Trial: one job whose result the prompt fixes, as § Trial types defines it                                              |
 | `design-task`   | `fable`                        | `low`                        | Planning and architecture outside stage-gate                                                                           |
@@ -255,7 +256,9 @@ file is picked up the same way is untested.
 > "workhorse" as the cheap worker models: the Opus agents did "all the
 > work and toolcalls that workhorse models were supposed to do, that the
 > opus agents were only supposed to be planning or overseeing"
-> (`.scratch/agent-reports/2026-10-26-session-usage-limit-investigation.md`).
+> (`.scratch/agent-reports/2026-10-26-session-usage-limit-investigation.md`;
+> gitignored; main checkout only). That the old meaning caused the Opus
+> agents to do this work is a hypothesis, untested.
 > The lead lane now holds the Opus work, and the workhorse lane holds the
 > cheap worker models. Text written before this date that says "workhorse"
 > for an Opus job means today's lead lane.
@@ -281,7 +284,8 @@ only for pass/fail or for a number, measurements the overseer specifies
 exactly, and small or modest coding (§ Trial types, "Modest"). In session
 895dc2f0 the 18 Opus subagents made 684 Bash calls, 492 of them searches
 or plain reads, and spawned nothing
-(`.scratch/agent-reports/2026-10-26-general-task-opus-did-worker-jobs.md` § 2).
+(`.scratch/agent-reports/2026-10-26-general-task-opus-did-worker-jobs.md` § 2;
+gitignored; main checkout only).
 
 | Job                                                                  | When the harness lists the GLM types | Otherwise                                     |
 | -------------------------------------------------------------------- | ------------------------------------ | --------------------------------------------- |
@@ -301,7 +305,8 @@ Hand off a **block**, not a command. One helper prompt names every file to
 read, every command to run, and the exact form of the answer: the lines to
 return, the number to report, `not found` with where it looked. A helper
 starts at about 51k tokens before its first tool call (measured, same
-session: `.scratch/agent-reports/2026-10-26-general-task-claude-code-context-levers.md`),
+session: `.scratch/agent-reports/2026-10-26-general-task-claude-code-context-levers.md`;
+gitignored; main checkout only),
 so a block is worth a helper when it would otherwise take the overseer
 more than about five tool calls on its own grown context (hypothesis,
 untested: the break-even is not measured). Run in place: a read of a file
@@ -452,7 +457,7 @@ hits a wall does not move to them (§ Four lanes).
   (§ Trial types, "Always `general-task`"): no `data/` edits, generated
   files, regens, pins, `vendor/tbc-new-fork` edits, `.githooks/`,
   `scripts/`, agent docs or `parallel-phase` workers. Their agent files
-  in `~/.claude_router/agents/` are to carry the short form of the list,
+  in `~/.claude_router/agents/` should hold the short form of the list,
   as the trial files do; the owner keeps them in step, because they are
   outside this repo. A GLM type that returns `NEEDS_JUDGMENT` is
   respawned on `general-task` with the same prompt (§ Claude Code).
@@ -468,8 +473,8 @@ hits a wall does not move to them (§ Four lanes).
   `glm-task` and `glm-flash-task`. On 2026-10-26 a `discrete-task` and a
   `simple-task` spawned on that card with model "sonnet" showed in the
   card's router log as `claude-sonnet-5-5 ANTHROPIC`, with no `z-ai/`
-  request (`.scratch/agent-reports/2026-10-26-session-usage-limit-investigation.md`,
-  gitignored, main checkout only).
+  request (`.scratch/agent-reports/2026-10-26-session-usage-limit-investigation.md`;
+  gitignored; main checkout only).
 - **Check every result** before you relay it or build on it, as for the
   trial types: when the caller is the interactive session, a
   `general-task` verifier does it. Check the worker's claims as well as
@@ -497,8 +502,8 @@ The `stage-gate` skill fills its seats from these lanes: Planner = design
 (Opus at effort `high`). Each seat's agent definition sets its model and
 its effort in frontmatter.
 
-The Executor is on the review lane, not the workhorse lane, because of the
-kind of work it does. It decides adapt-vs-flag-vs-stop wherever the plan
+The Executor runs on Opus at effort `high` because of the kind of work
+it does. It decides adapt-vs-flag-vs-stop wherever the plan
 and reality disagree, and a plan is underspecified by construction. The
 failure mode there is a silent paper-over, which is a judgment failure and
 not a throughput one. The Executor's `parallel-phase` workers run
@@ -549,8 +554,6 @@ Cursor bills **two pools**:
 
 | Lane                                | Pin                                                                                                                                    | Why                                                                                                          |
 | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Lane                                | Pin                                                                                                                                    | Why                                                                                                          |
-| ---                                 | ---                                                                                                                                    | ---                                                                                                          |
 | **Workhorse** (workers, implement)  | **Composer** (`composer-2.5-fast` on Task if that’s the only Composer slug; non-fast via custom agent / parent inherit when available) | Same first-party pool as Grok; much cheaper per token than Grok; avoids the Other-pool spawn death           |
 | **Lead**                            | **Composer**, as workhorse                                                                                                             | No owner ruling has named another pin for Cursor                                                             |
 | **Review** (pre-merge axes)         | **Grok high** (prefer non-fast; else `cursor-grok-4.5-high-fast`)                                                                      | The judgment tier Cursor will actually run                                                                   |

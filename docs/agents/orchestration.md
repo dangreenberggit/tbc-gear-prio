@@ -42,7 +42,8 @@ jobs.
 
 Pick each subagent's type from your harness section of `model-policy.md`:
 
-- **Claude Code:** `general-task` for lead-lane work; the workhorse types
+- **Claude Code:** `general-task` for lead-lane and review-lane work
+  (model-policy § Four lanes); the workhorse types
   for workhorse jobs (model-policy § Workhorse jobs); `design-task` for a
   plan or an architecture call outside stage-gate. Run `pre-merge-review`
   on a `general-task`. The session sends every

@@ -206,9 +206,9 @@ despite the widening, generate the type instead.
 
 Comments explain **why**, never **what**. If a comment restates the code,
 delete it. If the code needs a comment to be readable, rename something
-first. Keep only comments that carry weight: a non-obvious constraint, an
+first. Keep only comments a reader needs: a non-obvious constraint, an
 external-system quirk, why a slower or uglier path was deliberately chosen,
-or a pointer to the finding or ADR that forced the shape. Nothing lints
+or a pointer to the finding or ADR that required the design. Nothing lints
 this: it is a pre-merge review item.
 
 ## Testing: seams and where tests go

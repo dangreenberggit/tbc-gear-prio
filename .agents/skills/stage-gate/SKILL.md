@@ -42,8 +42,8 @@ that one reviews the diff after.
 | SME | `gate-sme` | `opus` | `high` | review |
 | Visual | `gate-visual` | `opus` | `high` | review |
 
-The Executor is on the review lane, not the workhorse lane, because
-plans are underspecified and it decides adapt-vs-flag-vs-stop on every
+The Executor runs on Opus at effort `high` because plans are
+underspecified and it decides adapt-vs-flag-vs-stop on every
 step where reality disagrees with the plan — the failure mode is a silent
 paper-over, which is a judgment failure, not a throughput one. Its
 `parallel-phase` workers are a separate call: `simple-task` for an
@@ -110,7 +110,8 @@ not` list below.
    `gate-executor` runs (step 4, **Review limit per chunk**). On
    2026-10-25 five stages ran at once, 12 planner and 8 reviewer runs
    went to 2 executor runs, and the session hit the 5-hour limit in 59
-   minutes (`.scratch/agent-reports/2026-10-25-general-task-usage-limit-burn.md`).
+   minutes (`.scratch/agent-reports/2026-10-25-general-task-usage-limit-burn.md`;
+   gitignored; main checkout only).
    This pacing is for this pipeline only: a plain request for a plan,
    outside stage-gate, is planned whole.
 

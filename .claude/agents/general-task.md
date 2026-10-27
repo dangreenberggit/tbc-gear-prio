@@ -1,6 +1,6 @@
 ---
 name: general-task
-description: Lead-lane work — oversight, judgment, hard implementation, a parallel-phase worker, a review axis, an investigation — on Opus at effort high. Spawn with model "opus" named at the call site. Searches, reads, command runs, measurements and small or modest coding go to the workhorse types (model-policy § Workhorse jobs); when unsure whether a job needs judgment, use this type.
+description: Lead-lane work (oversight, judgment, hard implementation, a parallel-phase worker, an investigation) and review-lane work (a review axis) on Opus at effort high. Spawn with model "opus" named at the call site. Searches, reads, command runs, measurements and small or modest coding go to the workhorse types (model-policy § Workhorse jobs); when unsure whether a job needs judgment, use this type.
 model: opus
 effort: high
 ---

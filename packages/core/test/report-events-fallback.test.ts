@@ -4,7 +4,7 @@
  *   ☐ fallback route exercised on a character with no ranked kills
  *
  * Tested at the `rankUpgrades` interface through the recorded `GearSource`,
- * per docs/workflow.md § Testing — the route is a seam behaviour, so a unit test of
+ * per docs/workflow.md § Testing: seams and where tests go — the route is a seam behaviour, so a unit test of
  * the fixture builder alone would assert that a map was built, not that the
  * engine resolves through it.
  *

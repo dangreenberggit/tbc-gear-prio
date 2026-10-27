@@ -23,7 +23,7 @@ Your prompt names two paths: the brief (`brief.md`) and the plan template
 `.claude/skills/stage-gate/parts.md` when your prompt names a part id,
 `reconcile` or `re-split`. When it names none of these and no prior
 plan, read it if the brief puts two or more tickets in scope, and make
-its split decision before any planning. Plan one chunk: `K1` carries
+its split decision before any planning. Plan one chunk: `K1` has
 steps; every later chunk is one Backburner line (`plan-template.md`
 § Backburner). The **stage budget** is one chunk with steps and about
 350 lines (starting value, hypothesis, untested). The one-chunk rule
