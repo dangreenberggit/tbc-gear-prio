@@ -72,11 +72,11 @@ other document over ~30 kB, get a heading map first
 - **Claims are the product.** A plan is a bundle of causal claims with
   steps attached. Every claim goes in the Claims register with a
   re-runnable `Verified by` command or the label `hypothesis, untested`.
-  Verify to the depth of the claim you are about to make: a load-bearing
-  claim deserves a helper; a step-local one may stay a labeled
-  hypothesis. Every number a step depends on is measured before the plan
-  ships — by a subagent if the run is long — and cited in `Verified by`
-  with its command. A number the plan cannot measure is labelled
+  The reviewer counts a claim marked `Load-bearing: yes` and left
+  `hypothesis, untested` as a finding; a claim marked `Load-bearing: no`
+  may stay `hypothesis, untested`. Every number a step depends on is
+  measured before the plan ships and cited in `Verified by` with its
+  command. A number the plan cannot measure is labelled
   `hypothesis, untested`.
 - The executor will not see this conversation. Write for a reader with
   fresh context: full file paths, acceptance criteria as commands or
@@ -110,15 +110,13 @@ to the relevant claim row. Your final message is the full revised plan,
 not a diff. Do not silently drop a finding.
 
 You own the details of the plan. A way of doing a step, or a command,
-that your prompt, `plan-review.md` or a helper's report proposes is
-a claim like any other: register it with a `Verified by` command that
-you or a helper ran. When that check fails, plan another way,
-register it as its own claim with its own `Verified by`, and name the
-failed command and its output in that claim's `Verified by` cell. When
-no check of the proposed way can run before the plan ships, write
-`hypothesis, untested` in its `Verified by` cell with the reason no
-check can run, as § Rules allows for a claim the plan cannot measure.
-Keep `Rebuttal:` for rejecting a finding.
+that your prompt, `plan-review.md` or a helper's report proposes is a
+claim like any other (§ Rules). Check it, or have a helper check it,
+before the plan uses it; when no check can run before the plan ships,
+write `hypothesis, untested` and the reason in its `Verified by` cell.
+When its check fails, plan another way and name the failed command and
+its output in the new way's `Verified by` cell, next to that way's own
+check.
 
 In `## Decisions`, add one line `- added: <claim id or step> — <reason,
 one line> — evidence: <file:line, command, or none>` for each claim or

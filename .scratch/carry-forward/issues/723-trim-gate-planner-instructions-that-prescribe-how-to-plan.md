@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: process
 Origin: owner request in session, 2026-10-27, after the research report `.scratch/agent-reports/2026-10-27-general-task-planning-guidance-sources.md` (gitignored, owner's checkout; its key quotes are copied below)
 Blocks: none
@@ -71,3 +71,60 @@ planner how to plan, as opposed to:
 
 Give each instruction on the list with its file:line. The owner decides
 what to cut.
+
+### 2026-10-27: list made, owner approved the edits; closed
+
+The list came from
+`.scratch/agent-reports/2026-10-27-general-task-723-how-to-plan-list.md`
+(gitignored, owner's checkout), read against `gate-planner.md` at
+`tbc-gear-prio@80c08777`. It found 10 instructions that tell the planner
+how to plan. Line numbers below are at `80c08777`.
+
+1. Make the split decision before any planning (`:25-26`): kept.
+2. **Whole job first** (`:26-30`): kept; it is the owner's ruling from
+   ticket 717.
+3. Get a heading map before reading a document over ~30 kB (`:36-38`):
+   kept.
+4. Research by subagent, the method parts (`:49-52`, `:57-60`): kept.
+5. "A plan is a bundle of causal claims with steps attached." (`:72-73`):
+   kept.
+6. "Verify to the depth of the claim" (`:75-77`): shortened, now Text A
+   below.
+7. "by a subagent if the run is long" (`:78`): cut; it repeats `:49-52`.
+8. "anything you were tempted to leave implicit" (`:83-84`): kept.
+9. The paragraph on a proposed way of doing a step (`:112-121`):
+   shortened, now Text B below.
+10. "with targeted `Edit` calls in one message" (`:138-139`): kept.
+
+Totals: 7 kept, 1 cut, 2 shortened.
+
+On 2026-10-27 the owner approved these two texts, applied word for word
+in `.claude/agents/gate-planner.md`:
+
+- Text A, in the **Claims are the product.** bullet: "The reviewer
+  counts a claim marked `Load-bearing: yes` and left
+  `hypothesis, untested` as a finding; a claim marked
+  `Load-bearing: no` may stay `hypothesis, untested`. Every number a
+  step depends on is measured before the plan ships and cited in
+  `Verified by` with its command."
+- Text B, replacing the paragraph that starts "You own the details of
+  the plan." in § Revisions: "You own the details of the plan. A way of
+  doing a step, or a command, that your prompt, `plan-review.md` or a
+  helper's report proposes is a claim like any other (§ Rules). Check
+  it, or have a helper check it, before the plan uses it; when no check
+  can run before the plan ships, write `hypothesis, untested` and the
+  reason in its `Verified by` cell. When its check fails, plan another
+  way and name the failed command and its output in the new way's
+  `Verified by` cell, next to that way's own check."
+
+The list's first draft of Text B dropped the rule to check a proposed
+way before the plan uses it. A reviewer restored it: it is ticket 712
+fix 2 (`.scratch/carry-forward/issues/712-*.md:210-215`). Ticket 725
+will rename the `Load-bearing` term that Text A uses.
+
+Verified by: on branch `feat/stage-gate-follow-ups`,
+`git grep -n -F 'Check it, or have a helper check it' .claude/agents/gate-planner.md`
+prints `.claude/agents/gate-planner.md:114:claim like any other (§ Rules). Check it, or have a helper check it,`
+(rc 0), and
+`grep -c -F 'by a subagent if the run is long' .claude/agents/gate-planner.md`
+prints `0` (rc 1).
