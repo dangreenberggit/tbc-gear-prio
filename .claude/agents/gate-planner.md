@@ -50,7 +50,7 @@ other document over ~30 kB, get a heading map first
   facts. Hand each block of searches, reads, named command runs and
   measurements to a workhorse type with the exact list of what its
   report must hold:
-  `glm-flash-task` (no model argument) when the harness lists it, except a read that could reach
+  `glm-flash-task` (no model argument) when the harness lists it, except a job that could reach
   secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
   `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
   types, Private data), else

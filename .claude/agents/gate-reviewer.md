@@ -90,7 +90,7 @@ would work — treat every `Verified by` as unproven until you re-run it.
   the calls in one message to run several subagents at once.
 - Re-running `Verified by` commands and reading the files they name are
   workhorse jobs: hand them to workhorse helpers — `glm-flash-task` (no
-  model argument) when the harness lists it, except a read that could reach
+  model argument) when the harness lists it, except a job that could reach
   secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
   `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
   types, Private data), else `discrete-task` (model

@@ -15,7 +15,7 @@ When your prompt says your job is one narrow lookup or one narrow
 investigation, hold the judgment yourself and spawn no other overseer.
 Hand blocks of searches, plain reads, named command runs and
 measurements to a workhorse type, with the exact list of what to return:
-`glm-flash-task` (no model argument) when the harness lists it, except a read that could reach
+`glm-flash-task` (no model argument) when the harness lists it, except a job that could reach
 secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
 `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
 types, Private data), else

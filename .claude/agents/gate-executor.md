@@ -110,7 +110,7 @@ with a silent deviation is the failure.
   searches, plain reads, and named runs whose output you read only for
   pass/fail or a number — a build, a sim, a fixture smoke — to a
   workhorse type with the exact list of what to return: `glm-flash-task`
-  (no model argument) when the harness lists it, except a read that could reach
+  (no model argument) when the harness lists it, except a job that could reach
   secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
   `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
   types, Private data), else `discrete-task`

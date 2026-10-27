@@ -481,10 +481,11 @@ hits a wall does not move to them (§ Four lanes).
   `docs/agents/home/AGENTS.md`). Give a GLM type no job that could reach
   secrets, session logs (`~/.claude/projects/`,
   `/tmp/claude-*/**/tasks/*.output`), or the config folders `~/.claude*`
-  and `~/.t3`. A read of that kind goes to `discrete-task`
-  (`model: "sonnet"`); any other such job goes to its Claude counterpart
-  in § Workhorse jobs. These jobs, and a retry on a wall, are the only
-  use of Sonnet on this card (§ Workhorse jobs). On the "Claude + GLM
+  and `~/.t3`. A search, read, run or measurement of that kind goes to
+  `discrete-task` (`model: "sonnet"`); any other such job goes to its
+  Claude counterpart in § Workhorse jobs. The Sonnet types on this card
+  take only a job z-ai must not see, or a retry when a GLM type hits a
+  usage wall (§ Workhorse jobs). On the "Claude + GLM
   workers" card, `model: "sonnet"` stays Claude Sonnet, and GLM runs only through
   `glm-task` and `glm-flash-task`. On 2026-10-26 a `discrete-task` and a
   `simple-task` spawned on that card with model "sonnet" showed in the
