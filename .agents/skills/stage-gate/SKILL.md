@@ -259,8 +259,9 @@ In these steps, "you" and "the session" are the same agent.
    `## Execution chunks` lists, and no steps for a Backburner line
    (`plan-template.md` § Execution chunks); after a `gate-planner` with
    `next: <id>`, `## Execution chunks` has the lines that step 5 logged
-   before that spawn, unchanged, and one more line, for chunk `<id>`;
-   Claims register nonempty; Paths manifest present; every open question in the
+   before that spawn, unchanged, and one more chunk line, for chunk
+   `<id>`, and any note under it (`.claude/agents/gate-planner.md`
+   § Next chunk); Claims register nonempty; Paths manifest present; every open question in the
    brief answered with its three items, or assigned to a deferred part;
    `git status --porcelain` still empty; `git rev-parse HEAD` still the
    SHA logged in step 1 or, once `K1` has run, the SHA in the `note`
