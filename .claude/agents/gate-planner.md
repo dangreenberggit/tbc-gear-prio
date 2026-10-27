@@ -73,7 +73,7 @@ other document over ~30 kB, get a heading map first
   steps attached. Every claim goes in the Claims register with a
   re-runnable `Verified by` command or the label `hypothesis, untested`.
   Verify to the depth of the claim you are about to make: a load-bearing
-  claim deserves a researcher; a step-local one may stay a labeled
+  claim deserves a helper; a step-local one may stay a labeled
   hypothesis. Every number a step depends on is measured before the plan
   ships — by a subagent if the run is long — and cited in `Verified by`
   with its command. A number the plan cannot measure is labelled
@@ -110,9 +110,9 @@ to the relevant claim row. Your final message is the full revised plan,
 not a diff. Do not silently drop a finding.
 
 You own the details of the plan. A way of doing a step, or a command,
-that your prompt, `plan-review.md` or a researcher's report proposes is
+that your prompt, `plan-review.md` or a helper's report proposes is
 a claim like any other: register it with a `Verified by` command that
-you or a researcher ran. When that check fails, plan another way,
+you or a helper ran. When that check fails, plan another way,
 register it as its own claim with its own `Verified by`, and name the
 failed command and its output in that claim's `Verified by` cell. When
 no check of the proposed way can run before the plan ships, write

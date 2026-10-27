@@ -1,7 +1,7 @@
 # Orchestration: the session, its subagents, and the owner
 
-Read this before spawning an agent, fanning out, stage-gating, or writing
-a question for the owner. Model and agent type: `model-policy.md`.
+Read this before spawning an agent, fanning out, stage-gating, writing
+a question for the owner, or ending an investigation. Model and agent type: `model-policy.md`.
 
 ## The session delegates
 
