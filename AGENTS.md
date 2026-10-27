@@ -7,6 +7,10 @@ paths: an `@` import loads at start and would undo the saving.
 
 ## Before you start, by kind of work
 
+- **You are the interactive session (the user talks to you directly):**
+  you route work and hand every task to a subagent. Read
+  `docs/agents/orchestration.md` § The session delegates before your
+  first tool call; it lists the few calls you make yourself.
 - **Writing code or tests, committing, pushing:** `docs/workflow.md`
   (the loop, gates, comment policy, testing seams, types from JSON,
   parking WIP, editing agent-facing documents).
@@ -20,8 +24,8 @@ paths: an `@` import loads at start and would undo the saving.
   `docs/agents/upstream-catch-up.md`.
 - **Pinning a vendored input, editing a parser, regenerating an artifact
   under `data/`:** the `data-pipeline-work` skill.
-- **Spawning an agent, fanning out, stage-gating, or writing a question
-  for the owner:** `docs/agents/orchestration.md`. **Which model and
+- **Spawning an agent, fanning out, stage-gating, writing a question for
+  the owner, or ending an investigation:** `docs/agents/orchestration.md`. **Which model and
   agent type:** `docs/agents/model-policy.md`.
 - **Judging a ranking, shortlist or pool output:** the `sme-rank-review`
   skill; its audience is the engineering team, not players.
