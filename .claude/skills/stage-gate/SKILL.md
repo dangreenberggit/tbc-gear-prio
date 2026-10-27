@@ -83,8 +83,9 @@ not` list below.
 3. **Route detail outward; keep the judgment.** Track what's done, what's
    next, and what's blocked. Delegate the detail and keep the one-paragraph
    conclusion. You judge the result; you don't author it. A question
-   between gates goes to a seat, or to a `general-task` / `simple-task`
-   agent. The only commands you run are the gate checks that `docs/agents/orchestration.md`
+   between gates goes to a seat or to a `general-task` agent; a workhorse
+   job goes to the type `docs/agents/model-policy.md` § Workhorse jobs
+   names. The only commands you run are the gate checks that `docs/agents/orchestration.md`
    § The session delegates lists. Tell the user that an agent is working
    only when the last `spawn` line in `decision-log.md` with that agent's
    id is `started` or `resumed` (step 1). When the agent's last
