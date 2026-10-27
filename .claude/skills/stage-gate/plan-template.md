@@ -56,8 +56,9 @@ shared manifests get exactly one owner.
 
 Each chunk is a piece worth building on its own, which one
 `gate-executor` builds after the chunks before it. List each chunk that
-has steps in this plan, as `K1: steps 1–4`. The planner decides from its
-plan of the whole job which chunks get steps now
+has steps in this plan, as `K1: steps 1–4`. `K1` always has steps. The
+planner decides from its plan of the whole job which later chunks get
+steps now
 (`.claude/agents/gate-planner.md` **Whole job first**). The Steps, Claims register
 and Paths manifest above cover those chunks only. A step whose result
 later steps must reason about goes in the same chunk as those steps.

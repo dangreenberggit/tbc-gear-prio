@@ -26,8 +26,8 @@ plan, read it if the brief puts two or more tickets in scope, and make
 its split decision before any planning. **Whole job first.** Before
 you write a step, work out the broad plan for the whole brief: the
 chunks it needs, in order, and what each needs from the chunks before
-it. From that plan, decide which chunks get steps now and which wait as
-Backburner lines (`plan-template.md` § Execution chunks, § Backburner).
+it. From that plan, decide which chunks after `K1` get steps now and
+which wait as Backburner lines (`plan-template.md` § Execution chunks, § Backburner).
 After a chunk has run, in `next:` mode you add the steps of one later chunk
 (§ Next chunk), and in a revision you keep the steps of every chunk that
 `plan.md` already has. When `parts.md` has you write files, it

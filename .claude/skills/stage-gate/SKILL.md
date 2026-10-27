@@ -250,7 +250,7 @@ In these steps, "you" and "the session" are the same agent.
    the user.
 
    **Gate A (mechanical):** every template section present, Backburner
-   included ("none" allowed); every step in a chunk that
+   included ("none" allowed); `K1` has steps; every step in a chunk that
    `## Execution chunks` lists, and no steps for a Backburner line
    (`plan-template.md` § Execution chunks); after a `gate-planner` with
    `next: <id>`, `## Execution chunks` has the lines that step 5 logged
