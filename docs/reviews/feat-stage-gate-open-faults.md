@@ -387,3 +387,26 @@ then checks only those two edits.
 | ---- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | R2-1 | Focused check | fixed       | `bcf50b5a`: after a `next: <id>` planner, Gate A allows one more chunk line, for chunk `<id>`, and any note under it; the lines step 5 logged must still be unchanged (owner, "Option 1")            |
 | R2-2 | Focused check | fixed       | `9fa66f25`: an executor takes a `minor` finding that names no step when no earlier chunk's report has a ledger row for its id, and starts each such row's `Why` with `R<n>-<id>` (owner, "Option 1") |
+| R2-3 | Focused check | wontfix     | The Disposition tables name each fix's commit, as the round-2 check suggested; adding IDs to the messages would mean rewriting commits                                                               |
+| Q-1  | Focused check | wontfix     | One 45-word sentence (`SKILL.md:201-204`); minor wording, and the review round limit is reached                                                                                                      |
+
+## Check of the round-2 fixes
+
+One fresh `general-task` agent on `model: "opus"`, which wrote neither
+fix, checked only `bcf50b5a` and `9fa66f25` (owner, "Option 1"). Both
+pass. This is not a third review round.
+
+- `bcf50b5a` (R2-1): `SKILL.md:262-264` now allows "one more chunk
+  line, for chunk `<id>`, and any note under it", which is what
+  `gate-planner.md:142-143` asks for ("say so under the chunk line").
+  It agrees with step 5's `note` (`SKILL.md:434-435`), which logs every
+  `## Execution chunks` line, notes included, for the next Gate A. The
+  `.agents/` mirror matches (`python3 scripts/check_skill_mirrors.py`,
+  rc 0).
+- `9fa66f25` (R2-2): `gate-executor.md:43-52` has an executor take a
+  no-step `minor` finding when no earlier chunk's report in
+  `execution-report.md` has a ledger row for its id, so a finding from
+  a later chunk's review reaches that chunk's executor. A `Why` cell that starts with `R<n>-<id>` fits the ledger
+  columns (`gate-executor.md:156`) and the id form that Gate B and the
+  `row` log lines use (`SKILL.md:157-160`). Gate C dispositions every
+  row (`SKILL.md:505-524`) and sets no form for the `Why` cell.
