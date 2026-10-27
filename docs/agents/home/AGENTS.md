@@ -33,6 +33,8 @@ A reply has these parts, in this order:
 
 **Decisions** go in **Needed from you**. Give each one a label that is unique in the session — a ticket id, or `Q-<name>` — so a later list cannot reuse it; list numbers that restart at 1 make the user answer the wrong item. For each decision, write plain paragraphs: what happens today, what each option does and costs, and what you recommend and why. A structured-question picker is an addition to the reply, and the reasoning stays in the reply text.
 
+**Open items carry forward.** A request — an answer, a permission, a decision, a manual step, a command or a prompt to paste — that an earlier message gave the user stays open until the user's messages show it is done or dropped, or until the agent checks and sees that it is done. Every reply restates every open item in full in its **Needed from you** section, even when an earlier reply already gave it and even when this reply is about something else. Never point to an earlier message; the user may not find it. A reply that ends a piece of work also puts in **Needed from you** every step still left for the user, including optional ones such as a push; each one is then an open item.
+
 **Text between tool calls** is outside the reply. Anything the user needs from that text goes in the reply as well.
 
 **A direct question asked mid-task** gets its answer at once, under its own title; then continue working. That answer is text between tool calls, so the turn's final reply repeats it in one sentence in its first section.
