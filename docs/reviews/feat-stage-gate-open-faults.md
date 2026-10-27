@@ -192,10 +192,11 @@ A1, A2, A3/P1, A4 and A7 (`SKILL.md`, `plan-template.md`,
 `gate-executor.md`, `gate-planner.md`), and S2, S3, S5, S6. The ticket
 fixes (A5, A6, P4, S7) are not agent files.
 
-Fixes are not made in this round. Until they are, round 2 cannot run,
-and the Disposition table below holds only S4. After the fixes and the
-code-quality pass are committed, round 2 (focused check) runs on
-`2b9ed795..<new HEAD>` and fills in the other rows.
+The owner approved every fix on 2026-10-27 ("have a subagent do all of
+the fixes now", relayed by the session). The fixes are commits
+`12ca28fb` through `4e75a9ea`, and the Disposition table below names the
+commit for each finding. Round 2 (focused check) runs on
+`2b9ed795..<new HEAD>`.
 
 Step 4 (`pnpm merge-to-dev --check-only`) has not run: the review is not
 finished until round 2. Tickets filed and closed are counted then.
@@ -204,4 +205,23 @@ finished until round 2. Tickets filed and closed are counted then.
 
 | ID  | Axis             | Disposition | Ticket / note                                                                                                                                                                                 |
 | --- | ---------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial      | fixed       | `12ca28fb`: after a `next:` planner, Gate A checks that `## Execution chunks` has the lines step 5 logged, unchanged, plus one line for the named chunk                                       |
+| A2  | Adversarial      | fixed       | `3264721c`: `K1` always has steps (`plan-template.md`, `gate-planner.md`), and Gate A checks it                                                                                               |
+| A3  | Adversarial      | fixed       | `ceac7d35`: a reviewer `spawn` line names every chunk the review covers, for example `K1 K2 round 1`                                                                                          |
+| A4  | Adversarial      | fixed       | `b7811da3`: `returned (<status>, waiting)` and `resumed (waiting)` record a waiting agent and its one message, and a fresh session starts the timer from the log                              |
+| A5  | Adversarial      | fixed       | `4e75a9ea`: ticket 722 no longer cites the size check                                                                                                                                         |
+| A6  | Adversarial      | fixed       | `4e75a9ea`: ticket 712's `Verified by:` cites `3c9d7ee2`                                                                                                                                      |
+| A7  | Adversarial      | fixed       | `f8603807`: only `K1`'s executor handles a `minor` finding whose `Where` names no step                                                                                                        |
+| S1  | Standards + Spec | fixed       | Same as A5: `4e75a9ea`                                                                                                                                                                        |
+| S2  | Standards + Spec | fixed       | `b7811da3` splits the waiting-agent rule; `180ce269` splits **Unasked-changes check**                                                                                                         |
+| S3  | Standards + Spec | fixed       | `180ce269`: "at most once" only in **Unasked-changes check**, its restating parenthesis removed; `b7811da3`: the 30 minutes only in step 1                                                    |
+| S5  | Standards + Spec | fixed       | `180ce269` names **Review limit per chunk**; `b7811da3` names the **one message to a waiting agent**                                                                                          |
+| S6  | Standards + Spec | fixed       | `3c9d7ee2`: the check stays in `gate-reviewer.md` **The approach**; `plan-template.md` points to it                                                                                           |
+| S7  | Standards + Spec | fixed       | `4e75a9ea`: ticket 720's section is "Copied from the old branch 2026-10-27"                                                                                                                   |
+| S8  | Standards + Spec | fixed       | Same as A6: `4e75a9ea`                                                                                                                                                                        |
+| P1  | Standards + Spec | fixed       | Same as A3: `ceac7d35`                                                                                                                                                                        |
+| P2  | Standards + Spec | fixed       | Same as A5: `4e75a9ea`                                                                                                                                                                        |
+| P3  | Standards + Spec | fixed       | Same as A6: `4e75a9ea`                                                                                                                                                                        |
+| P4  | Standards + Spec | fixed       | `4e75a9ea`: ticket 712's `Related:` names 720                                                                                                                                                 |
+| P5  | Standards + Spec | fixed       | `4e75a9ea`: ticket 712 § Comments records the approvals as relayed by the session, and the review reports each later fix commit applies                                                       |
 | S4  | Standards + Spec | wontfix     | The name is how each rule that applies the check links to it; one rule defines it (`SKILL.md:384`) and the others name it, so a rename touching each mention is expected, not scattered logic |
