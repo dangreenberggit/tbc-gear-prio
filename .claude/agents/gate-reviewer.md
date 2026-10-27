@@ -159,8 +159,8 @@ revision, your prompt names the claims and steps that the latest
 revision changed or added, and the earlier findings that the revision
 was asked to fix, each as `R<m>-<id>`: `<m>` is the number in the
 `# Round <m>` heading of the `plan-review.md` section that holds the
-finding. On the first review of a later chunk (a line after `K1` in
-the plan's `## Execution chunks` section), your prompt names the claims
+finding. On the first review of a later chunk (a chunk that a
+`gate-planner` with `next:` added), your prompt names the claims
 and steps that the `gate-planner` added for that chunk, and no earlier
 findings. Review only those claims and steps, using § What to hunt.
 For each named finding that `plan.md` still does not fix, add a row to

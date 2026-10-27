@@ -355,7 +355,9 @@ In these steps, "you" and "the session" are the same agent.
      line that step 5 plans. Each chunk gets its first review (step 3 for
      a chunk the first plan gives steps, step 5 for a chunk that step 5
      plans) and
-     at most two more, each after a revision of that chunk. The session
+     at most two more, each after a revision of that chunk. A review or
+     revision of the first plan counts for every chunk that the first
+     plan gives steps. The session
      spawns no fourth `gate-reviewer` for a chunk. The **Unasked-changes
      check** below is not one of these reviews: it does not count toward
      the three, this bullet's rules for a third review do not apply to
