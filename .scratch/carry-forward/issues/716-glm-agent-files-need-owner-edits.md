@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: pre-merge review feat/usage-limit-fixes, spec axis P3, 2026-10-26
 Blocks: none
@@ -25,3 +25,24 @@ and `glm-task.md`, outside this repo. Two rulings wait on edits there:
 
 The owner has made both edits, and the § Workhorse jobs table moves
 exact-text edits and small coding to `glm-flash-task`.
+
+## Closed 2026-10-26
+
+Both edits are in the agent files in `~/.claude_router/agents/`, outside
+git. Edit 1: `glm-task.md` and `glm-flash-task.md` each hold the
+`NEEDS_JUDGMENT` bullet with the short form of the bars. Edit 2:
+`glm-flash-task.md` has Edit and Write in `tools:` and no longer says
+"Change no file", and its `description:` now names small or modest
+edits. The files as they were before each change are in
+`/home/daniel/Code/lulz/tbc-gear-prio/.scratch/glm-agent-files-backup-2026-10-26/`
+(gitignored, main checkout only): `glm-task.md` before the bars edit,
+`glm-flash-task.md` before the bars and tools edits, and `glm-flash-task.md.before-description`
+before the description edit. The § Workhorse jobs table in
+`docs/agents/model-policy.md` now sends exact-text edits and small or
+modest coding to `glm-flash-task`, under the owner's ruling of
+2026-10-26 ("Sonnet generally should not be used but flash should be
+used for workhorse tasks").
+
+Verified by: `grep -n "^tools:\|NEEDS_JUDGMENT" ~/.claude_router/agents/glm-task.md ~/.claude_router/agents/glm-flash-task.md`
+(both files list Edit and Write and hold the bullet), and the table move
+at tbc-gear-prio@e5a80126.

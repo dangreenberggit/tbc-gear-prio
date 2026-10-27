@@ -404,6 +404,6 @@ file contention, worker prompt. This file stays the chronological log.
 - 713 `pnpm merge-to-dev` refuses the 17 empty stub files that agent sandbox commands leave in the folder (owner merge of feat/712-stage-gate-loops) 2026-10-26
 - 714 The docs disagree on whether a parallel-phase slice may run on simple-task (pre-merge review feat/usage-limit-fixes, A8) 2026-10-26
 - 715 Open owner question Q-haiku: cheap read-only jobs on Haiku (pre-merge review feat/usage-limit-fixes, P2) 2026-10-26
-- 716 The GLM agent files outside the repo need two owner edits (pre-merge review feat/usage-limit-fixes, P3) 2026-10-26
+- 716 The GLM agent files outside the repo need two owner edits (pre-merge review feat/usage-limit-fixes, P3) 2026-10-26; CLOSED 2026-10-26, both edits made in `~/.claude_router/agents/` (backups in `.scratch/glm-agent-files-backup-2026-10-26/`); § Workhorse jobs moved edits and small coding to `glm-flash-task` in e5a80126
 - 717 The stage-gate rules for later plan chunks have three gaps: a Gate C that may never run, a review count lost on restart, no planner size self-check (r4 wording review of feat/usage-limit-fixes, owner comment) 2026-10-26
 - 718 Stopping a trial type leaves no named workhorse type on cards without GLM (pre-merge review feat/usage-limit-fixes, A5) 2026-10-26
