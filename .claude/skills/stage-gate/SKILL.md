@@ -336,8 +336,10 @@ In these steps, "you" and "the session" are the same agent.
    register) and whose verdict in the `## Register verdicts` table of the
    review is `refuted`.
    - **Loop back.** A `blocking` finding, or a refuted load-bearing
-     claim → loop back: respawn `gate-planner` with brief + plan + review
-     for a revision, then spawn a `gate-reviewer` for a re-review
+     claim → loop back: respawn `gate-planner` with brief + plan +
+     review + the id of each chunk that the latest review covers (the
+     last field of that `gate-reviewer`'s `spawn` line), for a revision,
+     then spawn a `gate-reviewer` for a re-review
      (step 3). Loop back a second time only when the
      re-review after the first loop-back has a `blocking` finding or a
      refuted load-bearing claim. After the revision of the second
@@ -346,7 +348,9 @@ In these steps, "you" and "the session" are the same agent.
      **Review limit per chunk** below says what the session does next.
    - No `blocking` finding and no refuted load-bearing claim, but one or
      more `material` findings need a change to `plan.md` → the session
-     spawns one `gate-planner` revision with brief + plan + review, then
+     spawns one `gate-planner` revision with brief + plan + review + the
+     id of each chunk that the latest review covers (the last field of
+     that `gate-reviewer`'s `spawn` line), then
      runs Gate A. This revision is not a loop-back and does not count
      toward the two loop-backs that **Loop back** allows. The session
      spawns a `gate-reviewer` for a re-review (step 3) only when the
