@@ -106,9 +106,7 @@ not` list below.
 6. **Pace the pipeline.** Hold at most two stages between step 2 and
    step 4 (planning or review) at once, and run one executor at a time
    across all stages; a further feature waits with its `brief.md`
-   written and nothing spawned. The session spawns at most three
-   reviews, plus at most one review of what a chunk's last revision added
-   or changed unasked (step 4, **Unasked-changes check**), for each
+   written and nothing spawned. The session limits the reviews of each
    chunk, a group of plan steps that one `gate-executor` runs (step 4,
    **Review limit per chunk**). On
    2026-10-25 five stages ran at once, 12 planner and 8 reviewer runs
@@ -370,9 +368,8 @@ In these steps, "you" and "the session" are the same agent.
      plan gives steps. The session
      spawns no fourth `gate-reviewer` for a chunk. The **Unasked-changes
      check** below is not one of these reviews: it does not count toward
-     the three, this bullet's rules for a third review do not apply to
-     it, and the session runs it at most once for each chunk. It is the
-     one exception because it checks only claims and steps that no
+     the three, and the rules of **Review limit per chunk** for a chunk's
+     third review do not apply to it. It is the one exception because it checks only claims and steps that no
      review has seen, and no revision follows it, so it cannot lead to
      another review. The session counts
      the reviews and the loop-backs of each chunk separately; the round
@@ -391,18 +388,16 @@ In these steps, "you" and "the session" are the same agent.
      stated for each `material` finding and logs each one `fixed`, with
      the plan step as evidence. A `material` finding that `plan.md` does
      not meet goes to the user.
-   - **Unasked-changes check.** After a revision that step 4 follows
-     with no further `gate-reviewer` for that chunk (the revision for the
-     `material` findings of a re-review that itself followed a revision
-     for `material` findings, and the revision for the `material`
-     findings of a chunk's third review), when the `## Decisions`
-     section of that `gate-planner`'s final message has lines that start
-     with `- added:` or `- changed:`, the session spawns one
-     `gate-reviewer` (step 3) once Gate A passes. Its spawn prompt is the
-     one step 3 gives for it. Before it spawns this review, the session
-     checks that revision's `material` findings against `plan.md`, as it
-     does for a revision that no re-review follows. No revision follows this
-     review. When it has a `blocking` finding or a refuted load-bearing
+   - **Unasked-changes check.** This check is for a chunk's last
+     revision, the one that step 4 follows with no further
+     `gate-reviewer` for that chunk. The session runs it at most once for
+     each chunk, and only when the `## Decisions` section of that
+     `gate-planner`'s final message has lines that start with `- added:`
+     or `- changed:`. Once Gate A passes on that revision, the session
+     first checks the revision's `material` findings against `plan.md`,
+     as it does for a revision that no re-review follows. Then it spawns
+     one `gate-reviewer` with the spawn prompt that step 3 gives for this
+     check. No revision follows this review. When it has a `blocking` finding or a refuted load-bearing
      claim, the session stops and gives the user the open findings. Each
      `material` finding goes to the user. Each `minor` finding gets a
      `row R<n>-<id> | advisory` line in `decision-log.md`.
