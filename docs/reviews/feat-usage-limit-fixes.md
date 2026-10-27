@@ -2,6 +2,8 @@
 
 Reviewed range: `2bc139f424db09c2635022f344d0ae20d1388d11..572ff9084a55924b3e9696e3f3fec877684c9c80`
 
+Reviewed range: `572ff9084a55924b3e9696e3f3fec877684c9c80..eff96d3878c5db0f15fc96e95682ba4c3fd6bd21`
+
 Dispatch (round 1, 2026-10-26): `codex` is not on `PATH` (`which codex`
 exit 1), so the axes ran as three fresh `general-task` agents on Opus
 (review lane) in one parallel batch: adversarial (brief
@@ -308,3 +310,150 @@ run.
 | S10 | Standards    | fixed       | 7d7d8f70: three `packages/core/test/*.test.ts` header comments use "§ Testing: seams and where tests go"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | P8a | Spec         | wontfix     | the coordinator kept 'lead', an ordinary word covering the whole job                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | O1  | Owner ruling | fixed       | e5a80126: on the "Claude + GLM workers" card `glm-flash-task` is the default workhorse type (searches, reads, named runs, measurements, exact-text edits, small or modest coding), `glm-task` takes larger planned edits, and Sonnet types take only jobs z-ai must not see, in `model-policy.md`, `AGENTS.md` § Spawning, `orchestration.md`, the seat and trial agent files and the parallel-phase adapter. Owner, 2026-10-26: "Flash should be used instead of sonnet, except for certain things zai models shouldn't do privacy-wise and are probably hooked out of doing (using gh, for example, I think). Sonnet generally should not be used but flash should be used for workhorse tasks." `gh` is denied to every agent on that card, so it is no reason to pick Sonnet |
+
+## Focused check (round 2)
+
+Range: `572ff908..eff96d38` (second `Reviewed range:` line). The session
+named `9e5abb00..eff96d38`; the one commit before that, `840f690e`
+(A2a, A6, A7a), was checked by the dispatching agent with `git show
+840f690e` and matches its three Disposition rows. Fork range: none;
+`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json` gave rc 0,
+so condition 3 holds. Dispatch: `codex` is not on `PATH` (round 1), so
+one fresh `general-task` agent on Opus (review lane), told it writes
+nothing. A `discrete-task` agent on Sonnet ran the mechanical checks
+(verify, mirrors, ticket numbers, ticket paths).
+
+Scope exception, as in `docs/reviews/feat-712-stage-gate-loops.md`
+§ Focused check: these commits are not on condition 1's list, and the
+session asked round 2 to review them anyway. Merges `8c3438c1` and
+`271affba` (their conflict resolutions only; dev's own commits were
+reviewed on their branches), `54b5e2c9` (the owner-approved r4 patch;
+only how it fits this branch's pacing and routing text), `861c3ce9`
+(the owner-approved "Open items carry forward." paragraph) and the
+option-A part of `e5a80126` (owner ruling O1). The fix commits name no
+finding ID in their messages; the round-1 Disposition rows map each one
+to its finding, and the reviewer checked each mapping against the diff.
+
+1. **Conditions 1-3: pass, with the scope exception above.** Each
+   mapping matches its commit, except `f8233fa7` (R2-1). Merge
+   `8c3438c1` resolved both meaning conflicts that § Merge order names
+   on this branch's side: `gate-planner.md:48-68` and
+   `gate-reviewer.md:91-108` keep the workhorse routing, and no text
+   points at "AGENTS.md § The session delegates". A line-presence check
+   over both merges (every line either side added since the merge base,
+   looked up in the merge result) found only 4 dev lines in
+   `gate-planner.md` where "researcher" became "helper" (now `:66-70`)
+   and the expected `NEXT` value. `271affba` brings dev's files in
+   unchanged. `861c3ce9`: `diff ~/.claude/AGENTS.md
+docs/agents/home/AGENTS.md` gives rc 0.
+2. **Only what each finding asks: fail for A2b and A3.** A1, A4, A7b,
+   P4, S1, S2, S3, S4, S7 and S10 are fixed at the tip in both skill
+   mirrors (`python3 scripts/check_skill_mirrors.py` rc 0). A2b goes
+   past E3 (R2-1); A3 covers reads only (R2-2).
+3. **Tests assert their findings: pass, none added.** The only test
+   changes are the three S10 header comments.
+4. **Touched tests pass.** `pnpm exec vitest run` on the three files:
+   34 passed, rc 0. `TBC_VERIFY_WITHOUT_FORK=1 pnpm verify` at
+   `eff96d38`: rc 0, `gates: 1345 ran, 218 skipped`; the upstream drift
+   step printed "CHECK DID NOT RUN" (sandbox denied `api.github.com`).
+
+Clean: the renumber (no duplicate ticket number, `NEXT` 719, `map.md`
+lists 713-718 once each, every ticket path in this file resolves, no
+text names the branch's old 713); the r4 fit; no commit after
+`271affba` changes the content ticket 717 cites.
+
+New findings. The dispatching agent re-read R2-1 to R2-4 at the tip;
+R2-5 to R2-11 are the reviewer's, not re-checked.
+
+- **R2-1 (fixed-before-merge class; skill file).** `f8233fa7`,
+  `parallel-phase/SKILL.md:14`, both mirrors. E3 asked for "workhorse"
+  to become "lead". The commit also wrote "a small or modest slice may
+  run on a workhorse type, as `docs/agents/model-policy.md` § Workhorse
+  jobs says". That contradicts `adapters/claude-code.md:10` ("a
+  `parallel-phase` slice itself never goes to them") and
+  `model-policy.md:412` (any `parallel-phase` worker is `general-task`),
+  and § Workhorse jobs does not mention slices. A Delegator reads this
+  skill first and could put a whole slice on `glm-flash-task`: the A2
+  fault again. Suggested text: "Workers run the **lead** lane (Opus
+  `general-task`), as `docs/agents/model-policy.md` § Four lanes says."
+- **R2-2 (fixed-before-merge class; agent files).** `3381fa1a`,
+  `e5a80126`. The five seat files (`general-task.md:18`,
+  `design-task.md:26`, `gate-planner.md:53`, `gate-reviewer.md:93`,
+  `gate-executor.md:113`) keep off GLM only "a read that could reach"
+  private paths, but they hand down runs and measurements too; the rule
+  they point to says "job". A measurement over `~/.claude/projects/` is
+  routed to `glm-flash-task` if read literally (hypothesis, untested:
+  not observed). Suggested text: "except a job that could reach" in all
+  five, and at `model-policy.md:483` "A search, read, run or measurement
+  of that kind goes to `discrete-task`".
+- **R2-3 (other: spec gap; introduced here).** `e5a80126`,
+  `model-policy.md:294-295`. The rows "Small or modest coding" →
+  `glm-flash-task` and "A larger planned edit inside the "Modest"
+  bounds" → `glm-task` overlap; every coding job inside the Modest
+  bounds matches both, and "larger" has no measure. `:351-352` does not
+  say which GLM type replaces which pick. Needs an owner ruling
+  (Q-glm-coding-split).
+- **R2-4 (code quality; introduced here).** `e5a80126`. The Sonnet rule
+  says two things: `model-policy.md:304-307` and `:485-486` name a
+  retry on a GLM wall as a second Sonnet use; `AGENTS.md:146-150`,
+  `orchestration.md:47-49`, `simple-task.md:3`, `discrete-task.md:3`,
+  the adapter (both mirrors) and the lane table (`model-policy.md:186`)
+  say Sonnet there takes only jobs z-ai must not see. The coding retry
+  goes to `modest-task` (Opus medium), not Sonnet. Fix depends on
+  Q-glm-wall-retry.
+- **R2-5 (silent-wrong-result risk, low; introduced here).**
+  `model-policy.md:89-91`: "A GLM type and its Claude counterpart are
+  peer fills" reads both ways, so a private job on `discrete-task` that
+  hits a wall "may retry" on `glm-flash-task`; only `:481` stops it.
+  Suggested text: "On Claude Code a job on a GLM type may retry on its
+  Claude counterpart (§ Workhorse jobs); a job never moves from a Claude
+  type to a GLM type."
+- **R2-6 (other; from dev, made contradictory by `e5a80126`).**
+  stage-gate `SKILL.md:86` sends a question between gates to
+  "`general-task` / `simple-task`", and slices go to `simple-task` at
+  `SKILL.md:49-50`, `gate-executor.md:119-120`,
+  `adapters/claude-code.md:9`, `model-policy.md:528-529`; the new
+  `simple-task.md:3` says that type is for private jobs only on the GLM
+  card. The slice lines belong with ticket 714.
+- **R2-7 (code quality; introduced here).** The stage-gate seat table
+  (`SKILL.md:41`) and `model-policy.md:519-521` put the Executor in the
+  review lane; § Four lanes (`model-policy.md:55`) defines lead as
+  running a plan and hard implementation, the Executor's job.
+- **R2-8 (code quality; introduced here).** `orchestration.md:3-4`
+  still lists the four old triggers, without "ending an investigation"
+  (E2).
+- **R2-9 (code quality; from merge `8c3438c1`).** `gate-planner.md:76,
+113, 115` still say "researcher" for the agent that `:48-68` now
+  calls "helper".
+- **R2-10 (code quality, judged wontfix-class by the dispatching
+  agent).** Inserted lines are not rewrapped to 80 columns. `.prettierrc`
+  sets no `proseWrap`, so Prettier keeps markdown line breaks as written,
+  and many tracked markdown lines are longer (`parallel-phase/SKILL.md:14`
+  is one line); no repo rule asks for the wrap.
+- **R2-11 (bookkeeping).** Ticket 717's line numbers, given at
+  `54b5e2c9`, are off at the tip: `SKILL.md` lines +1 (S7), and
+  `gate-planner.md:101-139` +3 (E4). The cited text is unchanged.
+
+Round 2 reported findings other than bookkeeping, so under § Round
+limit the review stops here: no fixes are made on this branch, there is
+no round 3, `## Disposition (round 2)` is not written, and the owner
+decides what happens next. R2-1, R2-2 and R2-5 are in the
+fixed-before-merge class and block the merge; R2-3, R2-4 and R2-7 to
+R2-9 were introduced here and block it unless the owner allows a
+deferral.
+
+## Summary (round 2)
+
+Every round-1 finding except A2b and A3 is fixed as its Disposition row
+says. The two dev merges, the r4 fit, the open-items copy and the ticket
+renumber are clean, and nothing on the branch fixes ticket 717's
+faults. Round 2 found two fixes that need another pass (R2-1, R2-2),
+one more privacy-routing gap (R2-5), two option-A contradictions that
+need owner rulings (R2-3, R2-4), and code-quality items R2-6 to R2-10.
+The merge is blocked until the owner rules on the next step.
+
+Tickets so far (counted at `eff96d38`; the final count is written with
+the last Disposition table): filed 4 (714, 715, 716, 718; `git diff
+--name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`),
+closed 1 (716). Filed is higher than closed because the round-1 defer
+rows each needed a ticket.
