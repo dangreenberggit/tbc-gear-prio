@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: process
 Origin: r4 wording review of the round-rule patch, `.scratch/agent-reports/2026-10-26-general-task-round-rule-r4-review.md` § "Faults seen but not fixed" (gitignored, owner's checkout), and an owner comment, 2026-10-26
 Blocks: none
@@ -97,3 +97,32 @@ edits 1a, 1b, 2a and 2b in
 Item 3 is still open. The owner rejected measuring a plan's work in
 lines (relayed by the session on 2026-10-27), so the drafted fault 3
 option A, which counts lines, is not applied.
+
+### 2026-10-27: item 3 resolved; closed
+
+Item 3 asked whether a planner should check its plan against the size
+budget. The owner ruled on 2026-10-27 (relayed by the session) that the
+planner should make a broader plan first and from it decide whether to
+give steps to every chunk or to one: "the reality is that the planner
+should be making a broader plan and from that knowledge deciding whether
+it should make detailed plans for everything or if one piece is enough."
+The owner accepted the draft
+`.scratch/agent-reports/2026-10-27-general-task-chunk-size-planner-led-draft.md`
+(gitignored, owner's checkout). `602d7b14` applies it: the planner rule
+**Whole job first** in `gate-planner.md`, and no size count is left, so
+there is no budget to check against. On steps that go stale before their
+chunk runs, the owner said: "this is an inevitbale part of having a
+broad plan and then doing subplans sequentially ... my assumption is that
+more guidance could just be more stuff for an agent to misinterpret", so
+no rule was added for that. `90b61b8e` adds to the reviewer's check
+**The approach** the Backburner check that `plan-template.md` already
+named.
+
+Done when is met: items 1 and 2 are applied (`a886eac3`, `b0afc857`) and
+item 3 is resolved by `602d7b14`, all on branch
+`feat/stage-gate-open-faults`, not yet merged into `dev`.
+
+Verified by: `tbc-gear-prio@90b61b8e`;
+`grep -rn '350\|stage budget\|over budget\|five steps\|size limit' .claude/skills/stage-gate .agents/skills/stage-gate .claude/agents`
+prints nothing (rc 1) and `python3 scripts/check_skill_mirrors.py` gives
+rc 0 at `90b61b8e`.
