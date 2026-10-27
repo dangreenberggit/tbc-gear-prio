@@ -49,12 +49,12 @@ change. **Lanes sort by kind of work, not by model height** — "which model is
 biggest" is never the question, and a taller model is not a better fill for a
 lane it does not belong to.
 
-| Lane          | Jobs                                                                                                                              | Model bar                                                                                                                  | Speed                                                                         |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| **Workhorse** | Searches, plain reads, command runs, measurements, small or modest coding, mechanical edits (§ Workhorse jobs)                    | The model your harness section names for **workhorse**: the cheap worker models, which the harness will **actually run**   | Prefer parallel; hand work over in blocks                                     |
-| **Lead**      | Oversight (running a plan, an investigation or a set of workers), judgment, hard implementation, `parallel-phase` workers, merges | The model your harness section names for **lead**                                                                          | Prefer parallel when slices are independent                                   |
-| **Review**    | Pre-merge review axes, adversarial and domain judgment, SME rank review                                                           | The model your harness section names for **review** — critique against a fixed standard, not the tallest model             | **Slow is fine**: sequential axes, wait/retry, or hand off to a fresh session |
-| **Design**    | Planning, architecture, hard open-ended design calls                                                                              | The model your harness section names for **design** — reserved for open-ended work with no fixed standard to check against | One at a time; never fanned out                                               |
+| Lane          | Jobs                                                                                                                                  | Model bar                                                                                                                  | Speed                                                                         |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **Workhorse** | Searches, plain reads, command runs, measurements, small or modest coding, mechanical edits (§ Workhorse jobs)                        | The model your harness section names for **workhorse**: the cheap worker models, which the harness will **actually run**   | Prefer parallel; hand work over in blocks                                     |
+| **Lead**      | Oversight (running a plan, an investigation or a set of workers), judgment, hard implementation, hard `parallel-phase` slices, merges | The model your harness section names for **lead**                                                                          | Prefer parallel when slices are independent                                   |
+| **Review**    | Pre-merge review axes, adversarial and domain judgment, SME rank review                                                               | The model your harness section names for **review** — critique against a fixed standard, not the tallest model             | **Slow is fine**: sequential axes, wait/retry, or hand off to a fresh session |
+| **Design**    | Planning, architecture, hard open-ended design calls                                                                                  | The model your harness section names for **design** — reserved for open-ended work with no fixed standard to check against | One at a time; never fanned out                                               |
 
 **Hard implementation** is any change that is not a workhorse job: one
 where the agent chooses the approach, one larger than § Trial types,
@@ -206,14 +206,14 @@ own description says to pass it only when the user, CLAUDE.md or a
 skill asks). This repo sets effort through each agent type's
 frontmatter, so spawn through a type that pins both:
 
-| Agent type      | Model                          | Effort                       | Use for                                                                                                                |
-| --------------- | ------------------------------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `simple-task`   | `sonnet`                       | `high`                       | An **extremely simple** job: one lookup, one search with a known target, or one edit whose exact text the prompt gives |
-| `general-task`  | `opus`                         | `high`                       | Lead-lane jobs (oversight, judgment, hard implementation, `parallel-phase` workers, investigations) and review axes    |
-| `modest-task`   | `opus`                         | `medium`                     | Trial: a modest job where the worker writes the code or text, as § Trial types defines it                              |
-| `discrete-task` | `sonnet`                       | `high`                       | Trial: one job whose result the prompt fixes, as § Trial types defines it                                              |
-| `design-task`   | `fable`                        | `low`                        | Planning and architecture outside stage-gate                                                                           |
-| `gate-*` seats  | `opus`; `gate-planner` `fable` | `high`; `gate-planner` `low` | Stage-gate only — see § Stage-gate seats                                                                               |
+| Agent type      | Model                          | Effort                       | Use for                                                                                                                 |
+| --------------- | ------------------------------ | ---------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `simple-task`   | `sonnet`                       | `high`                       | An **extremely simple** job: one lookup, one search with a known target, or one edit whose exact text the prompt gives  |
+| `general-task`  | `opus`                         | `high`                       | Lead-lane jobs (oversight, judgment, hard implementation, hard `parallel-phase` slices, investigations) and review axes |
+| `modest-task`   | `opus`                         | `medium`                     | Trial: a modest job where the worker writes the code or text, as § Trial types defines it                               |
+| `discrete-task` | `sonnet`                       | `high`                       | Trial: one job whose result the prompt fixes, as § Trial types defines it                                               |
+| `design-task`   | `fable`                        | `low`                        | Planning and architecture outside stage-gate                                                                            |
+| `gate-*` seats  | `opus`; `gate-planner` `fable` | `high`; `gate-planner` `low` | Stage-gate only — see § Stage-gate seats                                                                                |
 
 The spawning agent decides which type to use (§ Trial types, "Which type
 takes a small job"; § Workhorse jobs). When unsure whether the job needs

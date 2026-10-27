@@ -98,7 +98,7 @@ plan.
 Four lanes, every harness, sorted by kind of work, not model height:
 **workhorse** for searches, reads, command runs, measurements and small
 or modest coding, on the cheap worker models; **lead** for oversight,
-judgment and hard implementation, including `parallel-phase` workers;
+judgment and hard implementation, including hard `parallel-phase` slices;
 **review** for pre-merge review axes and adversarial judgment; **design**
 for planning and architecture. Go slower or serial on walls; never invent
 a weaker substitute for a review job: if waiting and serialising both
