@@ -1,9 +1,9 @@
-Status: open
+Status: closed
 Type: process
 Origin: audit `.scratch/agent-reports/2026-10-25-general-task-stage-gate-revision-audit.md` (§ Q3 "What looks plainly wrong in how the loop was run", § Q4; gitignored, owner's checkout) of stage-gate session 895dc2f0, 2026-10-25 19:33-20:33Z
 Blocks: none
 Blocked by: none
-Related: 550 on unmerged branch `feat/subagent-foreground-helpers` (not dev's 550; see "Related unmerged fix")
+Related: 720 (ticket 550 on unmerged branch `feat/subagent-foreground-helpers`; see "Related unmerged fix")
 
 # Stage-gate revision loops were run wrong in six ways
 
@@ -281,3 +281,83 @@ branch's SKILL.md step 3 round numbering ("1 for the stage's first
 review, then 1 higher for each later review") and the step 4 bullet
 "Round 3 is the last review" must be rewritten too, keeping each
 `# Round <n>` heading and `R<n>-<id>` id unique within `plan-review.md`.
+
+### 2026-10-27: owner rulings on two open items and the old branch
+
+The owner's rulings, relayed by the session on 2026-10-27, on the
+options in
+`.scratch/agent-reports/2026-10-27-general-task-stage-gate-fault-drafts-v2.md`
+(gitignored, owner's checkout). Applied on branch
+`feat/stage-gate-open-faults`, not yet merged into `dev`:
+
+- No rule moves the stage on when a waiting agent is never resumed
+  (fault 4 in the drafts). Option B, a 30-minute background timer and
+  then one `SendMessage`. Owner: "B sounds ok". Applied as drafted
+  (edits 4B-a, 4B-b, 4B-c) in `2517440b`.
+- `- added:` lines in a chunk's last revision reach the executor
+  unreviewed (fault 5). Option B, one narrow `gate-reviewer` pass on
+  those lines only. Owner: "sure". `6eb1037d` adds the bullet
+  **Added-lines check** to `SKILL.md` step 4 and names it as the one
+  exception in **Review limit per chunk**.
+- Branch `feat/subagent-foreground-helpers` on the `windows` remote
+  (tip `870e88d0`). Owner: "ok" to copying its ticket and review file
+  onto this branch and then deleting the remote branch. `2dfe8d21`
+  copies the ticket as 720 (dev already has a 550) and
+  `docs/reviews/feat-subagent-foreground-helpers.md`. The delete,
+  `git push windows --delete feat/subagent-foreground-helpers`, was
+  refused for the agent by the `agent-guard` hook ("git push to windows
+  (windows) is not a dangreenberggit GitHub repo. The owner can run it
+  in their own terminal."), so the owner runs it. Check:
+  `git ls-remote windows feat/subagent-foreground-helpers` prints
+  nothing once it is gone.
+
+A later review of the fault 4 and 5 commits
+(`.scratch/agent-reports/2026-10-27-general-task-fault-4-5-applied-review.md`,
+gitignored, owner's checkout) led to `f3f47db2` and `3883082e`. On
+2026-10-27 the owner approved faults 6 and 7 with the words "plain fixes
+approved": `86fd3681` adds `- changed:` lines (fault 6) and `98356b7f`
+covers a `minor` finding whose `Where` names no step (fault 7). The same
+review found two faults in unchanged text, filed as 721 and 722. With
+fault 6 applied, a chunk's last revision could still pass `- changed:`
+lines to the executor unreviewed. Asked whether the same single check
+should also cover unasked changes, the owner answered "sure"
+(2026-10-27): `c8737b8a` makes it run on `- added:` or `- changed:`
+lines and renames it **Unasked-changes check** (spawn-line marker
+`unasked-changes`).
+
+### 2026-10-27: closed
+
+Done when is met. Findings 1-6 have the fix the owner approved on
+2026-10-26, merged into `dev` in `b5022cb8`. The decision on
+`feat/subagent-foreground-helpers` is made: copy its ticket and review
+file, then delete the remote branch. The four open items the 2026-10-26
+fix left are applied on `feat/stage-gate-open-faults`, which is not yet
+merged into `dev`. The remote delete is not done: the owner runs it.
+
+Verified by: `tbc-gear-prio@b5022cb8` (findings 1-6);
+`tbc-gear-prio@3c9d7ee2` (the four open items, on
+`feat/stage-gate-open-faults`, after the later changes in the comment
+below); `python3 scripts/check_skill_mirrors.py` (rc 0 at `3c9d7ee2`).
+
+### 2026-10-27: owner approval of the later wording
+
+The session reports (2026-10-27) that the owner approved each change on
+this branch by choosing an option, and asked for a fresh review of each
+applied change. The later fix commits apply what those reviews found:
+
+- `f3f47db2` and `3883082e` fix findings F4-1, F4-2 and F5-1 of
+  `.scratch/agent-reports/2026-10-27-general-task-fault-4-5-applied-review.md`.
+- `1808a79c`, `d22fe9fd` and `2b9ed795` fix findings B1, M1-M4 and M5 of
+  `.scratch/agent-reports/2026-10-27-general-task-fault-3-applied-review.md`.
+- `90b61b8e` adds the Backburner check to the reviewer. The draft the
+  owner accepted,
+  `.scratch/agent-reports/2026-10-27-general-task-chunk-size-planner-led-draft.md`,
+  left the choice open: delete the template sentence or add the check
+  to the reviewer.
+
+The pre-merge review `docs/reviews/feat-stage-gate-open-faults.md`
+(round 1) found more gaps. The owner approved all its fixes on
+2026-10-27 (relayed by the session: "have a subagent do all of the fixes
+now"). They are `12ca28fb` through `3c9d7ee2`; the review's Disposition
+table names the commit for each finding. The report files above are
+gitignored, in the owner's checkout.

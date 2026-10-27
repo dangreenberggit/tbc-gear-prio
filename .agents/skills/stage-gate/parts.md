@@ -23,7 +23,7 @@ Decide one of:
 - **partial** — defer a part that depends on a result nobody has yet (a
   measurement, a gate's exit, a user ruling), that waits on a question
   only the user can answer, or that would make more than 3 planned
-  parts. Within a part, later chunks go to the plan's Backburner
+  parts. Within a part, a chunk without steps goes to the plan's Backburner
   (`plan-template.md`), not to Deferred: a deferred part is another
   ticket's work, a Backburner chunk is this plan's later work.
 
@@ -41,7 +41,7 @@ parts; otherwise it goes to `parts/P1/plan.md`.
 
 ## Re-split
 
-Your prompt says `re-split` with a reason: over the stage budget, a
+Your prompt says `re-split` with a reason: a
 Gate A violation, a review (`plan-review.md`) with findings marked
 `Where: decomposition`, or the user's ruling on a deferral. Start from
 `plan.md`. Keep it, defer chunks, or bring a deferred part back, only as

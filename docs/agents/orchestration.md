@@ -18,7 +18,10 @@ The session makes only these tool calls itself:
   verbatim from a seat's final message
 - the short gate checks: `git status --porcelain`, `git rev-parse HEAD`,
   `git diff --stat`, and `date -u +%Y-%m-%dT%H:%MZ` for `decision-log.md`
-  times
+  times and for the age of a waiting agent's `returned` line
+- a background `sleep 1800` timer for an agent that is waiting on its own
+  background work (`.claude/skills/stage-gate/SKILL.md` step 1 **Open the
+  stage**, the `spawn` lines)
 - reading the stage-gate artifacts under `.scratch/stage-gate/<slug>/`
   and `.claude/skills/stage-gate/plan-template.md`
 - reading a subagent's report file (AGENTS.md § Subagent reports) for a
@@ -128,11 +131,13 @@ cannot tell them from a stray worker's.
 When a wrong plan would be expensive, run the `stage-gate` skill: Planner
 (Fable, effort low) → adversarial Plan-Reviewer (Opus, effort high) →
 fresh-context Executor (Opus, effort high), with judged gates and a
-capped loop-back. Inside this flow the planner plans one chunk in detail
-and lists the rest on the plan's Backburner, and the session runs at most
+capped loop-back. Inside this flow the planner works out the whole job,
+writes steps for the chunks it chooses, and lists the rest on the plan's
+Backburner, and the session runs at most
 two stages in planning or review at once (SKILL.md § Orchestrator
 conduct). That pacing belongs to the stage-gate flow only: a plain
-request for a plan is planned whole. `pre-merge-review` still runs after.
+request for a plan gets steps for every part. `pre-merge-review` still
+runs after.
 Seats are agent definitions under `.claude/agents/`; registration of new
 agent files: model-policy § Claude Code.
 
