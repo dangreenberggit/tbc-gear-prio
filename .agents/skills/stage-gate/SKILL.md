@@ -208,7 +208,8 @@ In these steps, "you" and "the session" are the same agent.
      the session logs `resumed`. When it lacks `"success":true`, or the
      agent's next notification again says it is waiting on its own
      background work, the session stops and tells the user.
-   - `note`: the SHAs that steps 1 and 5 record, each question and
+   - `note`: the SHAs that steps 1 and 5 record (step 5 adds the
+     `## Execution chunks` lines after its SHA), each question and
      answer of step 5, and filed ticket ids with the new HEAD.
 
    Write the reason on every line. Write `evidence: none` when you
@@ -251,8 +252,10 @@ In these steps, "you" and "the session" are the same agent.
    **Gate A (mechanical):** every template section present, Backburner
    included ("none" allowed); every step in a chunk that
    `## Execution chunks` lists, and no steps for a Backburner line
-   (`plan-template.md` § Execution chunks); Claims register
-   nonempty; Paths manifest present; every open question in the
+   (`plan-template.md` § Execution chunks); after a `gate-planner` with
+   `next: <id>`, `## Execution chunks` has the lines that step 5 logged
+   before that spawn, unchanged, and one more line, for chunk `<id>`;
+   Claims register nonempty; Paths manifest present; every open question in the
    brief answered with its three items, or assigned to a deferred part;
    `git status --porcelain` still empty; `git rev-parse HEAD` still the
    SHA logged in step 1 or, once `K1` has run, the SHA in the `note`
@@ -425,8 +428,8 @@ In these steps, "you" and "the session" are the same agent.
 5. **Execute.** Run the chunks in the order of their ids (`K1`, `K2`,
    ...), one `gate-executor` (`model: "opus"`) for each. When the next
    chunk is still a Backburner line and may start (**Gate C between
-   chunks** below), log
-   `git rev-parse HEAD` in a `note` line (Gate A compares against it),
+   chunks** below), log `git rev-parse HEAD` and the lines of
+   `## Execution chunks` in a `note` line (Gate A compares against both),
    then spawn
    `gate-planner` (`model: "fable"`) with `next: <that chunk's id>`
    and the paths of `plan.md`, `execution-report.md` and `progress.md`;
