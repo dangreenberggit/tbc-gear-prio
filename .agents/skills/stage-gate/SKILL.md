@@ -87,12 +87,10 @@ not` list below.
    job goes to the type `docs/agents/model-policy.md` § Workhorse jobs
    names. The only commands you run are the ones that `docs/agents/orchestration.md`
    § The session delegates lists. Tell the user that an agent is working
-   only when the last `spawn` line in `decision-log.md` with that agent's
-   id is `started` or `resumed` (step 1). When the agent's last
-   notification says it is waiting on its own background work, tell the
-   user that it has stopped and may resume on its own, and that if it is
-   still waiting 30 minutes after that notification, the session sends it
-   one message (step 1 **Open the stage**, the `spawn` lines).
+   only when it is **working** (step 1 **Open the stage**, the `spawn`
+   lines). When it is **waiting** (same place), tell the user that it has
+   stopped and may resume on its own, and when the session will send it
+   the **one message to a waiting agent**.
 4. **Let open issues block end-of-line moves like merge.** When a phase
    produces open tickets — a correctness gap, a test hole, a half-delivered
    feature — the honest next step is to close that work. "No blocking review
@@ -154,7 +152,7 @@ In these steps, "you" and "the session" are the same agent.
 
        <time> | <session> | gate <A, B, C, or chunk id> | <outcome> | round <n> | <reason, one line>
        <time> | <session> | row <finding or ledger id> | <fixed, accepted, rejected, advisory, rework, or escalate> | <reason, one line> | evidence: <file:line, command, or none>
-       <time> | <session> | spawn <subagent_type> (<model>) | <started, resumed, or returned (<status>)> | agent <agent id> | subagent_tokens <n or n/a> | <mode, part id or chunk id>
+       <time> | <session> | spawn <subagent_type> (<model>) | <started, resumed, resumed (waiting), returned (<status>), or returned (<status>, waiting)> | agent <agent id> | subagent_tokens <n or n/a> | <mode, part id or chunk id>
        <time> | <session> | note <sha, question, or tickets> | <the SHA, the question and its answer, or the ticket ids> | <reason, one line>
 
    - `gate`: each gate outcome.
@@ -178,38 +176,45 @@ In these steps, "you" and "the session" are the same agent.
        (the line `agentId: <id>`). The line has that agent id and
        `subagent_tokens n/a`.
      - `resumed`: the session sent the agent a `SendMessage`, and the
-       tool result has `"success":true`.
+       tool result has `"success":true`. For the **one message to a
+       waiting agent** (below), write `resumed (waiting)`.
      - `returned (<status>)`: a `<task-notification>` whose `<task-id>`
        is the agent id arrived. Write the text of its `<status>` tag in
        the brackets (seen: `completed`, `failed`, `killed`). Copy the
        number in its `<subagent_tokens>` tag, or write `n/a` when it has
-       none.
+       none. When its `<summary>` says the agent `is waiting on its own
+       background work`, write `returned (<status>, waiting)`.
      An agent is **working** when the last `spawn` line with its agent id
-     is `started` or `resumed`. An agent's **final message** is the
-     `<result>` of a `<task-notification>` with
+     is `started`, `resumed` or `resumed (waiting)`. An agent's **final
+     message** is the `<result>` of a `<task-notification>` with
      `<status>completed</status>` whose `<summary>` does not say the
      agent `is waiting on its own background work`. When the `<summary>`
      does say that, the `<result>` may be interim: log the `returned`
-     line and act on nothing else in that notification. When the session
-     has not yet sent this agent the message below, it then starts a
-     timer: one Bash call `sleep 1800` with `run_in_background: true` and
-     `timeout: 1900000`. When it ends, its notification starts a turn of
-     the session; that notification does not say which agent the timer
-     is for. On each later turn of the session, from a timer or from
-     anything else, the session gets the time with
-     `date -u +%Y-%m-%dT%H:%MZ` and checks every agent whose last
-     notification said it is waiting on its own background work. When
-     that notification's `returned` line is still the last `spawn` line
-     with that agent id and is at least 30 minutes old (30 minutes is a
-     first guess, not measured: hypothesis, untested), and the session
-     has not yet sent that agent this message, the session sends it one
-     `SendMessage`: "Read the output of your background work. When it
-     has finished, end your turn with the final message your
-     instructions ask for." This holds for a `gate-executor` at any
-     tool-call count. When the tool result has `"success":true`,
-     the session logs `resumed`. When it lacks `"success":true`, or the
-     agent's next notification again says it is waiting on its own
-     background work, the session stops and tells the user.
+     line and act on nothing else in that notification.
+
+     An agent is **waiting** when the last `spawn` line with its agent id
+     is a `returned` line marked `waiting`. The **one message to a
+     waiting agent** is one `SendMessage` with this text: "Read the
+     output of your background work. When it has finished, end your turn
+     with the final message your instructions ask for." The session sends
+     it at most once to each agent. An agent has had it when a `spawn`
+     line with its agent id is `resumed (waiting)`.
+
+     When the session logs a `returned` line marked `waiting`, or a fresh
+     session finds one in `decision-log.md`, for an agent that has not
+     had the message, the session starts a timer: one Bash call
+     `sleep 1800` with `run_in_background: true` and `timeout: 1900000`.
+     When the timer ends, its notification starts a turn of the session.
+     That notification does not say which agent the timer is for. So on
+     each turn, the session gets the time with
+     `date -u +%Y-%m-%dT%H:%MZ` and checks every waiting agent. When an
+     agent's last `spawn` line is at least 30 minutes old and the agent
+     has not had the message, the session sends it the message. (30
+     minutes is a first guess, not measured: hypothesis, untested.) This
+     holds for a `gate-executor` at any tool-call count. When the tool
+     result lacks `"success":true`, or the agent's next notification
+     again says it is waiting on its own background work, the session
+     stops and tells the user.
    - `note`: the SHAs that steps 1 and 5 record (step 5 adds the
      `## Execution chunks` lines after its SHA), each question and
      answer of step 5, and filed ticket ids with the new HEAD.
