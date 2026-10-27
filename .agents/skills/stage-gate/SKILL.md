@@ -418,7 +418,8 @@ In these steps, "you" and "the session" are the same agent.
      their ids and the new `git rev-parse HEAD`.
 
 5. **Execute.** Run one `gate-executor` (`model: "opus"`) for `K1`. When
-   its Gate C passes and the Backburner is not "none", log
+   the next chunk may start after `K1` (**Gate C between chunks** below)
+   and the Backburner is not "none", log
    `git rev-parse HEAD` in a `note` line (Gate A compares against it),
    then spawn
    `gate-planner` (`model: "fable"`) with `next: <first Backburner id>`
@@ -449,10 +450,13 @@ In these steps, "you" and "the session" are the same agent.
    Append its final message to `execution-report.md` under the chunk id,
    and log the chunk id, its base SHA and the executor's agent id in
    `decision-log.md`. A fresh executor per chunk keeps each context small.
-   A chunk whose handoff `Status` is not `success`, or whose ledger has a
-   `flag` or `stop` row, goes to Gate C before the next chunk starts; an
-   `advisory` row waits for the final Gate C. A final message that
-   starts with `NEEDS_PRIOR_CONTEXT` is not a handoff.
+   **Gate C between chunks.** A chunk whose handoff `Status` is not
+   `success`, or whose ledger has a `flag` or `stop` row, goes to Gate C
+   before the next chunk starts, and the next chunk starts when step 6
+   has `accepted` every row and status that this Gate C covers. After
+   any other chunk, the next chunk starts with no Gate C. An `advisory`
+   row waits for the final Gate C. A final message that starts with
+   `NEEDS_PRIOR_CONTEXT` is not a handoff.
 
    An executor whose final message starts with
    `NEEDS_PRIOR_CONTEXT: <question>` has hit a
