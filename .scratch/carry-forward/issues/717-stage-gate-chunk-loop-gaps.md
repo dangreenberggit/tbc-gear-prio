@@ -74,3 +74,25 @@ may need to count only the new chunk (hypothesis, untested).
 
 Each of items 1-3 has a rule change the owner approved and applied, or an
 owner ruling not to change it, recorded here.
+
+## Comments
+
+### 2026-10-27: items 1 and 2 applied; item 3 still open
+
+The owner approved the drafted fixes for items 1 and 2 on 2026-10-27 with
+the words "plain fixes approved" (relayed by the session). The drafts are
+edits 1a, 1b, 2a and 2b in
+`.scratch/agent-reports/2026-10-27-general-task-stage-gate-fault-drafts-v2.md`
+(gitignored, owner's checkout). They are applied on branch
+`feat/stage-gate-open-faults`, not yet merged into `dev`:
+
+- Item 1: `a886eac3` (edits 1a and 1b).
+- Item 2: `b0afc857` (edits 2a and 2b). The `spawn` line of an
+  **Added-lines check** reviewer is marked `added-lines`, and a fresh
+  session leaves those lines out of a chunk's review count, because that
+  check does not count toward the three reviews (**Review limit per
+  chunk**).
+
+Item 3 is still open. The owner rejected measuring a plan's work in
+lines (relayed by the session on 2026-10-27), so the drafted fault 3
+option A, which counts lines, is not applied.

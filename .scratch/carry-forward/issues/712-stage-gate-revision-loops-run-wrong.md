@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: process
 Origin: audit `.scratch/agent-reports/2026-10-25-general-task-stage-gate-revision-audit.md` (§ Q3 "What looks plainly wrong in how the loop was run", § Q4; gitignored, owner's checkout) of stage-gate session 895dc2f0, 2026-10-25 19:33-20:33Z
 Blocks: none
@@ -311,7 +311,24 @@ options in
   `git ls-remote windows feat/subagent-foreground-helpers` prints
   nothing once it is gone.
 
-Still open: a claim the planner changed without being asked may not be
-named in a re-review (fault 6), and no executor rule covers a `minor`
-finding whose `Where` names no step (fault 7). The same review found two
-faults in unchanged text, filed as 721 and 722.
+A later review of the fault 4 and 5 commits
+(`.scratch/agent-reports/2026-10-27-general-task-fault-4-5-applied-review.md`,
+gitignored, owner's checkout) led to `f3f47db2` and `3883082e`. On
+2026-10-27 the owner approved faults 6 and 7 with the words "plain fixes
+approved": `86fd3681` adds `- changed:` lines (fault 6) and `98356b7f`
+covers a `minor` finding whose `Where` names no step (fault 7). The same
+review found two faults in unchanged text, filed as 721 and 722.
+
+### 2026-10-27: closed
+
+Done when is met. Findings 1-6 have the fix the owner approved on
+2026-10-26, merged into `dev` in `b5022cb8`. The decision on
+`feat/subagent-foreground-helpers` is made: copy its ticket and review
+file, then delete the remote branch. The four open items the 2026-10-26
+fix left are applied on `feat/stage-gate-open-faults`, which is not yet
+merged into `dev`. The remote delete is not done: the owner runs it.
+
+Verified by: `tbc-gear-prio@b5022cb8` (findings 1-6);
+`tbc-gear-prio@98356b7f` (the four open items, on
+`feat/stage-gate-open-faults`); `python3 scripts/check_skill_mirrors.py`
+(rc 0 at `98356b7f`).
