@@ -64,7 +64,8 @@ would work — treat every `Verified by` as unproven until you re-run it.
    truth.
 4. **The approach.** Does the plan solve the brief, or a nearby easier
    problem? Would the rejected alternative in `Approach` actually be
-   worse?
+   worse? Does any step rely on a chunk that has no steps yet, only a
+   Backburner line?
 5. **The partition** (when the Paths manifest declares slices): open each
    slice's target files and confirm no file appears in two slices and
    every shared manifest has exactly one owner.
