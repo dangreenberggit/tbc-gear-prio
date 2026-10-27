@@ -90,7 +90,8 @@ not` list below.
    only when the last `spawn` line in `decision-log.md` with that agent's
    id is `started` or `resumed` (step 1). When the agent's last
    notification says it is waiting on its own background work, tell the
-   user that it has stopped and may resume on its own.
+   user that it has stopped and may resume on its own, and that when the
+   timer in step 1 ends, the session sends it one message.
 4. **Let open issues block end-of-line moves like merge.** When a phase
    produces open tickets — a correctness gap, a test hole, a half-delivered
    feature — the honest next step is to close that work. "No blocking review
@@ -180,7 +181,20 @@ In these steps, "you" and "the session" are the same agent.
      `<status>completed</status>` whose `<summary>` does not say the
      agent `is waiting on its own background work`. When the `<summary>`
      does say that, the `<result>` may be interim: log the `returned`
-     line and act on nothing else in that notification.
+     line and act on nothing else in that notification. Then start a
+     timer: one Bash call `sleep 1800` with `run_in_background: true` and
+     `timeout: 1900000`. When it ends, its notification starts a turn of
+     the session. On each later turn of the session, from the timer or
+     from anything else, when that `returned` line is still the last
+     `spawn` line with that agent id and is at least 30 minutes old (the
+     timer's length; starting value, hypothesis, untested), the session
+     sends that agent one `SendMessage`: "Read the output of your
+     background work. When it has finished, end your turn with the final
+     message your instructions ask for." This holds for a `gate-executor`
+     at any tool-call count. When the tool result has `"success":true`,
+     the session logs `resumed`. When it lacks `"success":true`, or the
+     agent's next notification again says it is waiting on its own
+     background work, the session stops and tells the user.
    - `note`: the SHAs that steps 1 and 5 record, each question and
      answer of step 5, and filed ticket ids with the new HEAD.
 
