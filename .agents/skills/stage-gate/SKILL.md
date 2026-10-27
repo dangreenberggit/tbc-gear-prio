@@ -168,8 +168,10 @@ In these steps, "you" and "the session" are the same agent.
      `run_in_background` unset). The harness then sends the session a
      `<task-notification>` each time the turn of that agent ends, so one
      agent can have several `returned` lines. On every `spawn` line of a
-     `gate-reviewer`, the last field is the chunk id that the review
-     covers and its round number, for example `K2 round 4`. For an
+     `gate-reviewer`, the last field is the id of every chunk that the
+     review covers and its round number, for example `K2 round 4`, or
+     `K1 K2 round 1` for a review of a first plan that gives steps to
+     `K1` and `K2`. For an
      **Unasked-changes check** (step 4), add `unasked-changes`, for
      example `K2 round 6 unasked-changes`.
      - `started`: the Agent call's tool result gave the new agent's id
