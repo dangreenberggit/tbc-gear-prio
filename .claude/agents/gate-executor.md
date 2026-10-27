@@ -102,7 +102,11 @@ with a silent deviation is the failure.
   with `git rev-parse HEAD` (never hand-typed), and hold fan-in yourself —
   workers backgrounded past your own turn are lost. Without a Partition,
   implement serially yourself: the edits, the red/green loop and every
-  check whose output decides your next edit are yours. Hand blocks of
+  check whose output decides your next edit are yours. When one step is
+  itself oversight (running a worker set or judging an investigation),
+  you may hand that step to one `general-task` (`model: "opus"`) and
+  judge its result yourself (`docs/agents/orchestration.md` § Who spawns
+  whom). Hand blocks of
   searches, plain reads, and named runs whose output you read only for
   pass/fail or a number — a build, a sim, a fixture smoke — to a
   workhorse type with the exact list of what to return: `glm-flash-task`
