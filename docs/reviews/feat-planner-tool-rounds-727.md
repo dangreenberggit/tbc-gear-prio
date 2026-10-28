@@ -254,11 +254,44 @@ closed. Ticket 727 stays open for S1, S2 and the test run.
 
 ## Disposition (round 2)
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                            |
-| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| S3  | Adversarial | defer       | `.scratch/carry-forward/issues/728-planner-tool-rounds-wording-gaps.md` — owner ruling 2026-10-28, in chat: "If round 2 finds only small wording issues, they go to a ticket rather than another pass before the merge." |
-| S4  | Standards   | defer       | `.scratch/carry-forward/issues/728-planner-tool-rounds-wording-gaps.md` — owner ruling 2026-10-28, in chat: "If round 2 finds only small wording issues, they go to a ticket rather than another pass before the merge." |
-| S5  | Adversarial | defer       | `.scratch/carry-forward/issues/728-planner-tool-rounds-wording-gaps.md` — owner ruling 2026-10-28, in chat: "If round 2 finds only small wording issues, they go to a ticket rather than another pass before the merge." |
-| S6  | Adversarial | defer       | `.scratch/carry-forward/issues/728-planner-tool-rounds-wording-gaps.md` — owner ruling 2026-10-28, in chat: "If round 2 finds only small wording issues, they go to a ticket rather than another pass before the merge." |
-| S7  | Adversarial | defer       | `.scratch/carry-forward/issues/728-planner-tool-rounds-wording-gaps.md` — owner ruling 2026-10-28, in chat: "If round 2 finds only small wording issues, they go to a ticket rather than another pass before the merge." |
-| S8  | Spec        | fixed       | Ticket 727's "Applied" section records `aa179d24`, `63959063` and round 2; § Facts line span corrected to 51-72                                                                                                          |
+| ID  | Axis        | Disposition | Ticket / note                                                                                                           |
+| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------- |
+| S1  | Adversarial | fixed       | Superseded in round 3: the owner-approved reset of 2026-10-28 removed the "Few tool rounds" text this finding was about |
+| S2  | Adversarial | fixed       | Superseded in round 3: the owner-approved reset of 2026-10-28 removed the "Few tool rounds" text this finding was about |
+| S3  | Adversarial | fixed       | Superseded in round 3: text removed by the owner-approved reset of 2026-10-28; ticket 728 closed as no longer needed    |
+| S4  | Standards   | fixed       | Superseded in round 3: text removed by the owner-approved reset of 2026-10-28; ticket 728 closed as no longer needed    |
+| S5  | Adversarial | fixed       | Superseded in round 3: text removed by the owner-approved reset of 2026-10-28; ticket 728 closed as no longer needed    |
+| S6  | Adversarial | fixed       | Superseded in round 3: text removed by the owner-approved reset of 2026-10-28; ticket 728 closed as no longer needed    |
+| S7  | Adversarial | fixed       | Superseded in round 3: text removed by the owner-approved reset of 2026-10-28; ticket 728 closed as no longer needed    |
+| S8  | Spec        | fixed       | Ticket 727's "Applied" section records `aa179d24`, `63959063` and round 2; § Facts line span corrected to 51-72         |
+
+## Round 3
+
+No new review ran. On 2026-10-28 the owner approved in chat (their
+word: "ok") a reset of `.claude/agents/gate-planner.md` and
+`docs/agents/stage-gate-project.md` to their state on `dev`
+(`104b2017`), plus one rule built on a sentence from Anthropic's
+"Prompting Claude Fable 5.1" guide: § Rules, "Batch your tool calls" in
+`.claude/agents/gate-planner.md`. The proposal came from two research
+reports (main checkout, gitignored):
+`.scratch/agent-reports/2026-10-28-general-task-planner-vs-sources.md`
+and
+`.scratch/agent-reports/2026-10-28-general-task-planning-guidance-and-overengineering.md`.
+
+The "Few tool rounds" text is gone, so S1 and S2 no longer apply and no
+longer block the merge, and S3 to S7 have nothing left to fix. The
+round-1 fixes (R1, R2, R3, R5) and the P1 to P4 texts edited that same
+text, so they are superseded too; their rows above stay as a record of
+what was done at the time. In the round 2 table, S1 and S2 have rows
+and S3 to S7 are now `fixed` with a "superseded in round 3" note.
+Ticket 728 is closed as no longer needed. Ticket 729 holds the larger
+simplification of the planner's rules that the reports propose. Ticket
+727 stays open for its test: after the merge, in a new session, run the
+four-planner dummy test twice and compare the run log's `calls` with 2,
+8, 2 and 8.
+
+`git diff --stat 104b2017 HEAD -- .claude/agents docs/agents` lists only
+`.claude/agents/gate-planner.md`, with 5 lines added.
+
+Tickets: filed 2 (728, 729), closed 2 (724, 728). Filed is not higher
+than closed. Ticket 727 stays open for the test run.

@@ -1,9 +1,21 @@
-Status: open
+Status: closed
 Type: process
 Origin: docs/reviews/feat-planner-tool-rounds-727.md
 Blocks: none
 Blocked by: none
 Related: 727
+
+Closed 2026-10-28 as no longer needed. The owner approved, in chat on
+2026-10-28 (their word: "ok"), a reset of
+`.claude/agents/gate-planner.md` and `docs/agents/stage-gate-project.md`
+to their state on `dev` (`104b2017`), plus one short batching rule. That
+reset removed the "Few tool rounds" text that S3 to S7 were about, so
+there is nothing left to fix.
+
+Verified by: `grep -c 'Few tool rounds' .claude/agents/gate-planner.md`
+prints 0, and `git diff 104b2017 HEAD -- docs/agents/stage-gate-project.md`
+prints nothing, both on `feat/planner-tool-rounds-727`. See
+`docs/reviews/feat-planner-tool-rounds-727.md` § Round 3.
 
 # Fix five wording gaps in the planner's "Few tool rounds" rule
 

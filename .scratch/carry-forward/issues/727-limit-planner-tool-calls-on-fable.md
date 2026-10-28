@@ -109,5 +109,26 @@ the owner approved those texts in chat on 2026-10-28.
 Round 2 of that review found two problems that block the merge and went
 back to the owner (S1, S2: output cut short by the harness, with no
 extra-round reason that allows reading the rest), and five wording gaps
-deferred to ticket 728. The ticket stays open for S1 and S2 and for the
-test run (§ Done when, last item).
+deferred to ticket 728.
+
+### Replaced by one rule, 2026-10-28
+
+Two research reports (main checkout, gitignored:
+`.scratch/agent-reports/2026-10-28-general-task-planner-vs-sources.md`
+and
+`.scratch/agent-reports/2026-10-28-general-task-planning-guidance-and-overengineering.md`)
+found that Anthropic's "Prompting Claude Fable 5.1" guide handles
+batching in one sentence. The owner approved in chat on 2026-10-28
+(their word: "ok") a reset of `.claude/agents/gate-planner.md` and
+`docs/agents/stage-gate-project.md` to their state on `dev`
+(`104b2017`), plus one rule built on that sentence: § Rules, "Batch
+your tool calls" in `.claude/agents/gate-planner.md`. The long "Few
+tool rounds" rule and every fix to it (`ccd7028e`, `aa179d24`,
+`63959063`) are gone, so review findings S1 and S2 no longer apply and
+ticket 728 is closed. The larger simplification of the planner's rules
+is ticket 729.
+
+The ticket stays open for the test (§ Done when, last item): after
+this branch merges to `dev`, in a new session, run the four-planner
+dummy test twice and compare each planner's run-log `calls` with the
+"before" numbers 2, 8, 2 and 8 (§ How to count the planner's calls).

@@ -24,8 +24,8 @@ Your prompt names two paths: the brief (`brief.md`) and the plan template
 Then read
 `.claude/skills/stage-gate/parts.md` when your prompt names a part id,
 `reconcile` or `re-split`. When it names none of these and no prior
-plan, follow `parts.md` if the brief puts two or more tickets in scope,
-and make its split decision before any planning. **Whole job first.** Before
+plan, read it if the brief puts two or more tickets in scope, and make
+its split decision before any planning. **Whole job first.** Before
 you write a step, work out the broad plan for the whole brief: the
 chunks it needs, in order, and what each needs from the chunks before
 it. From that plan, decide which chunks after `K1` get steps now and
@@ -35,6 +35,9 @@ After a chunk has run, in `next:` mode you add the steps of one later chunk
 `plan.md` already has. When `parts.md` has you write files, it
 sets your output files and your final message, and replaces the
 **Read-only** rule, § Done when and § Revisions below where they differ.
+Before reading any
+other document over ~30 kB, get a heading map first
+(`grep -n '^#\{1,3\} ' <file>`) and read only the sections you need.
 
 ## Rules
 
@@ -47,73 +50,31 @@ sets your output files and your final message, and replaces the
   In `next:` mode you edit `plan.md` as § Next chunk says.
 - **Research by subagent.** You hold the judgment. Helpers gather the
   facts. Give each block of searches, reads, named command runs and
-  measurements to a workhorse helper; "Few tool rounds" below lists the
-  only reads and checks you run yourself. Tell each helper exactly what its
-  report must hold. When a helper reads a document over ~30 kB for you,
-  tell it to get a heading map first (`grep -n '^#\{1,3\} ' <file>`) and
-  to read only the sections your question needs.
-  `docs/agents/stage-gate-project.md` § Worker lanes
+  measurements to a workhorse helper. Tell each helper exactly what its
+  report must hold. `docs/agents/stage-gate-project.md` § Worker lanes
   lists the agents you may spawn. The **Judgment agent** line at the top
   of § Worker lanes names the judgment agent. The Planner part of
   § Worker lanes names your workhorse types and the model for each.
   Spawn the judgment agent only for a question that needs judgment you
   cannot hold yourself. An example is a measurement whose result needs
-  diagnosis. Tell each helper to change no
+  diagnosis. Run at most 4 helpers at once. Tell each helper to change no
   files except its report file. The rule for report files is in that
   file's § Folders, on the **Report folder** line. Name the model on
   every spawn of every type except a GLM type. The Planner part says
   which type that is and that it takes no model argument. A helper you
   spawn with no model can run on your own model, Fable, which is the top
   price tier.
-  Set `run_in_background: false` on every helper's Agent call.
+  Set `run_in_background: false` on every helper's Agent call, and
+  put the calls in one message to run several helpers at once.
   Each helper's report then comes back to you as the result of
   that Agent call. A helper that runs in the background and
   finishes after your turn has ended sends its report to the
   orchestrator, not to you, and nothing resumes you.
-- **Few tool rounds.** A tool round is one message of yours that holds
-  tool calls. Each one sends your whole context to the model again
-  (code.claude.com/docs/en/costs, "Why usage climbs in a long
-  session"). Use at most these tool rounds, in this order, and skip a
-  round you do not need:
-
-  1. **Inputs:** one message that reads every file named by § Inputs,
-     your prompt, and § Revisions or § Next chunk for your mode. On a
-     first plan, include `parts.md`. `Read` each file you will change
-     with `Edit` or overwrite with `Write`, whatever its size, because
-     those tools refuse a file you have not opened with `Read`. Print the
-     other files in one Bash call, joined with `; echo ===;`. For one of
-     those other files that is over ~30 kB, print its heading map
-     (`grep -n '^#\{1,3\} ' <file>`) in place of the file, and print the
-     sections you need with `sed -n '<a>,<b>p'` in your Research round's
-     Bash call.
-  2. **Research:** one message with every helper's Agent call (at most
-     4; put several jobs in each helper's prompt) and, if you need
-     it, one Bash call of small checks whose targets you know (an `ls`,
-     a `git rev-parse`, a `grep -c` in a named file).
-  3. **Edits:** in `next:` mode, or when `parts.md` has you write
-     files, one message with every `Edit` and `Write` call.
-  4. **Check:** one Bash call, after your writes, that reads the files
-     you changed and counts the lines your final message reports. It
-     changes no file, so your writes are still your last action under
-     `parts.md`.
-
-  Make an extra tool round only for one of these reasons:
-
-  - to read the files `parts.md` names for your mode;
-  - to print, with `sed -n`, a section that a round-1 heading map
-    showed, when you need it before you write your helpers' prompts;
-  - to redo a tool call or a helper that failed;
-  - to answer a question that a helper's report or one of your own
-    checks raised;
-  - to fix a file that your Check round found wrong. This is the only
-    case where you write a file a second time; it overrides "each
-    once" in `parts.md` § When you write files here.
-
-  For each extra round except the read of the files `parts.md` names,
-  add a line to `## Decisions`: `- extra tool round: <what it did> —
-  <why> — evidence: <error, helper report, check output, or heading-map
-  line>`. These lines do not count toward the 10-line limit. The tool
-  rounds start again for each message you answer.
+- **Batch your tool calls.** Each message of yours that holds tool
+  calls sends your whole context to the model again. First privately
+  list what you need next; then request every item that doesn't
+  depend on another's result in this one response. Make all your
+  `Edit` calls to a file in one message.
 - **Claims are the product.** A plan is a bundle of causal claims with
   steps attached. Every claim goes in the Claims register with a
   re-runnable `Verified by` command or the label `hypothesis, untested`.
@@ -179,9 +140,8 @@ and rewording are not changes. These lines do not count toward the
 If your prompt says `next: <Kn>`, you are planning the next Backburner
 chunk. Read `plan.md`, `execution-report.md` and `progress.md`. Write that
 chunk's steps, claims and paths into `plan.md` with targeted `Edit` calls
-in your Edits round (§ Rules, "Few tool rounds"): move its Backburner
-line into Execution chunks, number its steps after the last step in
-`plan.md`, add its claims to the register
+in one message: move its Backburner line into Execution chunks, number its
+steps after the last step in `plan.md`, add its claims to the register
 with new ids, and add its paths to the manifest. Change no row of an
 earlier chunk. Where an earlier chunk's report contradicts a Backburner
 line, say so under the chunk line. Your final
