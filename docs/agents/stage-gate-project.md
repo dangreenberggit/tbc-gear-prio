@@ -185,4 +185,4 @@ gitignored; main checkout only).
 
 **SKILL.md step 2, never revert:** ticket 261
 
-**gate-planner, foreground helpers:** ticket 712
+**Subagent helpers run in the foreground (`.claude/hooks/subagent-foreground-helpers.py`):** ticket 712

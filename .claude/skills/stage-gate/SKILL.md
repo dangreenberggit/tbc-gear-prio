@@ -155,7 +155,7 @@ In these steps, "you" and "the session" are the same agent.
 
        <time> | <session> | gate <A, B, C, or chunk id> | <outcome> | round <n> | <reason, one line>
        <time> | <session> | row <finding or ledger id> | <fixed, accepted, rejected, advisory, rework, or escalate> | <reason, one line> | evidence: <file:line, command, or none>
-       <time> | <session> | spawn <subagent_type> (<model>) | <started, resumed, resumed (waiting), returned (<status>), or returned (<status>, waiting)> | agent <agent id> | subagent_tokens <n or n/a> | <mode or chunk id>
+       <time> | <session> | spawn <subagent_type> (<model>) | <started, resumed, resumed (waiting), returned (<status>), or returned (<status>, waiting)> | agent <agent id> | subagent_tokens <n or n/a> | <chunk id, or none>
        <time> | <session> | note <sha, question, or tickets> | <the SHA, the question and its answer, or the ticket ids> | <reason, one line>
 
    - `gate`: each gate outcome.

@@ -134,4 +134,6 @@ tickets without asking the owner, which the ticket ruling above
 forbids. Not changed here, because skill text needs the owner's
 approval of the exact wording.
 
+Pre-merge review (`docs/reviews/feat-simplify-planner-729.md`): A1 open, awaiting the owner's ruling; A2 and S2 wording fixed; the rest `wontfix`.
+
 Still to do for § Done when: the stage-gate test run (draft § 7).
