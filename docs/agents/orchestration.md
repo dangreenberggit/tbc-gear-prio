@@ -22,8 +22,9 @@ The session makes only these tool calls itself:
 - a background `sleep 1800` timer for an agent that is waiting on its own
   background work (`.claude/skills/stage-gate/SKILL.md` step 1 **Open the
   stage**, the `spawn` lines)
-- reading the stage-gate artifacts under `.scratch/stage-gate/<slug>/`
-  and `.claude/skills/stage-gate/plan-template.md`
+- reading the stage-gate artifacts under `.scratch/stage-gate/<slug>/`,
+  `.claude/skills/stage-gate/plan-template.md` and
+  `docs/agents/stage-gate-project.md`
 - reading a subagent's report file (AGENTS.md § Subagent reports) for a
   detail the condensed report leaves out
 

@@ -12,11 +12,12 @@ when reality disagrees with the plan is your job, not a failure.
 
 **First actions, before reading anything else:**
 
-1. When your prompt gives a pair path, the pair is the shared checkout: run every
-   git and pnpm command, starting with the one below, with
-   `-C <pair path>` (fork commands: `-C <pair path>/vendor/tbc-new-fork`),
-   run scripts by their path under the pair, and read and edit files by
-   their absolute paths under the pair.
+1. When your prompt gives a checkout path, that checkout is the shared
+   checkout: run every git and package-manager command, starting with the
+   one below, with `-C <checkout path>`, run scripts by their path under
+   it, and read and edit files by their absolute paths under it
+   (`docs/agents/stage-gate-project.md` § Checkouts names this project's
+   checkout kinds and their extra commands).
    Run `git log -1 --format=%H` and compare to the base SHA your prompt
    names. Match → proceed. Mismatch in an isolated worktree (your prompt
    says which mode you are in) → `git checkout -b <branch from prompt> <SHA>`
@@ -35,7 +36,8 @@ the orchestrator settled its `blocking` and `material` findings before
 the orchestrator spawned you),
 `execution-report.md` (reports of earlier chunks, if any), the absolute
 path of `progress.md`, your chunk id, the base SHA, your branch, and your
-checkout mode. Implement only your chunk's steps. If your prompt names no
+checkout mode. Also read `docs/agents/stage-gate-project.md`, this
+project's stage-gate values. Implement only your chunk's steps. If your prompt names no
 chunk id, the whole plan is yours. If it names dirty paths, examine each
 before your first commit, because that commit takes in every dirty file:
 finish the work they hold, or stop with `Status: blocked` naming them.
@@ -110,41 +112,24 @@ with a silent deviation is the failure.
   implement serially yourself: the edits, the red/green loop and every
   check whose output decides your next edit are yours. When one step is
   itself oversight (running a worker set or judging an investigation),
-  you may hand that step to one `general-task` (`model: "opus"`) and
-  judge its result yourself (`docs/agents/orchestration.md` § Who spawns
-  whom). Hand blocks of
-  searches, plain reads, and named runs whose output you read only for
-  pass/fail or a number — a build, a sim, a fixture smoke — to a
-  workhorse type with the exact list of what to return: `glm-flash-task`
-  (no model argument) when the harness lists it, except a job that could reach
-  secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
-  `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
-  types, Private data), else `discrete-task`
-  (`model: "sonnet"`) (`docs/agents/model-policy.md` § Workhorse jobs).
+  you may hand that step to one judgment agent
+  (`docs/agents/stage-gate-project.md` § Worker lanes) and judge its
+  result yourself. Hand blocks of searches, plain reads, and named runs
+  whose output you read only for pass/fail or a number — a build, a test
+  run, a smoke check — to a workhorse type with the exact list of what to
+  return (types and models: `docs/agents/stage-gate-project.md` § Worker
+  lanes, Executor).
 - **Pick each worker's agent type from its slice, and name its model on
-  the spawn.** An extremely simple slice (see `simple-task`) goes to
-  `simple-task` (`model: "sonnet"`). Every other slice goes to
-  `general-task` (`model: "opus"`). Keep to the `parallel-phase` cap of
-  3–5 workers at once. Name each worker's report-file path in your own
-  checkout (AGENTS.md § Subagent reports), because teardown removes the
-  worker's worktree.
+  the spawn** (`docs/agents/stage-gate-project.md` § Worker lanes,
+  Executor). Keep to the `parallel-phase` cap of 3–5 workers at once.
+  Name each worker's report-file path in your own checkout (report rule:
+  that file's § Folders), because teardown removes the worker's worktree.
 - Stay inside the Paths manifest. A file you need that is not in it is a
   `flag` ledger row, not an edit.
-- Per unit with a `Visual check:` line: run `pnpm tab-fixtures:smoke` (it
-  starts `:5173` if the port is free) and Read the named fixtures' PNGs in
-  `.scratch/tab-fixtures-smoke/`, or, where the harness has a browser pane,
-  open their links from `http://localhost:5173/tbc/tab-fixtures/` in it →
-  judge against the sentence → record the smoke line and what you saw in the
-  ledger → re-pin.
-- Per unit with a `Visual acceptance:` block: fork edits → write
-  `.scratch/stage-gate/<slug>/visual/<unit>/manifest.json` →
-  `pnpm tab-review <manifest>` → spawn `gate-visual` (`model: "opus"`) →
-  `fail`: fix, re-capture, `SendMessage` the same seat for the failed
-  tickets; `cannot-judge`: fix the manifest and re-capture; `pass`: commit
-  the handoff, then re-pin. Ledger row per ticket:
-  `visual: pass | fail-fixed | contested`. A ticket with a Visual
-  acceptance is not closed on `fail` or `cannot-judge`.
-- `pnpm verify` on your tip before reporting.
+- Per unit of a kind that `docs/agents/stage-gate-project.md`
+  § Project seats names: do what that section says for the Executor.
+- Run the project's gate command (`docs/agents/stage-gate-project.md`
+  § Hand off) on your tip before reporting.
 
 ## Report
 
@@ -157,8 +142,9 @@ the Deviation ledger and then `## Decisions`:
 
 An empty ledger is a claim — it asserts the diff matches the plan
 step-for-step, and the orchestrator checks it against `git diff --stat`.
-Do not merge into `dev` or `main`, and do not run `pre-merge-review` — the
-orchestrator owns the next gate.
+Do not merge your branch into any other branch, and do not run the
+project's review step (`docs/agents/stage-gate-project.md` § Hand off) —
+the orchestrator owns the next gate.
 
 End your final message with a `## Decisions` section of at most 10
 lines, placed after everything else except a "Summary for the user":

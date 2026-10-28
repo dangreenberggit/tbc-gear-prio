@@ -23,7 +23,8 @@ bills the wrong lane whatever it was asked to do.
 Your prompt names the brief (`brief.md`), the plan (`plan.md`), the path
 of `plan-review.md` and, on a split run, `decomposition.md`. Read each one
 that exists. `plan-review.md` exists only on a re-review, and holds the
-earlier rounds. A plan is sufficient
+earlier rounds. Also read `docs/agents/stage-gate-project.md`, this
+project's stage-gate values. A plan is sufficient
 evidence for what is proposed and insufficient evidence for why it
 would work — treat every `Verified by` as unproven until you re-run it.
 
@@ -34,15 +35,11 @@ would work — treat every `Verified by` as unproven until you re-run it.
    module, function, parser, script, data file or config entry — ask
    whether the brief's goal can be met without it:
    - by deleting or simplifying code, so that the problem goes away;
-   - by using or changing code that already exists in this repo, in the
-     fork (`vendor/tbc-new-fork`), or in wowsims upstream
-     (`upstream/master` in the fork). From the root of your checkout,
-     search for words that name the job with `git grep -n <words>` (this
-     repo), `git -C vendor/tbc-new-fork grep -n <words>` (the fork) and
-     `git -C vendor/tbc-new-fork grep -n <words> upstream/master`
-     (upstream). `vendor/` is gitignored, so `git grep` in this repo does
-     not search the fork. If your checkout has no `vendor/tbc-new-fork`,
-     write that in `Evidence` and search this repo only;
+   - by using or changing code that already exists in this repo or in the
+     other places `docs/agents/stage-gate-project.md` § Search scopes
+     lists. From the root of your checkout, search for words that name
+     the job with `git grep -n <words>` (this repo) and with the commands
+     that section gives for each other place;
    - by dropping the step, because the brief does not need it.
 
    When one of these meets the goal with less code than the step adds,
@@ -90,19 +87,15 @@ would work — treat every `Verified by` as unproven until you re-run it.
 - Set `run_in_background: false` on every Agent call you make, and put
   the calls in one message to run several subagents at once.
 - Re-running `Verified by` commands and reading the files they name are
-  workhorse jobs: hand them to workhorse helpers — `glm-flash-task` (no
-  model argument) when the harness lists it, except a job that could reach
-  secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
-  `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
-  types, Private data), else `discrete-task` (model
-  `sonnet` at the call site) — several claims per helper, each told to
-  change no files except its report file (AGENTS.md § Subagent reports)
-  and to put in its report each command, its exit code and the output
-  lines that bear on the claim. You compare the output with the claim
-  (`docs/agents/model-policy.md` § Workhorse jobs).
-- A refutation that needs judgment goes to a `general-task` subagent,
-  model `opus` at the call site, cap 2, told to change no files except its
-  report file, and prompted to refute: "Find the input, state, or file
+  workhorse jobs: hand them to workhorse helpers (types and models:
+  `docs/agents/stage-gate-project.md` § Worker lanes, Reviewer) — several
+  claims per helper, each told to change no files except its report file
+  (report rule: that file's § Folders) and to put in its report each
+  command, its exit code and the output lines that bear on the claim. You
+  compare the output with the claim.
+- A refutation that needs judgment goes to a judgment agent
+  (`docs/agents/stage-gate-project.md` § Worker lanes), cap 2, told to
+  change no files except its report file, and prompted to refute: "Find the input, state, or file
   that breaks this claim: <claim>. Start your final message with
   `REFUTED:` and the evidence, or with `NOT REFUTED:` and the list of
   checks that failed to break it." A bare

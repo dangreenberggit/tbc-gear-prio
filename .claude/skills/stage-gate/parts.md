@@ -1,9 +1,8 @@
 # Split planning: parts and merging
 
 Read this when your agent file sends you here. All files below are in
-the stage folder `.scratch/stage-gate/<slug>/`, which git ignores
-(`git check-ignore -v .scratch/stage-gate/<slug>/plan.md`), so writing
-there leaves `git status --porcelain` empty.
+the stage folder (`docs/agents/stage-gate-project.md` § Folders), which
+git ignores, so writing there leaves `git status --porcelain` empty.
 
 Part ids are `P1`, `P2`, ... in planning order. A part keeps its id when
 it is deferred; a deferred chunk takes the next free id. Steps in
@@ -69,13 +68,10 @@ back leaves two or more planned parts, also write each planned part's
 
 ## Ticket drafts
 
-`parts/<id>/ticket.md` starts with the five header lines of
-`docs/agents/issue-tracker.md`: `Status: open`, `Type: task`, `Origin:`
-the stage slug and branch, `Blocks:` the phase the brief names or
-`none`, and `Blocked by:` what must exist first — ticket files, the
-output of this stage's planned parts (named by stage slug), another
-deferred part by its part id (the filing agent replaces it with the
-ticket number), or `none`. The body stands on its own: the user's words
+`parts/<id>/ticket.md` starts with the header lines that the project's
+ticket rules require (`docs/agents/stage-gate-project.md` § Tickets). A
+line that names what must exist first may name another deferred part by
+its part id; the filing agent replaces it with the ticket number. The body stands on its own: the user's words
 it serves (verbatim, with source), goal, done-means, the seam contract
 (what the planned parts give it and assume about it), and what this
 stage learned that its planner needs.

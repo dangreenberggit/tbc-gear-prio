@@ -29,21 +29,8 @@ Numbered. Each step: action, files touched, a checkable acceptance
 criterion (a command or an observable), and the claims it depends on
 (C-ids).
 
-A step that changes what the Upgrades tab renders says how it is looked
-at. The default is a `Visual check:` line: the fixture names to look at
-(from `data/tab-fixtures/`) and the one sentence to judge against. The
-executor opens the fixture's link in a browser pane where the harness has
-one (the Claude desktop app's Browser pane; untested under T3 Code or WSL
-mode), and otherwise looks at the PNGs from `pnpm tab-fixtures:smoke`.
-Only the browser pane covers hover and widths other than 1280. No live
-sim runs. Use a `Visual acceptance:` block instead only when the ticket
-must close on recorded evidence (captures at fixed widths, axe results,
-measured facts, a pre-run state, or an independent `gate-visual`
-verdict), or when a step needs hover or another width and the harness has
-no browser pane.
-The block names the state (`pre-run` / `post-run`), widths, selectors to
-capture, interactions, facts to record, and the sentence; the manifest
-schema is in the header comment of `scripts/tab-harness/test-review.mjs`.
+A step of a kind that `docs/agents/stage-gate-project.md` § Project seats
+names carries the lines that section gives.
 
 ## Paths manifest
 
@@ -76,8 +63,9 @@ lines. Write "none" when every chunk has steps.
 
 ## Verify recipe
 
-The exact commands that prove the whole plan landed (at minimum
-`pnpm verify`), plus any plan-specific checks.
+The exact commands that prove the whole plan is complete (at minimum the
+project's gate command, `docs/agents/stage-gate-project.md` § Hand off),
+plus any plan-specific checks.
 
 ## Out of scope
 
