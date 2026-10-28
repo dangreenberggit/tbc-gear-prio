@@ -79,22 +79,31 @@ sets your output files and your final message, and replaces the
   1. **Inputs:** one message that reads every file named by § Inputs,
      your prompt, and § Revisions or § Next chunk for your mode. On a
      first plan, include `parts.md`. `Read` each file you will edit;
-     print the others in one Bash call, joined with `; echo ===;`.
+     print the others in one Bash call, joined with `; echo ===;`. For
+     a file over ~30 kB, print its heading map
+     (`grep -n '^#\{1,3\} ' <file>`) in place of the file, and print the
+     sections you need with `sed -n '<a>,<b>p'` in your Research round's
+     Bash call.
   2. **Research:** one message with every helper's Agent call (at most
      4; put several jobs in each helper's prompt) and, if you need
      it, one Bash call of small checks whose targets you know (an `ls`,
      a `git rev-parse`, a `grep -c` in a named file).
   3. **Edits:** in `next:` mode, or when `parts.md` has you write
      files, one message with every `Edit` and `Write` call.
-  4. **Check:** one Bash call that checks the files you changed and
-     counts the lines your final message reports.
+  4. **Check:** one Bash call, after your writes, that reads the files
+     you changed and counts the lines your final message reports. It
+     changes no file, so your writes are still your last action under
+     `parts.md`.
 
   Make one more tool round only to read the files `parts.md` names for
-  your mode, to redo a tool call or helper that failed, or to answer a
-  question that a helper's report or one of your own checks raised.
-  Add a line to `## Decisions` for each one: `- extra tool round:
-  <what it did> — <why> — evidence: <error or helper report>`. The
-  tool rounds start again for each message you answer.
+  your mode or a `sed -n` of a section that a round-1 heading map
+  named, to redo a tool call or helper that failed, to answer a
+  question that a helper's report or one of your own checks raised, or
+  to fix a file your Check round found wrong. Add a line to
+  `## Decisions` for each extra round, except the read of the files
+  `parts.md` names for your mode: `- extra tool round: <what it did> —
+  <why> — evidence: <error or helper report>`. The tool rounds start
+  again for each message you answer.
 - **Claims are the product.** A plan is a bundle of causal claims with
   steps attached. Every claim goes in the Claims register with a
   re-runnable `Verified by` command or the label `hypothesis, untested`.

@@ -140,6 +140,10 @@ written when the last Disposition table is.
 
 ## Disposition
 
-| ID  | Axis | Disposition | Ticket / note                                                                                                                           |
-| --- | ---- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| R4  | Spec | fixed       | "Applied, 2026-10-28" section added to `.scratch/carry-forward/issues/727-limit-planner-tool-calls-on-fable.md` in this review's commit |
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                   |
+| --- | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R4  | Spec        | fixed       | "Applied, 2026-10-28" section added to `.scratch/carry-forward/issues/727-limit-planner-tool-calls-on-fable.md` in this review's commit                                                                         |
+| R1  | Adversarial | fixed       | Owner approved the suggested text in chat on 2026-10-28; heading-map text added to step 1 "Inputs" and the `sed -n` reason to the extra-round sentence in `.claude/agents/gate-planner.md`                      |
+| R2  | Adversarial | fixed       | Owner approved the suggested text in chat on 2026-10-28; step 4 "Check" replaced and the "fix a file your Check round found wrong" reason added to the extra-round sentence in `.claude/agents/gate-planner.md` |
+| R3  | Adversarial | fixed       | Owner approved the suggested text in chat on 2026-10-28; `## Decisions` line now exempts the read of the files `parts.md` names for your mode, in `.claude/agents/gate-planner.md`                              |
+| R5  | Standards   | fixed       | Owner approved the suggested text in chat on 2026-10-28; Planner pointer in `docs/agents/stage-gate-project.md` now names § Workhorse jobs, "Hand off a **block**"                                              |

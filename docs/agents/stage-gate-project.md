@@ -59,10 +59,11 @@ harness lists it, except a job that could reach secrets, session logs
 (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*`
 or `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
 types, Private data), else `discrete-task` (model `sonnet` at the call
-site). Block size: `docs/agents/model-policy.md` § Workhorse jobs. Its
-"Run in place" bound does not apply to the planner: the planner's own
-tool calls follow `.claude/agents/gate-planner.md` § Rules, "Few tool
-rounds".
+site). How to write a helper's block: `docs/agents/model-policy.md`
+§ Workhorse jobs, "Hand off a **block**". That section's rule on what to
+run yourself (about five tool calls) does not apply to the planner: the
+planner's own tool calls follow `.claude/agents/gate-planner.md`
+§ Rules, "Few tool rounds".
 
 **Name the model on every spawn:** every type except a GLM type
 (`glm-flash-task` here), which takes no model argument. A helper you
