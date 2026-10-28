@@ -2,6 +2,8 @@
 
 Reviewed range: `6fc7fb58aa29c00398abcbc1f93758ae7964fc39..2e0e5b339fdbd655f6a65b90e0be8448e1388cdd`
 
+Reviewed range: `2e0e5b339fdbd655f6a65b90e0be8448e1388cdd..331c093bf783b05c7632bb34b32bdde7e3508fb0`
+
 Dispatch note (round 1): full axes. The branch is not a small change:
 `git diff --shortstat dev...HEAD` gives 14 files, 458 insertions, 254
 deletions. `codex` is not on `PATH`, so each axis ran as a fresh
@@ -172,6 +174,14 @@ Tickets filed by this branch: 1 (726). Closed: 0. This branch filed
 more tickets than it closed: 724 stays open until the merge, which its
 close rule requires.
 
+Round 2 (focused check) passed. It found three bookkeeping items and
+no other finding; the round-2 Disposition table below gives each one
+`wontfix`. After round 2: tickets filed by this branch: 2 (726, 727).
+Closed: 0 (`git diff --name-status dev...HEAD --
+'.scratch/carry-forward/issues/*.md'` lists 726 and 727 as `A`; the
+closed-status grep counts 0). This branch filed more tickets than it
+closed: 724 stays open until the merge, as its close rule requires.
+
 ## Disposition
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                      |
@@ -186,3 +196,96 @@ close rule requires.
 | Q2  | Standards   | fixed       | S1. Owner-approved text 2026-10-27. gate-planner.md:51-66 now says "Name the model on every spawn of every type except a GLM type." and names the **Report folder** line in § Folders, so no "that section" is left.               |
 | Q3  | Standards   | fixed       | S4, second part. stage-gate-project.md:52-53 now reads: **Workhorse types:** the type `docs/agents/model-policy.md` § Workhorse jobs names. The second citation is gone.                                                           |
 | Q4  | Standards   | fixed       | S5, second part. stage-gate-project.md:97-98 now reads: **In the pair (the pair path is the checkout path):** (fork commands: `-C <pair path>/vendor/tbc-new-fork`).                                                               |
+
+## Focused check (round 2)
+
+Dispatch note: the focused check ran in one fresh `general-task` agent
+(Opus, effort high) that wrote none of the reviewed text; `codex` is not
+on `PATH`. Main range `2e0e5b33..331c093b`; `dc6d91f0` in that range
+changes only this review file. Fork range: none.
+`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json` exits 0,
+so the branch never moves the fork pin and condition 3 holds. The
+caller limited the check to the commits after round 1 and to the items
+below.
+
+1. **Conditions 1 to 3: pass, with one call recorded.** `a8c0d5a6`
+   fixes A1, Q1, Q3 and Q4, which ticket 724's note names
+   (724:104-116). `e2445fda` fixes Q2 with the owner-approved paragraph,
+   replaces the Q1 entry with owner-approved text, and drops the
+   trailing slash from the A1 value. Every changed line is at
+   gate-planner.md:51-67 or at stage-gate-project.md:13, 52-53, 65-69 or
+   99, the places those findings cite. `331c093b` adds ticket 727 and
+   moves `NEXT` from 727 to 728. No Disposition row links 727, so taken
+   literally it is none of condition 1's five kinds. It changes no rule
+   text, and the caller asked for it to be checked here, so this check
+   reviewed it in full rather than stopping.
+2. **Diff changes only what each finding asks for: pass.** The
+   `e2445fda` paragraph is wider than Q2's suggested edit; the owner
+   approved it on 2026-10-27, as ticket 724's note records. The
+   approved texts themselves are not in any file this check could
+   read (searched `.scratch/` in the main checkout and worktrees), so
+   the word-for-word match with the owner's approval is not checked
+   here.
+3. **New tests assert their findings: pass (no tests in range).**
+   `git diff --stat dc6d91f0..HEAD` lists only agent docs, tickets,
+   `NEXT` and this review file.
+4. **Tests the fixes touch pass: pass.** `pnpm mirrors:check`
+   (`python scripts/check_skill_mirrors.py`) rc=0, and
+   `diff -r .claude/skills/stage-gate .agents/skills/stage-gate` rc=0.
+   The ticket-724 test-of-general grep prints nothing (`grep` rc=1).
+
+What else this check confirmed:
+
+- **A1:** `**Run-log folder:** \`.scratch/agent-runs\``sits under
+§ Folders (stage-gate-project.md:8, :13), the section SKILL.md:559
+names. With the value substituted, SKILL.md:558 reads`.scratch/agent-runs/<session>.jsonl`and SKILL.md:562 reads "grep the`.scratch/agent-runs`folder's`*.jsonl`files". Both resolve to the
+real log,`.scratch/agent-runs/<session>.jsonl` (main checkout).
+- **Rules kept.** Each rule in the round-1 "Research by subagent" text
+  is in the new one: judgment stays with the planner, blocks go to a
+  workhorse helper, each helper is told what its report holds, the
+  judgment agent only for judgment the planner cannot hold, at most 4
+  helpers, report-file-only writes with the rule in § Folders, and
+  naming the model on every spawn except a GLM type's. The new Q1
+  entry keeps the old rule "Name the model on every spawn except a GLM
+  type's" and its model-policy pointer.
+- **Pointers.** § Worker lanes (:46), the **Judgment agent:** line
+  (:48), the Planner part (:55), § Folders (:8), the **Report folder:**
+  line (:15), model-policy § Lane is per job, not per parent (:107) and
+  § Workhorse jobs (:282) all exist. `git grep` finds no pointer to the
+  old labels "Spawns with no model argument" or "Fork commands in the
+  pair".
+- **Ticket 727** has the five header lines, `Status: open`, and
+  `NEXT` moved in the same commit, as `docs/agents/issue-tracker.md`
+  requires. Each quoted line matches its file: gate-planner.md:4,
+  gate-planner.md:52-53, stage-gate-project.md:62-63,
+  model-policy.md:334-338, log-agent-run.py:112 and :191, AGENTS.md:96,
+  and `plan.md:146` in the main checkout. The run log
+  `.scratch/agent-runs/c33da48e-1527-4d89-8989-f3c193ceffe9.jsonl`
+  (main checkout) gives the four planner `stop` lines with `calls` 2,
+  8, 2, 8 and `est_cost_usd` 0.6898, 1.0679, 0.7151, 1.1795, which the
+  ticket rounds correctly.
+
+Bookkeeping found (no other finding):
+
+- **R2-1.** Ticket 724:113 says "The same commit also sets
+  **Run-log folder:** to `.scratch/agent-runs`". The only fix commit the note names
+  is `a8c0d5a6`, but `a8c0d5a6` set
+  `.scratch/agent-runs/`; `e2445fda` removed the slash. Suggested text:
+  "Commit `e2445fda`, which adds this note, also sets".
+- **R2-2.** Round-1 Disposition rows cite stale lines: Q4 says
+  stage-gate-project.md:97-98 (the label is at :98-99), and Q2 says
+  gate-planner.md:51-66 (the rule ends at :67). The quoted text in both
+  rows is right.
+- **R2-3.** gate-planner.md:61-62, "The rule for report files is in
+  that file's § Folders", follows a sentence that ends "its report
+  file". Checked: a report file has no § Folders and no **Report
+  folder** line, so only `docs/agents/stage-gate-project.md`, named
+  at :54, fits. Round 1's text had the same "that file's § Folders".
+
+## Disposition (round 2)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                        |
+| ---- | ------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R2-1 | Focused check | wontfix     | Bookkeeping in ticket 724's note; `git log` shows which commit set the value. The suggested text is above if the caller wants to apply it.           |
+| R2-2 | Focused check | wontfix     | Bookkeeping: line numbers in round-1 rows are one line off; the quoted text is correct and findable by search.                                       |
+| R2-3 | Focused check | wontfix     | Not a defect: the only file the rule names that has a § Folders and a **Report folder** line is `docs/agents/stage-gate-project.md`. Owner-approved. |
