@@ -85,3 +85,20 @@ estimated 0.69, 1.07, 0.72 and 1.18 USD (`est_cost_usd`). These are the
 - The change is applied.
 - A stage-gate test run shows the planner's `calls` count from the run
   log, next to the "before" numbers above.
+
+## Applied, 2026-10-28
+
+The session that applied this ticket reports that the owner approved
+the wording in chat on 2026-10-28; the wording history is in
+`.scratch/agent-reports/2026-10-28-general-task-727-*.md` (main
+checkout, gitignored). Commit `ccd7028e` on
+`feat/planner-tool-rounds-727` adds § Rules, "Few tool rounds" to
+`.claude/agents/gate-planner.md` and points
+`docs/agents/stage-gate-project.md` § Worker lanes, Planner at it. It
+allows up to 4 helpers in one Research round, not the one helper that
+§ Proposed direction named. Line numbers in § Facts are at `104b2017`.
+
+The pre-merge review (`docs/reviews/feat-planner-tool-rounds-727.md`)
+found wording problems in that text (R1, R2, R3, R5) whose fixes need
+the owner's approval. The ticket stays open for those and for the test
+run (§ Done when, last item).
