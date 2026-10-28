@@ -10,8 +10,7 @@ one section per kind. Lanes and spawning rules in full:
 **Stage folder:** `.scratch/stage-gate/<slug>/`
 (`git check-ignore -v .scratch/stage-gate/<slug>/plan.md`)
 
-**Run-log folder:** `.scratch/agent-runs/<session>.jsonl`,
-`.scratch/agent-runs/*.jsonl`
+**Run-log folder:** `.scratch/agent-runs/`
 
 **Report folder:** Report files: AGENTS.md § Subagent reports.
 
@@ -51,7 +50,7 @@ The only commands you run are the ones that
 ### Session
 
 **Workhorse types:** the type `docs/agents/model-policy.md` § Workhorse
-jobs names (model-policy § Workhorse jobs)
+jobs names
 
 ### Planner
 
@@ -63,7 +62,7 @@ types, Private data), else `discrete-task` (model `sonnet` at the call
 site). Block size, and what to run in place:
 `docs/agents/model-policy.md` § Workhorse jobs.
 
-**Spawns with no model argument:** except a GLM type's: you run on
+**Name the model on every spawn:** except a GLM type's: you run on
 Fable, the top price tier (model-policy § Lane is per job, not per
 parent)
 
@@ -95,7 +94,7 @@ slice goes to `general-task` (`model: "opus"`).
 pair, have a subagent make the pair with `pnpm wt:pair`;
 `isolation: worktree` has no fork.
 
-**Fork commands in the pair (the pair path is the checkout path):**
+**In the pair (the pair path is the checkout path):**
 (fork commands: `-C <pair path>/vendor/tbc-new-fork`)
 
 ## Search scopes
