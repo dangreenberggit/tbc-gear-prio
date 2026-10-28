@@ -58,3 +58,45 @@ for `pnpm`, `.scratch`, `vendor`, `fork`, `wowsims`, `Upgrades`, `SME`,
 `.agents/` copy; `grep -rn` for every script and hook path the files
 name. A file with no hit for those words can still hold a tie they miss:
 hypothesis, untested.
+
+## Comments
+
+### Decision and step 1, 2026-10-27
+
+Owner, 2026-10-27, on doing this in two steps: "i agree with your 2 step
+rec. it makes the most sense to me."; "sure lets go". Step 1 splits the
+mixed files in place: the stage-gate skill and seat files keep only
+general text, and `docs/agents/stage-gate-project.md` holds this repo's
+values. Step 2, moving the general core to a plugin repo, is ticket 726.
+
+The owner approved the plan's sentence list on 2026-10-27: N1-N34 with
+N14b and N32b (N5 withdrawn). The owner then approved N38 ("sure"): the
+SKILL.md step 7 sentence that named `dev` now names the project's
+integration branch (`docs/agents/stage-gate-project.md` § Hand off), and
+that section gained **Integration branch:** `dev`. The plan is
+`.scratch/agent-reports/2026-10-27-design-task-724-split-in-place-plan.md`
+(gitignored; main checkout only).
+
+Step 1 is on branch `feat/stage-gate-split-724`, from `dev` at
+`6fc7fb58`:
+
+- `d20fdf1d` Add stage-gate project values file (724): the new file, and
+  `docs/agents/orchestration.md` § The session delegates names it.
+- `ee8e3eae` Point stage-gate skill at project values (724):
+  `SKILL.md`, `parts.md`, `plan-template.md`, in `.claude/skills/` and
+  `.agents/skills/`.
+- `4234ecd1` Point stage-gate seats at project values (724):
+  `gate-planner.md`, `gate-reviewer.md`, `gate-executor.md`.
+- The commit that adds this note and ticket 726.
+
+Checks on `4234ecd1`: `pnpm mirrors:check` exit 0;
+`TBC_VERIFY_WITHOUT_FORK=1 pnpm verify` exit 0; this grep prints
+nothing:
+
+```
+git grep -n -E 'pnpm|\.scratch|vendor/|tbc-new-fork|fork edits|fork commands|wowsims|Upgrades|tab-fixtures|tab-review|gate-sme|gate-visual|sme-rank|AGENTS\.md|docs/agents|issue-tracker|model-policy|general-task|simple-task|discrete-task|glm-|merge-to-dev|pre-merge-review|ticket [0-9]|`dev`|SME|Visual|re-pin|5173|upstream/master|tab-harness|T3 Code|no fork' -- .claude/skills/stage-gate .claude/agents/gate-planner.md .claude/agents/gate-reviewer.md .claude/agents/gate-executor.md | grep -v 'stage-gate-project.md'
+```
+
+This ticket stays open until step 1 is on `dev`. On merge, set
+`Status: closed` with `Verified by:` that grep (prints nothing) and
+`pnpm mirrors:check` (exit 0), both run on the merge commit.
