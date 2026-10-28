@@ -247,12 +247,12 @@ In these steps, "you" and "the session" are the same agent.
    session sends that `gate-planner` a `SendMessage` to its agent id with
    this text: "Your final message was not the final message your
    instructions ask for. If you started researchers, read their report
-   files. Then end your turn with that final message." The session logs
-   `resumed`. When the `SendMessage` tool result lacks
-   `"success":true`, the session respawns the `gate-planner` in the
-   same mode. When the next final message of the resumed or respawned
-   `gate-planner` is again none of these, the session stops and tells
-   the user.
+   files. Then end your turn with that final message." When the
+   `SendMessage` tool result has `"success":true`, the session logs
+   `resumed` in `decision-log.md`. When it lacks `"success":true`, the
+   session respawns the `gate-planner` in the same mode. When the next
+   final message of the resumed or respawned `gate-planner` is again
+   none of these, the session stops and tells the user.
 
    **Gate A (mechanical):** every template section present, Backburner
    included ("none" allowed); `K1` has steps; every step in a chunk that
@@ -336,8 +336,10 @@ In these steps, "you" and "the session" are the same agent.
    register) and whose verdict in the `## Register verdicts` table of the
    review is `refuted`.
    - **Loop back.** A `blocking` finding, or a refuted load-bearing
-     claim → loop back: respawn `gate-planner` with brief + plan + review
-     for a revision, then spawn a `gate-reviewer` for a re-review
+     claim → loop back: respawn `gate-planner` with brief + plan +
+     review + the id of each chunk that the latest review covers (the
+     last field of that `gate-reviewer`'s `spawn` line), for a revision,
+     then spawn a `gate-reviewer` for a re-review
      (step 3). Loop back a second time only when the
      re-review after the first loop-back has a `blocking` finding or a
      refuted load-bearing claim. After the revision of the second
@@ -346,7 +348,9 @@ In these steps, "you" and "the session" are the same agent.
      **Review limit per chunk** below says what the session does next.
    - No `blocking` finding and no refuted load-bearing claim, but one or
      more `material` findings need a change to `plan.md` → the session
-     spawns one `gate-planner` revision with brief + plan + review, then
+     spawns one `gate-planner` revision with brief + plan + review + the
+     id of each chunk that the latest review covers (the last field of
+     that `gate-reviewer`'s `spawn` line), then
      runs Gate A. This revision is not a loop-back and does not count
      toward the two loop-backs that **Loop back** allows. The session
      spawns a `gate-reviewer` for a re-review (step 3) only when the
