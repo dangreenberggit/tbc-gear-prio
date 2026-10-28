@@ -17,20 +17,24 @@ This ticket is that follow-up. Make all the edits in one change.
 
 ## Where the term is
 
-Line numbers in this ticket are at `80c08777`. Ticket 723 edits
-`.claude/agents/gate-planner.md` lines 75-79 and 112-121, so that
-file's lines will move. Re-find every line with the grep below before
-you edit.
+Line numbers in this ticket are at `80c08777`, except the
+`.claude/agents/gate-planner.md` rows, which are at the text after
+ticket 723 (branch `feat/stage-gate-follow-ups`, `5902e14e`). Tickets
+722 and 723 on that branch also move the `SKILL.md` lines after about
+line 340 by 2 to 4 lines (for example, `:343` is now `:345` and `:401`
+is now `:405`). The quoted Current text is what to grep for: re-find
+every line with the grep below before you edit.
 
 `git grep -c -i -E 'load[- ]?bearing'` at the repo root finds 504
 matching lines in 282 tracked files. The full list:
 `git grep -n -i -E 'load[- ]?bearing'`.
 
-The lines fall into four groups.
+The lines fall into four groups. The fork repo's lines are a fifth,
+group E.
 
 | Group                                   | Lines     | Files                                                                                                                                                                                                                                                   |
 | --------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A. Claims-register term (stage-gate)    | 24        | `.claude/skills/stage-gate/SKILL.md` (8), `.claude/skills/stage-gate/plan-template.md` (2), the same two under `.agents/skills/stage-gate/` (8 + 2), `.claude/agents/gate-executor.md` (1), `.claude/agents/gate-planner.md` (1), `.claude/agents/gate-reviewer.md` (2) |
+| A. Claims-register term (stage-gate)    | 25        | `.claude/skills/stage-gate/SKILL.md` (8), `.claude/skills/stage-gate/plan-template.md` (2), the same two under `.agents/skills/stage-gate/` (8 + 2), `.claude/agents/gate-executor.md` (1), `.claude/agents/gate-planner.md` (2), `.claude/agents/gate-reviewer.md` (2) |
 | B. Other live files ("essential")       | 49        | skills (5 per mirror, 10 total), `CONTEXT.md` (1), `PLAN.md` (4), ADRs 0017/0024/0030/0032 (4), `docs/fork-phase-seams.md` (1), `docs/plans/**` (12), `packages/core` (4), `scripts/*.py` (5), open tickets (8)                                         |
 | C. Ban lists that name the word to ban it | 3       | `docs/agents/home/AGENTS.md:13`, `.claude/skills/writing-great-skills/GLOSSARY.md:187`, its `.agents` mirror                                                                                                                                             |
 | D. History                              | about 428 | `.scratch/**` except open tickets, `docs/reviews/**`, `docs/verification-log.md`, `docs/stage0-findings.md`, `PLAN-REVIEW.md`                                                                                                                           |
@@ -52,11 +56,7 @@ Keep group C as it is. Removing the word there removes the ban.
 - Skill files need the owner's approval before an edit (`AGENTS.md`,
   "Propose changes to `AGENTS.md`, `CLAUDE.md` and skill files in
   chat").
-- The fork repo `vendor/tbc-new-fork` has 11 matching lines in 10 files
-  (`git -C vendor/tbc-new-fork grep -c -i -E 'load[- ]?bearing'`). Some
-  of these may be upstream wowsims files, which need the owner's OK for
-  each exact edit: hypothesis, untested. A fork edit needs a pair
-  (`docs/agents/paired-worktrees.md`).
+- The fork repo lines are group E, below.
 - Prettier re-pads the markdown tables in `docs/plans/compute-topology.md`
   and `docs/plans/upstream-data-redundancy.md` after the edit.
 - No link points at an anchor that changes:
@@ -82,7 +82,8 @@ picks another term, use it in the same places. Make each
 | `SKILL.md:381`                         | `load-bearing claim, the session spawns no revision: it stops, gives`                                | `approach claim, the session spawns no revision: it stops, gives`                                    |
 | `SKILL.md:401`                         | ``check. No revision follows this review. When it has a `blocking` finding or a refuted load-bearing`` | ``check. No revision follows this review. When it has a `blocking` finding or a refuted approach``   |
 | `.claude/agents/gate-executor.md:87`   | ``  load-bearing: stop work, report `Status: blocked`.``                                             | ``  as an approach claim: stop work, report `Status: blocked`.``                                     |
-| `.claude/agents/gate-planner.md:75`    | `  Verify to the depth of the claim you are about to make: a load-bearing`                           | `  Verify to the depth of the claim you are about to make: an approach`                              |
+| `.claude/agents/gate-planner.md:75`    | ``  The reviewer counts a claim marked `Load-bearing: yes` and left``                               | ``  The reviewer counts a claim marked `Approach claim: yes` and left``                              |
+| `.claude/agents/gate-planner.md:76`    | ``  `hypothesis, untested` as a finding; a claim marked `Load-bearing: no` ``                      | ``  `hypothesis, untested` as a finding; a claim marked `Approach claim: no` ``                     |
 | `.claude/agents/gate-reviewer.md:60-61` | `   plan survives the hypothesis being false; a load-bearing untested` / `   hypothesis is a finding.` | `   plan survives the hypothesis being false; an untested approach claim` / `   is a finding.`       |
 | `.claude/agents/gate-reviewer.md:138`  | ``Severity: `blocking` (the approach or a load-bearing claim fails, or a``                           | ``Severity: `blocking` (the approach or an approach claim fails, or a``                              |
 
@@ -152,6 +153,18 @@ Some group B lines also use other banned words that this rename does not
 fix: `writing-fragments/SKILL.md:38` ("land", "shapes"),
 `docs/adr/0030-...md:49` ("carries"), `foundation.md:181` ("land").
 
+## Group E: the fork repo
+
+The fork repo `vendor/tbc-new-fork` has 11 matching lines in 10 files
+(`git -C vendor/tbc-new-fork grep -c -i -E 'load[- ]?bearing'`). The
+main repo grep does not reach them, because `vendor/` is gitignored.
+
+- A fork change needs a pair, then a re-pin
+  (`docs/agents/paired-worktrees.md` § Re-pin after a fork change).
+- Some of these lines may be in upstream wowsims files. Each exact edit
+  to such a file needs the owner's OK: hypothesis, untested. Find out
+  which files are upstream files before you propose the edits.
+
 ## Questions for the owner
 
 **Q-725-term: what is the new term?** Today the Claims-register column
@@ -159,9 +172,9 @@ is named `Load-bearing`. It marks a claim that, if false, makes the
 whole approach wrong, not just one step. The options:
 
 - `Approach claim` (recommended). It says the claim works at the level
-  of the whole approach. It pairs with "step-local claim", which
-  `gate-planner.md:76` already uses. It is two words, and
-  `git grep -n -i 'approach claim'` finds no clash.
+  of the whole approach, which is what the column marks: refuting the
+  claim makes the approach wrong (`plan-template.md:19`). It is two
+  words, and `git grep -n -i 'approach claim'` finds no clash.
 - `Critical`. It is short, but it reads like a severity level. The
   review already has three levels (`blocking`, `material`, `minor`), so
   a reader may take it as a fourth.
@@ -185,4 +198,6 @@ options:
 - `git grep -n -i -E 'load[- ]?bearing'` lists only the lines the owner
   agreed to keep: the group C ban lists, the two quotes in tickets 405
   and 407, and group D if the owner keeps it.
+- `git -C <pair>/vendor/tbc-new-fork grep -n -i -E 'load[- ]?bearing'`
+  lists only the fork lines the owner agreed to keep.
 - `pnpm mirrors:check` passes.

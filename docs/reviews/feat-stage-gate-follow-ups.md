@@ -140,11 +140,15 @@ edit and this file, as `pre-merge-review` § Round limit allows.
 
 ## Disposition
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                                                  |
-| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| A4  | Adversarial | wontfix     | Ticket 724 states its line numbers are at `46e75132` (its line 21); they are correct at that commit.                           |
-| A5  | Adversarial | wontfix     | The comma separates the inserted parenthetical; meaning unchanged; approved text is not re-worded by review.                   |
-| S1  | Standards   | wontfix     | `issue-tracker.md:122-127` asks for `map.md` lines only for wayfinding Resolve; tickets 720-724 already lack them.             |
-| P1  | Spec        | wontfix     | Duplicate of A2; disposed under A2.                                                                                            |
-| P2  | Spec        | wontfix     | Duplicate of A1; disposed under A1.                                                                                            |
-| P4  | Spec        | wontfix     | Ticket 723 is closed and 725 will be closed when done, so both fall in group D, which "Done when" already lets the owner keep. |
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                   |
+| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | Ticket 725 Q-725-term: the "step-local claim" reason is gone; the reason now cites `plan-template.md:19`.                       |
+| A2  | Adversarial | fixed       | Ticket 725 Group A: two `gate-planner.md` rows (`:75`, `:76`) with the current text; count is 2 and the group total 25.         |
+| A3  | Adversarial | fixed       | Ticket 725 § Where the term is: says `SKILL.md` lines after about 340 moved by 2 to 4 and that the quoted text is the grep key. |
+| A4  | Adversarial | wontfix     | Ticket 724 states its line numbers are at `46e75132` (its line 21); they are correct at that commit.                            |
+| A5  | Adversarial | wontfix     | The comma separates the inserted parenthetical; meaning unchanged; approved text is not re-worded by review.                    |
+| S1  | Standards   | wontfix     | `issue-tracker.md:122-127` asks for `map.md` lines only for wayfinding Resolve; tickets 720-724 already lack them.              |
+| P1  | Spec        | fixed       | Same finding as A2; fixed in ticket 725 under A2.                                                                               |
+| P2  | Spec        | fixed       | Same finding as A1; fixed in ticket 725 under A1.                                                                               |
+| P3  | Spec        | fixed       | Ticket 725 Group E: the 11 fork lines, the pair and re-pin rule, the upstream-file caveat, and a fork grep in "Done when".      |
+| P4  | Spec        | wontfix     | Ticket 723 is closed and 725 will be closed when done, so both fall in group D, which "Done when" already lets the owner keep.  |
