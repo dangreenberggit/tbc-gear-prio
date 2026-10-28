@@ -10,7 +10,7 @@ one section per kind. Lanes and spawning rules in full:
 **Stage folder:** `.scratch/stage-gate/<slug>/`
 (`git check-ignore -v .scratch/stage-gate/<slug>/plan.md`)
 
-**Run-log folder:** `.scratch/agent-runs/`
+**Run-log folder:** `.scratch/agent-runs`
 
 **Report folder:** Report files: AGENTS.md § Subagent reports.
 
@@ -62,9 +62,11 @@ types, Private data), else `discrete-task` (model `sonnet` at the call
 site). Block size, and what to run in place:
 `docs/agents/model-policy.md` § Workhorse jobs.
 
-**Name the model on every spawn:** except a GLM type's: you run on
-Fable, the top price tier (model-policy § Lane is per job, not per
-parent)
+**Name the model on every spawn:** every type except a GLM type
+(`glm-flash-task` here), which takes no model argument. A helper you
+spawn with no model can run on your own model, Fable, which is the top
+price tier (`docs/agents/model-policy.md` § Lane is per job, not per
+parent).
 
 ### Reviewer
 

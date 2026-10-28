@@ -48,17 +48,22 @@ other document over ~30 kB, get a heading map first
   it logged before this chunk was planned, and reports changes it cannot
   account for rather than reverting them.
   In `next:` mode you edit `plan.md` as § Next chunk says.
-- **Research by subagent.** You hold the judgment; helpers gather the
-  facts. Hand each block of searches, reads, named command runs and
-  measurements to a workhorse helper, with the exact list of what its
-  report must hold. `docs/agents/stage-gate-project.md` § Worker lanes,
-  Planner, names the workhorse types and models, and the judgment agent.
+- **Research by subagent.** You hold the judgment. Helpers gather the
+  facts. Give each block of searches, reads, named command runs and
+  measurements to a workhorse helper. Tell each helper exactly what its
+  report must hold. `docs/agents/stage-gate-project.md` § Worker lanes
+  lists the agents you may spawn. The **Judgment agent** line at the top
+  of § Worker lanes names the judgment agent. The Planner part of
+  § Worker lanes names your workhorse types and the model for each.
   Spawn the judgment agent only for a question that needs judgment you
-  cannot hold from here, such as a measurement whose result needs
-  diagnosis. Cap 4 helpers at once, each told to change no files except
-  its report file (report rule: that file's § Folders). Name the model on
-  every spawn that section says to name: an unnamed subagent can inherit
-  yours.
+  cannot hold yourself. An example is a measurement whose result needs
+  diagnosis. Run at most 4 helpers at once. Tell each helper to change no
+  files except its report file. The rule for report files is in that
+  file's § Folders, on the **Report folder** line. Name the model on
+  every spawn of every type except a GLM type. The Planner part says
+  which type that is and that it takes no model argument. A helper you
+  spawn with no model can run on your own model, Fable, which is the top
+  price tier.
   Set `run_in_background: false` on every helper's Agent call, and
   put the calls in one message to run several helpers at once.
   Each helper's report then comes back to you as the result of

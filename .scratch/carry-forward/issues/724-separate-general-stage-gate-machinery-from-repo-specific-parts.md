@@ -100,3 +100,17 @@ git grep -n -E 'pnpm|\.scratch|vendor/|tbc-new-fork|fork edits|fork commands|wow
 This ticket stays open until step 1 is on `dev`. On merge, set
 `Status: closed` with `Verified by:` that grep (prints nothing) and
 `pnpm mirrors:check` (exit 0), both run on the merge commit.
+
+### Review fixes, 2026-10-27
+
+The pre-merge review is `docs/reviews/feat-stage-gate-split-724.md`
+(`dc6d91f0`). Commit `a8c0d5a6` fixed A1, Q1, Q3 and Q4 in
+`docs/agents/stage-gate-project.md`. The owner then approved two texts
+on 2026-10-27. The first is a plain-words rewrite of the
+**Research by subagent.** rule in `.claude/agents/gate-planner.md`,
+which fixes review finding Q2. The second is the planner's
+**Name the model on every spawn:** entry in
+`docs/agents/stage-gate-project.md` § Worker lanes. The same commit
+also sets **Run-log folder:** to `.scratch/agent-runs` with no
+trailing slash, so SKILL.md's `<run-log folder>/<session>.jsonl` gives
+no doubled slash.
