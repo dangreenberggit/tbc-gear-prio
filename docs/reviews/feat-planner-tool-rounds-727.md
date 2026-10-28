@@ -147,3 +147,118 @@ written when the last Disposition table is.
 | R2  | Adversarial | fixed       | Owner approved the suggested text in chat on 2026-10-28; step 4 "Check" replaced and the "fix a file your Check round found wrong" reason added to the extra-round sentence in `.claude/agents/gate-planner.md` |
 | R3  | Adversarial | fixed       | Owner approved the suggested text in chat on 2026-10-28; `## Decisions` line now exempts the read of the files `parts.md` names for your mode, in `.claude/agents/gate-planner.md`                              |
 | R5  | Standards   | fixed       | Owner approved the suggested text in chat on 2026-10-28; Planner pointer in `docs/agents/stage-gate-project.md` now names § Workhorse jobs, "Hand off a **block**"                                              |
+
+## Round 2
+
+Reviewed range: `104b20176917bde1788cd64e540512ee0f8421fb..63959063a7b1a83bbe93037d75885b3f71f38bb3`
+
+Dispatch: round 2 reviews the whole branch from `dev` (`104b2017`), not
+only the commits after round 1, because the session that ran this
+review asked for that. It is not the skill's focused check: commit
+`63959063` ("Fix 727 rule after the wording check") applies texts P1 to
+P4 from
+`.scratch/agent-reports/2026-10-28-general-task-727-committed-rule-check.md`
+(main checkout, gitignored), which no round-1 finding ID names, so the
+focused check's condition 1 does not hold. The session reports that the
+owner approved P1 to P4 in chat on 2026-10-28, and gave this ruling for
+the round, in chat on 2026-10-28, by agreeing to: "If round 2 finds only
+small wording issues, they go to a ticket rather than another pass
+before the merge. A real break would still come back to you." A real
+break is a finding that makes a planner fail to do its job: a required
+action no rule allows, two rules that give opposite orders, or an edit
+that cannot succeed. `codex` is not on `PATH`, so the reviewer was one
+fresh `general-task` agent on Opus (review lane), given the adversarial
+brief and the `code-review` skill's Standards and Spec checks, and told
+to write nothing. Domain skipped: no game content.
+
+### Findings (round 2)
+
+**S1. Real break. `.claude/agents/gate-planner.md:84-88`. The Inputs
+round's one Bash call has no limit on its total output, and no
+extra-round reason allows reading output the harness cut short.** The
+~30 kB heading-map rule is per file. Claude Code saves a Bash output
+over about 30 kB to a file and returns a 2 KB preview: a 31,000-character
+output came back as "Output too large (30.3KB). Full output saved to
+... Preview (first 2KB)" (`head -c 31000 /dev/zero | tr '\0' 'a'`,
+re-run by the dispatcher). The fixed inputs are `stage-gate-project.md`
+7,989 bytes, `parts.md` 6,574 and `plan-template.md` 2,644 (`wc -c`);
+`brief.md` files in the main checkout are 5,790 bytes at the median and
+16,603 at most. In `next:` mode the call also prints
+`execution-report.md` and `progress.md`; adding those sizes (each file
+over 30 kB counted as a 2,000-byte heading map) puts 17 of 67 stage
+folders over 30,000 bytes (dispatcher's `find .scratch/stage-gate ...
+-printf '%s'` estimate). The planner must then read the saved file, and
+of the five reasons at :100-110 only "redo a tool call ... that failed"
+comes close, though the call did not fail. Reviewer's suggested text:
+split the Inputs Bash output across several Bash calls in the same
+message, each under about 25,000 characters, and add the reason "to
+read the rest of a file or output that came back cut short: a partial
+`Read` view, or Bash output saved to a file".
+
+**S2. Real break. `.claude/agents/gate-planner.md:81-83`. "`Read` each
+file you will change ... whatever its size" meets `Read`'s 25,000-token
+limit.** The reviewer measured a `Read` of a 141,917-byte file: it
+returned lines 1-1024 of 2809 with the notice "58273 tokens, cap 25000"
+(reviewer's run; not re-run by the dispatcher). That is about 61 kB per
+`Read`. In the main checkout, 11 of 117 `plan.md` files are over 60 kB
+(`find .scratch/stage-gate -name plan.md -size +60k | wc -l`). In
+`next:` mode the sections the planner edits (Execution chunks,
+Backburner) come after Steps (`plan-template.md:26-62`), so the first
+page may not hold them, and no listed reason allows reading the next
+page. Whether `Edit` accepts a file that was only partly read is
+hypothesis, untested. Reviewer's suggested fix: the S1 reason, plus
+"When `Read` returns a partial view of a file you will change, read its
+other pages with `offset` and `limit`."
+
+**S3 to S7. Wording.** S3: the Check round prints whole changed files
+(:95-98). S4: `docs/agents/stage-gate-project.md:66-69` turns off all of
+model-policy § Workhorse jobs for the planner, not only the five-call
+rule. S5: the `Read`-before-`Edit` rule is stated only for round 1
+(:81-83). S6: no round names the file delete that `re-split` needs
+(:93-94; `parts.md:51-52`). S7: a revision of a large `plan.md` always
+costs an extra round (:84-88 with § Revisions). A planner still gets
+through each of these, at the cost of an extra round or an unclear
+sentence. Full text and suggested fixes:
+`.scratch/carry-forward/issues/728-planner-tool-rounds-wording-gaps.md`.
+
+**S8. Bookkeeping. `.scratch/carry-forward/issues/727-limit-planner-tool-calls-on-fable.md`.**
+The ticket still said the R1, R2, R3 and R5 fixes waited for the
+owner's approval, recorded neither `aa179d24` nor `63959063`, and cited
+"lines 51-71" where the rule runs to line 72 at `104b2017`
+(`git show 104b2017:.claude/agents/gate-planner.md | grep -n '^- \*\*'`).
+Fixed in this round's commit.
+
+**Checked and clean.** Round-1 fixes R1, R2, R3 and R5 do what their
+findings asked; P4 widened R5 (S4). No two rules in `gate-planner.md`
+give opposite orders. The nested list at :100-110 and the paragraph at
+:112-116 sit inside the "Few tool rounds" bullet (2-space indent;
+`prettier --check` on both files exits 0). Banned-word grep on added
+lines prints nothing; `grep -cE 'AGENTS\.md|docs/agents|CLAUDE\.md|model-policy'
+.claude/agents/gate-planner.md` gives 2, both `docs/agents/stage-gate-project.md`;
+`pnpm mirrors:check` exits 0; the five commit subjects are 32 to 42
+characters, imperative, capitalised, no period.
+
+### Summary (round 2)
+
+Round 2 found two real breaks, S1 and S2. Both come from the harness
+cutting a large output short (Bash over about 30 kB, `Read` over 25,000
+tokens), after which the planner needs one more read that none of the
+five extra-round reasons allows. This branch introduced both, through
+the round limit. Under the owner's ruling they go back to the owner and
+are not fixed here, so **S1 and S2 block the merge** and have no
+Disposition row. S3 to S7 are deferred to ticket 728 under the same
+ruling. S8 is fixed.
+
+Tickets: filed 1 (728), closed 1 (724). Filed is not higher than
+closed. Ticket 727 stays open for S1, S2 and the test run.
+
+## Disposition (round 2)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                            |
+| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| S3  | Adversarial | defer       | `.scratch/carry-forward/issues/728-planner-tool-rounds-wording-gaps.md` — owner ruling 2026-10-28, in chat: "If round 2 finds only small wording issues, they go to a ticket rather than another pass before the merge." |
+| S4  | Standards   | defer       | `.scratch/carry-forward/issues/728-planner-tool-rounds-wording-gaps.md` — owner ruling 2026-10-28, in chat: "If round 2 finds only small wording issues, they go to a ticket rather than another pass before the merge." |
+| S5  | Adversarial | defer       | `.scratch/carry-forward/issues/728-planner-tool-rounds-wording-gaps.md` — owner ruling 2026-10-28, in chat: "If round 2 finds only small wording issues, they go to a ticket rather than another pass before the merge." |
+| S6  | Adversarial | defer       | `.scratch/carry-forward/issues/728-planner-tool-rounds-wording-gaps.md` — owner ruling 2026-10-28, in chat: "If round 2 finds only small wording issues, they go to a ticket rather than another pass before the merge." |
+| S7  | Adversarial | defer       | `.scratch/carry-forward/issues/728-planner-tool-rounds-wording-gaps.md` — owner ruling 2026-10-28, in chat: "If round 2 finds only small wording issues, they go to a ticket rather than another pass before the merge." |
+| S8  | Spec        | fixed       | Ticket 727's "Applied" section records `aa179d24`, `63959063` and round 2; § Facts line span corrected to 51-72                                                                                                          |

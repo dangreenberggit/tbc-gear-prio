@@ -30,7 +30,7 @@ stage-gate follow-ups branch merges to `dev`.
   targets — evidence: C9, C10". Check:
   `grep -n inline .scratch/stage-gate/test-revision-chunk-id/plan.md`.
 - No line in `.claude/agents/gate-planner.md` says the planner may run a
-  lookup itself. Its § Rules, "Research by subagent" (lines 51-71), says
+  lookup itself. Its § Rules, "Research by subagent" (lines 51-72), says
   "Give each block of searches, reads, named command runs and
   measurements to a workhorse helper."
 - `docs/agents/stage-gate-project.md:62-63` sends the planner elsewhere
@@ -99,6 +99,15 @@ allows up to 4 helpers in one Research round, not the one helper that
 § Proposed direction named. Line numbers in § Facts are at `104b2017`.
 
 The pre-merge review (`docs/reviews/feat-planner-tool-rounds-727.md`)
-found wording problems in that text (R1, R2, R3, R5) whose fixes need
-the owner's approval. The ticket stays open for those and for the test
-run (§ Done when, last item).
+found wording problems in that text (R1, R2, R3, R5). Commit `aa179d24`
+applies the owner-approved fixes. Commit `63959063` replaces parts of
+them with texts P1 to P4 from
+`.scratch/agent-reports/2026-10-28-general-task-727-committed-rule-check.md`
+(main checkout, gitignored); the session that applied them reports that
+the owner approved those texts in chat on 2026-10-28.
+
+Round 2 of that review found two problems that block the merge and went
+back to the owner (S1, S2: output cut short by the harness, with no
+extra-round reason that allows reading the rest), and five wording gaps
+deferred to ticket 728. The ticket stays open for S1 and S2 and for the
+test run (§ Done when, last item).
