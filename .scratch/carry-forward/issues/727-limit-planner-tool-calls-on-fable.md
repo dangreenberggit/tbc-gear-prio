@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: process
 Origin: owner decision in session, 2026-10-27, on tickets 723 and 724
 Blocks: none
@@ -132,3 +132,91 @@ The ticket stays open for the test (§ Done when, last item): after
 this branch merges to `dev`, in a new session, run the four-planner
 dummy test twice and compare each planner's run-log `calls` with the
 "before" numbers 2, 8, 2 and 8 (§ How to count the planner's calls).
+
+## Test result and close, 2026-10-28
+
+The dummy test ran twice in session
+`7ed55f38-b4c7-4d55-8e81-d22141af5e92`, in stage folders
+`.scratch/stage-gate/727-planner-calls-a` and
+`.scratch/stage-gate/727-planner-calls-b` (main checkout, gitignored;
+each has a `decision-log.md`). Run-log `calls` / `est_cost_usd` of the
+four planner runs:
+
+| Planner run    | Before (`c33da48e`) | After, stage a | After, stage b |
+| -------------- | ------------------- | -------------- | -------------- |
+| first plan     | 2 / 0.6898          | 2 / 0.6973     | 2 / 0.7685     |
+| next K2        | 8 / 1.0679          | 3 / 0.9553     | 3 / 0.9974     |
+| revision of K2 | 2 / 0.7151          | 2 / 0.6968     | 3 / 0.8056     |
+| next K3        | 8 / 1.1795          | 5 / 1.1386     | 5 / 1.3546     |
+
+On the two `next:` runs, `calls` fell from 8 to 3-5. The estimated cost
+did not clearly fall: next K2 went from 1.07 to 0.96 and 1.00, next K3
+from 1.18 to 1.14 and 1.35. Each run had its own planner and its own
+reviewer findings, so the plans differ, and two runs per change is a
+small sample.
+
+Verified by:
+
+```
+for s in c33da48e-1527-4d89-8989-f3c193ceffe9 7ed55f38-b4c7-4d55-8e81-d22141af5e92; do
+grep '"agent_type": "gate-planner"' .scratch/agent-runs/$s.jsonl | python3 -c 'import sys,json
+for line in sys.stdin:
+    d = json.loads(line)
+    print(d["description"], d["calls"], d["est_cost_usd"])'
+done
+```
+
+### What `calls` counts
+
+`read_calls` (`.claude/hooks/log-agent-run.py:112-160`) counts the model
+responses in the agent's own transcript: assistant records that have
+`usage`, one per message id, `<synthetic>` records left out. One
+response can hold several parallel tool calls. The harness reported
+`tool_uses` of 14, 13, 11 and 14 for the four after-runs of `next:`,
+against `calls` of 3, 3, 5 and 5.
+
+The hook reads the transcript when it runs (async `SubagentStop`, line
+5). In 11 of the 12 planner runs above, the transcript did not yet hold
+the planner's final response at that time: the recount below finds one
+more call per run, and that call is the last one, with `stop_reason`
+`end_turn`. Only stage b's next K3 already included it. So in these
+runs the logged `calls` is the number of tool rounds, and the logged
+cost leaves out the final response. Why the final record is missing at
+hook time is hypothesis, untested.
+
+Recount from the transcripts, `calls` / `est_cost_usd` (transcripts are
+deleted after `cleanupPeriodDays`, default 30): before 3 / 0.8551,
+9 / 1.1432, 3 / 1.0147, 9 / 1.2431; stage a 3 / 0.9296, 4 / 1.0852,
+3 / 1.0042, 6 / 1.2053; stage b 3 / 0.9936, 4 / 1.1151, 4 / 1.2094,
+5 / 1.3546. The comparison holds: rounds on `next:` fell from 9 to 4-6,
+and cost did not clearly fall.
+
+```
+python3 - <<'EOF'
+import json, importlib.util
+spec = importlib.util.spec_from_file_location("h", ".claude/hooks/log-agent-run.py")
+h = importlib.util.module_from_spec(spec); spec.loader.exec_module(h)
+for s in ["c33da48e-1527-4d89-8989-f3c193ceffe9", "7ed55f38-b4c7-4d55-8e81-d22141af5e92"]:
+    for line in open(f".scratch/agent-runs/{s}.jsonl"):
+        d = json.loads(line)
+        if d["agent_type"] == "gate-planner":
+            st = h.context_stats(d["agent_transcript_path"])
+            print(d["description"], st.get("calls"), st.get("est_cost_usd"))
+EOF
+```
+
+### Helpers are not in the planner's cost
+
+`est_cost_usd` covers only the planner's own transcript
+(`agent_transcript_path` at line 230, `context_stats(transcript)` at
+line 248). A helper gets its own run-log line. Stage b's planners
+spawned one `glm-flash-task` helper on every run except the first plan;
+stage a's spawned none. The four helper lines show `est_cost_usd` 0 and
+`unpriced_calls` 1, so the run log puts no price on them.
+
+### Close
+
+§ Done when, last item: "A stage-gate test run shows the planner's
+`calls` count from the run log, next to the "before" numbers above."
+The table above meets it. These numbers do not show that the rule
+lowers the planner's cost.
