@@ -70,6 +70,11 @@ other document over ~30 kB, get a heading map first
   that Agent call. A helper that runs in the background and
   finishes after your turn has ended sends its report to the
   orchestrator, not to you, and nothing resumes you.
+- **Batch your tool calls.** Each message of yours that holds tool
+  calls sends your whole context to the model again. First privately
+  list what you need next; then request every item that doesn't
+  depend on another's result in this one response. Make all your
+  `Edit` calls to a file in one message.
 - **Claims are the product.** A plan is a bundle of causal claims with
   steps attached. Every claim goes in the Claims register with a
   re-runnable `Verified by` command or the label `hypothesis, untested`.

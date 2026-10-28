@@ -1,0 +1,297 @@
+# Pre-merge review — feat/planner-tool-rounds-727
+
+Reviewed range: `104b20176917bde1788cd64e540512ee0f8421fb..ccd7028ee8285ce69231bf88d2ffbfc0bab0be8f`
+
+Dispatch: round 1, small-change lane. `git diff --shortstat dev...HEAD`
+gave `3 files changed, 50 insertions(+), 17 deletions(-)`, and
+`git diff --name-only dev...HEAD` listed
+`.claude/agents/gate-planner.md`,
+`.scratch/carry-forward/issues/724-separate-general-stage-gate-machinery-from-repo-specific-parts.md`
+and `docs/agents/stage-gate-project.md`: at most 6 files and 150 lines,
+and no path under `data/`, `vendor/` or `packages/core/src/` or with
+`.generated.` in its name. `codex` is not on `PATH`, so the reviewer was
+one fresh `general-task` agent on Opus (review lane), given the
+adversarial brief and told to apply the `code-review` skill's Standards
+and Spec checks itself and to write nothing. The domain brief was not
+given: the diff changes only agent instructions and a ticket, with no
+TBC, WCL or wowsims content. Ticket 727's before/after stage-gate test
+run was out of scope for this review; the ticket stays open for it.
+
+## Adversarial
+
+R1, R2 and R3 (below). The tree was clean at review time
+(`git status --porcelain` printed nothing; HEAD `ccd7028e`).
+
+**R1. `.claude/agents/gate-planner.md:79-82` with :52-54. The planner's
+own large-file rule is gone.** The old text told the planner: "Before
+reading any other document over ~30 kB, get a heading map first ... and
+read only the sections you need." The new text keeps that rule only for
+helpers (:52-54), and round 1, "Inputs", tells the planner to "print the
+others in one Bash call". In `next:` mode that call prints
+`execution-report.md` and `progress.md` whole (§ Next chunk). In the
+main checkout, 14 of 72 `.scratch/stage-gate/**/execution-report.md`
+files are over 30 kB, and the five largest are 62, 88, 99, 133 and
+1,053 kB (`find .scratch/stage-gate -name execution-report.md -size +30k
+| wc -l`; `-printf '%s\n' | sort -n | tail -5`). That puts more text
+into the Fable context that ticket 727 is trying to shrink. Whether the
+Bash tool cuts such output, and whether it says so when it does, is
+hypothesis, untested. The move of the 30 kB sentence to helpers was a
+deliberate wording-review edit (`.scratch/agent-reports/2026-10-28-general-task-727-final-wording-check.md`,
+P5), so the planner's own reads losing the rule is a gap in approved
+wording, not a slip in applying it. Reviewer's suggested text for
+:81-82: "`Read` each file you will edit; print the others in one Bash
+call, joined with `; echo ===;`. For a file over ~30 kB, print its
+heading map (`grep -n '^#\{1,3\} ' <file>`) in place of the file, and
+print the sections you need with `sed -n '<a>,<b>p'` in your Research
+round's Bash call." and, in the extra-round list at :92-94, ", a
+`sed -n` of a section that a round-1 heading map named".
+
+**R2. `.claude/agents/gate-planner.md:89-94`. When the Check round runs
+is unclear.** Round 4, "Check", runs after the writes, but
+`.claude/skills/stage-gate/parts.md` § When you write files here says to
+write the files "as your last action", and `gate-planner.md` lets
+`parts.md` replace its rules "where they differ". A planner may skip the
+check. The extra-round list (:92-94) also gives no round to fix a file
+that the check shows is wrong. Reviewer's suggested text for :89-90:
+"4. **Check:** one Bash call, after your writes, that reads the files
+you changed and counts the lines your final message reports. It changes
+no file, so your writes are still your last action under `parts.md`."
+And for :92-94, add "or to fix a file your Check round found wrong".
+
+**R3. `.claude/agents/gate-planner.md:95-96`. Required extra rounds use
+up the Decisions cap.** Part mode and reconcile mode always need an
+extra round, because `parts.md` § Part mode and § Reconcile mode name
+files that § Inputs does not. Each extra round adds a line to
+`## Decisions`, which has a 10-line cap (§ Rules, "End your final
+message with a `## Decisions` section of at most 10 lines"); only the
+`added:` and `changed:` lines are exempt. Reviewer's suggested text:
+"Add a line to `## Decisions` for each extra round, except the read of
+the files `parts.md` names for your mode: `- extra tool round: ...`".
+
+## Domain
+
+Not run: the diff has no game-domain content (see Dispatch).
+
+## Standards + Spec
+
+**Standards:** R5 (below). Otherwise clean against `docs/workflow.md`
+§ Editing agent-facing documents, the `writing-for-agents` skill and
+the global writing-style rules; no banned words in the new text, and
+both commit subjects follow the seven rules. `pnpm mirrors:check`
+exits 0, and no tracked copy of either changed file exists.
+
+**R5. `docs/agents/stage-gate-project.md:62-65`. The pointer names a
+bound by a sentence fragment.** In `docs/agents/model-policy.md`
+§ Workhorse jobs the block-size rule and the five-call "Run in place"
+bound are one sentence, so "Block size: § Workhorse jobs. Its "Run in
+place" bound does not apply" points the planner at that rule and then
+turns half of it off, naming the half by words a reader cannot look up
+as a heading. Reviewer's suggested text: "How to write a helper's block:
+`docs/agents/model-policy.md` § Workhorse jobs, "Hand off a **block**".
+That section's rule on what to run yourself (about five tool calls)
+does not apply to the planner: the planner's own tool calls follow
+`.claude/agents/gate-planner.md` § Rules, "Few tool rounds"."
+
+**Spec (ticket 724, commit 17066a42): clean.** The close note's
+`Verified by:` line follows `Status: closed`
+(`docs/agents/issue-tracker.md`); `104b2017` is the merge of
+`feat/stage-gate-split-724` (parents `6fc7fb58`, `c9ce64e2`); the
+ticket's grep prints nothing at HEAD and at `104b2017`; `git show
+e2445fda` shows it adds the note and drops the Run-log folder's
+trailing slash, as the reworded note says.
+
+**Spec (ticket 727): R4 (below).**
+
+**R4. `.scratch/carry-forward/issues/727-limit-planner-tool-calls-on-fable.md`.
+The ticket did not record that the change was applied.** The range did
+not touch the ticket, so nothing recorded the owner's approval (§ Done
+when, item 1), the applied change (item 2), the departure from
+§ Proposed direction ("one helper") to "at most 4" helpers, or that
+§ Facts line numbers are now stale. Bookkeeping: fixed in this review's
+commit by an "Applied, 2026-10-28" section in the ticket.
+
+## Code quality
+
+| ID  | File                                      | Row                                                                                                |
+| --- | ----------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| R2  | `.claude/agents/gate-planner.md:89-94`    | Check round's place against `parts.md` "last action"; no round to fix a file the check finds wrong |
+| R3  | `.claude/agents/gate-planner.md:95-96`    | Required extra rounds in part and reconcile mode use up the 10-line Decisions cap                  |
+| R5  | `docs/agents/stage-gate-project.md:62-65` | Pointer turns off half a sentence of model-policy, named by a fragment                             |
+
+## Summary
+
+Round 1 (small-change lane) found five problems; none is data loss.
+R4 (ticket bookkeeping) is fixed in this review's commit. R1, R2, R3
+and R5 all change the owner-approved wording in
+`.claude/agents/gate-planner.md` or `docs/agents/stage-gate-project.md`,
+so under this skill's "Agent files" rule they wait for one owner
+approval before any fix is made; round 2 then checks the fixes.
+
+Blocking the merge: R1. This branch introduced it, and its effect is a
+cost (whole large reports printed into the planner's context) and
+possibly cut-off output (hypothesis, untested). It needs either an
+approved fix or the owner's allowance to defer it with a ticket.
+R2, R3 and R5 are code-quality rows: they go to one fix pass after the
+owner approves the wording, and each then gets a Disposition row.
+
+Tickets so far: filed 0, closed 1 (724). Ticket 727 stays open for the
+test run and for the outcome of R1, R2, R3 and R5. The final counts are
+written when the last Disposition table is.
+
+## Disposition
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                   |
+| --- | ----------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R4  | Spec        | fixed       | "Applied, 2026-10-28" section added to `.scratch/carry-forward/issues/727-limit-planner-tool-calls-on-fable.md` in this review's commit                                                                         |
+| R1  | Adversarial | fixed       | Owner approved the suggested text in chat on 2026-10-28; heading-map text added to step 1 "Inputs" and the `sed -n` reason to the extra-round sentence in `.claude/agents/gate-planner.md`                      |
+| R2  | Adversarial | fixed       | Owner approved the suggested text in chat on 2026-10-28; step 4 "Check" replaced and the "fix a file your Check round found wrong" reason added to the extra-round sentence in `.claude/agents/gate-planner.md` |
+| R3  | Adversarial | fixed       | Owner approved the suggested text in chat on 2026-10-28; `## Decisions` line now exempts the read of the files `parts.md` names for your mode, in `.claude/agents/gate-planner.md`                              |
+| R5  | Standards   | fixed       | Owner approved the suggested text in chat on 2026-10-28; Planner pointer in `docs/agents/stage-gate-project.md` now names § Workhorse jobs, "Hand off a **block**"                                              |
+
+## Round 2
+
+Reviewed range: `104b20176917bde1788cd64e540512ee0f8421fb..63959063a7b1a83bbe93037d75885b3f71f38bb3`
+
+Dispatch: round 2 reviews the whole branch from `dev` (`104b2017`), not
+only the commits after round 1, because the session that ran this
+review asked for that. It is not the skill's focused check: commit
+`63959063` ("Fix 727 rule after the wording check") applies texts P1 to
+P4 from
+`.scratch/agent-reports/2026-10-28-general-task-727-committed-rule-check.md`
+(main checkout, gitignored), which no round-1 finding ID names, so the
+focused check's condition 1 does not hold. The session reports that the
+owner approved P1 to P4 in chat on 2026-10-28, and gave this ruling for
+the round, in chat on 2026-10-28, by agreeing to: "If round 2 finds only
+small wording issues, they go to a ticket rather than another pass
+before the merge. A real break would still come back to you." A real
+break is a finding that makes a planner fail to do its job: a required
+action no rule allows, two rules that give opposite orders, or an edit
+that cannot succeed. `codex` is not on `PATH`, so the reviewer was one
+fresh `general-task` agent on Opus (review lane), given the adversarial
+brief and the `code-review` skill's Standards and Spec checks, and told
+to write nothing. Domain skipped: no game content.
+
+### Findings (round 2)
+
+**S1. Real break. `.claude/agents/gate-planner.md:84-88`. The Inputs
+round's one Bash call has no limit on its total output, and no
+extra-round reason allows reading output the harness cut short.** The
+~30 kB heading-map rule is per file. Claude Code saves a Bash output
+over about 30 kB to a file and returns a 2 KB preview: a 31,000-character
+output came back as "Output too large (30.3KB). Full output saved to
+... Preview (first 2KB)" (`head -c 31000 /dev/zero | tr '\0' 'a'`,
+re-run by the dispatcher). The fixed inputs are `stage-gate-project.md`
+7,989 bytes, `parts.md` 6,574 and `plan-template.md` 2,644 (`wc -c`);
+`brief.md` files in the main checkout are 5,790 bytes at the median and
+16,603 at most. In `next:` mode the call also prints
+`execution-report.md` and `progress.md`; adding those sizes (each file
+over 30 kB counted as a 2,000-byte heading map) puts 17 of 67 stage
+folders over 30,000 bytes (dispatcher's `find .scratch/stage-gate ...
+-printf '%s'` estimate). The planner must then read the saved file, and
+of the five reasons at :100-110 only "redo a tool call ... that failed"
+comes close, though the call did not fail. Reviewer's suggested text:
+split the Inputs Bash output across several Bash calls in the same
+message, each under about 25,000 characters, and add the reason "to
+read the rest of a file or output that came back cut short: a partial
+`Read` view, or Bash output saved to a file".
+
+**S2. Real break. `.claude/agents/gate-planner.md:81-83`. "`Read` each
+file you will change ... whatever its size" meets `Read`'s 25,000-token
+limit.** The reviewer measured a `Read` of a 141,917-byte file: it
+returned lines 1-1024 of 2809 with the notice "58273 tokens, cap 25000"
+(reviewer's run; not re-run by the dispatcher). That is about 61 kB per
+`Read`. In the main checkout, 11 of 117 `plan.md` files are over 60 kB
+(`find .scratch/stage-gate -name plan.md -size +60k | wc -l`). In
+`next:` mode the sections the planner edits (Execution chunks,
+Backburner) come after Steps (`plan-template.md:26-62`), so the first
+page may not hold them, and no listed reason allows reading the next
+page. Whether `Edit` accepts a file that was only partly read is
+hypothesis, untested. Reviewer's suggested fix: the S1 reason, plus
+"When `Read` returns a partial view of a file you will change, read its
+other pages with `offset` and `limit`."
+
+**S3 to S7. Wording.** S3: the Check round prints whole changed files
+(:95-98). S4: `docs/agents/stage-gate-project.md:66-69` turns off all of
+model-policy § Workhorse jobs for the planner, not only the five-call
+rule. S5: the `Read`-before-`Edit` rule is stated only for round 1
+(:81-83). S6: no round names the file delete that `re-split` needs
+(:93-94; `parts.md:51-52`). S7: a revision of a large `plan.md` always
+costs an extra round (:84-88 with § Revisions). A planner still gets
+through each of these, at the cost of an extra round or an unclear
+sentence. Full text and suggested fixes:
+`.scratch/carry-forward/issues/728-planner-tool-rounds-wording-gaps.md`.
+
+**S8. Bookkeeping. `.scratch/carry-forward/issues/727-limit-planner-tool-calls-on-fable.md`.**
+The ticket still said the R1, R2, R3 and R5 fixes waited for the
+owner's approval, recorded neither `aa179d24` nor `63959063`, and cited
+"lines 51-71" where the rule runs to line 72 at `104b2017`
+(`git show 104b2017:.claude/agents/gate-planner.md | grep -n '^- \*\*'`).
+Fixed in this round's commit.
+
+**Checked and clean.** Round-1 fixes R1, R2, R3 and R5 do what their
+findings asked; P4 widened R5 (S4). No two rules in `gate-planner.md`
+give opposite orders. The nested list at :100-110 and the paragraph at
+:112-116 sit inside the "Few tool rounds" bullet (2-space indent;
+`prettier --check` on both files exits 0). Banned-word grep on added
+lines prints nothing; `grep -cE 'AGENTS\.md|docs/agents|CLAUDE\.md|model-policy'
+.claude/agents/gate-planner.md` gives 2, both `docs/agents/stage-gate-project.md`;
+`pnpm mirrors:check` exits 0; the five commit subjects are 32 to 42
+characters, imperative, capitalised, no period.
+
+### Summary (round 2)
+
+Round 2 found two real breaks, S1 and S2. Both come from the harness
+cutting a large output short (Bash over about 30 kB, `Read` over 25,000
+tokens), after which the planner needs one more read that none of the
+five extra-round reasons allows. This branch introduced both, through
+the round limit. Under the owner's ruling they go back to the owner and
+are not fixed here, so **S1 and S2 block the merge** and have no
+Disposition row. S3 to S7 are deferred to ticket 728 under the same
+ruling. S8 is fixed.
+
+Tickets: filed 1 (728), closed 1 (724). Filed is not higher than
+closed. Ticket 727 stays open for S1, S2 and the test run.
+
+## Disposition (round 2)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                           |
+| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------- |
+| S1  | Adversarial | fixed       | Superseded in round 3: the owner-approved reset of 2026-10-28 removed the "Few tool rounds" text this finding was about |
+| S2  | Adversarial | fixed       | Superseded in round 3: the owner-approved reset of 2026-10-28 removed the "Few tool rounds" text this finding was about |
+| S3  | Adversarial | fixed       | Superseded in round 3: text removed by the owner-approved reset of 2026-10-28; ticket 728 closed as no longer needed    |
+| S4  | Standards   | fixed       | Superseded in round 3: text removed by the owner-approved reset of 2026-10-28; ticket 728 closed as no longer needed    |
+| S5  | Adversarial | fixed       | Superseded in round 3: text removed by the owner-approved reset of 2026-10-28; ticket 728 closed as no longer needed    |
+| S6  | Adversarial | fixed       | Superseded in round 3: text removed by the owner-approved reset of 2026-10-28; ticket 728 closed as no longer needed    |
+| S7  | Adversarial | fixed       | Superseded in round 3: text removed by the owner-approved reset of 2026-10-28; ticket 728 closed as no longer needed    |
+| S8  | Spec        | fixed       | Ticket 727's "Applied" section records `aa179d24`, `63959063` and round 2; § Facts line span corrected to 51-72         |
+
+## Round 3
+
+No new review ran. On 2026-10-28 the owner approved in chat (their
+word: "ok") a reset of `.claude/agents/gate-planner.md` and
+`docs/agents/stage-gate-project.md` to their state on `dev`
+(`104b2017`), plus one rule built on a sentence from Anthropic's
+"Prompting Claude Fable 5.1" guide: § Rules, "Batch your tool calls" in
+`.claude/agents/gate-planner.md`. The proposal came from two research
+reports (main checkout, gitignored):
+`.scratch/agent-reports/2026-10-28-general-task-planner-vs-sources.md`
+and
+`.scratch/agent-reports/2026-10-28-general-task-planning-guidance-and-overengineering.md`.
+
+The "Few tool rounds" text is gone, so S1 and S2 no longer apply and no
+longer block the merge, and S3 to S7 have nothing left to fix. The
+round-1 fixes (R1, R2, R3, R5) and the P1 to P4 texts edited that same
+text, so they are superseded too; their rows above stay as a record of
+what was done at the time. In the round 2 table, S1 and S2 have rows
+and S3 to S7 are now `fixed` with a "superseded in round 3" note.
+Ticket 728 is closed as no longer needed. Ticket 729 holds the larger
+simplification of the planner's rules that the reports propose. Ticket
+727 stays open for its test: after the merge, in a new session, run the
+four-planner dummy test twice and compare the run log's `calls` with 2,
+8, 2 and 8.
+
+`git diff --stat 104b2017 HEAD -- .claude/agents docs/agents` lists only
+`.claude/agents/gate-planner.md`, with 5 lines added.
+
+Tickets: filed 2 (728, 729), closed 2 (724, 728). Filed is not higher
+than closed. Ticket 727 stays open for the test run.

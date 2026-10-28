@@ -30,7 +30,7 @@ stage-gate follow-ups branch merges to `dev`.
   targets — evidence: C9, C10". Check:
   `grep -n inline .scratch/stage-gate/test-revision-chunk-id/plan.md`.
 - No line in `.claude/agents/gate-planner.md` says the planner may run a
-  lookup itself. Its § Rules, "Research by subagent" (lines 51-71), says
+  lookup itself. Its § Rules, "Research by subagent" (lines 51-72), says
   "Give each block of searches, reads, named command runs and
   measurements to a workhorse helper."
 - `docs/agents/stage-gate-project.md:62-63` sends the planner elsewhere
@@ -85,3 +85,50 @@ estimated 0.69, 1.07, 0.72 and 1.18 USD (`est_cost_usd`). These are the
 - The change is applied.
 - A stage-gate test run shows the planner's `calls` count from the run
   log, next to the "before" numbers above.
+
+## Applied, 2026-10-28
+
+The session that applied this ticket reports that the owner approved
+the wording in chat on 2026-10-28; the wording history is in
+`.scratch/agent-reports/2026-10-28-general-task-727-*.md` (main
+checkout, gitignored). Commit `ccd7028e` on
+`feat/planner-tool-rounds-727` adds § Rules, "Few tool rounds" to
+`.claude/agents/gate-planner.md` and points
+`docs/agents/stage-gate-project.md` § Worker lanes, Planner at it. It
+allows up to 4 helpers in one Research round, not the one helper that
+§ Proposed direction named. Line numbers in § Facts are at `104b2017`.
+
+The pre-merge review (`docs/reviews/feat-planner-tool-rounds-727.md`)
+found wording problems in that text (R1, R2, R3, R5). Commit `aa179d24`
+applies the owner-approved fixes. Commit `63959063` replaces parts of
+them with texts P1 to P4 from
+`.scratch/agent-reports/2026-10-28-general-task-727-committed-rule-check.md`
+(main checkout, gitignored); the session that applied them reports that
+the owner approved those texts in chat on 2026-10-28.
+
+Round 2 of that review found two problems that block the merge and went
+back to the owner (S1, S2: output cut short by the harness, with no
+extra-round reason that allows reading the rest), and five wording gaps
+deferred to ticket 728.
+
+### Replaced by one rule, 2026-10-28
+
+Two research reports (main checkout, gitignored:
+`.scratch/agent-reports/2026-10-28-general-task-planner-vs-sources.md`
+and
+`.scratch/agent-reports/2026-10-28-general-task-planning-guidance-and-overengineering.md`)
+found that Anthropic's "Prompting Claude Fable 5.1" guide handles
+batching in one sentence. The owner approved in chat on 2026-10-28
+(their word: "ok") a reset of `.claude/agents/gate-planner.md` and
+`docs/agents/stage-gate-project.md` to their state on `dev`
+(`104b2017`), plus one rule built on that sentence: § Rules, "Batch
+your tool calls" in `.claude/agents/gate-planner.md`. The long "Few
+tool rounds" rule and every fix to it (`ccd7028e`, `aa179d24`,
+`63959063`) are gone, so review findings S1 and S2 no longer apply and
+ticket 728 is closed. The larger simplification of the planner's rules
+is ticket 729.
+
+The ticket stays open for the test (§ Done when, last item): after
+this branch merges to `dev`, in a new session, run the four-planner
+dummy test twice and compare each planner's run-log `calls` with the
+"before" numbers 2, 8, 2 and 8 (§ How to count the planner's calls).
