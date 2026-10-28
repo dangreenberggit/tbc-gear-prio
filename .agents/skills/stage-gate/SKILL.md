@@ -28,9 +28,15 @@ The seats run in sequence — Planner → Reviewer → Executor — and the
 session that runs them is the **orchestrator**.
 Complementary to `parallel-phase` (which partitions one phase into
 parallel slices): stage-gate sequences different kinds of work, and its
-Executor may run `parallel-phase` inside its own stage. `pre-merge-review`
-runs after, unchanged — this skill reviews the plan before code exists;
-that one reviews the diff after.
+Executor may run `parallel-phase` inside its own stage. The project's
+review step (`docs/agents/stage-gate-project.md` § Hand off) runs after,
+unchanged — this skill reviews the plan before code exists; that one
+reviews the diff after.
+
+This project's values — folders, commands, ticket rules, worker lanes,
+project seats — are in `docs/agents/stage-gate-project.md` at the
+checkout root. Read it before step 1. Each rule below that depends on one
+of them names that file's section.
 
 ## Seats
 
@@ -39,18 +45,19 @@ that one reviews the diff after.
 | Planner | `gate-planner` | `fable` | `low` | design |
 | Reviewer | `gate-reviewer` | `opus` | `high` | review |
 | Executor | `gate-executor` | `opus` | `high` | lead |
-| SME | `gate-sme` | `opus` | `high` | review |
-| Visual | `gate-visual` | `opus` | `high` | review |
+
+The project seats and when they run:
+`docs/agents/stage-gate-project.md` § Project seats.
 
 The Executor runs on Opus at effort `high` because plans are
 underspecified and it decides adapt-vs-flag-vs-stop on every
 step where reality disagrees with the plan — the failure mode is a silent
 paper-over, which is a judgment failure, not a throughput one. Its
-`parallel-phase` workers are a separate call: `simple-task` for an
-extremely simple slice, `general-task` for every other slice. Every seat
-hands its workhorse jobs — searches, plain reads, named runs,
-measurements — to the workhorse types, with several jobs in each
-helper's prompt (model-policy § Workhorse jobs).
+`parallel-phase` workers are a separate choice
+(`docs/agents/stage-gate-project.md` § Worker lanes, Executor). Every
+seat hands its workhorse jobs — searches, plain reads, named runs,
+measurements — to the workhorse types that section names for the seat,
+with several jobs in each helper's prompt.
 
 Name the model on every spawn, even though each seat's frontmatter sets
 its model. A call-site name outranks frontmatter, so a wrong name
@@ -83,10 +90,10 @@ not` list below.
 3. **Route detail outward; keep the judgment.** Track what's done, what's
    next, and what's blocked. Delegate the detail and keep the one-paragraph
    conclusion. You judge the result; you don't author it. A question
-   between gates goes to a seat or to a `general-task` agent; a workhorse
-   job goes to the type `docs/agents/model-policy.md` § Workhorse jobs
-   names. The only commands you run are the ones that `docs/agents/orchestration.md`
-   § The session delegates lists. Tell the user that an agent is working
+   between gates goes to a seat or to a judgment agent; a workhorse job
+   goes to a workhorse type (`docs/agents/stage-gate-project.md` § Worker
+   lanes names both). The only commands you run are the ones that file's
+   § Session commands lists. Tell the user that an agent is working
    only when it is **working** (step 1 **Open the stage**, the `spawn`
    lines). When it is **waiting** (same place), tell the user that it has
    stopped and may resume on its own, and when the session will send it
@@ -97,7 +104,8 @@ not` list below.
    findings" is a fact about the review, not a verdict that the work is done.
    Reserve merge (and other end-of-line moves) for when the work is done by
    the user's bar, and say plainly when it isn't. Ties to step 7 (ask before
-   merge) and the AGENTS.md merge gate.
+   merge) and the project's merge rule
+   (`docs/agents/stage-gate-project.md` § Hand off).
 5. **Carry every decision whose answer is derivable; hand back the ones that
    are the user's to make.** Points 1–4 all say "carry the work yourself" —
    this is the limit. Intent, priorities, spending, and anything irreversible
@@ -108,11 +116,7 @@ not` list below.
    across all stages; a further feature waits with its `brief.md`
    written and nothing spawned. The session limits the reviews of each
    chunk, a group of plan steps that one `gate-executor` runs (step 4,
-   **Review limit per chunk**). On
-   2026-10-25 five stages ran at once, 12 planner and 8 reviewer runs
-   went to 2 executor runs, and the session hit the 5-hour limit in 59
-   minutes (`.scratch/agent-reports/2026-10-25-general-task-usage-limit-burn.md`;
-   gitignored; main checkout only).
+   **Review limit per chunk**).
    This pacing is for this pipeline only: a plain request for a plan,
    outside stage-gate, is planned whole.
 
@@ -120,7 +124,8 @@ not` list below.
 
 In these steps, "you" and "the session" are the same agent.
 
-1. **Open the stage.** Pick `<slug>`; create `.scratch/stage-gate/<slug>/`;
+1. **Open the stage.** Pick `<slug>`; create the stage folder
+   (`docs/agents/stage-gate-project.md` § Folders);
    write `brief.md` — goal, the tickets in scope, constraints, and what
    done means, in terms the planner can plan against. Start
    `decision-log.md` in the format below. Confirm
@@ -269,7 +274,7 @@ In these steps, "you" and "the session" are the same agent.
    `next:` for the chunk being planned.
    New changes mean the seat edited files: **stop and report them to the
    user** — never revert, because another agent's live work looks identical
-   from here (ticket 261). Respawn once with the violation named (on a
+   from here. Respawn once with the violation named (on a
    split run, `gate-planner` with `re-split: gate A`). One respawn per
    gap; a second failure goes to the user. Log the outcome.
 
@@ -292,7 +297,7 @@ In these steps, "you" and "the session" are the same agent.
    whichever chunk it reviews, so that no two `# Round` headings in
    `plan-review.md` share a number) and the
    absolute paths of `brief.md`, `plan.md`, `plan-review.md` and, on a
-   split run, `decomposition.md`, all in `.scratch/stage-gate/<slug>/`.
+   split run, `decomposition.md`, all in the stage folder.
    Every review after the first in the stage is a **re-review**. Its
    spawn prompt also names what the review checks. After a revision, it
    names the claims and steps that the latest revision changed or added
@@ -426,10 +431,11 @@ In these steps, "you" and "the session" are the same agent.
    - A seat contradiction you cannot settle by having a subagent re-run a
      command is the user's call. Log every gate outcome.
    - **File deferred parts.** When `decomposition.md` lists deferred
-     parts, after `K1`'s Gate B passes spawn one `general-task`
-     (`model: "opus"`) to file the
+     parts, after `K1`'s Gate B passes spawn one judgment agent
+     (`docs/agents/stage-gate-project.md` § Worker lanes) to file the
      `parts/<id>/ticket.md` of each part in the Deferred table as a
-     ticket per `docs/agents/issue-tracker.md` and commit them. Log
+     ticket per the project's ticket rules (same file, § Tickets) and
+     commit them. Log
      their ids and the new `git rev-parse HEAD`.
 
 5. **Execute.** Run the chunks in the order of their ids (`K1`, `K2`,
@@ -459,10 +465,11 @@ In these steps, "you" and "the session" are the same agent.
    free (the seat's base-SHA assertion is what makes worktree mode safe on
    a feature branch). A plan with more than one chunk uses the shared
    checkout, so each chunk starts from the commits of the one before.
-   When AGENTS.md § The forked tab repo says the work needs a pair, have a
-   subagent make the pair with `pnpm wt:pair`, use it as the shared
-   checkout for every chunk, pass its path, and run this step's git
-   checks with `git -C <pair>`; `isolation: worktree` has no fork.
+   When the work needs a checkout other than this one
+   (`docs/agents/stage-gate-project.md` § Checkouts says when, and how a
+   subagent makes it), use it as the shared checkout for every chunk, pass
+   its path to each executor as the checkout path, and run this step's git
+   checks with `git -C <checkout path>`.
    Append its final message to `execution-report.md` under the chunk id,
    and log the chunk id, its base SHA and the executor's agent id in
    `decision-log.md`. A fresh executor per chunk keeps each context small.
@@ -486,25 +493,11 @@ In these steps, "you" and "the session" are the same agent.
    when it made fewer than about 25 tool calls, or else respawn it for the
    same chunk with a fresh base SHA and the answer in its prompt.
 
-   When the plan has an SME step, the executor spawns `gate-sme` once and
-   commits its handoff. That handoff is the ticket's SME verdict: Gate C
-   dispositions it like a ledger row, and a second SME runs only when the
-   executor's ledger marks the verdict `contested`.
-
-   When a plan step carries a `Visual check:` line, the executor looks at
-   each named fixture before that unit's re-pin (`pnpm tab-fixtures:smoke`
-   and its PNGs, or the fixture's link in a browser pane where the harness
-   has one), judges it against the sentence, and records the smoke line
-   and what it saw in its ledger. That is the whole check: no `tab-review`
-   run and no `gate-visual` seat.
-
-   When a plan step carries a `Visual acceptance:` block, the executor
-   writes the unit's manifest, runs `pnpm tab-review <manifest>`, and spawns
-   `gate-visual` once per unit before that unit's re-pin. The handoff is the
-   tickets' visual verdict: Gate C dispositions it like a ledger row, and a
-   second visual seat runs only when the ledger marks it `contested`. A
-   ticket with a Visual acceptance is not closed on `fail` or
-   `cannot-judge`.
+   A plan step of a kind that `docs/agents/stage-gate-project.md`
+   § Project seats names runs as that section says. When a project seat
+   judges it, the seat's handoff is the ticket's verdict: Gate C
+   dispositions it like a ledger row, and that seat runs a second time
+   only when the executor's ledger marks the verdict `contested`.
 
 6. **Gate C.** Disposition every Deviation-ledger row, and every chunk
    `Status` that is not `success`, in `decision-log.md`: `accepted`,
@@ -525,14 +518,16 @@ In these steps, "you" and "the session" are the same agent.
 
    Done when (final Gate C): every ledger row, every non-`success`
    status and every out-of-manifest path is dispositioned, the report
-   shows `pnpm verify` passed on the tip, and every ticket with a Visual
-   acceptance has a `pass` row or an accepted / escalated disposition.
+   shows the project's gate command (`docs/agents/stage-gate-project.md`
+   § Hand off) passed on the tip, and every Gate C condition in that
+   file's § Project seats holds.
 
-7. **Hand off.** The normal loop resumes: `pre-merge-review`, then **ask**
-   before `pnpm merge-to-dev`. Stage artifacts stay in
-   `.scratch/stage-gate/<slug>/`. Name any deferred-part tickets in the
-   reply, and say they are visible from `dev` only after this branch
-   merges. Backburner lines still open when the stage ends become
+7. **Hand off.** The normal loop resumes: the project's review step, then
+   **ask** before its merge command (`docs/agents/stage-gate-project.md`
+   § Hand off). Stage artifacts stay in the stage folder. Name any
+   deferred-part tickets in the reply, and say they are visible from the
+   project's integration branch (`docs/agents/stage-gate-project.md`
+   § Hand off) only after this branch merges. Backburner lines still open when the stage ends become
    tickets, filed like deferred parts (step 4, **File deferred parts**).
 
 ## Recovery
@@ -560,10 +555,11 @@ loop-backs.
 
 Two async hooks (`.claude/hooks/log-agent-run.py`, registered in
 `.claude/settings.json`) append one JSON line per subagent report, at
-any depth, to `.scratch/agent-runs/<session>.jsonl`, where `<session>`
+any depth, to `<run-log folder>/<session>.jsonl`
+(`docs/agents/stage-gate-project.md` § Folders), where `<session>`
 is a session ID as in `decision-log.md`. The `decisions` field holds
 the report's `## Decisions` section. To trace a decision: find its line
-in `decision-log.md`, grep `.scratch/agent-runs/*.jsonl` for the agent
+in `decision-log.md`, grep the run-log folder's `*.jsonl` files for the agent
 id or agent type, read `decisions`, then open `agent_transcript_path`
 if it still exists (transcripts are deleted after `cleanupPeriodDays`,
 default 30: https://code.claude.com/docs/en/settings-reference.md).
