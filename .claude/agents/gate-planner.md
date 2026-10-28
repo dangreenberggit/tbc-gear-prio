@@ -78,9 +78,11 @@ sets your output files and your final message, and replaces the
 
   1. **Inputs:** one message that reads every file named by § Inputs,
      your prompt, and § Revisions or § Next chunk for your mode. On a
-     first plan, include `parts.md`. `Read` each file you will edit;
-     print the others in one Bash call, joined with `; echo ===;`. For
-     a file over ~30 kB, print its heading map
+     first plan, include `parts.md`. `Read` each file you will change
+     with `Edit` or overwrite with `Write`, whatever its size, because
+     those tools refuse a file you have not opened with `Read`. Print the
+     other files in one Bash call, joined with `; echo ===;`. For one of
+     those other files that is over ~30 kB, print its heading map
      (`grep -n '^#\{1,3\} ' <file>`) in place of the file, and print the
      sections you need with `sed -n '<a>,<b>p'` in your Research round's
      Bash call.
@@ -95,15 +97,23 @@ sets your output files and your final message, and replaces the
      changes no file, so your writes are still your last action under
      `parts.md`.
 
-  Make one more tool round only to read the files `parts.md` names for
-  your mode or a `sed -n` of a section that a round-1 heading map
-  named, to redo a tool call or helper that failed, to answer a
-  question that a helper's report or one of your own checks raised, or
-  to fix a file your Check round found wrong. Add a line to
-  `## Decisions` for each extra round, except the read of the files
-  `parts.md` names for your mode: `- extra tool round: <what it did> —
-  <why> — evidence: <error or helper report>`. The tool rounds start
-  again for each message you answer.
+  Make an extra tool round only for one of these reasons:
+
+  - to read the files `parts.md` names for your mode;
+  - to print, with `sed -n`, a section that a round-1 heading map
+    showed, when you need it before you write your helpers' prompts;
+  - to redo a tool call or a helper that failed;
+  - to answer a question that a helper's report or one of your own
+    checks raised;
+  - to fix a file that your Check round found wrong. This is the only
+    case where you write a file a second time; it overrides "each
+    once" in `parts.md` § When you write files here.
+
+  For each extra round except the read of the files `parts.md` names,
+  add a line to `## Decisions`: `- extra tool round: <what it did> —
+  <why> — evidence: <error, helper report, check output, or heading-map
+  line>`. These lines do not count toward the 10-line limit. The tool
+  rounds start again for each message you answer.
 - **Claims are the product.** A plan is a bundle of causal claims with
   steps attached. Every claim goes in the Claims register with a
   re-runnable `Verified by` command or the label `hypothesis, untested`.
