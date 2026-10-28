@@ -59,8 +59,10 @@ harness lists it, except a job that could reach secrets, session logs
 (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*`
 or `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
 types, Private data), else `discrete-task` (model `sonnet` at the call
-site). Block size, and what to run in place:
-`docs/agents/model-policy.md` § Workhorse jobs.
+site). Block size: `docs/agents/model-policy.md` § Workhorse jobs. Its
+"Run in place" bound does not apply to the planner: the planner's own
+tool calls follow `.claude/agents/gate-planner.md` § Rules, "Few tool
+rounds".
 
 **Name the model on every spawn:** every type except a GLM type
 (`glm-flash-task` here), which takes no model argument. A helper you
