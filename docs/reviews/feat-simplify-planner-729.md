@@ -123,9 +123,14 @@ closed 2 (727 and 730). No ticket was filed by this review.
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                 |
 | --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | Owner approved the suggested clause in chat on 2026-10-28; applied to both SKILL.md copies.                                   |
 | A2  | Adversarial | fixed       | SKILL.md:158 `<mode or chunk id>` changed to `<chunk id, or none>` in both copies                                             |
 | A3  | Adversarial | wontfix     | both readings of "its first chunk" give unique names and step 6 reads every renamed plan; polish under the owner's ruling     |
 | S1  | Standards   | wontfix     | the template does not forbid naming the open question on the one-line chunk, so Gate A can pass; a new field is an added rule |
 | S2  | Standards   | fixed       | stage-gate-project.md:188 history line now names the foreground-helpers hook                                                  |
 | P1  | Spec        | wontfix     | same as A3                                                                                                                    |
 | P2  | Spec        | wontfix     | line wrapping only; Prettier ignores `.claude/`                                                                               |
+
+Owner ruling 2026-10-28: the SKILL.md step 2 and step 7 ticket filing
+stays as it is; the owner does not want agents to stop work to ask
+before filing a ticket.

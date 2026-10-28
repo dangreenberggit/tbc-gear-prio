@@ -128,12 +128,12 @@ plan now, and only a chunk that needs an earlier chunk's results waits
 as a one-line entry. No agent files a new ticket without asking the
 owner; small findings go in this ticket.
 
-Open finding: `.claude/skills/stage-gate/SKILL.md` step 2 (`SPLIT:`)
-and step 7 (chunks that have not run) still have a judgment agent file
-tickets without asking the owner, which the ticket ruling above
-forbids. Not changed here, because skill text needs the owner's
-approval of the exact wording.
+Finding (settled): `.claude/skills/stage-gate/SKILL.md` step 2
+(`SPLIT:`) and step 7 (chunks that have not run) still have a judgment
+agent file tickets without asking the owner. Owner ruling,
+2026-10-28: the filing stays as it is; an agent should not stop work
+to ask before filing a ticket.
 
-Pre-merge review (`docs/reviews/feat-simplify-planner-729.md`): A1 open, awaiting the owner's ruling; A2 and S2 wording fixed; the rest `wontfix`.
+Pre-merge review (`docs/reviews/feat-simplify-planner-729.md`): A1 fixed (owner approved, 2026-10-28). Step 2 and step 7 ticket filing stays as it is (owner: an agent should not stop work to ask before filing a ticket). A2 and S2 wording fixed; the rest `wontfix`.
 
 Still to do for § Done when: the stage-gate test run (draft § 7).

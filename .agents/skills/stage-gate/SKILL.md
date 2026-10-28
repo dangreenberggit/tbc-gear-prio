@@ -458,8 +458,10 @@ In these steps, "you" and "the session" are the same agent.
 6. **Gate C.** Disposition every Deviation-ledger row, and every chunk
    `Status` that is not `success`, in `decision-log.md`: `accepted`,
    `rework` (respawn a `gate-executor` for the affected chunk with a fresh
-   base SHA and the ledger row; `SendMessage` the same executor only when
-   it made fewer than about 25 tool calls), or `escalate` to the user.
+   base SHA, the ledger row, and the plan that gives that chunk steps
+   (`plan.md` or a `plan-<id>.md` that step 5 renamed); `SendMessage`
+   the same executor only when it made fewer than about 25 tool calls),
+   or `escalate` to the user.
    Then cross-check `git diff --stat <base SHA>..HEAD`, using the first
    chunk's base SHA, against the Paths manifests of `plan.md` and of
    each `plan-<id>.md` that step 5 renamed: any
