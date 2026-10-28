@@ -1,9 +1,14 @@
-Status: open
+Status: closed
 Type: process
 Origin: owner request in session, 2026-10-27, on branch feat/stage-gate-open-faults
 Blocks: none
 Blocked by: none
 Related: 712, 723
+
+Verified by: `tbc-gear-prio@104b2017` (merge of `feat/stage-gate-split-724`
+into `dev`). Both checks re-run on that merge commit: the ticket's own
+grep command (in § Decision and step 1 below) prints nothing, and
+`pnpm mirrors:check` exits 0.
 
 # Separate the general stage-gate machinery from repo-specific parts
 
@@ -110,7 +115,7 @@ on 2026-10-27. The first is a plain-words rewrite of the
 **Research by subagent.** rule in `.claude/agents/gate-planner.md`,
 which fixes review finding Q2. The second is the planner's
 **Name the model on every spawn:** entry in
-`docs/agents/stage-gate-project.md` § Worker lanes. The same commit
-also sets **Run-log folder:** to `.scratch/agent-runs` with no
+`docs/agents/stage-gate-project.md` § Worker lanes. Commit `e2445fda`,
+which adds this note, also sets **Run-log folder:** to `.scratch/agent-runs` with no
 trailing slash, so SKILL.md's `<run-log folder>/<session>.jsonl` gives
 no doubled slash.
