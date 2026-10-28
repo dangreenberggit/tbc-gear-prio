@@ -29,8 +29,8 @@ Numbered. Each step: action, files touched, a checkable acceptance
 criterion (a command or an observable), and the claims it depends on
 (C-ids).
 
-A step of a kind that `docs/agents/stage-gate-project.md` § Project seats
-names carries the lines that section gives.
+A step of a kind that `docs/agents/stage-gate-project.md` § Planner
+names includes the lines that section gives.
 
 ## Paths manifest
 
@@ -41,30 +41,20 @@ shared manifests get exactly one owner.
 
 ## Execution chunks
 
-Each chunk is a piece worth building on its own, which one
-`gate-executor` builds after the chunks before it. List each chunk that
-has steps in this plan, as `K1: steps 1–4`. `K1` always has steps. The
-planner decides from its plan of the whole job which later chunks get
-steps now
-(`.claude/agents/gate-planner.md` **Whole job first**). The Steps, Claims register
-and Paths manifest above cover those chunks only. A step whose result
-later steps must reason about goes in the same chunk as those steps.
-
-## Backburner
-
-Every chunk without steps, one line each. After the chunks before it
-run, a `gate-planner` with `next:` adds its steps, claims and paths from
-their execution reports (`.claude/agents/gate-planner.md` § Next chunk):
-`K3: <goal in one sentence> — needs from K2: <result or file> — open:
-<what must be learned or ruled first, or none>`. A line here is not a
-step; the reviewer's check **The approach**
-(`.claude/agents/gate-reviewer.md`) checks the steps against these
-lines. Write "none" when every chunk has steps.
+A chunk is a piece worth building on its own, which one `gate-executor`
+builds after the chunks before it. List every chunk, in build order.
+The first chunks have steps: `K1: steps 1–4`. Each later chunk is one
+line: `K2: <goal in one sentence> — needs from K1: <result or file>`.
+The Steps, Claims register and Paths manifest above cover the chunks
+with steps. A step whose result later steps must reason about goes in
+the same chunk as those steps. A new plan for a later chunk starts its
+list at that chunk, and numbers its steps and claims after the last
+ones of the plan before it.
 
 ## Verify recipe
 
 The exact commands that prove the whole plan is complete (at minimum the
-project's gate command, `docs/agents/stage-gate-project.md` § Hand off),
+project's gate command, `docs/agents/stage-gate-project.md` § Planner),
 plus any plan-specific checks.
 
 ## Out of scope

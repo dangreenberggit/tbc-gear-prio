@@ -205,6 +205,12 @@ for s in ["c33da48e-1527-4d89-8989-f3c193ceffe9", "7ed55f38-b4c7-4d55-8e81-d2214
 EOF
 ```
 
+Ticket 730 was filed to fix this in the hook. The owner ruled on
+2026-10-28 that 730 closes as this note, because this section already
+records the problem and the recount. The hook is not changed: to get a
+run's true `calls` and cost, recount from its transcript with the
+command above.
+
 ### Helpers are not in the planner's cost
 
 `est_cost_usd` covers only the planner's own transcript

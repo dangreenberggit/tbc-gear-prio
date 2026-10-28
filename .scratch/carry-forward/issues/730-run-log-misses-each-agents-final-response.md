@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: ticket 727 § What `calls` counts (close note, 2026-10-28)
 Blocks: none
@@ -71,3 +71,16 @@ Line numbers are at `tbc-gear-prio@e3736534`.
 Run-log lines written before the fix stay as they are. Transcripts are
 deleted after `cleanupPeriodDays` (default 30), so a recount of old
 lines works only before then.
+
+## Closed, 2026-10-28
+
+Folded into ticket 727 § What `calls` counts, by owner ruling in chat
+on 2026-10-28: no new tickets without asking the owner, and 727
+already records this problem and the recount command. The hook is not
+changed.
+
+Verified by:
+
+```
+grep -n -A6 'Ticket 730 was filed' .scratch/carry-forward/issues/727-limit-planner-tool-calls-on-fable.md
+```
