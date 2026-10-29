@@ -48,7 +48,9 @@ Self-tests for the pure functions (no git, no network):
 from __future__ import annotations
 
 import argparse
+import os
 import re
+import stat
 import subprocess
 import sys
 from dataclasses import dataclass, field
@@ -631,6 +633,61 @@ def _merge_base(branch: str, integration: str, root: Path) -> tuple[str, str | N
     return base.stdout.strip(), None
 
 
+def is_device(path: Path) -> bool:
+    try:
+        mode = os.lstat(path).st_mode
+    except OSError:
+        return False
+    return stat.S_ISCHR(mode) or stat.S_ISBLK(mode)
+
+
+# The paths the agent sandbox leaves as empty files, from the 17 seen in
+# tickets 709 and 713. They name Claude Code's write-protected paths, so a
+# Claude Code update can add one; the merge then refuses again, naming no
+# lost work, and the fix is to add the name here.
+SANDBOX_STUBS = frozenset(
+    {
+        ".bash_profile",
+        ".bashrc",
+        ".gitconfig",
+        ".gitmodules",
+        ".idea",
+        ".mcp.json",
+        ".profile",
+        ".ripgreprc",
+        ".vscode",
+        ".zprofile",
+        ".zshrc",
+        ".claude/commands",
+        ".claude/loop.md",
+        ".claude/output-styles",
+        ".claude/routines",
+        ".claude/settings.local.json",
+        ".claude/workflows",
+    }
+)
+
+
+def holds_no_work(root: Path, rel: str) -> bool:
+    """Whether untracked `rel` under `root` is a sandbox mount and not work.
+
+    Inside the agent sandbox each mount is a device (ticket 709); git cannot
+    track a device, so any path counts. Outside it the mount point is left
+    as an empty regular file (ticket 713). An empty file can be work, such
+    as a new `.gitkeep`, so only the known stub paths count.
+    """
+    path = root / rel
+    if is_device(path):
+        return True
+    if rel not in SANDBOX_STUBS:
+        return False
+    try:
+        st = os.lstat(path)
+    except OSError:
+        return False
+    return stat.S_ISREG(st.st_mode) and st.st_size == 0
+
+
 @dataclass(frozen=True)
 class BranchChanges:
     """What a branch changed since its merge base with dev (`read_changes`)."""
@@ -674,7 +731,9 @@ def read_changes(
 
     Read-only: `git merge-base`, `git branch --show-current`, `git diff
     --name-only` and, when the branch is checked out, `git ls-files
-    --others`; nothing that writes a ref, an index or an object.
+    --others`; nothing that writes a ref, an index or an object. An untracked
+    file that `holds_no_work` is left out, as `pnpm merge-to-dev` leaves it
+    out of its clean-tree check.
 
     Diffing against the merge base rather than the branch tip is what keeps
     this honest -- a plain `git diff dev` would also list every file that
@@ -708,7 +767,9 @@ def read_changes(
         out = subprocess.run(argv, cwd=root, capture_output=True, text=True)
         if out.returncode != 0:
             return None, f"{' '.join(argv[:2])} failed: {out.stderr.strip()}"
-        names.update(ln.strip() for ln in out.stdout.splitlines() if ln.strip())
+        listed = (ln.strip() for ln in out.stdout.splitlines() if ln.strip())
+        untracked = argv[1] == "ls-files"
+        names.update(rel for rel in listed if not (untracked and holds_no_work(root, rel)))
     return BranchChanges(root, branch, base, from_tree, frozenset(names)), None
 
 
@@ -2028,6 +2089,12 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             # requires the review, so --product-files must not say to skip it.
             ("empty", 1, "missing review", 1, ""),
         )
+        def put_stubs(text: str):
+            def put() -> None:
+                for rel in (".bashrc", ".claude/settings.local.json"):
+                    (root / rel).write_text(text)
+            return put
+
         # (name, working-tree change on the checked-out `tooling` branch, gate
         # rc, text, --product-files stdout): what `--check-only` previews must
         # match what the gate says once the change is committed.
@@ -2043,6 +2110,11 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             ("untracked product file",
              lambda: (root / "packages" / "new.ts").write_text("export const y = 1;\n"),
              1, "missing review", "packages/new.ts\n"),
+            # The empty files the agent sandbox leaves in a checkout
+            # (`holds_no_work`) are no work; the same path with content is.
+            ("empty sandbox stubs", put_stubs(""), 0, "review not required", ""),
+            ("sandbox stub path with content", put_stubs("x"),
+             1, "missing review", ".bashrc\n.claude/settings.local.json\n"),
         )
         # (branch, gate rc, text, --product-files stdout), run with `dev`
         # checked out: the gate must read each branch's tip, not the working

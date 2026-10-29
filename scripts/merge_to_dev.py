@@ -59,7 +59,6 @@ from __future__ import annotations
 import argparse
 import os
 import shutil
-import stat
 import subprocess
 import sys
 from collections.abc import Callable
@@ -71,6 +70,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 import check_layout_gate  # noqa: E402
 import check_merge_ready  # noqa: E402
+# The sandbox stub rule lives in check_merge_ready, whose changed-file read
+# leaves the stubs out too; check_merge_to_dev.py tests it through here.
+from check_merge_ready import SANDBOX_STUBS, holds_no_work, is_device  # noqa: E402,F401
 import worktree_pair  # noqa: E402
 
 # pre-commit on `dev` refuses merge commits unless this is set (see .githooks/pre-commit).
@@ -132,61 +134,6 @@ def parse_porcelain_z(text: str) -> list[tuple[str, str]]:
                 out.append((xy, fields[i]))
             i += 1
     return out
-
-
-def is_device(path: Path) -> bool:
-    try:
-        mode = os.lstat(path).st_mode
-    except OSError:
-        return False
-    return stat.S_ISCHR(mode) or stat.S_ISBLK(mode)
-
-
-# The paths the agent sandbox leaves as empty files, from the 17 seen in
-# tickets 709 and 713. They name Claude Code's write-protected paths, so a
-# Claude Code update can add one; the merge then refuses again, naming no
-# lost work, and the fix is to add the name here.
-SANDBOX_STUBS = frozenset(
-    {
-        ".bash_profile",
-        ".bashrc",
-        ".gitconfig",
-        ".gitmodules",
-        ".idea",
-        ".mcp.json",
-        ".profile",
-        ".ripgreprc",
-        ".vscode",
-        ".zprofile",
-        ".zshrc",
-        ".claude/commands",
-        ".claude/loop.md",
-        ".claude/output-styles",
-        ".claude/routines",
-        ".claude/settings.local.json",
-        ".claude/workflows",
-    }
-)
-
-
-def holds_no_work(root: Path, rel: str) -> bool:
-    """Whether untracked `rel` under `root` is a sandbox mount and not work.
-
-    Inside the agent sandbox each mount is a device (ticket 709); git cannot
-    track a device, so any path counts. Outside it the mount point is left
-    as an empty regular file (ticket 713). An empty file can be work, such
-    as a new `.gitkeep`, so only the known stub paths count.
-    """
-    path = root / rel
-    if is_device(path):
-        return True
-    if rel not in SANDBOX_STUBS:
-        return False
-    try:
-        st = os.lstat(path)
-    except OSError:
-        return False
-    return stat.S_ISREG(st.st_mode) and st.st_size == 0
 
 
 def real_changes(
