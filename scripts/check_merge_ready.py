@@ -8,7 +8,7 @@ open carry-forward ticket.
 
 Agent-tooling branches: when every file the branch changed is on
 `TOOLING_PATHS`, the review file is not required, because the product review
-does not apply to them. A review file that exists is still checked. The
+does not apply to agent-tooling files. A review file that exists is still checked. The
 ticket checks below run on every branch. A branch that deletes a ticket that
 was open at the merge base needs the review file, because the deleted ticket
 drops out of every ticket check (`deleted_open_tickets`).
@@ -158,14 +158,16 @@ INTEGRATION_BRANCH = "dev"
 
 # Agent-tooling paths: the one list of files that are an exception to this
 # repo's product review (AGENTS.md, "Commits and merges"). An entry ending in
-# `/` covers everything under it; any other entry is one file. A branch whose
-# changed files are all on this list, plus its own review file, needs no
-# review file to merge. The owner approves every change to this list.
+# `/` covers everything under it; any other entry is one file. A branch needs
+# no review file to merge when each file it changed is on this list or is the
+# branch's own review file. The owner approves every change to this list.
 #
 # The list lives here and not in a doc under docs/agents/ because that folder
 # is on the list: a branch could then widen the list and exempt itself in the
 # same diff. This file is not on the list, so a change to it gets the product
-# review.
+# review. The list and GATE_PATHS stop a mistake, not a deliberate edit: the
+# gate runs the branch's own copy of this file, so a branch that edits both
+# lists here can exempt itself (ticket 733).
 TOOLING_PATHS = (
     ".claude/skills/",
     ".agents/skills/",
@@ -191,6 +193,7 @@ GATE_PATHS = (
     "scripts/merge_to_dev.py",
     "scripts/check_merge_to_dev.py",
     "scripts/check_layout_gate.py",
+    "scripts/run_verify.mjs",
     ".githooks/",
     "package.json",
 )
@@ -648,10 +651,10 @@ def changed_files_vs_integration(
     git default), moving `packages/x.ts` to `docs/agents/x.md` lists only the
     new path, and every caller would miss the product file the branch deleted.
 
-    Every failure degrades to a reason string. This is a warn-only advisory
-    bolted onto a gate people rely on; it must never be the thing that stops a
-    merge working, least of all in a detached HEAD or a fresh clone with no
-    local `dev`.
+    Every failure degrades to a reason string, and callers fail closed on it:
+    `check()` then requires the review file, and skips the relevant-ticket
+    scan, which stays warn-only. A git failure, as in a detached HEAD or a
+    fresh clone with no local `dev`, never fails the merge by itself.
     """
     base, why = _merge_base(branch, integration, root)
     if why:
@@ -709,12 +712,12 @@ def _on_list(path: str, entries: tuple[str, ...]) -> bool:
     return any(path == e or (e.endswith("/") and path.startswith(e)) for e in entries)
 
 
-def is_tooling_path(path: str) -> bool:
-    """True when `path` is on TOOLING_PATHS and is not gate code. Pure."""
-    return _on_list(path, TOOLING_PATHS) and not _on_list(path, GATE_PATHS)
+def is_tooling_path(path: str, tooling: tuple[str, ...] = TOOLING_PATHS) -> bool:
+    """True when `path` is on `tooling` and is not gate code. Pure."""
+    return _on_list(path, tooling) and not _on_list(path, GATE_PATHS)
 
 
-def review_not_required(
+def review_exemption_reason(
     changed: set[str],
     why_unknown: str | None,
     review_rel: str,
@@ -876,6 +879,94 @@ def list_open_carry_forward() -> list[tuple[Path, str, str, str]]:
     return out
 
 
+def review_file_errors(review: Path) -> list[str]:
+    """Check the review file's Disposition table: print what was parsed and
+    return the errors. `review` must exist."""
+    errors: list[str] = []
+    text = review.read_text(encoding="utf-8")
+    scan = scan_disposition(text)
+    rows = scan.rows
+
+    denominator = (
+        f"disposition rows: {len(rows)} parsed of {scan.candidates} "
+        f"row-shaped lines in {scan.sections} section(s)"
+    )
+
+    # See scan_disposition's docstring on why an unparsed row is reported by
+    # line number rather than counted as zero.
+    for line_no, raw in scan.unparsed:
+        errors.append(f"line {line_no}: disposition row not parsed — {raw!r}")
+
+    # See DISPOSITION_HEADING_RE.
+    if scan.disposition_headings > scan.sections:
+        errors.append(
+            f"{scan.disposition_headings} heading(s) start with 'Disposition' "
+            f"but only {scan.sections} '## Disposition' section(s) were parsed"
+        )
+
+    # A candidate that reached neither list is a row nobody checked. The
+    # denominator would show it (`0 parsed of 1`) and every other branch would
+    # still pass, so say it outright rather than trusting a reader to notice.
+    leaked = scan.candidates - len(rows) - len(scan.unparsed)
+    if leaked > 0:
+        errors.append(
+            f"{leaked} row-shaped line(s) were neither parsed nor reported — "
+            f"{scan.candidates} candidate(s), {len(rows)} parsed, "
+            f"{len(scan.unparsed)} reported unparsed"
+        )
+
+    if scan.sections == 0:
+        errors.append(
+            "review has no ## Disposition section "
+            f"(rows: {'|'.join(DISPOSITIONS)}; defer must link a ticket path)"
+        )
+    elif scan.header_rows == 0:
+        # The header row is the only signal separating "the author had nothing
+        # to report" from "the author forgot the table". Keeping it mandatory
+        # is what preserves the missing-table check; the template always writes
+        # it, so an all-clean review costs its author nothing.
+        errors.append(
+            "## Disposition section has no table — write the header row "
+            "(`| ID | Axis | Disposition | Ticket / note |`) and its separator "
+            "even when there are no findings"
+        )
+    elif not rows and not scan.unparsed and scan.candidates == 0:
+        # Every axis clean. A row disposes of a finding, so no findings means
+        # no rows -- that is a pass, not an empty table to complain about.
+        print(f"{denominator} (no findings)")
+    else:
+        print(denominator)
+        for row in rows:
+            disp = row["disposition"]
+            if disp == "defer":
+                tpath = ticket_path_from_note(row["note"])
+                if not tpath:
+                    errors.append(
+                        f"{row['id']}: defer with no ticket path — {row['note']!r}"
+                    )
+                    continue
+                rel = tpath.relative_to(ROOT).as_posix()
+                if not tpath.is_file():
+                    errors.append(f"{row['id']}: defer ticket missing: {rel}")
+                    continue
+                status = read_status(tpath)
+                if status not in OPEN_STATUSES:
+                    errors.append(
+                        f"{row['id']}: {rel} has Status: {status!r} "
+                        f"(defer tickets must be open|claimed)"
+                    )
+                else:
+                    print(f"  ok  {row['id']}: defer -> {rel} ({status})")
+            elif disp in DISPOSITIONS:
+                print(f"  ok  {row['id']}: {disp}")
+            else:
+                errors.append(
+                    f"{row['id']}: unknown disposition {disp!r} "
+                    f"(accepted: {', '.join(DISPOSITIONS)})"
+                )
+    return errors
+
+
 def check(
     branch: str | None = None,
     review: Path | None = None,
@@ -888,19 +979,19 @@ def check(
         review = ROOT / review
     errors: list[str] = []
 
+    review_rel = review.relative_to(ROOT).as_posix()
     print(f"branch: {branch}")
-    print(f"review: {review.relative_to(ROOT).as_posix()}")
+    print(f"review: {review_rel}")
 
     # The changed files decide whether a review file is required, so read
     # them before the review. Later checks reuse this result.
-    review_rel = review.relative_to(ROOT).as_posix()
     changed, why_not = changed_files_vs_integration(branch)
     deleted_open, why_not_deleted = deleted_open_tickets(branch)
-    exempt = review_not_required(
+    exemption = review_exemption_reason(
         changed, why_not or why_not_deleted, review_rel, deleted_open
     )
 
-    if not review.is_file() and not exempt:
+    if not review.is_file() and not exemption:
         for rel in sorted(deleted_open):
             print(f"open ticket deleted on this branch, so it needs the review: {rel}")
         print(
@@ -909,90 +1000,10 @@ def check(
             file=sys.stderr,
         )
         return 1
-    if not review.is_file():
-        print(f"review not required: {exempt}")
+    if review.is_file():
+        errors.extend(review_file_errors(review))
     else:
-        text = review.read_text(encoding="utf-8")
-        scan = scan_disposition(text)
-        rows = scan.rows
-
-        denominator = (
-            f"disposition rows: {len(rows)} parsed of {scan.candidates} "
-            f"row-shaped lines in {scan.sections} section(s)"
-        )
-
-        # See scan_disposition's docstring on why an unparsed row is reported by
-        # line number rather than counted as zero.
-        for line_no, raw in scan.unparsed:
-            errors.append(f"line {line_no}: disposition row not parsed — {raw!r}")
-
-        # See DISPOSITION_HEADING_RE.
-        if scan.disposition_headings > scan.sections:
-            errors.append(
-                f"{scan.disposition_headings} heading(s) start with 'Disposition' "
-                f"but only {scan.sections} '## Disposition' section(s) were parsed"
-            )
-
-        # A candidate that reached neither list is a row nobody checked. The
-        # denominator would show it (`0 parsed of 1`) and every other branch would
-        # still pass, so say it outright rather than trusting a reader to notice.
-        leaked = scan.candidates - len(rows) - len(scan.unparsed)
-        if leaked > 0:
-            errors.append(
-                f"{leaked} row-shaped line(s) were neither parsed nor reported — "
-                f"{scan.candidates} candidate(s), {len(rows)} parsed, "
-                f"{len(scan.unparsed)} reported unparsed"
-            )
-
-        if scan.sections == 0:
-            errors.append(
-                "review has no ## Disposition section "
-                f"(rows: {'|'.join(DISPOSITIONS)}; defer must link a ticket path)"
-            )
-        elif scan.header_rows == 0:
-            # The header row is the only signal separating "the author had nothing
-            # to report" from "the author forgot the table". Keeping it mandatory
-            # is what preserves the missing-table check; the template always writes
-            # it, so an all-clean review costs its author nothing.
-            errors.append(
-                "## Disposition section has no table — write the header row "
-                "(`| ID | Axis | Disposition | Ticket / note |`) and its separator "
-                "even when there are no findings"
-            )
-        elif not rows and not scan.unparsed and scan.candidates == 0:
-            # Every axis clean. A row disposes of a finding, so no findings means
-            # no rows -- that is a pass, not an empty table to complain about.
-            print(f"{denominator} (no findings)")
-        else:
-            print(denominator)
-            for row in rows:
-                disp = row["disposition"]
-                if disp == "defer":
-                    tpath = ticket_path_from_note(row["note"])
-                    if not tpath:
-                        errors.append(
-                            f"{row['id']}: defer with no ticket path — {row['note']!r}"
-                        )
-                        continue
-                    rel = tpath.relative_to(ROOT).as_posix()
-                    if not tpath.is_file():
-                        errors.append(f"{row['id']}: defer ticket missing: {rel}")
-                        continue
-                    status = read_status(tpath)
-                    if status not in OPEN_STATUSES:
-                        errors.append(
-                            f"{row['id']}: {rel} has Status: {status!r} "
-                            f"(defer tickets must be open|claimed)"
-                        )
-                    else:
-                        print(f"  ok  {row['id']}: defer -> {rel} ({status})")
-                elif disp in DISPOSITIONS:
-                    print(f"  ok  {row['id']}: {disp}")
-                else:
-                    errors.append(
-                        f"{row['id']}: unknown disposition {disp!r} "
-                        f"(accepted: {', '.join(DISPOSITIONS)})"
-                    )
+        print(f"review not required: {exemption}")
 
     unparseable = unparseable_status_tickets()
     if unparseable:
@@ -1741,33 +1752,6 @@ def _scratch_branch(root: Path, git, name: str, writes: dict, deletes=()) -> Non
     git("commit", "-q", "-m", name)
 
 
-def check_changed_files_lists_both_sides_of_a_rename() -> list[str]:
-    """A file moved from product code into a tooling path is listed under
-    both names; with rename detection on, git lists only the new one."""
-    import tempfile
-
-    body = "export const x = 1;\n" * 20
-    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
-        root = Path(tmp)
-        git = _scratch_git(root)
-        try:
-            git("init", "-q", "-b", INTEGRATION_BRANCH)
-            (root / "packages").mkdir()
-            (root / "packages" / "x.ts").write_text(body, encoding="utf-8")
-            git("add", "-A")
-            git("commit", "-q", "-m", "base")
-            _scratch_branch(
-                root, git, "move", {"docs/agents/x.ts": body}, deletes=("packages/x.ts",)
-            )
-        except (OSError, subprocess.CalledProcessError) as exc:
-            return [f"rename test could not build its repo: {exc}"]
-        got, why = changed_files_vs_integration("move", root=root)
-        want = {"packages/x.ts", "docs/agents/x.ts"}
-        if why or got != want:
-            return [f"rename: got {sorted(got)} ({why}), want {sorted(want)}"]
-        return []
-
-
 _OWN_REVIEW = "docs/reviews/chore-x.md"
 
 
@@ -1795,7 +1779,7 @@ def check_review_requirement_by_changed_files() -> list[str]:
     ]
     problems = []
     for name, changed, why, want_required in cases:
-        got_required = review_not_required(changed, why, _OWN_REVIEW) is None
+        got_required = review_exemption_reason(changed, why, _OWN_REVIEW) is None
         if got_required != want_required:
             problems.append(
                 f"review requirement, {name}: required={got_required}, want {want_required}"
@@ -1811,7 +1795,7 @@ def check_review_requirement_by_changed_files() -> list[str]:
     got = product_files({"AGENTS.md", ticket}, _OWN_REVIEW, {ticket})
     if got != [ticket]:
         problems.append(f"a deleted open ticket is not a product file: got {got}")
-    if review_not_required({"AGENTS.md", ticket}, None, _OWN_REVIEW, {ticket}):
+    if review_exemption_reason({"AGENTS.md", ticket}, None, _OWN_REVIEW, {ticket}):
         problems.append("a branch deleting an open ticket needs no review file")
     return problems
 
@@ -1819,27 +1803,23 @@ def check_review_requirement_by_changed_files() -> list[str]:
 def check_gate_paths_win_over_tooling_paths() -> list[str]:
     """Adding `scripts/` to TOOLING_PATHS still leaves the gate's own code
     needing the product review."""
-    global TOOLING_PATHS
-    saved = TOOLING_PATHS
-    TOOLING_PATHS = saved + ("scripts/", ".githooks/")
-    try:
-        problems = [
-            f"gate path {p} counted as tooling"
-            for p in ("scripts/check_merge_ready.py", "scripts/merge_to_dev.py",
-                      ".githooks/pre-commit")
-            if is_tooling_path(p)
-        ]
-        if not is_tooling_path("scripts/other.py"):
-            problems.append("widened list not applied to a non-gate script")
-    finally:
-        TOOLING_PATHS = saved
+    widened = TOOLING_PATHS + ("scripts/", ".githooks/")
+    problems = [
+        f"gate path {p} counted as tooling"
+        for p in ("scripts/check_merge_ready.py", "scripts/merge_to_dev.py",
+                  "scripts/run_verify.mjs", ".githooks/pre-commit")
+        if is_tooling_path(p, widened)
+    ]
+    if not is_tooling_path("scripts/other.py", widened):
+        problems.append("widened list not applied to a non-gate script")
     return problems
 
 
 def check_review_requirement_reads_git() -> list[str]:
     """On a throwaway repo: a tooling-only branch needs no review file, and a
     mixed branch and a branch that moves product code into a tooling path
-    both do."""
+    both do. The move is listed under both names: with rename detection on,
+    git lists only the new one, and the product file would be missed."""
     import tempfile
 
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
@@ -1867,9 +1847,13 @@ def check_review_requirement_reads_git() -> list[str]:
         except (OSError, subprocess.CalledProcessError) as exc:
             return [f"review requirement git test could not build its repo: {exc}"]
         problems = []
+        got, why = changed_files_vs_integration("move", root=root)
+        want = {"packages/x.ts", "docs/agents/x.ts"}
+        if why or got != want:
+            problems.append(f"rename: got {sorted(got)} ({why}), want {sorted(want)}")
         for branch, want_required in (("tooling", False), ("mixed", True), ("move", True)):
             changed, why = changed_files_vs_integration(branch, root=root)
-            got_required = review_not_required(changed, why, _OWN_REVIEW) is None
+            got_required = review_exemption_reason(changed, why, _OWN_REVIEW) is None
             if got_required != want_required:
                 problems.append(
                     f"branch {branch}: required={got_required}, want {want_required} "
@@ -1971,7 +1955,6 @@ CHECKS = (
     check_closing_without_verified_by_is_flagged,
     check_closing_rule_edges,
     check_closing_rule_reads_git,
-    check_changed_files_lists_both_sides_of_a_rename,
     check_review_requirement_by_changed_files,
     check_gate_paths_win_over_tooling_paths,
     check_review_requirement_reads_git,
