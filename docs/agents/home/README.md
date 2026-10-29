@@ -21,6 +21,7 @@ terminal**:
 ```bash
 cp docs/agents/home/AGENTS.md ~/.claude/AGENTS.md
 cp docs/agents/home/CLAUDE.md.install ~/.claude/CLAUDE.md
+mkdir -p ~/.claude/skills/instruction-review
 cp docs/agents/home/skills/instruction-review/SKILL.md ~/.claude/skills/instruction-review/SKILL.md
 ```
 
