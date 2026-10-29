@@ -561,7 +561,7 @@ def relevant_paths(changed_files: set[str], ticket_paths: set[str]) -> list[str]
 
 
 def changed_files_vs_integration(
-    branch: str, integration: str = INTEGRATION_BRANCH
+    branch: str, integration: str = INTEGRATION_BRANCH, root: Path = ROOT
 ) -> tuple[set[str], str | None]:
     """Files this branch changed since it forked from the integration branch.
 
@@ -572,6 +572,10 @@ def changed_files_vs_integration(
     Diffing against the merge base rather than the branch tip is what keeps
     this honest -- a plain `git diff dev` would also list every file that
     changed *on dev* since the fork, and blame this branch for all of them.
+
+    `--no-renames` lists both sides of a rename. With rename detection on (the
+    git default), moving `packages/x.ts` to `docs/agents/x.md` lists only the
+    new path, and every caller would miss the product file the branch deleted.
 
     Every failure degrades to a reason string. This is a warn-only advisory
     bolted onto a gate people rely on; it must never be the thing that stops a
@@ -586,7 +590,7 @@ def changed_files_vs_integration(
     try:
         base = subprocess.run(
             ["git", "merge-base", integration, branch],
-            cwd=ROOT,
+            cwd=root,
             capture_output=True,
             text=True,
         )
@@ -601,8 +605,8 @@ def changed_files_vs_integration(
         )
 
     diff = subprocess.run(
-        ["git", "diff", "--name-only", base.stdout.strip(), branch],
-        cwd=ROOT,
+        ["git", "diff", "--name-only", "--no-renames", base.stdout.strip(), branch],
+        cwd=root,
         capture_output=True,
         text=True,
     )
@@ -1558,10 +1562,69 @@ def check_closing_rule_reads_git() -> list[str]:
         return problems
 
 
+def _scratch_git(root: Path):
+    """A `git` runner for a throwaway repo at `root`, with no hooks and a
+    fixed identity, so a test never runs this repo's pre-commit."""
+    hooks = root / "no-hooks"
+    hooks.mkdir()
+
+    def git(*argv: str) -> None:
+        subprocess.run(
+            ["git", "-c", f"core.hooksPath={hooks.as_posix()}",
+             "-c", "user.name=t", "-c", "user.email=t@t",
+             "-c", "commit.gpgsign=false", *argv],
+            cwd=root, check=True, capture_output=True,
+        )
+
+    return git
+
+
+def _scratch_branch(root: Path, git, name: str, writes: dict, deletes=()) -> None:
+    """Make branch `name` off dev with the given file writes and deletions."""
+    git("checkout", "-q", INTEGRATION_BRANCH)
+    git("checkout", "-q", "-b", name)
+    for rel in deletes:
+        git("rm", "-q", rel)
+    for rel, text in writes.items():
+        p = root / rel
+        p.parent.mkdir(parents=True, exist_ok=True)
+        p.write_text(text, encoding="utf-8", newline="")
+    git("add", "-A")
+    git("commit", "-q", "-m", name)
+
+
+def check_changed_files_lists_both_sides_of_a_rename() -> list[str]:
+    """A file moved from product code into a tooling path is listed under
+    both names; with rename detection on, git lists only the new one."""
+    import tempfile
+
+    body = "export const x = 1;\n" * 20
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        root = Path(tmp)
+        git = _scratch_git(root)
+        try:
+            git("init", "-q", "-b", INTEGRATION_BRANCH)
+            (root / "packages").mkdir()
+            (root / "packages" / "x.ts").write_text(body, encoding="utf-8")
+            git("add", "-A")
+            git("commit", "-q", "-m", "base")
+            _scratch_branch(
+                root, git, "move", {"docs/agents/x.ts": body}, deletes=("packages/x.ts",)
+            )
+        except (OSError, subprocess.CalledProcessError) as exc:
+            return [f"rename test could not build its repo: {exc}"]
+        got, why = changed_files_vs_integration("move", root=root)
+        want = {"packages/x.ts", "docs/agents/x.ts"}
+        if why or got != want:
+            return [f"rename: got {sorted(got)} ({why}), want {sorted(want)}"]
+        return []
+
+
 CHECKS = (
     check_closing_without_verified_by_is_flagged,
     check_closing_rule_edges,
     check_closing_rule_reads_git,
+    check_changed_files_lists_both_sides_of_a_rename,
     check_extracts_common_paths,
     check_extracts_all_source_extensions,
     check_ignores_prose_and_bare_filenames,
