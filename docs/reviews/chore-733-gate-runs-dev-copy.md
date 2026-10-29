@@ -265,3 +265,58 @@ Commands and results:
 | --- | ---- | ----------- | ------------- |
 
 No finding.
+
+## Code check of the merge-ready change
+
+Range `3d493648..5e394981` (commit `5e394981`, "Run dev's copy of the
+gate in pnpm merge-ready"). Dispatch: one fresh `general-task` agent on
+Opus, given the diff and the owner's intent. The fixes are in `8996a94d`.
+
+The check found that `pnpm merge-ready` now refuses whenever dev's copy
+refuses, for every flag and case it tried, unless the branch edits
+`main()` in its own copy. It found one regression (C1) and six smaller
+points.
+
+- **C1 (P2).** With `merge_ready_at` in `check_merge_ready.py`, a branch
+  that edited only that file could stub `merge_ready_at` and pass the
+  no-branch `pnpm merge-to-dev --check-only`. At `3d493648` the same
+  branch was refused.
+- **C2 (P3).** The checkout's copy printed `merge-ready: ok` before dev's
+  copy ran, and no closing verdict followed.
+- **C3 (P3).** The comment in `main()` claimed that no edit to the
+  branch's own copy could make merge-ready pass.
+- **C4 (P3).** Three mutants survived: dev's copy given the current branch
+  in place of `--branch`; a failure of the checkout's copy ignored; a
+  missing local `dev` treated as a pass.
+- **C5 (P3).** On `dev`, merge-ready asked for `docs/reviews/dev.md`
+  instead of refusing `dev` by name as `merge-to-dev` does.
+- **C6 (P3).** With `--branch` from another checkout, or `--review` at
+  another path, merge-ready can pass where `merge-to-dev` refuses. Both
+  flags existed before this branch.
+- **C7 (P3).** Ticket 733 said `pnpm merge-ready` runs only the branch's
+  copy, and that a branch editing only `check_merge_ready.py` is refused.
+
+Commands and results after `8996a94d`:
+
+- `python3 scripts/check_merge_to_dev.py`: rc 0, 23 checks.
+- `python3 scripts/check_merge_ready.py --self-test`: rc 0, 43 checks.
+- `TBC_VERIFY_WITHOUT_FORK=1 pnpm verify`: rc 0.
+- Mutants, each on a copy of `scripts/` under `$TMPDIR/mut733`: dropping
+  the dev-copy run, passing the current branch to dev's copy, ignoring
+  the checkout's copy's failure, treating a missing `dev` as a pass,
+  taking `merge_ready_at` from `check_merge_ready`, dropping the
+  `dev`/`main` refusal, and dropping the `--review` or
+  `--ack-open-blockers` pass-through. Each gives rc 1 with at least one
+  failure.
+
+## Disposition (merge-ready code check)
+
+| ID  | Axis       | Disposition | Ticket / note                                                                                                                |
+| --- | ---------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| C1  | Code check | fixed       | `merge_ready_at` moved to `scripts/gate_copy.py` (on `GATE_PATHS`); test `check_editing_only_the_gate_cannot_skip_devs_copy` |
+| C2  | Code check | fixed       | `main()` prints a FAIL line naming dev's copy, or `merge-ready: ok (this checkout's copy and dev's copy)`                    |
+| C3  | Code check | fixed       | comment now limits the claim to edits of the rules and points to "Which copy of the gate code runs"                          |
+| C4  | Code check | fixed       | test `check_merge_ready_needs_both_copies_to_pass` kills all three mutants                                                   |
+| C5  | Code check | fixed       | `main()` refuses `dev` and `main`; covered by the same test                                                                  |
+| C6  | Code check | fixed       | comment in `main()` says that with `--branch` or `--review` the result can differ from the door's                            |
+| C7  | Code check | fixed       | ticket 733 updated in `8996a94d`                                                                                             |
