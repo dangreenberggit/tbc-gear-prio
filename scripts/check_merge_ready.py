@@ -1809,6 +1809,69 @@ def check_review_requirement_reads_git() -> list[str]:
         return problems
 
 
+def _run_gate_copy(root: Path, *argv: str) -> tuple[int, str, str]:
+    """Run the copy of this file at `root/scripts/` as a CLI; (rc, stdout, stderr)."""
+    out = subprocess.run(
+        [sys.executable, str(root / "scripts" / Path(__file__).name), *argv],
+        cwd=root, capture_output=True, text=True,
+    )
+    return out.returncode, out.stdout, out.stderr
+
+
+def check_gate_cli_on_a_scratch_repo() -> list[str]:
+    """End to end, through `main()` and `check()`: a copy of this file runs as
+    the CLI in a throwaway repo, so the "review not required" decision and the
+    `--product-files` output are tested where they are made, not only in the
+    pure helpers they call."""
+    import shutil
+    import tempfile
+
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        root = Path(tmp)
+        git = _scratch_git(root)
+        try:
+            git("init", "-q", "-b", INTEGRATION_BRANCH)
+            (root / "scripts").mkdir()
+            shutil.copy(Path(__file__), root / "scripts" / Path(__file__).name)
+            (root / "packages").mkdir()
+            (root / "packages" / "x.ts").write_text("export const x = 1;\n")
+            (root / "AGENTS.md").write_text("# rules\n")
+            git("add", "-A")
+            git("commit", "-q", "-m", "base")
+            _scratch_branch(root, git, "tooling", {
+                "AGENTS.md": "# rules\nnew rule\n",
+                ".claude/skills/s/SKILL.md": "skill\n",
+            })
+            _scratch_branch(root, git, "mixed", {
+                "AGENTS.md": "# rules\nnew rule\n",
+                "packages/x.ts": "export const x = 2;\n",
+            })
+            git("checkout", "-q", INTEGRATION_BRANCH)
+        except (OSError, subprocess.CalledProcessError) as exc:
+            return [f"gate CLI test could not build its repo: {exc}"]
+
+        problems = []
+        # (branch, gate rc, text the gate prints, --product-files rc, its stdout)
+        cases = (
+            ("tooling", 0, "review not required", 0, ""),
+            ("mixed", 1, "missing review", 0, "packages/x.ts\n"),
+        )
+        for branch, want_rc, want_text, want_pf_rc, want_pf in cases:
+            rc, out, err = _run_gate_copy(root, "--branch", branch)
+            if rc != want_rc or want_text not in out + err:
+                problems.append(
+                    f"gate on {branch} with no review file: rc={rc}, want {want_rc} "
+                    f"and {want_text!r}; output {(out + err)[-300:]!r}"
+                )
+            rc, out, err = _run_gate_copy(root, "--product-files", "--branch", branch)
+            if rc != want_pf_rc or out != want_pf:
+                problems.append(
+                    f"--product-files on {branch}: rc={rc} stdout={out!r}, "
+                    f"want rc={want_pf_rc} stdout={want_pf!r} (stderr {err[-200:]!r})"
+                )
+        return problems
+
+
 CHECKS = (
     check_closing_without_verified_by_is_flagged,
     check_closing_rule_edges,
@@ -1817,6 +1880,7 @@ CHECKS = (
     check_review_requirement_by_changed_files,
     check_gate_paths_win_over_tooling_paths,
     check_review_requirement_reads_git,
+    check_gate_cli_on_a_scratch_repo,
     check_extracts_common_paths,
     check_extracts_all_source_extensions,
     check_ignores_prose_and_bare_filenames,
