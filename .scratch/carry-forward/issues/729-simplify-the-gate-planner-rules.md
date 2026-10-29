@@ -3,7 +3,7 @@ Type: process
 Origin: owner decision in session, 2026-10-28, on ticket 727
 Blocks: none
 Blocked by: none
-Related: 712, 723, 726, 727, 728, 730
+Related: 712, 723, 726, 727, 728, 730, 731, 732
 
 # Simplify the gate-planner's rules
 
