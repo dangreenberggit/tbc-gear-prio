@@ -161,6 +161,68 @@ hand-off is its final message, so one spawn is a full trial. It was not
 run: it needs the `gate-planner` type, which this review's budget
 excludes.
 
+#### Result of the trial, run after the review (2026-10-29)
+
+Run by the dispatching session's follow-up agent, at the owner's request
+(option 1 of Q-729wd-template-trial). One `gate-planner` spawn on Fable
+(agent `a4c0a848e35c671a5`, model `claude-fable-5-1`, 2 calls, 0.7043
+USD by the run log in `.scratch/agent-runs/46401644-f7e4-42f5-996c-65cd93061a16.jsonl`).
+
+Set-up, the same as the second run except where named:
+
+- Checkout: a shallow clone of `dev` at `3c008f0d`
+  (`git clone --depth 1 --branch dev file://<main checkout>`), so the
+  template the planner read is `dev`'s. `gate-planner.md` and
+  `docs/agents/stage-gate-project.md` are the same on `dev`, `eded62c3`
+  and this branch's HEAD (`git diff --stat dev eded62c3 -- <file>`
+  prints nothing for both), so the template is the only planner input
+  that differs from the second run.
+- Brief: `.scratch/stage-gate/729-planner-test-2/brief.md` with only the
+  stage path moved (`diff` shows line 15 alone).
+- Prompt: the second run's planner prompt (from its transcript), with the
+  paths and HEAD of the clone.
+- `decision-log.md` at spawn time: the second run's first three lines,
+  with the clone's SHA.
+
+The planner read the named brief and template, and the stage folder
+(transcript: two Bash calls). Its first plan gave steps to all three
+chunks. `## Execution chunks`, quoted:
+
+> - K1: steps 1–3 — creates `statements.md` with the K1 line.
+> - K2: steps 4–7 — appends the K2 line. Needs from K1: `statements.md`
+>   with exactly one line starting `K1: `.
+> - K3: steps 8–12 — appends the K3 line and reports all three lines.
+>   Needs from K2: `statements.md` with exactly two lines, `K1: ` then
+>   `K2: `.
+>
+> All three chunks have steps now; no later chunk waits on a planning
+> input from an earlier run.
+
+Its § Approach rejects the first run's layout: "planning only K1 now and
+leaving K2 and K3 as one-line chunks; that costs two extra planning
+rounds for no information gain, since K2 and K3 do not depend on what
+sentence K1 chose." Its first § Decisions line: "Planned all three
+chunks with steps now instead of one-line placeholders for K2 and K3 —
+later chunks need only a file-state precondition, not an earlier run's
+result". The second run's planner, on the new template, wrote nearly the
+same line: "Planned all three chunks with steps now instead of leaving
+K2 and K3 one-line — no chunk needs a result from an earlier run"
+(`.scratch/agent-runs/fc215b62-f051-47b1-b269-e4f6d0ac0250.jsonl`,
+agent `a33945bd682b70549`, `decisions` field).
+
+Conclusion: on this brief, the old template and the new template give
+the same result. The brief sentence "`K2` and `K3` are later chunks."
+caused the first run's one-line chunks, not the template. The template
+edit is a no-op clarification here: it brings the template into line
+with `gate-planner.md:36-41`, and no trial shows that it changes what
+the planner does. One spawn per template is a small sample. One trace
+of the old one-line form remains: K2 and K3 have steps but keep the
+"Needs from K1:" wording of the old one-line example. It did no harm.
+
+Files: `.scratch/agent-reports/2026-10-29-instruction-review-729wd-trial/ir1-old-template-run/`
+in this worktree (gitignored; `brief.md`, `decision-log.md`, and
+`plan.md`, the planner's final message verbatim).
+
 ### Gate A (IR2)
 
 Run for this review. Two `general-task` agents on Opus (old text agent
@@ -258,7 +320,9 @@ What went badly:
   accept the record as it is, because the new template agrees with
   `gate-planner.md:36-41` either way. Recommended: option 1. It is one
   spawn, and if the brief sentence was the cause, that is worth knowing
-  before the next brief is written.
+  before the next brief is written. **Answered:** option 1 was run after
+  the review. The brief sentence was the cause (§ Check 3 § Template
+  § Result of the trial).
 - **Q-729wd-gate-a-trial (IR2).** Today the Gate A trial matched old
   and new verdicts (the pass test for a behaviour-keeping change), but
   stopped at the hand-off, so under the skill's rule it counts as no
@@ -283,7 +347,7 @@ review (`AGENTS.md` § Commits and merges).
 
 | ID  | Axis    | Disposition | Ticket / note                                                                                                                                                                                                   |
 | --- | ------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| IR1 | Check 3 |             | owner decision Q-729wd-template-trial (§ Needed from the owner)                                                                                                                                                 |
+| IR1 | Check 3 | fixed       | trial run (§ Check 3 § Template § Result): the old template with the second brief also gave steps to K1, K2 and K3, so the brief sentence was the cause and the template edit is a no-op clarification          |
 | IR2 | Check 3 |             | owner decision Q-729wd-gate-a-trial (§ Needed from the owner)                                                                                                                                                   |
 | IR3 | Check 1 | wontfix     | the sentence is unchanged by this branch, and the cold reader took the meant reading as its own                                                                                                                 |
 | IR4 | Check 1 | wontfix     | matches `gate-planner.md:38-39`; a chunk that waits on an owner decision goes out as "Open questions" (`SKILL.md:240-243`)                                                                                      |
