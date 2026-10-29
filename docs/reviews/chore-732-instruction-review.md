@@ -11,7 +11,8 @@ on the unmerged 731 branch, not on `dev` (`git grep -n instruction-review
 dev -- AGENTS.md docs/workflow.md .claude/skills/pre-merge-review`
 prints nothing). Path: full (the branch adds a new file). Two cold
 readers ran as fresh `general-task` agents on Opus, one per changed file.
-No GLM type was used. No new trial of the skill ran, as the caller asked.
+No GLM type was used. No new trial of the skill ran in the review itself,
+as the caller asked; a follow-up ran the K1 trial (§ Trial status).
 
 Intent, from ticket 732 (`.scratch/carry-forward/issues/732-global-skill-for-reviewing-agent-instruction-changes.md`
 § The problem, § Where it lives, § Done when): a global skill that
@@ -37,7 +38,7 @@ is a symlink to `~/.claude/skills`; `~/.claude_router/CLAUDE.md` and
 | --- | ------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | K1  | Check 3 | SKILL.md:91-94                   | "A partial trial counts as none: a run of the new text with no old-text run beside it, or a run that stops before ..."      | The sentence is meant to change how a reviewer rates a partial trial. It was written after the trial on record, so no trial has run it.                                                | blocks     | `trial.md:4` says the trial ran a 118-line draft; the staged file has 121 lines (`wc -l`). `trial.md:176-179` proposes this edit after the trial ("not applied because the draft passed"). See § Trial status.                                                                                            |
 | R1  | Check 2 | README.md:24 (before the fix)    | `cp docs/agents/home/skills/instruction-review/SKILL.md ~/.claude/skills/instruction-review/SKILL.md`                       | On a machine with no `~/.claude/skills/instruction-review/`, the copy fails and the skill is not installed. The two other lines copy into `~/.claude/`, which always exists.           | should fix | In `$TMPDIR`, `cp src <missing dir>/SKILL.md` printed `cp: cannot create regular file ... No such file or directory`, rc=1. README cold reader: "The third copy fails if the folder `~/.claude/skills/instruction-review/` does not exist yet."                                                           |
-| R2  | Check 1 | README.md:1, :9, :27-29          | "Staged copies of ~/.claude/AGENTS.md and ~/.claude/CLAUDE.md"; "including the two copies below"; "Both files are required" | The text around the new line still describes two files. An agent that verifies the install with the README's `ls` skips the skill, and cannot tell whether the skill copy is required. | should fix | README cold reader: "It names two files but copies three", "Its check only shows that the files exist ... It does not check the third file (`SKILL.md`)", "Is the skill copy required? The check leaves it out, which suggests no."                                                                       |
+| R2  | Check 1 | README.md:1, :9, :27-29 (before) | "Staged copies of ~/.claude/AGENTS.md and ~/.claude/CLAUDE.md"; "including the two copies below"; "Both files are required" | The text around the new line still describes two files. An agent that verifies the install with the README's `ls` skips the skill, and cannot tell whether the skill copy is required. | should fix | README cold reader: "It names two files but copies three", "Its check only shows that the files exist ... It does not check the third file (`SKILL.md`)", "Is the skill copy required? The check leaves it out, which suggests no."                                                                       |
 | R3  | Check 1 | README.md:21-29                  | relative `cp` sources; "Verify with `ls ...`"; "On the WSL host"                                                            | The commands fail outside the repo root; `ls` passes on an old copy; the README does not say WSL or Windows.                                                                           | minor      | README cold reader, § Where the text is unclear. All three were in the README before this branch; the new line follows the same style.                                                                                                                                                                    |
 | S1  | Check 1 | SKILL.md:27-35                   | "Light path: a wording edit of one line that changes no rule"                                                               | The skill does not say whether the path is chosen per branch or per file. The reader took the full path for the whole branch, which is the safe choice the skill names.                | minor      | Skill cold reader Q2, quoting "When unsure, take the full path."                                                                                                                                                                                                                                          |
 | S2  | Check 1 | SKILL.md:80-85                   | "A change that alters what an agent does is done only after one trial run" / "Do checks 1, 2 and 3"                         | On the full path, a reviewer cannot tell whether a wording line that keeps behaviour also needs a trial.                                                                               | minor      | Skill cold reader Q3 quotes all three sentences.                                                                                                                                                                                                                                                          |
@@ -81,34 +82,67 @@ lines; the difference is the sentence the owner added at SKILL.md:91-94
 ("A partial trial counts as none: ..."), which `trial.md:176-179`
 proposed after the trial.
 
-**The added sentence: no trial run (K1).** It changes behaviour: it is
-meant to make a reviewer rate a partial trial as blocking. The evidence
-that the old text did not do this is draft run 1 (`trial.md:142-154`),
-which found the missing helper trial but said "Nothing blocks". By the
-skill's own check 3 ("check that it ran the current text"; "A paper
-review, this one included, is not a trial run"), the sentence needs a
-trial. Paper evidence only: the skill cold reader in this review acted
-on it as meant ("Each run continues until the planner hands work to the
-next agent"; it left out "Counting this review, or a run of the new text
-only, as a trial", quoting "A partial trial counts as none").
+**The added sentence: trial run, both versions block (K1).** Before
+the follow-up, no trial had run the sentence. The evidence that the old
+text did not rate a partial trial as blocking was draft run 1
+(`trial.md:142-154`), which found the missing helper trial but said
+"Nothing blocks".
 
-The trial to run:
+Set-up, 2026-10-29:
 
+- Old text: the staged SKILL.md with the sentence "A partial trial counts
+  as none: ... leaves the blocking finding open." deleted, 118 lines. New
+  text: the staged SKILL.md, 121 lines, `cmp` against the staged file
+  exits 0. `diff` of the two shows only that sentence (SKILL.md:91-94).
+  Each was copied to a neutral path in `$TMPDIR` (`copy-a`, `copy-b`).
 - Input: the item 7 case from `trial.md:49`, the command
   `git -C /home/daniel/Code/lulz/tbc-gear-prio diff dev chore/729-test-result -- .claude/agents/gate-reviewer.md`,
-  with the same Limits as `trial.md:51-56` (known answers out of reach,
-  a trial of at most one agent run, writes only under `$TMPDIR`).
-- Old text: the staged SKILL.md with the sentence "A partial trial
-  counts as none: ... leaves the blocking finding open." deleted (the
-  118-line draft is not stored; this rebuild is a hypothesis, untested,
-  but the line count matches).
-- New text: the staged SKILL.md as it is.
-- Pass: the new-text reviewer, when its own trial is new-text only or
-  plays the helper's part, rates "no trial run" as **blocks**; the
-  old-text reviewer may rate it lower, as draft run 1 did. One pair may
-  not separate them: old-text run 2 already rated it blocks
-  (`trial.md:135`), so the old text sometimes gets this right without the
-  sentence.
+  with the Limits of `trial.md:51-56`: `.scratch/`, `docs/reviews/` and
+  commit messages out of reach, no `gate-*` types, no stage-gate run, a
+  trial of at most one agent run, writes only under `$TMPDIR`. Both
+  reviewers were also told not to load the installed `instruction-review`
+  skill or read `~/.claude/skills/instruction-review/`.
+- A recorded partial trial, written for this test and given to both
+  reviewers: a run of the new item 7 text by one `general-task` agent,
+  through its hand-off (the `# Round 1` section and its final message),
+  that "behaved as written". Its last line: "No run of the old text was
+  made."
+- Two `general-task` reviewers on Opus, sent in one message. The prompts
+  were the same except for the skill file path, and neither was told
+  what was being tested. No GLM type was used.
+
+Result: **both reviewers rated the missing old-text run as blocks.** By
+the caller's pass rule this is a pass, but this pair shows no
+difference in the rating from the sentence.
+
+- Old text (agent a0f67b36147b06b80, 594 s, 18 tool uses): "One thing
+  blocks: the trial is not complete. A complete trial runs the old text
+  as a baseline on the same input as the new text, and nobody has done
+  that run." Its finding 1, severity **blocks**, quotes the record: "No
+  run of the old text was made." It then used its one agent run on a
+  second new-text trial: "My own trial ran the current text (blob
+  `d8ec5d7a`), but I was allowed only one agent run, so there is no
+  old-text run to compare it with."
+- New text (agent a8d2fb3e65a1b99e7, 493 s, 14 tool uses): "One finding
+  blocks. The trial record ran only the new text. [...] Under the
+  skill's check 3, that counts as no trial." Its trial status: "It is
+  new text only, so it is partial and leaves finding 1 open." It ran no
+  trial of its own: "My budget allowed one agent run, and a trial needs
+  two runs, new text and old text, on the same input."
+
+The one observed difference is in what each reviewer did, not in how it
+rated the gap. The old-text reviewer spent its run on another new-text
+trial. The new-text reviewer used the sentence's words ("partial",
+"leaves [...] open") and did not start a run that could not be
+complete. One pair cannot show that this difference comes from the
+sentence and not from chance (hypothesis, untested).
+
+Limits of this trial: it tests only the first part of the sentence (a
+new-text run with no old-text run beside it). The second part (a run
+that stops before the hand-off) was not tested; draft run 1's case is
+the one that tests it. The record's explicit last line makes the gap
+easy to see. The inputs (`$TMPDIR/k1-trial/`) are temporary and are not
+kept.
 
 **The README line:** it changes what the user runs, not what an agent
 does, so check 3 does not apply. The fixed block was run as written
@@ -305,38 +339,21 @@ transcript.)
 
 ## Needed from the owner
 
-**K1 — trial of the added check 3 sentence.** Today the skill on disk
-has the sentence "A partial trial counts as none: ..." (SKILL.md:91-94),
-and no trial has run it; the trial on record ran the text before it. By
-the skill's own rule this blocks counting the skill as done. Option 1:
-run the two-run trial in § Trial status (two `general-task` agents on
-Opus; the earlier trial's agents took 482-714 s each, `trial.md:173-175`).
-Option 2: accept the sentence without a trial, since it only tightens a
-rating and the cold reader read it as meant; record that choice in ticket 732. Recommendation: option 1, because ticket 732 counts the third failure
-(a rule counted as done before a trial) as the reason this skill exists,
-and the skill would otherwise pass its own review against its own rule.
-
-**R2 — README wording around the new line.** Today README.md:1 and :9
-speak of two files, :27-29 says "Both files are required" and verifies
-with `ls` on two paths only. Proposed text, for your approval (this
-review may edit only the install line): title "Staged copies of
-~/.claude/AGENTS.md, ~/.claude/CLAUDE.md and the instruction-review
-skill"; line 9 "including the copies below"; after the `AGENTS.md`
-sentence, "The skill copy is separate: it installs the global
-`instruction-review` skill." and verify with
-`ls ~/.claude/AGENTS.md ~/.claude/CLAUDE.md ~/.claude/skills/instruction-review/SKILL.md`.
-Cost: four short wording edits in one file. Without them, an agent that
-verifies an install skips the skill file.
+Nothing open from this review. The caller asked for both follow-ups
+named here before: the K1 trial (option 1, result in § Trial status)
+and the R2 wording (README.md:1, :9, :28-32 now).
 
 ## Disposition
 
-| ID  | Axis    | Disposition | Ticket / note                                                                                                                          |
-| --- | ------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| R1  | Check 2 | fixed       | README.md:24 now `mkdir -p ~/.claude/skills/instruction-review` before the `cp`; the block exits 0 against a fresh home, `cmp` exits 0 |
-| R3  | Check 1 | wontfix     | relative paths, existence-only `ls` and WSL-or-Windows were in the README before this branch; the new line follows the file's style    |
-| S1  | Check 1 | wontfix     | minor; the reader took the safe full path the skill names; the skill text is owner-approved and this review edits none of it           |
-| S2  | Check 1 | wontfix     | minor; same reason as S1                                                                                                               |
-| S3  | Check 1 | wontfix     | minor; both choices leave the gap on record, so no wrong outcome follows; skill text not edited                                        |
-| S4  | Check 1 | wontfix     | minor; same reason as S1                                                                                                               |
-| S5  | Check 2 | wontfix     | minor; the skill leaves agent types to the repo; the earlier trial used `general-task` in place of a seat (`trial.md:22-25`)           |
-| S6  | Check 1 | wontfix     | minor; each edge case has an obvious default; skill text not edited                                                                    |
+| ID  | Axis    | Disposition | Ticket / note                                                                                                                                                                                               |
+| --- | ------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| K1  | Check 3 | fixed       | trial run 2026-10-29 (§ Trial status): both the old-text and new-text reviewer rated the missing old-text run blocks; no observed difference from the sentence in one pair; first part of the sentence only |
+| R1  | Check 2 | fixed       | README.md:24 now `mkdir -p ~/.claude/skills/instruction-review` before the `cp`; the block exits 0 against a fresh home, `cmp` exits 0                                                                      |
+| R2  | Check 1 | fixed       | README.md title names the skill; "the copies below"; one sentence says the skill copy installs the global `instruction-review` skill; the `ls` check lists `SKILL.md`                                       |
+| R3  | Check 1 | wontfix     | relative paths, existence-only `ls` and WSL-or-Windows were in the README before this branch; the new line follows the file's style                                                                         |
+| S1  | Check 1 | wontfix     | minor; the reader took the safe full path the skill names; the skill text is owner-approved and this review edits none of it                                                                                |
+| S2  | Check 1 | wontfix     | minor; same reason as S1                                                                                                                                                                                    |
+| S3  | Check 1 | wontfix     | minor; both choices leave the gap on record, so no wrong outcome follows; skill text not edited                                                                                                             |
+| S4  | Check 1 | wontfix     | minor; same reason as S1                                                                                                                                                                                    |
+| S5  | Check 2 | wontfix     | minor; the skill leaves agent types to the repo; the earlier trial used `general-task` in place of a seat (`trial.md:22-25`)                                                                                |
+| S6  | Check 1 | wontfix     | minor; each edge case has an obvious default; skill text not edited                                                                                                                                         |

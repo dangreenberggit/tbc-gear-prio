@@ -1,4 +1,4 @@
-# Staged copies of ~/.claude/AGENTS.md and ~/.claude/CLAUDE.md
+# Staged copies of ~/.claude/AGENTS.md, ~/.claude/CLAUDE.md and the instruction-review skill
 
 On the WSL host, `~/.claude/hooks/agent-guard.py` and `permissions.deny`
 rules in `~/.claude/settings.json` replace `block-outside-repo.sh`; both
@@ -6,7 +6,7 @@ were installed 2026-10-19. The hook refuses an agent's writes to
 `~/.claude/settings.json`, `~/.claude/settings.local.json` and
 `~/.claude/hooks/`, and the deny rules also refuse Write and Edit calls to
 `settings.json` and `hooks/`. An agent's write anywhere else in
-`~/.claude/`, including the two copies below, goes ahead, and the hook
+`~/.claude/`, including the copies below, goes ahead, and the hook
 logs it to `~/.local/state/agent-guard/outside-writes.jsonl` except under
 `~/.claude/projects/` and `~/.claude/plans/`. The hook sees a Write or
 Edit call, and a Bash redirect or write command such as `cp` or `tee`
@@ -27,7 +27,9 @@ cp docs/agents/home/skills/instruction-review/SKILL.md ~/.claude/skills/instruct
 
 Both files are required — `AGENTS.md` is reached only through the
 `@AGENTS.md` import in `CLAUDE.md`, so copying `AGENTS.md` alone loads
-nothing. Verify with `ls ~/.claude/AGENTS.md ~/.claude/CLAUDE.md`.
+nothing. The skill copy is separate: it installs the global
+`instruction-review` skill. Verify with
+`ls ~/.claude/AGENTS.md ~/.claude/CLAUDE.md ~/.claude/skills/instruction-review/SKILL.md`.
 
 The staged file is named `CLAUDE.md.install` because a real `CLAUDE.md`
 here would be auto-discovered as project context when an agent reads this
