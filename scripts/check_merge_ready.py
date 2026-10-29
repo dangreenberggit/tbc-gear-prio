@@ -1078,9 +1078,9 @@ def check(
     if not review.is_file() and not exemption:
         for rel in sorted(needing_review):
             print(
-                f"ticket open at the merge base is deleted, leaves open without a "
-                f"verified close, or blocks something else on this branch, so it "
-                f"needs the review: {rel}"
+                f"needs the review file: {rel} was open at the merge base, and "
+                f"this branch deletes it, gives it a status that is not a "
+                f"verified close, or changes its Blocks: values"
             )
         print(
             f"FAIL: missing review — run pre-merge-review; expected "
@@ -1903,9 +1903,6 @@ def check_ticket_needs_review_rule() -> list[str]:
          "**Status:** resolved\n\n# t\n", True),
         ("open to closed with a placeholder Verified by:", blocker,
          blocker.replace("open", "closed\nVerified by: TODO"), True),
-        # A verified close is ordinary ticket work: the `Verified by:` check
-        # runs on every branch, and a closed ticket blocks no phase, so what
-        # its `Blocks:` line says no longer matters.
         ("open to closed, verified", blocker,
          blocker.replace("open", "closed\nVerified by: `pnpm verify`"), False),
         ("bold open to resolved, verified", "**Status:** open\n\n# t\n",
@@ -2090,10 +2087,7 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             ("drop-closed", 0, "review not required", 0, ""),
             ("drop-wontfix", 0, "review not required", 0, ""),
             ("drop-nested", 0, "review not required", 0, ""),
-            # Taking an open ticket out of open by any route but a verified
-            # close, or changing what it blocks while it stays open, clears a
-            # blocker as surely as deleting it. A verified close, and any
-            # other edit, is ordinary ticket work.
+            # The ticket rule (`ticket_needs_review`) through the CLI.
             ("edit-open", 0, "review not required", 0, ""),
             ("phase-9/wontfix", 1, "missing review", 0, f"{open_rel}\n"),
             ("phase-9/unblock", 1, "missing review", 0, f"{open_rel}\n"),

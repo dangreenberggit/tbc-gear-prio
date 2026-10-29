@@ -217,7 +217,7 @@ So it answers whether the 729 branch needs a review file.
   git with `git update-index --assume-unchanged`) and run there with no
   arguments: rc=0, "merge-ready: ok"; the review file's 19 Disposition
   rows parse.
-- After review row R2-1b (the commit that adds it: a close with a valid
+- After review row R2-1b (`c631482e`: a close with a valid
   `Verified by:` line keeps the exemption): rc=0, "review not required:
   every one of the 10 changed file(s) is agent tooling", and "no ticket
   closed on this branch without Verified by: evidence".
@@ -225,3 +225,14 @@ So it answers whether the 729 branch needs a review file.
   (rc=0). The same script in the sparse clone of the 729 tip `512b26f6`,
   run with no arguments: rc=0, "merge-ready: ok"; 19 Disposition rows
   parse.
+- Review finding A8 found that the lines above hold for `--branch` from
+  another checkout only. In the main checkout, which has
+  `chore/729-test-result` checked out, the gate also listed the 17 empty
+  files the agent sandbox leaves there (`git ls-files --others
+  --exclude-standard`), and at `a8c7493f` it gave 27 changed files and no
+  exemption. After `0dbe0ea7`, the worktree's script run against the main
+  checkout without writing to it (its source run with `__file__` set
+  inside the main checkout, `GIT_OPTIONAL_LOCKS=0`, `python3 -B`) gives
+  "review not required: every one of the 10 changed file(s) is agent
+  tooling"; `--product-files` prints nothing (rc=0); with no arguments it
+  reads the branch's review file and gives rc=0, "merge-ready: ok".
