@@ -780,7 +780,7 @@ def read_changes(
         # Plain `git commit` takes a file's staged copy, but this repo's
         # pre-commit hook can commit the rest of a partly staged file too
         # (AGENTS.md, "Commits and merges"), so neither copy is a safe guess.
-        # A real merge never gets here: it refuses a dirty tree first.
+        # A real merge never meets this: it refuses a dirty tree first.
         partly = sorted(staged & (unstaged | untracked))
         if partly:
             raise SystemExit(
