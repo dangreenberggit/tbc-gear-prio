@@ -187,3 +187,33 @@ Standards and Spec axes, each a fresh `general-task` agent on Opus. The
 Domain (SME) axis was skipped by the owner's ruling quoted above.
 Findings and their outcomes: `docs/reviews/chore-731-tooling-review-exemption.md`
 § Disposition.
+
+## The merge check on `chore/729-test-result`
+
+§ Done when asks for `pnpm merge-to-dev --check-only` on
+`chore/729-test-result`. That command was not run. It runs the gate
+copy in that branch's own checkout (`scripts/merge_to_dev.py`,
+`merge_named`: `script = wt / "scripts" / "merge_to_dev.py"`), and that
+copy has no exemption: `git grep -c TOOLING_PATHS chore/729-test-result
+-- scripts/check_merge_ready.py` finds nothing (rc=1). It would test the
+old rule (ticket 733). In its place,
+`python3 scripts/check_merge_ready.py --branch chore/729-test-result`
+ran from the `chore/731-tooling-review-exemption` worktree. It reads the
+729 branch's changed files and tickets from its tip, and the review file
+from this worktree, which has no `docs/reviews/chore-729-test-result.md`.
+So it answers whether the 729 branch needs a review file.
+
+- At `abd4148f` (round 1 rule): rc=0, "review not required: every one
+  of the 10 changed file(s) is agent tooling".
+- At `947561e3` (round 2 rule, review finding R2-1): rc=1, "missing
+  review", with "ticket open at the merge base is deleted, no longer
+  open or blocks something else on this branch, so it needs the review:
+  .scratch/carry-forward/issues/729-simplify-the-gate-planner-rules.md".
+  The 729 branch sets ticket 729 from `open` to `closed`.
+  `--product-files --branch chore/729-test-result` prints that ticket
+  only.
+- The `947561e3` script copied into a throwaway sparse clone of
+  `chore/729-test-result` (its review file present, the copy hidden from
+  git with `git update-index --assume-unchanged`) and run there with no
+  arguments: rc=0, "merge-ready: ok"; the review file's 19 Disposition
+  rows parse.
