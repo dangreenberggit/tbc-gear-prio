@@ -992,9 +992,7 @@ def relevant_open_tickets(
 
 def list_open_carry_forward() -> list[tuple[Path, str, str, str]]:
     out = []
-    if not CARRY.is_dir():
-        return out
-    for path in sorted(CARRY.glob("*.md")):
+    for path in iter_issue_files():
         status = read_status(path) or "?"
         if status not in OPEN_STATUSES:
             continue
@@ -1073,7 +1071,7 @@ def review_file_errors(review: Path) -> list[str]:
                     )
                     continue
                 rel = tpath.relative_to(ROOT).as_posix()
-                if not tpath.is_file():
+                if not is_ticket_file(tpath):
                     errors.append(f"{row['id']}: defer ticket missing: {rel}")
                     continue
                 status = read_status(tpath)
@@ -1689,6 +1687,52 @@ def check_duplicate_unparsed_lines_get_distinct_numbers() -> list[str]:
     )
     lines = [n for n, _ in scan_disposition(text).unparsed]
     return [] if lines == [5, 7] else [f"duplicate unparsed: lines {lines}, want [5, 7]"]
+
+
+def _with_linked_ticket(run):
+    """Call `run(carry)` with ROOT and CARRY pointed at a throwaway tree whose
+    issues directory holds `1-open.md` and `9-link.md`, a link to it."""
+    import tempfile
+
+    global ROOT, CARRY
+    saved = ROOT, CARRY
+    with tempfile.TemporaryDirectory() as tmp:
+        ROOT = Path(tmp)
+        CARRY = ROOT / saved[1].relative_to(saved[0])
+        try:
+            CARRY.mkdir(parents=True)
+            (CARRY / "1-open.md").write_text("Status: open\n\n# t\n")
+            (CARRY / "9-link.md").symlink_to("1-open.md")
+            return run(CARRY)
+        finally:
+            ROOT, CARRY = saved
+
+
+def check_defer_refuses_a_linked_ticket() -> list[str]:
+    """A `defer` row naming a link is refused as a missing ticket (F3-1): a
+    link is not a ticket (`is_ticket_file`)."""
+    import contextlib
+    import io
+
+    def run(carry: Path) -> list[str]:
+        review = carry.parent / "review.md"
+        rel = (carry / "9-link.md").relative_to(ROOT).as_posix()
+        review.write_text(
+            "## Disposition\n\n" + _HEADER + f"| A1 | Adv | defer | `{rel}` |\n"
+        )
+        with contextlib.redirect_stdout(io.StringIO()):
+            errors = review_file_errors(review)
+        want = f"A1: defer ticket missing: {rel}"
+        return [] if errors == [want] else [f"defer to a link: {errors}, want [{want!r}]"]
+    return _with_linked_ticket(run)
+
+
+def check_open_list_skips_linked_tickets() -> list[str]:
+    """`pnpm issues:open` does not list a link as a second ticket (F3-2)."""
+    def run(carry: Path) -> list[str]:
+        names = [p.name for p, *_ in list_open_carry_forward()]
+        return [] if names == ["1-open.md"] else [f"open list: {names}, want ['1-open.md']"]
+    return _with_linked_ticket(run)
 
 
 def check_closing_without_verified_by_is_flagged() -> list[str]:
@@ -2320,6 +2364,8 @@ CHECKS = (
     check_indented_row_is_not_silently_dropped,
     check_every_candidate_reaches_one_list,
     check_duplicate_unparsed_lines_get_distinct_numbers,
+    check_defer_refuses_a_linked_ticket,
+    check_open_list_skips_linked_tickets,
 )
 
 
