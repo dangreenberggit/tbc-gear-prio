@@ -2,6 +2,11 @@
 
 Reviewed range: `e0958bfb2406b5106b03e94286afa4e466125106..2e7e373232847fe5a17d6ba3e784ab701892df3f`
 
+Reviewed range: `2e7e373232847fe5a17d6ba3e784ab701892df3f..4a743b7f18f4a2301592a33414205cf176c80def`
+
+The second line is the focused check (round 2) of the fixes for round 1's
+findings: `## Focused check (round 2)`, at the end of this file.
+
 Dispatch: round 1, full axes. `codex` is not on `PATH` (`command -v
 codex` printed nothing), so each axis ran as a fresh `general-task`
 agent on Opus, all three in one parallel batch: Adversarial, and the
@@ -119,7 +124,7 @@ merge-to-dev --check-only` (or `pnpm merge-ready`)", while
 | ID  | Row                                                                                                          |
 | --- | ------------------------------------------------------------------------------------------------------------ |
 | Q1  | S2: one way to run git in the throwaway repos of `scripts/check_merge_to_dev.py`.                            |
-| Q2  | S3: no check function in `scripts/check_merge_to_dev.py` over about 45 lines.                                |
+| Q2  | Standards                                                                                                    | fixed | `07da3aed` split the check into five, although its message names only A1, A2, A4 and S1 (round 2, R2-3); the longest is 42 lines, as the pass for `d3d7bcb3` measured. |
 | Q3  | S4: rename `dev_merge_ready` to `merge_ready_at`.                                                            |
 | Q4  | S5: one local `kept_note` for the two `die(...)` calls in `merge_named`.                                     |
 | Q5  | S6: state the no-branch limit once, in "Which copy of the gate code runs"; the other two places point to it. |
@@ -159,3 +164,54 @@ file today unless an ignore rule matches it (hypothesis, untested).
 | Q3  | Standards   | fixed       | `d3d7bcb3`: `merge_ready_at`; `grep -rn dev_merge_ready scripts` prints nothing.                                                                                                                                                                                                                                            |
 | Q4  | Standards   | fixed       | `d3d7bcb3`: one `kept_note`.                                                                                                                                                                                                                                                                                                |
 | Q5  | Standards   | fixed       | `d3d7bcb3`: the full statement is in "Which copy of the gate code runs"; step 4 and the `TOOLING_PATHS` comment point to it.                                                                                                                                                                                                |
+
+## Focused check (round 2)
+
+Range `2e7e3732..4a743b7f`; no fork range (`git diff --quiet dev...HEAD --
+data/wowsims-fork.lock.json` exits 0). Dispatch: one fresh `general-task`
+agent on Opus, with the four checks.
+
+### The four checks
+
+1. Conditions 1 to 3: pass. `07da3aed` names A1, A2, A4 and S1;
+   `bbebe5cb` names A3; `d3d7bcb3` names Q1 to Q5; `4a743b7f` changes
+   only this file, ticket 734, `NEXT` and `map.md`, which the agent counted
+   as ticket filing for the P2 row (`docs/agents/issue-tracker.md:22-23`).
+   Every changed line outside tests and comments is at a place a fixed
+   finding cites.
+2. The diff changes only what each finding asks: pass.
+3. Each new test asserts its finding: pass for A1 (`git merge-base`), A2,
+   A4 and S1. The agent re-ran those mutants on copies under
+   `$TMPDIR/r2-733/`; each made `check_merge_to_dev.py` exit 1. The
+   unmutated copy with `GIT_DIR=/nonexistent/.git` gave rc 0, 17 checks.
+   The exception is R2-1.
+4. The tests the fixes touch pass: `python scripts/check_merge_to_dev.py`
+   (17 checks, rc 0) and `python scripts/check_merge_ready.py --self-test`
+   (43 checks, rc 0).
+
+### Findings
+
+- **R2-1 (not bookkeeping).** `scripts/merge_to_dev.py:543`: the
+  no-branch half of the A1 fix (`merge_ready_at("refs/heads/dev", ...)`)
+  has no test. With the short name `"dev"` put back, the check still
+  passed 17 of 17. Trigger: a branch widens its gate and tags that commit
+  `dev`; the mutant then loads the tag's widened copy and passes, while
+  the real code refuses with `missing review` (`$TMPDIR/r2-733/probe.py
+tagwiden`). The current check tags a commit whose scripts match dev's.
+- **R2-2 (not bookkeeping; older than this branch; a loud failure).**
+  `scripts/merge_to_dev.py:394`, `git -C <wt> merge --no-edit dev`, still
+  uses the short name. With a local tag `dev` at an old dev commit and dev
+  ahead of the branch, a real named run merges the tag, the gates check a
+  tree without dev's newer commits, the merge into dev is made, and the
+  run then fails with "dev's new tree differs ...": rc 1, but dev has
+  moved (`$TMPDIR/r2-733/probe.py tagmerge`).
+- **R2-3 (bookkeeping).** Q2's change is in `07da3aed`, whose message
+  does not name Q2. Fixed: the Q2 row above now says so.
+
+### Outcome
+
+Round 2 reported two findings other than bookkeeping, so the review stops
+under the skill's "Round limit": no further fix and no third round here.
+R2-1 and R2-2 have no Disposition row yet; the owner decides what happens
+next. Step 4 (`pnpm merge-to-dev --check-only`) was not run, as the round
+limit says.
