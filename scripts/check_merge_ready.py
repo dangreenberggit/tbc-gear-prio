@@ -679,12 +679,17 @@ def review_not_required(
     """
     if why_unknown or not changed:
         return None
-    if all(is_tooling_path(p) or p == review_rel for p in changed):
+    if not product_files(changed, review_rel):
         return (
             f"every one of the {len(changed)} changed file(s) is agent tooling "
             f"(TOOLING_PATHS in scripts/check_merge_ready.py)"
         )
     return None
+
+
+def product_files(changed: set[str], review_rel: str) -> list[str]:
+    """The changed files that are not agent tooling, sorted. Pure."""
+    return sorted(p for p in changed if not (is_tooling_path(p) or p == review_rel))
 
 
 def _git_show(root: Path, ref: str, rel: str) -> str | None:
@@ -1729,6 +1734,13 @@ def check_review_requirement_by_changed_files() -> list[str]:
             problems.append(
                 f"review requirement, {name}: required={got_required}, want {want_required}"
             )
+    got = product_files(
+        {"AGENTS.md", _OWN_REVIEW, "packages/core/src/rank.ts", "scripts/merge_to_dev.py"},
+        _OWN_REVIEW,
+    )
+    want = ["packages/core/src/rank.ts", "scripts/merge_to_dev.py"]
+    if got != want:
+        problems.append(f"product files of a mixed branch: got {got}, want {want}")
     return problems
 
 
@@ -1861,12 +1873,30 @@ def main() -> int:
         action="store_true",
         help="run the pure-logic checks for the relevant-ticket scan and exit",
     )
+    ap.add_argument(
+        "--product-files",
+        action="store_true",
+        help="print the files this branch changed that are not agent tooling, "
+        "one per line, for the product review's diff; exit 1 when the changed "
+        "files cannot be read",
+    )
     ap.add_argument("--review", type=Path)
     ap.add_argument("--branch")
     args = ap.parse_args()
 
     if args.self_test:
         return self_test()
+
+    if args.product_files:
+        branch = args.branch or branch_name()
+        changed, why = changed_files_vs_integration(branch)
+        if why:
+            print(f"changed files unknown: {why}", file=sys.stderr)
+            return 1
+        own_review = review_path(branch).relative_to(ROOT).as_posix()
+        for rel in product_files(changed, own_review):
+            print(rel)
+        return 0
 
     if args.list_only:
         rows = list_open_carry_forward()

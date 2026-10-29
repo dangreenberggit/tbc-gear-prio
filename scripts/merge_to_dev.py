@@ -12,7 +12,9 @@ Steps (no branch argument, run from the branch's own checkout):
   1. Refuse detaching / merging from dev or main
   2. Require a clean working tree
   3. pnpm verify
-  4. merge-ready check (review + deferred tickets filed)
+  4. merge-ready check (review + deferred tickets filed; no review file is
+     needed when every changed file is agent tooling, see TOOLING_PATHS in
+     scripts/check_merge_ready.py)
   5. layout gate (Upgrades tab) -- runs only if the fork's tab source changed
      since the last green run, and only when its prereqs are present; skips
      cleanly otherwise (ticket 325). See scripts/check_layout_gate.py.
