@@ -6,10 +6,15 @@ Reviewed range: `8faf766d38570fadf15ee0a1637d4c0349849aaa..363e5d1ee55ce590919bf
 
 Reviewed range: `f3d460376a92b5a33e2a7cc1a1cc697b4c4783af..c631482eea147f286c8bae2b63667117d97de441`
 
+Reviewed range: `a8c7493f0bfef93729ed30f6f961dce6d6ab335a..00ed9a964a217bf888bfecacaf979c269e0e04fc`
+
 The third line is a fresh round 1 on the commits made after round 2
 stopped (the fixes for R2-1 to R2-5). Its sections are under
 `# Fresh review, round 1` at the end of this file. The commits between
-round 2's end, `363e5d1e`, and `f3d46037` change only this file.
+round 2's end, `363e5d1e`, and `f3d46037` change only this file. The
+fourth line is the focused check (round 2) of that fresh review, on the
+fixes for its findings: `## Focused check (fresh round 2)`, at the end
+of this file.
 
 Dispatch: round 1, full axes. `codex` is not on `PATH` (`which codex`
 printed nothing), so each axis ran as a fresh `general-task` agent on
@@ -735,3 +740,174 @@ counts are redone when the last table is written.
 | S12 | Standards   | fixed       | `d772118e`: `read_changes` runs `git branch --show-current` once per gate run and returns a `BranchChanges` that the ticket rule, the `Verified by:` check and `--product-files` share; it also replaces the second merge-base and file-listing code that `tickets_closed_without_verification` had. `branch_name()` still runs the same command once when no `--branch` is given, to find the branch                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | S13 | Standards   | fixed       | `4f7bfb8d`: "needs the review file: <ticket> was open at the merge base, and this branch deletes it, gives it a status that is not a verified close, or changes its Blocks: values"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | S14 | Standards   | fixed       | `4f7bfb8d`: ticket 731 names `c631482e`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+## Focused check (fresh round 2)
+
+Range: the fourth `Reviewed range:` line, `a8c7493f..00ed9a96`, six
+commits: `a1427560`, `d772118e`, `0dbe0ea7`, `de11acd3`, `4f7bfb8d`,
+`00ed9a96`. Fork range: none. This worktree has no `vendor/tbc-new-fork`,
+and `git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json` exits 0,
+so the branch never moves the fork pin and condition 3 holds. Dispatch:
+one fresh `general-task` agent on Opus ran the four checks, the refactor
+comparison and one time-boxed adversarial pass that the dispatching
+session asked for. The domain axis was skipped under the owner's ruling
+quoted in the fresh round 1 dispatch note. The scripts and logs named
+below are in `/tmp/claude-1000/r5/` (not tracked).
+
+### The four checks
+
+1. **Conditions: PASS.** Each commit names the findings it fixes in its
+   message: `a1427560` A7; `d772118e` S9, S10, S12, A9 and A10;
+   `0dbe0ea7` A8 (P5); `de11acd3` A11; `4f7bfb8d` S11, S13 and S14;
+   `00ed9a96` the Disposition rows of A7 to A11, P5 and S9 to S14, plus a
+   one-word change in the `read_changes` comment that `de11acd3` wrote.
+   Every changed code line is at a place those findings cite, except the
+   `pnpm issues:open` change (F2-3).
+2. **Each diff changes only what its finding asks for: PASS**, with F2-3.
+3. **Each new test asserts its finding: PASS.** Each fix was removed from
+   a copy of the script at `00ed9a96` (`python3
+/tmp/claude-1000/r5/mutate.py <copy> <out dir>`), and `--self-test` ran
+   on each copy (logs `/tmp/claude-1000/r5/mut/*.log`). The unchanged
+   copy gives rc=0 (41 checks). Each mutation gives rc=1:
+   - A7, the phase scan reads only the first `Blocks:` line: the
+     `phase-9/blank-blocks` and `phase-11/swap` cases fail (gate rc=0).
+   - A8, untracked empty stubs counted: "empty sandbox stubs" fails
+     (gate rc=1, `--product-files` lists `.bashrc` and
+     `.claude/settings.local.json`).
+   - A11, the partly-staged refusal removed: "partly staged ticket" and
+     "partly staged product file" fail (gate rc=0).
+   - m1 (A9), `BranchChanges.new_text` always reads the working tree:
+     "--branch from another checkout" and "phase-9/wontfix from dev"
+     fail.
+   - m4 (A10), the untracked-file listing dropped: "working tree",
+     "untracked product file" and "sandbox stub path with content" fail.
+
+   These mutations take each fix out of the final code; they do not
+   rebuild the code at each fix's parent. The case runs below show the
+   A7 and A8 cases on the code before the fixes. The A8 row's
+   main-checkout result was re-run read-only (`GIT_OPTIONAL_LOCKS=0
+python3 -I -B /tmp/claude-1000/r5/maincheck.py <copy>
+/home/daniel/Code/lulz/tbc-gear-prio chore/729-test-result`): at
+   `a8c7493f`, 27 changed files, the 17 sandbox stubs listed as product
+   files, no exemption; at `00ed9a96`, 10 changed files, no product file,
+   "every one of the 10 changed file(s) is agent tooling".
+
+4. **The tests the fixes touch pass: PASS.** At `00ed9a96`:
+   `python3 scripts/check_merge_ready.py --self-test` rc=0 (41 checks);
+   `python3 scripts/check_merge_to_dev.py` rc=0 (12 checks);
+   `TBC_VERIFY_WITHOUT_FORK=1 pnpm verify` rc=0, "gates: 1345 ran, 218
+   skipped" (`/tmp/claude-1000/r5/verify.log`; the skipped gates need
+   `vendor/tbc-new-fork`). The `pnpm merge-to-dev --check-only` result is
+   in the report of the agent that wrote this section, because it runs on
+   the commit that adds this section.
+
+### The refactor changes no other behaviour
+
+Both earlier case scripts ran on copies of the script at `a8c7493f` and
+at `00ed9a96`: `bash /tmp/claude-1000/r2/cases.sh <copy> <repo>` (29
+cases, logs `/tmp/claude-1000/r5/cases-<sha>.log`) and `bash
+/tmp/claude-1000/adv3/mycases.sh <copy> <repo>` (6 cases, logs
+`/tmp/claude-1000/r5/mycases-<sha>.log`).
+
+- `cases.sh`: the gate's exit code is the same in all 29 cases, and the
+  `--product-files` output is the same in every case that prints it. 15
+  lines differ, each only in the missing-review text that S13 rewrote.
+- `mycases.sh`: three cases differ, each as its fix intends:
+  `phase-9/comma` and `phase-11/swap` go from rc=0 "merge-ready: ok" to
+  rc=1 "1 open Blocks: phase-N ticket(s)" (A7), and
+  `tooling+empty-stubs` goes from rc=1 "missing review" to rc=0 "review
+  not required" (A8). The other three are the same.
+- `pnpm issues:open` (`list_open_carry_forward`), loaded from each copy
+  and pointed at this worktree's tickets
+  (`/tmp/claude-1000/r5/listcmp.py`): the same 126 rows at both commits.
+- `scripts/merge_to_dev.py` now imports `SANDBOX_STUBS`, `holds_no_work`
+  and `is_device` from `check_merge_ready`; `check_merge_to_dev.py`,
+  which tests them through `merge_to_dev`, passes (12 checks).
+
+### Adversarial pass
+
+Time-boxed to the ticket and path rules. Cases: `bash
+/tmp/claude-1000/r5/advcases.sh <copy> <new folder under
+/tmp/claude-1000/r5/>`, logs `/tmp/claude-1000/r5/adv-a8c7493f.log` and
+`adv-00ed9a96.log`. Both commits give the same results, so the two
+findings below are older than this range. They come from the
+working-tree read added for R2-2 (`947561e3`); fresh round 1 listed
+symlinked tickets as unexamined. Before this branch every branch needed
+the review file, so neither was reachable.
+
+**F2-1. A tooling-only branch can replace an open ticket with a symlink
+to a closed ticket and merge with no review file; on a phase branch this
+clears its own blocker.** Effect: a check that passes when it should
+fail. `scripts/check_merge_ready.py:713` (`BranchChanges.new_text` reads
+the working tree with `path.read_text`, which follows the link) and the
+phase scan at `:507` and `:514`, which follows it too. Case
+`phase-9/symlink`: the commit replaces `1-open.md` (`Status: open`,
+`Blocks: phase-9`) with a link to `2-closed.md` (`Status: closed`,
+`` Verified by: `pnpm verify` ``). With the branch checked out: gate
+rc=0, "review not required", "no open Blocks: phase-9 tickets",
+"merge-ready: ok"; `--product-files` prints nothing; `git status` is
+clean. The same branch through `--branch` from `dev` gives rc=1,
+"missing review", because `git show` returns the link text, which has
+no status. Case `sym-plain` (an open ticket with no `Blocks:` line on a
+branch that is not a phase branch): rc=0, "review not required". A real
+merge runs `check()` on the checked-out branch after its clean-tree
+check (`scripts/merge_to_dev.py:470` and `:489`), so it would read the
+link the same way; the real merge was not run. The ticket's own text
+leaves the branch, which the rule treats as a deletion when the file is
+removed. Suggested fix, untested: `new_text` returns None for a symlink,
+with a CLI case.
+
+**F2-2. A tooling-only branch can commit `Status: wontfix` on an open
+ticket and hide the change from the gate with `git update-index
+--skip-worktree` (or `--assume-unchanged`) and a working copy that still
+says open.** Effect: a check that passes when it should fail.
+`scripts/check_merge_ready.py:713` reads the working copy, and git does
+not report the hidden difference. Cases `skipwt-plain` and
+`assume-plain`: the tip says `Status: wontfix`, the working copy says
+`Status: open`, `git status` is clean; gate rc=0, "review not required",
+"merge-ready: ok"; `--product-files` prints nothing. Limits: on a phase
+branch the blocker scan reads the same open working copy and still fails
+(`phase-9/skipwt`: rc=1, "1 open Blocks: phase-9 ticket(s)"), and a
+hidden product edit is still listed (`skipwt-product`: rc=1,
+`packages/x.ts`). Suggested fix, untested: when the branch is checked
+out, refuse a changed file that `git ls-files -v` marks skip-worktree or
+assume-unchanged, as `read_changes` refuses a partly staged file.
+
+Both need a deliberate act. The comment at
+`scripts/check_merge_ready.py:171-173` says the path lists "stop a
+mistake, not a deliberate edit", and ticket 733 records that a branch can
+exempt itself by editing its own copy of the gate. By effect (the skill's
+step 3), F2-1 and F2-2 are "fixed before merge" findings; whether they
+belong with ticket 733 instead is for the owner.
+
+**F2-3. Scope.** `a1427560` also changes `list_open_carry_forward`
+(`pnpm issues:open`, `scripts/check_merge_ready.py:960`): it prints
+the values of every `Blocks:` line, sorted and in lower case, in place
+of the first line's text. Finding A7 cites only the phase scan and the
+ticket rule. The A7 row names this change, and the output for the 126
+open tickets in this worktree is the same at both commits (above).
+
+Cases that behaved correctly: the symlink branch through `--branch` from
+another checkout needs the review file; skip-worktree cannot hide a
+phase blocker or a product file (above).
+
+### Outcome
+
+Round 2 stops under "Round limit". All four checks pass, and the fixes
+for A7, A8 (P5), A9, A10, A11 and S9 to S14 do what their rows say, so
+those rows stand. The adversarial pass found F2-1 and F2-2: checks that
+pass when they should fail, which this branch introduced. They block the
+merge until the owner decides what happens next, and they get no
+Disposition row. There is no round 3.
+
+Tickets: this branch filed 733 and brings 731 (filed on
+`chore/729-test-result`), and closed none; `NEXT` is 734 (`git diff
+--name-status dev...HEAD -- .scratch/carry-forward/issues/`).
+
+## Disposition (fresh round 2)
+
+F2-1 and F2-2 have no row: see the Outcome above.
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                                                      |
+| ---- | ------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F2-3 | Focused check | wontfix     | not a defect: the change makes `pnpm issues:open` read `Blocks:` the same way as the gate, which is what A7 asks for; the A7 row names it, and the 126 open tickets print the same at both commits |
