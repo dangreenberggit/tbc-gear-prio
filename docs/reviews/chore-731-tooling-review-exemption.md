@@ -4,6 +4,13 @@ Reviewed range: `3c008f0d2cffcb8b9218287d762abea39f3ee542..8faf766d38570fadf15ee
 
 Reviewed range: `8faf766d38570fadf15ee0a1637d4c0349849aaa..363e5d1ee55ce590919bf94689905592f56b3af9`
 
+Reviewed range: `f3d460376a92b5a33e2a7cc1a1cc697b4c4783af..c631482eea147f286c8bae2b63667117d97de441`
+
+The third line is a fresh round 1 on the commits made after round 2
+stopped (the fixes for R2-1 to R2-5). Its sections are under
+`# Fresh review, round 1` at the end of this file. The commits between
+round 2's end, `363e5d1e`, and `f3d46037` change only this file.
+
 Dispatch: round 1, full axes. `codex` is not on `PATH` (`which codex`
 printed nothing), so each axis ran as a fresh `general-task` agent on
 Opus, all three in one parallel batch: Adversarial, and the `code-review`
@@ -473,3 +480,246 @@ stays exempt.
 | R2-4  | Focused check | fixed       | `947561e3`, `65bd1b86` and the commit that adds this table name their finding IDs. Older commits are left as they are. `NEXT` is 734, as round 2 found                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | R2-5  | Focused check | fixed       | `65bd1b86`: ticket 731 § The merge check on `chore/729-test-result` names the command that ran, its results at `abd4148f` and `947561e3`, and why `pnpm merge-to-dev --check-only` would have tested the old rule                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | R2-6  | Focused check | wontfix     | not a defect: step 1 of the skill has the dispatching agent write the `Reviewed range:` line before dispatch                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+
+# Fresh review, round 1
+
+Range: the third `Reviewed range:` line, `f3d46037..c631482e` (commits
+`947561e3`, `65bd1b86`, `95c54e25`, `c631482e`). The dispatching
+session scoped this round to the commits made after round 2 stopped.
+`git diff --shortstat f3d46037..c631482e`: 3 files changed, 291
+insertions, 60 deletions, over the small-change limit of 150 lines, so
+the axes ran separately. `codex` is not on `PATH`. Each axis ran as a
+fresh `general-task` agent on Opus, all three in one parallel batch:
+Adversarial, and the `code-review` skill's Standards and Spec
+sub-agents. The domain axis was skipped under the same owner ruling as
+round 1: "pre merge review without the SME stuff is fine (this is a
+different subject matter!)" (quoted by the dispatching session).
+
+Each axis got the diff, the intent of the commits as the dispatching
+session states it (below), round 2's findings, and was told to treat the
+`## Disposition (round 2)` notes as claims to test. Intent: a
+tooling-only branch needs no review file, except when it deletes a
+ticket that was open at the merge base, sets an open ticket to `wontfix`
+or any status that is not a verified close, closes an open ticket
+without a valid `Verified by:` line, or removes or changes the `Blocks:`
+values of a ticket that stays open; a verified close keeps the
+exemption. `--check-only` and `pnpm merge-ready` must see uncommitted
+changes the same way as committed ones. Ticket 731 records the merge
+check on `chore/729-test-result`. Not raised again, because the owner
+has them already: the `docs/workflow.md` Gates row does not mention the
+ticket cases; a likely merge conflict on ticket 731 and `NEXT` with
+`chore/729-without-dry-run`.
+
+## Adversarial (fresh round 1)
+
+The case script from earlier rounds, run on the script at `c631482e`
+(`bash /tmp/claude-1000/r2/cases.sh /tmp/claude-1000/r3/cmr-c631482e.py
+/tmp/claude-1000/r3/cases-repo`, log
+`/tmp/claude-1000/r3/cases-c631482e.log`), gives the intended result in
+every case: `phase-9/wontfix`, `phase-9/unblock`, `phase-9/close-bare`
+and an uncommitted blocker deletion need the review file;
+`phase-9/close-true` (a close with `` Verified by: `true` ``) stays
+exempt, which the intent allows. Deletes, renames, moves, case changes,
+bold and unknown statuses, `**Blocks:**`, an empty `Blocks:` line, no
+local `dev` and an orphan branch all need the review file, and
+`--product-files` agrees with the gate in every case (the axis's own
+cases, `/tmp/claude-1000/adv3/mycases.sh`).
+
+**A7. A tooling-only phase branch can still clear its own blocker with
+no review file, by rewriting its `Blocks:` lines.**
+`scripts/check_merge_ready.py:706-713` (`_blocks_values`) compares the
+set of values on every `Blocks:` line, but `open_blockers_for_phase`
+reads only the first `Blocks:` line (`:514`, `BLOCKS_RE.search`). An
+edit that keeps the set but changes the first line passes the first
+check and clears the blocker. Inputs: `Blocks: phase-9` becomes
+`Blocks: ,` followed by `Blocks: phase-9`; or a ticket with `Blocks:
+phase-11` and `Blocks: phase-12` lines swaps their order on branch
+`phase-11/…`. Axis result for both: gate rc=0, "review not required",
+"no open Blocks: phase-N tickets", "merge-ready: ok", and
+`--product-files` prints nothing (`bash /tmp/claude-1000/adv3/mycases.sh
+/tmp/claude-1000/adv3/cmr.py /tmp/claude-1000/adv3/repo2`). The
+dispatcher confirmed the two halves on the module at `c631482e`:
+`ticket_let_go` returns False for both edits, and the first `Blocks:`
+value is `,` and `phase-12`. No test has a ticket with two `Blocks:`
+lines: reading only the first match in `_blocks_values`
+(`/tmp/claude-1000/adv3/m5_blocks_first_only.py`) still passes
+`--self-test` (rc=0, 41 checks; re-run by the dispatcher). Both edits
+are deliberate, and no ticket on `dev` has two `Blocks:` lines (the
+axis's search). Effect: a check that passes when it should fail. It
+disproves the R2-1b note "no edit clears a phase blocker unless that
+check accepts the close".
+
+**A8 (also Spec P5). In the main checkout, every tooling-only branch
+now needs a review file.** `scripts/check_merge_ready.py:688` adds `git
+ls-files --others --exclude-standard` to the changed files when the
+branch is checked out. In the main checkout that listing gives the 17
+empty character-device files the sandbox leaves there (`.bashrc`,
+`.mcp.json`, `.idea`, `.claude/commands` and others; `stat` shows
+"character special file", size 0). `scripts/merge_to_dev.py:149`
+(`SANDBOX_STUBS`, `holds_no_work`) treats them as no work, so the merge
+passes its clean-tree check and the gate then refuses it. The
+dispatcher re-ran this on the module at `c631482e` with `root` set to
+the main checkout, which has `chore/729-test-result` checked out:
+`changed_files_vs_integration` gives 27 files, of which the 17 stubs
+are not tooling (plus the branch's own review file). The Spec axis got
+`exemption: None` for the same call. Ticket 731 says
+`chore/729-test-result` is exempt again; that holds for `--branch` from
+another checkout (`python3 scripts/check_merge_ready.py --branch
+chore/729-test-result` from this worktree: rc=0, "review not required
+… 10 changed file(s)"), not in its own checkout. Effect: a loud wrong
+failure ("missing review") that this branch introduced. Whether the
+owner merges from the main checkout is hypothesis, untested.
+
+**A9. Test gap: the self-test never runs the ticket rule on a branch
+that is not checked out.** Every CLI case checks the branch out before
+it runs the gate. `from_tree = True` at `:757`
+(`/tmp/claude-1000/adv3/m1_letgo_always_tree.py`) still passes
+`--self-test` (rc=0, 41 checks; re-run by the dispatcher). With that
+mutation, `--branch phase-9/wontfix` run from `dev` would read `dev`'s
+tickets and miss the change (the axis's reading of the code).
+
+**A10. Test gap: untracked files are never tested.** Deleting the `git
+ls-files --others` line at `:688`
+(`/tmp/claude-1000/adv3/m4_no_untracked.py`) still passes `--self-test`
+(rc=0, 41 checks; re-run by the dispatcher). The three "uncommitted"
+cases edit tracked files only, though the R2-2 note says an uncommitted
+product file is covered.
+
+**A11. `--check-only` reads the working tree, not what a commit would
+hold, when the two differ.** The axis raised this as a hypothesis; the
+dispatcher ran it in the case repo. On branch `tooling`, stage `**Status:**
+wontfix` on the open ticket `3-bold.md`, then put the working-tree copy
+back to `open` (`git status`: `MM`). The gate gives rc=0, "review not
+required … merge-ready: ok". After `git commit` (which commits the
+staged `wontfix`) the gate, still reading the working tree, again says
+"merge-ready: ok". A real merge refuses the dirty tree
+(`scripts/merge_to_dev.py:524-525`), and once the tree is clean the gate
+asks for the review. Effect: a wrong "ok" in the preview only, the same
+kind as R2-2. The trigger is narrow: the staged copy and the working
+copy of a ticket must differ.
+
+Not a finding: a verified close with `` Verified by: `true` `` clears a
+blocker with no review file; the intent allows it, and the same bar
+holds on every branch.
+
+**Unexamined** (from the axis): device-file stubs could not be made
+inside the sandbox (the live listing stood in); non-UTF-8 ticket text
+and the `--review` override, both older than this range; symlinked
+ticket files.
+
+## Standards + Spec (fresh round 1)
+
+### Standards
+
+**S9. The module docstring contradicts the code.**
+`scripts/check_merge_ready.py:12-15` says "A branch that deletes or
+closes a ticket that was open at the merge base, or changes its
+`Blocks:` line, needs the review file". Since `c631482e` a verified
+close keeps the exemption, even when it also drops `Blocks:`
+(`ticket_let_go`, `:715`; self-test case "verified close that also
+drops its Blocks:", want False). Standard: `docs/workflow.md` § Comment
+policy and `AGENTS.md` § Durable claims.
+
+Judgement calls (smell baseline):
+
+- **S10. Possible Mysterious Name.** `ticket_let_go` (`:715`) and
+  `tickets_let_go` (`:737`) differ by one letter, and "let go" is an
+  idiom, not a plain name for "drops out of the ticket checks".
+- **S11. Possible Duplicated Code (comments).** The reason "a verified
+  close is ordinary ticket work … a closed ticket blocks no phase" is
+  written three times, at `:720-723`, `:1889-1891` and `:2066-2069`.
+- **S12. Repeated work.** `_reads_working_tree(branch, root)` runs `git
+branch --show-current` three times per gate run: twice through
+  `_names_changed_since`, once in `tickets_let_go`.
+- **S13. Plain English.** The failure text at `:1066`, "leaves open
+  without a verified close, or blocks something else", is hard to read,
+  and "blocks something else" does not describe a removed `Blocks:`
+  line.
+- **S14. Bookkeeping.**
+  `.scratch/carry-forward/issues/731-exempt-agent-tooling-files-from-product-review.md:220`
+  says "(the commit that adds it: …)" without the commit's sha.
+
+The commit subjects are 40 to 46 characters and no body line is over
+72 characters (the axis's `git log` check).
+
+### Spec
+
+A8 above is the Spec axis's main finding too (P5): the spec says
+`--check-only` and `pnpm merge-ready` must see uncommitted changes "the
+same way as committed ones", and sandbox stubs are not uncommitted work.
+
+**P6. Adding a `Blocks:` value to an open ticket needs the review
+file.** `:734` compares the whole set of values, so `Blocks: phase-9`
+to `phase-9, phase-10`, `Blocks: none` to `phase-9`, or removing a
+`Blocks: none` line each return True from `ticket_let_go`. The axis
+found `Blocks: none` in 603 tickets on `dev`.
+
+**P7. R2-3 asked for a CLI case for a ticket with no status at the
+merge base; there is only a pure case** (`:1908`).
+
+Checked, no finding: R2-1 and R2-1b match the intent (the case log);
+R2-2's uncommitted deletion needs the review file; `NEXT` is 734 (R2-4);
+ticket 731 § The merge check on `chore/729-test-result` names the
+command that ran and why `--check-only` was not run (R2-5). All 674
+tickets on `dev` have a status `read_status` can read (the axis's
+script). No scope creep: the full working-tree read goes beyond R2-2's
+suggested fix, but the intent asks for it.
+
+## Code quality (fresh round 1)
+
+| ID  | Row                                                                                                                                                                     |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S9  | `scripts/check_merge_ready.py:12-15`: the module docstring still says any close of an open ticket needs the review file; say that a verified close keeps the exemption. |
+| S10 | `:715`, `:737`: rename `ticket_let_go` and `tickets_let_go` to plain names that differ by more than one letter.                                                         |
+| S11 | `:720-723`, `:1889-1891`, `:2066-2069`: keep the verified-close reason in the `ticket_let_go` docstring only.                                                           |
+| S12 | `:668-675`, `:679`, `:757`: compute `_reads_working_tree` once per gate run and pass it down.                                                                           |
+| S13 | `:1066`: rewrite the failure text in plain words that name each case: deleted, set to a status that is not a verified close, or `Blocks:` values changed.               |
+
+## Summary (fresh round 1)
+
+Not ready to merge. The fixes for R2-1 to R2-5 do what round 2 asked in
+every case the earlier case script covers, but this round found:
+
+- **Fixed before merge** (cannot be deferred): **A7**, a tooling-only
+  phase branch clears its own blocker with no review file by adding an
+  empty `Blocks: ,` line above the real one or by swapping two
+  `Blocks:` lines; **A11**, `--check-only` says "ok" when the staged copy
+  of a ticket lets it go but the working copy does not (preview only,
+  the same kind as R2-2).
+- **Blocks the merge unless the owner allows a deferral** (introduced
+  by this branch): **A8/P5**, in the main checkout the 17 sandbox stub
+  files count as product files, so every tooling-only branch checked out
+  there, `chore/729-test-result` included, is refused for a missing
+  review file; **A9** and **A10**, the self-test does not cover the
+  ticket rule on a branch that is not checked out, or untracked files.
+- **Code quality**, for one fix pass before round 2: S9 to S13.
+- **Bookkeeping**: S14.
+- **Not defects** (rows below): P6 and P7.
+
+Suggested fixes, not applied and untested: A7, make
+`open_blockers_for_phase` read every `Blocks:` line, the same as
+`_blocks_values`, and add a two-line case; A8, leave out the paths
+`holds_no_work` treats as no work, and add an untracked-stub case
+(A10); A9, a CLI case that runs `--branch X` with another branch checked
+out; A11, read the index as well as the working tree, or have
+`--check-only` warn when they differ.
+
+No agent files are in this range's findings. Checks at `c631482e`, with
+only this file uncommitted: `python3 scripts/check_merge_ready.py
+--self-test` rc=0 (41 checks); `python3 scripts/check_merge_to_dev.py`
+rc=0 (12 checks); `TBC_VERIFY_WITHOUT_FORK=1 pnpm verify` rc=0, "gates:
+1345 ran, 218 skipped" (the skipped gates need `vendor/tbc-new-fork`,
+which this worktree does not have). The `pnpm merge-to-dev
+--check-only` result is in the dispatching agent's report, because it
+runs on the commit that adds this section.
+
+Every finding of this round is open except P6 and P7. The open findings
+get their rows after the fixes and the code-quality pass; the ticket
+counts are redone when the last table is written.
+
+## Disposition (fresh round 1)
+
+| ID  | Axis | Disposition | Ticket / note                                                                                                                                                                                                                               |
+| --- | ---- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P6  | Spec | wontfix     | not a defect: the intent says the review is needed when a ticket's `Blocks:` values are "removed or changed", and adding a value changes them; the error is a review asked for, never a missed one                                          |
+| P7  | Spec | wontfix     | not a defect: the pure case "no status at the base counts as open" fails when an unreadable status at the base counts as not open (`/tmp/claude-1000/r3/mut-nostatus.py --self-test` rc=1, re-run by the dispatcher), so the path is tested |
