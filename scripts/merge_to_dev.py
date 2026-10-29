@@ -391,11 +391,11 @@ def merge_named(args: argparse.Namespace) -> int:
             )
         else:
             print(f"\n=== merge dev into {target} (in {wt}) ===")
-            if run(["git", "-C", str(wt), "merge", "--no-edit", "dev"]).returncode != 0:
+            if run(["git", "-C", str(wt), "merge", "--no-edit", "refs/heads/dev"]).returncode != 0:
                 run(["git", "-C", str(wt), "merge", "--abort"])
                 die(
                     f"merging dev into {target} failed in {wt}, and was aborted. "
-                    f"Resolve it there (git -C {wt} merge dev) and run this again"
+                    f"Resolve it there (git -C {wt} merge refs/heads/dev) and run this again"
                 )
             tip = rev_parse(branch_ref)
 

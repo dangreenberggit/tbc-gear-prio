@@ -435,6 +435,63 @@ def check_a_tag_named_dev_does_not_move_the_merge_base() -> list[str]:
         return problems
 
 
+def _tag_dev_at_a_wider_gate(s: _Scratch) -> None:
+    """Commit a widened gate on dev, tag that commit `dev`, then put dev's
+    real gate back in a newer commit. git resolves a bare `dev` to the tag
+    before the branch, so code that loads `dev:<file>` gets the wide gate."""
+    gate = s.main / "scripts" / "check_merge_ready.py"
+    strict = gate.read_text(encoding="utf-8")
+    s.widen_the_gate(s.main)
+    s.commit(s.main, "old, wider gate")
+    s.git(s.main, "tag", "dev")
+    s.write(s.main, "scripts/check_merge_ready.py", strict)
+    s.commit(s.main, "dev's gate now")
+
+
+def check_a_tag_named_dev_does_not_pick_devs_gate_copy() -> list[str]:
+    """Review finding R2-1: with a tag `dev` at an old commit whose gate was
+    wider, the no-branch form must still load dev's copy from the branch
+    `dev`. The branch widens its own copy too, so only dev's copy refuses."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _Scratch(Path(tmp))
+        _tag_dev_at_a_wider_gate(s)
+        wt = s.branch("chore/tagwiden", "refs/heads/dev")
+        s.widen_the_gate(wt)
+        s.write(wt, "packages/x.ts", "export const x = 2;\n")
+        s.commit(wt, "widen")
+        rc, out = s.merge_to_dev(wt, "--check-only")
+        return _refused("no-branch form with a tag named dev at a wider gate", rc, out, "missing review")
+
+
+def check_a_tag_named_dev_does_not_change_what_is_merged() -> list[str]:
+    """Review finding R2-2: a real named run with a tag `dev` at an old
+    commit and the branch `dev` ahead must merge the branch `dev` into the
+    branch, so the gates check, and dev receives, a tree with dev's newer
+    commits."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _Scratch(Path(tmp))
+        s.git(s.main, "tag", "dev")
+        wt = s.branch("chore/tagmerge", "refs/heads/dev")
+        s.write(wt, "packages/x.ts", "export const x = 2;\n")
+        s.write(wt, "docs/reviews/chore-tagmerge.md", _EMPTY_REVIEW)
+        s.commit(wt, "work")
+        s.write(s.main, "packages/y.ts", "export const y = 1;\n")
+        s.commit(s.main, "dev moves on")
+        dev_before = s.git(s.main, "rev-parse", "refs/heads/dev")
+        rc, out = s.merge_to_dev(s.main, "chore/tagmerge")
+        problems = _passed("real named run with a tag named dev", rc, out)
+        merged = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", dev_before, "refs/heads/chore/tagmerge"],
+            cwd=s.main, env=_scratch_env(),
+        )
+        if merged.returncode != 0:
+            problems.append("the branch did not get the branch dev's tip merged in")
+        tree = s.git(s.main, "rev-parse", "refs/heads/dev^{tree}")
+        if tree != s.git(s.main, "rev-parse", "refs/heads/chore/tagmerge^{tree}"):
+            problems.append("after a real named run, dev's tree is not the branch's")
+        return problems
+
+
 def check_an_ignored_review_file_does_not_count() -> list[str]:
     """A review file that an ignore rule hides from git is on disk but would
     not be merged, so a real named run must refuse and leave dev alone."""
@@ -461,6 +518,8 @@ CHECKS = (
     check_real_named_run_runs_devs_copy_after_merging_dev,
     check_ack_open_blockers_reaches_devs_copy,
     check_a_tag_named_dev_does_not_move_the_merge_base,
+    check_a_tag_named_dev_does_not_pick_devs_gate_copy,
+    check_a_tag_named_dev_does_not_change_what_is_merged,
     check_an_ignored_review_file_does_not_count,
     check_named_merge_runs_only_on_dev,
     check_gate_run_keeps_every_flag,
