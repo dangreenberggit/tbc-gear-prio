@@ -534,7 +534,7 @@ def main() -> int:
     # Under --gates-only the named form has already run dev's copy.
     if not args.gates_only:
         print("\n=== merge-ready, by dev's copy ===")
-        ready = dev_merge_ready("dev", ROOT, branch, args.ack_open_blockers)
+        ready = dev_merge_ready("refs/heads/dev", ROOT, branch, args.ack_open_blockers)
         if ready != 0:
             return ready
 

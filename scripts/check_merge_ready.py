@@ -627,8 +627,9 @@ def _merge_base(branch: str, integration: str, root: Path) -> tuple[str, str | N
     if branch == integration:
         return "", f"already on {integration}"
     try:
+        # The full ref name: a tag named `dev` would win over the branch.
         base = subprocess.run(
-            ["git", "merge-base", integration, branch],
+            ["git", "merge-base", f"refs/heads/{integration}", branch],
             cwd=root,
             capture_output=True,
             text=True,
@@ -1118,6 +1119,18 @@ def check(
     needing_review = tickets_needing_review(changes) if changes else set()
     exemption = review_exemption_reason(changed, why_not, review_rel, needing_review)
 
+    # An ignored review file is on disk but would not be merged.
+    review_ignored = review.is_file() and subprocess.run(
+        ["git", "check-ignore", "-q", "--", review_rel], cwd=ROOT
+    ).returncode == 0
+    if review_ignored:
+        print(
+            f"FAIL: {review_rel} is ignored by git, so the merge would not "
+            f"include it; change the ignore rule so it does not match the file, "
+            f"then commit the file",
+            file=sys.stderr,
+        )
+        return 1
     if not review.is_file() and not exemption:
         for rel in sorted(needing_review):
             print(

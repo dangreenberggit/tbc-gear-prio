@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Checks for the pure logic in scripts/merge_to_dev.py, plus two on
-throwaway git repos under the temp folder: one runs `has_changes`, and one
-runs both forms of merge-to-dev with `--check-only --no-verify` (ticket 733).
+"""Checks for the pure logic in scripts/merge_to_dev.py, plus checks on
+throwaway git repos under the temp folder: one runs `has_changes`, and the
+`_Scratch` ones run both forms of merge-to-dev with `--no-verify` (ticket 733).
 
 Follows the check_worktree_pair.py convention -- a standalone script of
 small checks, not a pytest suite (this repo has no pytest infra). The git
@@ -226,53 +226,82 @@ _GATE_SCRIPTS = (
     "check_tab_fixtures.py",
     "worktree_pair.py",
 )
+_EMPTY_REVIEW = "## Disposition\n\n| ID | Axis | Disposition | Ticket / note |\n| --- | --- | --- | --- |\n"
 
 
-def check_branch_cannot_exempt_itself_by_editing_the_gate() -> list[str]:
-    """Ticket 733, on a throwaway repo: a branch adds `packages/` and
-    `scripts/` to TOOLING_PATHS in its copy of check_merge_ready.py, takes
-    that file and merge_to_dev.py off GATE_PATHS, and edits a product file, with no review file.
-    Its own copy then needs no review file. Both forms of merge-to-dev must
-    still refuse, because they also run dev's copy; with a review file, both
-    pass. A second branch also makes its own merge_to_dev.py skip dev's
-    copy: the named form, which is dev's merge_to_dev.py, must still refuse.
-    The no-branch form runs that edited file, so nothing is asserted there."""
-    here = Path(__file__).resolve().parent
-    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
-        main, wt, hooks = Path(tmp) / "main", Path(tmp) / "wt", Path(tmp) / "no-hooks"
-        wt_door = Path(tmp) / "wt-door"
-        hooks.mkdir()
+def _scratch_env() -> dict[str, str]:
+    """The environment for git and the gate scripts in a throwaway repo.
+    `pnpm verify` runs from the pre-push hook, whose GIT_DIR and friends
+    would point git at the real checkout."""
+    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    return env
 
-        def git(cwd: Path, *args: str) -> None:
-            subprocess.run(
-                ["git", "-c", f"core.hooksPath={hooks.as_posix()}", "-c", "user.name=t",
-                 "-c", "user.email=t@t", "-c", "commit.gpgsign=false", *args],
-                cwd=cwd, check=True, capture_output=True,
-            )
 
-        def run(cwd: Path, *argv: str) -> tuple[int, str]:
-            out = subprocess.run(
-                [sys.executable, *argv], cwd=cwd, capture_output=True, text=True,
-                env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"},
-            )
-            return out.returncode, out.stdout + out.stderr
+class _Scratch:
+    """A throwaway repo whose `main` folder has `dev` checked out, with this
+    folder's gate scripts and `packages/x.ts`. Its config turns hooks off and
+    sets an identity, so the gate scripts' own git calls work in it too."""
 
-        (main / "scripts").mkdir(parents=True)
+    def __init__(self, tmp: Path) -> None:
+        self.tmp = tmp
+        self.main = tmp / "main"
+        here = Path(__file__).resolve().parent
         for name in _GATE_SCRIPTS:
-            (main / "scripts" / name).write_bytes((here / name).read_bytes())
-        (main / "packages").mkdir()
-        (main / "packages" / "x.ts").write_text("export const x = 1;\n")
-        (main / ".gitignore").write_text("__pycache__/\n")
-        git(main, "init", "-q", "-b", "dev")
-        git(main, "add", "-A")
-        git(main, "commit", "-q", "-m", "base")
-        branch = "chore/widen"
-        git(main, "worktree", "add", "-q", "-b", branch, str(wt))
+            self.write(self.main, f"scripts/{name}", (here / name).read_text(encoding="utf-8"))
+        self.write(self.main, "packages/x.ts", "export const x = 1;\n")
+        self.write(self.main, ".gitignore", "__pycache__/\n")
+        self.git(self.main, "init", "-q", "-b", "dev")
+        hooks = tmp / "no-hooks"
+        hooks.mkdir()
+        for key, value in (
+            ("core.hooksPath", hooks.as_posix()),
+            ("user.name", "t"),
+            ("user.email", "t@t"),
+            ("commit.gpgsign", "false"),
+        ):
+            self.git(self.main, "config", key, value)
+        self.commit(self.main, "base")
 
+    def git(self, cwd: Path, *args: str) -> str:
+        return subprocess.run(
+            ["git", *args], cwd=cwd, check=True, capture_output=True, text=True,
+            env=_scratch_env(),
+        ).stdout.strip()
+
+    @staticmethod
+    def write(cwd: Path, rel: str, text: str) -> None:
+        path = cwd / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8", newline="")
+
+    def commit(self, cwd: Path, message: str) -> None:
+        self.git(cwd, "add", "-A")
+        self.git(cwd, "commit", "-q", "-m", message)
+
+    def branch(self, name: str, start: str = "dev") -> Path:
+        """A worktree with new branch `name` checked out."""
+        wt = self.tmp / name.replace("/", "-")
+        self.git(self.main, "worktree", "add", "-q", "-b", name, str(wt), start)
+        return wt
+
+    def merge_to_dev(self, cwd: Path, *argv: str) -> tuple[int, str]:
+        """Run the copy of merge_to_dev.py in `cwd` with --no-verify."""
+        out = subprocess.run(
+            [sys.executable, str(cwd / "scripts" / "merge_to_dev.py"), *argv, "--no-verify"],
+            cwd=cwd, capture_output=True, text=True, env=_scratch_env(),
+        )
+        return out.returncode, out.stdout + out.stderr
+
+    def widen_the_gate(self, wt: Path) -> None:
+        """Edit `wt`'s copy of check_merge_ready.py so that a branch changing
+        `packages/` and `scripts/` needs no review file: both go on
+        TOOLING_PATHS, and check_merge_ready.py and merge_to_dev.py come off
+        GATE_PATHS."""
         gate = wt / "scripts" / "check_merge_ready.py"
         text = gate.read_text(encoding="utf-8")
         edited = text.replace(
-            'TOOLING_PATHS = (\n', 'TOOLING_PATHS = (\n    "packages/",\n    "scripts/",\n', 1
+            "TOOLING_PATHS = (\n", 'TOOLING_PATHS = (\n    "packages/",\n    "scripts/",\n', 1
         ).replace(
             'GATE_PATHS = (\n    "scripts/check_merge_ready.py",\n    "scripts/merge_to_dev.py",\n',
             "GATE_PATHS = (\n",
@@ -281,58 +310,157 @@ def check_branch_cannot_exempt_itself_by_editing_the_gate() -> list[str]:
         if edited.count('"packages/"') != text.count('"packages/"') + 1 or (
             edited.count('"scripts/merge_to_dev.py",') != text.count('"scripts/merge_to_dev.py",') - 1
         ):
-            return ["test setup: could not edit TOOLING_PATHS and GATE_PATHS in the branch's copy"]
-        gate.write_text(edited, encoding="utf-8", newline="")
-        (wt / "packages" / "x.ts").write_text("export const x = 2;\n")
-        git(wt, "commit", "-q", "-am", "widen")
+            raise AssertionError("test setup: TOOLING_PATHS or GATE_PATHS has moved")
+        self.write(wt, "scripts/check_merge_ready.py", edited)
 
+    def skip_devs_copy(self, wt: Path) -> None:
+        """Edit `wt`'s copy of merge_to_dev.py so it never runs dev's copy."""
+        own = (wt / "scripts" / "merge_to_dev.py").read_text(encoding="utf-8")
+        stub = '\ndef dev_merge_ready(*args, **kwargs):\n    return 0\n\n\nif __name__ == "__main__":'
+        self.write(wt, "scripts/merge_to_dev.py", own.replace('\nif __name__ == "__main__":', stub, 1))
+
+
+def _refused(label: str, rc: int, out: str, want: str) -> list[str]:
+    if rc != 0 and want in out:
+        return []
+    return [f"{label}: want a refusal naming {want!r}; rc={rc} {out[-400:]!r}"]
+
+
+def _passed(label: str, rc: int, out: str) -> list[str]:
+    return [] if rc == 0 else [f"{label}: want rc 0; rc={rc} {out[-400:]!r}"]
+
+
+def check_branch_cannot_exempt_itself_by_editing_the_gate() -> list[str]:
+    """Ticket 733: a branch widens its copy of the gate (`widen_the_gate`)
+    and edits a product file, with no review file. Its own copy then needs
+    no review file; both forms of merge-to-dev must still refuse, because
+    they also run dev's copy. A second branch also makes its own
+    merge_to_dev.py skip dev's copy: the named form, which is dev's
+    merge_to_dev.py, must still refuse it. The no-branch form runs that
+    edited file, so nothing is asserted there. With a review file, both
+    forms pass."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _Scratch(Path(tmp))
+        wt = s.branch("chore/widen")
+        s.widen_the_gate(wt)
+        s.write(wt, "packages/x.ts", "export const x = 2;\n")
+        s.commit(wt, "widen")
+        out = subprocess.run(
+            [sys.executable, str(wt / "scripts" / "check_merge_ready.py")],
+            cwd=wt, capture_output=True, text=True, env=_scratch_env(),
+        )
+        if out.returncode != 0 or "review not required" not in out.stdout:
+            return [f"test setup: the branch's own copy should exempt it: {out.stdout[-300:]!r}"]
         problems = []
-        rc, out = run(wt, str(gate))
-        if rc != 0 or "review not required" not in out:
-            problems.append(f"test setup: the branch's own copy should exempt it; rc={rc} {out[-300:]!r}")
-        forms = (
-            ("named form", main, (str(main / "scripts" / "merge_to_dev.py"), branch)),
-            ("no-branch form", wt, (str(wt / "scripts" / "merge_to_dev.py"),)),
-        )
+        forms = (("named form", s.main, ("chore/widen",)), ("no-branch form", wt, ()))
         for label, cwd, argv in forms:
-            rc, out = run(cwd, *argv, "--check-only", "--no-verify")
-            if rc == 0 or "missing review" not in out:
-                problems.append(
-                    f"{label} let a branch that edits the gate's lists skip its review: "
-                    f"rc={rc} {out[-400:]!r}"
-                )
-        door = "chore/widen-door"
-        git(main, "worktree", "add", "-q", "-b", door, str(wt_door), branch)
-        own_door = wt_door / "scripts" / "merge_to_dev.py"
-        own_door.write_text(
-            own_door.read_text(encoding="utf-8").replace(
-                '\nif __name__ == "__main__":',
-                '\ndef dev_merge_ready(*args, **kwargs):\n    return 0\n\n\nif __name__ == "__main__":',
-                1,
-            ),
-            encoding="utf-8", newline="",
-        )
-        git(wt_door, "commit", "-q", "-am", "skip dev's copy")
-        rc, out = run(main, str(main / "scripts" / "merge_to_dev.py"), door, "--check-only", "--no-verify")
-        if rc == 0 or "missing review" not in out:
-            problems.append(
-                f"named form let a branch whose own merge_to_dev.py skips dev's copy "
-                f"skip its review: rc={rc} {out[-400:]!r}"
-            )
-        review = wt / "docs" / "reviews" / "chore-widen.md"
-        review.parent.mkdir(parents=True)
-        review.write_text("## Disposition\n\n| ID | Axis | Disposition | Ticket / note |\n| --- | --- | --- | --- |\n")
-        git(wt, "add", "-A")
-        git(wt, "commit", "-q", "-m", "review")
+            rc, out = s.merge_to_dev(cwd, *argv, "--check-only")
+            problems += _refused(label, rc, out, "missing review")
+        door = s.branch("chore/widen-door", "chore/widen")
+        s.skip_devs_copy(door)
+        s.commit(door, "skip dev's copy")
+        rc, out = s.merge_to_dev(s.main, "chore/widen-door", "--check-only")
+        problems += _refused("named form, own merge_to_dev.py edited", rc, out, "missing review")
+        s.write(wt, "docs/reviews/chore-widen.md", _EMPTY_REVIEW)
+        s.commit(wt, "review")
         for label, cwd, argv in forms:
-            rc, out = run(cwd, *argv, "--check-only", "--no-verify")
-            if rc != 0:
-                problems.append(f"{label} refused the branch with its review file: rc={rc} {out[-400:]!r}")
+            rc, out = s.merge_to_dev(cwd, *argv, "--check-only")
+            problems += _passed(f"{label} with its review file", rc, out)
+        return problems
+
+
+def check_real_named_run_runs_devs_copy_after_merging_dev() -> list[str]:
+    """A real named run, with dev ahead of the branch, so it first merges dev
+    into the branch. The branch widens its gate and skips dev's copy in its
+    own merge_to_dev.py, so only the caller's call to dev's copy can refuse
+    it. Refused with no review file and dev not moved; merged with one."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _Scratch(Path(tmp))
+        wt = s.branch("chore/door")
+        s.widen_the_gate(wt)
+        s.skip_devs_copy(wt)
+        s.write(wt, "packages/x.ts", "export const x = 2;\n")
+        s.commit(wt, "widen and skip dev's copy")
+        s.write(s.main, "packages/y.ts", "export const y = 1;\n")
+        s.commit(s.main, "dev moves on")
+        dev_before = s.git(s.main, "rev-parse", "refs/heads/dev")
+        rc, out = s.merge_to_dev(s.main, "chore/door")
+        problems = _refused("real named run, no review file", rc, out, "missing review")
+        if s.git(s.main, "rev-parse", "refs/heads/dev") != dev_before:
+            problems.append("a refused real named run moved dev")
+        s.write(wt, "docs/reviews/chore-door.md", _EMPTY_REVIEW)
+        s.commit(wt, "review")
+        rc, out = s.merge_to_dev(s.main, "chore/door")
+        problems += _passed("real named run with its review file", rc, out)
+        if s.git(s.main, "rev-parse", "dev^{tree}") != s.git(s.main, "rev-parse", "chore/door^{tree}"):
+            problems.append("after a real named run, dev's tree is not the branch's")
+        return problems
+
+
+def check_ack_open_blockers_reaches_devs_copy() -> list[str]:
+    """On phase-9/x with an open `Blocks: phase-9` ticket, the named form
+    refuses without --ack-open-blockers and passes with it, so the flag
+    reaches dev's copy as well as the branch's."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _Scratch(Path(tmp))
+        s.write(s.main, ".scratch/carry-forward/issues/1-t.md", "Status: open\nBlocks: phase-9\n\n# t\n")
+        s.commit(s.main, "ticket")
+        wt = s.branch("phase-9/x")
+        s.write(wt, "packages/x.ts", "export const x = 2;\n")
+        s.write(wt, "docs/reviews/phase-9-x.md", _EMPTY_REVIEW)
+        s.commit(wt, "work")
+        rc, out = s.merge_to_dev(s.main, "phase-9/x", "--check-only")
+        problems = _refused("named form without --ack-open-blockers", rc, out, "Blocks: phase-9")
+        rc, out = s.merge_to_dev(s.main, "phase-9/x", "--check-only", "--ack-open-blockers")
+        return problems + _passed("named form with --ack-open-blockers", rc, out)
+
+
+def check_a_tag_named_dev_does_not_move_the_merge_base() -> list[str]:
+    """A tag named `dev` at the branch's product commit would make
+    `git merge-base dev <branch>` start after it, leaving only a tooling
+    commit to judge. Both forms must still see the product file."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _Scratch(Path(tmp))
+        wt = s.branch("chore/tag")
+        s.write(wt, "packages/x.ts", "export const x = 2;\n")
+        s.commit(wt, "product")
+        s.git(wt, "tag", "dev")
+        s.write(wt, "docs/agents/foo.md", "tooling\n")
+        s.commit(wt, "tooling")
+        problems = []
+        for label, cwd, argv in (("named form", s.main, ("chore/tag",)), ("no-branch form", wt, ())):
+            rc, out = s.merge_to_dev(cwd, *argv, "--check-only")
+            problems += _refused(f"{label} with a tag named dev", rc, out, "missing review")
+        return problems
+
+
+def check_an_ignored_review_file_does_not_count() -> list[str]:
+    """A review file that an ignore rule hides from git is on disk but would
+    not be merged, so a real named run must refuse and leave dev alone."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _Scratch(Path(tmp))
+        wt = s.branch("chore/ignored")
+        s.write(wt, "packages/x.ts", "export const x = 2;\n")
+        s.commit(wt, "product")
+        exclude = Path(s.git(s.main, "rev-parse", "--git-common-dir"))
+        exclude = (exclude if exclude.is_absolute() else s.main / exclude) / "info" / "exclude"
+        exclude.parent.mkdir(parents=True, exist_ok=True)
+        exclude.write_text("docs/reviews/\n", encoding="utf-8")
+        s.write(wt, "docs/reviews/chore-ignored.md", _EMPTY_REVIEW)
+        dev_before = s.git(s.main, "rev-parse", "refs/heads/dev")
+        rc, out = s.merge_to_dev(s.main, "chore/ignored")
+        problems = _refused("real named run with an ignored review file", rc, out, "ignored by git")
+        if s.git(s.main, "rev-parse", "refs/heads/dev") != dev_before:
+            problems.append("a refused real named run moved dev")
         return problems
 
 
 CHECKS = (
     check_branch_cannot_exempt_itself_by_editing_the_gate,
+    check_real_named_run_runs_devs_copy_after_merging_dev,
+    check_ack_open_blockers_reaches_devs_copy,
+    check_a_tag_named_dev_does_not_move_the_merge_base,
+    check_an_ignored_review_file_does_not_count,
     check_named_merge_runs_only_on_dev,
     check_gate_run_keeps_every_flag,
     check_porcelain_reads_paths_and_rename_sources,
