@@ -150,8 +150,9 @@ commands) is A4.
 
 These rows are agent-file edits. Under this skill's § Agent files they
 go to the owner for one approval together with the fixes for A1-A4,
-before any fix pass. No fix pass has run, so they have no Disposition
-row yet.
+before any fix pass. The owner approved the S1 fix and kept S4 and S5
+as written (2026-10-29, as the dispatching session reports); see
+§ Disposition.
 
 ## Summary
 
@@ -184,8 +185,9 @@ Bookkeeping applied in this commit: ticket 729's stale section now
 records the `8cd7e45e` Gate A edit and the `7e2ebae0` dry run (A6, S2,
 P1, P2).
 
-Round 2 has not run: the fixes for A1-A4 and the code-quality pass wait
-for the owner. When they land, round 2 is the focused check of step 2.
+Round 2 has not run. The fixes for A1-A4 and S1 landed in the commit
+"Fix dry-run gaps in the plan reviewer"; round 2 is the focused check of
+step 2.
 
 Tickets: this branch filed 0 and closed 1 (729). Filed is the number of
 `A` rows in `git diff --name-status dev...HEAD --
@@ -205,3 +207,10 @@ Tickets: this branch filed 0 and closed 1 (729). Filed is the number of
 | P3  | Spec        | wontfix     | the dispatcher reports the owner approved the exact wording of each of the three agent-file commits, which includes the § Fan-out and § Done when lines of `7e2ebae0`                                                               |
 | P4  | Spec        | wontfix     | not a defect: § Re-review rounds says "using § What to hunt", and item 7 is part of that list; a named step cannot be dry-run without the earlier steps that make its inputs. The Done-when half is A4                              |
 | P5  | Spec        | wontfix     | same as A5                                                                                                                                                                                                                          |
+| A1  | Adversarial | fixed       | commit "Fix dry-run gaps in the plan reviewer": item 7 runs a tracked-file write with its target moved under the temp folder, and holds back only a write that cannot be moved there; owner approved 2026-10-29, "looks ok, do it"  |
+| A2  | Adversarial | fixed       | same commit: item 7 holds back as `not run` a command that reads a moved target without naming its path, such as a test runner that imports it                                                                                      |
+| A3  | Adversarial | fixed       | same commit: the helper runs `mktemp -d` once and writes the printed absolute path into every command; `$T` is gone from the file                                                                                                   |
+| A4  | Adversarial | fixed       | same commit: § Done when also requires the `Dry run:` line to account for every Verify-recipe command                                                                                                                               |
+| S1  | Standards   | fixed       | same commit: § Fan-out bullet 3 lets the dry-run helper write under its temp folder                                                                                                                                                 |
+| S4  | Standards   | wontfix     | wording preference on text the owner approved (`8cd7e45e`); not changed, as the owner chose on 2026-10-29 (reported by the dispatching session)                                                                                     |
+| S5  | Standards   | wontfix     | wording preference on text the owner approved (`7e2ebae0`); not changed, as the owner chose on 2026-10-29 (reported by the dispatching session)                                                                                     |
