@@ -53,13 +53,22 @@ because that would need updating every time a tool changes.
    only links it. See [`docs/agents/issue-tracker.md`](agents/issue-tracker.md).
    List anytime: `pnpm issues:open`.
 
+   **Agent tooling** is the exception to this review. The list is
+   `TOOLING_PATHS` in `scripts/check_merge_ready.py`, and the owner
+   approves every change to it. The `pre-merge-review` skill, § Agent-tooling
+   branches, says what a tooling-only branch and a mixed branch get in its
+   place. On a tooling-only branch, `pnpm merge-to-dev` needs no review
+   file; a review file that exists is still checked.
+
    Launch mini-loops for the new tickets a review files unless there is a
    stated reason to defer them: delegate to a planner, then the plan to an
    executor, then an independent reviewer.
 
 5. **Ask the user, then `pnpm merge-to-dev`.** Agents must not merge into
-   `dev` unless the user explicitly asks **after** the review file exists
-   and they have seen the summary. “Review and merge” in one message means
+   `dev` unless the user explicitly asks **after** the branch's review
+   exists (the review file, or for a tooling-only branch the
+   `instruction-review` result) and they have seen the summary.
+   “Review and merge” in one message means
    run the review and stop — wait for a separate merge ask. `pnpm merge-to-dev` is
    the only supported door: verify → review/ticket check →
    `git merge --no-ff` into `dev`. Do not merge into `dev` by hand. On
@@ -86,16 +95,17 @@ Cursor adapters. See
 
 ## Gates — what's enforced vs. advisory
 
-| Gate                                                                           | Enforcement                                                                                     | Escape hatch                                                  |
-| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `pnpm verify` before push                                                      | `.githooks/pre-push` refuses the push on failure                                                | `git push --no-verify`                                        |
-| No direct commits to `main`                                                    | `.githooks/pre-commit` refuses the commit                                                       | `git commit --no-verify`                                      |
-| `pnpm verify` on every push/PR                                                 | GitHub Actions (`.github/workflows/verify.yml`)                                                 | none — this is the backstop                                   |
-| Purity of `packages/core/src` (no fs/net/`process`/`console` outside `seams/`) | ESLint (`eslint.config.js`), runs inside `pnpm verify`                                          | none, short of disabling the rule inline                      |
-| Merge to `dev`                                                                 | `pnpm merge-to-dev` + pre-commit refuses merge commits on `dev` without `TBC_ALLOW_DEV_MERGE=1` | `TBC_ALLOW_DEV_MERGE=1 git merge …`; `git commit --no-verify` |
-| Deferred findings filed as tickets                                             | `pnpm merge-to-dev` / `merge-ready` — every `defer` links an open carry-forward ticket          | `wontfix` with a reason, or fix on branch                     |
-| Phase open-blockers seen                                                       | `pnpm merge-to-dev` on `phase-N/*` fails if `Blocks: phase-N` tickets are open                  | `--ack-open-blockers`                                         |
-| Comment policy (why, not what)                                                 | Not mechanically enforced — a `pre-merge-review` finding                                        | —                                                             |
+| Gate                                                                           | Enforcement                                                                                                                                                        | Escape hatch                                                  |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
+| `pnpm verify` before push                                                      | `.githooks/pre-push` refuses the push on failure                                                                                                                   | `git push --no-verify`                                        |
+| No direct commits to `main`                                                    | `.githooks/pre-commit` refuses the commit                                                                                                                          | `git commit --no-verify`                                      |
+| `pnpm verify` on every push/PR                                                 | GitHub Actions (`.github/workflows/verify.yml`)                                                                                                                    | none — this is the backstop                                   |
+| Purity of `packages/core/src` (no fs/net/`process`/`console` outside `seams/`) | ESLint (`eslint.config.js`), runs inside `pnpm verify`                                                                                                             | none, short of disabling the rule inline                      |
+| Merge to `dev`                                                                 | `pnpm merge-to-dev` + pre-commit refuses merge commits on `dev` without `TBC_ALLOW_DEV_MERGE=1`                                                                    | `TBC_ALLOW_DEV_MERGE=1 git merge …`; `git commit --no-verify` |
+| Review file before merge to `dev`                                              | `pnpm merge-to-dev` / `merge-ready` fail with no `docs/reviews/<branch>.md`, except when every changed file is on `TOOLING_PATHS` (`scripts/check_merge_ready.py`) | none                                                          |
+| Deferred findings filed as tickets                                             | `pnpm merge-to-dev` / `merge-ready` — every `defer` links an open carry-forward ticket                                                                             | `wontfix` with a reason, or fix on branch                     |
+| Phase open-blockers seen                                                       | `pnpm merge-to-dev` on `phase-N/*` fails if `Blocks: phase-N` tickets are open                                                                                     | `--ack-open-blockers`                                         |
+| Comment policy (why, not what)                                                 | Not mechanically enforced — a `pre-merge-review` finding                                                                                                           | —                                                             |
 
 **The escape hatch is real and intentional** — spikes and throwaway
 exploration shouldn't be blocked by the full gate. It's safe specifically
