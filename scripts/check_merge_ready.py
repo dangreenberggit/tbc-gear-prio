@@ -1927,6 +1927,7 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
                               ("drop-closed", closed_rel)):
                 _scratch_branch(root, git, name, {"AGENTS.md": "# rules\nx\n"},
                                 deletes=(rel,))
+            git("branch", "empty", INTEGRATION_BRANCH)
             git("checkout", "-q", INTEGRATION_BRANCH)
         except (OSError, subprocess.CalledProcessError) as exc:
             return [f"gate CLI test could not build its repo: {exc}"]
@@ -1941,6 +1942,9 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             ("drop-open", 1, "missing review", 0, f"{open_rel}\n"),
             ("phase-9/drop", 1, "missing review", 0, f"{open_rel}\n"),
             ("drop-closed", 0, "review not required", 0, ""),
+            # No changed file is not "every changed file is tooling": the gate
+            # requires the review, so --product-files must not say to skip it.
+            ("empty", 1, "missing review", 1, ""),
         )
         for branch, want_rc, want_text, want_pf_rc, want_pf in cases:
             # The gate reads tickets and the review file from the working
@@ -1958,6 +1962,8 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
                     f"--product-files on {branch}: rc={rc} stdout={out!r}, "
                     f"want rc={want_pf_rc} stdout={want_pf!r} (stderr {err[-200:]!r})"
                 )
+            if branch == "empty" and "no file changed" not in err:
+                problems.append(f"--product-files on empty: stderr {err!r}")
         return problems
 
 
@@ -2034,7 +2040,7 @@ def main() -> int:
         action="store_true",
         help="print the files this branch changed that are not agent tooling, "
         "one per line, for the product review's diff; exit 1 when the changed "
-        "files cannot be read",
+        "files cannot be read or there are none",
     )
     ap.add_argument("--review", type=Path)
     ap.add_argument("--branch")
@@ -2049,6 +2055,15 @@ def main() -> int:
         deleted_open, why_deleted = deleted_open_tickets(branch)
         if why or why_deleted:
             print(f"changed files unknown: {why or why_deleted}", file=sys.stderr)
+            return 1
+        if not changed:
+            # Empty output means "every changed file is tooling, skip the
+            # review"; with no changed file the gate requires the review file.
+            print(
+                f"no file changed since the {INTEGRATION_BRANCH} merge base, so "
+                f"the review file is required: review the whole branch",
+                file=sys.stderr,
+            )
             return 1
         own_review = review_path(branch).relative_to(ROOT).as_posix()
         for rel in product_files(changed, own_review, deleted_open):
