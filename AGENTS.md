@@ -121,11 +121,15 @@ so every dirty file rides along, and staging part of a file commits the
 rest of it too. Before each commit `git status` must be clean of work
 you did not do; after `git reset`, re-read `git log -1` before
 recommitting. `pnpm verify` before every push. Merging into `dev` waits
-for the user to ask **after** the review file exists and they saw its
+for the user to ask **after** the branch's review exists and they saw its
 summary; a combined "review and merge" request is not that ask. Then
 `pnpm merge-to-dev` is the only door: no `git merge` into `dev`, no
 `TBC_ALLOW_DEV_MERGE=1`. The loop, the review, mini-loops for tickets
-and the gates: `docs/workflow.md` § The loop and § Gates.
+and the gates: `docs/workflow.md` § The loop and § Gates. **Agent
+tooling** (`TOOLING_PATHS` in `scripts/check_merge_ready.py`) is the
+exception to the product review: a branch that changes only tooling gets
+`<GLOBAL-TOOLING-REVIEW-SKILL>` in its place (`docs/workflow.md` § The
+loop, step 4).
 
 ## Spawning
 
