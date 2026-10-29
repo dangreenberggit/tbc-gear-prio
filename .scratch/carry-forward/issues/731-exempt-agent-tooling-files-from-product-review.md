@@ -217,3 +217,11 @@ So it answers whether the 729 branch needs a review file.
   git with `git update-index --assume-unchanged`) and run there with no
   arguments: rc=0, "merge-ready: ok"; the review file's 19 Disposition
   rows parse.
+- After review row R2-1b (the commit that adds it: a close with a valid
+  `Verified by:` line keeps the exemption): rc=0, "review not required:
+  every one of the 10 changed file(s) is agent tooling", and "no ticket
+  closed on this branch without Verified by: evidence".
+  `--product-files --branch chore/729-test-result` prints nothing
+  (rc=0). The same script in the sparse clone of the 729 tip `512b26f6`,
+  run with no arguments: rc=0, "merge-ready: ok"; 19 Disposition rows
+  parse.

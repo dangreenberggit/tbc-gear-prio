@@ -714,11 +714,21 @@ def _blocks_values(text: str) -> set[str]:
 
 def ticket_let_go(old_text: str, new_text: str | None) -> bool:
     """True when a ticket open at the merge base (`old_text`) is deleted
-    (`new_text` None), no longer open, or has its `Blocks:` values removed or
-    changed. Pure. Any other edit of an open ticket is ordinary ticket work."""
+    (`new_text` None), leaves `OPEN_STATUSES` by any route but a verified
+    close, or stays open with its `Blocks:` values removed or changed. Pure.
+
+    A verified close is ordinary ticket work: `closed_without_verification`
+    judges it on every branch, and a closed ticket blocks no phase, so a
+    `Blocks:` edit made with it changes nothing. Any other edit of an open
+    ticket is ordinary ticket work too."""
     if read_status(path_text=old_text) in NOT_OPEN_STATUSES:
         return False
-    if new_text is None or read_status(path_text=new_text) in NOT_OPEN_STATUSES:
+    if new_text is None:
+        return True
+    new_status = read_status(path_text=new_text)
+    if new_status in CLOSED_STATUSES:
+        return closed_without_verification(old_text, new_text)
+    if new_status not in OPEN_STATUSES:
         return True
     old_blocks = _blocks_values(old_text)
     return bool(old_blocks) and _blocks_values(new_text) != old_blocks
@@ -731,9 +741,11 @@ def tickets_let_go(
     Returns (repo-relative paths, reason unknown).
 
     Every ticket check reads the tickets that are open, so a ticket that is
-    deleted or closed drops out of all of them, and a ticket whose `Blocks:`
-    line changes stops blocking its phase. The review file is then the only
-    check left, so such a ticket counts as a product change (`product_files`).
+    deleted or taken out of open drops out of all of them, and a ticket whose
+    `Blocks:` line changes stops blocking its phase. The review file is then
+    the only check left, so such a ticket counts as a product change
+    (`product_files`). A verified close is the exception: the `Verified by:`
+    check (`tickets_closed_without_verification`) still judges it.
     """
     base, why = _merge_base(branch, integration, root)
     if why:
@@ -1051,8 +1063,9 @@ def check(
     if not review.is_file() and not exemption:
         for rel in sorted(let_go):
             print(
-                f"ticket open at the merge base is deleted, no longer open or "
-                f"blocks something else on this branch, so it needs the review: {rel}"
+                f"ticket open at the merge base is deleted, leaves open without a "
+                f"verified close, or blocks something else on this branch, so it "
+                f"needs the review: {rel}"
             )
         print(
             f"FAIL: missing review — run pre-merge-review; expected "
@@ -1867,9 +1880,22 @@ def check_ticket_let_go_rule() -> list[str]:
     cases = [
         ("open ticket deleted", blocker, None, True),
         ("open to wontfix", blocker, blocker.replace("open", "wontfix"), True),
-        ("open to closed", blocker, blocker.replace("open", "closed"), True),
-        ("bold open to resolved", "**Status:** open\n\n# t\n",
+        ("open to closed with no Verified by:", blocker,
+         blocker.replace("open", "closed"), True),
+        ("bold open to resolved with no Verified by:", "**Status:** open\n\n# t\n",
          "**Status:** resolved\n\n# t\n", True),
+        ("open to closed with a placeholder Verified by:", blocker,
+         blocker.replace("open", "closed\nVerified by: TODO"), True),
+        # A verified close is ordinary ticket work: the `Verified by:` check
+        # runs on every branch, and a closed ticket blocks no phase, so what
+        # its `Blocks:` line says no longer matters.
+        ("open to closed, verified", blocker,
+         blocker.replace("open", "closed\nVerified by: `pnpm verify`"), False),
+        ("bold open to resolved, verified", "**Status:** open\n\n# t\n",
+         "**Status:** resolved\nVerified by: `true`\n\n# t\n", False),
+        ("verified close that also drops its Blocks:", blocker,
+         "Status: closed\nVerified by: `true`\n\n# t\n", False),
+        ("open to an unknown status", blocker, blocker.replace("open", "done"), True),
         ("Blocks: line removed", blocker, "Status: open\n\n# t\n", True),
         ("Blocks: value removed", blocker, blocker.replace(", phase-10", ""), True),
         ("Blocks: value changed", blocker, blocker.replace("phase-9", "phase-11"), True),
@@ -2016,6 +2042,8 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
                 ("phase-9/unblock", "Status: open\n\n# t\n"),
                 ("reblock", "Status: open\nBlocks: phase-10\n\n# t\n"),
                 ("close-open", "Status: closed\nVerified by: `true`\nBlocks: phase-9\n\n# t\n"),
+                ("phase-9/close-true", "Status: closed\nVerified by: `true`\n\n# t\n"),
+                ("phase-9/close-bare", "Status: closed\nBlocks: phase-9\n\n# t\n"),
             ):
                 _scratch_branch(root, git, name, {open_rel: text})
             git("branch", "empty", INTEGRATION_BRANCH)
@@ -2035,14 +2063,17 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             ("drop-closed", 0, "review not required", 0, ""),
             ("drop-wontfix", 0, "review not required", 0, ""),
             ("drop-nested", 0, "review not required", 0, ""),
-            # Taking an open ticket out of open, or changing what it blocks,
-            # clears a blocker as surely as deleting it. Other edits are
-            # ordinary ticket work.
+            # Taking an open ticket out of open by any route but a verified
+            # close, or changing what it blocks while it stays open, clears a
+            # blocker as surely as deleting it. A verified close, and any
+            # other edit, is ordinary ticket work.
             ("edit-open", 0, "review not required", 0, ""),
             ("phase-9/wontfix", 1, "missing review", 0, f"{open_rel}\n"),
             ("phase-9/unblock", 1, "missing review", 0, f"{open_rel}\n"),
             ("reblock", 1, "missing review", 0, f"{open_rel}\n"),
-            ("close-open", 1, "missing review", 0, f"{open_rel}\n"),
+            ("close-open", 0, "review not required", 0, ""),
+            ("phase-9/close-true", 0, "review not required", 0, ""),
+            ("phase-9/close-bare", 1, "missing review", 0, f"{open_rel}\n"),
             # No changed file is not "every changed file is tooling": the gate
             # requires the review, so --product-files must not say to skip it.
             ("empty", 1, "missing review", 1, ""),
