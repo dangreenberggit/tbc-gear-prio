@@ -67,7 +67,7 @@ because that would need updating every time a tool changes.
 5. **Ask the user, then `pnpm merge-to-dev`.** Agents must not merge into
    `dev` unless the user explicitly asks **after** the branch's review
    exists (the review file, or for a tooling-only branch the
-   `<GLOBAL-TOOLING-REVIEW-SKILL>` result) and they have seen the summary.
+   `instruction-review` result) and they have seen the summary.
    “Review and merge” in one message means
    run the review and stop — wait for a separate merge ask. `pnpm merge-to-dev` is
    the only supported door: verify → review/ticket check →

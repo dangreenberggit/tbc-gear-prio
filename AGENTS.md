@@ -128,7 +128,7 @@ summary; a combined "review and merge" request is not that ask. Then
 and the gates: `docs/workflow.md` § The loop and § Gates. **Agent
 tooling** (`TOOLING_PATHS` in `scripts/check_merge_ready.py`) is the
 exception to the product review: a branch that changes only tooling gets
-`<GLOBAL-TOOLING-REVIEW-SKILL>` in its place (`docs/workflow.md` § The
+`instruction-review` in its place (`docs/workflow.md` § The
 loop, step 4).
 
 ## Spawning
