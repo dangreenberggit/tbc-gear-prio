@@ -154,6 +154,11 @@ needed a removed rule. The planner did not follow Option B: it gave
 steps to `K1` only, so the run used four planner spawns, the same count
 as 727. The ticket stays open for that reason (§ Why open).
 
+Template fix applied on branch `chore/729-test-result` with the owner's
+approval ("sure, fine", 2026-10-29): the § Why open wording is now in
+both `plan-template.md` copies. A second dummy run follows; the ticket
+stays open until it passes.
+
 ### Cost
 
 `calls` / `est_cost_usd` per spawn. "Run log" is the handoff's
