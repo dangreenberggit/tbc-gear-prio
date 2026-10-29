@@ -177,6 +177,8 @@ TOOLING_PATHS = (
     "AGENTS.md",
     "CLAUDE.md",
     ".scratch/carry-forward/issues/",
+    ".scratch/carry-forward/notes/",
+    ".scratch/carry-forward/plans/",
     ".scratch/carry-forward/map.md",
 )
 
@@ -1722,8 +1724,9 @@ def check_review_requirement_by_changed_files() -> list[str]:
         ("gate script", {"AGENTS.md", "scripts/check_merge_ready.py"}, None, True),
         ("other doc", {"docs/stage0-findings.md"}, None, True),
         ("a prefix that is not a folder", {"AGENTS.md.bak"}, None, True),
-        ("carry-forward notes are not tickets", {".scratch/carry-forward/notes/n.md"},
-         None, True),
+        ("carry-forward notes and plans are tooling",
+         {".scratch/carry-forward/notes/n.md", ".scratch/carry-forward/plans/p.md"},
+         None, False),
         ("nothing changed", set(), None, True),
         ("changed files unknown", {"AGENTS.md"}, "no merge base", True),
     ]
