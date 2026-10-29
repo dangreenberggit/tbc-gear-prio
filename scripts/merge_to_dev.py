@@ -4,7 +4,7 @@ merge_to_dev.py — the only supported door from a feature/phase branch into dev
 
     pnpm merge-to-dev
     pnpm merge-to-dev --ack-open-blockers   # phase-N/* with open Blocks: still open
-    pnpm merge-to-dev --check-only          # verify + merge-ready, no merge
+    pnpm merge-to-dev --check-only          # verify, merge-ready, layout gate; no merge
     pnpm merge-to-dev --no-verify           # skip pnpm verify (escape hatch; not for real merges)
     pnpm merge-to-dev <branch>              # from a folder on dev; see "Named branch" below
 
@@ -55,7 +55,8 @@ makes its tip's tree the merge result.
 Which copy of the gate code runs: the named form is dev's copy of this
 script, so a branch cannot edit away its call to dev's merge-ready check.
 The no-branch form is the branch's own copy of this script, and a branch
-that also edits this file can drop the call there (ticket 733). Both forms
+that also edits this file or scripts/gate_copy.py can drop the call there
+(ticket 733). `pnpm merge-ready` has the same limit. Both forms
 also run code from the branch: `pnpm verify`, its gates, and its git hooks
 (`core.hooksPath` is the relative `.githooks`, so the named form's merge of
 dev into the branch runs the branch's hooks before dev's check). So the
@@ -88,7 +89,7 @@ import check_merge_ready  # noqa: E402
 # The sandbox stub rule lives in check_merge_ready, whose changed-file read
 # leaves the stubs out too; check_merge_to_dev.py tests it through here.
 from check_merge_ready import SANDBOX_STUBS, holds_no_work, is_device  # noqa: E402,F401
-from check_merge_ready import merge_ready_at  # noqa: E402
+from gate_copy import merge_ready_at  # noqa: E402
 import worktree_pair  # noqa: E402
 
 # pre-commit on `dev` refuses merge commits unless this is set (see .githooks/pre-commit).
@@ -468,7 +469,7 @@ def main() -> int:
     ap.add_argument(
         "--check-only",
         action="store_true",
-        help="run verify + merge-ready only; do not merge",
+        help="run verify, merge-ready and the layout gate; do not merge",
     )
     ap.add_argument(
         "--no-verify",

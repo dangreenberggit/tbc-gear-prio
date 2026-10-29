@@ -17,7 +17,7 @@ open (`ticket_needs_review`). A verified close keeps the exemption.
 Used by `pnpm merge-to-dev` (the only supported door into dev). Also:
 
     pnpm merge-ready              # check only, no merge: this checkout's copy
-                                  # of this file, then dev's (`merge_ready_at`)
+                                  # of this file, then dev's (scripts/gate_copy.py)
     pnpm issues:open              # list open carry-forward tickets
 
 Phase-N branches: open tickets with `Blocks: phase-N` are listed. Merging
@@ -54,7 +54,6 @@ import re
 import stat
 import subprocess
 import sys
-import types
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -170,10 +169,11 @@ INTEGRATION_BRANCH = "dev"
 # The list lives here and not in a doc under docs/agents/ because that folder
 # is on the list: a branch could then widen the list and exempt itself in the
 # same diff. This file is not on the list, so a change to it gets the product
-# review. `pnpm merge-to-dev` and `pnpm merge-ready` also run dev's copy of this
-# file on the branch (`merge_ready_at`, ticket 733), so a branch's edit to
-# either list here takes effect only once it is on dev. For the no-branch
-# limit, see "Which copy of the gate code runs" in scripts/merge_to_dev.py.
+# review. `pnpm merge-to-dev` and `pnpm merge-ready` also run dev's copy of
+# this file on the branch (`merge_ready_at` in scripts/gate_copy.py, ticket
+# 733), so a branch's edit to either list here takes effect only once it is
+# on dev. For the no-branch limit, see "Which copy of the gate code runs" in
+# scripts/merge_to_dev.py.
 TOOLING_PATHS = (
     ".claude/skills/",
     ".agents/skills/",
@@ -198,6 +198,7 @@ GATE_PATHS = (
     "scripts/check_merge_ready.py",
     "scripts/merge_to_dev.py",
     "scripts/check_merge_to_dev.py",
+    "scripts/gate_copy.py",
     "scripts/check_layout_gate.py",
     "scripts/run_verify.mjs",
     ".githooks/",
@@ -1234,45 +1235,6 @@ def check(
     return 0
 
 
-def merge_ready_at(
-    rev: str,
-    checkout: Path,
-    branch: str,
-    ack_open_blockers: bool,
-    review: Path | None = None,
-) -> int:
-    """Run `rev`'s committed copy of this file on `branch`, which is checked
-    out at `checkout`; return its exit code.
-
-    The branch's own copy alone could be edited to exempt the branch from
-    its review (ticket 733). The copy runs with `__file__` set to the
-    checkout's path, so its ROOT, and every ticket and review file it reads,
-    are the checkout's.
-    """
-    rel = "scripts/" + Path(__file__).name
-    shown = subprocess.run(
-        ["git", "show", f"{rev}:{rel}"],
-        cwd=ROOT,
-        capture_output=True,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-    )
-    if shown.returncode != 0:
-        print(f"FAIL: cannot read {rel} at {rev}: {shown.stderr.strip()}", file=sys.stderr)
-        return 1
-    name = "check_merge_ready_at_" + rev.replace("/", "_")
-    module = types.ModuleType(name)
-    module.__file__ = str(checkout / rel)
-    # dataclasses looks the module up in sys.modules while it builds a class.
-    sys.modules[name] = module
-    try:
-        exec(compile(shown.stdout, f"{rev}:{rel}", "exec"), module.__dict__)
-        return module.check(branch=branch, review=review, ack_open_blockers=ack_open_blockers)
-    finally:
-        del sys.modules[name]
-
-
 # ---------------------------------------------------------------------------
 # Self-tests for the pure functions.
 #
@@ -2139,9 +2101,12 @@ def check_review_requirement_reads_git() -> list[str]:
 
 def _run_gate_copy(root: Path, *argv: str) -> tuple[int, str, str]:
     """Run the copy of this file at `root/scripts/` as a CLI; (rc, stdout, stderr)."""
+    # No bytecode: a scripts/__pycache__/ from the gate_copy import would be
+    # an untracked change in the scratch repo.
+    env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
     out = subprocess.run(
         [sys.executable, str(root / "scripts" / Path(__file__).name), *argv],
-        cwd=root, capture_output=True, text=True,
+        cwd=root, capture_output=True, text=True, env=env,
     )
     return out.returncode, out.stdout, out.stderr
 
@@ -2161,6 +2126,7 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             git("init", "-q", "-b", INTEGRATION_BRANCH)
             (root / "scripts").mkdir()
             shutil.copy(Path(__file__), root / "scripts" / Path(__file__).name)
+            shutil.copy(Path(__file__).with_name("gate_copy.py"), root / "scripts" / "gate_copy.py")
             (root / "packages").mkdir()
             (root / "packages" / "x.ts").write_text("export const x = 1;\n")
             (root / "AGENTS.md").write_text("# rules\n")
@@ -2496,11 +2462,24 @@ def main() -> int:
             )
         return 0
 
-    # `pnpm merge-ready` runs both copies that `pnpm merge-to-dev` runs:
-    # this checkout's, then dev's. A branch's edit to its own copy then
-    # cannot make merge-ready pass where dev's copy refuses. It skips the
-    # door's `pnpm verify` and layout gate.
+    # `pnpm merge-ready` runs the review and ticket check by this checkout's
+    # copy, then by dev's, as `pnpm merge-to-dev` does; it skips the door's
+    # `pnpm verify` and layout gate. A branch's edit to the rules in its own
+    # copy (TOOLING_PATHS, GATE_PATHS) then cannot make merge-ready pass
+    # where dev's copy refuses. An edit to this function can; see "Which
+    # copy of the gate code runs" in scripts/merge_to_dev.py. `--branch`
+    # and `--review` have no merge-to-dev twin: with them, both copies read
+    # this checkout's files, so the result can differ from the door's.
+    from gate_copy import merge_ready_at
+
     branch = args.branch or branch_name()
+    if branch in ("dev", "main"):
+        print(
+            f"FAIL: refuse to check {branch!r}: merge-ready checks a feature or "
+            f"phase branch before it merges into {INTEGRATION_BRANCH}",
+            file=sys.stderr,
+        )
+        return 1
     print("=== merge-ready, by this checkout's copy ===")
     ready = check(
         branch=branch,
@@ -2510,9 +2489,18 @@ def main() -> int:
     if ready != 0:
         return ready
     print(f"\n=== merge-ready, by {INTEGRATION_BRANCH}'s copy ===")
-    return merge_ready_at(
+    ready = merge_ready_at(
         f"refs/heads/{INTEGRATION_BRANCH}", ROOT, branch, args.ack_open_blockers, args.review
     )
+    if ready != 0:
+        print(
+            f"\nFAIL: {INTEGRATION_BRANCH}'s copy of the merge-ready check failed "
+            f"(this checkout's copy passed)",
+            file=sys.stderr,
+        )
+        return ready
+    print(f"\nmerge-ready: ok (this checkout's copy and {INTEGRATION_BRANCH}'s copy)")
+    return 0
 
 
 if __name__ == "__main__":

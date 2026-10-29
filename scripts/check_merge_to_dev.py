@@ -223,6 +223,7 @@ def check_gate_run_keeps_every_flag() -> list[str]:
 _GATE_SCRIPTS = (
     "merge_to_dev.py",
     "check_merge_ready.py",
+    "gate_copy.py",
     "check_layout_gate.py",
     "check_tab_fixtures.py",
     "worktree_pair.py",
@@ -489,6 +490,61 @@ def check_merge_ready_passes_ack_open_blockers_to_devs_copy() -> list[str]:
         return problems
 
 
+def check_editing_only_the_gate_cannot_skip_devs_copy() -> list[str]:
+    """A branch that widens its copy of check_merge_ready.py and also defines
+    a `merge_ready_at` that passes in that file must still be refused by the
+    no-branch form: merge_to_dev.py takes `merge_ready_at` from
+    scripts/gate_copy.py, which the branch did not edit."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _Scratch(Path(tmp))
+        wt = s.branch("chore/widen")
+        s.widen_the_gate(wt)
+        gate = wt / "scripts" / "check_merge_ready.py"
+        stub = "\n\ndef merge_ready_at(*args, **kwargs):\n    return 0\n"
+        s.write(wt, "scripts/check_merge_ready.py", gate.read_text(encoding="utf-8") + stub)
+        s.write(wt, "packages/x.ts", "export const x = 2;\n")
+        s.commit(wt, "widen and stub")
+        rc, out = s.merge_to_dev(wt, "--check-only")
+        return _refused("no-branch form, only check_merge_ready.py edited", rc, out, "missing review")
+
+
+def check_merge_ready_needs_both_copies_to_pass() -> list[str]:
+    """`pnpm merge-ready` refuses `dev` itself; with `--branch` it checks the
+    named branch with both copies; it refuses when the checkout's copy
+    refuses even if dev's copy would pass; and it refuses when there is no
+    local `dev` to read dev's copy from."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _Scratch(Path(tmp))
+        rc, out = s.merge_ready(s.main)
+        problems = _refused("merge-ready on dev", rc, out, "refuse to check 'dev'")
+        other = s.branch("chore/other")
+        s.write(other, "packages/x.ts", "export const x = 3;\n")
+        s.commit(other, "product, no review")
+        narrow = s.branch("chore/narrow")
+        s.write(narrow, "packages/x.ts", "export const x = 4;\n")
+        s.commit(narrow, "product, no review")
+        wt = s.branch("chore/widen")
+        s.widen_the_gate(wt)
+        s.write(wt, "docs/reviews/chore-widen.md", _EMPTY_REVIEW)
+        s.commit(wt, "widen, with its review")
+        rc, out = s.merge_ready(wt, "--branch", "chore/other")
+        problems += _refused("merge-ready --branch from a widened checkout", rc, out, "missing review")
+        s.widen_the_gate(s.main)
+        s.commit(s.main, "dev widens its gate")
+        rc, out = s.own_copy_only(narrow)
+        if rc == 0:
+            return problems + [f"test setup: chore/narrow's own copy should refuse: {out[-300:]!r}"]
+        rc, out = s.merge_ready(narrow)
+        problems += _refused("merge-ready when only dev's copy passes", rc, out, "missing review")
+        s.git(s.main, "branch", "-m", "dev", "dev-old")
+        rc, out = s.own_copy_only(wt)
+        if rc != 0:
+            return problems + [f"test setup: with no dev, chore/widen's own copy should pass: {out[-300:]!r}"]
+        rc, out = s.merge_ready(wt)
+        problems += _refused("merge-ready with no local dev", rc, out, "cannot read")
+        return problems
+
+
 def check_a_tag_named_dev_does_not_move_the_merge_base() -> list[str]:
     """A tag named `dev` at the branch's product commit would make
     `git merge-base dev <branch>` start after it, leaving only a tooling
@@ -592,6 +648,8 @@ CHECKS = (
     check_ack_open_blockers_reaches_devs_copy,
     check_merge_ready_runs_devs_copy,
     check_merge_ready_passes_ack_open_blockers_to_devs_copy,
+    check_editing_only_the_gate_cannot_skip_devs_copy,
+    check_merge_ready_needs_both_copies_to_pass,
     check_a_tag_named_dev_does_not_move_the_merge_base,
     check_a_tag_named_dev_does_not_pick_devs_gate_copy,
     check_a_tag_named_dev_does_not_change_what_is_merged,

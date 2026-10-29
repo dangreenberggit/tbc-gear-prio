@@ -57,12 +57,20 @@ runs too, and both must pass.
   branch cannot edit this call away.
 - No-branch form (`pnpm merge-to-dev` from the branch's checkout): the
   branch's own `merge_to_dev.py` makes the same call, against the local
-  `dev` ref. A branch that edits only `check_merge_ready.py` is refused.
-  A branch that also edits `merge_to_dev.py` (or the `merge-to-dev` line
-  in `package.json`) can skip the call in this form. No code change can
-  close that: in this form every line that runs comes from the branch.
-- `pnpm merge-ready` still runs only the branch's copy. It is a preview,
-  not the door.
+  `dev` ref. A branch that edits only `check_merge_ready.py` is refused
+  (`check_editing_only_the_gate_cannot_skip_devs_copy` in
+  `scripts/check_merge_to_dev.py`). A branch that also edits
+  `merge_to_dev.py`, `gate_copy.py` (which holds `merge_ready_at`), or the
+  `merge-to-dev` line in `package.json` can skip the call in this form. No
+  code change can close that: in this form every line that runs comes from
+  the branch.
+- `pnpm merge-ready` runs the checkout's copy and then dev's copy, and
+  fails if either fails (`check_merge_ready_runs_devs_copy` and
+  `check_merge_ready_needs_both_copies_to_pass` in
+  `scripts/check_merge_to_dev.py`). It skips `pnpm verify` and the layout
+  gate, so it is a preview, not the door. It has the no-branch form's
+  limit: a branch that edits `main()` in its own `check_merge_ready.py`
+  can skip dev's copy.
 - Both forms also run code from the branch: `pnpm verify`, its gates,
   and its git hooks (in the named form, the merge of dev into the branch
   runs the branch's `.githooks/` before dev's check). The door stops a
