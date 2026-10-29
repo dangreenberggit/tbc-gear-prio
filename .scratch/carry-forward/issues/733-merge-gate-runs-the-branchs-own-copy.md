@@ -63,6 +63,17 @@ runs too, and both must pass.
   close that: in this form every line that runs comes from the branch.
 - `pnpm merge-ready` still runs only the branch's copy. It is a preview,
   not the door.
+- Both forms also run code from the branch: `pnpm verify`, its gates,
+  and its git hooks (in the named form, the merge of dev into the branch
+  runs the branch's `.githooks/` before dev's check). The door stops a
+  branch that changes the gate's rules. It does not stop code in the
+  branch written to get around it (review round 1, A3).
+
+Review round 1 (`docs/reviews/chore-733-gate-runs-dev-copy.md`) found
+two older ways past the check, fixed in `tbc-gear-prio@07da3aed`: a tag
+named `dev` moved the merge base (the check now names `refs/heads/dev`),
+and a review file that an ignore rule hides from git counted as present
+(the check now refuses it).
 
 ### A branch that changes the gate itself
 
@@ -88,3 +99,11 @@ With dev's `merge_to_dev.py` (before the fix) in place, the check fails
 on all three refusal cases (rc 0 each). Three mutants each fail it:
 skipping the call in the named form, skipping it in the no-branch form,
 and loading the branch's copy in place of dev's.
+
+At `tbc-gear-prio@07da3aed` the same command gives rc 0 with 17 checks.
+The new checks cover a real named run with dev ahead of the branch,
+`--ack-open-blockers`, a tag named `dev` and an ignored review file.
+Each of seven mutants fails it: the three above, dropping
+`--ack-open-blockers` on the way to dev's copy, the short `dev` name in
+`git merge-base`, removing the ignored-review-file refusal, and keeping
+the `GIT_*` variables in the throwaway repos.

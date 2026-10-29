@@ -53,9 +53,14 @@ fork's proto build. The branch's worktree already has them, and step 2
 makes its tip's tree the merge result.
 
 Which copy of the gate code runs: the named form is dev's copy of this
-script, so its call to dev's merge-ready check cannot be edited away by the
-branch. The no-branch form is the branch's own copy of this script, and a
-branch that also edits this file can drop the call there (ticket 733).
+script, so a branch cannot edit away its call to dev's merge-ready check.
+The no-branch form is the branch's own copy of this script, and a branch
+that also edits this file can drop the call there (ticket 733). Both forms
+also run code from the branch: `pnpm verify`, its gates, and its git hooks
+(`core.hooksPath` is the relative `.githooks`, so the named form's merge of
+dev into the branch runs the branch's hooks before dev's check). So the
+door stops a branch that changes the gate's rules. It does not stop code
+in the branch that is written to get around the door.
 
 Does not push. Does not touch main.
 
