@@ -916,3 +916,70 @@ checked those fixes. The case runs named in their rows are in
 | F2-3 | Focused check | wontfix     | not a defect: the change makes `pnpm issues:open` read `Blocks:` the same way as the gate, which is what A7 asks for; the A7 row names it, and the 126 open tickets print the same at both commits                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | F2-1 | Focused check | fixed       | `0065e74b`, after the last round: `is_ticket_file` says a ticket is a regular file, so a symlink, in the working tree or in git (mode 120000), counts as absent, and an open ticket replaced by one is a deletion that needs the review file. `BranchChanges.new_text`, `_git_show` and `iter_issue_files` (the phase scan) all use it. Self-test CLI cases `phase-9/symlink` (checked out and from `dev`), `link-text` (a link whose target text reads as `Status: closed` with `Verified by:`, which from `dev` gave rc=0 with the fix not yet written) and `phase-9/link-copy` (a link to an open blocker is not a second blocker): five checks failed before the fix. Mutations on the fixed code, each removing one part (the symlink test, the git mode check, the scan filter): `--self-test` rc=1 each; file restored, `cmp` equal. `advcases.sh`: `phase-9/symlink` and `sym-plain`, checked out, go from rc=0 to rc=1 "missing review"                                                                |
 | F2-2 | Focused check | fixed       | `6eb6260f`, after the last round: when the branch is checked out, `read_changes` stops the gate and `--product-files` with rc=1 while any tracked file is marked skip-worktree or assume-unchanged (`git ls-files -v` tag `S` or lower case), and names the files and the commands that clear the marks. It refuses any marked file, not only changed files and tickets, because the gate also reads the review file from the working tree; no file in this worktree or the main checkout has a mark (`git ls-files -v`, every tag `H`). Self-test CLI cases "skip-worktree ticket" and "assume-unchanged ticket" (a `wontfix` commit behind an open working copy) gave rc=0 "review not required" before the fix. Mutations (the refusal removed; only `S`; only lower case): `--self-test` rc=1 each; file restored, `cmp` equal. `advcases.sh`: `skipwt-plain` and `assume-plain` go from rc=0 to the refusal; `phase-9/skipwt` and `skipwt-product` refuse too, where they failed before for another reason |
+
+## Short check of the gap fixes (owner-requested)
+
+The owner asked for a short check of the F2-1 and F2-2 fixes ("short
+check sounds fine"): range `0e3b0e55..a67086b5` (`0065e74b`, `6eb6260f`,
+`a67086b5`). A `general-task` agent ran it in this worktree and changed
+no code. Logs are in `/tmp/claude-1000/r7/` (not tracked).
+
+**Results.**
+
+- Symlink rule. These readers go through `is_ticket_file` or the mode
+  check in `_git_show`: `iter_issue_files` (the phase scan, the
+  relevant-ticket scan and the unreadable-status check use it),
+  `BranchChanges.new_text` for a checked-out branch, and `_git_show` for
+  `old_text` and for `new_text` from another checkout. Two readers do
+  not; see F3-1 and F3-2.
+- Mutations. Seven mutated copies of the script at `a67086b5` (written
+  by `/tmp/claude-1000/r6/mutate.py` to `/tmp/claude-1000/r7/mut/`) each
+  make `--self-test` fail, and the unmutated copy passes there. They
+  remove: the filter in `iter_issue_files`; `is_ticket_file` in
+  `new_text`; the mode `120000` check in `_git_show`; the symlink test in
+  `is_ticket_file`; the whole skip-worktree / assume-unchanged refusal;
+  only the lower-case test; only the `S` test.
+- No false refusal. `bash /tmp/claude-1000/r2/cases.sh` (29 cases) and
+  `/tmp/claude-1000/adv3/mycases.sh` (6 cases) on the script at
+  `a67086b5` print the same lines as the fixer's runs at `6eb6260f`
+  (`diff` against `/tmp/claude-1000/r6/cases-6eb6260f.log` and
+  `mycases-6eb6260f.log`, commit ids masked). `a67086b5` changes only
+  this file. `chore/729-test-result` is still exempt: this worktree's
+  `python3 scripts/check_merge_ready.py --branch chore/729-test-result`
+  gives rc=0, "review not required", and `--product-files` prints
+  nothing. Neither writes to the main checkout.
+- A branch that replaces the whole `issues/` directory with a link still
+  needs the review file: the link's own path is a changed product file
+  (scratch repo `/tmp/claude-1000/r7/adv`).
+- Gates at `a67086b5`, all rc=0: `python3 scripts/check_merge_ready.py
+--self-test` (41 checks), `python3 scripts/check_merge_to_dev.py` (12
+  checks), `TBC_VERIFY_WITHOUT_FORK=1 pnpm verify`, and
+  `TBC_VERIFY_WITHOUT_FORK=1 pnpm merge-to-dev --check-only` ("check-only:
+  ok (not merging)").
+
+**Findings.** Both are low severity. Neither changes whether a branch
+needs the review file, whether a close counts as verified, or whether a
+phase blocker is open. Both break the stated rule that a link counts as
+absent everywhere tickets are read, and the `is_ticket_file` docstring
+(`scripts/check_merge_ready.py:510-515`) says every reader treats a
+link as absent, which is not true for these two.
+
+- **F3-1** — `review_file_errors`, `scripts/check_merge_ready.py:1076`
+  and `:1079`: the `defer` check uses `tpath.is_file()` and
+  `read_status(tpath)`, which follow a link. In the scratch repo, a
+  `defer` row naming `issues/9-link.md`, a link to an open ticket, prints
+  `ok  A1: defer -> .scratch/carry-forward/issues/9-link.md (open)`. A
+  link to a closed ticket is still refused.
+- **F3-2** — `list_open_carry_forward`, `scripts/check_merge_ready.py:997`
+  (`pnpm issues:open`, `--list-only`): it globs `*.md` without
+  `is_ticket_file`, so it lists `9-link.md` as a second open ticket. It
+  only prints a list.
+
+F3-1 and F3-2 have no row: whether to fix them on this branch or defer
+them to a ticket is the dispatching session's decision. This check
+judges that neither blocks the merge.
+
+## Disposition (short check)
+
+| ID  | Axis | Disposition | Ticket / note |
+| --- | ---- | ----------- | ------------- |
