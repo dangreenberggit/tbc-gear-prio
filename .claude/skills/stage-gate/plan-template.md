@@ -43,12 +43,14 @@ shared manifests get exactly one owner.
 
 A chunk is a piece worth building on its own, which one `gate-executor`
 builds after the chunks before it. List every chunk, in build order.
-The first chunks have steps: `K1: steps 1–4`. Each later chunk is one
-line: `K2: <goal in one sentence> — needs from K1: <result or file>`.
+Each chunk you can plan now has steps: `K1: steps 1–4`, `K2: steps
+5–7`. A chunk is one line only when it needs a result that an earlier
+chunk's run produces and the plan cannot know before then: `K3: <goal
+in one sentence> — needs from K2's run: <result>`.
 The Steps, Claims register and Paths manifest above cover the chunks
 with steps. A step whose result later steps must reason about goes in
-the same chunk as those steps. A new plan for a later chunk starts its
-list at that chunk, and numbers its steps and claims after the last
+the same chunk as those steps. A new plan for a one-line chunk starts
+its list at that chunk, and numbers its steps and claims after the last
 ones of the plan before it.
 
 ## Verify recipe
