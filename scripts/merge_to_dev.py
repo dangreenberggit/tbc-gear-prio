@@ -76,7 +76,6 @@ import os
 import shutil
 import subprocess
 import sys
-import types
 from collections.abc import Callable
 from pathlib import Path
 
@@ -89,13 +88,13 @@ import check_merge_ready  # noqa: E402
 # The sandbox stub rule lives in check_merge_ready, whose changed-file read
 # leaves the stubs out too; check_merge_to_dev.py tests it through here.
 from check_merge_ready import SANDBOX_STUBS, holds_no_work, is_device  # noqa: E402,F401
+from check_merge_ready import merge_ready_at  # noqa: E402
 import worktree_pair  # noqa: E402
 
 # pre-commit on `dev` refuses merge commits unless this is set (see .githooks/pre-commit).
 ALLOW_DEV_MERGE = "TBC_ALLOW_DEV_MERGE"
 LAYOUT_LOCK = "data/wowsims-fork-layout.lock.json"
 FORK_LOCK = "data/wowsims-fork.lock.json"
-MERGE_READY = "scripts/check_merge_ready.py"
 
 
 def _resolve_cmd(cmd: list[str]) -> list[str]:
@@ -215,28 +214,6 @@ def _commit_layout_baseline(lock_path: Path, digest: str) -> None:
     if commit.returncode != 0:
         die("layout gate advanced the baseline but committing the lock failed")
     print(f"committed layout baseline advance ({rel}) onto {ROOT.name}'s branch")
-
-
-def merge_ready_at(rev: str, checkout: Path, branch: str, ack_open_blockers: bool) -> int:
-    """Run `rev`'s committed copy of check_merge_ready.py on `branch`, which
-    is checked out at `checkout`; return its exit code.
-
-    The branch's own copy alone could be edited to exempt the branch from
-    its review (ticket 733). The copy runs with `__file__` set to the
-    checkout's path, so its ROOT, and every ticket and review file it reads,
-    are the checkout's.
-    """
-    name = "check_merge_ready_at_" + rev.replace("/", "_")
-    module = types.ModuleType(name)
-    module.__file__ = str(checkout / MERGE_READY)
-    source = git_out("show", f"{rev}:{MERGE_READY}")
-    # dataclasses looks the module up in sys.modules while it builds a class.
-    sys.modules[name] = module
-    try:
-        exec(compile(source, f"{rev}:{MERGE_READY}", "exec"), module.__dict__)
-        return module.check(branch=branch, ack_open_blockers=ack_open_blockers)
-    finally:
-        del sys.modules[name]
 
 
 def named_mode_problem(current: str, target: str) -> str | None:

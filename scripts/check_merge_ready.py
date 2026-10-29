@@ -16,7 +16,8 @@ open (`ticket_needs_review`). A verified close keeps the exemption.
 
 Used by `pnpm merge-to-dev` (the only supported door into dev). Also:
 
-    pnpm merge-ready              # check only, no merge
+    pnpm merge-ready              # check only, no merge: this checkout's copy
+                                  # of this file, then dev's (`merge_ready_at`)
     pnpm issues:open              # list open carry-forward tickets
 
 Phase-N branches: open tickets with `Blocks: phase-N` are listed. Merging
@@ -53,6 +54,7 @@ import re
 import stat
 import subprocess
 import sys
+import types
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -168,11 +170,10 @@ INTEGRATION_BRANCH = "dev"
 # The list lives here and not in a doc under docs/agents/ because that folder
 # is on the list: a branch could then widen the list and exempt itself in the
 # same diff. This file is not on the list, so a change to it gets the product
-# review. `pnpm merge-to-dev` also runs dev's copy of this file on the branch
-# (`merge_ready_at` in scripts/merge_to_dev.py, ticket 733), so a branch's
-# edit to either list here takes effect only once it is on dev. `pnpm
-# merge-ready` runs only the branch's copy. For the no-branch limit, see
-# "Which copy of the gate code runs" in scripts/merge_to_dev.py.
+# review. `pnpm merge-to-dev` and `pnpm merge-ready` also run dev's copy of this
+# file on the branch (`merge_ready_at`, ticket 733), so a branch's edit to
+# either list here takes effect only once it is on dev. For the no-branch
+# limit, see "Which copy of the gate code runs" in scripts/merge_to_dev.py.
 TOOLING_PATHS = (
     ".claude/skills/",
     ".agents/skills/",
@@ -1231,6 +1232,45 @@ def check(
 
     print("\nmerge-ready: ok")
     return 0
+
+
+def merge_ready_at(
+    rev: str,
+    checkout: Path,
+    branch: str,
+    ack_open_blockers: bool,
+    review: Path | None = None,
+) -> int:
+    """Run `rev`'s committed copy of this file on `branch`, which is checked
+    out at `checkout`; return its exit code.
+
+    The branch's own copy alone could be edited to exempt the branch from
+    its review (ticket 733). The copy runs with `__file__` set to the
+    checkout's path, so its ROOT, and every ticket and review file it reads,
+    are the checkout's.
+    """
+    rel = "scripts/" + Path(__file__).name
+    shown = subprocess.run(
+        ["git", "show", f"{rev}:{rel}"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if shown.returncode != 0:
+        print(f"FAIL: cannot read {rel} at {rev}: {shown.stderr.strip()}", file=sys.stderr)
+        return 1
+    name = "check_merge_ready_at_" + rev.replace("/", "_")
+    module = types.ModuleType(name)
+    module.__file__ = str(checkout / rel)
+    # dataclasses looks the module up in sys.modules while it builds a class.
+    sys.modules[name] = module
+    try:
+        exec(compile(shown.stdout, f"{rev}:{rel}", "exec"), module.__dict__)
+        return module.check(branch=branch, review=review, ack_open_blockers=ack_open_blockers)
+    finally:
+        del sys.modules[name]
 
 
 # ---------------------------------------------------------------------------
@@ -2456,10 +2496,22 @@ def main() -> int:
             )
         return 0
 
-    return check(
-        branch=args.branch,
+    # `pnpm merge-ready` runs both copies that `pnpm merge-to-dev` runs:
+    # this checkout's, then dev's. A branch's edit to its own copy then
+    # cannot make merge-ready pass where dev's copy refuses. It skips the
+    # door's `pnpm verify` and layout gate.
+    branch = args.branch or branch_name()
+    print("=== merge-ready, by this checkout's copy ===")
+    ready = check(
+        branch=branch,
         review=args.review,
         ack_open_blockers=args.ack_open_blockers,
+    )
+    if ready != 0:
+        return ready
+    print(f"\n=== merge-ready, by {INTEGRATION_BRANCH}'s copy ===")
+    return merge_ready_at(
+        f"refs/heads/{INTEGRATION_BRANCH}", ROOT, branch, args.ack_open_blockers, args.review
     )
 
 

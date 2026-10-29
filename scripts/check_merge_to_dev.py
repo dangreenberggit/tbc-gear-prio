@@ -294,6 +294,28 @@ class _Scratch:
         )
         return out.returncode, out.stdout + out.stderr
 
+    def merge_ready(self, cwd: Path, *argv: str) -> tuple[int, str]:
+        """Run `pnpm merge-ready`'s command, the copy of check_merge_ready.py
+        in `cwd`, as a CLI."""
+        out = subprocess.run(
+            [sys.executable, str(cwd / "scripts" / "check_merge_ready.py"), *argv],
+            cwd=cwd, capture_output=True, text=True, env=_scratch_env(),
+        )
+        return out.returncode, out.stdout + out.stderr
+
+    def own_copy_only(self, cwd: Path) -> tuple[int, str]:
+        """Run `check()` of the copy of check_merge_ready.py in `cwd` alone,
+        without dev's copy."""
+        code = (
+            "import sys; sys.path.insert(0, 'scripts'); import check_merge_ready as c; "
+            "raise SystemExit(c.check())"
+        )
+        out = subprocess.run(
+            [sys.executable, "-c", code], cwd=cwd, capture_output=True, text=True,
+            env=_scratch_env(),
+        )
+        return out.returncode, out.stdout + out.stderr
+
     def widen_the_gate(self, wt: Path) -> None:
         """Edit `wt`'s copy of check_merge_ready.py so that a branch changing
         `packages/` and `scripts/` needs no review file: both go on
@@ -346,12 +368,9 @@ def check_branch_cannot_exempt_itself_by_editing_the_gate() -> list[str]:
         s.widen_the_gate(wt)
         s.write(wt, "packages/x.ts", "export const x = 2;\n")
         s.commit(wt, "widen")
-        out = subprocess.run(
-            [sys.executable, str(wt / "scripts" / "check_merge_ready.py")],
-            cwd=wt, capture_output=True, text=True, env=_scratch_env(),
-        )
-        if out.returncode != 0 or "review not required" not in out.stdout:
-            return [f"test setup: the branch's own copy should exempt it: {out.stdout[-300:]!r}"]
+        rc, out = s.own_copy_only(wt)
+        if rc != 0 or "review not required" not in out:
+            return [f"test setup: the branch's own copy should exempt it: {out[-300:]!r}"]
         problems = []
         forms = (("named form", s.main, ("chore/widen",)), ("no-branch form", wt, ()))
         for label, cwd, argv in forms:
@@ -414,6 +433,60 @@ def check_ack_open_blockers_reaches_devs_copy() -> list[str]:
         problems = _refused("named form without --ack-open-blockers", rc, out, "Blocks: phase-9")
         rc, out = s.merge_to_dev(s.main, "phase-9/x", "--check-only", "--ack-open-blockers")
         return problems + _passed("named form with --ack-open-blockers", rc, out)
+
+
+def check_merge_ready_runs_devs_copy() -> list[str]:
+    """`pnpm merge-ready` runs the branch's copy of check_merge_ready.py and
+    then dev's, so it refuses whenever dev's copy refuses. The branch widens
+    its copy of the gate and has no review file: merge-ready must refuse,
+    with or without `--branch`. `--review` reaches dev's copy: a review file
+    at another path passes both copies. With its own review file the branch
+    passes, and the output shows that dev's copy ran."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _Scratch(Path(tmp))
+        wt = s.branch("chore/widen")
+        s.widen_the_gate(wt)
+        s.write(wt, "packages/x.ts", "export const x = 2;\n")
+        s.commit(wt, "widen")
+        rc, out = s.own_copy_only(wt)
+        if rc != 0 or "review not required" not in out:
+            return [f"test setup: the branch's own copy should exempt it: {out[-300:]!r}"]
+        problems = []
+        for argv in ((), ("--branch", "chore/widen")):
+            rc, out = s.merge_ready(wt, *argv)
+            problems += _refused(f"merge-ready {' '.join(argv)}".strip(), rc, out, "missing review")
+        s.write(wt, "docs/reviews/elsewhere.md", _EMPTY_REVIEW)
+        s.commit(wt, "review at another path")
+        rc, out = s.merge_ready(wt, "--review", "docs/reviews/elsewhere.md")
+        problems += _passed("merge-ready --review at another path", rc, out)
+        s.write(wt, "docs/reviews/chore-widen.md", _EMPTY_REVIEW)
+        s.commit(wt, "review")
+        rc, out = s.merge_ready(wt)
+        problems += _passed("merge-ready with its review file", rc, out)
+        if rc == 0 and "by dev's copy" not in out:
+            problems.append(f"merge-ready passed without saying it ran dev's copy: {out[-300:]!r}")
+        return problems
+
+
+def check_merge_ready_passes_ack_open_blockers_to_devs_copy() -> list[str]:
+    """On phase-9/x with an open `Blocks: phase-9` ticket, `pnpm merge-ready`
+    refuses without --ack-open-blockers and passes with it, so the flag
+    reaches dev's copy as well as the branch's."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _Scratch(Path(tmp))
+        s.write(s.main, ".scratch/carry-forward/issues/1-t.md", "Status: open\nBlocks: phase-9\n\n# t\n")
+        s.commit(s.main, "ticket")
+        wt = s.branch("phase-9/x")
+        s.write(wt, "packages/x.ts", "export const x = 2;\n")
+        s.write(wt, "docs/reviews/phase-9-x.md", _EMPTY_REVIEW)
+        s.commit(wt, "work")
+        rc, out = s.merge_ready(wt)
+        problems = _refused("merge-ready without --ack-open-blockers", rc, out, "Blocks: phase-9")
+        rc, out = s.merge_ready(wt, "--ack-open-blockers")
+        problems += _passed("merge-ready with --ack-open-blockers", rc, out)
+        if rc == 0 and "by dev's copy" not in out:
+            problems.append(f"merge-ready passed without saying it ran dev's copy: {out[-300:]!r}")
+        return problems
 
 
 def check_a_tag_named_dev_does_not_move_the_merge_base() -> list[str]:
@@ -517,6 +590,8 @@ CHECKS = (
     check_branch_cannot_exempt_itself_by_editing_the_gate,
     check_real_named_run_runs_devs_copy_after_merging_dev,
     check_ack_open_blockers_reaches_devs_copy,
+    check_merge_ready_runs_devs_copy,
+    check_merge_ready_passes_ack_open_blockers_to_devs_copy,
     check_a_tag_named_dev_does_not_move_the_merge_base,
     check_a_tag_named_dev_does_not_pick_devs_gate_copy,
     check_a_tag_named_dev_does_not_change_what_is_merged,
