@@ -504,7 +504,16 @@ def iter_issue_files() -> list[Path]:
     """Only carry-forward tickets — not nested worktree / scratch copies."""
     if not CARRY.is_dir():
         return []
-    return sorted(CARRY.glob("*.md"))
+    return sorted(p for p in CARRY.glob("*.md") if is_ticket_file(p))
+
+
+def is_ticket_file(path: Path) -> bool:
+    """A ticket is a regular file. A symlink is not a ticket, in the working
+    tree or in git (mode 120000): replacing an open ticket with a link to a
+    closed one would otherwise read as a verified close (finding F2-1), so
+    every ticket reader treats a link as absent, which for an open ticket is
+    a deletion."""
+    return path.is_file() and not path.is_symlink()
 
 
 def open_blockers_for_phase(phase: str) -> list[tuple[Path, str]]:
@@ -710,7 +719,9 @@ class BranchChanges:
         if not self.from_tree:
             return _git_show(self.root, self.branch, rel)
         path = self.root / rel
-        return path.read_text(encoding="utf-8", errors="replace") if path.is_file() else None
+        if not is_ticket_file(path):
+            return None
+        return path.read_text(encoding="utf-8", errors="replace")
 
     def tickets(self) -> list[str]:
         """The changed carry-forward tickets: top-level `.md` files only, the
@@ -899,6 +910,13 @@ def product_files(
 
 
 def _git_show(root: Path, ref: str, rel: str) -> str | None:
+    """Ticket `rel` at `ref`, or None when it is absent there or is a
+    symlink (`is_ticket_file`)."""
+    mode = subprocess.run(
+        ["git", "ls-tree", ref, "--", rel], cwd=root, capture_output=True, text=True
+    ).stdout
+    if mode.startswith("120000 "):
+        return None
     out = subprocess.run(
         ["git", "show", f"{ref}:{rel}"],
         cwd=root,
@@ -2070,6 +2088,19 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
                 f"{carry_rel}/3-two.md":
                     "Status: open\nBlocks: phase-12\nBlocks: phase-11\n\n# t\n",
             })
+
+            def link_branch(name: str, rel: str, target: str) -> None:
+                git("checkout", "-q", INTEGRATION_BRANCH)
+                git("checkout", "-q", "-b", name)
+                (root / rel).unlink(missing_ok=True)
+                (root / rel).symlink_to(target)
+                git("add", "-A")
+                git("commit", "-q", "-m", name)
+
+            link_branch("phase-9/symlink", open_rel, "2-closed.md")
+            # A link's text in git is its target, which can read as a ticket.
+            link_branch("link-text", open_rel, "Status: closed\nVerified by: `true`\n")
+            link_branch("phase-9/link-copy", f"{carry_rel}/9-link.md", "1-open.md")
             git("branch", "empty", INTEGRATION_BRANCH)
             git("checkout", "-q", INTEGRATION_BRANCH)
         except (OSError, subprocess.CalledProcessError) as exc:
@@ -2099,6 +2130,11 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             # the phase scan reads every line, as the ticket rule does.
             ("phase-9/blank-blocks", 1, "open Blocks: phase-9", 0, ""),
             ("phase-11/swap", 1, "open Blocks: phase-11", 0, ""),
+            # A symlink is not a ticket: an open ticket replaced by a link is
+            # deleted, and a link to a ticket is not a second copy of it.
+            ("phase-9/symlink", 1, "missing review", 0, f"{open_rel}\n"),
+            ("link-text", 1, "missing review", 0, f"{open_rel}\n"),
+            ("phase-9/link-copy", 1, "1 open Blocks: phase-9", 0, ""),
             # No changed file is not "every changed file is tooling": the gate
             # requires the review, so --product-files must not say to skip it.
             ("empty", 1, "missing review", 1, ""),
@@ -2152,6 +2188,8 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
         # tree, which holds dev's copy of every file.
         from_another_checkout = (
             ("phase-9/wontfix", 1, "missing review", f"{open_rel}\n"),
+            ("phase-9/symlink", 1, "missing review", f"{open_rel}\n"),
+            ("link-text", 1, "missing review", f"{open_rel}\n"),
             ("mixed", 1, "missing review", "packages/x.ts\n"),
             ("tooling", 0, "review not required", ""),
         )
