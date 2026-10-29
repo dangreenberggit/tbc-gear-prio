@@ -175,6 +175,7 @@ def _stub_repo_problems() -> list[str]:
                 cwd=root,
                 check=True,
                 capture_output=True,
+                env=_scratch_env(),
             )
 
         git("init", "-q")
@@ -316,7 +317,7 @@ class _Scratch:
     def skip_devs_copy(self, wt: Path) -> None:
         """Edit `wt`'s copy of merge_to_dev.py so it never runs dev's copy."""
         own = (wt / "scripts" / "merge_to_dev.py").read_text(encoding="utf-8")
-        stub = '\ndef dev_merge_ready(*args, **kwargs):\n    return 0\n\n\nif __name__ == "__main__":'
+        stub = '\ndef merge_ready_at(*args, **kwargs):\n    return 0\n\n\nif __name__ == "__main__":'
         self.write(wt, "scripts/merge_to_dev.py", own.replace('\nif __name__ == "__main__":', stub, 1))
 
 

@@ -46,7 +46,7 @@ branch's gates. Hypothesis, untested: loading the module from
 
 Fixed in `tbc-gear-prio@de4e383a`. `scripts/merge_to_dev.py` now runs
 dev's committed copy of `scripts/check_merge_ready.py` on the branch
-(`dev_merge_ready`). It loads the text with `git show <dev>:<path>` and
+(`merge_ready_at`). It loads the text with `git show <dev>:<path>` and
 runs it with `__file__` set to the branch checkout's path, so the copy
 reads the branch's tickets and review file. The branch's own copy still
 runs too, and both must pass.
