@@ -1095,9 +1095,10 @@ def check(
 #
 # Follows the check_lock_merge.py / check_sync_wowsims.py convention -- a
 # tuple of small checks returning problem strings, not a pytest suite (this
-# repo has no pytest infra). Only the pure halves are covered:
-# `extract_ticket_paths` and `relevant_paths` take text and sets, so they need
-# no branch, no repo state and no git.
+# repo has no pytest infra). The pure halves are covered: `extract_ticket_paths`
+# and `relevant_paths` take text and sets, so they need no branch, no repo
+# state and no git. `check_gate_cli_on_a_scratch_repo` also runs the gate CLI
+# on a throwaway repo.
 #
 #     python scripts/check_merge_ready.py --self-test
 # ---------------------------------------------------------------------------
