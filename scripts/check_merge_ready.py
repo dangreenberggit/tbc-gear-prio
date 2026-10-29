@@ -731,7 +731,9 @@ def read_changes(
 
     Read-only: `git merge-base`, `git branch --show-current`, `git diff
     --name-only` and, when the branch is checked out, `git ls-files
-    --others`; nothing that writes a ref, an index or an object. An untracked
+    --others` and `git diff --cached`; nothing that writes a ref, an index or
+    an object. When a file's staged copy differs from its working copy, it
+    exits with a message naming the file. An untracked
     file that `holds_no_work` is left out, as `pnpm merge-to-dev` leaves it
     out of its clean-tree check.
 
@@ -755,21 +757,39 @@ def read_changes(
         ["git", "branch", "--show-current"], cwd=root, capture_output=True, text=True
     ).stdout.strip()
     from_tree = branch == current
+    diff = ["git", "diff", "--name-only", "--no-renames"]
     if from_tree:
         listings = (
-            ["git", "diff", "--name-only", "--no-renames", base],
+            [*diff, base],
             ["git", "ls-files", "--others", "--exclude-standard"],
+            [*diff, "--cached"],
+            diff,
         )
     else:
-        listings = (["git", "diff", "--name-only", "--no-renames", base, branch],)
-    names: set[str] = set()
+        listings = ([*diff, base, branch],)
+    listed: list[set[str]] = []
     for argv in listings:
         out = subprocess.run(argv, cwd=root, capture_output=True, text=True)
         if out.returncode != 0:
             return None, f"{' '.join(argv[:2])} failed: {out.stderr.strip()}"
-        listed = (ln.strip() for ln in out.stdout.splitlines() if ln.strip())
-        untracked = argv[1] == "ls-files"
-        names.update(rel for rel in listed if not (untracked and holds_no_work(root, rel)))
+        listed.append({ln.strip() for ln in out.stdout.splitlines() if ln.strip()})
+    names = listed[0]
+    if from_tree:
+        changed, untracked, staged, unstaged = listed
+        names = changed | {rel for rel in untracked if not holds_no_work(root, rel)}
+        # Plain `git commit` takes a file's staged copy, but this repo's
+        # pre-commit hook can commit the rest of a partly staged file too
+        # (AGENTS.md, "Commits and merges"), so neither copy is a safe guess.
+        # A real merge never gets here: it refuses a dirty tree first.
+        partly = sorted(staged & (unstaged | untracked))
+        if partly:
+            raise SystemExit(
+                "FAIL: the staged copy differs from the working copy of: "
+                + ", ".join(partly)
+                + ". The gate cannot tell which copy the next commit takes. Stage "
+                "all of each file (git add) or unstage it (git restore --staged), "
+                "then run the check again."
+            )
     return BranchChanges(root, branch, base, from_tree, frozenset(names)), None
 
 
@@ -2116,6 +2136,23 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             ("sandbox stub path with content", put_stubs("x"),
              1, "missing review", ".bashrc\n.claude/settings.local.json\n"),
         )
+        def stage_then_undo(rel: str, staged: str):
+            def change() -> None:
+                path = root / rel
+                kept = path.read_text()
+                path.write_text(staged)
+                git("add", rel)
+                path.write_text(kept)
+            return change
+
+        # (name, change): the staged copy of a file differs from its working
+        # copy, so the gate cannot tell which one a commit takes and refuses.
+        partly_staged = (
+            ("partly staged ticket",
+             stage_then_undo(open_rel, "Status: wontfix\nBlocks: phase-9\n\n# t\n")),
+            ("partly staged product file",
+             stage_then_undo("packages/x.ts", "export const x = 4;\n")),
+        )
         # (branch, gate rc, text, --product-files stdout), run with `dev`
         # checked out: the gate must read each branch's tip, not the working
         # tree, which holds dev's copy of every file.
@@ -2153,6 +2190,11 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             expect(label, "tooling", want_rc, want_text, 0, want_pf)
             git("checkout", "-q", "-f", "tooling")
             git("clean", "-fdq", "-e", "no-hooks")
+        for label, change in partly_staged:
+            git("checkout", "-q", "-f", "tooling")
+            change()
+            expect(label, "tooling", 1, "staged copy differs", 1, "")
+            git("checkout", "-q", "-f", "tooling")
         git("checkout", "-q", INTEGRATION_BRANCH)
         for branch, want_rc, want_text, want_pf in from_another_checkout:
             expect(f"{branch} from {INTEGRATION_BRANCH}", branch, want_rc, want_text, 0, want_pf)
