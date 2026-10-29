@@ -272,6 +272,16 @@ run that stops before the agent hands work to the next agent leaves the
 blocking finding open". A full trial is a live stage-gate run with the
 `gate-*` types, outside this review's budget.
 
+Ruling after the review (dispatching session, 2026-10-29): the trial
+counts as full. The Gate A wording decides only the session's own
+verdict and the respawn the session writes. Both runs produced that
+verdict and the full respawn text, and the next agent's own
+instructions (`gate-planner.md`) are unchanged. So the work that the
+changed text controls was done in full, and IR2 is fixed. The skill's
+rule that a run which "stops before the agent hands work to the next
+agent" is no trial is unclear for text whose only output is a verdict;
+ticket 732 § Skill feedback from real use records it.
+
 ## How the skill worked
 
 What went well:
@@ -332,6 +342,8 @@ What went badly:
   stage-gate run whose brief has open questions, and check Gate A there.
   Option 3: build a live stage-gate trial now with a planted
   open-question plan (several spawns). Recommended: option 1.
+  **Answered:** option 1, by the dispatching session's ruling (§ Check 3
+  § Gate A).
 
 Merging into `dev` also waits for the owner's own ask after reading this
 review (`AGENTS.md` § Commits and merges).
@@ -348,7 +360,7 @@ review (`AGENTS.md` § Commits and merges).
 | ID  | Axis    | Disposition | Ticket / note                                                                                                                                                                                                   |
 | --- | ------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | IR1 | Check 3 | fixed       | trial run (§ Check 3 § Template § Result): the old template with the second brief also gave steps to K1, K2 and K3, so the brief sentence was the cause and the template edit is a no-op clarification          |
-| IR2 | Check 3 |             | owner decision Q-729wd-gate-a-trial (§ Needed from the owner)                                                                                                                                                   |
+| IR2 | Check 3 | fixed       | the changed text decides only the session's verdict and respawn; both runs wrote that verdict and the full respawn text, and `gate-planner.md` is unchanged (§ Check 3 § Gate A, ruling after the review)       |
 | IR3 | Check 1 | wontfix     | the sentence is unchanged by this branch, and the cold reader took the meant reading as its own                                                                                                                 |
 | IR4 | Check 1 | wontfix     | matches `gate-planner.md:38-39`; a chunk that waits on an owner decision goes out as "Open questions" (`SKILL.md:240-243`)                                                                                      |
 | IR5 | Check 2 | wontfix     | the same option was in the old Gate A text; the cost is one Gate A respawn, and Gate A names the violation, as for A5 in `docs/reviews/chore-729-test-result.md`                                                |
