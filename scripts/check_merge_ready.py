@@ -9,10 +9,10 @@ open carry-forward ticket.
 Agent-tooling branches: when every file the branch changed is on
 `TOOLING_PATHS`, the review file is not required, because the product review
 does not apply to agent-tooling files. A review file that exists is still checked. The
-ticket checks below run on every branch. A branch that deletes or closes a
-ticket that was open at the merge base, or changes its `Blocks:` line, needs
-the review file, because that ticket drops out of the ticket checks
-(`tickets_let_go`).
+ticket checks below run on every branch. A ticket that was open at the merge
+base still needs the review file when the branch deletes it, gives it any
+status but a verified close, or changes its `Blocks:` values while it stays
+open (`ticket_needs_review`). A verified close keeps the exemption.
 
 Used by `pnpm merge-to-dev` (the only supported door into dev). Also:
 
@@ -631,16 +631,50 @@ def _merge_base(branch: str, integration: str, root: Path) -> tuple[str, str | N
     return base.stdout.strip(), None
 
 
-def changed_files_vs_integration(
-    branch: str, integration: str = INTEGRATION_BRANCH, root: Path = ROOT
-) -> tuple[set[str], str | None]:
-    """Files this branch changed since it forked from the integration branch.
+@dataclass(frozen=True)
+class BranchChanges:
+    """What a branch changed since its merge base with dev (`read_changes`)."""
 
-    Returns (changed files, reason it could not be determined). Read-only: a
-    `git merge-base`, a `git diff --name-only` and, when the branch is checked
-    out, `git ls-files --others`; nothing that writes a ref, an index or an
-    object. A checked-out branch is read from the working tree
-    (`_reads_working_tree`).
+    root: Path
+    branch: str
+    base: str
+    # True when the branch is checked out at `root`: the new side of every
+    # file is then the working tree, so that `--check-only` on a dirty tree
+    # previews what the gate says once the changes are committed. For any
+    # other branch (`--branch X` from another checkout) it is the branch tip.
+    from_tree: bool
+    names: frozenset[str]
+
+    def old_text(self, rel: str) -> str | None:
+        return _git_show(self.root, self.base, rel)
+
+    def new_text(self, rel: str) -> str | None:
+        """`rel` on the branch, or None when the branch deletes it."""
+        if not self.from_tree:
+            return _git_show(self.root, self.branch, rel)
+        path = self.root / rel
+        return path.read_text(encoding="utf-8", errors="replace") if path.is_file() else None
+
+    def tickets(self) -> list[str]:
+        """The changed carry-forward tickets: top-level `.md` files only, the
+        same set `iter_issue_files()` scans."""
+        carry_rel = CARRY.relative_to(ROOT).as_posix()
+        return sorted(
+            rel for rel in self.names
+            if rel.endswith(".md") and Path(rel).parent.as_posix() == carry_rel
+        )
+
+
+def read_changes(
+    branch: str, integration: str = INTEGRATION_BRANCH, root: Path = ROOT
+) -> tuple[BranchChanges | None, str | None]:
+    """The files this branch changed since it forked from the integration
+    branch, read once per gate run. Returns (changes, reason they could not
+    be read).
+
+    Read-only: `git merge-base`, `git branch --show-current`, `git diff
+    --name-only` and, when the branch is checked out, `git ls-files
+    --others`; nothing that writes a ref, an index or an object.
 
     Diffing against the merge base rather than the branch tip is what keeps
     this honest -- a plain `git diff dev` would also list every file that
@@ -657,45 +691,29 @@ def changed_files_vs_integration(
     """
     base, why = _merge_base(branch, integration, root)
     if why:
-        return set(), why
-    return _names_changed_since(base, branch, root)
-
-
-def _reads_working_tree(branch: str, root: Path) -> bool:
-    """True when `branch` is checked out at `root`. The gate then reads the
-    working tree, as the ticket scans do, so that `--check-only` on a dirty
-    tree previews what the gate says once the changes are committed. For any
-    other branch (`--branch X` from another checkout) it reads the branch tip."""
+        return None, why
     current = subprocess.run(
         ["git", "branch", "--show-current"], cwd=root, capture_output=True, text=True
     ).stdout.strip()
-    return branch == current
-
-
-def _names_changed_since(
-    base: str, branch: str, root: Path, *pathspec: str
-) -> tuple[set[str], str | None]:
-    """Paths that differ between `base` and the branch, both sides of a
-    rename listed; untracked files count when the working tree is read."""
-    tail = ["--", *pathspec] if pathspec else []
-    if _reads_working_tree(branch, root):
+    from_tree = branch == current
+    if from_tree:
         listings = (
-            ["git", "diff", "--name-only", "--no-renames", base, *tail],
-            ["git", "ls-files", "--others", "--exclude-standard", *tail],
+            ["git", "diff", "--name-only", "--no-renames", base],
+            ["git", "ls-files", "--others", "--exclude-standard"],
         )
     else:
-        listings = (["git", "diff", "--name-only", "--no-renames", base, branch, *tail],)
+        listings = (["git", "diff", "--name-only", "--no-renames", base, branch],)
     names: set[str] = set()
     for argv in listings:
         out = subprocess.run(argv, cwd=root, capture_output=True, text=True)
         if out.returncode != 0:
-            return set(), f"{' '.join(argv[:2])} failed: {out.stderr.strip()}"
+            return None, f"{' '.join(argv[:2])} failed: {out.stderr.strip()}"
         names.update(ln.strip() for ln in out.stdout.splitlines() if ln.strip())
-    return names, None
+    return BranchChanges(root, branch, base, from_tree, frozenset(names)), None
 
 
 # A ticket in one of these is not open. Any other status, an unreadable one
-# included, counts as open, so a ticket the gate cannot read is not let go.
+# included, counts as open, so a ticket the gate cannot read is treated as open.
 NOT_OPEN_STATUSES = (*CLOSED_STATUSES, "wontfix")
 
 
@@ -710,7 +728,7 @@ def blocks_values(text: str) -> set[str]:
     }
 
 
-def ticket_let_go(old_text: str, new_text: str | None) -> bool:
+def ticket_needs_review(old_text: str, new_text: str | None) -> bool:
     """True when a ticket open at the merge base (`old_text`) is deleted
     (`new_text` None), leaves `OPEN_STATUSES` by any route but a verified
     close, or stays open with its `Blocks:` values removed or changed. Pure.
@@ -732,47 +750,24 @@ def ticket_let_go(old_text: str, new_text: str | None) -> bool:
     return bool(old_blocks) and blocks_values(new_text) != old_blocks
 
 
-def tickets_let_go(
-    branch: str, integration: str = INTEGRATION_BRANCH, root: Path = ROOT
-) -> tuple[set[str], str | None]:
-    """Carry-forward tickets that this branch lets go (`ticket_let_go`).
-    Returns (repo-relative paths, reason unknown).
+def tickets_needing_review(changes: BranchChanges) -> set[str]:
+    """The changed carry-forward tickets that `ticket_needs_review` flags,
+    as repo-relative paths.
 
     Every ticket check reads the tickets that are open, so a ticket that is
     deleted or taken out of open drops out of all of them, and a ticket whose
-    `Blocks:` line changes stops blocking its phase. The review file is then
+    `Blocks:` values change stops blocking its phase. The review file is then
     the only check left, so such a ticket counts as a product change
-    (`product_files`). A verified close is the exception: the `Verified by:`
-    check (`tickets_closed_without_verification`) still judges it.
+    (`product_files`).
     """
-    base, why = _merge_base(branch, integration, root)
-    if why:
-        return set(), why
-    carry_rel = CARRY.relative_to(ROOT).as_posix()
-    names, why = _names_changed_since(base, branch, root, carry_rel)
-    if why:
-        return set(), why
-    from_tree = _reads_working_tree(branch, root)
     found = set()
-    for rel in sorted(names):
-        # Same set iter_issue_files() scans: top-level .md files only.
-        if not rel.endswith(".md") or Path(rel).parent.as_posix() != carry_rel:
-            continue
-        old_text = _git_show(root, base, rel)
+    for rel in changes.tickets():
+        old_text = changes.old_text(rel)
         if old_text is None:
             continue  # added on this branch
-        if from_tree:
-            path = root / rel
-            new_text = (
-                path.read_text(encoding="utf-8", errors="replace")
-                if path.is_file()
-                else None
-            )
-        else:
-            new_text = _git_show(root, branch, rel)
-        if ticket_let_go(old_text, new_text):
+        if ticket_needs_review(old_text, changes.new_text(rel)):
             found.add(rel)
-    return found, None
+    return found
 
 
 def _on_list(path: str, entries: tuple[str, ...]) -> bool:
@@ -788,19 +783,19 @@ def review_exemption_reason(
     changed: set[str],
     why_unknown: str | None,
     review_rel: str,
-    let_go: set[str] = frozenset(),
+    needing_review: set[str] = frozenset(),
 ) -> str | None:
     """Why this branch may merge with no review file, or None when it needs one.
 
     Pure. Fails closed: when the changed files are unknown, or there are none,
     the review file is required as before. `review_rel` is the branch's own
     review file, which counts as tooling so that a review record does not turn
-    a tooling branch into a mixed one. `let_go` is the `tickets_let_go`
-    result.
+    a tooling branch into a mixed one. `needing_review` is the
+    `tickets_needing_review` result.
     """
     if why_unknown or not changed:
         return None
-    if not product_files(changed, review_rel, let_go):
+    if not product_files(changed, review_rel, needing_review):
         return (
             f"every one of the {len(changed)} changed file(s) is agent tooling "
             f"(TOOLING_PATHS in scripts/check_merge_ready.py)"
@@ -809,16 +804,16 @@ def review_exemption_reason(
 
 
 def product_files(
-    changed: set[str], review_rel: str, let_go: set[str] = frozenset()
+    changed: set[str], review_rel: str, needing_review: set[str] = frozenset()
 ) -> list[str]:
     """The changed files that are not agent tooling, sorted. Pure.
 
-    A ticket in `let_go` is listed although its folder is tooling: see
-    `tickets_let_go`.
+    A ticket in `needing_review` is listed although its folder is tooling:
+    see `tickets_needing_review`.
     """
     return sorted(
         p for p in changed
-        if p in let_go or not (is_tooling_path(p) or p == review_rel)
+        if p in needing_review or not (is_tooling_path(p) or p == review_rel)
     )
 
 
@@ -834,75 +829,18 @@ def _git_show(root: Path, ref: str, rel: str) -> str | None:
     return out.stdout if out.returncode == 0 else None
 
 
-def tickets_closed_without_verification(
-    branch: str, root: Path = ROOT
-) -> tuple[list[str], str | None]:
+def tickets_closed_without_verification(changes: BranchChanges) -> list[str]:
     """Carry-forward tickets this branch flips to closed/resolved with no
-    `Verified by:` line. Returns (repo-relative paths, reason not checked).
-
-    When `branch` is the checked-out branch, the new side is the working
-    tree, as every other ticket scan here reads it, so an uncommitted or
-    untracked ticket counts: `--check-only` should see what the author is
-    about to commit. For any other branch (`--branch X` from another
-    checkout) the new side is that branch's tip, since the working tree
-    holds some other branch's tickets. The old side is the merge base with
-    dev; a ticket absent there is new on this branch.
-    """
-    if not branch:
-        return [], "no current branch (detached HEAD?)"
-    if branch == INTEGRATION_BRANCH:
-        return [], f"already on {INTEGRATION_BRANCH}"
-    try:
-        base = subprocess.run(
-            ["git", "merge-base", INTEGRATION_BRANCH, branch],
-            cwd=root,
-            capture_output=True,
-            text=True,
-        )
-    except OSError as exc:
-        return [], f"could not run git: {exc}"
-    if base.returncode != 0 or not base.stdout.strip():
-        return [], f"no merge base between {INTEGRATION_BRANCH} and {branch}"
-    base_sha = base.stdout.strip()
-    carry_rel = CARRY.relative_to(ROOT).as_posix()
-    current = subprocess.run(
-        ["git", "branch", "--show-current"], cwd=root, capture_output=True, text=True
-    ).stdout.strip()
-    from_tree = branch == current
-
-    if from_tree:
-        listings = (
-            ["git", "diff", "--name-only", base_sha, "--", carry_rel],
-            ["git", "ls-files", "--others", "--exclude-standard", "--", carry_rel],
-        )
-    else:
-        listings = (["git", "diff", "--name-only", base_sha, branch, "--", carry_rel],)
-    names: set[str] = set()
-    for argv in listings:
-        out = subprocess.run(argv, cwd=root, capture_output=True, text=True)
-        if out.returncode != 0:
-            return [], f"{' '.join(argv[:2])} failed: {out.stderr.strip()}"
-        names.update(ln.strip() for ln in out.stdout.splitlines() if ln.strip())
-
+    `Verified by:` line, as repo-relative paths. The old side is the merge
+    base with dev; a ticket absent there is new on this branch."""
     flagged = []
-    for rel in sorted(names):
-        # Same set iter_issue_files() scans: top-level .md files only.
-        if not rel.endswith(".md") or Path(rel).parent.as_posix() != carry_rel:
-            continue
-        if from_tree:
-            path = root / rel
-            new_text = (
-                path.read_text(encoding="utf-8", errors="replace")
-                if path.is_file()
-                else None
-            )
-        else:
-            new_text = _git_show(root, branch, rel)
+    for rel in changes.tickets():
+        new_text = changes.new_text(rel)
         if new_text is None:
             continue  # deleted on the branch
-        if closed_without_verification(_git_show(root, base_sha, rel), new_text):
+        if closed_without_verification(changes.old_text(rel), new_text):
             flagged.append(rel)
-    return flagged, None
+    return flagged
 
 
 def relevant_open_tickets(
@@ -1051,14 +989,13 @@ def check(
 
     # The changed files decide whether a review file is required, so read
     # them before the review. Later checks reuse this result.
-    changed, why_not = changed_files_vs_integration(branch)
-    let_go, why_not_let_go = tickets_let_go(branch)
-    exemption = review_exemption_reason(
-        changed, why_not or why_not_let_go, review_rel, let_go
-    )
+    changes, why_not = read_changes(branch)
+    changed = set(changes.names) if changes else set()
+    needing_review = tickets_needing_review(changes) if changes else set()
+    exemption = review_exemption_reason(changed, why_not, review_rel, needing_review)
 
     if not review.is_file() and not exemption:
-        for rel in sorted(let_go):
+        for rel in sorted(needing_review):
             print(
                 f"ticket open at the merge base is deleted, leaves open without a "
                 f"verified close, or blocks something else on this branch, so it "
@@ -1083,9 +1020,9 @@ def check(
             print(f"  - {rel} — {why}")
             errors.append(f"{rel}: {why} (a ticket the gate cannot read cannot block a merge)")
 
-    closed_bare, why_not_closed = tickets_closed_without_verification(branch)
-    if why_not_closed:
-        print(f"\nticket-closing check skipped: {why_not_closed}")
+    closed_bare = tickets_closed_without_verification(changes) if changes else []
+    if not changes:
+        print(f"\nticket-closing check skipped: {why_not}")
     elif closed_bare:
         print("\ntickets closed on this branch with no Verified by: evidence:")
         for rel in closed_bare:
@@ -1780,15 +1717,17 @@ def check_closing_rule_reads_git() -> list[str]:
 
         want = [f"{carry_rel}/{n}" for n in ("1-a.md", "2-b.md", "3-c.md")]
         problems = []
-        got, why = tickets_closed_without_verification("feat", root)
-        if why or got != want:
-            problems.append(f"working tree: got {got} ({why}), want {want}")
+        changes, why = read_changes("feat", root=root)
+        got = tickets_closed_without_verification(changes) if changes else why
+        if got != want:
+            problems.append(f"working tree: got {got}, want {want}")
         git("add", "-A")
         git("commit", "-q", "-m", "rest")
         git("checkout", "-q", INTEGRATION_BRANCH)
-        got, why = tickets_closed_without_verification("feat", root)
-        if why or got != want:
-            problems.append(f"--branch from another checkout: got {got} ({why}), want {want}")
+        changes, why = read_changes("feat", root=root)
+        got = tickets_closed_without_verification(changes) if changes else why
+        if got != want:
+            problems.append(f"--branch from another checkout: got {got}, want {want}")
         return problems
 
 
@@ -1871,7 +1810,7 @@ def check_review_requirement_by_changed_files() -> list[str]:
     return problems
 
 
-def check_ticket_let_go_rule() -> list[str]:
+def check_ticket_needs_review_rule() -> list[str]:
     """Which changes to a ticket at the merge base need the review file."""
     blocker = "Status: open\nBlocks: phase-9, phase-10\n\n# t\n"
     cases = [
@@ -1909,9 +1848,9 @@ def check_ticket_let_go_rule() -> list[str]:
          "Status: wontfix\n", False),
     ]
     return [
-        f"ticket let go, {name}: got {not want}, want {want}"
+        f"ticket needs review, {name}: got {not want}, want {want}"
         for name, old, new, want in cases
-        if ticket_let_go(old, new) != want
+        if ticket_needs_review(old, new) != want
     ]
 
 
@@ -1962,12 +1901,14 @@ def check_review_requirement_reads_git() -> list[str]:
         except (OSError, subprocess.CalledProcessError) as exc:
             return [f"review requirement git test could not build its repo: {exc}"]
         problems = []
-        got, why = changed_files_vs_integration("move", root=root)
+        changes, why = read_changes("move", root=root)
+        got = set(changes.names) if changes else set()
         want = {"packages/x.ts", "docs/agents/x.ts"}
         if why or got != want:
             problems.append(f"rename: got {sorted(got)} ({why}), want {sorted(want)}")
         for branch, want_required in (("tooling", False), ("mixed", True), ("move", True)):
-            changed, why = changed_files_vs_integration(branch, root=root)
+            changes, why = read_changes(branch, root=root)
+            changed = set(changes.names) if changes else set()
             got_required = review_exemption_reason(changed, why, _OWN_REVIEW) is None
             if got_required != want_required:
                 problems.append(
@@ -2099,6 +2040,17 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             ("uncommitted product edit",
              lambda: (root / "packages" / "x.ts").write_text("export const x = 3;\n"),
              1, "missing review", "packages/x.ts\n"),
+            ("untracked product file",
+             lambda: (root / "packages" / "new.ts").write_text("export const y = 1;\n"),
+             1, "missing review", "packages/new.ts\n"),
+        )
+        # (branch, gate rc, text, --product-files stdout), run with `dev`
+        # checked out: the gate must read each branch's tip, not the working
+        # tree, which holds dev's copy of every file.
+        from_another_checkout = (
+            ("phase-9/wontfix", 1, "missing review", f"{open_rel}\n"),
+            ("mixed", 1, "missing review", "packages/x.ts\n"),
+            ("tooling", 0, "review not required", ""),
         )
 
         def expect(label: str, branch: str, want_rc: int, want_text: str,
@@ -2128,6 +2080,10 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             change()
             expect(label, "tooling", want_rc, want_text, 0, want_pf)
             git("checkout", "-q", "-f", "tooling")
+            git("clean", "-fdq", "-e", "no-hooks")
+        git("checkout", "-q", INTEGRATION_BRANCH)
+        for branch, want_rc, want_text, want_pf in from_another_checkout:
+            expect(f"{branch} from {INTEGRATION_BRANCH}", branch, want_rc, want_text, 0, want_pf)
         return problems
 
 
@@ -2136,7 +2092,7 @@ CHECKS = (
     check_closing_rule_edges,
     check_closing_rule_reads_git,
     check_review_requirement_by_changed_files,
-    check_ticket_let_go_rule,
+    check_ticket_needs_review_rule,
     check_gate_paths_win_over_tooling_paths,
     check_review_requirement_reads_git,
     check_gate_cli_on_a_scratch_repo,
@@ -2215,12 +2171,11 @@ def main() -> int:
 
     if args.product_files:
         branch = args.branch or branch_name()
-        changed, why = changed_files_vs_integration(branch)
-        let_go, why_let_go = tickets_let_go(branch)
-        if why or why_let_go:
-            print(f"changed files unknown: {why or why_let_go}", file=sys.stderr)
+        changes, why = read_changes(branch)
+        if not changes:
+            print(f"changed files unknown: {why}", file=sys.stderr)
             return 1
-        if not changed:
+        if not changes.names:
             # Empty output means "every changed file is tooling, skip the
             # review"; with no changed file the gate requires the review file.
             print(
@@ -2230,7 +2185,7 @@ def main() -> int:
             )
             return 1
         own_review = review_path(branch).relative_to(ROOT).as_posix()
-        for rel in product_files(changed, own_review, let_go):
+        for rel in product_files(changes.names, own_review, tickets_needing_review(changes)):
             print(rel)
         return 0
 
