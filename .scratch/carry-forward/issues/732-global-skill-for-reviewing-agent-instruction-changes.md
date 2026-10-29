@@ -101,3 +101,37 @@ handoff
 - Ticket 731's exemption names this skill as the review for
   agent-tooling files, or the owner chose something else and this
   ticket says what.
+
+## Skill feedback from real use
+
+From the first real run of the global `instruction-review` skill, on
+branch `chore/729-without-dry-run`
+(`docs/reviews/chore-729-without-dry-run.md` § How the skill worked and
+§ Check 3). Notes only; the skill file is unchanged.
+
+- **The hand-off rule and text whose only output is a verdict.** Check 3
+  says a run that "stops before the agent hands work to the next agent"
+  leaves the blocking finding open. The Gate A text decides only the
+  session's own verdict and the respawn it writes, and the next agent's
+  instructions were unchanged. Both trial runs wrote that verdict and
+  the full respawn, but did not deliver it. The skill does not say
+  whether the written call or the delivered call is the hand-off; the
+  dispatching session ruled the written call enough (IR2).
+- **Only part of a trial fits the budget.** "Run one when it fits the
+  review's budget" does not say what to do when part of it fits. The
+  template trial needed the `gate-planner` type, which the budget left
+  out, so it ran only after the review (IR1).
+- **Reader noise from unchanged text.** Each cold reader listed about
+  16 unclear sentences, almost all in text the branch did not change.
+  Separating them from the changed lines took a manual pass. The skill
+  could ask readers to mark each item against the changed lines.
+- **Mirror files and one reader.** Check 1 asks for "one cold reader per
+  changed file". The `.agents/` mirrors are identical to their
+  `.claude/` files, so the review ran one reader per distinct text. The
+  skill does not say whether that is allowed.
+- **No Disposition format.** The skill names none. The review copied
+  this repo's table because `scripts/check_merge_ready.py` parses it; a
+  repo without that gate would need its own.
+- **Slash commands in subagents.** The skill asks for `/doctor
+  prompt-audit`. The review ran as a subagent, which cannot run slash
+  commands, so that step was skipped.
