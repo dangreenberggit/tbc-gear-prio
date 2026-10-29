@@ -160,3 +160,79 @@ commits (`7e2ebae0`, `683bf83b`, `79160874`) until they pass ticket
 - The ticket records how the exemption branch itself was reviewed. It
   may change `scripts/`, which is product gate code; ask the owner which
   review applies to it before starting.
+
+## Owner approvals, 2026-10-29
+
+Quoted from the prompt of the agent that fixed round 1 of the review of
+`chore/731-tooling-review-exemption`; that agent did not see the owner's
+messages.
+
+- The exempt-path list in proposal § 1
+  (`.scratch/agent-reports/2026-10-28-general-task-731-exemption-proposal.md`,
+  main checkout), with `.scratch/carry-forward/notes/` and
+  `.scratch/carry-forward/plans/` added: "ok sounds good".
+- The exact wording in proposal § 2: "approve".
+- The review of the exemption branch: "pre merge review without the SME
+  stuff is fine (this is a different subject matter!)".
+- The name of ticket 732's skill, option C, `instruction-review`: "C looks
+  ok".
+
+## How the exemption branch was reviewed
+
+`chore/731-tooling-review-exemption` got the full `pre-merge-review`
+skill, because its own rule is not in force until it merges and it
+changes gate code under `scripts/`. Round 1 covered
+`3c008f0d..8faf766d`: the Adversarial axis and the `code-review` skill's
+Standards and Spec axes, each a fresh `general-task` agent on Opus. The
+Domain (SME) axis was skipped by the owner's ruling quoted above.
+Findings and their outcomes: `docs/reviews/chore-731-tooling-review-exemption.md`
+§ Disposition.
+
+## The merge check on `chore/729-test-result`
+
+§ Done when asks for `pnpm merge-to-dev --check-only` on
+`chore/729-test-result`. That command was not run. It runs the gate
+copy in that branch's own checkout (`scripts/merge_to_dev.py`,
+`merge_named`: `script = wt / "scripts" / "merge_to_dev.py"`), and that
+copy has no exemption: `git grep -c TOOLING_PATHS chore/729-test-result
+-- scripts/check_merge_ready.py` finds nothing (rc=1). It would test the
+old rule (ticket 733). In its place,
+`python3 scripts/check_merge_ready.py --branch chore/729-test-result`
+ran from the `chore/731-tooling-review-exemption` worktree. It reads the
+729 branch's changed files and tickets from its tip, and the review file
+from this worktree, which has no `docs/reviews/chore-729-test-result.md`.
+So it answers whether the 729 branch needs a review file.
+
+- At `abd4148f` (round 1 rule): rc=0, "review not required: every one
+  of the 10 changed file(s) is agent tooling".
+- At `947561e3` (round 2 rule, review finding R2-1): rc=1, "missing
+  review", with "ticket open at the merge base is deleted, no longer
+  open or blocks something else on this branch, so it needs the review:
+  .scratch/carry-forward/issues/729-simplify-the-gate-planner-rules.md".
+  The 729 branch sets ticket 729 from `open` to `closed`.
+  `--product-files --branch chore/729-test-result` prints that ticket
+  only.
+- The `947561e3` script copied into a throwaway sparse clone of
+  `chore/729-test-result` (its review file present, the copy hidden from
+  git with `git update-index --assume-unchanged`) and run there with no
+  arguments: rc=0, "merge-ready: ok"; the review file's 19 Disposition
+  rows parse.
+- After review row R2-1b (`c631482e`: a close with a valid
+  `Verified by:` line keeps the exemption): rc=0, "review not required:
+  every one of the 10 changed file(s) is agent tooling", and "no ticket
+  closed on this branch without Verified by: evidence".
+  `--product-files --branch chore/729-test-result` prints nothing
+  (rc=0). The same script in the sparse clone of the 729 tip `512b26f6`,
+  run with no arguments: rc=0, "merge-ready: ok"; 19 Disposition rows
+  parse.
+- Review finding A8 found that the lines above hold for `--branch` from
+  another checkout only. In the main checkout, which has
+  `chore/729-test-result` checked out, the gate also listed the 17 empty
+  files the agent sandbox leaves there (`git ls-files --others
+  --exclude-standard`), and at `a8c7493f` it gave 27 changed files and no
+  exemption. After `0dbe0ea7`, the worktree's script run against the main
+  checkout without writing to it (its source run with `__file__` set
+  inside the main checkout, `GIT_OPTIONAL_LOCKS=0`, `python3 -B`) gives
+  "review not required: every one of the 10 changed file(s) is agent
+  tooling"; `--product-files` prints nothing (rc=0); with no arguments it
+  reads the branch's review file and gives rc=0, "merge-ready: ok".

@@ -1,6 +1,6 @@
 ---
 name: pre-merge-review
-description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch and stop after writing docs/reviews/. Use when the user wants to review a feature branch, asks to "run pre-merge review", or a feature's work looks done and needs a review before any merge ask.
+description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch and stop after writing docs/reviews/. Use when the user wants to review a feature branch, asks to "run pre-merge review", or a feature's work looks done and needs a review before any merge ask. A branch that changes only agent tooling gets instruction-review in its place.
 ---
 
 # Pre-Merge Review
@@ -16,6 +16,26 @@ the code stops finding the code's mistakes.
 | Adversarial | [`.agents/reviews/adversarial.md`](../../../.agents/reviews/adversarial.md) | Correctness bugs, silent-failure modes, test theatre |
 | Domain | [`.agents/reviews/domain.md`](../../../.agents/reviews/domain.md) | TBC/WCL/wowsims facts vs. `docs/stage0-findings.md` |
 | Standards + Spec | the `code-review` skill | Invoked unchanged — don't duplicate its logic here |
+
+## Agent-tooling branches
+
+This review is for this repo's product code. Agent tooling is the
+exception: its list is `TOOLING_PATHS` in `scripts/check_merge_ready.py`,
+and the owner approves every change to that list. Before step 1, run:
+
+```bash
+python scripts/check_merge_ready.py --product-files
+```
+
+- **It prints nothing:** every changed file is agent tooling. Run
+  `instruction-review` in place of this skill, and stop here.
+- **It prints files:** the branch is mixed. Run this skill on the printed
+  files only: in steps 1 and 2, end every `git diff` and `git log -p` of
+  this repo with `-- <the printed files>`. Run
+  `instruction-review` on the other changed files. Write both
+  lists in the review file's dispatch note.
+- **It exits 1:** the changed files are unknown. Run this skill on the
+  whole branch, and write the error in the dispatch note.
 
 ## Process
 
