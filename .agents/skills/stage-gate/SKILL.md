@@ -155,7 +155,7 @@ In these steps, "you" and "the session" are the same agent.
 
        <time> | <session> | gate <A, B, C, or chunk id> | <outcome> | round <n> | <reason, one line>
        <time> | <session> | row <finding or ledger id> | <fixed, accepted, rejected, advisory, rework, or escalate> | <reason, one line> | evidence: <file:line, command, or none>
-       <time> | <session> | spawn <subagent_type> (<model>) | <started, resumed, resumed (waiting), returned (<status>), or returned (<status>, waiting)> | agent <agent id> | subagent_tokens <n or n/a> | <mode, part id or chunk id>
+       <time> | <session> | spawn <subagent_type> (<model>) | <started, resumed, resumed (waiting), returned (<status>), or returned (<status>, waiting)> | agent <agent id> | subagent_tokens <n or n/a> | <chunk id, or none>
        <time> | <session> | note <sha, question, or tickets> | <the SHA, the question and its answer, or the ticket ids> | <reason, one line>
 
    - `gate`: each gate outcome.
@@ -218,8 +218,7 @@ In these steps, "you" and "the session" are the same agent.
      result lacks `"success":true`, or the agent's next notification
      again says it is waiting on its own background work, the session
      stops and tells the user.
-   - `note`: the SHAs that steps 1 and 5 record (step 5 adds the
-     `## Execution chunks` lines after its SHA), each question and
+   - `note`: the SHAs that steps 1 and 5 record, each question and
      answer of step 5, and filed ticket ids with the new HEAD.
 
    Write the reason on every line. Write `evidence: none` when you
@@ -230,24 +229,24 @@ In these steps, "you" and "the session" are the same agent.
    `.claude/skills/stage-gate/plan-template.md` and the stage folder.
    Spawn one. When a `gate-planner`'s final message is a plan, write it
    to `plan.md` verbatim.
-   When its final message starts with `DECISION:`, it has split the
-   brief and written its files itself: this is a **split run**, marked
-   by a `decomposition.md` in the stage folder. When the Parts table
-   there has more than one part, spawn one `gate-planner` with
-   `part: <id>` for each part after `P1`, in order and one at a time;
-   then one with `reconcile`, which writes `plan.md`.
+   When its final message starts with `SPLIT:`, it planned nothing and
+   proposes building the brief as separate stages, one line each, in
+   build order. Log a `gate A` line with the outcome `split`, open one
+   stage per line (step 1) with a brief cut from this one, and end this
+   stage. For a line that no existing ticket covers, a judgment agent
+   (`docs/agents/stage-gate-project.md` § Worker lanes) files a ticket
+   first (same file, § Tickets). § Orchestrator conduct, point 6, paces
+   the new stages.
    When a planner's final message lists "Open questions", put them to
    the user before the next spawn and send the answers back to that
-   planner (`SendMessage` it, or respawn it in the same mode with the
+   planner (`SendMessage` it, or respawn it with the same prompt and the
    answers). That planner receives the user's answers once.
 
    When a `gate-planner`'s final message is none of these — a plan,
    meaning a message with at least one `##` heading of
    `plan-template.md` (Gate A, not this rule, handles a plan with a
-   missing section); a message that starts with
-   `DECISION:`, with `WRONG_MODEL:`, or with `Plan file:`
-   (`parts.md` § When you write files here,
-   `.claude/agents/gate-planner.md` § Next chunk); a message that lists "Open
+   missing section); a message that starts with `SPLIT:` or with
+   `WRONG_MODEL:`; a message that lists "Open
    questions" — no agent is working on that `gate-planner`'s job. The
    session sends that `gate-planner` a `SendMessage` to its agent id with
    this text: "Your final message was not the final message your
@@ -255,59 +254,38 @@ In these steps, "you" and "the session" are the same agent.
    files. Then end your turn with that final message." When the
    `SendMessage` tool result has `"success":true`, the session logs
    `resumed` in `decision-log.md`. When it lacks `"success":true`, the
-   session respawns the `gate-planner` in the same mode. When the next
+   session respawns the `gate-planner` with the same prompt. When the next
    final message of the resumed or respawned `gate-planner` is again
    none of these, the session stops and tells the user.
 
-   **Gate A (mechanical):** every template section present, Backburner
-   included ("none" allowed); `K1` has steps; every step in a chunk that
-   `## Execution chunks` lists, and no steps for a Backburner line
-   (`plan-template.md` § Execution chunks); after a `gate-planner` with
-   `next: <id>`, `## Execution chunks` has the lines that step 5 logged
-   before that spawn, unchanged, and one more chunk line, for chunk
-   `<id>`, and any note under it (`.claude/agents/gate-planner.md`
-   § Next chunk); Claims register nonempty; Paths manifest present; every open question in the
-   brief answered with its three items, or assigned to a deferred part;
-   `git status --porcelain` still empty; `git rev-parse HEAD` still the
-   SHA logged in step 1 or, once `K1` has run, the SHA in the `note`
-   line that step 5 logged before it spawned the `gate-planner` with
-   `next:` for the chunk being planned.
+   **Gate A (mechanical):** every template section present; the first
+   chunk in `## Execution chunks` has steps, and no chunk with steps
+   comes after a one-line chunk;
+   Claims register nonempty; Paths manifest present; every open question
+   in the brief that no earlier plan of the stage answered is answered
+   with its three items, or named on the line of the later chunk that
+   will answer it; `git status --porcelain` still
+   empty; `git rev-parse HEAD` still the SHA in the latest `note sha`
+   line (step 1, or step 5 before a new plan).
    New changes mean the seat edited files: **stop and report them to the
    user** — never revert, because another agent's live work looks identical
-   from here. Respawn once with the violation named (on a
-   split run, `gate-planner` with `re-split: gate A`). One respawn per
+   from here. Respawn once with the violation named. One respawn per
    gap; a second failure goes to the user. Log the outcome.
-
-   On a split run, Gate A also checks: `decomposition.md` has a
-   `DECISION:` line and a Why; when two or more parts were planned,
-   every planned part has its `parts/<id>/plan.md` and `plan.md` has a
-   Seams section; every deferred part has its `parts/<id>/ticket.md`.
-
-   Deferrals made at the first split stand, and the reviewer checks
-   them. A deferral made by a re-split, and any open question of the
-   brief assigned to a deferred part, goes to the user before Gate B
-   passes. If the user rejects one, spawn `gate-planner` with
-   `re-split: ruling` and the ruling; it rewrites `plan.md` itself, and
-   that rewrite is a revision of the chunk being planned (step 4,
-   **Review limit per chunk**).
 
 3. **Review.** The session spawns `gate-reviewer` (`model: "opus"`).
    The session's spawn prompt gives the round number `<n>` (1 for the
    first review in the stage, then 1 higher for each later review,
    whichever chunk it reviews, so that no two `# Round` headings in
    `plan-review.md` share a number) and the
-   absolute paths of `brief.md`, `plan.md`, `plan-review.md` and, on a
-   split run, `decomposition.md`, all in the stage folder.
-   Every review after the first in the stage is a **re-review**. Its
-   spawn prompt also names what the review checks. After a revision, it
+   absolute paths of `brief.md`, `plan.md` and `plan-review.md`, all in
+   the stage folder.
+   A review that follows a revision is a **re-review**. Its
+   spawn prompt also names what the review checks. It
    names the claims and steps that the latest revision changed or added
    (those the listed findings asked for, and those on the revision's
    `- added:` and `- changed:` lines), and the `blocking` and `material`
    findings that the latest revision prompt listed, each by its `row` id
-   `R<m>-<id>` (step 1). On the
-   first review of a later chunk (step 5), it names the claims and steps
-   that the `gate-planner` with `next:` added for that chunk, and no
-   earlier findings. For an **Unasked-changes check** (step 4), it names
+   `R<m>-<id>` (step 1). For an **Unasked-changes check** (step 4), it names
    only the claims and steps on the `- added:` and `- changed:` lines of
    the latest revision, and no findings. The prompt says that the review
    checks only those claims and steps and whether `plan.md` now fixes
@@ -368,14 +346,11 @@ In these steps, "you" and "the session" are the same agent.
      spawns one `gate-planner` revision for them, runs Gate A, and spawns
      no further `gate-reviewer` for that chunk.
    - **Review limit per chunk.** A chunk is a group of plan steps that
-     one `gate-executor` runs (`plan-template.md` § Execution chunks):
-     each chunk that the first plan gives steps, then each Backburner
-     line that step 5 plans. Each chunk gets its first review (step 3 for
-     a chunk the first plan gives steps, step 5 for a chunk that step 5
-     plans) and
-     at most two more, each after a revision of that chunk. A review or
-     revision of the first plan counts for every chunk that the first
-     plan gives steps. The session
+     one `gate-executor` runs (`plan-template.md` § Execution chunks).
+     Each chunk gets its first review, on the plan that gives it steps,
+     and at most two more, each after a revision of that plan. A review
+     or revision of a plan counts for every chunk that plan gives steps.
+     The session
      spawns no fourth `gate-reviewer` for a chunk. The **Unasked-changes
      check** below is not one of these reviews: it does not count toward
      the three, and the rules of **Review limit per chunk** for a chunk's
@@ -416,12 +391,6 @@ In these steps, "you" and "the session" are the same agent.
      revision prompt repeats a way of doing a step, or a command, that a
      `gate-reviewer` or a researcher's report suggested, the session
      marks it `hypothesis, untested` in that prompt.
-   - On a split run, when a `blocking` or `material` finding has
-     `Where: decomposition`, the round's revision is one `gate-planner`
-     (`model: "fable"`) with `plan-review.md` and `re-split: review`. It
-     handles every finding and rewrites `plan.md` itself. Every other
-     revision prompt on a split run says: keep each step's part id and
-     the `## Seams` section.
    - Proceed when: no blocking finding stands; every `material` finding is
      fixed in the plan or accepted in `decision-log.md` with a reason;
      every `minor` finding has a `row R<n>-<id> | advisory` line in
@@ -430,31 +399,18 @@ In these steps, "you" and "the session" are the same agent.
      `plan-review.md` (`.claude/agents/gate-executor.md` § Inputs).
    - A seat contradiction you cannot settle by having a subagent re-run a
      command is the user's call. Log every gate outcome.
-   - **File deferred parts.** When `decomposition.md` lists deferred
-     parts, after `K1`'s Gate B passes spawn one judgment agent
-     (`docs/agents/stage-gate-project.md` § Worker lanes) to file the
-     `parts/<id>/ticket.md` of each part in the Deferred table as a
-     ticket per the project's ticket rules (same file, § Tickets) and
-     commit them. Log
-     their ids and the new `git rev-parse HEAD`.
 
 5. **Execute.** Run the chunks in the order of their ids (`K1`, `K2`,
    ...), one `gate-executor` (`model: "opus"`) for each. When the next
-   chunk is still a Backburner line and may start (**Gate C between
-   chunks** below), log `git rev-parse HEAD` and the lines of
-   `## Execution chunks` in a `note` line (Gate A compares against both),
-   then spawn
-   `gate-planner` (`model: "fable"`) with `next: <that chunk's id>`
-   and the paths of `plan.md`, `execution-report.md` and `progress.md`;
-   it writes that chunk's steps into `plan.md`. The session runs Gate A
-   (step 2) on `plan.md`, then spawns
-   a `gate-reviewer` for a re-review of that chunk (step 3); that
-   re-review is the chunk's first review (step 4, **Review limit per
-   chunk**). Then the session judges Gate B (step 4) for that chunk and
-   runs the chunk's `gate-executor` as the rest of this step says.
-   Repeat until every chunk has run. A
-   plan whose `Execution chunks` section is missing or says "none" is one
-   chunk, `K1`, covering every step. For each chunk:
+   chunk has no steps in `plan.md` and may start (**Gate C between
+   chunks** below), rename `plan.md` to `plan-<id of its first
+   chunk>.md` (`mv`), log `git rev-parse HEAD` in a `note` line, and
+   spawn a `gate-planner` (`model: "fable"`) with the paths step 2
+   names, plus the renamed plan, `execution-report.md`, `progress.md`
+   and the id of the chunk to plan. Its final message is a new plan:
+   write it to `plan.md`, run Gate A (step 2), then review it (step 3)
+   and judge Gate B (step 4) as for a first plan.
+   Repeat until every chunk has run. For each chunk:
    resolve the base SHA fresh (`git rev-parse HEAD` — paste command
    output, never hand-typed), then spawn the executor with the paths of
    `plan.md`, `plan-review.md` and `execution-report.md` (the earlier
@@ -502,10 +458,13 @@ In these steps, "you" and "the session" are the same agent.
 6. **Gate C.** Disposition every Deviation-ledger row, and every chunk
    `Status` that is not `success`, in `decision-log.md`: `accepted`,
    `rework` (respawn a `gate-executor` for the affected chunk with a fresh
-   base SHA and the ledger row; `SendMessage` the same executor only when
-   it made fewer than about 25 tool calls), or `escalate` to the user.
+   base SHA, the ledger row, and the plan that gives that chunk steps
+   (`plan.md` or a `plan-<id>.md` that step 5 renamed); `SendMessage`
+   the same executor only when it made fewer than about 25 tool calls),
+   or `escalate` to the user.
    Then cross-check `git diff --stat <base SHA>..HEAD`, using the first
-   chunk's base SHA, against the plan's Paths manifest: any
+   chunk's base SHA, against the Paths manifests of `plan.md` and of
+   each `plan-<id>.md` that step 5 renamed: any
    out-of-manifest path with no ledger row becomes one now and is
    dispositioned like the rest. `progress.md`, the executor's resume
    file, is not an out-of-manifest path.
@@ -524,11 +483,13 @@ In these steps, "you" and "the session" are the same agent.
 
 7. **Hand off.** The normal loop resumes: the project's review step, then
    **ask** before its merge command (`docs/agents/stage-gate-project.md`
-   § Hand off). Stage artifacts stay in the stage folder. Name any
-   deferred-part tickets in the reply, and say they are visible from the
-   project's integration branch (`docs/agents/stage-gate-project.md`
-   § Hand off) only after this branch merges. Backburner lines still open when the stage ends become
-   tickets, filed like deferred parts (step 4, **File deferred parts**).
+   § Hand off). Stage artifacts stay in the stage folder. Chunks that
+   have not run when the stage ends become tickets: spawn one judgment
+   agent (`docs/agents/stage-gate-project.md` § Worker lanes) to file
+   them per that file's § Tickets and commit them, and log their ids and
+   the new `git rev-parse HEAD`. Name the tickets in the reply, and say
+   they are visible from the project's integration branch (same file,
+   § Hand off) only after this branch merges.
 
 ## Recovery
 
@@ -543,8 +504,8 @@ earlier executor's unfinished work. Every stage artifact is on disk the
 moment its stage ends, so a fresh session resumes from
 `decision-log.md`: the last logged gate is where you are. In a fresh
 session, a `gate-planner` with no final message after its last
-`started` or `resumed` line was cut off: respawn that `gate-planner` in
-the same mode. A fresh session counts a chunk's reviews (step 4,
+`started` or `resumed` line was cut off: respawn that `gate-planner`
+with the same prompt. A fresh session counts a chunk's reviews (step 4,
 **Review limit per chunk**) as the number of different round numbers on
 the `gate-reviewer` `spawn` lines that name that chunk, leaving out
 the lines marked `unasked-changes`. It needs no loop-back count: each

@@ -116,3 +116,24 @@ these (`grep -l -E '^(maxTurns|tools|disallowedTools|omitClaudeMd):'
 - The owner has chosen the scope and approved the wording in chat.
 - The change is applied, and a stage-gate test run shows the planner
   still produces a plan the reviewer accepts.
+
+## Applied, 2026-10-28
+
+On branch `feat/simplify-planner-729`, from the draft in
+`.scratch/agent-reports/2026-10-28-general-task-729-simplified-planner-draft.md`
+§ 2, § 3 and § 6 Option B. Owner rulings in chat, 2026-10-28: scope as
+in this ticket and the draft ("rec sounds ok"); later chunks by
+Option B ("B sounds ok"): the planner gives steps to every chunk it can
+plan now, and only a chunk that needs an earlier chunk's results waits
+as a one-line entry. No agent files a new ticket without asking the
+owner; small findings go in this ticket.
+
+Finding (settled): `.claude/skills/stage-gate/SKILL.md` step 2
+(`SPLIT:`) and step 7 (chunks that have not run) still have a judgment
+agent file tickets without asking the owner. Owner ruling,
+2026-10-28: the filing stays as it is; an agent should not stop work
+to ask before filing a ticket.
+
+Pre-merge review (`docs/reviews/feat-simplify-planner-729.md`): A1 fixed (owner approved, 2026-10-28). Step 2 and step 7 ticket filing stays as it is (owner: an agent should not stop work to ask before filing a ticket). A2 and S2 wording fixed; the rest `wontfix`.
+
+Still to do for § Done when: the stage-gate test run (draft § 7).

@@ -20,10 +20,9 @@ bills the wrong lane whatever it was asked to do.
 
 ## Inputs
 
-Your prompt names the brief (`brief.md`), the plan (`plan.md`), the path
-of `plan-review.md` and, on a split run, `decomposition.md`. Read each one
-that exists. `plan-review.md` exists only on a re-review, and holds the
-earlier rounds. Also read `docs/agents/stage-gate-project.md`, this
+Your prompt names the brief (`brief.md`), the plan (`plan.md`) and the
+path of `plan-review.md`. Read each one that exists. `plan-review.md`
+holds the earlier rounds, when there are any. Also read `docs/agents/stage-gate-project.md`, this
 project's stage-gate values. A plan is sufficient
 evidence for what is proposed and insufficient evidence for why it
 would work — treat every `Verified by` as unproven until you re-run it.
@@ -61,20 +60,13 @@ would work — treat every `Verified by` as unproven until you re-run it.
    truth.
 4. **The approach.** Does the plan solve the brief, or a nearby easier
    problem? Would the rejected alternative in `Approach` actually be
-   worse? Does any step need a result or file that only a Backburner
-   chunk will make?
+   worse? Does any step need a result or file that only a later chunk
+   (a one-line chunk in `## Execution chunks`) will make?
 5. **The partition** (when the Paths manifest declares slices): open each
    slice's target files and confirm no file appears in two slices and
    every shared manifest has exactly one owner.
 6. **Executor traps.** Steps whose acceptance criterion is not checkable,
    paths that do not exist, verify recipes that pass vacuously.
-7. **Seams and deferrals** (split runs). When two or more parts were
-   planned, check that each step names its part and that every file
-   touched by steps of two parts has a Seams row. Check that no step
-   relies on work a deferred part in `decomposition.md` holds. Give
-   `Where: decomposition` to any finding whose fix changes which parts
-   are planned or deferred, including a split that leaves the plan
-   solving an easier problem than the brief.
 
 ## Fan-out
 
@@ -147,15 +139,11 @@ is set.
 
 ## Re-review rounds
 
-A re-review is any review after the first in the stage. After a
-revision, your prompt names the claims and steps that the latest
+A re-review is a review that follows a revision. Your prompt names the claims and steps that the latest
 revision changed or added, and the earlier findings that the revision
 was asked to fix, each as `R<m>-<id>`: `<m>` is the number in the
 `# Round <m>` heading of the `plan-review.md` section that holds the
-finding. On the first review of a later chunk (a chunk that a
-`gate-planner` with `next:` added), your prompt names the claims
-and steps that the `gate-planner` added for that chunk, and no earlier
-findings. Review only those claims and steps, using § What to hunt.
+finding. Review only those claims and steps, using § What to hunt.
 For each named finding that `plan.md` still does not fix, add a row to
 your `## Findings` table with a new ID and that finding's severity, and
 start its `What breaks` cell with `Not fixed: R<m>-<id>.` The named

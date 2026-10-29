@@ -5,6 +5,49 @@ one section per kind. Lanes and spawning rules in full:
 `docs/agents/model-policy.md` § Workhorse jobs and
 `docs/agents/orchestration.md` § Who spawns whom.
 
+## Planner
+
+The `gate-planner` reads only this section.
+
+**Workhorse types:** `glm-flash-task` (no model argument) when the
+harness lists it, except a job that could reach secrets, session logs
+(`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*`
+or `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
+types, Private data), else `discrete-task` (model `sonnet` at the call
+site).
+
+**Block size:** a block is worth a helper when it would otherwise take
+you more than about five tool calls (hypothesis, untested: the
+break-even is not measured). Run in place a check whose output decides
+your next step, and anything under that bound
+(`docs/agents/model-policy.md` § Workhorse jobs).
+
+**Name the model on every spawn:** every type except a GLM type
+(`glm-flash-task` here), which takes no model argument. A helper you
+spawn with no model can run on your own model, Fable, which is the top
+price tier (`docs/agents/model-policy.md` § Lane is per job, not per
+parent).
+
+**Judgment agent:** `general-task` (`model: "opus"`)
+
+**Gate command** (the Verify recipe runs it): `pnpm verify`
+
+**Plan lines:** A step that changes what the Upgrades tab
+renders says how it is looked at. The default is a `Visual check:` line:
+the fixture names to look at (from `data/tab-fixtures/`) and the one
+sentence to judge against. The executor opens the fixture's link in a
+browser pane where the harness has one (the Claude desktop app's Browser
+pane; untested under T3 Code or WSL mode), and otherwise looks at the
+PNGs from `pnpm tab-fixtures:smoke`. Only the browser pane covers hover
+and widths other than 1280. No live sim runs. Use a `Visual acceptance:`
+block instead only when the ticket must close on recorded evidence
+(captures at fixed widths, axe results, measured facts, a pre-run state,
+or an independent `gate-visual` verdict), or when a step needs hover or
+another width and the harness has no browser pane. The block names the
+state (`pre-run` / `post-run`), widths, selectors to capture,
+interactions, facts to record, and the sentence; the manifest schema is
+in the header comment of `scripts/tab-harness/test-review.mjs`.
+
 ## Folders
 
 **Stage folder:** `.scratch/stage-gate/<slug>/`
@@ -32,12 +75,6 @@ one section per kind. Lanes and spawning rules in full:
 
 **Ticket rules:** a ticket per `docs/agents/issue-tracker.md`
 
-**Deferred-part ticket header:** the five header lines of
-`docs/agents/issue-tracker.md`: `Status: open`, `Type: task`, `Origin:`
-the stage slug and branch, `Blocks:` the phase the brief names or
-`none`, and `Blocked by:` what must exist first — ticket files, the
-output of this stage's planned parts (named by stage slug), or `none`.
-
 ## Session commands
 
 The only commands you run are the ones that
@@ -51,22 +88,6 @@ The only commands you run are the ones that
 
 **Workhorse types:** the type `docs/agents/model-policy.md` § Workhorse
 jobs names
-
-### Planner
-
-**Workhorse types:** `glm-flash-task` (no model argument) when the
-harness lists it, except a job that could reach secrets, session logs
-(`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*`
-or `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
-types, Private data), else `discrete-task` (model `sonnet` at the call
-site). Block size, and what to run in place:
-`docs/agents/model-policy.md` § Workhorse jobs.
-
-**Name the model on every spawn:** every type except a GLM type
-(`glm-flash-task` here), which takes no model argument. A helper you
-spawn with no model can run on your own model, Fable, which is the top
-price tier (`docs/agents/model-policy.md` § Lane is per job, not per
-parent).
 
 ### Reviewer
 
@@ -118,21 +139,7 @@ fork. If your checkout has no `vendor/tbc-new-fork`, write that in
 | SME    | `gate-sme`    | `opus`          | `high`             | review |
 | Visual | `gate-visual` | `opus`          | `high`             | review |
 
-**Plan lines (planner):** A step that changes what the Upgrades tab
-renders says how it is looked at. The default is a `Visual check:` line:
-the fixture names to look at (from `data/tab-fixtures/`) and the one
-sentence to judge against. The executor opens the fixture's link in a
-browser pane where the harness has one (the Claude desktop app's Browser
-pane; untested under T3 Code or WSL mode), and otherwise looks at the
-PNGs from `pnpm tab-fixtures:smoke`. Only the browser pane covers hover
-and widths other than 1280. No live sim runs. Use a `Visual acceptance:`
-block instead only when the ticket must close on recorded evidence
-(captures at fixed widths, axe results, measured facts, a pre-run state,
-or an independent `gate-visual` verdict), or when a step needs hover or
-another width and the harness has no browser pane. The block names the
-state (`pre-run` / `post-run`), widths, selectors to capture,
-interactions, facts to record, and the sentence; the manifest schema is
-in the header comment of `scripts/tab-harness/test-review.mjs`.
+**Plan lines (planner):** in § Planner.
 
 **Session, step 5:** When the plan has an SME step, the executor spawns
 `gate-sme` once and commits its handoff.
@@ -178,4 +185,4 @@ gitignored; main checkout only).
 
 **SKILL.md step 2, never revert:** ticket 261
 
-**gate-planner, foreground helpers:** ticket 712
+**Subagent helpers run in the foreground (`.claude/hooks/subagent-foreground-helpers.py`):** ticket 712

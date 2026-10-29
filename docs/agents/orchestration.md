@@ -15,7 +15,9 @@ The session makes only these tool calls itself:
 - spawning and messaging agents
 - loading a skill
 - writing `brief.md`, `decision-log.md`, and any stage artifact copied
-  verbatim from a seat's final message
+  verbatim from a seat's final message, and the one `mv` of `plan.md`
+  that `.claude/skills/stage-gate/SKILL.md` step 5 makes before a new
+  plan
 - the short gate checks: `git status --porcelain`, `git rev-parse HEAD`,
   `git diff --stat`, and `date -u +%Y-%m-%dT%H:%MZ` for `decision-log.md`
   times and for the age of a waiting agent's `returned` line
@@ -133,8 +135,9 @@ When a wrong plan would be expensive, run the `stage-gate` skill: Planner
 (Fable, effort low) → adversarial Plan-Reviewer (Opus, effort high) →
 fresh-context Executor (Opus, effort high), with judged gates and a
 capped loop-back. Inside this flow the planner works out the whole job,
-writes steps for the chunks it chooses, and lists the rest on the plan's
-Backburner, and the session runs at most
+writes steps for every chunk it can plan now, and lists in one line each
+chunk that needs an earlier chunk's results; the session asks for a new
+plan when it reaches a one-line chunk, and runs at most
 two stages in planning or review at once (SKILL.md § Orchestrator
 conduct). That pacing belongs to the stage-gate flow only: a plain
 request for a plan gets steps for every part. `pre-merge-review` still
