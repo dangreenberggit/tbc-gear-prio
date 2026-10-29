@@ -262,9 +262,13 @@ In these steps, "you" and "the session" are the same agent.
    chunk in `## Execution chunks` has steps, and no chunk with steps
    comes after a one-line chunk;
    Claims register nonempty; Paths manifest present; every open question
-   in the brief that no earlier plan of the stage answered is answered
-   with its three items, or named on the line of the later chunk that
-   will answer it; `git status --porcelain` still
+   in the brief that no earlier plan of the stage answered either has its
+   three items in this plan, or is named on the line of a one-line chunk
+   that will answer it (a chunk with no steps yet: it gets its own plan
+   before it runs, and that plan must answer the question. A chunk with
+   steps runs the plan it already has, and no rule tells its executor to
+   answer an open question, so a question named there can go
+   unanswered); `git status --porcelain` still
    empty; `git rev-parse HEAD` still the SHA in the latest `note sha`
    line (step 1, or step 5 before a new plan).
    New changes mean the seat edited files: **stop and report them to the
