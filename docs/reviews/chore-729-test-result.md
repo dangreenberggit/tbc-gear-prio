@@ -1,6 +1,7 @@
 # Pre-merge review — chore/729-test-result
 
 Reviewed range: `3c008f0d2cffcb8b9218287d762abea39f3ee542..8cd7e45e66b2de6a48ff74ccee668ff82dad422a`
+Reviewed range: `8cd7e45e66b2de6a48ff74ccee668ff82dad422a..683bf83be385bd2d8b93b42f4bc448fbbbd4b2f5`
 
 Dispatch: round 1, full axes. `codex` is not on `PATH` (`which codex`
 printed nothing), so each axis ran as a fresh `general-task` agent on
@@ -154,6 +155,95 @@ before any fix pass. The owner approved the S1 fix and kept S4 and S5
 as written (2026-10-29, as the dispatching session reports); see
 § Disposition.
 
+## Focused check (round 2)
+
+Range: `8cd7e45e..683bf83b` (two commits: `83f3853a`, bookkeeping in
+this file and ticket 729; `683bf83b`, the fix for A1-A4 and S1). Fork
+range: none. `git diff --quiet dev...HEAD --
+data/wowsims-fork.lock.json` exits 0, so the branch never moves the fork
+pin and condition 3 holds. `codex` is not on `PATH`; the check ran as
+one fresh `general-task` agent on Opus. The dispatching agent checked
+R2-1 to R2-3 against the files named below.
+
+Conditions, tested by the dispatching agent before dispatch:
+
+1. Holds, settled from this file. `83f3853a` changes only this file
+   and ticket 729, which rows A6 and P2 name. The `683bf83b` commit
+   message names no finding ID; the Disposition rows that the same
+   commit adds (A1-A4, S1) name the commit by its subject and give each
+   finding's change.
+2. Holds. In `git diff --word-diff 8cd7e45e..683bf83b --
+.claude/agents/gate-reviewer.md`, each changed line is at A3 (lines
+   79-83, and line 100, "before the change to `$T`" becomes "before the
+   move", which follows from removing `$T`), A1 (90-93), A2 (93-95), S1
+   (128-129) or A4 (200-202). Lines 101-109 are re-wrapped only.
+3. Holds (see above).
+
+The four checks:
+
+1. Pass: conditions 1 to 3 hold.
+2. Pass: the diff changes only what each finding asks for. Dropping
+   "or under `data/`" from the hold-back list follows A1's suggested fix
+   ("hold back only a command whose write cannot be moved"); its effect
+   is R2-1.
+3. Pass, nothing to check: the branch has no tests (`git diff
+--name-only dev...HEAD` lists only skill, agent, ticket and review
+   files).
+4. Pass, nothing to check: no test exists. `python3
+scripts/check_skill_mirrors.py` exits 0; it covers only
+   `.claude/skills`, not `.claude/agents/gate-reviewer.md`.
+
+Contradictions: none inside `gate-reviewer.md` (`$T` and the old
+hold-back list are gone; § Fan-out bullets 1 and 3 agree) or with
+`docs/agents/stage-gate-project.md` § Worker lanes, Reviewer. R2-2 is a
+conflict with the worker type definitions that § Worker lanes points to.
+
+**R2-1.** `gate-reviewer.md:84-87` with `:90-93`. A tracked-file write
+now runs, with its named target moved under the temp folder, and the
+`ls -l --full-time` guard watches only named targets. A script that also
+writes other tracked files by default changes the real checkout, and the
+guard does not see it. Example: the usage line
+`python scripts/parse_atlasloot.py --lua vendor/atlasloot/data-tbc.lua --out data/atlasloot_sources.json`
+(`scripts/parse_atlasloot.py:17`) moves only `--out`; the script also
+writes `data/two-hop/raid-recipes.json`, `data/two-hop/sunmote-pairs.json`
+and `data/faction_ids.json` (defaults at `:35-38` and `:515-518`, writes at `:604-651`; all three
+are in `git ls-files data`). The hold-back "a script that writes a
+tracked file itself" covers this only when the helper knows what the
+script writes. Effect: during a plan review, tracked `data/` files are
+rewritten in the real checkout, usually with the same bytes, but an
+uncommitted edit to one of them is lost. Before `683bf83b` the command
+was held back, because it writes a tracked file under `data/`. Whether
+a helper would run it, and not class it as a regen, is hypothesis,
+untested. The checker's suggested fix: run `git -C <root> status
+--porcelain` before and after each command, and stop on any change.
+This also answers the question about dropping "under `data/`": a
+movable named write under `data/` is safe; an unnamed side write by a
+script is not, under `data/` or anywhere else.
+
+**R2-2.** `gate-reviewer.md:90-91` against `.claude/agents/discrete-task.md:37-43`
+and the `glm-flash-task` definition (lines 17-20). Item 7 now tells the
+helper to run tracked-file writes on a moved target. Both worker types
+stop with `NEEDS_JUDGMENT` on "an edit under `data/`" and "a `sed` or
+script write to a tracked file", and item 7 does not say what the
+reviewer does with that return. Effect: a worker that reads its rules
+literally refuses, and the dry run does not happen (a loud failure, not
+a wrong result). The checker's suggested fix: the helper prompt says
+the temp copies are untracked.
+
+**R2-3.** `gate-reviewer.md:200-202` against `:105-107`. § Done when
+(A4's fix, round 1's suggested text word for word) requires the
+`Dry run:` line to account for every Verify-recipe command. On a
+re-review, item 7 dry-runs only the named steps, the steps that make
+their inputs and the commands that read their outputs, and the list of
+`not run` reasons has no "outside the re-review scope". Effect: a
+re-reviewer runs extra commands or makes up a reason.
+
+Result: round 2 stops under § Round limit. Fixes for these findings, if
+any, are edits to `gate-reviewer.md` that need the owner's approval of
+the wording. Likely cause (hypothesis, untested): the A1 fix widened
+what the dry run runs, from untracked writes to tracked ones, without
+widening the guard or the workers' rules to match.
+
 ## Summary
 
 Round 1 found nothing that damages the checkout or gives a silent wrong
@@ -185,9 +275,14 @@ Bookkeeping applied in this commit: ticket 729's stale section now
 records the `8cd7e45e` Gate A edit and the `7e2ebae0` dry run (A6, S2,
 P1, P2).
 
-Round 2 has not run. The fixes for A1-A4 and S1 landed in the commit
-"Fix dry-run gaps in the plan reviewer"; round 2 is the focused check of
-step 2.
+Round 2 (the focused check of the commit "Fix dry-run gaps in the plan
+reviewer", `683bf83b`) ran and **stopped** under the skill's § Round
+limit: its four checks pass, but it found three problems in the lines
+the fixes wrote, none of them bookkeeping (R2-1 to R2-3, see § Focused
+check (round 2)). The skill allows no round 3, so this file has no
+round-2 Disposition table and step 4 was not run as part of the review.
+The owner decides what happens next. Until then, the branch is **not
+ready to merge**.
 
 Tickets: this branch filed 0 and closed 1 (729). Filed is the number of
 `A` rows in `git diff --name-status dev...HEAD --
