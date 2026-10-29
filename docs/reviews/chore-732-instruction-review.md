@@ -337,6 +337,19 @@ The README has gaps a reader would trip on:
 points above, are left out. The full text is in agent aaed1b268ab3fe421's
 transcript.)
 
+## Short-reply rule (staged 2026-10-29)
+
+The commit "Stage the short-reply rule for the global AGENTS.md" edits
+`docs/agents/home/AGENTS.md` lines 24, 36 and 40 (§ Chat responses). It
+stages text the owner approved ("short reply text approved"). That text
+was reviewed with `instruction-review` (cold reader, cross-file check,
+old-vs-new trial) in
+`.scratch/agent-reports/2026-10-29-general-task-short-updates-rule.md`,
+§ Revision 2. The three lines match that section's "new" blocks word for
+word (`diff` of each line against its block, no output). The review's
+findings and dispositions are in that report, so this commit adds no
+Disposition rows.
+
 ## Needed from the owner
 
 Nothing open from this review. The caller asked for both follow-ups
