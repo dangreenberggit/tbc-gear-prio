@@ -279,10 +279,13 @@ Round 2 (the focused check of the commit "Fix dry-run gaps in the plan
 reviewer", `683bf83b`) ran and **stopped** under the skill's § Round
 limit: its four checks pass, but it found three problems in the lines
 the fixes wrote, none of them bookkeeping (R2-1 to R2-3, see § Focused
-check (round 2)). The skill allows no round 3, so this file has no
-round-2 Disposition table and step 4 was not run as part of the review.
-The owner decides what happens next. Until then, the branch is **not
-ready to merge**.
+check (round 2)). The skill allows no round 3, and step 4 was not run as
+part of the review. The owner then chose the fixes (2026-10-29, "your
+rec sounds about right", as the dispatching session reports): the commit
+"Hold back tracked-file writes in the dry run" makes them, and
+§ Disposition (round 2) records them. No review round has checked that
+commit; the owner decides what review follows it. Until then, the branch
+is **not ready to merge**.
 
 Tickets: this branch filed 0 and closed 1 (729). Filed is the number of
 `A` rows in `git diff --name-status dev...HEAD --
@@ -309,3 +312,11 @@ Tickets: this branch filed 0 and closed 1 (729). Filed is the number of
 | S1  | Standards   | fixed       | same commit: § Fan-out bullet 3 lets the dry-run helper write under its temp folder                                                                                                                                                 |
 | S4  | Standards   | wontfix     | wording preference on text the owner approved (`8cd7e45e`); not changed, as the owner chose on 2026-10-29 (reported by the dispatching session)                                                                                     |
 | S5  | Standards   | wontfix     | wording preference on text the owner approved (`7e2ebae0`); not changed, as the owner chose on 2026-10-29 (reported by the dispatching session)                                                                                     |
+
+## Disposition (round 2)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                               |
+| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R2-1 | Focused check | fixed       | commit "Hold back tracked-file writes in the dry run": item 7 holds back as `not run` a command that writes, or may write, a file git tracks at its real path, such as a script whose outputs the plan does not all name; the sentence that ran tracked-file writes on a moved target is gone, which undoes that part of A1's fix; owner approved 2026-10-29, "your rec sounds about right" |
+| R2-2 | Focused check | fixed       | same commit: the helper runs no write to a tracked file, so the dry run no longer asks `discrete-task` or `glm-flash-task` for "a `sed` or script write to a tracked file" or a tracked edit under `data/`; owner approved 2026-10-29, "your rec sounds about right"                                                                                                                        |
+| R2-3 | Focused check | fixed       | same commit: on a re-review, each command outside the dry-run scope is `not run`, outside this re-review's scope, which § Done when's "or `not run`" already admits; owner approved 2026-10-29, "your rec sounds about right"                                                                                                                                                               |

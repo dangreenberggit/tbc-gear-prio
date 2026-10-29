@@ -87,12 +87,11 @@ would work — treat every `Verified by` as unproven until you re-run it.
    reports the change, which is a finding.
    Where the executor fills in a value, give the helper one the plan
    allows that is most likely to break the command (such as text with
-   `%`, `\` or a quote). A command that writes a tracked file runs, with
-   its target moved under the temp folder. The helper holds back, as
-   `not run` with the reason: a command whose write cannot be moved under
-   the temp folder, such as a script that writes a tracked file itself; a
-   command that reads a moved target without naming its path, such as a
-   test runner that imports it; a regen, commit, push or merge; a long
+   `%`, `\` or a quote). The helper holds back, as `not run` with the
+   reason: a command that writes, or may write, a file git tracks at its
+   real path, such as a script whose outputs the plan does not all name;
+   a command that reads a moved target without naming its path, such as
+   a test runner that imports it; a regen, commit, push or merge; a long
    run or a process that keeps running (`pnpm verify`, a sim, a server);
    and a command whose input comes from an earlier step that the dry run
    did not run. For each command it runs, it returns the step, the
@@ -104,9 +103,10 @@ would work — treat every `Verified by` as unproven until you re-run it.
    command and output as `Evidence`. Judge a `not run` command from its
    text. On a re-review, dry-run the steps your prompt names, the earlier
    steps that make their inputs, and the later commands that read what
-   they write. After the `## Findings` table, write one line: `Dry run:`,
-   the steps whose results were all as expected, then each `not run`
-   command and its reason.
+   they write; each other command is `not run`, outside this re-review's
+   scope. After the `## Findings` table, write one line: `Dry run:`, the
+   steps whose results were all as expected, then each `not run` command
+   and its reason.
 
 ## Fan-out
 
