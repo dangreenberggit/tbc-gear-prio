@@ -21,6 +21,7 @@ terminal**:
 ```bash
 cp docs/agents/home/AGENTS.md ~/.claude/AGENTS.md
 cp docs/agents/home/CLAUDE.md.install ~/.claude/CLAUDE.md
+cp docs/agents/home/skills/instruction-review/SKILL.md ~/.claude/skills/instruction-review/SKILL.md
 ```
 
 Both files are required — `AGENTS.md` is reached only through the
