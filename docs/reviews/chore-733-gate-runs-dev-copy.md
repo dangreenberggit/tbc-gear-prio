@@ -215,3 +215,47 @@ under the skill's "Round limit": no further fix and no third round here.
 R2-1 and R2-2 have no Disposition row yet; the owner decides what happens
 next. Step 4 (`pnpm merge-to-dev --check-only`) was not run, as the round
 limit says.
+
+## Short check of the round 2 fixes
+
+Range `7c2a4ede..97667012` (one commit, `97667012`). Dispatch: one
+`general-task` agent on Opus.
+
+- **R2-2 fix.** `scripts/merge_to_dev.py:394` now runs
+  `git -C <wt> merge --no-edit refs/heads/dev`, and the error text at
+  line 398 names the same ref.
+- **R2-1 test.** `check_a_tag_named_dev_does_not_pick_devs_gate_copy`
+  tags `dev` at a commit with a wider gate and expects the no-branch
+  `--check-only` run to refuse with `missing review`.
+- **R2-2 test.** `check_a_tag_named_dev_does_not_change_what_is_merged`
+  tags `dev` at the first commit, moves the branch `dev` ahead, and runs
+  a real named merge. It expects rc 0, the branch `dev`'s old tip in the
+  feature branch, and the same tree on both branches.
+
+Commands and results:
+
+- `python3 scripts/check_merge_to_dev.py`: rc 0, 19 checks.
+- `python3 scripts/check_merge_ready.py --self-test`: rc 0, 43 checks.
+- Mutant 1 (copy under `$TMPDIR/sc733/m1`, line 543 back to
+  `merge_ready_at("dev", ...)`): rc 1. One failure, from the R2-1 test:
+  "no-branch form with a tag named dev at a wider gate: want a refusal
+  naming 'missing review'; rc=0".
+- Mutant 2 (copy under `$TMPDIR/sc733/m2`, line 394 back to
+  `merge --no-edit dev`): rc 1. Three failures, all from the R2-2 test:
+  the run returned rc 1 with "dev's new tree differs", "the branch did
+  not get the branch dev's tip merged in", and "dev's tree is not the
+  branch's".
+- No other short-name `dev` ref reaches git in either file. `_merge_base`
+  uses `refs/heads/{integration}`, and the named form passes `dev_sha`.
+  The no-branch form's `git checkout dev` (`merge_to_dev.py:583`) stays
+  as it is. In a throwaway repo with git 2.34.1, a tag `dev` and a branch
+  `dev` at different commits, `git rev-parse dev` gave the tag's commit,
+  but `git checkout dev` printed "Switched to branch 'dev'" and left HEAD
+  on the branch's tip. `git checkout refs/heads/dev` would detach HEAD.
+  The other uses of `INTEGRATION_BRANCH` in `check_merge_ready.py` are
+  message text or self-test setup in throwaway repos.
+
+| ID  | Axis | Disposition | Ticket / note |
+| --- | ---- | ----------- | ------------- |
+
+No finding.
