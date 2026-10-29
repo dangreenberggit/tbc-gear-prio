@@ -742,9 +742,10 @@ def read_changes(
 
     Read-only: `git merge-base`, `git branch --show-current`, `git diff
     --name-only` and, when the branch is checked out, `git ls-files
-    --others` and `git diff --cached`; nothing that writes a ref, an index or
-    an object. When a file's staged copy differs from its working copy, it
-    exits with a message naming the file. An untracked
+    --others`, `git diff --cached` and `git ls-files -v`; nothing that writes
+    a ref, an index or an object. When a file's staged copy differs from its
+    working copy, or git is set to ignore changes to a file's working copy,
+    it exits with a message naming the file. An untracked
     file that `holds_no_work` is left out, as `pnpm merge-to-dev` leaves it
     out of its clean-tree check.
 
@@ -800,6 +801,29 @@ def read_changes(
                 + ". The gate cannot tell which copy the next commit takes. Stage "
                 "all of each file (git add) or unstage it (git restore --staged), "
                 "then run the check again."
+            )
+        # git does not report a working-copy change to a file marked
+        # skip-worktree or assume-unchanged (`git ls-files -v` tag S, or a
+        # lower-case tag), so a commit that closes a ticket could hide behind
+        # a working copy that still reads open (finding F2-2). The gate reads
+        # tickets and the review file from the working tree, so any mark is
+        # refused; nothing in this repo sets one.
+        tags = subprocess.run(
+            ["git", "ls-files", "-v"], cwd=root, capture_output=True, text=True
+        )
+        if tags.returncode != 0:
+            return None, f"git ls-files -v failed: {tags.stderr.strip()}"
+        hidden = sorted(
+            ln[2:] for ln in tags.stdout.splitlines() if ln[:1] == "S" or ln[:1].islower()
+        )
+        if hidden:
+            raise SystemExit(
+                "FAIL: git is set to ignore changes to the working copy of: "
+                + ", ".join(hidden)
+                + " (git update-index --skip-worktree or --assume-unchanged), so "
+                "the gate cannot tell whether that copy is the committed one. Run "
+                "git update-index --no-skip-worktree <file>, then git update-index "
+                "--no-assume-unchanged <file>, and run the check again."
             )
     return BranchChanges(root, branch, base, from_tree, frozenset(names)), None
 
@@ -2076,6 +2100,7 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             for name, text in (
                 ("edit-open", "Status: open\nBlocks: phase-9\n\n# t\nmore notes\n"),
                 ("phase-9/wontfix", "Status: wontfix\nBlocks: phase-9\n\n# t\n"),
+                ("wontfix", "Status: wontfix\nBlocks: phase-9\n\n# t\n"),
                 ("phase-9/unblock", "Status: open\n\n# t\n"),
                 ("reblock", "Status: open\nBlocks: phase-10\n\n# t\n"),
                 ("close-open", "Status: closed\nVerified by: `true`\nBlocks: phase-9\n\n# t\n"),
@@ -2121,6 +2146,7 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             # The ticket rule (`ticket_needs_review`) through the CLI.
             ("edit-open", 0, "review not required", 0, ""),
             ("phase-9/wontfix", 1, "missing review", 0, f"{open_rel}\n"),
+            ("wontfix", 1, "missing review", 0, f"{open_rel}\n"),
             ("phase-9/unblock", 1, "missing review", 0, f"{open_rel}\n"),
             ("reblock", 1, "missing review", 0, f"{open_rel}\n"),
             ("close-open", 0, "review not required", 0, ""),
@@ -2183,6 +2209,18 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             ("partly staged product file",
              stage_then_undo("packages/x.ts", "export const x = 4;\n")),
         )
+        def hide_wontfix(flag: str):
+            def change() -> None:
+                git("update-index", flag, open_rel)
+                (carry / "1-open.md").write_text("Status: open\nBlocks: phase-9\n\n# t\n")
+            return change
+
+        # (name, change) on the checked-out `wontfix` branch: git hides the
+        # working copy's difference from the commit, so the gate refuses.
+        hidden = (
+            ("skip-worktree ticket", hide_wontfix("--skip-worktree")),
+            ("assume-unchanged ticket", hide_wontfix("--assume-unchanged")),
+        )
         # (branch, gate rc, text, --product-files stdout), run with `dev`
         # checked out: the gate must read each branch's tip, not the working
         # tree, which holds dev's copy of every file.
@@ -2227,6 +2265,13 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             change()
             expect(label, "tooling", 1, "staged copy differs", 1, "")
             git("checkout", "-q", "-f", "tooling")
+        for label, change in hidden:
+            git("checkout", "-q", "-f", "wontfix")
+            change()
+            expect(label, "wontfix", 1, "git is set to ignore", 1, "")
+            git("update-index", "--no-skip-worktree", open_rel)
+            git("update-index", "--no-assume-unchanged", open_rel)
+            git("checkout", "-q", "-f", "wontfix")
         git("checkout", "-q", INTEGRATION_BRANCH)
         for branch, want_rc, want_text, want_pf in from_another_checkout:
             expect(f"{branch} from {INTEGRATION_BRANCH}", branch, want_rc, want_text, 0, want_pf)
