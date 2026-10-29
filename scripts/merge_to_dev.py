@@ -14,7 +14,10 @@ Steps (no branch argument, run from the branch's own checkout):
   3. pnpm verify
   4. merge-ready check (review + deferred tickets filed; no review file is
      needed when every changed file is agent tooling, see TOOLING_PATHS in
-     scripts/check_merge_ready.py)
+     scripts/check_merge_ready.py), run twice: by the branch's copy of
+     check_merge_ready.py and by dev's copy (`dev_merge_ready`). Both must
+     pass, so a branch that edits the gate's lists cannot exempt itself
+     (ticket 733).
   5. layout gate (Upgrades tab) -- runs only if the fork's tab source changed
      since the last green run, and only when its prereqs are present; skips
      cleanly otherwise (ticket 325). See scripts/check_layout_gate.py.
@@ -31,9 +34,11 @@ checked out, such as the main folder while <branch> sits in a pair):
      an ancestor of <branch>, so the merge into dev produces exactly
      <branch>'s tree, and the gates below check the merge result. That merge
      commit stays on <branch> even when a later gate fails.
-  3. Steps 2-5 above run in that worktree, by its own copy of this script
-     (`--gates-only`). They read its fork, lock, review file and tickets.
-     Afterwards the worktree must still be clean and at the checked tip.
+  3. Dev's copy of check_merge_ready.py, as committed at dev's tip, checks
+     the worktree (`dev_merge_ready`). Then steps 2-5 above run in that
+     worktree, by its own copy of this script (`--gates-only`). They read
+     its fork, lock, review file and tickets. Afterwards the worktree must
+     still be clean and at the checked tip.
   4. git merge --no-ff <branch's tip> here. Dirty files in this folder block
      only when the merge writes them, or when they are staged; the rest stay
      as they are.
@@ -46,6 +51,11 @@ node_modules and no wowsims copies, so verify cannot run there. Providing
 them takes what `pnpm wt:pair` does: a fork worktree, an install and the
 fork's proto build. The branch's worktree already has them, and step 2
 makes its tip's tree the merge result.
+
+Which copy of the gate code runs: the named form is dev's copy of this
+script, so its call to dev's merge-ready check cannot be edited away by the
+branch. The no-branch form is the branch's own copy of this script, and a
+branch that also edits this file can drop the call there (ticket 733).
 
 Does not push. Does not touch main.
 
@@ -61,6 +71,7 @@ import os
 import shutil
 import subprocess
 import sys
+import types
 from collections.abc import Callable
 from pathlib import Path
 
@@ -79,6 +90,7 @@ import worktree_pair  # noqa: E402
 ALLOW_DEV_MERGE = "TBC_ALLOW_DEV_MERGE"
 LAYOUT_LOCK = "data/wowsims-fork-layout.lock.json"
 FORK_LOCK = "data/wowsims-fork.lock.json"
+MERGE_READY = "scripts/check_merge_ready.py"
 
 
 def _resolve_cmd(cmd: list[str]) -> list[str]:
@@ -198,6 +210,28 @@ def _commit_layout_baseline(lock_path: Path, digest: str) -> None:
     if commit.returncode != 0:
         die("layout gate advanced the baseline but committing the lock failed")
     print(f"committed layout baseline advance ({rel}) onto {ROOT.name}'s branch")
+
+
+def dev_merge_ready(rev: str, checkout: Path, branch: str, ack_open_blockers: bool) -> int:
+    """Run `rev`'s committed copy of check_merge_ready.py on `branch`, which
+    is checked out at `checkout`; return its exit code.
+
+    The branch's own copy alone could be edited to exempt the branch from
+    its review (ticket 733). The copy runs with `__file__` set to the
+    checkout's path, so its ROOT, and every ticket and review file it reads,
+    are the checkout's.
+    """
+    name = "check_merge_ready_at_" + rev.replace("/", "_")
+    module = types.ModuleType(name)
+    module.__file__ = str(checkout / MERGE_READY)
+    source = git_out("show", f"{rev}:{MERGE_READY}")
+    # dataclasses looks the module up in sys.modules while it builds a class.
+    sys.modules[name] = module
+    try:
+        exec(compile(source, f"{rev}:{MERGE_READY}", "exec"), module.__dict__)
+        return module.check(branch=branch, ack_open_blockers=ack_open_blockers)
+    finally:
+        del sys.modules[name]
 
 
 def named_mode_problem(current: str, target: str) -> str | None:
@@ -360,6 +394,12 @@ def merge_named(args: argparse.Namespace) -> int:
                 )
             tip = rev_parse(branch_ref)
 
+    kept = f"{target} keeps its commits up to {tip[:9]}, including the merge of dev made in this run, if any"
+    print(f"\n=== merge-ready, by dev's copy ({dev_sha[:9]}) ===")
+    ready = dev_merge_ready(dev_sha, wt, target, args.ack_open_blockers)
+    if ready != 0:
+        die("dev's copy of the merge-ready check failed." + ("" if args.check_only else f" {kept}."), ready)
+
     print(f"\n=== gates in {wt} ===")
     argv = gate_argv(
         sys.executable,
@@ -371,7 +411,6 @@ def merge_named(args: argparse.Namespace) -> int:
     )
     print("+", " ".join(argv))
     gates = subprocess.run(argv, cwd=wt)
-    kept = f"{target} keeps its commits up to {tip[:9]}, including the merge of dev made in this run, if any"
     if gates.returncode != 0:
         die(f"gates failed in {wt}." + ("" if args.check_only else f" {kept}."), gates.returncode)
     if args.check_only:
@@ -492,6 +531,12 @@ def main() -> int:
     )
     if ready != 0:
         return ready
+    # Under --gates-only the named form has already run dev's copy.
+    if not args.gates_only:
+        print("\n=== merge-ready, by dev's copy ===")
+        ready = dev_merge_ready("dev", ROOT, branch, args.ack_open_blockers)
+        if ready != 0:
+            return ready
 
     # The Upgrades-tab layout gate. Runs only when the fork's tab source changed
     # since the last green run AND the fork, its built dist/, and a Chromium are

@@ -168,9 +168,12 @@ INTEGRATION_BRANCH = "dev"
 # The list lives here and not in a doc under docs/agents/ because that folder
 # is on the list: a branch could then widen the list and exempt itself in the
 # same diff. This file is not on the list, so a change to it gets the product
-# review. The list and GATE_PATHS stop a mistake, not a deliberate edit: the
-# gate runs the branch's own copy of this file, so a branch that edits both
-# lists here can exempt itself (ticket 733).
+# review. `pnpm merge-to-dev` also runs dev's copy of this file on the branch
+# (`dev_merge_ready` in scripts/merge_to_dev.py, ticket 733), so a branch's
+# edit to either list here takes effect only once it is on dev. Two limits:
+# the no-branch form of merge-to-dev runs the branch's own merge_to_dev.py,
+# which a branch can edit to skip that call; and `pnpm merge-ready` runs only
+# the branch's copy.
 TOOLING_PATHS = (
     ".claude/skills/",
     ".agents/skills/",
