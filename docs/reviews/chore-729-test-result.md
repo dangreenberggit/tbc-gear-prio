@@ -485,3 +485,29 @@ blocking, and code-quality rows get their rows after the pass (step 3).
 Tickets: this branch filed 0 and closed 1 (729), as counted in the
 earlier summary; the count is redone when this round's table is
 written.
+
+# Review stopped by the owner, 2026-10-29
+
+The owner stopped the review process for this branch on 2026-10-29:
+"tell the (3??) reviews to wrap up. make a ticket or two and a handoff
+for not drafting but getting a global skill for this kind of review, but
+also more importantly making these files an exception to the review
+system." The owner's reason, the same day: "there's no reason to adopt
+a review process meant for development of code in a project that we're
+not acutally even touching". Both quotes are from the dispatching
+session's prompt; this review did not see the owner's message.
+
+No further review rounds run on this branch. The open findings of
+`# Fresh review, round 1` (A7, A8, A9/S7, S6/P6/P7, A10, S8) stay as
+recorded above. None of them is fixed, and this section gives them no
+Disposition rows.
+
+Two tickets carry the follow-up:
+
+- `.scratch/carry-forward/issues/731-exempt-agent-tooling-files-from-product-review.md`
+  takes agent-tooling files out of this repo's product review system and
+  says what then decides whether this branch may merge.
+- `.scratch/carry-forward/issues/732-global-skill-for-reviewing-agent-instruction-changes.md`
+  gets a global skill for reviewing changes to agent instructions. The
+  dry run (`.claude/agents/gate-reviewer.md` § What to hunt, item 7) and
+  its open findings go to that kind of review and a trial run.
