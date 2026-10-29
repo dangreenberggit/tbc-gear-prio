@@ -132,6 +132,7 @@ branch `chore/729-without-dry-run`
 - **No Disposition format.** The skill names none. The review copied
   this repo's table because `scripts/check_merge_ready.py` parses it; a
   repo without that gate would need its own.
-- **Slash commands in subagents.** The skill asks for `/doctor
-  prompt-audit`. The review ran as a subagent, which cannot run slash
-  commands, so that step was skipped.
+- **Slash commands in subagents.** Check 2 says "If you can run slash
+  commands, also run `/doctor prompt-audit`". The review ran as a
+  subagent, which cannot run slash commands, so that check was not
+  run. Each review run as a subagent will skip it.
