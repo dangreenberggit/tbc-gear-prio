@@ -354,6 +354,7 @@ review (`AGENTS.md` § Commits and merges).
   `7e2ebae0` is on `chore/729-test-result` only, pointing to
   `docs/reviews/chore-729-test-result.md` § Item 7 dropped. This review
   was allowed to write only this file, so it did not make the edit.
+  **Done** after the review, in the same commit that set IR8 to fixed.
 
 ## Disposition
 
@@ -366,5 +367,5 @@ review (`AGENTS.md` § Commits and merges).
 | IR5 | Check 2 | wontfix     | the same option was in the old Gate A text; the cost is one Gate A respawn, and Gate A names the violation, as for A5 in `docs/reviews/chore-729-test-result.md`                                                |
 | IR6 | Check 1 | wontfix     | both trial runs read a label such as "answers Q3" as naming the question                                                                                                                                        |
 | IR7 | Check 2 | wontfix     | the parenthesis gives the template's meaning; recorded in ticket 729 § "Later chunk" in two files                                                                                                               |
-| IR8 | Records |             | for the dispatching session: a one-sentence edit to ticket 729 (§ For the dispatching session); this review may write only this file                                                                            |
+| IR8 | Records | fixed       | ticket 729 § "Later chunk" in two files now says `7e2ebae0` is on `chore/729-test-result` only and points to `docs/reviews/chore-729-test-result.md` § Item 7 dropped                                           |
 | IR9 | Rubric  | wontfix     | wording preference on text the owner approved (`8cd7e45e`, per `docs/reviews/chore-729-test-result.md` lines 26-30; `f4d37a1c` has the same `git patch-id`), and the rubric finding explains no check 1 finding |

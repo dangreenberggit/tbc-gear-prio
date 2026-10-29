@@ -456,9 +456,11 @@ rewrote the Gate A line in `.claude/skills/stage-gate/SKILL.md` and its
 `.agents/` mirror. An open question now has its three items in the plan,
 or is named on the line of a one-line chunk; the new text says why a
 chunk with steps does not count. The quote in the first bullet above is the old text.
-`gate-reviewer.md:63-64` was not changed. Commit `7e2ebae0`, on the same
-branch, added the reviewer's dry run (`gate-reviewer.md` § What to hunt,
-item 7); it is outside Option B. Review:
+`gate-reviewer.md:63-64` was not changed. Commit `7e2ebae0` added the
+reviewer's dry run (`gate-reviewer.md` § What to hunt, item 7); it is
+outside Option B. That commit is on branch `chore/729-test-result` only,
+not on `chore/729-without-dry-run`: the owner dropped item 7
+(`docs/reviews/chore-729-test-result.md` § Item 7 dropped). Review:
 `docs/reviews/chore-729-test-result.md`.
 
 Verified by:
