@@ -7,9 +7,11 @@ Related: 712, 723, 726, 727, 728
 
 # Simplify the gate-planner's rules
 
-Not started. The owner decides the scope and the timing. Do this before
-ticket 726 (move the general stage-gate core to a plugin repo), so the
-plugin does not start from rules that are about to change.
+Applied and merged to `dev` at `3c008f0d`. Open: one test run found that
+the planner does not follow the owner's Option B ruling (§ Test result,
+2026-10-28). Do this before ticket 726 (move the general stage-gate core
+to a plugin repo), so the plugin does not start from rules that are
+about to change.
 
 ## The problem
 
@@ -136,4 +138,165 @@ to ask before filing a ticket.
 
 Pre-merge review (`docs/reviews/feat-simplify-planner-729.md`): A1 fixed (owner approved, 2026-10-28). Step 2 and step 7 ticket filing stays as it is (owner: an agent should not stop work to ask before filing a ticket). A2 and S2 wording fixed; the rest `wontfix`.
 
-Still to do for § Done when: the stage-gate test run (draft § 7).
+## Test result, 2026-10-28
+
+One stage-gate run, session `fc215b62-f051-47b1-b269-e4f6d0ac0250`,
+stage folder `.scratch/stage-gate/729-planner-test/` (main checkout,
+gitignored; read `decision-log.md` first). The brief is the 727
+three-chunk dummy brief, with its Backburner sentence replaced by
+"`K2` and `K3` are later chunks." (draft § 7 item 1). Handoff:
+`.scratch/handoffs/2026-10-28-ticket-729-planner-test.md`.
+
+### Result
+
+The planner wrote plans the reviewer accepted, and nothing in the run
+needed a removed rule. The planner did not follow Option B: it gave
+steps to `K1` only, so the run used four planner spawns, the same count
+as 727. The ticket stays open for that reason (§ Why open).
+
+### Cost
+
+`calls` / `est_cost_usd` per spawn. "Run log" is the handoff's
+§ Measure command. "Recount" is the transcript recount from ticket 727
+§ What `calls` counts, with this session id.
+
+| Spawn                   | Run log      | Recount      |
+| ----------------------- | ------------ | ------------ |
+| planner, first plan     | 2 / 0.6844   | 3 / 0.8534   |
+| reviewer, round 1 (K1)  | 3 / 0.4545   | 4 / 0.5054   |
+| planner, revision of K1 | 2 / 0.6542   | 3 / 0.8772   |
+| executor, K1            | 6 / 0.4002   | 7 / 0.4515   |
+| planner, new plan K2    | 2 / 0.6779   | 3 / 0.9232   |
+| reviewer, round 2 (K2)  | 5 / 0.4799   | 6 / 0.5285   |
+| executor, K2            | 8 / 0.4217   | 9 / 0.4776   |
+| planner, new plan K3    | 3 / 0.8122   | 4 / 1.1280   |
+| reviewer, round 3 (K3)  | 7 / 0.5720   | 8 / 0.6251   |
+| executor, K3            | 7 / 0.4353   | 8 / 0.4959   |
+| **planner total (4)**   | 9 / 2.8287   | 13 / 3.7818  |
+| reviewer total (3)      | 15 / 1.5064  | 18 / 1.6590  |
+| executor total (3)      | 21 / 1.2572  | 24 / 1.4250  |
+| all 10 spawns           | 5.5923 USD   | 6.8658 USD   |
+
+Against 727 on the same brief (ticket 727 § Test result and close):
+
+- First plan: 2 calls / 0.68 USD, against 2 / 0.70-0.77. The same.
+- Four planner spawns: 2.83 USD, against 3.49 (stage a) and 3.93
+  (stage b) from the run log. By recount: 3.78, against 4.22 and 4.67.
+  The 727 recount totals are the sums of the per-run recounts in 727
+  § What `calls` counts.
+- The spawns differ in kind. 727 had `next:` edits and a revision of
+  K2. This run had new plans and a revision of K1. One run is a small
+  sample.
+
+Ticket 730 (run log leaves out each agent's last response) affects
+these numbers: every one of the 10 run-log lines is one call short of
+the recount, and its cost leaves out that call. The 727 numbers in the
+handoff are run-log numbers with the same gap, so the run-log
+comparison is like for like. The recount comparison gives the same
+order.
+
+### Against § Done when and the handoff's § What passes
+
+- Plans the reviewer accepts: yes. The first plan got `VERDICT:
+  revise` with one `material` finding, R1-F1 (step 1 put the sentence
+  in the `printf` format string, so a `%` or `\` changed the line). One
+  revision fixed it, and Gate B passed without a re-review. The new
+  plans for K2 and K3 each passed Gate A and got `VERDICT: sound` in one
+  spawn (`plan-review.md` § Round 1 to § Round 3; `decision-log.md`
+  `gate B` lines).
+- "A plan in one spawn that passes Gate A and the reviewer's review":
+  not met for the first plan (R1-F1), met for K2 and K3.
+- Gate A passed on the first try for all four plans. Every gate in
+  `decision-log.md` passed except Gate B round 1, which returned
+  `revise` for R1-F1.
+- One-line chunks reached a new plan as `SKILL.md` step 5 says: yes,
+  for K2 and K3 (`decision-log.md`, `note sha` lines "before new plan
+  for K2" and "before new plan for K3"). `statements.md` holds the
+  three lines.
+- Removed rules: no stage file asks for Backburner, `next:`, `SPLIT:`,
+  a part, a reconcile or `parts.md`. The only mention is the
+  decision-log line about the brief edit.
+
+### Why open: Option B did not take effect
+
+The owner ruled that the planner gives steps to every chunk it can plan
+now (§ Applied). In this brief, K2 and K3 only append a line to a file
+whose content K1's steps fix. Nothing about them is unknown at plan
+time. Both the first planner and the K2 planner still left the later
+chunks as one-line entries. The one-line entries even hold the full
+commands and checks: `plan-before-K1-revision.md` and `plan-K2.md`
+§ Execution chunks. Their `needs from` field names a file state that
+K1's own acceptance fixes. With Option B followed, this run needed one
+planner spawn plus the revision, not four.
+
+What in the files allows this:
+
+- `.claude/skills/stage-gate/plan-template.md:46-47`: "The first chunks
+  have steps: `K1: steps 1–4`. Each later chunk is one line: `K2: …
+  — needs from K1: <result or file>`." The draft wrote this text for
+  Option A. Option B only changed "chunk" to "chunks" (draft § 3 and
+  § 6). It contradicts `.claude/agents/gate-planner.md:37-40` ("Give
+  steps to every chunk you can plan now"), and its only example has
+  steps on K1 alone.
+- `gate-planner.md` never uses the term "later chunk". The template and
+  the brief do.
+- The brief's sentence "`K2` and `K3` are later chunks." uses the
+  template's word for a one-line chunk. Hypothesis, untested: the brief
+  and template lines 46-47 together read as an order to leave K2 and K3
+  without steps. The first planner also read the `decision-log.md` line
+  saying this sentence replaced the Backburner sentence.
+- Gate A (`SKILL.md` step 2) and the reviewer allow the result, as
+  designed, so nothing catches it.
+
+The template is a skill file, so the fix waits for the owner's approval
+of the wording. Proposed wording for `plan-template.md` § Execution
+chunks and its mirror `.agents/skills/stage-gate/plan-template.md`
+(not applied): replace the two sentences quoted above with
+
+> Each chunk you can plan now has steps: `K1: steps 1–4`,
+> `K2: steps 5–7`. A chunk is one line only when it needs a result
+> that an earlier chunk's run produces and the plan cannot know
+> before then: `K3: <goal in one sentence> — needs from K2's run:
+> <result>`.
+
+and change "A new plan for a later chunk" to "A new plan for a one-line
+chunk". Then rerun the same dummy without the brief sentence "`K2` and
+`K3` are later chunks.": pass when the first plan gives steps to all
+three chunks and the run has one planner spawn plus any revision.
+
+### Small findings (noted here by owner ruling; no new tickets)
+
+- The K3 planner's final message began with a chat line ("I have
+  everything I need; …") before the plan. The session left it out of
+  `plan.md`. `gate-planner.md:25-26` says the final message is the plan.
+- The K3 plan labelled C15 `hypothesis, untested` although its command
+  was run and passes (R3-F3).
+- The K3 plan's step 14 acceptance names the `# K3` section of
+  `execution-report.md`, which only the session writes (R3-F1). The
+  executor adapted.
+- The session copied `plan.md` to `plan-before-K1-revision.md` before
+  the revision. `docs/agents/orchestration.md` § The session delegates
+  does not list that copy, and no rule asks for it. It did no harm.
+
+Verified by:
+
+```
+s=fc215b62-f051-47b1-b269-e4f6d0ac0250
+grep '"agent_type": "gate-planner"' .scratch/agent-runs/$s.jsonl | python3 -c 'import sys,json
+for line in sys.stdin:
+    d = json.loads(line)
+    print(d["description"], d["calls"], d["est_cost_usd"])'
+python3 - "$s" <<'EOF'
+import sys, json, importlib.util
+spec = importlib.util.spec_from_file_location("h", ".claude/hooks/log-agent-run.py")
+h = importlib.util.module_from_spec(spec); spec.loader.exec_module(h)
+for line in open(f".scratch/agent-runs/{sys.argv[1]}.jsonl"):
+    d = json.loads(line)
+    st = h.context_stats(d["agent_transcript_path"])
+    print(d["agent_type"], d["description"], d["calls"], d["est_cost_usd"], st.get("calls"), st.get("est_cost_usd"))
+EOF
+grep -n -A4 '^## Execution chunks' .scratch/stage-gate/729-planner-test/plan-before-K1-revision.md .scratch/stage-gate/729-planner-test/plan-K2.md
+```
+
+Transcripts are deleted after `cleanupPeriodDays` (default 30), so the
+recount works only until about 2026-11-27.
