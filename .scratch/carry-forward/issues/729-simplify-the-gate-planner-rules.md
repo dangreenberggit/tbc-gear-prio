@@ -429,7 +429,7 @@ should be reopened; no run so far meets it.
   findings that the revision had already applied (R1-F3, R1-F4) or that
   the reviewer marked "No change needed" (R2-F5). They did no harm.
 
-### "Later chunk" in two files (noted, not edited)
+### "Later chunk" in two files (Gate A line edited in `8cd7e45e`)
 
 The template-fix agent found two lines that still say "later chunk"
 for a one-line chunk. Neither conflicts with the new template:
@@ -448,8 +448,18 @@ for a one-line chunk. Neither conflicts with the new template:
   the template's words, so the check means the same as the template.
 
 Changing "later chunk" to "one-line chunk" at both places would use one
-term everywhere. Both are agent-facing files, so that edit waits for the
+term everywhere. Both are agent-facing files, so that edit waited for the
 owner's approval of the wording.
+
+Update after the close: commit `8cd7e45e` (owner-approved wording)
+rewrote the Gate A line in `.claude/skills/stage-gate/SKILL.md` and its
+`.agents/` mirror. An open question now has its three items in the plan,
+or is named on the line of a one-line chunk; the new text says why a
+chunk with steps does not count. The quote in the first bullet above is the old text.
+`gate-reviewer.md:63-64` was not changed. Commit `7e2ebae0`, on the same
+branch, added the reviewer's dry run (`gate-reviewer.md` § What to hunt,
+item 7); it is outside Option B. Review:
+`docs/reviews/chore-729-test-result.md`.
 
 Verified by:
 
