@@ -2,6 +2,8 @@
 
 Reviewed range: `3c008f0d2cffcb8b9218287d762abea39f3ee542..8faf766d38570fadf15ee0a1637d4c0349849aaa`
 
+Reviewed range: `8faf766d38570fadf15ee0a1637d4c0349849aaa..363e5d1ee55ce590919bf94689905592f56b3af9`
+
 Dispatch: round 1, full axes. `codex` is not on `PATH` (`which codex`
 printed nothing), so each axis ran as a fresh `general-task` agent on
 Opus, all three in one parallel batch: Adversarial, and the `code-review`
@@ -276,6 +278,10 @@ also lists ticket 731 as added: it was filed on `chore/729-test-result`
 and brought here for P1. The final count goes here when the last Disposition table is
 written.
 
+Round 2 (the focused check) stopped: see `## Focused check (round 2)`.
+Two of its findings, R2-1 and R2-2, block the merge until the owner
+decides what happens next.
+
 ## Disposition
 
 | ID  | Axis         | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -299,3 +305,149 @@ written.
 | S7  | Code quality | fixed       | `b33d936f`: the rename case lives only in `check_review_requirement_reads_git`; `check()` computes `review_rel` once                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | S8  | Code quality | fixed       | `b33d936f`: `is_tooling_path` takes the list as an argument, so the test no longer sets a global; the review-file block is `review_file_errors()`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | S1  | Standards    | wontfix     | the subjects stay: this review file cites `9795fbd5` and `8bbc7f49`, and rewording them would change those shas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+
+## Focused check (round 2)
+
+Range: the second `Reviewed range:` line, `8faf766d..363e5d1e`. Fork
+range: none. This worktree has no `vendor/tbc-new-fork`, and
+`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json` exits 0, so
+the branch never moves the fork pin and condition 3 holds. Dispatch: one
+fresh `general-task` agent on Opus (`codex` is not on `PATH`). It got the
+range, round 1's findings, the four checks and the points the dispatching
+session listed. It was told to treat the Disposition notes as claims to
+test, and that it writes nothing. Its full logs:
+`.scratch/agent-reports/2026-10-29-general-task-731-round2-focused-check.md`
+in this worktree (gitignored).
+
+**Condition 1 does not hold.** `977f41e3` fixes no round 1 finding: it
+puts the owner's chosen skill name, `instruction-review`, in place of the
+`<GLOBAL-TOOLING-REVIEW-SKILL>` placeholder that the round 1 dispatch note
+called deliberate (ticket 732). Also, no commit message names the
+finding IDs it fixes, and `b33d936f` does not name its Code quality rows.
+For every commit other than `977f41e3`, the Disposition table and the
+diffs show which finding the commit fixes. `94dd3c34` also changes
+`.scratch/carry-forward/map.md`, and `363e5d1e` changes `NEXT` and a
+code comment. Under "Round limit" a failed condition stops round 2. The
+check ran anyway, because the dispatching session asked for `977f41e3`
+and ticket 731 to be checked; its result does not change that outcome.
+
+**Condition 2 holds.** Every changed code line is at a place a finding
+cites, or is the `_merge_base` helper that the A1 fix needs.
+
+### The four checks
+
+1. **Conditions: FAIL** (condition 1, above).
+2. **Each diff changes only what its finding asks for: PASS.**
+   `977f41e3` changes only the placeholder token (word diff). All 8 of
+   8 approved blocks of proposal § 2 are found in `AGENTS.md`,
+   `docs/workflow.md` and both skill copies, after the name swap and
+   whitespace normalising. `git grep GLOBAL-TOOLING` matches only this
+   file. Ticket 731 differs from its `chore/729-test-result` copy
+   (`512b26f6`) only by two added sections, "Owner approvals,
+   2026-10-29" and "How the exemption branch was reviewed".
+3. **Each new test asserts its finding: PASS for the asked mutations,
+   with gaps (R2-3).** On copies of the script at `363e5d1e`,
+   `--self-test` fails (rc=1) with: the review-required test in `check()`
+   inverted; `--product-files` printing nothing; `--product-files`
+   exiting 0 on an empty diff; the deleted-open-ticket rule dropped from
+   `check()`, from `--product-files` or from `product_files()`; every
+   deleted ticket counted as closed; `--no-renames` dropped;
+   `scripts/run_verify.mjs` dropped from `GATE_PATHS`; an empty diff
+   counted as exempt. The restored copy passes. `b33d936f` changes no
+   behaviour: the scripts at `33d584ea`, `b33d936f` and `363e5d1e` give
+   the same output on every throwaway-repo case.
+4. **The tests the fixes touch pass: PASS.** `python3
+scripts/check_merge_ready.py --self-test` rc=0 (40 checks);
+   `python3 scripts/check_merge_to_dev.py` rc=0 (12 checks);
+   `python3 scripts/check_skill_mirrors.py` rc=0.
+
+The deleted-ticket rule held in every bypass case tried: deleting a
+ticket whose status is `open`, `**Status:** open`, `OPEN` or `blocked`;
+renaming it inside `issues/`; moving it to `notes/`, to a subfolder or
+to `docs/agents/`; deleting it and adding it under a new name; a phase
+branch deleting its own blocker. Each needs the review file, and
+`--product-files` agrees with `check()` in every case. Deleting `map.md`
+lines, deleting `NEXT`, deleting a closed or `wontfix` ticket and
+editing an open ticket stay exempt.
+
+### Findings
+
+**R2-1. A tooling-only phase branch can clear its own phase blocker
+with no review file, by editing the ticket instead of deleting it.**
+Effect: a check that passes when it should fail.
+`scripts/check_merge_ready.py:1031` reads the blockers from the
+branch's current tickets; `:114` leaves `wontfix` out of
+`CLOSED_STATUSES`, so no `Verified by:` line is needed. Cases (re-run by
+the dispatching agent with `$TMPDIR/r2/cases.sh`): branch
+`phase-9/wontfix` sets `Status: wontfix` on its `Blocks: phase-9`
+ticket, and branch `phase-9/unblock` deletes the ticket's `Blocks:`
+line. Both: rc=0, "review not required … no open Blocks: phase-9
+tickets … merge-ready: ok". Round 1 ruled the `wontfix` edit ordinary
+ticket work; it did not consider the `Blocks:`-line edit. Before this
+branch, the required review file covered both. Suggested fix: a phase-N
+branch gets no exemption when a ticket that was an open `Blocks:
+phase-N` ticket at the merge base no longer is one.
+
+**R2-2. `--check-only` misses an uncommitted ticket deletion.** Effect:
+a silent wrong result, in the preview only.
+`scripts/check_merge_ready.py:675-708`: `deleted_open_tickets` reads
+commits, while the blocker scan reads the working tree when the branch
+is checked out (`:804`). Case `phase-9/keep` with its blocker deleted
+but not committed: rc=0, "review not required … no open Blocks: phase-9
+tickets … merge-ready: ok" (re-run by the dispatching agent). A real
+merge refuses a dirty tree (`scripts/merge_to_dev.py:524-525`), and
+once the deletion is committed the gate asks for the review. Suggested
+fix: when the branch is checked out, also list working-tree deletions,
+as `tickets_closed_without_verification` does.
+
+**R2-3. Four paths of the deleted-ticket rule have no test.** Effect: a
+test gap. Each of these mutations of `:675-708` still passes
+`--self-test` (rc=0, 40 checks): a status unreadable at the merge base
+counts as closed (the docstring says open); `--diff-filter=D` dropped
+(every tooling branch that edits an open ticket would need a review);
+the top-level-only folder filter dropped; `wontfix` at the merge base
+counts as open. Suggested fix: CLI cases for editing an open ticket, a
+ticket with no status at the merge base, deleting a `wontfix` ticket,
+and a nested `.md` file.
+
+**R2-4. Bookkeeping.** The commit messages do not name the finding IDs
+(condition 1). `94dd3c34` filed ticket 733 without moving `NEXT`
+(`docs/agents/issue-tracker.md:22-23`); `363e5d1e` set it to 734, which
+is right: 733 is the highest ticket, and 732 exists only on
+`chore/729-test-result`.
+
+**R2-5. Bookkeeping.** Ticket 731's "Done when" asks for
+`pnpm merge-to-dev --check-only` on `chore/729-test-result`. What ran
+was `python3 scripts/check_merge_ready.py --branch chore/729-test-result`
+(rc=0, "review not required: every one of the 10 changed file(s) is
+agent tooling"; re-run by the check agent). The ticket does not say so.
+
+**R2-6. Bookkeeping, not a defect.** The check agent saw this file
+dirty: the dispatching agent had written the round 2 `Reviewed range:`
+line before dispatch, as step 1 says.
+
+Ticket 731's owner quotes each name a date and a source, the prompt of
+an agent, so each is second hand; the check agent could not see the
+owner's messages and did not confirm the words. One sentence, "The
+owner said it matters more.", is a paraphrase with no source; it is not
+shown as a quote.
+
+### Outcome
+
+Round 2 stops under "Round limit": condition 1 fails, and the check
+found R2-1 and R2-2 (checks that pass when they should fail) and R2-3 (a
+test gap). There is no round 3 and no round 2 Disposition table. R2-1
+and R2-2 are "fixed before merge" findings introduced by this branch;
+they block the merge until the owner decides what happens next. Ticket
+731's "Done when" items are not changed by this round.
+
+Run at the dispatching session's request:
+`TBC_VERIFY_WITHOUT_FORK=1 pnpm verify` at `363e5d1e`, with only this
+file's `Reviewed range:` line uncommitted, rc=0, "gates: 1345 ran, 218 skipped". The
+skipped gates name the missing fork: sim-implemented-effects, engine
+port drift, the fork half of equip eligibility, fork lint, fork tests,
+mock fixtures, EP presets, meta conditions, fork data copies, the layout
+gate, and the fork-backed test cases (`wowsims-fork-parity`,
+`CliSimRunner`, the 535, 538 and 541 cases among them). The
+`pnpm merge-to-dev --check-only` result is in the dispatching agent's
+report, not here, because it runs on the commit that adds this section.
