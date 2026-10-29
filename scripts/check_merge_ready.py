@@ -511,13 +511,9 @@ def open_blockers_for_phase(phase: str) -> list[tuple[Path, str]]:
     for path in iter_issue_files():
         text = path.read_text(encoding="utf-8")
         status_m = STATUS_RE.search(text)
-        blocks_m = BLOCKS_RE.search(text)
-        if not status_m or not blocks_m:
+        if not status_m or status_m.group(1).lower().strip("*_`") not in OPEN_STATUSES:
             continue
-        if status_m.group(1).lower().strip("*_`") not in OPEN_STATUSES:
-            continue
-        blocks = [b.strip().lower() for b in blocks_m.group(1).split(",")]
-        if phase_l not in blocks:
+        if phase_l not in blocks_values(text):
             continue
         title = next(
             (ln.strip("# ").strip() for ln in text.splitlines() if ln.strip()),
@@ -703,7 +699,9 @@ def _names_changed_since(
 NOT_OPEN_STATUSES = (*CLOSED_STATUSES, "wontfix")
 
 
-def _blocks_values(text: str) -> set[str]:
+def blocks_values(text: str) -> set[str]:
+    """The values on every `Blocks:` line of a ticket, lower case. Pure. The
+    one reader of `Blocks:`, so the phase scan and the ticket rule agree."""
     return {
         b.strip().lower()
         for m in BLOCKS_RE.finditer(text)
@@ -730,8 +728,8 @@ def ticket_let_go(old_text: str, new_text: str | None) -> bool:
         return closed_without_verification(old_text, new_text)
     if new_status not in OPEN_STATUSES:
         return True
-    old_blocks = _blocks_values(old_text)
-    return bool(old_blocks) and _blocks_values(new_text) != old_blocks
+    old_blocks = blocks_values(old_text)
+    return bool(old_blocks) and blocks_values(new_text) != old_blocks
 
 
 def tickets_let_go(
@@ -940,8 +938,7 @@ def list_open_carry_forward() -> list[tuple[Path, str, str, str]]:
         if status not in OPEN_STATUSES:
             continue
         text = path.read_text(encoding="utf-8")
-        blocks_m = BLOCKS_RE.search(text)
-        blocks = blocks_m.group(1).strip() if blocks_m else "(none)"
+        blocks = ", ".join(sorted(blocks_values(text))) or "(none)"
         blocked_m = BLOCKED_BY_RE.search(text)
         blocked_by = blocked_m.group(1).strip() if blocked_m else "(unset)"
         out.append((path, status, blocks, blocked_by))
@@ -2014,6 +2011,9 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
                 "Status: closed\nVerified by: `pnpm verify`\n\n# t\n"
             )
             (carry / "7-wontfix.md").write_text("Status: wontfix\n\n# t\n")
+            (carry / "3-two.md").write_text(
+                "Status: open\nBlocks: phase-11\nBlocks: phase-12\n\n# t\n"
+            )
             # Not a ticket: every ticket scan reads top-level files only.
             (carry / "archive").mkdir()
             (carry / "archive" / "5-old.md").write_text("Status: open\n\n# t\n")
@@ -2044,8 +2044,13 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
                 ("close-open", "Status: closed\nVerified by: `true`\nBlocks: phase-9\n\n# t\n"),
                 ("phase-9/close-true", "Status: closed\nVerified by: `true`\n\n# t\n"),
                 ("phase-9/close-bare", "Status: closed\nBlocks: phase-9\n\n# t\n"),
+                ("phase-9/blank-blocks", "Status: open\nBlocks: ,\nBlocks: phase-9\n\n# t\n"),
             ):
                 _scratch_branch(root, git, name, {open_rel: text})
+            _scratch_branch(root, git, "phase-11/swap", {
+                f"{carry_rel}/3-two.md":
+                    "Status: open\nBlocks: phase-12\nBlocks: phase-11\n\n# t\n",
+            })
             git("branch", "empty", INTEGRATION_BRANCH)
             git("checkout", "-q", INTEGRATION_BRANCH)
         except (OSError, subprocess.CalledProcessError) as exc:
@@ -2074,6 +2079,10 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             ("close-open", 0, "review not required", 0, ""),
             ("phase-9/close-true", 0, "review not required", 0, ""),
             ("phase-9/close-bare", 1, "missing review", 0, f"{open_rel}\n"),
+            # Moving a ticket's values between `Blocks:` lines changes nothing:
+            # the phase scan reads every line, as the ticket rule does.
+            ("phase-9/blank-blocks", 1, "open Blocks: phase-9", 0, ""),
+            ("phase-11/swap", 1, "open Blocks: phase-11", 0, ""),
             # No changed file is not "every changed file is tooling": the gate
             # requires the review, so --product-files must not say to skip it.
             ("empty", 1, "missing review", 1, ""),
