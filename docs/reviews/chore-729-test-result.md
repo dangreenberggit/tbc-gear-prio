@@ -2,6 +2,12 @@
 
 Reviewed range: `3c008f0d2cffcb8b9218287d762abea39f3ee542..8cd7e45e66b2de6a48ff74ccee668ff82dad422a`
 Reviewed range: `8cd7e45e66b2de6a48ff74ccee668ff82dad422a..683bf83be385bd2d8b93b42f4bc448fbbbd4b2f5`
+Reviewed range: `3c008f0d2cffcb8b9218287d762abea39f3ee542..79160874af4d6b8612cdf4d7087e7dde1cc34abd`
+
+The third line is a fresh round 1 over the whole branch. The owner chose
+it after round 2 stopped at the round limit (as the dispatching session
+reports). Its sections are under `# Fresh review, round 1` at the end of
+this file; the sections before that heading are the earlier review.
 
 Dispatch: round 1, full axes. `codex` is not on `PATH` (`which codex`
 printed nothing), so each axis ran as a fresh `general-task` agent on
@@ -285,7 +291,8 @@ rec sounds about right", as the dispatching session reports): the commit
 "Hold back tracked-file writes in the dry run" makes them, and
 § Disposition (round 2) records them. No review round has checked that
 commit; the owner decides what review follows it. Until then, the branch
-is **not ready to merge**.
+is **not ready to merge**. The owner chose a fresh round 1; see
+`# Fresh review, round 1`.
 
 Tickets: this branch filed 0 and closed 1 (729). Filed is the number of
 `A` rows in `git diff --name-status dev...HEAD --
@@ -320,3 +327,161 @@ Tickets: this branch filed 0 and closed 1 (729). Filed is the number of
 | R2-1 | Focused check | fixed       | commit "Hold back tracked-file writes in the dry run": item 7 holds back as `not run` a command that writes, or may write, a file git tracks at its real path, such as a script whose outputs the plan does not all name; the sentence that ran tracked-file writes on a moved target is gone, which undoes that part of A1's fix; owner approved 2026-10-29, "your rec sounds about right" |
 | R2-2 | Focused check | fixed       | same commit: the helper runs no write to a tracked file, so the dry run no longer asks `discrete-task` or `glm-flash-task` for "a `sed` or script write to a tracked file" or a tracked edit under `data/`; owner approved 2026-10-29, "your rec sounds about right"                                                                                                                        |
 | R2-3 | Focused check | fixed       | same commit: on a re-review, each command outside the dry-run scope is `not run`, outside this re-review's scope, which § Done when's "or `not run`" already admits; owner approved 2026-10-29, "your rec sounds about right"                                                                                                                                                               |
+
+# Fresh review, round 1
+
+Range: `3c008f0d..79160874` (the third `Reviewed range:` line). This is
+the first review of `79160874` ("Hold back tracked-file writes in the
+dry run").
+
+Dispatch: full axes. `codex` is not on `PATH` (`which codex` printed
+nothing), so each axis ran as a fresh `general-task` agent on Opus, all
+three in one parallel batch. Too large for the small-change lane:
+`git diff --shortstat dev...HEAD` gave 7 files changed, 752 insertions,
+25 deletions; `git diff --name-only dev...HEAD` lists the five
+stage-gate and reviewer files of the earlier round, ticket 729, and this
+file. Standards and Spec used the `code-review` skill's step 4 prompts
+(read from `.claude/skills/code-review/SKILL.md`) with its smell
+baseline. The domain axis was skipped: the diff changes only agent
+instructions, one ticket and this file, and has no game-domain content.
+Each axis was told it writes nothing, to report no finding on this file
+or ticket 729, and to read this file only after forming its own
+findings. Context given to every axis: the owner approved the wording of
+every agent-file change on this branch, so a finding that only prefers
+other wording is minor (from the dispatching session's prompt).
+
+Finding IDs continue after the earlier review's IDs, so that no two
+findings in this file share an ID.
+
+## Adversarial (fresh round 1)
+
+**A7.** `.claude/agents/gate-reviewer.md:90-92` with `:84-87`.
+`79160874` changed the hold-back from "a command whose write cannot be
+moved under the temp folder" to "a command that writes, or may write, a
+file git tracks at its real path". A command that writes an untracked
+or gitignored file at a path the plan does not name now runs at the
+real path. The `ls -l --full-time` guard sees only named targets, and
+Gate A's `git status --porcelain` (`.claude/skills/stage-gate/SKILL.md:314-315`)
+does not show ignored files. Files of this kind: everything under
+`.scratch/*` that is not re-included (`.gitignore:43`), including stage
+folders (`.gitignore:59`), and every file in `vendor/tbc-new-fork`,
+which the main repo ignores (`.gitignore:16`; `git check-ignore -v`
+confirms all three), so "a file git tracks", read from the checkout
+root, is false for fork files that the fork's own git tracks. The
+axis's example, `pnpm tab-fixtures:smoke`, writes
+`.scratch/tab-fixtures-smoke/<name>.png` itself
+(`scripts/tab-fixtures/smoke.mjs:17,75`); it also needs a running
+server, so a helper may hold it back as a long run (hypothesis,
+untested). Effect: live ignored files, or files in the main checkout's
+fork, overwritten during a plan review with no warning. Whether a
+helper meets such a command in practice is hypothesis, untested.
+
+**A8.** `gate-reviewer.md:77-80`. A later command that reads a moved
+target names its temp path, which is outside the repo, and repo-aware
+tools then act differently. Checked by this dispatcher on a `mktemp -d`
+copy: `pnpm exec eslint <temp>/packages/core/src/foo.ts` printed
+"File ignored because outside of base path" and exited 0;
+`git diff --stat -- <temp path>` exited 128 ("outside repository").
+Effect: a lint acceptance command on a new file passes the dry run
+without checking anything (a check that passes when it should fail; the
+executor's real run would still catch it later), and a git command gives
+a false finding that costs a revision round. The axis reports Prettier
+behaves like eslint; whether repo config changes that is hypothesis,
+untested.
+
+**A9.** `gate-reviewer.md:76` against `SKILL.md:279-285` and
+`:428-432`. Item 7 runs commands "from the checkout root the executor
+starts in", but the review spawn prompt gives only the round number and
+the paths of `brief.md`, `plan.md` and `plan-review.md`; the session
+picks the executor's checkout at step 5, and a pair is made then
+(`docs/agents/stage-gate-project.md` § Checkouts). Effect: in a pair
+stage the helper runs fork commands against the session checkout's own
+`vendor/tbc-new-fork` (on its own branch; `docs/agents/paired-worktrees.md`),
+so dry-run results describe the wrong tree with no warning. Same as S7.
+
+## Standards + Spec (fresh round 1)
+
+### Standards
+
+Clean checks: `python3 scripts/check_skill_mirrors.py` printed "skill
+mirrors match" (rc=0); all 9 commit subjects are 37-50 characters,
+capitalized, imperative, no period, no body; `gate-planner.md:36-41` and
+`docs/agents/orchestration.md:136-140` agree with `plan-template.md:46-54`.
+
+**S6.** `gate-reviewer.md:90-92`. Deciding whether a command "may
+write" a tracked file means reading its source, which is a judgment
+call, and the helper is a workhorse type: `glm-flash-task` is "Not for
+review, design or judgment" and returns `NEEDS_JUDGMENT` on "a choice
+the prompt did not make" (`/home/daniel/.claude_router/agents/glm-flash-task.md:3,14`;
+`discrete-task.md:37-39` is the same). Effect: the helper stops with
+`NEEDS_JUDGMENT` and item 7 does not say what the reviewer does next (a
+loud failure), or the helper misjudges a script with unnamed tracked
+outputs. That second case is caught afterwards by Gate A's clean-tree
+check, and the stage starts from a clean tree, so it loses no
+uncommitted work (loud). Suggested fix (axis): the reviewer sorts the
+commands and gives the helper a fixed list to run.
+
+**S7.** Same as A9.
+
+### Spec
+
+Clean: R2-3 is fixed (item 7's "outside this re-review's scope" and
+§ Done when's "or `not run`" agree, `gate-reviewer.md:104-107,199-205`);
+the template change matches ticket 729's Option B; the Gate A line uses
+the template's term "one-line chunk"; `diff -r .claude/skills/stage-gate
+.agents/skills/stage-gate` printed nothing. `79160874` changes only the
+two sentences R2-1 and R2-3 asked about.
+
+**P6.** Partial fix of R2-1. Round 2's suggested guard (`git status
+--porcelain` before and after each command) was not adopted; the guard
+still watches only named targets, so the hold-back works only when the
+helper knows everything a script writes (`scripts/parse_atlasloot.py`
+writes three `data/` files by default that a plan need not name). Effect
+as S6: loud, through Gate A. Same fix as S6.
+
+**P7.** Partial fix of R2-2. R2-2 said "item 7 does not say what the
+reviewer does with that return" (`NEEDS_JUDGMENT`); it still does not,
+and the new "may write" test is itself a choice the helper's prompt does
+not make (`docs/agents/model-policy.md:328-330`: a helper prompt "names
+... every command to run"). Effect: loud failure; the dry run does not
+happen. Same fix as S6.
+
+## Code quality (fresh round 1)
+
+| ID  | Row                                                                                                                                                                                                                                                                    |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A10 | `gate-reviewer.md:107-109` against `:200-202`: the `Dry run:` line lists only "the steps whose results were all as expected", so the passing commands of a step with one `not run` command appear nowhere, but § Done when requires every command to be accounted for. |
+| S8  | `gate-reviewer.md:150-158`: § Report's format block shows `VERDICT`, `## Findings` and `## Register verdicts` but not the `Dry run:` line that `:107` and `:200` require.                                                                                              |
+
+## Summary (fresh round 1)
+
+Not ready to merge. Every finding is in item 7 (the dry run), which this
+branch adds, so each one blocks the merge under step 3:
+
+- **Fixed before merge** (cannot be deferred): **A7**, the dry run may
+  overwrite live gitignored files or files in the main checkout's fork
+  with no warning (opened by `79160874`); **A8**, a lint check on a moved
+  file passes without checking anything; **A9/S7**, in a pair stage the
+  dry run tests the wrong checkout's fork with no warning.
+- **Blocks unless the owner allows a deferral**: **S6/P6/P7**, the helper
+  must judge what a script writes, which its worker type refuses, and
+  item 7 does not say what happens then.
+- **Code quality**, fixed in one pass before round 2: A10, S8.
+
+All fixes are edits to `.claude/agents/gate-reviewer.md` (A9 may also
+need `.claude/skills/stage-gate/SKILL.md` step 3), so under § Agent files
+they go to the owner for one approval before any fix. Suggested fixes,
+not applied and untested: A7 and S6/P6/P7, the reviewer gives the helper
+a fixed list of commands, and the helper holds back any command that may
+write a path the plan does not name, tracked or not, inside the fork
+included; A8, hold back a command that reads a moved target with a
+repo-aware tool (lint, format, git); A9, the session's review prompt
+names the executor's checkout, or item 7 holds back commands that need a
+checkout that does not exist yet. Round 2 (the focused check) runs after
+those fixes and the code-quality pass.
+
+No Disposition table for this round yet: every finding is open and
+blocking, and code-quality rows get their rows after the pass (step 3).
+Tickets: this branch filed 0 and closed 1 (729), as counted in the
+earlier summary; the count is redone when this round's table is
+written.
