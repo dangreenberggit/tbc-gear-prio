@@ -29,11 +29,12 @@ paths: an `@` import loads at start and would undo the saving.
   agent type:** `docs/agents/model-policy.md`.
 - **Judging a ranking, shortlist or pool output:** the `sme-rank-review`
   skill; its audience is the engineering team, not players.
-- **A plan, a ticket, a skill, `AGENTS.md`, `CLAUDE.md`, or a doc an
-  agent is pointed at:** a second pass against the `writing-for-agents`
-  skill, then `docs/workflow.md` § Editing agent-facing documents.
-  Propose changes to `AGENTS.md`, `CLAUDE.md` and skill files in chat and
-  wait for approval before editing them: they steer every future session.
+- **A plan, a ticket, a skill, an agent definition, `AGENTS.md`,
+  `CLAUDE.md`, or a doc an agent is pointed at:** a second pass against
+  the `writing-for-agents` skill, then `docs/workflow.md` § Editing
+  agent-facing documents. A change to `AGENTS.md`, `CLAUDE.md`, a skill
+  or an agent definition then follows the global rule "Changing agent
+  instructions" (staged in `docs/agents/home/AGENTS.md`).
 - **Reporting a nontrivial task done,** especially a review, research, or
   "use X to check Y": the `dont-be-stupid` checklist.
 - **Tickets:** local markdown under `.scratch/`,
