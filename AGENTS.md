@@ -26,7 +26,8 @@ paths: an `@` import loads at start and would undo the saving.
   under `data/`:** the `data-pipeline-work` skill.
 - **Spawning an agent, fanning out, stage-gating, writing a question for
   the owner, or ending an investigation:** `docs/agents/orchestration.md`. **Which model and
-  agent type:** `docs/agents/model-policy.md`.
+  agent type:** `~/.claude/model-policy.md`; this repo's values are in
+  `docs/agents/model-policy.md`.
 - **Judging a ranking, shortlist or pool output:** the `sme-rank-review`
   skill; its audience is the engineering team, not players.
 - **A plan, a ticket, a skill, an agent definition, `AGENTS.md`,
@@ -134,31 +135,17 @@ loop, step 4).
 
 ## Spawning
 
-Name the model on every spawn (the GLM types excepted: they take none,
-model-policy § GLM worker types). An unnamed subagent inherits its
-parent's model, and a session on Fable then pays the top price tier for
-a `grep`. Pick the type by the job (model-policy § Claude Code):
-
-- An **overseer** (Opus or Fable) plans, reviews, executes a plan,
-  oversees workers, or judges an investigation; on Opus it also does
-  hard implementation. It holds the judgment itself and hands
-  **workhorse jobs** (searches, plain reads, command runs, measurements,
-  small or modest coding) to the workhorse lane in blocks. It spawns
-  another overseer only for judgment work it delegates: a review axis, a
-  chunk of a plan, oversight of a worker set.
-- The **workhorse lane** does one block whose result the prompt fixes
-  or names, and spawns nothing (model-policy § Workhorse jobs). When the
-  harness lists the GLM types, `glm-flash-task` takes every workhorse
-  job, small or modest coding included, and the Sonnet types
-  (`discrete-task`, `simple-task`) take only a job z-ai must not see
-  (such as a read that could reach secrets or session logs), or a retry
-  when a GLM type hits a usage wall; Sonnet is otherwise not used there.
-  A job `glm-flash-task` hands back as `NEEDS_JUDGMENT` goes to a bigger
-  agent (model-policy § Workhorse jobs). Else the workhorse types are
-  `discrete-task`, `modest-task` and `simple-task`.
-
-Nothing runs on Haiku. A helper's `not found` is one input to a
-conclusion of absence, never the conclusion.
+The spawning rules are global (`~/.claude/AGENTS.md` § Spawning, staged
+in `docs/agents/home/AGENTS.md`); this repo's values are in
+`docs/agents/model-policy.md`. In this repo a workhorse type also stops
+and returns `NEEDS_JUDGMENT` for an edit under `data/` or
+`vendor/tbc-new-fork`, `.githooks/` or `scripts/`. It runs `node --version`
+in the same shell command as each `node`, `pnpm` or test command, for
+example `node --version; pnpm verify`; if it does not print v22, it
+discards the command's result and returns
+`NEEDS_JUDGMENT: node --version printed <output>`
+(`docs/agents/known-traps.md`, "Before running node / pnpm / test
+commands").
 
 ## Subagent reports
 

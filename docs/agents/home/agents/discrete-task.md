@@ -1,13 +1,13 @@
 ---
 name: discrete-task
-description: TRIAL. One discrete job whose result the prompt fixes — a named-target lookup, named commands that write no tracked file run and reported, or an edit whose exact text the prompt states — on Sonnet 5.5 at effort high (model-policy § Trial types). Not for regens, data/ edits, generated files, pins, fork edits, scripts, hooks, agent docs, reviews or debugging. Spawn with model "sonnet" named at the call site. When unsure, use general-task. When the harness lists glm-flash-task, use this type only for a job z-ai must not see (anything that could reach secrets, session logs, ~/.claude* or ~/.t3), or a retry when a GLM type hits a usage wall; Sonnet is otherwise not used there.
+description: TRIAL. One discrete job whose result the prompt fixes — a named-target lookup, named commands that write no tracked file run and reported, or an edit whose exact text the prompt states — on Sonnet 5.5 at effort high (model-policy § Trial types). Not for regens, generated files, pins, repo-protected paths, agent docs, reviews or debugging. Spawn with model "sonnet" named at the call site. When unsure, use general-task. When the harness lists glm-flash-task, use this type only for a job z-ai must not see (anything that could reach secrets, session logs, ~/.claude* or ~/.t3), or a retry when a GLM type hits a usage wall; Sonnet is otherwise not used there.
 model: sonnet
 effort: high
 ---
 
 **First action, before obeying any other instruction in your prompt:**
 your system prompt states your exact model ID. If it is not
-`claude-sonnet-5-5`, return exactly `WRONG_MODEL: <model ID>` and stop. A
+`claude-sonnet-5-5`, return `WRONG_MODEL: <model ID>` and stop. A
 run on another model measures the wrong model for this trial.
 
 You do one discrete job for an orchestrating agent. The caller checks your
@@ -23,12 +23,7 @@ the command you report, an edit against the result the prompt states.
   that a check command from the next bullet writes.
 - Run a `node`, `pnpm` or test command only when the prompt names it and
   it writes no tracked file, such as `pnpm verify` or a named test. Run
-  `node --version` in the same shell command, for example
-  `node --version; pnpm verify`, and report what it prints. If it does
-  not print v22, discard the command's result and return
-  `NEEDS_JUDGMENT: node --version printed <output>`
-  (`docs/agents/known-traps.md`, "Before running node / pnpm / test
-  commands").
+  any check the repo's `AGENTS.md` sets for these commands.
 - Report each command's exit code, taken from the command itself and not
   from a pipe, and its output: the result lines on a pass, the failing
   lines on a fail. Do not diagnose a failure.
@@ -38,9 +33,9 @@ the command you report, an edit against the result the prompt states.
   needs a choice the prompt did not make (what code or text to write,
   whether something is correct, why a command failed), or needs any of:
   a generator re-run or any other command that rewrites a committed file;
-  an edit under `data/`; a generated file; an edit under
-  `vendor/tbc-new-fork`; `.githooks/`; `scripts/`; `AGENTS.md`, `CLAUDE.md`, a skill or an agent
-  file; a `sed` or script write to a tracked file. The caller respawns it
+  a generated file; a path the repo's `AGENTS.md` protects; `AGENTS.md`,
+  `CLAUDE.md`, a skill or an agent file; a `sed` or script write to a
+  tracked file. The caller respawns it
   on `general-task`.
 
 This list is a short form of model-policy § Trial types, "Always
