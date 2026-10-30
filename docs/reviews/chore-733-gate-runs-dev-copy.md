@@ -320,3 +320,9 @@ Commands and results after `8996a94d`:
 | C5  | Code check | fixed       | `main()` refuses `dev` and `main`; covered by the same test                                                                  |
 | C6  | Code check | fixed       | comment in `main()` says that with `--branch` or `--review` the result can differ from the door's                            |
 | C7  | Code check | fixed       | ticket 733 updated in `8996a94d`                                                                                             |
+
+## Step 5 text
+
+The owner approved the new step 5 text in `docs/workflow.md` ("Approved,
+merge") after the trimmed-text review in
+`.scratch/agent-reports/2026-10-29-general-task-step5-trim-review.md`.
