@@ -6,7 +6,7 @@ were installed 2026-10-19. The hook refuses an agent's writes to
 `~/.claude/settings.json`, `~/.claude/settings.local.json` and
 `~/.claude/hooks/`, and the deny rules also refuse Write and Edit calls to
 `settings.json` and `hooks/`. An agent's write anywhere else in
-`~/.claude/`, including the copies below, goes ahead, and the hook
+`~/.claude/` goes ahead, and the hook
 logs it to `~/.local/state/agent-guard/outside-writes.jsonl` except under
 `~/.claude/projects/` and `~/.claude/plans/`. The hook sees a Write or
 Edit call, and a Bash redirect or write command such as `cp` or `tee`

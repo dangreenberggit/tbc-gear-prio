@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
-# Blocks two Bash mistakes that succeed at doing the wrong thing.
+# Blocks a Bash mistake that succeeds at doing the wrong thing.
 #
 # THIS FILE IS THE SOURCE OF TRUTH, BUT IT IS NOT THE COPY THAT RUNS.
 # Registered at the USER level so it guards every repo:
 #     ~/.claude/settings.json  ->  ~/.claude/hooks/bash-footguns.sh
 # After editing:
 #     bash docs/agents/home/hooks/tests/bash-footguns.sh     # all cases must pass
-#     cp docs/agents/home/hooks/bash-footguns.sh ~/.claude/hooks/
+# then the user installs it (docs/agents/home/README.md).
 # Editing only this copy changes nothing at runtime.
 #
 # PreToolUse hook. Reads the tool call on stdin, exits 2 to block.
 #
-# Both rules target commands that EXIT 0 while accomplishing nothing, which is
-# why they are worth a hook: a loud failure teaches you on the spot, a quiet
+# The rule targets commands that EXIT 0 while accomplishing nothing, which is
+# why it is worth a hook: a loud failure teaches you on the spot, a quiet
 # one gets believed and reported as done.
 #
 # Bash only. PowerShell is a separate tool_name with its own cwd semantics and
-# native path handling, so neither rule applies there.
+# native path handling, so the rule does not apply there.
 
 set -uo pipefail
 
