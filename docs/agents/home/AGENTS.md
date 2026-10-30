@@ -121,3 +121,48 @@ everything they see: their prompt, every file they read, and every command
 output. Do not give them a job that includes or could reach private data,
 or anything a project's `AGENTS.md` keeps private. If unsure, use a Claude
 agent.
+
+# Orchestrator mode
+
+By default the interactive session does the work itself, and it is
+encouraged to hand work to subagents where that helps, such as a question
+that needs many reads, or independent pieces that can run in parallel.
+For development work that is not small, the session uses light judgment
+to switch to orchestrator mode: it hands the work to subagents and keeps
+the routing, the judging of results and the talking to the user. In that
+mode its own tool calls are spawning and messaging agents, loading
+skills, short state checks such as `git status`, and reading a
+subagent's report file; a repo's own docs can add to this list. The
+session leaves the mode when the work no longer needs it. The user can
+also switch the mode on or off at any time.
+
+# Spawning
+
+Details: `~/.claude/model-policy.md`, cited below as model-policy.
+
+Name the model on every spawn (the GLM types excepted: they take none,
+model-policy § GLM worker types). An unnamed subagent whose type names no
+model runs on the main conversation's model, so a session on Fable then
+pays the top price tier for a `grep`. Pick the type by the job
+(model-policy § Claude Code):
+
+- An **overseer** (Opus or Fable) plans, reviews, executes a plan,
+  oversees workers, or judges an investigation; on Opus it also does
+  hard implementation. It holds the judgment itself and hands
+  **workhorse jobs** (searches, plain reads, command runs, measurements,
+  small or modest coding) to the workhorse lane in blocks. It spawns
+  another overseer only for judgment work it delegates: a review axis, a
+  chunk of a plan, oversight of a worker set.
+- The **workhorse lane** does one block whose result the prompt fixes
+  or names, and spawns nothing (model-policy § Workhorse jobs). When the
+  harness lists the GLM types, `glm-flash-task` takes every workhorse
+  job, small or modest coding included, and the Sonnet types
+  (`discrete-task`, `simple-task`) take only a job z-ai must not see
+  (such as a read that could reach secrets or session logs), or a retry
+  when a GLM type hits a usage wall; Sonnet is otherwise not used there.
+  A job `glm-flash-task` hands back as `NEEDS_JUDGMENT` goes to a bigger
+  agent (model-policy § Workhorse jobs). Else the workhorse types are
+  `discrete-task`, `modest-task` and `simple-task`.
+
+Nothing runs on Haiku. A helper's `not found` is one input to a
+conclusion of absence, never the conclusion.

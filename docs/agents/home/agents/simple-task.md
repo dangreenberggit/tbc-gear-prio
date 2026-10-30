@@ -17,6 +17,6 @@ the prompt names and nothing next to it.
   `NEEDS_JUDGMENT: <one line saying why>`. The caller respawns it on
   `general-task`.
 - Do the job with your own tool calls; spawn no subagents.
-- Return only what the prompt asks for, within any length limit it sets.
+- Return what the prompt asks for, within any length limit it sets.
   Give file paths as absolute paths, and name the command or file each
   fact came from.

@@ -5,15 +5,10 @@ a question for the owner, or ending an investigation. Model and agent type: `mod
 
 ## The session delegates
 
-On every harness the interactive session is the orchestrator. It routes
-work, judges results, and relays conclusions to the owner. It hands every
-task to a subagent, so its own tool use stays low and its context stays
-small.
+In orchestrator mode (global `AGENTS.md` § Orchestrator mode, staged in
+`docs/agents/home/AGENTS.md`), the session in this repo also makes these
+tool calls itself:
 
-The session makes only these tool calls itself:
-
-- spawning and messaging agents
-- loading a skill
 - writing `brief.md`, `decision-log.md`, and any stage artifact copied
   verbatim from a seat's final message, and the one `mv` of `plan.md`
   that `.claude/skills/stage-gate/SKILL.md` step 5 makes before a new
@@ -27,8 +22,6 @@ The session makes only these tool calls itself:
 - reading the stage-gate artifacts under `.scratch/stage-gate/<slug>/`,
   `.claude/skills/stage-gate/plan-template.md` and
   `docs/agents/stage-gate-project.md`
-- reading a subagent's report file (AGENTS.md § Subagent reports) for a
-  detail the condensed report leaves out
 
 Everything else goes to a subagent: reading code or docs, running `pnpm`
 or any other `git` command, editing files, and committing. To run
@@ -38,66 +31,13 @@ and have it return the review file's path and its summary.
 
 ## Who spawns whom
 
-AGENTS.md § Spawning gives the rule. The guard on delegation is the
-**job type**, not the depth of the chain: an overseer spawns another
-overseer when the delegated piece is itself judgment, and an executor
-that delegates oversight of a chunk to another Opus agent is the
-intended case. What a block is, when a block is worth a helper, and how
-the overseer judges each workhorse result: model-policy § Workhorse
-jobs.
-
-Pick each subagent's type from your harness section of `model-policy.md`:
-
-- **Claude Code:** `general-task` for lead-lane and review-lane work
-  (model-policy § Four lanes); the workhorse types
-  for workhorse jobs (model-policy § Workhorse jobs: on the "Claude + GLM
-  workers" card `glm-flash-task` for every workhorse job, and a Sonnet
-  type only for a job z-ai must not see, or a retry when a GLM type hits
-  a usage wall); `design-task` for a
-  plan or an architecture call outside stage-gate. Run `pre-merge-review`
-  on a `general-task`. The session sends every
-  `modest-task`, `discrete-task` or GLM-type result to a `general-task`
-  check before it relays or builds on it; for a trial type the check's
-  prompt asks for a `TRIAL-REJECT <type>: <why>` line when it rejects or
-  corrects the result (model-policy § Trial types, "Measuring"). An
-  overseer is its own checker for the workhorse results it asked for. If
-  the harness does not recognize one of these types, restart the session
-  rather than falling back to a built-in type; a missing GLM type is the
-  exception (model-policy § GLM worker types).
-- **Codex:** everything that is not review or design goes to subagents at
-  the workhorse fill, mid tier at a lower reasoning effort. The owner
-  wants these used freely. Review and design jobs go to subagents at the
-  review and design fills.
-- **Cursor:** everything that is not review or design goes to subagents
-  on the workhorse pin, Composer. Review and design jobs go to subagents
-  at the review and design fills.
+The general rules are in `~/.claude/model-policy.md` § Who spawns whom.
+Run `pre-merge-review` on a `general-task`.
 
 The session-only rule above binds the interactive session. A subagent
 that orchestrates (the stage-gate Executor, or a subagent spawned to run
 `parallel-phase` as Delegator) holds its own judgment, merge and fan-in,
 and hands workhorse jobs down like any overseer.
-
-Any agent that splits a research question across subagents splits it
-until each piece is narrow enough for one agent to answer from its own
-reads and its workhorse agents' returns, and puts this sentence in every
-piece's prompt: "Your job is one narrow investigation: hold the judgment
-yourself and hand workhorse jobs to the workhorse lane; spawn no other
-overseer."
-
-**A bounded question is a subagent, not a detour.** When answering
-something takes many reads whose content you will not reuse (measuring a
-filter, probing what upstream does, confirming a spec claim), send it out
-and keep the paragraph, not the thirty tool calls. This is not the
-`parallel-phase` fan-out: no worktree, no merge, nothing to sequence, so
-its disjointness rule does not apply. Match the agent type to the
-judgment, not the token count. The sign that you got this wrong is
-retrospective: you are deep in a file you only opened to answer one
-question.
-
-A permission denial is evidence about that call, not a capability model.
-If a fan-out or merge precondition cannot be established, stop and report
-the exact blocked command rather than silently dropping or rewriting the
-plan.
 
 ## Models and walls
 

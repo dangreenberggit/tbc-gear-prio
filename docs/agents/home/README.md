@@ -1,4 +1,4 @@
-# Staged copies of ~/.claude/AGENTS.md, ~/.claude/CLAUDE.md and the instruction-review skill
+# Staged copies of the global agent files
 
 On the WSL host, `~/.claude/hooks/agent-guard.py` and `permissions.deny`
 rules in `~/.claude/settings.json` replace `block-outside-repo.sh`; both
@@ -15,21 +15,50 @@ the XDG directory variables before it checks a path. It does not see a
 write made inside a script or an interpreter one-liner. The
 `settings.json` in the Windows home wires no hook.
 
-The files are versioned here, and **the user runs the copy in their own
-terminal**:
+The files are versioned here, and **the user runs the install in their own
+terminal**, from inside a checkout of the branch that holds the change. It checks
+every source first, writes each copy next to its target as `.new`, and
+moves the copies into place only when all are written:
 
 ```bash
-cp docs/agents/home/AGENTS.md ~/.claude/AGENTS.md
-cp docs/agents/home/CLAUDE.md.install ~/.claude/CLAUDE.md
-mkdir -p ~/.claude/skills/instruction-review
-cp docs/agents/home/skills/instruction-review/SKILL.md ~/.claude/skills/instruction-review/SKILL.md
+bash <<'EOF'
+set -euo pipefail
+S="$(git rev-parse --show-toplevel)/docs/agents/home"
+pairs=(
+  "$S/AGENTS.md"                          "$HOME/.claude/AGENTS.md"
+  "$S/CLAUDE.md.install"                  "$HOME/.claude/CLAUDE.md"
+  "$S/model-policy.md"                    "$HOME/.claude/model-policy.md"
+  "$S/skills/instruction-review/SKILL.md" "$HOME/.claude/skills/instruction-review/SKILL.md"
+)
+for t in general discrete simple modest design; do
+  pairs+=("$S/agents/$t-task.md" "$HOME/.claude/agents/$t-task.md"
+          "$S/agents/$t-task.md" "$HOME/.claude_router/agents/$t-task.md")
+done
+for t in glm-task glm-flash-task; do
+  pairs+=("$S/agents/$t.md" "$HOME/.claude_router/agents/$t.md")
+done
+for ((i = 0; i < ${#pairs[@]}; i += 2)); do
+  test -s "${pairs[i]}" || { echo "missing or empty: ${pairs[i]}" >&2; exit 1; }
+done
+for ((i = 0; i < ${#pairs[@]}; i += 2)); do
+  mkdir -p "$(dirname "${pairs[i+1]}")"
+  cp "${pairs[i]}" "${pairs[i+1]}.new"
+  cmp -s "${pairs[i]}" "${pairs[i+1]}.new"
+done
+for ((i = 0; i < ${#pairs[@]}; i += 2)); do
+  mv "${pairs[i+1]}.new" "${pairs[i+1]}"
+done
+echo "installed $(( ${#pairs[@]} / 2 )) files"
+EOF
 ```
 
-Both files are required — `AGENTS.md` is reached only through the
-`@AGENTS.md` import in `CLAUDE.md`, so copying `AGENTS.md` alone loads
-nothing. The skill copy is separate: it installs the global
-`instruction-review` skill. Verify with
-`ls ~/.claude/AGENTS.md ~/.claude/CLAUDE.md ~/.claude/skills/instruction-review/SKILL.md`.
+`AGENTS.md` is reached only through the `@AGENTS.md` import in
+`CLAUDE.md`, so both are needed. `~/.claude_router/` links `AGENTS.md`,
+`CLAUDE.md` and `skills` to `~/.claude/`, but each card reads its own
+`agents` folder: the "Claude" card reads `~/.claude/agents/`, and "Claude +
+GLM workers" reads `~/.claude_router/agents/`. So the five worker types go
+to both, and the two GLM types only to the second. The script prints
+`installed 16 files`.
 
 The staged file is named `CLAUDE.md.install` because a real `CLAUDE.md`
 here would be auto-discovered as project context when an agent reads this
