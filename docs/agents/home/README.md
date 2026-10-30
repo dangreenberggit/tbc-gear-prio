@@ -29,6 +29,8 @@ pairs=(
   "$S/CLAUDE.md.install"                  "$HOME/.claude/CLAUDE.md"
   "$S/model-policy.md"                    "$HOME/.claude/model-policy.md"
   "$S/skills/instruction-review/SKILL.md" "$HOME/.claude/skills/instruction-review/SKILL.md"
+  "$S/hooks/bash-footguns.sh"             "$HOME/.claude/hooks/bash-footguns.sh"
+  "$S/hooks/subagent-foreground-helpers.py" "$HOME/.claude/hooks/subagent-foreground-helpers.py"
 )
 for t in general discrete simple modest design; do
   pairs+=("$S/agents/$t-task.md" "$HOME/.claude/agents/$t-task.md"
@@ -58,7 +60,7 @@ EOF
 `agents` folder: the "Claude" card reads `~/.claude/agents/`, and "Claude +
 GLM workers" reads `~/.claude_router/agents/`. So the five worker types go
 to both, and the two GLM types only to the second. The script prints
-`installed 16 files`.
+`installed 18 files`.
 
 The staged file is named `CLAUDE.md.install` because a real `CLAUDE.md`
 here would be auto-discovered as project context when an agent reads this

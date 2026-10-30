@@ -1,6 +1,6 @@
 """Cases for subagent-foreground-helpers.py. Run after any edit to the hook:
 
-    python .claude/hooks/tests/subagent-foreground-helpers.py
+    python docs/agents/home/hooks/tests/subagent-foreground-helpers.py
 
 Each case pipes one JSON payload into the hook as Claude Code would and
 checks stdout and the exit code. Exit 0 when every case passes, 1 otherwise.
@@ -9,19 +9,22 @@ A wrong rewrite is worse than a miss: the hook replaces the whole tool
 input, so a dropped key silently changes the spawn. The rewrite cases
 therefore compare every key, not only run_in_background.
 
-The settings case checks that .claude/settings.json still names this hook.
-If that path stops resolving, python exits 2, and a PreToolUse hook that
-exits 2 blocks every Agent call.
+The settings cases check that ~/.claude/settings.json and
+~/.claude_router/settings.json still name the installed copy,
+~/.claude/hooks/subagent-foreground-helpers.py. If that path stops
+resolving, python exits 2, and a PreToolUse hook that exits 2 blocks every
+Agent call.
 """
 
 import json
 import os
+import shlex
 import subprocess
 import sys
 
 HOOK = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "subagent-foreground-helpers.py")
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(HOOK)))
-SETTINGS = os.path.join(ROOT, ".claude", "settings.json")
+INSTALLED = os.path.expanduser(os.path.join("~", ".claude", "hooks", "subagent-foreground-helpers.py"))
+SETTINGS = [os.path.expanduser(os.path.join("~", d, "settings.json")) for d in (".claude", ".claude_router")]
 
 SPAWN = {
     "description": "Research 540 proc sites",
@@ -87,18 +90,14 @@ def expect_registered(name, settings_path):
         return ["%s: want one PreToolUse entry with matcher Agent, found %d" % (name, len(entries))]
     tokens = []
     for hook in entries[0].get("hooks", []):
-        tokens.append(hook.get("command", ""))
+        tokens.extend(shlex.split(hook.get("command", "")))
         tokens.extend(hook.get("args", []))
-    want = os.path.normcase(os.path.normpath(HOOK))
-    named = [
-        token
-        for token in tokens
-        if os.path.normcase(os.path.normpath(token.replace("${CLAUDE_PROJECT_DIR}", ROOT))) == want
-    ]
+    want = os.path.normcase(os.path.normpath(INSTALLED))
+    named = [token for token in tokens if os.path.normcase(os.path.normpath(os.path.expandvars(token))) == want]
     if not named:
-        return ["%s: no command or arg names %s; saw %r" % (name, HOOK, tokens)]
-    if not os.path.isfile(HOOK):
-        return ["%s: %s does not exist" % (name, HOOK)]
+        return ["%s: no command or arg names %s; saw %r" % (name, INSTALLED, tokens)]
+    if not os.path.isfile(INSTALLED):
+        return ["%s: %s does not exist" % (name, INSTALLED)]
     return []
 
 
@@ -114,8 +113,7 @@ def main():
         expect_silent("empty stdin", ""),
         expect_silent("tool_input not an object", payload("text")),
         expect_silent("stdin is a JSON list", "[1, 2]"),
-        expect_registered("settings.json names this hook", SETTINGS),
-    ]
+    ] + [expect_registered("%s names the installed hook" % path, path) for path in SETTINGS]
     failures = [line for case in cases for line in case]
     for line in failures:
         print("FAIL " + line)

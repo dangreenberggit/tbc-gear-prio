@@ -5,8 +5,8 @@
 # Registered at the USER level so it guards every repo:
 #     ~/.claude/settings.json  ->  ~/.claude/hooks/bash-footguns.sh
 # After editing:
-#     bash .claude/hooks/tests/bash-footguns.sh     # all cases must pass
-#     cp .claude/hooks/bash-footguns.sh ~/.claude/hooks/
+#     bash docs/agents/home/hooks/tests/bash-footguns.sh     # all cases must pass
+#     cp docs/agents/home/hooks/bash-footguns.sh ~/.claude/hooks/
 # Editing only this copy changes nothing at runtime.
 #
 # PreToolUse hook. Reads the tool call on stdin, exits 2 to block.
@@ -51,22 +51,7 @@ pnpm -C <dir>. For anything else, run it in the foreground."
   fi
 fi
 
-# Rule 2: Git Bash path form passed to a Windows-native binary.
-#
-# node/python read C:/Users/..., not /c/Users/.... The Bash form resolves to
-# C:\c\Users\... and raises ENOENT, which reads as a missing file rather than
-# a malformed path.
-# Matching the binary anywhere and the path anywhere flags any command whose
-# text merely mentions both -- a commit message about this very rule trips it.
-# Require instead that the path FOLLOW the binary on the same segment, and drop
-# heredoc bodies first, since prose there is data the binary never parses.
-scan=$(printf '%s' "$command" | sed 's/<<-\{0,1\}[[:space:]]*[A-Za-z_'\''"][A-Za-z0-9_]*.*$//')
-
-if printf '%s' "$scan" | grep -qE '(^|[[:space:];&|(])(node|python|python3)([[:space:]]+[^;&|]*)?[[:space:]"'\''=(]/[a-zA-Z]/[Uu]sers/'; then
-  block "Git Bash path form (/c/Users/...) passed to a Windows-native binary" \
-"node and python read C:/Users/..., not /c/Users/.... The Bash form becomes
-C:\\c\\Users\\... and fails with ENOENT, which looks like a missing file.
-Rewrite the path as C:/Users/... -- forward slashes are fine."
-fi
+# Rule 2 (Git Bash path form -> Windows binary) removed for Linux/WSL:
+# it is a Windows-only footgun and on Linux would teach a false rule.
 
 exit 0
