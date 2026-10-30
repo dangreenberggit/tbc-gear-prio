@@ -350,8 +350,7 @@ least one non-Windows host before claiming cross-platform reproducibility.
 ### 4.5 Verification
 
 A `--check` mode (`pnpm gen:ep-weights --check`) regenerates into a temp file
-and byte-compares against the committed artifact, mirroring the existing
-byte-compare discipline in AGENTS.md § Durable claims. It **cannot** run in
+and byte-compares against the committed artifact. It **cannot** run in
 `pnpm verify` (needs the native binary, which CI does not have). It is a manual
 pre-merge step whenever the artifact or generator changes, and its output goes
 in the commit message.

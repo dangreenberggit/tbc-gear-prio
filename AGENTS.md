@@ -43,65 +43,22 @@ paths: an `@` import loads at start and would undo the saving.
   `docs/agents/issue-tracker.md`. **Domain docs:** `CONTEXT.md` and
   `docs/adr/`, `docs/agents/domain.md`.
 
-## Find out before you ask
-
-Resolve a question yourself: from what the user already said, from what
-is derivable, or by sending an agent to investigate. Spend a clarifying
-question only on a true fork in what the user wants, one no investigation
-settles because it is a preference. The `dont-be-stupid` guardrail (ask
-when the question is cheap and being wrong is expensive) is the other
-bound.
-
 ## Durable claims
 
-In committed or dispatched artifacts (commit messages, tickets, ADRs,
-tracked docs and skills, retros, worker prompts), a causal claim points
-at a command a reader can re-run or says **hypothesis** / **untested** in
-the same sentence. Chat may speculate freely. Do not state as fact that
-an artifact was produced on an environment you did not observe. Never
-assert that a gitignored or untracked generated input is present for a
-fresh worktree: give the regen/sync command and how to verify.
-
-**A property measured against one option is not a comparison.** Before
-ruling an option in or out, name the alternatives and say what the same
-measurement gives for each. When the claim is that something is absent,
-resolve every ref that could contain it (`known-traps.md` § Before
-moving the wowsims engine pin).
-
-**An exit code is not evidence that work happened.** A stopped
-background task reports exit 0, and a command that ran in the wrong
-directory succeeds at nothing. A pipe reports the **last** command's
-status, so `make ... 2>&1 | tail` returns `tail`'s 0. To bound output
-and keep the status, append `; echo "rc=${PIPESTATUS[0]}"` to the same
-command, or redirect to a file and `tail` it separately. Confirm the
-artifact (`ls node_modules`, read the file, check the row count) before
-reporting an install, build or regen as done.
+The rules on durable claims, one-option comparisons and exit codes are
+global (`~/.claude/AGENTS.md` § Durable claims, staged in
+`docs/agents/home/AGENTS.md`). When the claim is that an upstream
+feature is absent, the refs that could contain it are in
+`docs/agents/known-traps.md` § Before moving the wowsims engine pin.
 
 ## CLI environment
 
 Commands run in bash on WSL (Ubuntu). Every bash process finds the
 project's tools without a login shell; setup and check:
 `docs/agents/known-traps.md` § Before running node / pnpm / test
-commands.
-
-Use absolute paths or the command's own directory flag (`git -C`,
-`pnpm -C`, `npm --prefix`) instead of `cd`: a backgrounded `cd X && cmd`
-runs in the session cwd and succeeds while doing the work somewhere
-else. Bound scaling output (`--stat`, `head`/`tail`, exit codes); to
-test whether one thing exists, name it (`ls <path>`, `grep -c
-<pattern>`), because a truncated listing cannot show absence.
-
-Read a command's error text before forming a theory about it;
-tool-manager errors usually name their own fix. `Edit` and `Write`
-refuse a file this agent has not opened with `Read` in this run: `Read`
-the part you will change, then edit.
-
-**One tool round, many commands.** Every tool call is one model request
-that sends your whole context again (code.claude.com/docs/en/costs, "Why
-usage climbs in a long session"). Put every command whose input does not
-depend on another's output into one Bash call (`cmd1; echo ===; cmd2`),
-bound each one's output, and send independent tool calls in one message.
-Decide what you need next before you call; then request all of it.
+commands. The general shell and tool habits are global
+(`~/.claude/AGENTS.md` § Shell and tool habits, staged in
+`docs/agents/home/AGENTS.md`).
 
 ## The forked tab repo
 
