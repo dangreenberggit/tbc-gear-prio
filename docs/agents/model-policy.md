@@ -62,8 +62,7 @@ other slice. Every seat hands its workhorse jobs to the workhorse types in
 blocks (§ Workhorse jobs).
 
 The orchestrator is the interactive session. The owner picks its model and
-effort per session. Whatever it runs on, it delegates every task
-(`docs/agents/orchestration.md` § The session delegates). The skill names every seat's model at
+effort per session. The skill names every seat's model at
 the call site, and each seat self-checks
 (`WRONG_MODEL: <name>` → respawn with the model the skill's seat table
 names, never continue).

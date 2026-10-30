@@ -199,7 +199,7 @@ Pick each subagent's type from your harness section of `model-policy.md`:
   workers" card `glm-flash-task` for every workhorse job, and a Sonnet
   type only for a job z-ai must not see, or a retry when a GLM type hits
   a usage wall); `design-task` for a
-  plan or an architecture call outside stage-gate. The session sends every
+  plan or an architecture call outside stage-gate. In orchestrator mode, the session sends every
   `modest-task`, `discrete-task` or GLM-type result to a `general-task`
   check before it relays or builds on it; for a trial type the check's
   prompt asks for a `TRIAL-REJECT <type>: <why>` line when it rejects or
@@ -447,7 +447,7 @@ tracked file is a repo value.
    files included.
 3. The result is checked before it is accepted. The caller reads the diff
    and runs a check the prompt names (`pnpm verify`, a named test). When
-   the caller is the interactive session, a `general-task` verifier does
+   the caller is the session in orchestrator mode, a `general-task` verifier does
    this. The worker's own report of a pass does not count.
 4. It is one job: the worker spawns no subagents, fans nothing out, and
    merges nothing.
@@ -459,7 +459,7 @@ named test), run and reported without diagnosis; or an edit whose exact
 text the prompt states. The caller checks it before accepting it: the
 answer against its sources, the diff against the stated result, plus a
 check the prompt names when code changed. When the caller is the
-interactive session, a `general-task` verifier does this. A list of
+session in orchestrator mode, a `general-task` verifier does this. A list of
 matches means "at least these", and `not found` means unanswered;
 neither is evidence that something is absent.
 
@@ -557,7 +557,7 @@ hits a wall does not move to them (§ Four lanes).
   request (`.scratch/agent-reports/2026-10-26-session-usage-limit-investigation.md`;
   gitignored; main checkout only).
 - **Check every result** before you relay it or build on it, as for the
-  trial types: when the caller is the interactive session, a
+  trial types: when the caller is the session in orchestrator mode, a
   `general-task` verifier does it. Check the worker's claims as well as
   its tests. In the first real use (pattern-text-extractor, 2026-10-23),
   151 of 151 tests passed, and a later review still found that a new test
@@ -583,8 +583,8 @@ efforts (repo value).
 | **Review**    | Top tier; `codex exec` runs                                            |
 | **Design**    | Top tier, extended reasoning                                           |
 
-The interactive session delegates every task (`docs/agents/orchestration.md`
-§ The session delegates). Work that is not review or design goes to a
+When the interactive session delegates (global `AGENTS.md` § Orchestrator
+mode), work that is not review or design goes to a
 subagent at the workhorse fill, and the owner wants these used freely. Review and design
 jobs go to subagents at the review and design fills.
 
@@ -608,16 +608,16 @@ Cursor bills **two pools**:
 - **Cursor Models** — Composer 2.5, Grok 4.5 (“generous” included usage).
 - **Other Models** — Terra, Sol, Sonnet, Opus, etc. (~$20/mo on Pro).
 
-| Lane                                | Pin                                                                                                                                    | Why                                                                                                          |
-| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Workhorse** (workers, implement)  | **Composer** (`composer-2.5-fast` on Task if that’s the only Composer slug; non-fast via custom agent / parent inherit when available) | Same first-party pool as Grok; much cheaper per token than Grok; avoids the Other-pool spawn death           |
-| **Lead**                            | **Composer**, as workhorse                                                                                                             | No owner ruling has named another pin for Cursor                                                             |
-| **Review** (pre-merge axes)         | **Grok high** (prefer non-fast; else `cursor-grok-4.5-high-fast`)                                                                      | The judgment tier Cursor will actually run                                                                   |
-| **Design** (planning, architecture) | **Grok high**; hand off externally for a big design call                                                                               | Cursor has no distinct design tier that reliably spawns — one lane fills both                                |
-| **Parent / orchestrator**           | Either; Grok is fine                                                                                                                   | Routes and judges; it delegates planning and merges (`docs/agents/orchestration.md` § The session delegates) |
+| Lane                                | Pin                                                                                                                                    | Why                                                                                                |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **Workhorse** (workers, implement)  | **Composer** (`composer-2.5-fast` on Task if that’s the only Composer slug; non-fast via custom agent / parent inherit when available) | Same first-party pool as Grok; much cheaper per token than Grok; avoids the Other-pool spawn death |
+| **Lead**                            | **Composer**, as workhorse                                                                                                             | No owner ruling has named another pin for Cursor                                                   |
+| **Review** (pre-merge axes)         | **Grok high** (prefer non-fast; else `cursor-grok-4.5-high-fast`)                                                                      | The judgment tier Cursor will actually run                                                         |
+| **Design** (planning, architecture) | **Grok high**; hand off externally for a big design call                                                                               | Cursor has no distinct design tier that reliably spawns — one lane fills both                      |
+| **Parent / orchestrator**           | Either; Grok is fine                                                                                                                   | Routes and judges; it delegates planning and merges (global `AGENTS.md` § Orchestrator mode)       |
 
-The interactive session delegates every task (`docs/agents/orchestration.md`
-§ The session delegates). Work that is not review or design goes to a subagent on the
+When the interactive session delegates (global `AGENTS.md` § Orchestrator
+mode), work that is not review or design goes to a subagent on the
 workhorse pin, Composer. Review and design jobs go to subagents on the
 review and design pins.
 

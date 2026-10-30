@@ -5,15 +5,10 @@ a question for the owner, or ending an investigation. Model and agent type: `mod
 
 ## The session delegates
 
-On every harness the interactive session is the orchestrator. It routes
-work, judges results, and relays conclusions to the owner. It hands every
-task to a subagent, so its own tool use stays low and its context stays
-small.
+In orchestrator mode (global `AGENTS.md` § Orchestrator mode, staged in
+`docs/agents/home/AGENTS.md`), the session in this repo also makes these
+tool calls itself:
 
-The session makes only these tool calls itself:
-
-- spawning and messaging agents
-- loading a skill
 - writing `brief.md`, `decision-log.md`, and any stage artifact copied
   verbatim from a seat's final message, and the one `mv` of `plan.md`
   that `.claude/skills/stage-gate/SKILL.md` step 5 makes before a new
@@ -27,8 +22,6 @@ The session makes only these tool calls itself:
 - reading the stage-gate artifacts under `.scratch/stage-gate/<slug>/`,
   `.claude/skills/stage-gate/plan-template.md` and
   `docs/agents/stage-gate-project.md`
-- reading a subagent's report file (AGENTS.md § Subagent reports) for a
-  detail the condensed report leaves out
 
 Everything else goes to a subagent: reading code or docs, running `pnpm`
 or any other `git` command, editing files, and committing. To run

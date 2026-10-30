@@ -122,6 +122,20 @@ output. Do not give them a job that includes or could reach private data,
 or anything a project's `AGENTS.md` keeps private. If unsure, use a Claude
 agent.
 
+# Orchestrator mode
+
+By default the interactive session does the work itself, and it is
+encouraged to hand work to subagents where that helps, such as a question
+that needs many reads, or independent pieces that can run in parallel.
+For development work that is not small, the session uses light judgment
+to switch to orchestrator mode: it hands the work to subagents and keeps
+the routing, the judging of results and the talking to the user. In that
+mode its own tool calls are spawning and messaging agents, loading
+skills, short state checks such as `git status`, and reading a
+subagent's report file; a repo's own docs can add to this list. The
+session leaves the mode when the work no longer needs it. The user can
+also switch the mode on or off at any time.
+
 # Spawning
 
 Details: `~/.claude/model-policy.md`, cited below as model-policy.

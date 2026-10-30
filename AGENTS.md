@@ -8,9 +8,10 @@ paths: an `@` import loads at start and would undo the saving.
 ## Before you start, by kind of work
 
 - **You are the interactive session (the user talks to you directly):**
-  you route work and hand every task to a subagent. Read
-  `docs/agents/orchestration.md` § The session delegates before your
-  first tool call; it lists the few calls you make yourself.
+  the global rule "Orchestrator mode" (staged in
+  `docs/agents/home/AGENTS.md`) says when you hand work to subagents. In
+  that mode, this repo's extra calls are in `docs/agents/orchestration.md`
+  § The session delegates.
 - **Writing code or tests, committing, pushing:** `docs/workflow.md`
   (the loop, gates, comment policy, testing seams, types from JSON,
   parking WIP, editing agent-facing documents).
