@@ -70,11 +70,18 @@ because that would need updating every time a tool changes.
    `instruction-review` result) and they have seen the summary.
    “Review and merge” in one message means
    run the review and stop — wait for a separate merge ask. `pnpm merge-to-dev` is
-   the only supported door: verify → review/ticket check →
-   `git merge --no-ff` into `dev`. Do not merge into `dev` by hand. On
-   `phase-N/*`, open `Blocks: phase-N` tickets require
-   `--ack-open-blockers` (or close / re-block them first). Check without
-   merging: `pnpm merge-to-dev --check-only` (or `pnpm merge-ready`).
+   the only supported door. It merges into `dev` only after three checks
+   pass: `pnpm verify`; the review and ticket check, run by the branch's
+   copy of `scripts/check_merge_ready.py` and again by the local `dev`
+   branch's copy; and the Upgrades-tab layout check, which can skip
+   without blocking (cases: `run()` in `scripts/check_layout_gate.py`).
+   Do not merge into `dev` by hand. On `phase-N/*`, open `Blocks: phase-N`
+   tickets require `--ack-open-blockers` (or close / re-block them first).
+   `pnpm merge-to-dev --check-only` runs the same checks and merges
+   nothing. `pnpm merge-ready` is quicker: it runs only the review and
+   ticket check, by both copies. For a branch in a pair, and for what
+   `--check-only` does there, see
+   `docs/agents/paired-worktrees.md` § Land it on dev.
 
 6. `main` receives a merge from `dev` only when a PLAN.md §14 gate (a
    phase or Stage 3T) is fully checked off in `docs/verification-log.md`;

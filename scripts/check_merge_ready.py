@@ -16,7 +16,8 @@ open (`ticket_needs_review`). A verified close keeps the exemption.
 
 Used by `pnpm merge-to-dev` (the only supported door into dev). Also:
 
-    pnpm merge-ready              # check only, no merge
+    pnpm merge-ready              # check only, no merge: this checkout's copy
+                                  # of this file, then dev's (scripts/gate_copy.py)
     pnpm issues:open              # list open carry-forward tickets
 
 Phase-N branches: open tickets with `Blocks: phase-N` are listed. Merging
@@ -168,9 +169,11 @@ INTEGRATION_BRANCH = "dev"
 # The list lives here and not in a doc under docs/agents/ because that folder
 # is on the list: a branch could then widen the list and exempt itself in the
 # same diff. This file is not on the list, so a change to it gets the product
-# review. The list and GATE_PATHS stop a mistake, not a deliberate edit: the
-# gate runs the branch's own copy of this file, so a branch that edits both
-# lists here can exempt itself (ticket 733).
+# review. `pnpm merge-to-dev` and `pnpm merge-ready` also run dev's copy of
+# this file on the branch (`merge_ready_at` in scripts/gate_copy.py, ticket
+# 733), so a branch's edit to either list here takes effect only once it is
+# on dev. For the no-branch limit, see "Which copy of the gate code runs" in
+# scripts/merge_to_dev.py.
 TOOLING_PATHS = (
     ".claude/skills/",
     ".agents/skills/",
@@ -195,6 +198,7 @@ GATE_PATHS = (
     "scripts/check_merge_ready.py",
     "scripts/merge_to_dev.py",
     "scripts/check_merge_to_dev.py",
+    "scripts/gate_copy.py",
     "scripts/check_layout_gate.py",
     "scripts/run_verify.mjs",
     ".githooks/",
@@ -624,8 +628,9 @@ def _merge_base(branch: str, integration: str, root: Path) -> tuple[str, str | N
     if branch == integration:
         return "", f"already on {integration}"
     try:
+        # The full ref name: a tag named `dev` would win over the branch.
         base = subprocess.run(
-            ["git", "merge-base", integration, branch],
+            ["git", "merge-base", f"refs/heads/{integration}", branch],
             cwd=root,
             capture_output=True,
             text=True,
@@ -1115,6 +1120,18 @@ def check(
     needing_review = tickets_needing_review(changes) if changes else set()
     exemption = review_exemption_reason(changed, why_not, review_rel, needing_review)
 
+    # An ignored review file is on disk but would not be merged.
+    review_ignored = review.is_file() and subprocess.run(
+        ["git", "check-ignore", "-q", "--", review_rel], cwd=ROOT
+    ).returncode == 0
+    if review_ignored:
+        print(
+            f"FAIL: {review_rel} is ignored by git, so the merge would not "
+            f"include it; change the ignore rule so it does not match the file, "
+            f"then commit the file",
+            file=sys.stderr,
+        )
+        return 1
     if not review.is_file() and not exemption:
         for rel in sorted(needing_review):
             print(
@@ -2084,9 +2101,12 @@ def check_review_requirement_reads_git() -> list[str]:
 
 def _run_gate_copy(root: Path, *argv: str) -> tuple[int, str, str]:
     """Run the copy of this file at `root/scripts/` as a CLI; (rc, stdout, stderr)."""
+    # No bytecode: a scripts/__pycache__/ from the gate_copy import would be
+    # an untracked change in the scratch repo.
+    env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
     out = subprocess.run(
         [sys.executable, str(root / "scripts" / Path(__file__).name), *argv],
-        cwd=root, capture_output=True, text=True,
+        cwd=root, capture_output=True, text=True, env=env,
     )
     return out.returncode, out.stdout, out.stderr
 
@@ -2106,6 +2126,7 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             git("init", "-q", "-b", INTEGRATION_BRANCH)
             (root / "scripts").mkdir()
             shutil.copy(Path(__file__), root / "scripts" / Path(__file__).name)
+            shutil.copy(Path(__file__).with_name("gate_copy.py"), root / "scripts" / "gate_copy.py")
             (root / "packages").mkdir()
             (root / "packages" / "x.ts").write_text("export const x = 1;\n")
             (root / "AGENTS.md").write_text("# rules\n")
@@ -2441,11 +2462,45 @@ def main() -> int:
             )
         return 0
 
-    return check(
-        branch=args.branch,
+    # `pnpm merge-ready` runs the review and ticket check by this checkout's
+    # copy, then by dev's, as `pnpm merge-to-dev` does; it skips the door's
+    # `pnpm verify` and layout gate. A branch's edit to the rules in its own
+    # copy (TOOLING_PATHS, GATE_PATHS) then cannot make merge-ready pass
+    # where dev's copy refuses. An edit to this function can; see "Which
+    # copy of the gate code runs" in scripts/merge_to_dev.py. `--branch`
+    # and `--review` have no merge-to-dev twin: with them, both copies read
+    # this checkout's files, so the result can differ from the door's.
+    from gate_copy import merge_ready_at
+
+    branch = args.branch or branch_name()
+    if branch in ("dev", "main"):
+        print(
+            f"FAIL: refuse to check {branch!r}: merge-ready checks a feature or "
+            f"phase branch before it merges into {INTEGRATION_BRANCH}",
+            file=sys.stderr,
+        )
+        return 1
+    print("=== merge-ready, by this checkout's copy ===")
+    ready = check(
+        branch=branch,
         review=args.review,
         ack_open_blockers=args.ack_open_blockers,
     )
+    if ready != 0:
+        return ready
+    print(f"\n=== merge-ready, by {INTEGRATION_BRANCH}'s copy ===")
+    ready = merge_ready_at(
+        f"refs/heads/{INTEGRATION_BRANCH}", ROOT, branch, args.ack_open_blockers, args.review
+    )
+    if ready != 0:
+        print(
+            f"\nFAIL: {INTEGRATION_BRANCH}'s copy of the merge-ready check failed "
+            f"(this checkout's copy passed)",
+            file=sys.stderr,
+        )
+        return ready
+    print(f"\nmerge-ready: ok (this checkout's copy and {INTEGRATION_BRANCH}'s copy)")
+    return 0
 
 
 if __name__ == "__main__":
