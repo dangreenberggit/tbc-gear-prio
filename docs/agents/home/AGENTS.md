@@ -72,6 +72,27 @@ Past six lines, an independent subagent decides whether the length is necessary.
 
 Write the body as prose that stands on its own. Say what a reader needs, once, and stop — no process narration, no "Summary:" or "Changes:" headings, no confidence claims about untested behaviour.
 
+# Changing agent instructions
+
+In this section, agent instructions means `AGENTS.md` and `CLAUDE.md`
+files, skills, and agent definitions: they steer every later session.
+Create or edit one only after the user approves, in chat, the exact
+text you showed them and where it goes. A subagent makes such an edit
+only when its prompt gives the approved exact text and where it goes;
+it writes that text there and nothing else.
+
+Before you show the text, review that exact text: one reviewer runs the
+`instruction-review` skill once. Show only text in the form the last
+review read. When the text or where it goes changes, review the changed
+text again the same way before you show it. A change can come from a
+review finding, a fix made during the review, or the user's feedback.
+When the review of a fix finds more to fix, stop: show the text as that
+review read it, and list those findings as open. The proposal gives the
+exact text and where it goes, and says what reviewed it: for each
+review, the path that ran (light or full), what it found and what was
+fixed after it; and what is still open, including a blocking finding
+such as no trial run.
+
 # Don't cut your own connection
 
 The user often reaches this machine from a phone: Tailscale on Windows
