@@ -45,7 +45,7 @@ with a cut or a one-line change where one existed.
 ## Summary
 
 The repo now keeps only its own values and pointers. The global
-`AGENTS.md`, `model-policy.md`, two hooks and 47 skills hold the general
+`AGENTS.md`, `model-policy.md`, two hooks and 48 skills hold the general
 rules, and the owner installed each part. Tickets filed: 0. Tickets
 closed: 0.
 
