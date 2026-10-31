@@ -13,8 +13,8 @@ paths: an `@` import loads at start and would undo the saving.
   that mode, this repo's extra calls are in `docs/agents/orchestration.md`
   § The session delegates.
 - **Writing code or tests, committing, pushing:** `docs/workflow.md`
-  (the loop, gates, comment policy, testing seams, types from JSON,
-  parking WIP, editing agent-facing documents).
+  (the loop, gates, testing seams, types from JSON, editing agent-facing
+  documents).
 - **A ported engine file, a scripted or generated file, the wowsims
   engine pin, a ticket, a review Disposition table, the dev servers,**
   or a node/pnpm command that fails strangely:
@@ -74,15 +74,13 @@ bump and `pnpm sim-implemented-effects:generate`):
 
 ## Commits and merges
 
-Commit per green slice, not one commit at the end and not only when
-asked. `git add <paths>` does not scope the commit: pre-commit runs
-`lint-staged` against `*` with `--no-stash --no-hide-partially-staged`,
-so every dirty file rides along, and staging part of a file commits the
-rest of it too. Before each commit `git status` must be clean of work
-you did not do; after `git reset`, re-read `git log -1` before
-recommitting. `pnpm verify` before every push. Merging into `dev` waits
-for the user to ask **after** the branch's review exists and they saw its
-summary; a combined "review and merge" request is not that ask. Then
+The rules on commits, the merge ask and parked work are global
+(`~/.claude/AGENTS.md` § Commits and merges, staged in
+`docs/agents/home/AGENTS.md`). Here, `git add <paths>` does not scope
+the commit: pre-commit runs `lint-staged` against `*` with `--no-stash
+--no-hide-partially-staged`, so every dirty file rides along, and
+staging part of a file commits the rest of it too. `pnpm verify` before
+every push. The integration branch is `dev`. After the user's merge ask,
 `pnpm merge-to-dev` is the only door: no `git merge` into `dev`, no
 `TBC_ALLOW_DEV_MERGE=1`. The loop, the review, mini-loops for tickets
 and the gates: `docs/workflow.md` § The loop and § Gates. **Agent

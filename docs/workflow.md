@@ -27,9 +27,8 @@ because that would need updating every time a tool changes.
 ## The loop
 
 1. Branch off `dev`: `feat/<slug>`, or `phase-N/<slug>` for a PLAN.md phase.
-2. Red → green, one slice at a time (see the `tdd` skill). Commit regularly
-   as you accomplish work — a commit per green slice, not one commit at the
-   end, and not only when asked.
+2. Red → green, one slice at a time (see the `tdd` skill). Commits: global
+   `AGENTS.md` § Commits and merges.
 3. `pnpm verify` before every push. This runs typecheck, lint, format check,
    and tests in one command — it's the thing every gate below actually
    calls, so there's one definition of "passing," not a different one per
@@ -64,16 +63,13 @@ because that would need updating every time a tool changes.
    stated reason to defer them: delegate to a planner, then the plan to an
    executor, then an independent reviewer.
 
-5. **Ask the user, then `pnpm merge-to-dev`.** Agents must not merge into
-   `dev` unless the user explicitly asks **after** the branch's review
-   exists (the review file, or for a tooling-only branch the
-   `instruction-review` result) and they have seen the summary.
-   “Review and merge” in one message means
-   run the review and stop — wait for a separate merge ask. `pnpm merge-to-dev` is
-   the only supported door. It merges into `dev` only after three checks
-   pass: `pnpm verify`; the review and ticket check, run by the branch's
-   copy of `scripts/check_merge_ready.py` and again by the local `dev`
-   branch's copy; and the Upgrades-tab layout check, which can skip
+5. **Ask the user, then `pnpm merge-to-dev`.** The merge ask follows
+   global `AGENTS.md` § Commits and merges; here the branch's review is
+   the review file, or for a tooling-only branch the `instruction-review`
+   result. `pnpm merge-to-dev` is the only supported door. It merges
+   into `dev` only after three checks pass: `pnpm verify`; the review and
+   ticket check, run by the branch's copy of `scripts/check_merge_ready.py`
+   and again by the local `dev` branch's copy; and the Upgrades-tab layout check, which can skip
    without blocking (cases: `run()` in `scripts/check_layout_gate.py`).
    Do not merge into `dev` by hand. On `phase-N/*`, open `Blocks: phase-N`
    tickets require `--ack-open-blockers` (or close / re-block them first).
@@ -112,7 +108,7 @@ Cursor adapters. See
 | Review file before merge to `dev`                                              | `pnpm merge-to-dev` / `merge-ready` fail with no `docs/reviews/<branch>.md`, except when every changed file is on `TOOLING_PATHS` (`scripts/check_merge_ready.py`) | none                                                          |
 | Deferred findings filed as tickets                                             | `pnpm merge-to-dev` / `merge-ready` — every `defer` links an open carry-forward ticket                                                                             | `wontfix` with a reason, or fix on branch                     |
 | Phase open-blockers seen                                                       | `pnpm merge-to-dev` on `phase-N/*` fails if `Blocks: phase-N` tickets are open                                                                                     | `--ack-open-blockers`                                         |
-| Comment policy (why, not what)                                                 | Not mechanically enforced — a `pre-merge-review` finding                                                                                                           | —                                                             |
+| Comment policy (why, not what; global `AGENTS.md` § Comment policy)            | Not mechanically enforced — a `pre-merge-review` finding                                                                                                           | —                                                             |
 
 **The escape hatch is real and intentional** — spikes and throwaway
 exploration shouldn't be blocked by the full gate. It's safe specifically
@@ -219,15 +215,6 @@ JSON, and `pnpm verify` fails if they drift.
 If you find yourself writing a comment explaining why an assertion is safe
 despite the widening, generate the type instead.
 
-## Comment policy
-
-Comments explain **why**, never **what**. If a comment restates the code,
-delete it. If the code needs a comment to be readable, rename something
-first. Keep only comments a reader needs: a non-obvious constraint, an
-external-system quirk, why a slower or uglier path was deliberately chosen,
-or a pointer to the finding or ADR that required the design. Nothing lints
-this: it is a pre-merge review item.
-
 ## Testing: seams and where tests go
 
 Invoke the `tdd` skill for any red/green work. The word **seam** means two
@@ -248,13 +235,6 @@ slot mapping, `applyView` (PLAN.md §6). They touch no port and need no
 adapter. What is banned is asserting on stage internals: the eight stages
 must stay reorganisable without touching a test.
 
-## Parking WIP
-
-When you stash WIP, say what you parked and what tip is missing because of
-it. Name the pieces (files or jobs), not a vibe. If tip still needs any of
-that to be correct or complete, write that down before you start the next
-work. "Restore later if needed" is not enough.
-
 ## Editing agent-facing documents
 
 Review means a second pass over your finished draft, revising it against
@@ -267,13 +247,6 @@ pipeline debugging, TDD). Put engineering rules in engineering skills and
 docs, game rules in game skills; what does not fit goes elsewhere or is
 left out. See `writing-great-skills` (relevance) and `dont-be-stupid`.
 
-Subagents receive the root `CLAUDE.md` / `AGENTS.md` text from when the
-parent session started, so an edit to those files reaches subagents only
-in a new session. An uncommitted token audit reported this, and on
-2026-09-26 a review subagent received an `AGENTS.md` older than the file on
-disk. A `CLAUDE.md` in another directory, such as a worktree, was loaded
-from disk when a subagent read a file there; this was seen once.
-
 ## CI
 
 `.github/workflows/verify.yml` runs `pnpm install --frozen-lockfile`, then
@@ -284,15 +257,9 @@ Green CI is the standing proof that the recorded-fixture path still works.
 
 ## Pre-merge review, in more detail
 
-Each of the three axes is dispatched with **no context beyond the diff and
-its own brief** — that's deliberate. A reviewer that remembers writing the
-code stops finding the code's mistakes; a fresh one doesn't have that
-blind spot. Reviewers stay on the **review** model lane (see
-[`docs/agents/model-policy.md`](agents/model-policy.md)): `codex exec` if
-installed, otherwise fresh review-lane subagents (parallel when healthy, **one
-axis at a time** after a rate-limit wall), otherwise print briefs for a
-fresh session. Never silently swap in a weaker model to finish the review;
-same-session authoring-agent review only with an explicit user opt-in.
+Fresh context for each axis, the order of reviewers to try, and what
+to do on a rate-limit wall: the `pre-merge-review` skill (its opening and
+§ 2. Dispatch) and global `model-policy.md` § Four lanes.
 
 The domain axis exists because PLAN.md and its findings docs carry a lot of
 hard-won, non-obvious facts (the 19→17 slot mapping, which enchant ID

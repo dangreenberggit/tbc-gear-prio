@@ -45,6 +45,14 @@ A reply has these parts, in this order:
 
 **Sources on important claims.** An important claim — one that something will be built on, or that a substantial decision rests on — names its source (file:line, a ticket, a command a reader can re-run, or the user's words from the session transcript) or is marked "unverified". An agent passing text on to the user adds only its verdict, and the verdict names its source like any other important claim. The agent keeps each claim to what its source says, and describes things on screen by where each one appears, never by a relation that no source shows.
 
+## Comment policy
+
+Comments explain **why**, never **what**. If a comment restates the code,
+delete it. If the code needs a comment to be readable, rename something
+first. Keep only comments a reader needs: a non-obvious constraint, an
+external-system quirk, why a slower or uglier path was deliberately chosen,
+or a pointer to the finding or ADR that required the design.
+
 ## Commit messages
 
 Follow the seven rules quoted below when you write a commit message. They come from these two sources:
@@ -71,6 +79,20 @@ Six lines is a soft maximum, not a target. A body that needs to exist is usually
 Past six lines, an independent subagent decides whether the length is necessary. Give it the diff and the proposed message. Do not tell it the length is justified, do not explain why you wrote what you wrote, and do not ask it to confirm. Ask which lines record something the diff cannot show, and have it return the ones that fail that test. Cut those. If the reviewer says the body should be shorter, it is shorter. If no reviewer can be reached, cut the body to six lines.
 
 Write the body as prose that stands on its own. Say what a reader needs, once, and stop — no process narration, no "Summary:" or "Changes:" headings, no confidence claims about untested behaviour.
+
+# Commits and merges
+
+Commit per green slice, not one commit at the end and not only when
+asked. Before each commit `git status` must be clean of work you did not
+do; after `git reset`, re-read `git log -1` before recommitting. Merging
+into the integration branch waits for the user to ask **after** the
+branch's review exists and they saw its summary; a combined "review and
+merge" request is not that ask.
+
+When you stash WIP, say what you parked and what the branch tip is
+missing because of it. Name the pieces (files or jobs). If the tip still
+needs any of that to be correct or complete, write that down before you
+start the next work. "Restore later if needed" is not enough.
 
 # Find out before you ask
 
@@ -145,6 +167,13 @@ exact text and where it goes, and says what reviewed it: for each
 review, the path that ran (light or full), what it found and what was
 fixed after it; and what is still open, including a blocking finding
 such as no trial run.
+
+Subagents receive the root `CLAUDE.md` / `AGENTS.md` text from when the
+parent session started, so an edit to those files reaches subagents only
+in a new session. On 2026-09-26 a review subagent received an
+`AGENTS.md` older than the file on disk. A `CLAUDE.md` in another
+directory, such as a worktree, was loaded from disk when a subagent read
+a file there; this was seen once.
 
 # Don't cut your own connection
 
