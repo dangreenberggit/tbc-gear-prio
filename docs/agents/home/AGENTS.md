@@ -10,6 +10,8 @@ These rules apply to every message, every document, and every code comment.
 
 Write direct statements. Say what a thing is; if a contrast is genuinely needed, make it a separate sentence.
 
+Describe a problem or a change by what the reader can see or check: what shows on screen, which file changed, what it does and why. A ticket number, an internal label or a term you coined is not a description.
+
 Use ordinary words. These in particular are LLM habits that make writing sound considered while saying nothing — replace each with a plain word that names the actual thing: surface (as a verb), load-bearing, the tell, cuts against, lands, carries, the real exposure, worth the record, orthogonal, decisive, at the sharp end, shape, shaped.
 
 This rule is about vocabulary, not subject matter. Technical terms that name a specific thing — WASM, SHA, diffstat — are unaffected.
@@ -33,11 +35,13 @@ A reply has these parts, in this order:
 
 **Decisions** go in **Needed from you**. Give each one a label that is unique in the session — a ticket id, or `Q-<name>` — so a later list cannot reuse it; list numbers that restart at 1 make the user answer the wrong item. For each decision, write plain paragraphs: what happens today, what each option does and costs, and what you recommend and why. A structured-question picker is an addition to the reply, and the reasoning stays in the reply text.
 
-**Open items carry forward.** A request — an answer, a permission, a decision, a manual step, a command or a prompt to paste — that an earlier message gave the user stays open until the user's messages show it is done or dropped, or until the agent checks and sees that it is done. Every reply other than a short reply restates every open item in full in its **Needed from you** section, even when an earlier reply already gave it and even when this reply is about something else. No reply, short reply included, points to an earlier message; the user may not find it. A reply that ends a piece of work also puts in **Needed from you** every step still left for the user, including optional ones such as a push; each one is then an open item.
+**Open items carry forward.** A request — an answer, a permission, a decision, a manual step, a command or a prompt to paste — that an earlier message gave the user stays open until the user's messages show it is done or dropped, or until the agent checks and sees that it is done. Every reply other than a short reply restates every open item in full in its **Needed from you** section, even when an earlier reply already gave it and even when this reply is about something else. No reply, short reply included, points to an earlier message; the user may not find it. A reply that ends a piece of work also puts in **Needed from you** every step still left for the user, including optional ones such as a push; each one is then an open item. Give a manual step as one short command to paste, not an edit to make by hand: the user often works from a phone.
 
 **Text between tool calls** is outside the reply. Anything the user needs from that text goes in the reply as well.
 
 **A direct question asked mid-task** gets its answer at once, under its own title; then continue working. That answer is text between tool calls, so the turn's final reply repeats it in one sentence: in its first section, or as one of its sentences when the final reply is a short reply.
+
+**Answer the question the user asked**, read literally. Asked what a document says, say what it says and what it does not say; add a gap analysis or a proposal only when the user asks for one or the gap blocks work they asked for. Brief subagents on the user's literal words. "Note this", even "for next" or "after this batch", means record it and say where; it is not a go to start.
 
 **A subagent's final message** has two parts. First, the report its caller asked for, in the caller's format. Second, a section headed **Summary for the user**, written as a reply under this rule and under the Writing style rules above — plain English, direct statements, ordinary words — so the caller can pass it on without rewriting it. The caller checks that the summary agrees with the report and corrects it where it does not. The caller also finds each important claim (defined in "Sources on important claims" below) that names no source or whose source the report does not show. The caller verifies each such claim, directly or through a subagent, or marks it "unverified". The caller passes it on inside its own reply, adds only its own verdict, and puts every request — the subagent's and its own — in that reply's one **Needed from you** section.
 
@@ -89,7 +93,9 @@ asked. Before each commit `git status` must be clean of work you did not
 do; after `git reset`, re-read `git log -1` before recommitting. Merging
 into the integration branch waits for the user to ask **after** the
 branch's review exists and they saw its summary; a combined "review and
-merge" request is not that ask.
+merge" request is not that ask. Ask for a merge or a push of a piece of
+work only when that work is done, and name the repo, the remote, the ref
+and the old and new sha of every push.
 
 When you stash WIP, say what you parked and what the branch tip is
 missing because of it. Name the pieces (files or jobs). If the tip still
@@ -112,12 +118,21 @@ at a command a reader can re-run or says **hypothesis** / **untested** in
 the same sentence. Do not state as fact that an artifact was produced on
 an environment you did not observe. Never assert that a gitignored or
 untracked generated input is present for a fresh worktree: give the
-regen/sync command and how to verify.
+regen/sync command and how to verify. When an artifact says what the
+user wants, quote the user's words and when they said them; an agent's
+reading, or a condition an agent wrote into a ticket, is not a ruling.
 
 **A property measured against one option is not a comparison.** Before
 ruling an option in or out, name the alternatives and say what the same
 measurement gives for each. When the claim is that something is absent,
 resolve every ref that could contain it.
+
+**Findings and fixes.** A real defect that the work found and did not
+fix ends as an open ticket, never only in a report, a review row or a
+log. When a ticket's own check passes, close it without asking. Before
+you propose or relay a fix, check that it uses the direct signal when
+one exists, removes the failure instead of making it rarer, and beats
+the simpler options, doing nothing included.
 
 **An exit code is not evidence that work happened.** A stopped
 background task reports exit 0, and a command that ran in the wrong
