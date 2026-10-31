@@ -4,7 +4,7 @@ Same contract as [agnostic.md](agnostic.md). Prefer these conveniences when runn
 
 ## Models (Task / in-session subagents)
 
-Lane-aware defaults (see [`docs/agents/model-policy.md`](../../../../docs/agents/model-policy.md)):
+Lane-aware defaults (see `~/.claude/model-policy.md`):
 
 - **Workhorse / simple:** **Composer** (`composer-2.5-fast` or current slug) — parallel implement workers, mechanical edits.
 - **Review / design:** **Grok high** — pre-merge axes, hard judgment, design calls. Cursor has no distinct design tier that reliably spawns, so one fill covers both. Do not open fan-out with Sol/Opus “for quality.”
@@ -19,7 +19,7 @@ Cursor Task managers hit the background-then-end-turn fan-in loss described in S
 
 ## Isolate
 
-- **Fork work:** a slice that reads or edits the fork gets a pair from `pnpm wt:pair` ([agnostic.md](agnostic.md) "Isolate a worker"), opened as the worker's folder. The worktrees below have no `vendor/`, so use them only for slices that never read the fork.
+- **Other isolation:** a slice that the repo's values file § Isolation covers is isolated as that section says ([agnostic.md](agnostic.md) "Isolate a worker"), opened as the worker's folder. Use the worktrees below only for slices that § Isolation does not cover.
 - **IDE / Agents Window:** start or move the worker into a **worktree** so it does not share the main checkout. Base from the feature branch.
 - **Slash commands:** `/worktree` for one isolated run; `/apply-worktree` only when bringing a result into the feature checkout (delegator/merger owns fan-in).
 - **Task / cloud:** `environment: "cloud"` for long workers (own VM + branch). Do not treat in-session `.cursor/agents` subagents as a fleet of N PR-producing workers — use worktrees or cloud for that.
@@ -27,8 +27,8 @@ Cursor Task managers hit the background-then-end-turn fan-in loss described in S
 
 ## Orchestrate (optional, large fan-out)
 
-For big trees with disk-canonical plan/state, the Cursor `/orchestrate` plugin is allowed. Keep this repo’s rules: merge onto the **feature branch**, never merge workers to `dev`; after fan-in, run `pre-merge-review`, then **ask** before `pnpm merge-to-dev`.
+For big trees with disk-canonical plan/state, the Cursor `/orchestrate` plugin is allowed. Keep this skill's rules: merge onto the **feature branch**, never merge workers into an integration branch; after fan-in, run the review step, then wait for the user's ask before the merge command.
 
 ## Merge
 
-Delegator merges worker branches into the feature branch (agnostic git merge), or applies worktree results deliberately, then `pnpm verify`. `/best-of-n` compares candidates only — pick one winner; it does not replace the merge step for independent slices.
+Delegator merges worker branches into the feature branch (agnostic git merge), or applies worktree results deliberately, then the gate command. `/best-of-n` compares candidates only — pick one winner; it does not replace the merge step for independent slices.

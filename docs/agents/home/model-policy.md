@@ -597,9 +597,9 @@ jobs go to subagents at the review and design fills.
 
 `codex exec` is the cross-vendor review-lane reviewer `pre-merge-review` reaches
 for **first** when the binary is on `PATH` (see
-`.claude/skills/pre-merge-review/SKILL.md`) — its value is that it is not the
+`~/.claude/skills/pre-merge-review/SKILL.md`) — its value is that it is not the
 authoring vendor, so it is not agreeing with its own prose. For fan-out,
-`parallel-phase`’s Codex adapter (`.claude/skills/parallel-phase/adapters/codex.md`)
+`parallel-phase`’s Codex adapter (`~/.claude/skills/parallel-phase/adapters/codex.md`)
 gives each worker its own worktree cwd, one agent (or `codex exec` run) per
 slice, with the full slice brief in the prompt because workers have no
 sibling channel.

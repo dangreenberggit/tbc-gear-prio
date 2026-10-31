@@ -91,10 +91,11 @@ Workers get their own worktree or clone, or a pair (`pnpm wt:pair`) when
 the slice reads or edits the fork; they merge **into the feature
 branch** (the delegator prefers to merge — it already planned the fit; a
 dedicated merger is the fallback). After fan-in, `pnpm verify` on that tip,
-then `pre-merge-review`, then **ask** before `pnpm merge-to-dev` into `dev`. The
+then `pre-merge-review`, then wait for the user's ask before `pnpm merge-to-dev` into `dev`. The
 skill is harness-agnostic: plain git plus optional Claude Code / Codex /
-Cursor adapters. See
-[`.agents/skills/parallel-phase/SKILL.md`](../.agents/skills/parallel-phase/SKILL.md).
+Cursor adapters. See the global `parallel-phase` skill
+(`~/.claude/skills/parallel-phase/SKILL.md`) and this repo's values in
+`docs/agents/parallel-phase-project.md`.
 
 ## Gates — what's enforced vs. advisory
 

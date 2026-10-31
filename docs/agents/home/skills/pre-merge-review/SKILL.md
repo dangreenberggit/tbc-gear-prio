@@ -1,31 +1,38 @@
 ---
 name: pre-merge-review
-description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch and stop after writing docs/reviews/. Use when the user wants to review a feature branch, asks to "run pre-merge review", or a feature's work looks done and needs a review before any merge ask. A branch that changes only agent tooling gets instruction-review in its place.
+description: Run the three-axis review (adversarial, domain, standards+spec) on a feature branch and stop after writing the review file. Use when the user wants to review a feature branch, asks to "run pre-merge review", or a feature's work looks done and needs a review before any merge ask. A branch that changes only agent tooling gets instruction-review in its place.
 ---
 
 # Pre-Merge Review
 
-Three independent axes review the branch before it merges to `dev`; a small
+Three independent axes review the branch before it merges into the
+integration branch; a small
 change gets one reviewer covering all three (step 2, "Small-change lane"). Each
 reviewer gets **fresh context** — the diff and its own brief only, no access
 to this conversation. That's the point: a reviewer that remembers writing
 the code stops finding the code's mistakes.
 
-| Axis | Brief | Notes |
-|---|---|---|
-| Adversarial | [`.agents/reviews/adversarial.md`](../../../.agents/reviews/adversarial.md) | Correctness bugs, silent-failure modes, test theatre |
-| Domain | [`.agents/reviews/domain.md`](../../../.agents/reviews/domain.md) | TBC/WCL/wowsims facts vs. `docs/stage0-findings.md` |
-| Standards + Spec | the `code-review` skill | Invoked unchanged — don't duplicate its logic here |
+The repo's values — integration branch, axis briefs, tooling check,
+review file, tickets, commands — are in
+`docs/agents/pre-merge-review-project.md` at the checkout root. Read it
+before step 1. Each rule below that depends on one of them names that
+file's section. When the checkout has no such file, or the file has no
+section that a step names, ask the user for that value before the step;
+do not guess one. In the commands below, `<base>` is the integration
+branch that § Branches names.
+
+| Axis             | Brief                   | Notes                                                |
+| ---------------- | ----------------------- | ---------------------------------------------------- |
+| Adversarial      | values file § Axes      | Correctness bugs, silent-failure modes, test theatre |
+| Domain           | values file § Axes      | Domain facts vs. the sources that § Axes names       |
+| Standards + Spec | the `code-review` skill | Invoked unchanged — don't duplicate its logic here   |
 
 ## Agent-tooling branches
 
-This review is for this repo's product code. Agent tooling is the
-exception: its list is `TOOLING_PATHS` in `scripts/check_merge_ready.py`,
-and the owner approves every change to that list. Before step 1, run:
-
-```bash
-python scripts/check_merge_ready.py --product-files
-```
+This review is for the repo's product code. Agent tooling is the
+exception: the values file § Tooling check names its list and the
+command that prints the branch's product files. Before step 1, run that
+command.
 
 - **It prints nothing:** every changed file is agent tooling. Run
   `instruction-review` in place of this skill, and stop here.
@@ -33,7 +40,11 @@ python scripts/check_merge_ready.py --product-files
   files only: in steps 1 and 2, end every `git diff` and `git log -p` of
   this repo with `-- <the printed files>`. Run
   `instruction-review` on the other changed files. Write both
-  lists in the review file's dispatch note.
+  lists in the review file's dispatch note. When every printed file only
+  wires in agent tooling (for example a `package.json` script line, or a
+  lint ignore for a tooling folder), run no axes: run
+  `instruction-review` on every changed file, and write the review file
+  in the step 3 form from its findings.
 - **It exits 1:** the changed files are unknown. Run this skill on the
   whole branch, and write the error in the dispatch note.
 
@@ -42,11 +53,11 @@ python scripts/check_merge_ready.py --product-files
 ### 1. Pin the diff
 
 ```bash
-git diff dev...HEAD
-git log dev..HEAD --oneline
+git diff <base>...HEAD
+git log <base>..HEAD --oneline
 ```
 
-Round 1 diffs `dev...HEAD` — three-dot against the merge-base, same convention
+Round 1 diffs `<base>...HEAD` — three-dot against the merge-base, same convention
 as `code-review`. Later rounds diff `<through-sha>..HEAD`, where `<through-sha>`
 is the previous round's recorded `<through-sha>`. There is at most one later
 round, a focused check; step 2's "Round limit" says when it runs and when the
@@ -70,13 +81,13 @@ nothing to review, not three empty reports.
 ### 2. Dispatch (review lane — slow is fine)
 
 Reviewers are on the **review** model lane — see
-[`docs/agents/model-policy.md`](../../../docs/agents/model-policy.md).
+`~/.claude/model-policy.md`.
 
 **Ceiling vs wall:** A **ceiling** is the harness having no taller model in its
 review lane than the one it gave you — e.g. Cursor topping out at Grok high.
 Run on the harness's review lane, note it in the dispatch line, and continue;
 that is not a downgrade. A **wall** is rate/usage/quota/`429`/spawn failure, or
-a swap to something *weaker* than the harness's review lane — then wait,
+a swap to something _weaker_ than the harness's review lane — then wait,
 serialise, or hand off; do not invent a weaker model to finish. A model in the
 **design** lane is not an upgrade for a review axis — it is a different kind of
 model, and review axes do not run there.
@@ -103,14 +114,14 @@ Try in order:
 Run the **adversarial** and **domain** sub-agents with the briefs above.
 Invoke the **`code-review`** skill for the third axis — don't re-implement
 its Standards/Spec logic here. Skip the domain axis when the diff has no
-game-domain content; the agent that dispatches the axes decides, and
+domain content (values file § Axes says what counts); the agent that dispatches the axes decides, and
 records the skip and its reason in the review file's dispatch note.
 
 **Tell every axis it writes nothing**, and that it reports no finding on
 this review file or on the tickets its Disposition rows link. Never ask
 an axis to leave `git status --porcelain` empty. That phrasing makes a reviewer responsible for
 tree state it does not own, and one duly "restored" a tree by reverting four
-files of live work (ticket 261). The constraint is *you write nothing*; a dirty
+files of live work (tbc-gear-prio ticket 261). The constraint is _you write nothing_; a dirty
 tree is reported in the findings.
 
 #### Small-change lane (round 1)
@@ -119,22 +130,22 @@ Before round 1, the agent that dispatches the review measures the branch
 against its merge base:
 
 ```bash
-git diff --shortstat dev...HEAD
-git diff --name-only dev...HEAD
+git diff --shortstat <base>...HEAD
+git diff --name-only <base>...HEAD
 ```
 
 The branch is a small change when both hold:
 
 - the first command reports at most 6 files changed, and its insertions
   plus deletions are at most 150;
-- no path the second command lists starts with `data/`, `vendor/` or
-  `packages/core/src/`, or has `.generated.` in its name.
+- no path the second command lists matches a path that the values file
+  § Small-change lane names.
 
 For a small change, round 1 is one fresh reviewer on the review lane,
 picked by the "Try in order" list above, in place of the separate axes.
 Give it the adversarial brief, and tell it to read the `code-review` skill
 and apply its Standards and Spec checks itself, spawning no subagents.
-Give it the domain brief too when the diff has game-domain content; the
+Give it the domain brief too when the diff has domain content; the
 dispatching agent decides that and records the reason, as for the domain
 axis above. Record the lane and both commands' output in the review
 file's dispatch note. Every other branch gets the full axes.
@@ -143,35 +154,30 @@ file's dispatch note. Every other branch gets the full axes.
 
 Before dispatching round 2, test three conditions against
 `git log -p <from-sha>..<through-sha>` (this round's `Reviewed range:` line
-from step 1), the fork's
-`git -C vendor/tbc-new-fork log -p <fork-from>..HEAD` (`<fork-from>` is the
-end of the fork range the last round recorded), and this review file. When
+from step 1), the log of each other repo that the values file
+§ Focused check names (from the end of the range the last round recorded
+for it), and this review file. When
 all three hold, run the focused check below. When any condition fails, or
 cannot be settled from those sources, do not run the three axes: stop as
 "Round limit" says.
-When `git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json` exits 0, the
-branch never moves the fork pin: skip the fork log and treat condition 3 as
-holding.
 
-1. Every commit, in both logs, is one of these:
+1. Every commit, in every log, is one of these:
    - a fix for findings that an earlier round in this file raised, named by
      ID in the commit message or in the ticket it names, whatever the
      finding's label;
    - the code-quality pass (step 3), with the `## Code quality` row IDs in
      its commit message;
-   - a fork re-pin: it changes `data/wowsims-fork.lock.json`, and every
-     other file it changes is under `data/` or `docs/`;
+   - a commit of a kind that the values file § Focused check adds;
    - a commit that changes only whitespace or line wrapping;
    - a commit that changes only this review file or tickets its Disposition
      rows link.
-2. Every changed line outside tests, comments, docs and fork re-pin commits
-   is at a place that a fixed finding cites.
-3. The wowsims-file check that this review file records (the commands in
-   `docs/fork-upstream-touchpoints.md`) gives the same output at the new
-   fork tip.
+2. Every changed line outside tests, comments, docs and the commits of
+   the kinds that § Focused check adds is at a place that a fixed finding
+   cites.
+3. Every condition that the values file § Focused check adds holds.
 
 Dispatch one fresh agent on the review lane, picked by the "Try in order"
-list above. Give it the main range, the fork range, the findings and tickets
+list above. Give it the main range, each other repo's range, the findings and tickets
 the commits fix, and these four checks:
 
 1. Conditions 1 to 3 above hold.
@@ -188,14 +194,14 @@ result for all four checks.
 
 The focused check is a round: step 1 has already written its
 `Reviewed range:` line. Add a `## Focused check (round 2)` section to the
-review file with the fork range and the result of each of the four checks.
+review file with each other repo's range and the result of each of the four checks.
 
 When all four checks pass and the agent reports no finding other than
 bookkeeping (step 3), add a `## Disposition (round 2)` table with one row
 per finding, except a finding that blocks the merge: it gets its row only
-as the outcome list in "Round limit" says. Follow `docs/agents/known-traps.md`, "Before writing a review
-Disposition table", for an empty table and for rows of earlier rounds that
-this round closes. File the ticket for each `defer` row as step 3 says. Then
+as the outcome list in "Round limit" says. Follow the Disposition rules
+that the values file § Review file names, for an empty table and for rows
+of earlier rounds that this round closes. File the ticket for each `defer` row as step 3 says. Then
 continue at step 4.
 
 Otherwise, record in the `## Focused check (round 2)` section which check
@@ -236,8 +242,8 @@ round 1 for new work.
 
 When round 2 passes or is skipped, give each open finding its outcome.
 When round 2 is skipped, write these outcomes in round 1's
-`## Disposition` table, editing rows as `docs/agents/known-traps.md`,
-"Before writing a review Disposition table", says.
+`## Disposition` table, editing rows as the Disposition rules in the
+values file § Review file say.
 
 - a "fixed before merge" finding that is still open: stop as the "Stop"
   paragraph above says, and report it to the user as blocking the merge;
@@ -274,9 +280,10 @@ Sort each finding by what it does, whatever label the reviewer gave it:
   also reads the code-quality pass. Before round 2, the agent that handles this
   review's findings sends every `## Code quality` row to one fresh
   agent, which fixes them all in one pass: a workhorse type when the rows
-  fit `docs/agents/model-policy.md` § Trial types, "Modest", else
+  fit `~/.claude/model-policy.md` § Trial types, "Modest", else
   `general-task`. The pass
-  changes no behaviour, and `pnpm verify` passes after it. Each row then
+  changes no behaviour, and the gate command (values file § Commands)
+  passes after it. Each row then
   gets a Disposition row: `fixed`, or `defer` with a ticket.
 - **Bookkeeping** (wording in this review file or in tickets, process
   notes): `wontfix` with the reason, or the reviewer's suggested text
@@ -298,11 +305,11 @@ by the user after round 1 and before any fix is made, so that the
 approved edits are fixes that round 2 checks; do not ask once per round.
 
 **Tickets are the source of truth for deferred work.** For every finding
-you would defer, create `.scratch/carry-forward/issues/<NN>-<slug>.md`
-first (`Status: open`, `Origin:`, `Blocks: phase-N`), then link it from
-Disposition. See [`docs/agents/issue-tracker.md`](../../../docs/agents/issue-tracker.md).
+you would defer, create its ticket first, as the values file § Tickets
+says, then link it from Disposition.
 
-Write `docs/reviews/<branch-name>.md` (slashes → dashes):
+Write the review file at the path that the values file § Review file
+names:
 
 ```markdown
 # Pre-merge review — <branch>
@@ -310,24 +317,28 @@ Write `docs/reviews/<branch-name>.md` (slashes → dashes):
 Reviewed range: `<from-sha>..<through-sha>`
 
 ## Adversarial
+
 …
 
 ## Domain
+
 …
 
 ## Standards + Spec
+
 …
 
 ## Summary
+
 …
 
 ## Disposition
 
-| ID | Axis | Disposition | Ticket / note |
-| --- | --- | --- | --- |
-| A1 | Adversarial | fixed | <what was fixed> |
-| A2 | Adversarial | defer | `.scratch/carry-forward/issues/0N-slug.md` |
-| D1 | Domain | wontfix | <why> |
+| ID  | Axis        | Disposition | Ticket / note    |
+| --- | ----------- | ----------- | ---------------- |
+| A1  | Adversarial | fixed       | <what was fixed> |
+| A2  | Adversarial | defer       | `<ticket path>`  |
+| D1  | Domain      | wontfix     | <why>            |
 ```
 
 `<through-sha>` is `git rev-parse HEAD` at dispatch; `<from-sha>` is the
@@ -341,39 +352,33 @@ finding. An axis with no findings writes no row — say so in that axis's prose
 (`**Spec: clean.**`) and leave the table to the findings. A concern that was
 raised and then checked and found not to be a defect is a finding: dispose of
 it as `wontfix` with the reason. Append a one-liner
-to `.scratch/carry-forward/map.md` when filing tickets.
+to the ticket map that the values file § Tickets names when filing tickets.
 
 When the review's last Disposition table is written and its tickets are
 committed (round 2's table, or round 1's when round 2 is skipped), count
 the tickets this branch filed and closed, and write both numbers in
-`## Summary`. Filed is the number of `A` rows in
-`git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`.
+`## Summary`. `<tickets>` is the ticket path pattern that the values file
+§ Tickets names. Filed is the number of `A` rows in
+`git diff --name-status <base>...HEAD -- '<tickets>'`.
 Closed is
-`git diff dev...HEAD -- '.scratch/carry-forward/issues/*.md' | grep -cE '^\+\s*(\*\*)?Status:(\*\*)? *(\*\*)?(closed|resolved|wontfix)'`.
+`git diff <base>...HEAD -- '<tickets>' | grep -cE '^\+\s*(\*\*)?Status:(\*\*)? *(\*\*)?(closed|resolved|wontfix)'`.
 When filed is higher than closed, say so in one sentence.
 
 ### 4. Prove the check (do not merge here)
 
-```bash
-pnpm merge-to-dev --check-only
-```
-
-On `phase-N/*` with open `Blocks: phase-N` tickets still open:
-
-```bash
-pnpm merge-to-dev --check-only --ack-open-blockers
-```
+Run the merge check that the values file § Commands names.
 
 ### 5. Report — then stop
 
 Tell the user where the review file is, the summary with its filed and
 closed ticket counts, and that
-`pnpm merge-to-dev --check-only` is green. List as blocking the merge
+the merge check is green. List as blocking the merge
 every finding that step 3 says blocks it and that the owner has not
 allowed to be deferred, and ask the owner to allow the deferral or
-to have it fixed. **Stop there.** Do not run `pnpm merge-to-dev`,
-do not `git merge` into `dev`, and do not set `TBC_ALLOW_DEV_MERGE=1`
+to have it fixed. **Stop there.** Do not run the merge command (values
+file § Commands), do not `git merge` into `<base>`, and do not use a
+merge override that § Commands names
 unless the user has **explicitly asked to merge after seeing the review
 summary**. “Review and land” / “the branch looks done” / “commit this” /
 finishing this skill is **not** permission to merge — wait for a separate
-ask. When they do ask, use `pnpm merge-to-dev` only — never a raw merge into `dev`.
+ask. When they do ask, use the merge command only — never a raw merge into `<base>`.

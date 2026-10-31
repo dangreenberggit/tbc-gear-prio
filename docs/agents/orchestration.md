@@ -11,16 +11,15 @@ tool calls itself:
 
 - writing `brief.md`, `decision-log.md`, and any stage artifact copied
   verbatim from a seat's final message, and the one `mv` of `plan.md`
-  that `.claude/skills/stage-gate/SKILL.md` step 5 makes before a new
-  plan
+  that the `stage-gate` skill's step 5 makes before a new plan
 - the short gate checks: `git status --porcelain`, `git rev-parse HEAD`,
   `git diff --stat`, and `date -u +%Y-%m-%dT%H:%MZ` for `decision-log.md`
   times and for the age of a waiting agent's `returned` line
 - a background `sleep 1800` timer for an agent that is waiting on its own
-  background work (`.claude/skills/stage-gate/SKILL.md` step 1 **Open the
-  stage**, the `spawn` lines)
+  background work (the `stage-gate` skill's step 1 **Open the stage**,
+  the `spawn` lines)
 - reading the stage-gate artifacts under `.scratch/stage-gate/<slug>/`,
-  `.claude/skills/stage-gate/plan-template.md` and
+  the skill's `plan-template.md` (`~/.claude/skills/stage-gate/`) and
   `docs/agents/stage-gate-project.md`
 
 Everything else goes to a subagent: reading code or docs, running `pnpm`
@@ -68,19 +67,8 @@ wait for the user's ask before `pnpm merge-to-dev`. Never merge each worker into
 
 ## Stage-gate features
 
-When a wrong plan would be expensive, run the `stage-gate` skill: Planner
-(Fable, effort low) → adversarial Plan-Reviewer (Opus, effort high) →
-fresh-context Executor (Opus, effort high), with judged gates and a
-capped loop-back. Inside this flow the planner works out the whole job,
-writes steps for every chunk it can plan now, and lists in one line each
-chunk that needs an earlier chunk's results; the session asks for a new
-plan when it reaches a one-line chunk, and runs at most
-two stages in planning or review at once (SKILL.md § Orchestrator
-conduct). That pacing belongs to the stage-gate flow only: a plain
-request for a plan gets steps for every part. `pre-merge-review` still
-runs after.
-Seats are agent definitions under `.claude/agents/`; registration of new
-agent files: model-policy § Claude Code.
+When a wrong plan would be expensive, run the `stage-gate` skill. This
+repo's values for it are in `docs/agents/stage-gate-project.md`.
 
 ## Interacting with the user
 

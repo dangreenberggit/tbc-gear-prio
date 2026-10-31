@@ -36,15 +36,17 @@ reviews the diff after.
 This project's values — folders, commands, ticket rules, worker lanes,
 project seats — are in `docs/agents/stage-gate-project.md` at the
 checkout root. Read it before step 1. Each rule below that depends on one
-of them names that file's section.
+of them names that file's section. When the checkout has no such file, or
+the file has no section that a step names, ask the user for that value
+before the step; do not guess one.
 
 ## Seats
 
-| Seat | subagent_type | Call-site model | Frontmatter effort | Lane |
-| --- | --- | --- | --- | --- |
-| Planner | `gate-planner` | `fable` | `low` | design |
-| Reviewer | `gate-reviewer` | `opus` | `high` | review |
-| Executor | `gate-executor` | `opus` | `high` | lead |
+| Seat     | subagent_type   | Call-site model | Frontmatter effort | Lane   |
+| -------- | --------------- | --------------- | ------------------ | ------ |
+| Planner  | `gate-planner`  | `fable`         | `low`              | design |
+| Reviewer | `gate-reviewer` | `opus`          | `high`             | review |
+| Executor | `gate-executor` | `opus`          | `high`             | lead   |
 
 The project seats and when they run:
 `docs/agents/stage-gate-project.md` § Project seats.
@@ -103,8 +105,8 @@ not` list below.
    feature — the honest next step is to close that work. "No blocking review
    findings" is a fact about the review, not a verdict that the work is done.
    Reserve merge (and other end-of-line moves) for when the work is done by
-   the user's bar, and say plainly when it isn't. Ties to step 7 (ask before
-   merge) and the project's merge rule
+   the user's bar, and say plainly when it isn't. Ties to step 7 (wait for
+   the user's ask before merge) and the project's merge rule
    (`docs/agents/stage-gate-project.md` § Hand off).
 5. **Carry every decision whose answer is derivable; hand back the ones that
    are the user's to make.** Points 1–4 all say "carry the work yourself" —
@@ -186,14 +188,14 @@ In these steps, "you" and "the session" are the same agent.
        the brackets (seen: `completed`, `failed`, `killed`). Copy the
        number in its `<subagent_tokens>` tag, or write `n/a` when it has
        none. When its `<summary>` says the agent `is waiting on its own
-       background work`, write `returned (<status>, waiting)`.
-     An agent is **working** when the last `spawn` line with its agent id
-     is `started`, `resumed` or `resumed (waiting)`. An agent's **final
-     message** is the `<result>` of a `<task-notification>` with
-     `<status>completed</status>` whose `<summary>` does not say the
-     agent `is waiting on its own background work`. When the `<summary>`
-     does say that, the `<result>` may be interim: log the `returned`
-     line and act on nothing else in that notification.
+background work`, write `returned (<status>, waiting)`.
+       An agent is **working** when the last `spawn` line with its agent id
+       is `started`, `resumed` or `resumed (waiting)`. An agent's **final
+       message** is the `<result>` of a `<task-notification>` with
+       `<status>completed</status>` whose `<summary>` does not say the
+       agent `is waiting on its own background work`. When the `<summary>`
+       does say that, the `<result>` may be interim: log the `returned`
+       line and act on nothing else in that notification.
 
      An agent is **waiting** when the last `spawn` line with its agent id
      is a `returned` line marked `waiting`. The **one message to a
@@ -218,6 +220,7 @@ In these steps, "you" and "the session" are the same agent.
      result lacks `"success":true`, or the agent's next notification
      again says it is waiting on its own background work, the session
      stops and tells the user.
+
    - `note`: the SHAs that steps 1 and 5 record, each question and
      answer of step 5, and filed ticket ids with the new HEAD.
 
@@ -225,8 +228,8 @@ In these steps, "you" and "the session" are the same agent.
    checked nothing.
 
 2. **Plan.** Every `gate-planner` spawn (`model: "fable"`) names the
-   absolute paths of `brief.md`,
-   `.claude/skills/stage-gate/plan-template.md` and the stage folder.
+   absolute paths of `brief.md`, the `plan-template.md` in this
+   skill's folder, and the stage folder.
    Spawn one. When a `gate-planner`'s final message is a plan, write it
    to `plan.md` verbatim.
    When its final message starts with `SPLIT:`, it planned nothing and
@@ -408,7 +411,7 @@ In these steps, "you" and "the session" are the same agent.
    ...), one `gate-executor` (`model: "opus"`) for each. When the next
    chunk has no steps in `plan.md` and may start (**Gate C between
    chunks** below), rename `plan.md` to `plan-<id of its first
-   chunk>.md` (`mv`), log `git rev-parse HEAD` in a `note` line, and
+chunk>.md` (`mv`), log `git rev-parse HEAD` in a `note` line, and
    spawn a `gate-planner` (`model: "fable"`) with the paths step 2
    names, plus the renamed plan, `execution-report.md`, `progress.md`
    and the id of the chunk to plan. Its final message is a new plan:
@@ -486,8 +489,9 @@ In these steps, "you" and "the session" are the same agent.
    file's § Project seats holds.
 
 7. **Hand off.** The normal loop resumes: the project's review step, then
-   **ask** before its merge command (`docs/agents/stage-gate-project.md`
-   § Hand off). Stage artifacts stay in the stage folder. Chunks that
+   wait for the user's ask before its merge command
+   (`docs/agents/stage-gate-project.md` § Hand off). Stage artifacts stay
+   in the stage folder. Chunks that
    have not run when the stage ends become tickets: spawn one judgment
    agent (`docs/agents/stage-gate-project.md` § Worker lanes) to file
    them per that file's § Tickets and commit them, and log their ids and

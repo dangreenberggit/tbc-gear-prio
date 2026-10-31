@@ -19,9 +19,9 @@ Every causal or factual claim the plan relies on, one row each.
 `Load-bearing: yes` when refuting the claim invalidates the approach, not
 just one step.
 
-| ID | Claim | Load-bearing | Verified by |
-| --- | --- | --- | --- |
-| C1 | <claim> | yes/no | `<command a reader can re-run>` or `hypothesis, untested` |
+| ID  | Claim   | Load-bearing | Verified by                                               |
+| --- | ------- | ------------ | --------------------------------------------------------- |
+| C1  | <claim> | yes/no       | `<command a reader can re-run>` or `hypothesis, untested` |
 
 ## Steps
 
