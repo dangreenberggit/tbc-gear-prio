@@ -175,6 +175,10 @@ text you showed them and where it goes. A subagent makes such an edit
 only when its prompt gives the approved exact text and where it goes;
 it writes that text there and nothing else.
 
+Make a second pass over your finished draft, revising it against the
+`writing-for-agents` skill: the skill is the rubric, and citing it is
+not the same as having applied it.
+
 Before you show the text, review that exact text: one reviewer runs the
 `instruction-review` skill once. Show only text in the form the last
 review read. When the text or where it goes changes, review the changed

@@ -235,18 +235,6 @@ slot mapping, `applyView` (PLAN.md §6). They touch no port and need no
 adapter. What is banned is asserting on stage internals: the eight stages
 must stay reorganisable without touching a test.
 
-## Editing agent-facing documents
-
-Review means a second pass over your finished draft, revising it against
-the `writing-for-agents` skill: the skill is the rubric, and citing it is
-not the same as having applied it.
-
-Before adding anything to a skill file, ask: does this belong to this
-skill's job and nature? A skill has a personality (game-domain SME,
-pipeline debugging, TDD). Put engineering rules in engineering skills and
-docs, game rules in game skills; what does not fit goes elsewhere or is
-left out. See `writing-great-skills` (relevance) and `dont-be-stupid`.
-
 ## CI
 
 `.github/workflows/verify.yml` runs `pnpm install --frozen-lockfile`, then

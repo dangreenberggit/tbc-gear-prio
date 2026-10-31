@@ -13,8 +13,7 @@ paths: an `@` import loads at start and would undo the saving.
   that mode, this repo's extra calls are in `docs/agents/orchestration.md`
   § The session delegates.
 - **Writing code or tests, committing, pushing:** `docs/workflow.md`
-  (the loop, gates, testing seams, types from JSON, editing agent-facing
-  documents).
+  (the loop, gates, testing seams, types from JSON).
 - **A ported engine file, a scripted or generated file, the wowsims
   engine pin, a ticket, a review Disposition table, the dev servers,**
   or a node/pnpm command that fails strangely:
@@ -33,10 +32,9 @@ paths: an `@` import loads at start and would undo the saving.
   skill; its audience is the engineering team, not players.
 - **A plan, a ticket, a skill, an agent definition, `AGENTS.md`,
   `CLAUDE.md`, or a doc an agent is pointed at:** a second pass against
-  the `writing-for-agents` skill, then `docs/workflow.md` § Editing
-  agent-facing documents. A change to `AGENTS.md`, `CLAUDE.md`, a skill
-  or an agent definition then follows the global rule "Changing agent
-  instructions" (staged in `docs/agents/home/AGENTS.md`).
+  the `writing-for-agents` skill. A change to `AGENTS.md`, `CLAUDE.md`, a
+  skill or an agent definition then follows the global rule "Changing
+  agent instructions" (staged in `docs/agents/home/AGENTS.md`).
 - **Reporting a nontrivial task done,** especially a review, research, or
   "use X to check Y": the `dont-be-stupid` checklist.
 - **Tickets:** local markdown under `.scratch/`,

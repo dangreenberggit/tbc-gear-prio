@@ -1,5 +1,0 @@
-interface:
-  display_name: "QA"
-  short_description: "Conversational QA that files issues"
-policy:
-  allow_implicit_invocation: false
