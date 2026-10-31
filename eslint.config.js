@@ -42,6 +42,8 @@ export default tseslint.config(
       "vendor/**",
       ".agents/**",
       ".claude/**",
+      // Staged copies of global skills and hooks, installed into ~/.claude.
+      "docs/agents/home/**",
       // Scratch holds retros, handoffs, and leftover nested checkouts — not source.
       ".scratch/**",
       "packages/core/src/proto/**",
