@@ -132,6 +132,13 @@ under `.scratch/handoffs/` the user can run elsewhere.
 
 ## Parallelism vs serial
 
+When you will have two writers running at once (independent slices:
+different kinds of work, mostly disjoint files), fan out with the
+`parallel-phase` skill. The session spawns a subagent to act as Delegator;
+on Claude Code that is a `general-task`. Without isolation, readers share
+the writers' index: a read-only agent sees your uncommitted edits and
+cannot tell them from a stray worker's.
+
 - **Implementation (`parallel-phase`):** parallel worktrees are the point —
   often faster _and_ better than one long chain. Cap around **3–5**
   workers. Every worker gets the fill your harness section names for its

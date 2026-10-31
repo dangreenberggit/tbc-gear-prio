@@ -25,8 +25,8 @@ paths: an `@` import loads at start and would undo the saving.
   `docs/agents/upstream-catch-up.md`.
 - **Pinning a vendored input, editing a parser, regenerating an artifact
   under `data/`:** the `data-pipeline-work` skill.
-- **Spawning an agent, fanning out, stage-gating, writing a question for
-  the owner, or ending an investigation:** `docs/agents/orchestration.md`. **Which model and
+- **Spawning an agent, fanning out, stage-gating, or ending an
+  investigation:** `docs/agents/orchestration.md`. **Which model and
   agent type:** `~/.claude/model-policy.md`; this repo's values are in
   `docs/agents/model-policy.md`.
 - **Judging a ranking, shortlist or pool output:** the `sme-rank-review`
