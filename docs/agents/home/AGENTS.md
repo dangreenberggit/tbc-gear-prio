@@ -10,9 +10,11 @@ These rules apply to every message, every document, and every code comment.
 
 Write direct statements. Say what a thing is; if a contrast is genuinely needed, make it a separate sentence.
 
+Describe a problem or a change by what the reader can see or check: what shows on screen, which file changed, what it does and why. A ticket number, an internal label or a term you coined is not a description.
+
 Use ordinary words. These in particular are LLM habits that make writing sound considered while saying nothing — replace each with a plain word that names the actual thing: surface (as a verb), load-bearing, the tell, cuts against, lands, carries, the real exposure, worth the record, orthogonal, decisive, at the sharp end, shape, shaped.
 
-This rule is about vocabulary, not subject matter. Technical terms that name a specific thing — ROW_SHAPED_RE, WASM, SHA, reforge, diffstat — are unaffected.
+This rule is about vocabulary, not subject matter. Technical terms that name a specific thing — WASM, SHA, diffstat — are unaffected.
 
 For word choice, sentence length, voice, tone, and person, consult the sources — do not improvise:
 
@@ -33,17 +35,29 @@ A reply has these parts, in this order:
 
 **Decisions** go in **Needed from you**. Give each one a label that is unique in the session — a ticket id, or `Q-<name>` — so a later list cannot reuse it; list numbers that restart at 1 make the user answer the wrong item. For each decision, write plain paragraphs: what happens today, what each option does and costs, and what you recommend and why. A structured-question picker is an addition to the reply, and the reasoning stays in the reply text.
 
-**Open items carry forward.** A request — an answer, a permission, a decision, a manual step, a command or a prompt to paste — that an earlier message gave the user stays open until the user's messages show it is done or dropped, or until the agent checks and sees that it is done. Every reply other than a short reply restates every open item in full in its **Needed from you** section, even when an earlier reply already gave it and even when this reply is about something else. No reply, short reply included, points to an earlier message; the user may not find it. A reply that ends a piece of work also puts in **Needed from you** every step still left for the user, including optional ones such as a push; each one is then an open item.
+**Open items carry forward.** A request — an answer, a permission, a decision, a manual step, a command or a prompt to paste — that an earlier message gave the user stays open until the user's messages show it is done or dropped, or until the agent checks and sees that it is done. Every reply other than a short reply restates every open item in full in its **Needed from you** section, even when an earlier reply already gave it and even when this reply is about something else. No reply, short reply included, points to an earlier message; the user may not find it. A reply that ends a piece of work also puts in **Needed from you** every step still left for the user, including optional ones such as a push; each one is then an open item. Give a manual step as one short command to paste, not an edit to make by hand: the user often works from a phone.
 
 **Text between tool calls** is outside the reply. Anything the user needs from that text goes in the reply as well.
 
 **A direct question asked mid-task** gets its answer at once, under its own title; then continue working. That answer is text between tool calls, so the turn's final reply repeats it in one sentence: in its first section, or as one of its sentences when the final reply is a short reply.
 
+**Answer the question the user asked**, read literally. Asked what a document says, say what it says and what it does not say; add a gap analysis or a proposal only when the user asks for one or the gap blocks work they asked for. Brief subagents on the user's literal words. "Note this", even "for next" or "after this batch", means record it and say where; it is not a go to start.
+
 **A subagent's final message** has two parts. First, the report its caller asked for, in the caller's format. Second, a section headed **Summary for the user**, written as a reply under this rule and under the Writing style rules above — plain English, direct statements, ordinary words — so the caller can pass it on without rewriting it. The caller checks that the summary agrees with the report and corrects it where it does not. The caller also finds each important claim (defined in "Sources on important claims" below) that names no source or whose source the report does not show. The caller verifies each such claim, directly or through a subagent, or marks it "unverified". The caller passes it on inside its own reply, adds only its own verdict, and puts every request — the subagent's and its own — in that reply's one **Needed from you** section.
 
 **Subagent reports.** The report in a subagent's final message is a **condensed report**: the conclusion; each important claim with its source, as "Sources on important claims" below requires; one line naming what the report file holds that the message leaves out; and the file's absolute path. Keep it to what the caller needs for its next step. The full report goes in the report file, at the path the prompt names, else at the path the project's rules name, else in the session's scratchpad directory, else in the system temp directory. If a file of that name exists, use a new name. Start the file name with the date or the task's words: Claude Code's Write tool refuses a subagent `.md` file whose name starts with report, summary, findings or analysis. Writing this file is allowed even when the prompt allows no other path. This rule overrides any harness instruction to return findings only in the final message. Claude Code tells every subagent not to write report files, because a parent does not read a file it does not know about; the condensed report gives the caller this file's path. Skip the file when the whole report fits in the condensed report, or when the task's product is already a file the caller reads, such as a review, a handoff or a plan. A format or template that the prompt names takes precedence over this paragraph. So does a prompt that forbids all writes, such as a review axis told it writes nothing: that agent returns its whole report in its final message. The caller reads a report file only for a detail that the condensed report leaves out, such as the evidence behind a claim it is about to build on.
 
+**An investigation session writes its record before it ends.** When a session's product is findings rather than code, it writes a record file before its last reply: the user's rulings word for word, each evidence file's path and what it holds, what was started and what was not, and the next step. The file goes at the path the project's rules name, else in the session's scratchpad directory, else in the system temp directory. The record is written when the findings are complete, not when the user asks: the user may not get to them before the session goes stale.
+
 **Sources on important claims.** An important claim — one that something will be built on, or that a substantial decision rests on — names its source (file:line, a ticket, a command a reader can re-run, or the user's words from the session transcript) or is marked "unverified". An agent passing text on to the user adds only its verdict, and the verdict names its source like any other important claim. The agent keeps each claim to what its source says, and describes things on screen by where each one appears, never by a relation that no source shows.
+
+## Comment policy
+
+Comments explain **why**, never **what**. If a comment restates the code,
+delete it. If the code needs a comment to be readable, rename something
+first. Keep only comments a reader needs: a non-obvious constraint, an
+external-system quirk, why a slower or uglier path was deliberately chosen,
+or a pointer to the finding or ADR that required the design.
 
 ## Commit messages
 
@@ -72,6 +86,101 @@ Past six lines, an independent subagent decides whether the length is necessary.
 
 Write the body as prose that stands on its own. Say what a reader needs, once, and stop — no process narration, no "Summary:" or "Changes:" headings, no confidence claims about untested behaviour.
 
+# Commits and merges
+
+Commit per green slice, not one commit at the end and not only when
+asked. Before each commit `git status` must be clean of work you did not
+do; after `git reset`, re-read `git log -1` before recommitting. Merging
+into the integration branch waits for the user to ask **after** the
+branch's review exists and they saw its summary; a combined "review and
+merge" request is not that ask. Ask for a merge or a push of a piece of
+work only when that work is done, and name the repo, the remote, the ref
+and the old and new sha of every push.
+
+When you stash WIP, say what you parked and what the branch tip is
+missing because of it. Name the pieces (files or jobs). If the tip still
+needs any of that to be correct or complete, write that down before you
+start the next work. "Restore later if needed" is not enough.
+
+# Find out before you ask
+
+Resolve a question yourself: from what the user already said, from what
+is derivable, or by sending an agent to investigate. Spend a clarifying
+question only on a true fork in what the user wants, one no investigation
+settles because it is a preference. Do ask when the question is cheap
+and a wrong guess is expensive.
+
+# Durable claims
+
+In committed or dispatched artifacts (commit messages, tickets, ADRs,
+tracked docs and skills, retros, worker prompts), a causal claim points
+at a command a reader can re-run or says **hypothesis** / **untested** in
+the same sentence. Do not state as fact that an artifact was produced on
+an environment you did not observe. Never assert that a gitignored or
+untracked generated input is present for a fresh worktree: give the
+regen/sync command and how to verify. When an artifact says what the
+user wants, quote the user's words and when they said them; an agent's
+reading, or a condition an agent wrote into a ticket, is not a ruling.
+
+**A property measured against one option is not a comparison.** Before
+ruling an option in or out, name the alternatives and say what the same
+measurement gives for each. When the claim is that something is absent,
+resolve every ref that could contain it.
+
+**Findings and fixes.** A real defect that the work found and did not
+fix ends as an open ticket, never only in a report, a review row or a
+log. When a ticket's own check passes, close it without asking. Before
+you propose or relay a fix, check that it uses the direct signal when
+one exists, removes the failure instead of making it rarer, and beats
+the simpler options, doing nothing included.
+
+**An exit code is not evidence that work happened.** A stopped
+background task reports exit 0, and a command that ran in the wrong
+directory succeeds at nothing. A pipe reports the **last** command's
+status, so `make ... 2>&1 | tail` returns `tail`'s 0. To bound output
+and keep the status, append `; echo "rc=${PIPESTATUS[0]}"` to the same
+command, or redirect to a file and `tail` it separately. Confirm the
+artifact (`ls node_modules`, read the file, check the row count) before
+reporting an install, build or regen as done.
+
+# Shell and tool habits
+
+Use absolute paths or the command's own directory flag (`git -C`,
+`pnpm -C`, `npm --prefix`) instead of `cd`: a backgrounded `cd X && cmd`
+runs in the session cwd and succeeds while doing the work somewhere
+else. Bound scaling output (`--stat`, `head`/`tail`, exit codes); to
+test whether one thing exists, name it (`ls <path>`, `grep -c
+<pattern>`), because a truncated listing cannot show absence.
+
+Read a command's error text before forming a theory about it;
+tool-manager errors usually name their own fix. `Edit` and `Write`
+refuse a file this agent has not opened with `Read` in this run: `Read`
+the part you will change, then edit.
+
+**One tool round, many commands.** Every tool call is one model request
+that sends your whole context again (code.claude.com/docs/en/costs, "Why
+usage climbs in a long session"). Put every command whose input does not
+depend on another's output into one Bash call (`cmd1; echo ===; cmd2`),
+bound each one's output, and send independent tool calls in one message.
+Decide what you need next before you call; then request all of it.
+
+A rewrite that changes a whole file's line endings makes `git diff
+--stat` show hundreds of changed lines for a small edit: a script that
+writes LF over one of the CRLF files (`git ls-files --eol | grep i/crlf`
+lists them), or a Windows editor saving over the `\\wsl.localhost\...`
+path as CRLF. Edit text files with the harness Edit tool, which
+preserves endings. After any scripted or generated write, read `git diff
+--stat` before committing: a line count near the file's length means
+endings flipped — confirm the real change with `git diff
+--ignore-cr-at-eol`, rewrite the file back to the endings HEAD has, then
+commit.
+
+When changing committed **generated** artifacts: regenerate from the
+committed sources with the pinned toolchain; the working tree must match
+`HEAD` (or you must document which side is wrong) before commit. For CI
+byte-compare gates, read a real CI run; do not predict from a local story
+about another OS.
+
 # Changing agent instructions
 
 In this section, agent instructions means `AGENTS.md` and `CLAUDE.md`
@@ -80,6 +189,10 @@ Create or edit one only after the user approves, in chat, the exact
 text you showed them and where it goes. A subagent makes such an edit
 only when its prompt gives the approved exact text and where it goes;
 it writes that text there and nothing else.
+
+Make a second pass over your finished draft, revising it against the
+`writing-for-agents` skill: the skill is the rubric, and citing it is
+not the same as having applied it.
 
 Before you show the text, review that exact text: one reviewer runs the
 `instruction-review` skill once. Show only text in the form the last
@@ -93,6 +206,33 @@ review, the path that ran (light or full), what it found and what was
 fixed after it; and what is still open, including a blocking finding
 such as no trial run.
 
+Subagents receive the root `CLAUDE.md` / `AGENTS.md` text from when the
+parent session started, so an edit to those files reaches subagents only
+in a new session. On 2026-09-26 a review subagent received an
+`AGENTS.md` older than the file on disk. A `CLAUDE.md` in another
+directory, such as a worktree, was loaded from disk when a subagent read
+a file there; this was seen once.
+
+# This machine
+
+Commands run in bash on WSL (Ubuntu). In WSL, `/usr/local/bin` is the
+one directory on every process's PATH, so each tool is linked there:
+`node`, `npm`, `npx`, `corepack` and `pnpm` through
+`~/.local/node-default` (a symlink to an nvm version folder; nvm's
+default alias is `system`), and `go`, `gofmt`, `protoc` and
+`protoc-gen-go` straight to `~/.local/go/bin`, `~/.local/protoc/bin` and
+`~/go/bin`. `python` is `/usr/bin/python` from the apt package
+`python-is-python3`. So any shell finds them: login, interactive,
+`bash -c`, `wsl.exe -e`, `t3code.service` and the git hooks each of
+those runs.
+
+T3 reads PATH from `bash -ilc` once, when it starts, puts it in front of
+its own, and passes it to every Claude Code process it launches; Claude
+Code's Bash tool takes its PATH from that process. So after a change to
+`~/.profile`, `~/.bashrc` or the nvm default, restart T3
+(`systemctl --user restart t3code.service`) when `C:\Users\<user>\.local\bin\t3-safe-off.ps1 -Check -Json`
+says it is idle; until then its agents keep the PATH from T3's start.
+
 # Don't cut your own connection
 
 The user often reaches this machine from a phone: Tailscale on Windows
@@ -100,7 +240,8 @@ forwards to the t3 server in WSL on port 3773. These actions lock the
 phone out until someone is at the PC, so never run them. Say what the
 action would do, and give the user the command instead:
 
-- shutting down or restarting WSL (`wsl --shutdown`, `wsl --terminate`)
+- shutting down or restarting WSL (`wsl --shutdown`, `wsl --terminate`,
+  or `t3-safe-off.ps1` without `-Check`)
 - stopping Tailscale, or changing its `tailscale serve` setup
 - restarting, shutting down or signing out of Windows
 

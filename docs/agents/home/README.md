@@ -6,7 +6,7 @@ were installed 2026-10-19. The hook refuses an agent's writes to
 `~/.claude/settings.json`, `~/.claude/settings.local.json` and
 `~/.claude/hooks/`, and the deny rules also refuse Write and Edit calls to
 `settings.json` and `hooks/`. An agent's write anywhere else in
-`~/.claude/`, including the copies below, goes ahead, and the hook
+`~/.claude/` goes ahead, and the hook
 logs it to `~/.local/state/agent-guard/outside-writes.jsonl` except under
 `~/.claude/projects/` and `~/.claude/plans/`. The hook sees a Write or
 Edit call, and a Bash redirect or write command such as `cp` or `tee`
@@ -28,8 +28,12 @@ pairs=(
   "$S/AGENTS.md"                          "$HOME/.claude/AGENTS.md"
   "$S/CLAUDE.md.install"                  "$HOME/.claude/CLAUDE.md"
   "$S/model-policy.md"                    "$HOME/.claude/model-policy.md"
-  "$S/skills/instruction-review/SKILL.md" "$HOME/.claude/skills/instruction-review/SKILL.md"
+  "$S/hooks/bash-footguns.sh"             "$HOME/.claude/hooks/bash-footguns.sh"
+  "$S/hooks/subagent-foreground-helpers.py" "$HOME/.claude/hooks/subagent-foreground-helpers.py"
 )
+while IFS= read -r -d '' f; do
+  pairs+=("$S/skills/$f" "$HOME/.claude/skills/$f")
+done < <(cd "$S/skills" && git ls-files -z)
 for t in general discrete simple modest design; do
   pairs+=("$S/agents/$t-task.md" "$HOME/.claude/agents/$t-task.md"
           "$S/agents/$t-task.md" "$HOME/.claude_router/agents/$t-task.md")
@@ -58,7 +62,7 @@ EOF
 `agents` folder: the "Claude" card reads `~/.claude/agents/`, and "Claude +
 GLM workers" reads `~/.claude_router/agents/`. So the five worker types go
 to both, and the two GLM types only to the second. The script prints
-`installed 16 files`.
+how many files it installed.
 
 The staged file is named `CLAUDE.md.install` because a real `CLAUDE.md`
 here would be auto-discovered as project context when an agent reads this

@@ -134,7 +134,7 @@ with a silent deviation is the failure.
 ## Report
 
 Final message in the shape of
-`.claude/skills/parallel-phase/handoff-template.md`, plus two sections,
+`~/.claude/skills/parallel-phase/handoff-template.md`, plus two sections,
 the Deviation ledger and then `## Decisions`:
 
     ## Deviation ledger

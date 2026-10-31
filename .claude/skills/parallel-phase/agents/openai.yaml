@@ -1,3 +1,0 @@
-interface:
-  display_name: "Parallel Phase"
-  short_description: "Fan out independent slices, merge to feature branch"

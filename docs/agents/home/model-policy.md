@@ -132,6 +132,13 @@ under `.scratch/handoffs/` the user can run elsewhere.
 
 ## Parallelism vs serial
 
+When you will have two writers running at once (independent slices:
+different kinds of work, mostly disjoint files), fan out with the
+`parallel-phase` skill. The session spawns a subagent to act as Delegator;
+on Claude Code that is a `general-task`. Without isolation, readers share
+the writers' index: a read-only agent sees your uncommitted edits and
+cannot tell them from a stray worker's.
+
 - **Implementation (`parallel-phase`):** parallel worktrees are the point —
   often faster _and_ better than one long chain. Cap around **3–5**
   workers. Every worker gets the fill your harness section names for its
@@ -590,9 +597,9 @@ jobs go to subagents at the review and design fills.
 
 `codex exec` is the cross-vendor review-lane reviewer `pre-merge-review` reaches
 for **first** when the binary is on `PATH` (see
-`.claude/skills/pre-merge-review/SKILL.md`) — its value is that it is not the
+`~/.claude/skills/pre-merge-review/SKILL.md`) — its value is that it is not the
 authoring vendor, so it is not agreeing with its own prose. For fan-out,
-`parallel-phase`’s Codex adapter (`.claude/skills/parallel-phase/adapters/codex.md`)
+`parallel-phase`’s Codex adapter (`~/.claude/skills/parallel-phase/adapters/codex.md`)
 gives each worker its own worktree cwd, one agent (or `codex exec` run) per
 slice, with the full slice brief in the prompt because workers have no
 sibling channel.
