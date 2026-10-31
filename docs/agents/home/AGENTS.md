@@ -149,6 +149,23 @@ depend on another's output into one Bash call (`cmd1; echo ===; cmd2`),
 bound each one's output, and send independent tool calls in one message.
 Decide what you need next before you call; then request all of it.
 
+A rewrite that changes a whole file's line endings makes `git diff
+--stat` show hundreds of changed lines for a small edit: a script that
+writes LF over one of the CRLF files (`git ls-files --eol | grep i/crlf`
+lists them), or a Windows editor saving over the `\\wsl.localhost\...`
+path as CRLF. Edit text files with the harness Edit tool, which
+preserves endings. After any scripted or generated write, read `git diff
+--stat` before committing: a line count near the file's length means
+endings flipped — confirm the real change with `git diff
+--ignore-cr-at-eol`, rewrite the file back to the endings HEAD has, then
+commit.
+
+When changing committed **generated** artifacts: regenerate from the
+committed sources with the pinned toolchain; the working tree must match
+`HEAD` (or you must document which side is wrong) before commit. For CI
+byte-compare gates, read a real CI run; do not predict from a local story
+about another OS.
+
 # Changing agent instructions
 
 In this section, agent instructions means `AGENTS.md` and `CLAUDE.md`
@@ -177,6 +194,26 @@ in a new session. On 2026-09-26 a review subagent received an
 directory, such as a worktree, was loaded from disk when a subagent read
 a file there; this was seen once.
 
+# This machine
+
+Commands run in bash on WSL (Ubuntu). In WSL, `/usr/local/bin` is the
+one directory on every process's PATH, so each tool is linked there:
+`node`, `npm`, `npx`, `corepack` and `pnpm` through
+`~/.local/node-default` (a symlink to an nvm version folder; nvm's
+default alias is `system`), and `go`, `gofmt`, `protoc` and
+`protoc-gen-go` straight to `~/.local/go/bin`, `~/.local/protoc/bin` and
+`~/go/bin`. `python` is `/usr/bin/python` from the apt package
+`python-is-python3`. So any shell finds them: login, interactive,
+`bash -c`, `wsl.exe -e`, `t3code.service` and the git hooks each of
+those runs.
+
+T3 reads PATH from `bash -ilc` once, when it starts, puts it in front of
+its own, and passes it to every Claude Code process it launches; Claude
+Code's Bash tool takes its PATH from that process. So after a change to
+`~/.profile`, `~/.bashrc` or the nvm default, restart T3
+(`systemctl --user restart t3code.service`) when `C:\Users\<user>\.local\bin\t3-safe-off.ps1 -Check -Json`
+says it is idle; until then its agents keep the PATH from T3's start.
+
 # Don't cut your own connection
 
 The user often reaches this machine from a phone: Tailscale on Windows
@@ -184,7 +221,8 @@ forwards to the t3 server in WSL on port 3773. These actions lock the
 phone out until someone is at the PC, so never run them. Say what the
 action would do, and give the user the command instead:
 
-- shutting down or restarting WSL (`wsl --shutdown`, `wsl --terminate`)
+- shutting down or restarting WSL (`wsl --shutdown`, `wsl --terminate`,
+  or `t3-safe-off.ps1` without `-Check`)
 - stopping Tailscale, or changing its `tailscale serve` setup
 - restarting, shutting down or signing out of Windows
 

@@ -53,12 +53,11 @@ feature is absent, the refs that could contain it are in
 
 ## CLI environment
 
-Commands run in bash on WSL (Ubuntu). Every bash process finds the
-project's tools without a login shell; setup and check:
-`docs/agents/known-traps.md` § Before running node / pnpm / test
-commands. The general shell and tool habits are global
-(`~/.claude/AGENTS.md` § Shell and tool habits, staged in
-`docs/agents/home/AGENTS.md`).
+The machine facts and the general shell and tool habits are global
+(`~/.claude/AGENTS.md` § This machine and § Shell and tool habits,
+staged in `docs/agents/home/AGENTS.md`). This repo's Node, pnpm, Go and
+protoc setup and its check: `docs/agents/known-traps.md` § Before
+running node / pnpm / test commands.
 
 ## The forked tab repo
 
