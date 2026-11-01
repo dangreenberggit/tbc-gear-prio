@@ -412,6 +412,6 @@ file contention, worker prompt. This file stays the chronological log.
 - 729 Simplify the gate-planner's rules: about 28 kB read per spawn, rules fixed by review rounds rather than test runs, split and next-chunk modes rarely used; do before 726 (owner decides scope and timing) 2026-10-28
 - 733 Stage-gate values file copies the global slice-model rule (Sonnet/Opus) and disagrees with model-policy § Workhorse jobs on the GLM card (instruction review of the pte rules split, F3) 2026-10-31
 - 734 GLM workers receive the owner's memory index (MEMORY.md reaches z-ai on every GLM spawn; proposed omitClaudeMd, untested) 2026-10-31
-- 735 Memory saves are refused on the Claude + GLM workers card (deny rule Edit(~/.claude/**) matches the memory symlink target; 12 refusals) 2026-10-31
+- 735 Memory saves are refused on the Claude + GLM workers card (deny rule Edit(~/.claude/**) matches the memory symlink target; 12 refusals) 2026-10-31; CLOSED 2026-10-31, the owner moved the memory folder into `~/.claude_router/projects/` and the plain card reaches it through a link; no rule or hook changed; GLM write gap stays in 736
 - 736 GLM workers can write some setup files (Write and Edit pass every rule and hook for `~/.claude_router/rules/**` and the project's `.claude/agents/`, `.claude/skills/`, `.claude/settings.json`; ticket 735 review 1, F6) 2026-10-31
 - 737 Setup repo's copy of the GLM card settings is out of date (lacks glm-log-guard, subagent-foreground-helpers and `~/pte-scratch`; `diff` against the live file) 2026-10-31

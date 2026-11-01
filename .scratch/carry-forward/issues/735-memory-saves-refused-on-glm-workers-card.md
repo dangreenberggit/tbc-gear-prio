@@ -1,8 +1,8 @@
-Status: blocked
+Status: closed
 Type: process
 Origin: .scratch/agent-reports/2026-10-31-general-task-memory-block-and-glm-memory.md (Q1; gitignored; main checkout only)
 Blocks: none
-Blocked by: owner approval of a harness setting change (agents cannot edit `~/.claude_router/settings.json`)
+Blocked by: none
 
 # Memory saves are refused on the Claude + GLM workers card
 
@@ -41,3 +41,35 @@ Needs the owner's approval: it is a harness setting.
 
 A memory save from this card succeeds, and GLM workers still cannot edit
 settings, hooks, skills, agent files or rule files.
+
+## Comments
+
+### 2026-10-31: closed after the owner moved the memory folder
+
+The owner applied the fix. The memory folder was moved into the GLM
+card's own folder, and the plain card now reaches it through a link.
+`ls -ld` shows
+`/home/daniel/.claude/projects/-home-daniel-Code-lulz-tbc-gear-prio/memory -> /home/daniel/.claude_router/projects/-home-daniel-Code-lulz-tbc-gear-prio/memory`
+(a link, dated Oct 31 21:18), and the `.claude_router` path is a real
+folder with 62 entries.
+
+After the move, a Write of a new memory file from the main session on
+the "Claude + GLM workers" card succeeded
+(`feedback-look-up-convention-before-decision.md`).
+
+No permission rule or hook changed. The fix, its tests and two reviews
+are in `.scratch/agent-reports/2026-10-31-general-task-ticket-735-fix.md`
+(gitignored, main checkout only).
+
+The other part of "Done when" (GLM workers cannot edit settings, hooks,
+skills, agent files or rule files) is only partly checked. Settings,
+hooks, skills and agent-folder paths stayed refused in the fix's probes.
+But review 1, finding F6, found that GLM workers can write
+`~/.claude_router/rules/**` and the project's `.claude/agents/`,
+`.claude/skills/` and `.claude/settings.json`. That gap existed before
+this ticket and is tracked in ticket 736. A real GLM worker check waits
+on ticket 734.
+
+Verified by: `ls -ld /home/daniel/.claude/projects/-home-daniel-Code-lulz-tbc-gear-prio/memory`
+(a link to the `.claude_router` path), and the fix report
+`.scratch/agent-reports/2026-10-31-general-task-ticket-735-fix.md`.
