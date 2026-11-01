@@ -1,0 +1,238 @@
+# Pre-merge review — fix/644-655-set-bonus-list
+
+Reviewed range: `ee69ae722241d87db1b0fce74c668d38aa80f6d2..1f979d3268d49f083ef79f3667fd9e7134246f30`
+
+Fork range, round 1: `119b9f676fd09622d1e81cea9ebcd190718ed13e..5b9182ed07f4cf296cc25d9b07c9424c9523f704`
+(`vendor/tbc-new-fork`, branch `fix/644-655-set-bonus-list`; commits
+3f2948ce1, fba7e1ad9, 5b9182ed0).
+
+Dispatch note, round 1:
+
+- Requested by the owner on 2026-11-01, replying "Sure" to
+  "Q-644-655-review: start the pre-merge review?".
+- The pair sits under `.scratch/wt-644-655` (the sandbox cannot write
+  `/home/daniel/Code/lulz/tbc-wt/`), so `pnpm wt:*` does not know it. Both
+  trees were clean at dispatch (`git status --short` empty in each).
+- Tooling check: `python scripts/check_merge_ready.py --product-files`
+  printed `data/sim-implemented-effects.json`, `data/wowsims-fork.lock.json`,
+  `docs/fork-provenance/engine.md`, `packages/core/test/fork-set-net.test.ts`
+  (rc=0), so the branch is mixed. The axes reviewed those four files and the
+  fork range above. The other changed files are tickets 644, 655 and 736 and
+  `.scratch/carry-forward/issues/NEXT`. They are not agent instructions, so
+  `instruction-review` has nothing to read there (as in
+  `docs/reviews/chore-733-gate-runs-dev-copy.md`); the Spec axis read the
+  tickets as the spec.
+- Not the small-change lane: `git diff --shortstat dev...HEAD` gave
+  `8 files changed, 390 insertions(+), 66 deletions(-)`, and two paths start
+  with `data/`.
+- `codex` is not on `PATH`. Four fresh `general-task` agents on Opus (review
+  lane) ran the adversarial axis, the domain axis, and the `code-review`
+  skill's Standards and Spec agents. Each was told it writes nothing.
+- Domain axis run: the diff decides which set-bonus piece counts a ranking
+  lists (game-domain content).
+- Wowsims-file check (`docs/fork-upstream-touchpoints.md` § How to reproduce
+  every number here): at fork `119b9f676` and at `5b9182ed0`,
+  `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M cec2a7b68 <tip>`
+  prints only `6 0 ui/app/SimTabsSection.tsx`, and `--name-status ... | cut -f1 | sort | uniq -c`
+  prints `237 A`, `1 M`. The same at both tips.
+
+## Adversarial
+
+- **A1 (loud failure, introduced) —
+  `vendor/tbc-new-fork/ui/features/upgrades/model/engine/rank.ts:3845`.**
+  `setBonusCountsInReach` rethrows `StopRefusedSim`, and nothing above it
+  (`buildSetBonuses`, awaited from `rankUpgrades` near :1560) catches it, so
+  a Stop pressed while the worn-set reads run makes the whole ranking reject
+  instead of returning the stopped result. Every other set-phase read
+  swallows a Stop (`rank.ts:1077`, `:1177`, `:1657`). Shown by a copy of
+  `fork-set-net.test.ts` that runs `STOP_SCENARIOS` with
+  `reportsSetBonuses: true` at every `stopDuringCall`: scenario 511-SR at
+  calls 4 and 5, and case 8 at calls 7 and 8, print
+  `THREW StopRefusedSim`; every other call gives the same ranking as a Stop
+  before the set phase. Probe and output (gitignored):
+  `.scratch/agent-reports/2026-11-01-review-644-655-probe/probe.test.ts` and
+  `out2.txt`; the reviewing session read `rank.ts:3796-3850` and `out2.txt`.
+  What the tab then shows: hypothesis, untested (probably its error state).
+- **A2 (missing test, introduced) — `packages/core/test/fork-set-net.test.ts`
+  (the fake runner near :291, the Stop suite near :5001) and
+  `worker_pool_sim_runner.test.ts`.** Only cases 644-A, 644-B and 644-C give
+  the fake runner `activeSetBonuses`; the production runner always has it
+  (`run.ts:65`, `:125`, per the axis). So the Stop tests and the 511 screen
+  tests run only the fallback path, and `WorkerPoolSimRunner.activeSetBonuses`
+  has no test. This is why A1 was not caught.
+- **A3 (visibly wrong result, rare, introduced) — `rank.ts`
+  `setBonusCountsInReach` (the `MetaRepairError` `continue` and the
+  read-failure `console.warn`, :3829-3850).** When the largest package fails
+  gem repair, or the read fails, that set falls back to trying every count,
+  which brings back the 644 symptom (for example a Thunderheart entry at 5)
+  with only a console warning. A smaller package that does repair would
+  still give the counts up to its size. How often a meta gem fails only at
+  the top count: hypothesis, untested. The Spec axis found the same (P3).
+- **A4 (other: spec gap, introduced) —
+  `vendor/tbc-new-fork/ui/features/upgrades/model/set_bonus_tip.ts`
+  `reachableLines` (:187-209).** Steps past the stop are filtered by
+  `stepEligible`, which compares against the item alone, but their printed
+  figure is against the stop's gear and has no noise check. A tie under the
+  strict best-stop rule prints "0.0 DPS more", and the doc comment's "a bonus
+  within the noise is never shown as a figure" (:181-182) is no longer true
+  for these lines.
+
+Checked and not defects (axis's sources): the sim builds each name as
+`"%s (%dpc)"` (`sim/core/item_sets.go:263`) and only at counts the set has a
+bonus at, so no set-name mismatch can arise; reading the largest package
+gives every count up to it; removing the marker entries keeps each row's
+`setContext` (`applySetContext`, `rank.ts:3389`) and the only other reader of
+`screened-out`, `screenedLine`, now reads `setScreen`; with the toggle on,
+Total = `row.deltaDps` + credit is unchanged and the past-stop lines sit
+after the Total; 644-C is not vacuous today (without the fake's
+`activeSetBonuses` it gives counts `[3,4,5,6]`); the four 511 cases still
+check the row parts. `pnpm -C <pair> exec vitest run packages/core/test/fork-set-net.test.ts`:
+100 passed; the fork's 4 changed test files: 66 passed (node v22.23.2).
+
+Unexamined: a live tab run; the PNGs. The axis also noted, unchecked, an
+older gap: with the toggle off, a future whose sim failed may be named
+nowhere. It predates this branch (hypothesis, untested).
+
+## Domain
+
+- **D1 (visibly wrong result, minor, introduced in 3f2948ce1 and 5b9182ed0)
+  — `rank.ts:3806-3846`.** The new rule takes the sim's active bonus names,
+  and `GetActiveSetBonusNames` (`sim/core/item_sets.go:258-266`) lists a
+  bonus even when the character lacks its required profession, while the
+  effect itself is skipped (`item_sets.go:210-213`). Burning Rage, Fel Skin
+  and Strength of the Clefthoof need a profession
+  (`sim/common/tbc/items_sets.go:116,233,247`), the tab does not model
+  professions (`engine/disclosure.ts:58`), and their items carry no
+  `requiredProfession` in `db.json`. If such a piece is in the pool and the
+  set screen keeps the set, the popover can print "Strength of the
+  Clefthoof 3pc too small to measure" for a bonus the sim never applies.
+  Whether these items reach a DPS pool and survive the screen: hypothesis,
+  untested. The number of sims does not change: these counts were tried
+  before the branch too.
+- D2 is a code-quality row (below).
+
+Facts checked and right (axis's sources): Thunderheart Harness (set 676,
+`sim/druid/item_sets.go:222-250`), Malorne Harness (640, `:77-110`),
+Crystalforge Battlegear (629) and Lightbringer Battlegear (680,
+`sim/paladin/item_sets.go:33-128`) have bonuses at 2 and 4 only; the eight
+Thunderheart ids in `fork-set-net.test.ts:43-52` are set 676; Gauntlets 29097,
+Breastplate 29096, Stag-Helm 29098, Greaves 29099 and Mantle 29100 of Malorne,
+so the case 1 line "4pc with Mantle, Breastplate and Greaves of Malorne" names
+the right pieces; 30990 is Lightbringer Breastplate (680); the name reaches
+`PlayerStats.sets` (`character.go:483`, `proto/api.proto`) and the regex
+`/ \((\d+)pc\)$/` matches it; the sim's 3-, 6- and 8-piece bonuses are read
+from the sim, so a 3pc-only set gets count 3 only; the popover text in
+`case1-built-1280.png` and `case2-built-on-1280.png` matches ticket 655.
+`docs/stage0-findings.md` says nothing on set-bonus piece counts.
+
+## Standards + Spec
+
+### Standards
+
+No hard violation. Checked and passing: each changed ported engine file's
+`sha256sum` matches its `docs/fork-provenance/engine.md` row, with a ticket
+644 note (the table diff is mostly column re-padding); the lock `commit` and
+`sim-implemented-effects.json` `forkCommit` both name `5b9182ed0`; no
+existing upstream file changed; the new method is an optional addition to the
+existing `SimRunner` port; the `sim-runner.ts` comment matches
+`item_sets.go:263`; "too small to measure"
+(`assets/locales/en/upgrades.json:104`) reads as plain player words.
+
+- **S1–S6:** code-quality rows (below).
+- **S7 (missing test, introduced) — `packages/core/test/fork-set-net.test.ts:5802-5810`.**
+  In 644-C, `for (const t of countsOf(ranking, 676)) expect([2, 4]).toContain(t)`
+  and the two loops after it pass with no check at all when the lists are
+  empty. The reviewing session read `:5780-5810`. It passes on the right
+  grounds today (see "Checked and not defects" under Adversarial), but a change that dropped every entry would
+  also pass it.
+
+### Spec
+
+Ticket 644's "Done when" and ticket 655's three checks are met for the tab
+with its usual runner: the marker is absent at `5b9182ed0` (`grep -c` gives
+0, 3 at `119b9f676`); the live recordings in `.scratch/tab-recordings-644/`
+hold only 2pc and 4pc entries; both 655 verify logs print `v22.23.2` and
+`rc=0`; all 6 capture manifests report `"outcome":"captured"`, `"errors":0`,
+and each `facts.json` shows the Total equal to the row's figure. No scope
+creep.
+
+- **P1 (other: rests on the session's reading, introduced) —
+  `set_bonus_tip.ts:187-209`, `set_bonus_labels.ts` `valueText`.** The
+  owner, 2026-11-01: "The wording isn't great. It could just show that the 4
+  piece is that amount (negative) but ehh okk / I do not like your wording
+  it's lame". The tab shows "11.5 DPS less" (`case1-built-1280.png`). The
+  choice of the toggle-off label and figure format is the session's rule in
+  ticket 655, not the owner's words. With the same words, the toggle-off
+  lines measure against the item alone and this line against the stop's gear
+  (`:206`, `f.stepGearDps - reference`), and nothing on screen says which.
+  The label also lists Breastplate of Malorne, which the 2pc stop already
+  counts.
+- **P2 (other: spec gap, before this branch) — `set_bonus_tip.ts:219`
+  (`noiseLines`).** It returns nothing when any other bonus of the set clears
+  the gate, so in a row with one bonus above the gate and one below, the one
+  below is still named nowhere. The test "names no bonus within the noise when
+  another bonus of the set clears the gate" (`set_bonus_tip.test.ts:247`) pins
+  this. The owner's "Case 2 a sounds fine" was about rows whose only future
+  bonus is below the gate. Before the branch no below-gate bonus was named in
+  any row, so this gap predates it.
+- **P3 (bookkeeping) — ticket 644, "A runner without `activeSetBonuses` (the
+  test fakes) gets the old behaviour."** Only the counts tried fall back; the
+  marker removal (`rank.ts:2165-2171`, read by the reviewing session) runs for
+  every runner. The behaviour half of this finding is A3.
+- **P4 (bookkeeping) — `.scratch/agent-reports/2026-11-01-verify-644.log`**
+  has no `rc=` line and no node version line, while
+  `2026-11-01-general-task-644-655.md:86` cites it as `rc=0`. Ticket 644 cites
+  only the vitest command.
+- **P5 (bookkeeping) — ticket 644, "`feral-p3-th-hands-legs` has no crossing
+  gate for Thunderheart at 3".** The new recording
+  (`.scratch/tab-recordings-644/feral-p3-th-hands-legs.json`) has no
+  `crossingGates` key at all (read by the reviewing session), so the sentence
+  is true but shows no gate of any kind.
+- **B1 (bookkeeping, found by the reviewing session) —
+  `.scratch/carry-forward/map.md`** had no line for ticket 736, which this
+  branch filed (`grep -c '^- 736' .scratch/carry-forward/map.md` gave 0).
+
+## Code quality
+
+| ID  | Where                                                                               | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| --- | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S1  | `rank.ts:3800`                                                                      | Comment says "on the gear that adds that package" with no package named before it, and "so no set name is matched" does not say why that matters (writing style, unclear back-reference).                                                                                                                                                                                                                                                                                                                            |
+| S2  | `set_bonus_tip.ts:178-186`                                                          | The `reachableLines` doc comment has a 40-word sentence with two nested qualifiers (writing style).                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| S3  | `set-value.ts:50`, `set_bonus_tip.test.ts:65`, `docs/fork-provenance/engine.md:150` | "carry" / "carries", a word the style rules list for replacement ("have" or "contain").                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| S4  | `rank.ts:2028` and `:3822`; `:1587` and `:1604`                                     | Possible Duplicated Code: the same reach loop (`t` from `max(2, worn+1)` while `selectFor(setId, t).ok`), and the same `setBonuses.length > 0 \|\| setBonusResult.markedSetIds.length > 0` test, each twice.                                                                                                                                                                                                                                                                                                         |
+| S5  | `rank.ts:3840`, `worker_pool_sim_runner.ts:235`                                     | Possible Primitive Obsession: the engine parses piece counts out of display strings that the adapter could return as numbers; the test fake rebuilds the string only to have it parsed back.                                                                                                                                                                                                                                                                                                                         |
+| S6  | `rank.ts` `setBonusCountsInReach` (7 parameters)                                    | Possible Data Clumps: `equipment`, `gems` and `composeFor` travel together here and at other build sites (`rank.ts:2060`, `:2217`).                                                                                                                                                                                                                                                                                                                                                                                  |
+| D2  | `set_bonus_tip.test.ts:254,261-263`                                                 | New fixture names Lightbringer Battlegear 4pc pieces with ids 30987, 30995, 30998 as "Lightbringer Chestguard / Legplates / Shoulderplates"; in `db.json` those ids are Faceguard, Legguards and Shoulderguards of set 679 (Lightbringer Armor), and the ret pieces are 30990, 30993, 30997. Older lines have the same kind of mistake: `:44` (30987 "Lightbringer Chestguard") and `:108`, `:306` (set id 627 named "Crystalforge Battlegear"; 627 is Crystalforge Raiment, Battlegear is 629). No output is wrong. |
+
+## Summary
+
+Round 1 found one loud failure (A1), six other findings this branch
+introduced (A2, A3, A4, D1, P1, S7), one gap from before the branch (P2,
+deferred to ticket 737), seven code-quality rows, and five bookkeeping items.
+
+**Blocking the merge** (introduced by this branch, no owner deferral; no
+Disposition row yet): A1, A2, A3, A4, D1, P1, S7. Each needs a fix on this
+branch or the owner's leave to defer it with a ticket. P1 needs an owner
+ruling on the case 1 line's wording before it can be fixed.
+
+**Code quality:** S1–S6 and D2 go to one fresh agent in one pass before round
+2; each then gets a Disposition row.
+
+**Bookkeeping applied in this commit:** P3 and P5 (ticket 644 text), B1 (map
+lines for 736 and 737). P4 is `wontfix` (reason in its row).
+
+Round 2 has not run: no fix commit exists yet, and this session was told to
+change no code.
+
+Tickets: filed 2 (736, 737), closed 2 (644, 655), by the two commands in the
+`pre-merge-review` skill step 3 at this commit.
+
+## Disposition
+
+| ID  | Axis | Disposition | Ticket / note                                                                                                                                                                          |
+| --- | ---- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P2  | Spec | defer       | `.scratch/carry-forward/issues/737-popover-names-no-below-gate-bonus-beside-one-above.md` — predates the branch; needs an owner ruling on mixed rows                                   |
+| P3  | Spec | fixed       | Ticket 644 now says only the gain side's counts fall back and the marker entry is gone for every runner                                                                                |
+| P4  | Spec | wontfix     | The 655 verify logs (`2026-11-01-verify-655-case1.log`, `-case2.log`) print `v22.23.2` and `rc=0` at later re-pins that include fork `3f2948ce1`; ticket 644 does not cite the 644 log |
+| P5  | Spec | fixed       | Ticket 644 now says the new recording has no `crossingGates` key at all                                                                                                                |
+| B1  | Spec | fixed       | Map lines added for 736 and 737                                                                                                                                                        |

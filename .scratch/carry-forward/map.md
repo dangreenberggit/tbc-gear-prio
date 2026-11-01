@@ -413,3 +413,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 733 The merge gate runs the branch's own copy of check_merge_ready.py, so a branch can edit TOOLING_PATHS and pass its own gate (pre-merge review chore/731-tooling-review-exemption, A3) 2026-10-29
 - 734 The pre-merge-review skill lists product files with the branch's own copy of check_merge_ready.py, so a branch that widens TOOLING_PATHS skips its product review and is then refused at the door (pre-merge review chore/733-gate-runs-dev-copy, P2) 2026-10-29
 - 735 The pre-merge-review skill asks for one approval of agent-file edits with no reviewed exact text, which the global rule "Changing agent instructions" does not accept (review chore/changing-agent-instructions-rule, finding 3) 2026-10-30
+- 736 The tab recorder stops re-recording feral-p5-th4pc with "gear not loaded", so ticket 644's fix is unchecked on the fixture where 644 was seen (branch fix/644-655-set-bonus-list) 2026-11-01
+- 737 The set-bonus popover names no below-gate bonus when another bonus of the same set clears the gate (pre-merge review fix/644-655-set-bonus-list, P2) 2026-11-01

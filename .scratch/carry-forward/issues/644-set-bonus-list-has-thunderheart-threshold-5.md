@@ -68,8 +68,12 @@ from the sim's `computeStats` `PlayerStats.sets`, names such as
 The gain side, the set screen's reach and the crossing gate then try only
 those counts. A set with no bonus in reach, or one the screen dropped, gets no
 `setBonuses` entry; its rows keep their `setContext` through an internal list,
-and the popover reads a dropped set from `ranking.setScreen`. A runner without
-`activeSetBonuses` (the test fakes) gets the old behaviour. The frozen
+and the popover reads a dropped set from `ranking.setScreen`. For a runner
+without `activeSetBonuses` (the test fakes), and for a set whose read fails or
+whose largest package fails gem repair, the gain side tries every count, as
+before (the doc comment on `setBonusCountsInReach`); the marker entry is gone for every
+runner (`rank.ts` `setBonusCountsInReach` and the `markedSetIds` branch; added
+by the pre-merge review, docs/reviews/fix-644-655-set-bonus-list.md, P3). The frozen
 recordings under `packages/core/test/fixtures/tab-recordings/` were made at
 `b908771dd` and still hold the old entries; they are engine test data, not
 rankings the tab shows.
@@ -83,7 +87,9 @@ Live check, 2026-11-01: `pnpm tab-fixtures:record` at fork `3f2948ce1` for
 `.scratch/tab-recordings-644/`). Neither has an entry for Thunderheart,
 Malorne, Lightbringer or Crystalforge at a count other than 2 or 4, and
 `feral-p3-th-hands-legs` has no crossing gate for Thunderheart at 3 (the old
-recording has one). The `feral-p5-th4pc` re-record did not run: the recorder
+recording has one; the new recording has no `crossingGates` key at all, so
+this shows no gate of any kind, not a gate at 2 or 4 only; added by the
+pre-merge review, P5). The `feral-p5-th4pc` re-record did not run: the recorder
 stopped with "gear not loaded; missing Signet of Primal Wrath, Berserker's
 Call" before any sim (cause untested).
 
