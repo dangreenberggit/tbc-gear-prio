@@ -19,7 +19,8 @@ You do one planned piece of work for an orchestrating agent, which reviews your 
   or script write to a
   tracked file; anything that could reach secrets, session transcripts
   (`~/.claude/projects/`), background agent output files
-  (`/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or `~/.t3`; or more
+  (`/tmp/claude-*/**/tasks/*.output`), `~/.claude*`, or `~/.t3` other
+  than the git checkouts in `~/.t3/worktrees/`; or more
   than 3 files and 150 changed lines. The caller respawns it on
   `general-task`.
 
