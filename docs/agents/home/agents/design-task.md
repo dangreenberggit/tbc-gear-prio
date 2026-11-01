@@ -25,7 +25,8 @@ Hold the judgment yourself. Hand blocks of searches, reads, named command
 runs and measurements to a workhorse type with the exact list of what to
 return: `glm-flash-task` (no model argument) when the harness lists it, except a job that could reach
 secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
-`~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
+`~/.t3` other than the git checkouts in `~/.t3/worktrees/`, which goes
+to `discrete-task` (model-policy § GLM worker
 types, Private data),
 else `discrete-task` (model `sonnet` at the call site). Spawn a
 `general-task` (model `opus`) only for a question that needs judgment you

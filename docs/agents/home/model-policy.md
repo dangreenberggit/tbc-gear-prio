@@ -552,7 +552,10 @@ hits a wall does not move to them (§ Four lanes).
   `docs/agents/home/AGENTS.md`). Give a GLM type no job that could reach
   secrets, session logs (`~/.claude/projects/`,
   `/tmp/claude-*/**/tasks/*.output`), or the config folders `~/.claude*`
-  and `~/.t3`. A search, read, run or measurement of that kind goes to
+  and `~/.t3` (a git checkout in `~/.t3/worktrees/` is not a config
+  folder: a job there follows the rules of any other checkout, the
+  repo's own private-data rules included). A search, read, run or
+  measurement of that kind goes to
   `discrete-task` (`model: "sonnet"`); any other such job goes to its
   Claude counterpart in § Workhorse jobs. The Sonnet types on this card
   take only a job z-ai must not see, or a retry when a GLM type hits a
