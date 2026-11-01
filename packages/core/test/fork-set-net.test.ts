@@ -5905,4 +5905,40 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
       warn.mockRestore();
     }
   });
+
+  it("644-R: a set whose largest package fails gem repair gets no entry and no count tried, and a warning names it", async () => {
+    // Scenario kind: each piece's single can switch the meta gem on, the
+    // package's gear cannot. Example: Malorne Harness 640 over gemless gear.
+    // The worn Gloves of Dexterous Manipulation have two sockets, so the
+    // Stag-Helm's single has three to recolour for its meta; the package puts
+    // the socketless Gauntlets of Malorne in their place and leaves only the
+    // helm's own, which is too few (as 512-C finds for the Thunderheart Cover).
+    const GLOVES_TWO_SOCKETS = 28506;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const { ranking } = await runScenario({
+        worn: wornGear({ hands: GLOVES_TWO_SOCKETS }),
+        pool: [
+          { itemId: MALORNE.head, slot: "head" },
+          { itemId: MALORNE.hands, slot: "hands" },
+        ],
+        measureBrokenSetValue: true,
+        reportsSetBonuses: true,
+      });
+      for (const id of [MALORNE.head, MALORNE.hands]) {
+        expect(thRow(ranking, id).setContext?.setId).toBe(640);
+      }
+      expect(countsOf(ranking, 640)).toEqual([]);
+      expect(futureCountsOf(ranking, 640)).toEqual([]);
+      expect(
+        warn.mock.calls.some(([line]) =>
+          String(line).includes(
+            "set 640: its bonus counts were not read, the package's gem repair failed"
+          )
+        )
+      ).toBe(true);
+    } finally {
+      warn.mockRestore();
+    }
+  });
 });
