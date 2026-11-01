@@ -1,8 +1,8 @@
-Status: blocked
+Status: wontfix
 Type: process
 Origin: .scratch/agent-reports/2026-10-31-general-task-memory-block-and-glm-memory.md (Q2; gitignored; main checkout only)
 Blocks: none
-Blocked by: owner approval of the exact agent-definition text
+Blocked by: none
 
 # GLM workers receive the owner's memory index
 
@@ -34,3 +34,22 @@ exact text.
 
 A re-run of the same yes/no test produces a transcript with no
 "user's auto-memory" line, and GLM workers still get the rules they need.
+
+## Closed 2026-11-01: wontfix
+
+The owner rejected the proposed fix on 2026-11-01: "Omitclaudemd sounds
+dumb as if I would want to prevent other models from seeing agent MD
+files, which afaik are not model specific." Earlier, on 2026-10-31: "I'm
+not obsessed with blocking glm models from seeing mere memory notes".
+
+The usual practice is that instruction files go to whatever model runs
+(agents.md calls AGENTS.md "a README for agents"). The controls are the
+choice of provider and keeping secrets out of those files and out of
+memory; global `AGENTS.md` § Secrets and GLM workers already requires
+the second. No documented setting drops only auto memory for one
+subagent: `omitClaudeMd` drops every CLAUDE.md level
+(code.claude.com/docs/en/sub-agents.md "What loads at startup"), and
+`autoMemoryEnabled` turns memory off for the whole session. Claude Code
+2.1.309 still sends `MEMORY.md` to subagents against those docs. Research:
+.scratch/agent-reports/2026-11-01-general-task-glm-context-convention.md
+(gitignored; main checkout only).
