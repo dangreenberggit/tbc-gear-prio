@@ -415,3 +415,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 735 The pre-merge-review skill asks for one approval of agent-file edits with no reviewed exact text, which the global rule "Changing agent instructions" does not accept (review chore/changing-agent-instructions-rule, finding 3) 2026-10-30
 - 736 The tab recorder stops re-recording feral-p5-th4pc with "gear not loaded", so ticket 644's fix is unchecked on the fixture where 644 was seen (branch fix/644-655-set-bonus-list) 2026-11-01
 - 737 The set-bonus popover names no below-gate bonus when another bonus of the same set clears the gate (pre-merge review fix/644-655-set-bonus-list, P2) 2026-11-01
+- 738 The tab can list a profession set bonus (Burning Rage, Fel Skin, Strength of the Clefthoof) that the sim never applies (pre-merge review fix/644-655-set-bonus-list, D1) 2026-11-01
+- 739 The shared ranking test fixture names item 30989 and set 627 wrongly (fix pass after review fix/644-655-set-bonus-list, D2) 2026-11-01
