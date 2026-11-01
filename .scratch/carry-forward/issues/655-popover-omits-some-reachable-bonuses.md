@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, follow-on of 336 (scope bucket for the orchestrator to set)
 Type: bug
 Origin: pre-merge review of feat/tab-set-bonus (docs/reviews/feat-tab-set-bonus.md, findings A1 and P1), 2026-10-15
@@ -112,12 +112,21 @@ the tab's own functions, not from a rendered page:
   Lightbringer Battlegear 4pc         too small to measure
 ```
 
-### Still open
+### Captures and close
 
-Check 3 of "What would close this" is not met. The `pnpm tab-review` capture
-did not run in the build session: its sandbox refuses Unix-socket listens, so
-`npx tsx vite.build-workers.mts` failed with `listen EPERM` and Chromium
-aborted with `process_singleton_posix.cc:292 ... socket() failed: Operation
-not permitted`. The manifests are ready in the pair:
-`.scratch/655-snapshots/work/case1-built.manifest.json` and
-`case2-built.manifest.json` (widths 1280 and 375).
+Check 3 is met. `pnpm tab-review` captured each entry in its own run (a fresh
+browser profile, because the Set potential setting persists between entries),
+from fork 5b9182ed0, at 1280 and 375 px: 29097 on `feral-p3-th-hands-legs`
+with the toggle on, and 30990 on `ret-p3-p2` with the toggle off and on. Each
+run reported `"outcome":"captured","errors":0`, and each `facts.json` shows
+the toggle state named and the popover text quoted above. PNGs (gitignored):
+`.scratch/655-snapshots/case1-built-{1280,375}.png` and
+`case2-built-{off,on}-{1280,375}.png`. Manifests and logs:
+`.scratch/655-snapshots/work/built-runs/`. This sandbox forbids Unix sockets,
+so the runs used the two stand-ins the 2026-11-01 snapshot run used:
+`PATH=/tmp/claude-1000/shim:$PATH` (runs `npx tsx X` as `node --import tsx X`)
+and `PLAYWRIGHT_BROWSERS_PATH=/tmp/claude-1000/pwb` (runs Playwright's
+headless shell). Neither is committed.
+
+Verified by: `tbc-new-fork@5b9182ed0` and `tbc-gear-prio@10866ee1`, with
+`pnpm verify` rc=0 and the captures above.
