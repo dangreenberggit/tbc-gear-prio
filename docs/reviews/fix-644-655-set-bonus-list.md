@@ -204,6 +204,111 @@ creep.
 | S6  | `rank.ts` `setBonusCountsInReach` (7 parameters)                                    | Possible Data Clumps: `equipment`, `gems` and `composeFor` travel together here and at other build sites (`rank.ts:2060`, `:2217`).                                                                                                                                                                                                                                                                                                                                                                                  |
 | D2  | `set_bonus_tip.test.ts:254,261-263`                                                 | New fixture names Lightbringer Battlegear 4pc pieces with ids 30987, 30995, 30998 as "Lightbringer Chestguard / Legplates / Shoulderplates"; in `db.json` those ids are Faceguard, Legguards and Shoulderguards of set 679 (Lightbringer Armor), and the ret pieces are 30990, 30993, 30997. Older lines have the same kind of mistake: `:44` (30987 "Lightbringer Chestguard") and `:108`, `:306` (set id 627 named "Crystalforge Battlegear"; 627 is Crystalforge Raiment, Battlegear is 629). No output is wrong. |
 
+## Focused check (round 2)
+
+Reviewed range: `1f979d3268d49f083ef79f3667fd9e7134246f30..df1f9838ab4953e7c22f9d702aa41b260f5c585f`
+
+Fork range, round 2: `5b9182ed07f4cf296cc25d9b07c9424c9523f704..2ab56cc0b23ffdb103636e564e04fc74601beff0`
+(21d36b7fc, 95b995ec1, f1d8b4e65, 7be7e3825, 7dba300e7, 2ab56cc0b).
+
+Dispatch note, round 2: `codex` is not on `PATH`; one fresh `general-task`
+agent on Opus (review lane) ran the four checks and was told it writes
+nothing. It made its mutation runs in a copy of the pair under `$TMPDIR`
+(log: `/tmp/claude-1000/r2mut/result.txt`, not kept). `git status --short`
+was empty in both trees before and after. The dispatching agent re-read the
+lines behind R2-1 to R2-3 and opened `.scratch/655-snapshots/case1-fixpass-1280.png`.
+
+Conditions, tested by the dispatching agent before dispatch:
+
+1. Holds, settled from this file, as in
+   `docs/reviews/chore-729-test-result.md`. No commit message in either range
+   names a finding ID or has a body (`git log --format=%B`); the Disposition
+   rows name each fix commit by SHA and give its findings. 73532cca mixes the
+   re-pin with the A1, A2, A3 and S7 tests in `fork-set-net.test.ts`; every
+   other file it changes is under `data/` or `docs/`. c600493a is a re-pin
+   plus S3 in `docs/fork-provenance/engine.md`. df1f9838 changes this file,
+   tickets 644, 738 and 739, `NEXT` and `map.md` (ticket filing).
+2. Holds. The changed non-test lines are `rank.ts` `:1587`, `:1604`, the
+   reach loop near `:2005-2040` and `setBonusCountsInReach` (A1, A3, S1, S4);
+   `set-value.ts:50` (S3); `set_bonus_tip.ts` `reachableLines` with its
+   `TipEntry` flags and import (A4, P1, S2); `set_bonus_labels.ts`
+   `valueText` (A4, P1).
+3. Holds. At fork `2ab56cc0b`,
+   `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M cec2a7b68 HEAD`
+   prints only `6 0 ui/app/SimTabsSection.tsx`, and `--name-status ... | cut -f1 | sort | uniq -c`
+   prints `237 A`, `1 M`: the same as round 1.
+
+The four checks (agent's results):
+
+1. **Pass.** As above; also the lock `commit` and `forkCommit` in
+   `data/sim-implemented-effects.json` both name `2ab56cc0b`, and
+   `python3 -I scripts/check_engine_port_drift.py` gives rc 0, "36 ported
+   files match engine.md".
+2. **Pass**, with R2-2 and R2-3. A1: a refused read gives the set an empty
+   count set, `buildSetBonuses` returns, and `rankUpgrades` sets `aborted`
+   and replaces the set phase with `emptySetPhase()` (`rank.ts:1659-1669`).
+   S4: `setBonuses` is reassigned only at `rank.ts:1667`, after both uses of
+   `hasSetContext`; `packagesInReach` walks the same counts as the old loops.
+   A4: `clearsSameGearGate` is `dps > max(floor, 2·se)`, and each
+   `stepGearSe` already includes the baseline's error, so the code comment's
+   "counts the baseline's error twice" is true. P1: only lines with
+   `againstStop` (toggle on, past the stop) are signed; the label's piece
+   list did not change; the capture shows "-11.5". S5 and S6: both `wontfix`
+   reasons hold (the engine filters by whole names, `wornNames.has(name)`;
+   `measureSetSteps` and `packageAt` predate the branch and take the same
+   three values).
+3. **Pass, except R2-1 and R2-4.** With each fix reverted in the copy:
+   rethrowing `StopRefusedSim` fails 644-S and both 533-S/W cases; dropping
+   `out.set` after a failed read fails 644-D; dropping every reachable count
+   fails 644-C; the engine ignoring `activeSetBonuses` fails 511-SD, 644-S
+   and 644-A to 644-D; each of the two runner mutations fails its runner
+   test; removing the noise gate fails 2 tip tests; dropping `againstStop`
+   fails 4 tests; adding `againstStop` to toggle-off lines fails 7 tests.
+4. **Pass.** Main `vitest run packages/core/test/fork-set-net.test.ts`: 102
+   passed, rc 0, node v22.23.2. Fork vitest on
+   `worker_pool_sim_runner.test.ts`, `set_bonus_tip.test.ts`,
+   `set_bonus_labels.test.ts`: 61 passed, rc 0. Fork `type-check`: rc 0.
+
+Round 2 findings:
+
+- **R2-1 (missing test) — fork `set_bonus_tip.test.ts:304`.** The test
+  "compares the gap with twice the two step gears' standard errors added in
+  quadrature" still passes when the gate uses only the step's own error: with
+  both errors at 6, one error already hides the 10.5 gap (2 × 6 = 12). The
+  dispatching agent read `:304-313`. Not on screen, not the pool, not a gate.
+- **R2-2 (code quality, wrong comment) — fork `rank.ts:3818`.** The
+  `setBonusCountsInReach` doc comment says "the caller drops the set phase";
+  its caller is `buildSetBonuses`, which has no abort check. `rankUpgrades`
+  drops it (`rank.ts:1659-1669`). Not on screen, not the pool, not a gate.
+- **R2-3 (scope, undocumented) — fork `rank.ts:2490`.** The empty count set
+  that A3's fix writes also makes the crossing gate skip that set
+  (`bonusCounts.get(setId)?.has(worn + 1) === false`); before the fix pass a
+  failed read left no map entry and the gate was measured. This fits the
+  owner's "failed check → no set entry", but neither the doc comment
+  (`rank.ts:3815-3820`) nor the ticket 644 note says it. Whether the tab
+  shows anything different: hypothesis, untested (the gain side has no
+  bonus for that set, so the row probably gets no set context at all,
+  `rank.ts:3410-3411`). Rare path (failed read or failed gem repair).
+- **R2-4 (missing test, already in the A3 row) — fork `rank.ts:3843-3848`.**
+  Removing `out.set` after a gem-repair failure leaves 51 of 51 tests
+  passing. The row's reason, "the harness cannot make repair fail", is
+  hypothesis, untested. Not on screen in the test run; on the live path it
+  decides whether a set whose repair fails lists counts.
+- **R2-5 (code quality, unclear comment; found by the dispatching agent) —
+  fork `rank.ts:3809`.** "`largestPackage` gives the pieces that fill the set
+  to that most." is not plain English ("to that most"). Not on screen, not
+  the pool, not a gate.
+- **B2 (bookkeeping).** The fix commits name no finding IDs (condition 1
+  above); the code-quality commits 7be7e3825, 7dba300e7 and 2ab56cc0b do not
+  name their `## Code quality` row IDs as the skill asks. Proposed
+  `wontfix`: rewording them would change every fork SHA that the lock and
+  the rows name, and the rows already settle the mapping.
+
+Outcome: the skill's "Round limit" stops the review here, because round 2
+reported findings other than bookkeeping (R2-1 to R2-5). No
+`## Disposition (round 2)` table is written. The owner decides what happens
+next.
+
 ## Summary
 
 Round 1 found one loud failure (A1), six other findings this branch
@@ -226,6 +331,14 @@ change no code.
 
 Tickets: filed 2 (736, 737), closed 2 (644, 655), by the two commands in the
 `pre-merge-review` skill step 3 at this commit.
+
+**Round 2** (focused check, section above): all four checks pass; every
+round 1 fix does what its finding asks, and the S5 and S6 `wontfix` reasons
+hold. It found two missing tests (R2-1, R2-4), two comment problems (R2-2,
+R2-5) and one undocumented side effect of the A3 fix on a rare path (R2-3).
+None is a silent wrong result or a loud failure. Under the skill's round
+limit the review stops: the branch is not merge-ready until the owner
+rules on R2-1 to R2-5 (fix, defer with a ticket, or drop).
 
 ## Disposition
 
