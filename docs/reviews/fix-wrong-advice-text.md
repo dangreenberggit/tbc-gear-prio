@@ -2,6 +2,11 @@
 
 Reviewed range: `b24a4228705bd681a65a1b97f4a0d1fa01fc6073..d7bb429347f8c40b807d0659728714a34edfff90`
 
+Reviewed range: `d7bb429347f8c40b807d0659728714a34edfff90..4421129b5c040a02cb0476af63555808c5cb323c`
+
+Fork range, round 2: `8a58f4af0084a81a326c09333b43e14b5770c6ea..e3dbf38fa07d224915f0d404b880cf692e4b3bfb`
+(commits dd137de96, c06b10b3f, d016093bd, e3dbf38fa).
+
 Fork range, round 1: `05da8b9ab5cecaaf323f365f7fa9be25c98c24c7..8a58f4af0084a81a326c09333b43e14b5770c6ea`
 (`vendor/tbc-new-fork`, branch `fix/wrong-advice-text`; commits 10e2d0f98,
 e707b1403, 8a58f4af0).
@@ -220,6 +225,12 @@ Ticket counts at round 1 (not final; round 2 is still to run): filed 2
 (745, 746), closed 3 (618, 625, 705), by the two commands in the
 `pre-merge-review` skill step 3.
 
+Round 2 (2026-11-02): the round-1 fixes are correct and their tests pass,
+but the focused check found two open code-quality findings in the fix
+lines (R2-CQ6, R2-CQ7 under `## Focused check (round 2)`), so the review
+stops there for the owner's decision. Ticket counts at round 2 by the
+same commands: filed 3 (745, 746, 747), closed 3 (618, 625, 705).
+
 ## Disposition
 
 | ID  | Axis         | Disposition | Ticket / note                                                                                                                                                                                                                                        |
@@ -245,3 +256,99 @@ Ticket counts at round 1 (not final; round 2 is still to run): filed 2
 | CQ3 | Code quality | fixed       | Fork d016093bd: `shown_figure.ts` exports `tenthsOf`; `shownTenths` and `set_bonus_tip.ts` use it.                                                                                                                                                   |
 | CQ4 | Code quality | fixed       | Fork e3dbf38fa: `PaneRows.emptyReason` (one of five values, decided in `paneRows` in the order the pane read the flags) replaces the four flags; `ResultsPane.tsx` maps it to the same strings.                                                      |
 | CQ5 | Code quality | fixed       | 443f3e79: the `wornWithMetaOff` comment says the repair puts Rigid in.                                                                                                                                                                               |
+
+## Focused check (round 2)
+
+Main range `d7bb4293..4421129b`; fork range `8a58f4af0..e3dbf38fa`
+(`vendor/tbc-new-fork`, branch `fix/wrong-advice-text`). The branch moves
+the fork pin (`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json`
+rc=1), so the fork log was read.
+
+Dispatch note, round 2: `codex` is not on `PATH`; one fresh `general-task`
+agent on Opus (review lane) ran the four checks, told it writes nothing.
+The dispatching agent read the three conditions before dispatch and
+proceeded although condition 1 does not hold as written (below), because
+the Disposition rows of round 1 name the commit for every finding; the
+user can rule otherwise.
+
+Results:
+
+- **Condition 1: fails as written (bookkeeping).** Five fix commits name
+  no finding ID in their messages: main c9141cc9 (A2); fork dd137de96
+  (A1), c06b10b3f (CQ1, CQ2), d016093bd (CQ3), e3dbf38fa (CQ4). Only the
+  round-1 Disposition table links them. 443f3e79 is the re-pin and also
+  changes the CQ5 test comment, which it names. 4421129b files ticket 747,
+  which no Disposition row links; 747 says it is not a review finding and
+  was there before this branch (`schemas/upgrades.schema.json` at fork
+  `05da8b9ab` has no `tip_too_small`). 7cce2598 changes only this file
+  and tickets its rows link.
+- **Condition 2: one change outside a cited place.** Fork `rank.ts:1186-1189`
+  at `e3dbf38fa` (the set-version hit read) now calls `hitPercentOf`; CQ1
+  cites only `:848-872` and `:1091-1111`. Same error text, same `catch`.
+  The CQ1 row already says "all three hit reads share `hitPercentOf`".
+- **Condition 3: holds.** At fork `e3dbf38fa`,
+  `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M cec2a7b68 e3dbf38fa`
+  prints only `6 0 ui/app/SimTabsSection.tsx`, and `--name-status ... | cut -f1 | sort | uniq -c`
+  prints `239 A`, `1 M`: the same as round 1 at `8a58f4af0`.
+- **Check 2 (only what each finding asks): pass**, except the third
+  hit-read site above. CQ1, CQ2 and CQ4 change no behaviour: `inactiveMeta`
+  (`meta-repair.ts:207`) keeps the same truthy gems in the same order as
+  the removed `wornMetaInactive`; the shared `hitCapReadFailed`
+  (`rank.ts:847-856`) adds the same single note for the worn-gear read,
+  which runs first.
+- **CQ4 claim: confirmed.** The no-source and already-worn cases can both
+  hold (`results_view.ts:123-127` at `e3dbf38fa`); the agent built one
+  (BiS only, owned BiS helm from Zul'Aman, unowned BiS helm from Black
+  Temple, Black Temple hidden) and got `'no-source-row'`. For every
+  combination of the four old flags, the new order shows the string the
+  old ternary showed (`ResultsPane.tsx:41-47` at `8a58f4af0`). Round 1's
+  "cannot be true together" in CQ4 was wrong.
+- **CQ1/CQ2 provenance: confirmed.** The sha256 of `rank.ts` and
+  `meta-repair.ts` at `e3dbf38fa` each appear once in
+  `docs/fork-provenance/engine.md`; the old hashes appear 0 times; other
+  rows changed only in column padding. The lock `commit` and
+  `sim-implemented-effects.json` `forkCommit` both read `e3dbf38fa`.
+- **Check 3 (tests assert their findings): pass.** With the A1 fix
+  reverted in a scratch copy, the new `set_bonus_tip` test failed
+  (`expected 2.96 to be 2.9`, rc=1). With the worn budget forced to
+  `remaining: 0`, W5 failed and W1 to W4 passed, so W5 catches the bug A2
+  described.
+- **Check 4 (touched tests pass): pass.** Node v22.23.2. Fork
+  `node node_modules/vitest/vitest.mjs run ui/features/upgrades`: 65
+  files, 743 passed, rc=0. Main `fork-meta-repair.test.ts` and
+  `wowsims-fork-parity.test.ts` (E-W3): 36 passed, rc=0. Fork `tsc
+--noEmit` rc=0; `oxlint --max-warnings 0` on the 9 changed fork files
+  rc=0.
+
+Findings of round 2 that are not bookkeeping (still open; no
+Disposition row yet):
+
+- **R2-CQ6 (code quality).** Fork `ui/features/upgrades/model/set_bonus_tip.ts`
+  at `e3dbf38fa` fails the fork's formatter: a double blank line at
+  `:80-81` (left when d016093bd removed `tenths`), and the `line(...)`
+  call at `:285-288` that oxfmt joins to one line after dd137de96. The
+  file was clean at `8a58f4af0`. Re-run: from inside the fork,
+  `git show e3dbf38fa:ui/features/upgrades/model/set_bonus_tip.ts | node_modules/.bin/oxfmt --stdin-filepath=ui/features/upgrades/model/set_bonus_tip.ts | diff <(git show e3dbf38fa:ui/features/upgrades/model/set_bonus_tip.ts) -`
+  (rc=1 at `e3dbf38fa`, rc=0 at `8a58f4af0`). Fix: run `oxfmt` on the
+  file in the fork, commit, re-pin.
+- **R2-CQ7 (test coverage).** No test covers the state where the
+  no-source and already-worn cases both hold, which the order in
+  `paneRows` (`results_view.ts:125-133`) decides. Several CQ4 assertions
+  are `.not.toBe(...)` where the exact reason is known, for example
+  `results_view.test.ts:300` asserts `.not.toBe('no-bis-list-row')` right
+  after `.toBe('owned-bis-row')`, and the `.not.toBe('owned-bis-row')`
+  lines at `:268-273` would still pass if the owned case were hidden
+  behind the no-source text. Fix: one test for the owned-plus-hidden-source
+  case expecting `'no-source-row'`, and exact expected reasons in place
+  of the `.not.toBe` lines.
+
+Bookkeeping found in round 2: B2, fix commits without finding IDs
+(condition 1 above; the fork is unpushed, `pushed: false`, so rewording
+is possible but moves every fork sha and needs another re-pin); B3,
+ticket 747 is not linked from this file (it is recorded here now).
+
+Outcome: round 2 reports two findings that are not bookkeeping, so by the
+skill's "Round limit" the review ends here with no `## Disposition
+(round 2)` table. The owner decides: fix R2-CQ6 and R2-CQ7 (a small
+fork change, a re-pin, then a further focused check), or allow them as
+`defer` rows with tickets.
