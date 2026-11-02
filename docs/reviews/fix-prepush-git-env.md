@@ -136,3 +136,13 @@ Round 2 reported a finding, so the review stops here as the skill's
 "Round limit" says: no round 2 Disposition table. The owner decides
 between a fix for ticket 744 with a further focused round, and merging
 with 744 open.
+
+R2-1 was fixed after the last round (`03b37d51`), with no further round:
+the owner answered "Yeah def" on 2026-11-01 to fixing the gap and merging
+with no further review round.
+
+## Disposition (round 2)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                         |
+| ---- | ------------- | ----------- | --------------------------------------------------------------------------------------------------------------------- |
+| R2-1 | Focused check | fixed       | 03b37d51: the hook exits 1 when `git rev-parse --local-env-vars` fails; the gate checks it; comment fixed; 744 closed |
