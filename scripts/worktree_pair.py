@@ -390,11 +390,11 @@ def say(msg: str) -> None:
     print(f"[wt] {msg}", flush=True)
 
 
-def run(cmd: list[str], env: dict[str, str] | None = None) -> None:
+def run(cmd: list[str], env: dict[str, str] | None = None, cwd: Path | None = None) -> None:
     """Run one setup step with its output shown, and time it."""
     say("$ " + " ".join(cmd))
     started = time.monotonic()
-    rc = subprocess.run(cmd, env=env).returncode
+    rc = subprocess.run(cmd, env=env, cwd=cwd).returncode
     say(f"  rc={rc} in {time.monotonic() - started:.0f}s")
     if rc != 0:
         raise Refusal(f"step failed (rc={rc}): {' '.join(cmd)}")
@@ -589,7 +589,9 @@ def pair(args: argparse.Namespace) -> int:
                 f"but {ref} names {engine_tag[:9]}; run {pnpm_in(target)} sync:wowsims:restore"
             )
 
-        run([exe("corepack"), "pnpm", "-C", str(target), "install", "--frozen-lockfile"])
+        # Corepack picks the pnpm version from the working directory, not from
+        # `-C`, so a main checkout pinning another pnpm would refuse the pair.
+        run([exe("corepack"), "pnpm", "install", "--frozen-lockfile"], cwd=target)
         run([exe("npm"), "--prefix", str(fork_target), "ci"])
         make = exe("make")
         run([make, "-C", str(fork_target), "proto"], env)
