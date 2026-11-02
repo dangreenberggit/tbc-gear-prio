@@ -4,6 +4,11 @@ Reviewed range: `b24a4228705bd681a65a1b97f4a0d1fa01fc6073..d7bb429347f8c40b807d0
 
 Reviewed range: `d7bb429347f8c40b807d0659728714a34edfff90..4421129b5c040a02cb0476af63555808c5cb323c`
 
+Reviewed range: `4421129b5c040a02cb0476af63555808c5cb323c..be968c3822ae6ed03d9c9ae8dd9dbb49d84074c1`
+
+Fork range, round 3: `e3dbf38fa07d224915f0d404b880cf692e4b3bfb..81e803ada3caa3f60ae442771a12665fbefdd7ae`
+(commits eee005acc, 81e803ada).
+
 Fork range, round 2: `8a58f4af0084a81a326c09333b43e14b5770c6ea..e3dbf38fa07d224915f0d404b880cf692e4b3bfb`
 (commits dd137de96, c06b10b3f, d016093bd, e3dbf38fa).
 
@@ -231,6 +236,17 @@ lines (R2-CQ6, R2-CQ7 under `## Focused check (round 2)`), so the review
 stops there for the owner's decision. Ticket counts at round 2 by the
 same commands: filed 3 (745, 746, 747), closed 3 (618, 625, 705).
 
+Round 3 (2026-11-02, focused check over the 625 rework and the R2-CQ6 and
+R2-CQ7 fixes): all four checks pass and nothing this branch wrote is wrong.
+One finding from before this branch is deferred: R3-1, the first sentence
+of the "No upgrades found" body, "Every candidate simmed at or below your
+current gear.", is false when rows that gained DPS sit below the cutoff or
+are hidden by BiS only (ticket 748). Final ticket counts by the two
+commands in the `pre-merge-review` skill step 3, at a5221e29: filed 4
+(745, 746, 747, 748), closed 3 (618, 625, 705). Filed is higher than
+closed because the review found three defects from before this branch
+(746, 747, 748) and the scope doc's Maintenance loop found 745.
+
 ## Disposition
 
 | ID  | Axis         | Disposition | Ticket / note                                                                                                                                                                                                                                        |
@@ -375,3 +391,110 @@ in the main checkout.
 
 The round-1 CQ4 row says `emptyReason` has five values; after eee005acc
 it has three (`no-bis-list-row`, `no-source-row`, `no-upgrades`).
+
+## Focused check (round 3)
+
+Main range `4421129b..be968c38`; fork range `e3dbf38fa..81e803ada`
+(`vendor/tbc-new-fork`, branch `fix/wrong-advice-text`). The branch moves
+the fork pin (`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json`
+rc=1), so the fork log was read.
+
+Dispatch note, round 3: requested by the dispatching session on
+2026-11-02 as the next focused check, over the 625 rework on the owner's
+ruling and the R2-CQ6 and R2-CQ7 fixes. `codex` is not on `PATH`
+(`command -v codex` rc=1). One fresh subagent on Opus (review lane), with
+no part in writing the code, ran the four checks itself and wrote only
+this file and tickets. A `discrete-task` helper (Sonnet) ran the
+fork test, lint, format and locale commands and three mutation runs in a
+`$TMPDIR` copy of the fork, and wrote nothing in either repo. Both trees
+were clean at dispatch (`git status --porcelain` empty in each).
+
+Results:
+
+- **Condition 1: holds except for the owner's rework.** Main 20d97407 and
+  be968c38 change only this file and ticket 625 (which row 625 of
+  `## Disposition (round 2)` links); de8b0e45 is a fork re-pin (lock and
+  `data/sim-implemented-effects.json` only). Fork 81e803ada names R2-CQ6.
+  Fork eee005acc names R2-CQ7 and ticket 625; its 625 part is new work on
+  the owner's ruling, not a fix for a finding of this review, so it is
+  outside the condition's list as written. The dispatching session asked
+  for this round to cover it; the user can rule that it needs a fresh
+  round 1.
+- **Condition 2: holds.** Every non-test line eee005acc changes is in the
+  places row 625 names (the locale, the schema, `ResultsPane.tsx`,
+  `results_view.ts`); 81e803ada changes only `set_bonus_tip.ts:80-81` and
+  `:284`, the places R2-CQ6 cites.
+- **Condition 3: holds.** At fork `81e803ada`,
+  `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M cec2a7b68 81e803ada`
+  prints only `6 0 ui/app/SimTabsSection.tsx`, and `--name-status ... | cut -f1 | sort | uniq -c`
+  prints `239 A`, `1 M`, the same as round 2. No ported engine file
+  changed (`docs/fork-provenance/engine.md` names none of the changed
+  files, `grep -c` 0). The lock `commit` and `sim-implemented-effects.json`
+  `forkCommit` both read `81e803ada`.
+- **Check 2 (only what each finding asks): pass.** Nothing of the removed
+  reasons is left: `git -C vendor/tbc-new-fork grep -nE "owned-bis|owned_bis|ownedBis|allOwned"`
+  at HEAD finds only the test variable `ownedBisHelm`
+  (`results_view.test.ts:261`); in main the strings appear only in ticket
+  625, this file and the lock's `_comment` history. A script comparing
+  every object of `assets/locales/en/upgrades.json` with
+  `schemas/upgrades.schema.json` (`properties` and `required`) finds
+  `upgrades_tab.results` matching exactly. `EMPTY_BODY_KEYS` in
+  `ResultsPane.tsx` is checked against `PaneEmptyReason` by its
+  `satisfies` clause, and `tsc --noEmit` is rc=0. The `paneRows` comment
+  lists the three reasons that remain. No `.not.toBe` on an empty reason is
+  left in the fork's tests.
+- **Check 3 (tests assert their findings): pass.** In a `$TMPDIR` copy of
+  the fork, three edits to the `emptyReason` line in `paneRows` each fail
+  the new test "says no BiS-list item before no shown source, and no shown
+  source before no upgrades": swapping the first two reasons (2 tests
+  fail), keying the no-source reason on `rows.length === 0` (2 fail), and
+  an all-worn check placed before the no-source check (1 fails, the new
+  test). The baseline copy passed (49 passed, 1 skipped). R2-CQ6: the
+  round-2 re-run command prints no diff at `81e803ada` (rc=0).
+- **Check 4 (touched tests pass): pass.** Node v22.23.2. Fork
+  `node node_modules/vitest/vitest.mjs run ui/features/upgrades`: 65
+  files, 741 passed, rc=0 (743 at round 2; eee005acc removes two
+  `ResultsPane` tests and merges two `results_view` tests into one).
+  `tsc --noEmit` rc=0; `oxlint --max-warnings 0 ./ui` rc=0;
+  `oxfmt --check` on the 7 changed files rc=0. Main
+  `fork-meta-repair.test.ts` and `wowsims-fork-parity.test.ts`: 36
+  passed, rc=0. The fork's `node test-locales.mjs` fails (rc=1) on
+  `upgrades_tab/set_bonus`, ticket 747, from before this branch.
+
+**Is the generic body true wherever it shows?** The new second sentence,
+"Widen your filters to consider more items.", names no one filter, as
+the owner asked. The first sentence, "Every candidate simmed at or below
+your current gear.", is not always true; it is unchanged since fork
+`2c88a1192` (2026-10-08) and is in the `dev` pin `05da8b9ab`:
+
+- **R3-1 (from before this branch).** The body shows for a pane whose main
+  table is empty (`ResultsPane.tsx:41-45`) and for the whole-results empty
+  state (`UpgradesResults.tsx:96-101`). It is false when the pane's
+  below-cutoff group holds a row that gained DPS below the cutoff: the
+  `ResultsPane.test.tsx:96-107` test renders that state (its row,
+  `fixtureRow(5)`, has `deltaDps` 2.91 under a 3 DPS cutoff) and the line
+  this branch added at `:103-106` asserts the sentence there. In the
+  `ret-p3-p2` recording 9 of 894 rows are below the cutoff with
+  `deltaDps > 0`, two of them necks (up to +1.25); so the neck pane under
+  BiS only, ticket 625's case, also hides two candidates that simmed above
+  the worn neck. Under BiS only with no BiS-list row in the run, the
+  whole-results state shows it too (read from `UpgradesResults.tsx:56`,
+  `:90-91` and `bisOnlyView`; not run). The 625 rework sends those panes
+  back to the text they showed on `dev`, so the branch adds no new place
+  where the sentence shows. Effect: false text, visible, from before this
+  branch; deferred to ticket 748. Its fix is player-facing text and needs
+  the owner's words.
+
+Bookkeeping found in round 3: B4, ticket 747 named one missing schema key;
+the check stops at its first error and hides a second,
+`upgrades_tab.assumptions.substitution_in_slot` (in the locale, not in the
+schema, at `05da8b9ab`, `e3dbf38fa` and `81e803ada`). Added to 747 in
+a5221e29. The intro of `## Disposition (round 2)` says no further focused
+check has run; this section is that check.
+
+## Disposition (round 3)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                               |
+| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| R3-1 | Focused check | defer       | .scratch/carry-forward/issues/748-no-upgrades-body-says-every-candidate-at-or-below.md — from before this branch; the words need the owner. |
+| B4   | Bookkeeping   | fixed       | a5221e29: ticket 747 now also names `upgrades_tab.assumptions.substitution_in_slot`.                                                        |
