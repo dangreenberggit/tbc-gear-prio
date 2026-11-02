@@ -420,3 +420,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 740 `engine-strict=true` in `.npmrc` is ignored by pnpm 11 and 12, so `pnpm install` never checks the Node floor (pre-merge review chore/pnpm-12.16.1, A2) 2026-11-01
 - 741 `pnpm -C <other checkout>` fails when the two checkouts pin different pnpm versions (pre-merge review chore/pnpm-12.16.1, A3) 2026-11-01
 - 743 An empty read-only `.git/config.lock` in the main checkout blocks every git config write (pre-merge review fix/prepush-git-env, I2) 2026-11-01
+- 744 The pre-push hook clears nothing and still runs verify when `git rev-parse --local-env-vars` fails (pre-merge review fix/prepush-git-env, R2-1) 2026-11-01
