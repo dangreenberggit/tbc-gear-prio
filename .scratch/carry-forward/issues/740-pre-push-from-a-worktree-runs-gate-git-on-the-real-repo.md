@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/agent-reports/2026-11-01-general-task-prepush-worktree-pair-check.md (main checkout)
 Blocks: none
@@ -59,3 +59,19 @@ then `2` commits (was 1) and `core.bare` `true` (was `false`).
 - A gate in `pnpm verify` runs both scripts with `GIT_DIR` set to a
   throwaway worktree gitdir and fails if the throwaway gains commits or
   branches or `core.bare` becomes true.
+
+## Resolution
+
+Fixed in `tbc-gear-prio@3034669d`. `.githooks/pre-push` now unsets every
+name `git rev-parse --local-env-vars` prints except `GIT_CONFIG*`, and
+`check_worktree_pair.py` `main()` and `check_merge_ready.py` `self_test()`
+delete every `GIT_*` variable before their checks run. The new gate
+`scripts/check_gate_git_env.py` (`pnpm gate-git-env:check`, first step of
+`verify:steps`) checks both layers. Before the fix it failed with 12
+problems (refs, commit counts, `core.bare` and worktree HEAD changed; the
+hook passed `GIT_DIR`, `GIT_WORK_TREE`, `GIT_INDEX_FILE` and
+`GIT_COMMON_DIR` on to pnpm). After it, it prints
+`gate git-env checks ok (3 checks)`, and the reproduction above prints
+`1` and `false`.
+
+Verified by: `pnpm gate-git-env:check`
