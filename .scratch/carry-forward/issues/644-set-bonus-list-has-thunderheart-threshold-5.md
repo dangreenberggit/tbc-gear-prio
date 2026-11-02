@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 follow-on (Tab-adjacent)
 Type: task
 Origin: .scratch/handoffs/sme-rank-judgment-613-tab-item-lists.md (finding F6)
@@ -39,3 +39,59 @@ Checked by reading every open ticket under `.scratch/carry-forward/issues/`
 that mentions a set bonus, threshold or piece count. Ticket 621 is related
 but different: those bonuses exist, and the sim panics when another class
 reaches them.
+
+## Cause and fix, 2026-11-01
+
+Cause, in two parts (fork `ui/features/upgrades/model/engine/rank.ts` at
+`119b9f676`):
+
+1. **A marker entry at worn + 1.** With `measureBrokenSetValue` (the tab's
+   setting), a set with candidates but no count in reach, or one the set
+   screen dropped, got one `setBonuses` entry with
+   `threshold: Math.max(2, piecesWorn + 1)` and `unmeasured`
+   `"insufficient-pieces"` or `"screened-out"`. In `feral-p5-th4pc`,
+   Thunderheart is worn at 4 and the set screen dropped it (`exact-zero`), so
+   the marker named 5. Re-run:
+   `git -C vendor/tbc-new-fork show 119b9f676:ui/features/upgrades/model/engine/rank.ts | grep -n "Math.max(2, piecesWorn + 1)"`
+2. **Every reachable count was tried.** The gain side and the crossing gate
+   tried every piece count from worn + 1 up to what the pool could fill, with
+   no knowledge of which counts the set has a bonus at. So rankings also held
+   below-gate entries at counts the set lacks: Thunderheart and Malorne at 3
+   and 5 in the recordings made at fork `b908771dd`. Re-run:
+   `python -c "import json,glob;[print(p.split('/')[-1],[(b['setName'],b['threshold']) for b in json.load(open(p))['ranking']['setBonuses'] if b['setId'] in (676,640,680) and b['threshold'] not in (2,4)]) for p in sorted(glob.glob('packages/core/test/fixtures/tab-recordings/*.json'))]"`
+
+Fix, fork `3f2948ce1` (re-pinned on branch `fix/644-655-set-bonus-list`): the
+ranking asks the sim which set bonuses are active on the gear that adds each
+set's largest package (new optional `SimRunner.activeSetBonuses`, answered
+from the sim's `computeStats` `PlayerStats.sets`, names such as
+`Thunderheart Harness (4pc)`), less those already active on the current gear.
+The gain side, the set screen's reach and the crossing gate then try only
+those counts. A set with no bonus in reach, or one the screen dropped, gets no
+`setBonuses` entry; its rows keep their `setContext` through an internal list,
+and the popover reads a dropped set from `ranking.setScreen`. For a runner
+without `activeSetBonuses` (the test fakes), and for a set whose read fails or
+whose largest package fails gem repair, the gain side tries every count, as
+before (the doc comment on `setBonusCountsInReach`); the marker entry is gone for every
+runner (`rank.ts` `setBonusCountsInReach` and the `markedSetIds` branch; added
+by the pre-merge review, docs/reviews/fix-644-655-set-bonus-list.md, P3). The frozen
+recordings under `packages/core/test/fixtures/tab-recordings/` were made at
+`b908771dd` and still hold the old entries; they are engine test data, not
+rankings the tab shows.
+
+Tests: `fork-set-net.test.ts` cases 644-A, 644-B and 644-C (red before the
+fork change, green after). Four 511 cases that pinned the marker entry now pin
+"no entry".
+
+Live check, 2026-11-01: `pnpm tab-fixtures:record` at fork `3f2948ce1` for
+`feral-p3-th-hands-legs` and `ret-p3-p2` (files in the pair's gitignored
+`.scratch/tab-recordings-644/`). Neither has an entry for Thunderheart,
+Malorne, Lightbringer or Crystalforge at a count other than 2 or 4, and
+`feral-p3-th-hands-legs` has no crossing gate for Thunderheart at 3 (the old
+recording has one; the new recording has no `crossingGates` key at all, so
+this shows no gate of any kind, not a gate at 2 or 4 only; added by the
+pre-merge review, P5). The `feral-p5-th4pc` re-record did not run: the recorder
+stopped with "gear not loaded; missing Signet of Primal Wrath, Berserker's
+Call" before any sim (cause untested).
+
+Verified by: `pnpm exec vitest run packages/core/test/fork-set-net.test.ts -t 644`
+at tbc-gear-prio@e798d4ad with tbc-new-fork@3f2948ce1
