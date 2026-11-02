@@ -1386,7 +1386,7 @@ describe.skipIf(!forkPresent)(
 /**
  * ret-p3-p2's worn gear with the chest's Enscribed Fire Opal (30584) swapped
  * for Bold, so the meta is off by one yellow and the worn-gear repair runs.
- * With no hit cap it puts Rigid back; with the baseline's budget, Inscribed.
+ * With no hit cap it puts Rigid in; with the baseline's budget, Inscribed.
  */
 async function wornWithMetaOff(): Promise<SimItemSpec[]> {
   const e = await engine();
