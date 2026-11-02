@@ -8,11 +8,12 @@ gates that build throwaway repos then ran git against the real repo: it set
 
 This gate builds its own throwaway repo with a linked worktree and checks:
 
-- `.githooks/pre-push` clears the repo-binding variables before it calls
-  pnpm, and keeps GIT_CONFIG* (a stub `pnpm` on PATH records what it got);
+- `.githooks/pre-push`, run with every `git rev-parse --local-env-vars`
+  name set, clears all but GIT_CONFIG* before it calls pnpm, and keeps
+  GIT_CONFIG* (a stub `pnpm` on PATH records what it got);
 - `check_worktree_pair.py` and `check_merge_ready.py --self-test`, run with
-  GIT_DIR set to the throwaway worktree's gitdir, pass and leave the
-  throwaway's refs, commits and `core.bare` as they were.
+  GIT_DIR, GIT_WORK_TREE and GIT_INDEX_FILE set to the throwaway worktree,
+  pass and leave the throwaway's refs, commits and `core.bare` as they were.
 
     python scripts/check_gate_git_env.py
 
@@ -34,8 +35,9 @@ SCRIPTS = (
     ("check_worktree_pair.py",),
     ("check_merge_ready.py", "--self-test"),
 )
-# Some of the `git rev-parse --local-env-vars` list, which the hook clears.
-BINDING_VARS = ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR")
+# While this is set, git 2.34 refuses `rev-parse` ("doesn't support
+# --super-prefix"), so the hook cannot run at all and there is nothing to test.
+NOT_SET_IN_TEST = ("GIT_INTERNAL_SUPER_PREFIX",)
 
 
 def git(*argv: str, cwd: Path) -> str:
@@ -74,24 +76,37 @@ def check_hook_clears_repo_binding_vars(tmp: Path, gitdir: Path) -> list[str]:
     # Names only: values can hold sandbox proxy credentials.
     stub.write_text(f"#!/bin/sh\nenv | sed 's/=.*//' | grep '^GIT_' > '{seen}'\n", encoding="utf-8")
     stub.chmod(stub.stat().st_mode | stat.S_IXUSR)
+    common = tmp / "main" / ".git"
+    # Real paths for the path-valued names, so git still runs with them set.
+    values = {
+        "GIT_DIR": str(gitdir),
+        "GIT_WORK_TREE": str(tmp / "wt"),
+        "GIT_INDEX_FILE": str(gitdir / "index"),
+        "GIT_COMMON_DIR": str(common),
+        "GIT_OBJECT_DIRECTORY": str(common / "objects"),
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES": str(common / "objects"),
+        "GIT_GRAFT_FILE": str(common / "info" / "grafts"),
+        "GIT_SHALLOW_FILE": str(common / "shallow"),
+        "GIT_REPLACE_REF_BASE": "refs/replace/",
+        "GIT_PREFIX": "",
+    }
+    binding_vars = [v for v in git("rev-parse", "--local-env-vars", cwd=tmp).split()
+                    if not v.startswith("GIT_CONFIG") and v not in NOT_SET_IN_TEST]
     env = dict(
         os.environ,
         PATH=f"{bin_dir}{os.pathsep}{os.environ['PATH']}",
-        GIT_DIR=str(gitdir),
-        GIT_WORK_TREE=str(tmp / "wt"),
-        GIT_INDEX_FILE=str(gitdir / "index"),
-        GIT_COMMON_DIR=str(tmp / "main" / ".git"),
         GIT_CONFIG_COUNT="1",
         GIT_CONFIG_KEY_0="safe.directory",
         GIT_CONFIG_VALUE_0="*",
     )
+    env.update({v: values.get(v, "1") for v in binding_vars})
     done = subprocess.run(["sh", str(HOOK), "origin", "unused"], cwd=tmp / "wt", env=env,
                           stdin=subprocess.DEVNULL, capture_output=True, text=True)
     if done.returncode != 0 or not seen.exists():
         return [f"pre-push with a stub pnpm: rc={done.returncode}, stub ran={seen.exists()}, "
                 f"stderr={done.stderr.strip()[-300:]!r}"]
     names = set(seen.read_text(encoding="utf-8").split())
-    problems = [f"pre-push passed {v} on to pnpm" for v in BINDING_VARS if v in names]
+    problems = [f"pre-push passed {v} on to pnpm" for v in binding_vars if v in names]
     if "GIT_CONFIG_COUNT" not in names:
         problems.append("pre-push dropped GIT_CONFIG_COUNT; the sandbox's git settings travel in GIT_CONFIG*")
     return problems
@@ -99,15 +114,17 @@ def check_hook_clears_repo_binding_vars(tmp: Path, gitdir: Path) -> list[str]:
 
 def check_script_leaves_hook_repo_alone(tmp: Path, main: Path, gitdir: Path, argv: tuple[str, ...]) -> list[str]:
     before = snapshot(main)
-    env = dict(os.environ, GIT_DIR=str(gitdir))
+    env = dict(os.environ, GIT_DIR=str(gitdir), GIT_WORK_TREE=str(tmp / "wt"),
+               GIT_INDEX_FILE=str(gitdir / "index"))
     done = subprocess.run([sys.executable, str(ROOT / "scripts" / argv[0]), *argv[1:]],
                           cwd=ROOT, env=env, capture_output=True, text=True)
     after = snapshot(main)
     name = " ".join(argv)
-    problems = [f"{name} under GIT_DIR changed {k}: {before[k]!r} -> {after[k]!r}"
+    problems = [f"{name} under hook git vars changed {k}: {before[k]!r} -> {after[k]!r}"
                 for k in before if before[k] != after[k]]
     if done.returncode != 0:
-        problems.append(f"{name} under GIT_DIR: rc={done.returncode}, stderr tail={done.stderr.strip()[-300:]!r}")
+        problems.append(f"{name} under hook git vars: rc={done.returncode}, "
+                        f"stderr tail={done.stderr.strip()[-300:]!r}")
     return problems
 
 

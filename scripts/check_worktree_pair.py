@@ -660,7 +660,9 @@ CHECKS = (
 
 def main() -> int:
     # Run from a git hook, an inherited GIT_DIR would point the temp-repo
-    # checks' git calls at the real repo (ticket 742).
+    # checks' git calls at the real repo (ticket 742). GIT_CONFIG* goes too:
+    # these checks pass without the sandbox's git settings, as in
+    # check_merge_to_dev.py.
     for k in [k for k in os.environ if k.startswith("GIT_")]:
         del os.environ[k]
     problems = [p for check in CHECKS for p in check()]
