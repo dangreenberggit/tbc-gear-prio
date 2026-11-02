@@ -659,6 +659,10 @@ CHECKS = (
 
 
 def main() -> int:
+    # Run from a git hook, an inherited GIT_DIR would point the temp-repo
+    # checks' git calls at the real repo (ticket 740).
+    for k in [k for k in os.environ if k.startswith("GIT_")]:
+        del os.environ[k]
     problems = [p for check in CHECKS for p in check()]
     if not problems:
         print(f"worktree_pair.py checks ok ({len(CHECKS)} checks)")
