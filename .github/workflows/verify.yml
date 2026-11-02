@@ -18,7 +18,9 @@ jobs:
 
       # Exact tag, not @v6: on 2026-11-01 the floating v6 tag was one commit
       # behind v6.1.0, the release that added pnpm 12 support (pnpm/action-setup
-      # PR 288). No `version:` input, so it reads packageManager in package.json.
+      # PR 288). Check: git ls-remote https://github.com/pnpm/action-setup
+      # 'refs/tags/v6^{}' 'refs/tags/v6.1.0^{}'. No `version:` input, so it
+      # reads packageManager in package.json.
       - uses: pnpm/action-setup@v6.1.0
 
       - uses: actions/setup-node@v4
