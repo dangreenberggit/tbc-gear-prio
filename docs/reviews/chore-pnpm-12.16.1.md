@@ -2,6 +2,8 @@
 
 Reviewed range: `acbc1033561501b7f451f7f67d671da030049e7b..e9cd61f983a2b1cae3c3f24d362a415f6f991c9f`
 
+Reviewed range: `e9cd61f983a2b1cae3c3f24d362a415f6f991c9f..6e31a5946e7443badb1fdca7dbccdd053296c8f4`
+
 Dispatch (round 1): full axes, not the small-change lane.
 `git diff --shortstat dev...HEAD` gave `3 files changed, 163 insertions(+),
 2 deletions(-)`: 165 changed lines, over the lane's 150. `git diff
@@ -103,7 +105,13 @@ Round 1 found one loud failure this branch triggers (A1, fixed in
 a642ae6a: the pair install now runs with `cwd` set to the pair), two
 problems that predate it (A2, A3: tickets 740, 741), and one comment row
 (Q1, fixed in 834013d9 by a fresh workhorse agent). S1 and SP1 are
-`wontfix` with reasons below.
+`wontfix` with reasons below. Round 2 (focused check) passed with no
+findings. Nothing blocks the merge.
+
+Tickets: this branch filed 2 (740, 741) and closed 0, so it filed more
+than it closed. `pnpm merge-ready` also lists open tickets 601 and 602 as
+naming `scripts/worktree_pair.py`; both are about the unpair command, not
+the install line this branch changed, so they are not addressed here.
 
 ## Disposition
 
@@ -115,3 +123,29 @@ problems that predate it (A2, A3: tickets 740, 741), and one comment row
 | S1  | Standards   | wontfix     | Rewording d36f6974 would rewrite the commits this file's round 1 range names; the command and error text behind the claim are recorded in this file's dispatch note.                                                                                                                    |
 | SP1 | Spec        | wontfix     | Checked, not a defect: `@v6` resolves to the commit before pnpm 12 support (`git ls-remote` above), so the exact tag is required.                                                                                                                                                       |
 | Q1  | Standards   | fixed       | 834013d9: the comment now names the `git ls-remote` check.                                                                                                                                                                                                                              |
+
+## Focused check (round 2)
+
+Other repo: none (`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json`
+rc=0, so the fork log is skipped and the wowsims-file condition holds). One
+fresh `general-task` agent on Opus, told it writes nothing.
+
+1. Conditions 1-3: pass. a642ae6a names A1, 834013d9 names Q1, 6e31a594
+   changes only this file, tickets 740 and 741, `NEXT` and `map.md`. The
+   only changed code lines are `scripts/worktree_pair.py:393,397,594`: the
+   install call A1 cites and the `cwd` parameter on `run()` that the fix
+   needs.
+2. Changes match the findings: pass. No other `run()` call changed;
+   `pnpm_in()` hints are left to ticket 741.
+3. Tests: pass, none missing. `scripts/check_worktree_pair.py:8-10` leaves
+   the git and install half of the pair script to live pair runs. The agent
+   re-ran the live check from the pnpm-11 main checkout: old form rc=1 with
+   the version error, new form printed 12.16.1.
+4. Tests the fixes touch: pass. `node --version` v22.23.2;
+   `python scripts/check_worktree_pair.py` rc=0, "27 checks ok".
+
+Findings: none.
+
+## Disposition (round 2)
+
+No new findings; round 1's rows stand.
