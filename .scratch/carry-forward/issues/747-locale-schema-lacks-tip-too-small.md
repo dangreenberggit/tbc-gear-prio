@@ -33,8 +33,17 @@ prints 0 and the same command on `assets/locales/en/upgrades.json` prints 1.
 `pnpm verify` passed at the same commit because no gate runs this check
 (ticket 626).
 
+A second key has the same gap, hidden because the check stops at its first
+error: `upgrades_tab.assumptions.substitution_in_slot` is in the locale and
+not in the schema. At fork `05da8b9ab`, `e3dbf38fa` and `81e803ada`,
+`grep -c substitution_in_slot` prints 1 on the locale and 0 on the schema
+(found in round 3 of `docs/reviews/fix-wrong-advice-text.md`, 2026-11-02, by
+a script that compares every locale object's keys with the schema's
+`properties` and `required`; no other object differs).
+
 ## Done when
 
-The schema lists `tip_too_small` under `upgrades_tab.set_bonus` (and in its
-`required` list if the other keys there are required), and
+The schema lists `tip_too_small` under `upgrades_tab.set_bonus` and
+`substitution_in_slot` under `upgrades_tab.assumptions` (each also in its
+object's `required` list if the other keys there are required), and
 `node ./test-locales.mjs` from inside the fork prints no `❌` line.

@@ -424,3 +424,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 745 The tab scope doc has no row for 17 open tickets (filed on branch fix/wrong-advice-text, from the Maintenance loops of docs/upgrades-tab-scope.md) 2026-11-02
 - 746 Meta-gem repair counts hit at full value, with no note, for every spec but ret and feral (pre-merge review fix/wrong-advice-text, D1) 2026-11-02
 - 747 The tab locale schema lacks `set_bonus.tip_too_small`, so the fork locale check fails (found while fixing fix/wrong-advice-text round 1) 2026-11-02
+- 748 "No upgrades found" says every candidate simmed at or below your gear when some simmed above it (pre-merge review fix/wrong-advice-text, round 3, R3-1) 2026-11-02
