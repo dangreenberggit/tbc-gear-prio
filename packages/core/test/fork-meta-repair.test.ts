@@ -1424,6 +1424,25 @@ describe.skipIf(!forkPresent)(
       );
     });
 
+    it("705-W5: with stats readable and hit under the cap, the worn repair keeps Rigid in the chest", async () => {
+      const worn = await wornWithMetaOff();
+      // Two hit percent under the baseline's leaves about 31 rating of room, more than Rigid's 8.
+      const run = await runRet({
+        worn,
+        pool: S_POOL,
+        computeStats: () =>
+          Promise.resolve({
+            stats: [],
+            pseudoStats: pseudoStatsWithHit(BASELINE_HIT_PERCENT - 2),
+          }),
+      });
+      const baselineChest = requestItems(run.requests[0]!)[CHEST]!;
+      expect(baselineChest.gems).toEqual([BOLD, RIGID, 28363]);
+      expect(run.ranking.baseline?.metaAdjusted).toBe(true);
+      expect(run.statsRequests.length).toBeGreaterThan(0);
+      expect(run.ranking.substitutions.filter(isHitCapNote)).toHaveLength(0);
+    });
+
     it("705-W2: with no computeStats, the worn repair keeps full weight and puts Rigid in the chest", async () => {
       const worn = await wornWithMetaOff();
       const run = await runRet({ worn, pool: S_POOL });
