@@ -59,9 +59,8 @@ git log <base>..HEAD --oneline
 
 Round 1 diffs `<base>...HEAD` — three-dot against the merge-base, same convention
 as `code-review`. Later rounds diff `<through-sha>..HEAD`, where `<through-sha>`
-is the previous round's recorded `<through-sha>`. There is at most one later
-round, a focused check; step 2's "Round limit" says when it runs and when the
-review stops.
+is the previous round's recorded `<through-sha>`. Later rounds are focused
+checks; step 2's "Round limit" says when they run and when the review stops.
 
 Why a recorded sha: fixes for a round's findings land after that round is
 dispatched, so a round that guesses its own starting point leaves those fix
@@ -213,8 +212,14 @@ A round is one line of this file that starts with `Reviewed range:`.
 Round 1 is the full review, or the small-change lane. The agent that
 handles this review's findings makes every fix for round 1's findings,
 the code-quality pass included (step 3), before it dispatches round 2.
-Round 2 is the focused check above, and it is the last round: there is
-no round 3.
+Round 2 is the focused check above. Prefer to stop there: the limit
+exists to stop review loops, but it is not a hard block. When something
+is not yet figured out and a further round seems like it could be
+needed, that choice should likely go to the user. Findings still open
+after round 2 may be a sign that the agent under review keeps getting
+things wrong. Consider a review of why; it may or may not be needed.
+That review asks whether there is a basic problem in that agent's
+approach, or more issues just keep turning up.
 
 Skip round 2 when every commit since round 1's `<through-sha>` only
 changes whitespace or line wrapping, only changes this review file or
@@ -226,27 +231,29 @@ paragraph says. The agent that handles this review's findings decides,
 and writes the skip and the output of
 `git log --oneline <through-sha>..HEAD` in `## Summary`.
 
-Stop, and do not fix and review again, when round 2 cannot run (one of
-the three conditions in "Focused check (round 2)" fails or cannot be
+When round 2, or a further round the user chose, cannot run (one of the
+three conditions in "Focused check (round 2)" fails or cannot be
 settled), when one of its four checks fails, or when it reports any
 finding other than bookkeeping — for example a fix that is wrong or
 missing, a new data loss or silent wrong result, a loud failure, or a
-code-quality finding in the lines the fixes wrote. Commit the review file
-as it stands, do not run step 4, and in place of step 5 report to the
-user which finding, which fix, what the check found, and the likely
-cause, labelled `hypothesis, untested` unless you checked it. The owner
-ruled out a third round: this rule assumes that another round would not
-make the writing agent get it right. The user decides what happens next,
-for example a dedicated quality pass, a different writer, or a fresh
-round 1 for new work.
+code-quality finding in the lines the fixes wrote, prefer to end the
+review there. Commit the review file as it stands, do not run step 4,
+and in place of step 5 report to the user which finding, which fix, what
+the check found, and the likely cause, labelled `hypothesis, untested`
+unless you checked it. Say whether a further round seems like it could
+be needed, and whether a review of why seems worth running. The user
+decides what happens next, for example a further round, a review of why,
+a dedicated quality pass, a different writer, or a fresh round 1 for new
+work.
 
 When round 2 passes or is skipped, give each open finding its outcome.
 When round 2 is skipped, write these outcomes in round 1's
 `## Disposition` table, editing rows as the Disposition rules in the
 values file § Review file say.
 
-- a "fixed before merge" finding that is still open: stop as the "Stop"
-  paragraph above says, and report it to the user as blocking the merge;
+- a "fixed before merge" finding that is still open: end the review as
+  the "When round 2 cannot run" paragraph above says, and report it to
+  the user as blocking the merge;
 - a finding that step 3 says blocks the merge, still open, that the owner
   has not allowed to be deferred: write no Disposition row for it yet;
   list it in `## Summary` as blocking the merge and report it as step 5
