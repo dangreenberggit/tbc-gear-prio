@@ -4,7 +4,7 @@
 A push from a linked worktree runs `.githooks/pre-push` with GIT_DIR set to
 the worktree's gitdir, and `pnpm run verify` passes it on to every gate. Two
 gates that build throwaway repos then ran git against the real repo: it set
-`core.bare=true` and added commits and branches there (ticket 740).
+`core.bare=true` and added commits and branches there (ticket 742).
 
 This gate builds its own throwaway repo with a linked worktree and checks:
 

@@ -419,3 +419,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 739 The shared ranking test fixture names item 30989 and set 627 wrongly (fix pass after review fix/644-655-set-bonus-list, D2) 2026-11-01
 - 740 `engine-strict=true` in `.npmrc` is ignored by pnpm 11 and 12, so `pnpm install` never checks the Node floor (pre-merge review chore/pnpm-12.16.1, A2) 2026-11-01
 - 741 `pnpm -C <other checkout>` fails when the two checkouts pin different pnpm versions (pre-merge review chore/pnpm-12.16.1, A3) 2026-11-01
+- 743 An empty read-only `.git/config.lock` in the main checkout blocks every git config write (pre-merge review fix/prepush-git-env, I2) 2026-11-01

@@ -30,8 +30,9 @@ calls act on the real repo instead:
 - `scripts/check_merge_ready.py`, `check_closing_rule_reads_git`: adds
   commits and a `feat` branch, and switches the worktree's HEAD.
 
-In the owner's run, the config write failed because the real repo has an
-empty read-only `.git/config.lock`, which gave the exit 128 above. With
+In the owner's run, the config write failed because the real repo had an
+empty read-only `.git/config.lock` (still present on 2026-11-01; ticket
+743), which gave the exit 128 above. With
 no lock file both gates pass and leave the damage. A push from the main
 checkout is not affected: the hook gets no `GIT_DIR`.
 
@@ -54,8 +55,9 @@ then `2` commits (was 1) and `core.bare` `true` (was `false`).
 - `.githooks/pre-push` clears the variables that bind git to one repo
   (`git rev-parse --local-env-vars`, keeping `GIT_CONFIG*`) before
   `pnpm run verify`.
-- Both scripts clear `GIT_*` themselves, so they are safe however they
-  are called.
+- Both scripts clear `GIT_*` before their throwaway-repo checks
+  (`check_worktree_pair.py` `main()`, `check_merge_ready.py`
+  `self_test()`), so those checks are safe however they are called.
 - A gate in `pnpm verify` runs both scripts with `GIT_DIR` set to a
   throwaway worktree gitdir and fails if the throwaway gains commits or
   branches or `core.bare` becomes true.

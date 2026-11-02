@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 # A push from a linked worktree exports GIT_DIR; gates that build throwaway
-# repos would then run git against this repo instead (ticket 740). GIT_CONFIG*
+# repos would then run git against this repo instead (ticket 742). GIT_CONFIG*
 # stays: the agent sandbox passes safe.directory and proxy settings in it.
 for v in $(git rev-parse --local-env-vars); do
   case "$v" in GIT_CONFIG*) ;; *) unset "$v" ;; esac
