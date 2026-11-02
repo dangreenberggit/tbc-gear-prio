@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/fix-prepush-git-env.md (round 2, R2-1)
 Blocks: none
@@ -34,3 +34,15 @@ runs and clears nothing.
   and checks the hook fails closed, or its comment states the real reason
   for leaving the name out.
 - `python scripts/check_gate_git_env.py` passes.
+
+## Closing note
+
+`.githooks/pre-push` now exits 1 with a message when
+`git rev-parse --local-env-vars` fails, before it calls pnpm. The gate's
+new check runs the hook with a stub `git` that fails and a stub `pnpm`,
+and expects a non-zero exit with pnpm not run. Before the hook change it
+failed (`rc=0, pnpm ran=True`); after, all 4 checks pass. The comment on
+`NOT_SET_IN_TEST` now gives the real reason for leaving the name out.
+
+Verified by:
+`python scripts/check_gate_git_env.py`

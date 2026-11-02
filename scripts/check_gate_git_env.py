@@ -11,6 +11,8 @@ This gate builds its own throwaway repo with a linked worktree and checks:
 - `.githooks/pre-push`, run with every `git rev-parse --local-env-vars`
   name set, clears all but GIT_CONFIG* before it calls pnpm, and keeps
   GIT_CONFIG* (a stub `pnpm` on PATH records what it got);
+- the hook exits non-zero without calling pnpm when that `git rev-parse`
+  fails (a stub `git` on PATH fails it);
 - `check_worktree_pair.py` and `check_merge_ready.py --self-test`, run with
   GIT_DIR, GIT_WORK_TREE and GIT_INDEX_FILE set to the throwaway worktree,
   pass and leave the throwaway's refs, commits and `core.bare` as they were.
@@ -35,8 +37,9 @@ SCRIPTS = (
     ("check_worktree_pair.py",),
     ("check_merge_ready.py", "--self-test"),
 )
-# While this is set, git 2.34 refuses `rev-parse` ("doesn't support
-# --super-prefix"), so the hook cannot run at all and there is nothing to test.
+# While this is set, git 2.34 fails `rev-parse` ("doesn't support
+# --super-prefix") and the hook stops before pnpm, so the clearing check could
+# not see what pnpm gets. check_hook_stops_when_rev_parse_fails covers that stop.
 NOT_SET_IN_TEST = ("GIT_INTERNAL_SUPER_PREFIX",)
 
 
@@ -112,6 +115,25 @@ def check_hook_clears_repo_binding_vars(tmp: Path, gitdir: Path) -> list[str]:
     return problems
 
 
+def check_hook_stops_when_rev_parse_fails(tmp: Path, gitdir: Path) -> list[str]:
+    # A stub git, not GIT_INTERNAL_SUPER_PREFIX: newer git versions drop that
+    # variable, and the test must not depend on which git is installed.
+    bin_dir = tmp / "bin"
+    bin_dir.mkdir()
+    ran = tmp / "pnpm-ran"
+    for name, body in (("git", "echo 'fatal: stub' >&2\nexit 128\n"), ("pnpm", f"touch '{ran}'\n")):
+        stub = bin_dir / name
+        stub.write_text(f"#!/bin/sh\n{body}", encoding="utf-8")
+        stub.chmod(stub.stat().st_mode | stat.S_IXUSR)
+    env = dict(os.environ, PATH=f"{bin_dir}{os.pathsep}{os.environ['PATH']}", GIT_DIR=str(gitdir))
+    done = subprocess.run(["sh", str(HOOK), "origin", "unused"], cwd=tmp / "wt", env=env,
+                          stdin=subprocess.DEVNULL, capture_output=True, text=True)
+    if done.returncode != 0 and not ran.exists():
+        return []
+    return [f"pre-push with a failing `git rev-parse`: rc={done.returncode}, pnpm ran={ran.exists()}; "
+            "it must stop before verify, because GIT_DIR is still set"]
+
+
 def check_script_leaves_hook_repo_alone(tmp: Path, main: Path, gitdir: Path, argv: tuple[str, ...]) -> list[str]:
     before = snapshot(main)
     env = dict(os.environ, GIT_DIR=str(gitdir), GIT_WORK_TREE=str(tmp / "wt"),
@@ -143,6 +165,10 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as td:
         _, gitdir = make_repo(Path(td))
         problems += check_hook_clears_repo_binding_vars(Path(td), gitdir)
+        checks += 1
+    with tempfile.TemporaryDirectory() as td:
+        _, gitdir = make_repo(Path(td))
+        problems += check_hook_stops_when_rev_parse_fails(Path(td), gitdir)
         checks += 1
     if not problems:
         print(f"gate git-env checks ok ({checks} checks)")

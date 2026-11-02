@@ -2,7 +2,12 @@
 # A push from a linked worktree exports GIT_DIR; gates that build throwaway
 # repos would then run git against this repo instead (ticket 742). GIT_CONFIG*
 # stays: the agent sandbox passes safe.directory and proxy settings in it.
-for v in $(git rev-parse --local-env-vars); do
+# Without the list nothing gets cleared, and verify would run with GIT_DIR set.
+names=$(git rev-parse --local-env-vars) || {
+  echo "pre-push: 'git rev-parse --local-env-vars' failed; push stopped so verify does not run git against this repo" >&2
+  exit 1
+}
+for v in $names; do
   case "$v" in GIT_CONFIG*) ;; *) unset "$v" ;; esac
 done
 # Full gate: typecheck, lint, format, test. See package.json "verify".
