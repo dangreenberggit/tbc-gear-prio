@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
 Type: bug
 Origin: docs/reviews/feat-bis-rows.md (finding D2)
@@ -36,3 +36,12 @@ Done when: under BiS only, a slot whose BiS-list rows are all owned shows a
 text that says so (for example "You already have this slot's BiS-list
 item."), with a test in `results_view.test.ts` or `ResultsPanes.test.tsx`,
 and the locale key has its property in `schemas/upgrades.schema.json`.
+
+## Resolution
+
+Verified by: tbc-new-fork@10e2d0f98; `cd vendor/tbc-new-fork && node node_modules/vitest/vitest.mjs run ui/features/upgrades/model/results_view.test.ts ui/features/upgrades/components/ResultsPane/ResultsPane.test.tsx`
+Closed on branch `fix/wrong-advice-text` (2026-11-02). Under BiS only, a slot
+pane whose BiS-list rows are all worn now shows "You already wear a BiS-list
+item in this slot." and the Shopping list pane in the same state shows "You
+already wear every BiS-list item that was simmed." The tests include one on
+the `ret-p3-p2` recording's neck pane.

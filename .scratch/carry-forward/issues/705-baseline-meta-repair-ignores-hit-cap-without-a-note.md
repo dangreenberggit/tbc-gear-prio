@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-704-plain-drop-lines.md (D2)
 Serves: .scratch/plans/upgrades-tab-finish-line.md
@@ -40,3 +40,17 @@ reworded the note.
 Either the worn-gear repair uses the same hit budget as candidate repairs, or
 the tab says in one plain sentence that the swaps on the worn gear count hit at
 full value. Decide which with the owner if it changes rankings.
+
+## Resolution
+
+Verified by: tbc-new-fork@8a58f4af0; `pnpm exec vitest run packages/core/test/fork-meta-repair.test.ts -t 705`
+Closed on branch `fix/wrong-advice-text` (2026-11-02). The owner chose the
+fix over a note: Q-705, 2026-10-25, owner's reply "a"
+(`.scratch/stage-gate/meta-hit-cap-705/brief.md`). When the worn meta gem is
+off and the runner can read stats, one stats read of the un-repaired worn
+gear gives the worn-gear repair its own hit budget; the cache field
+`metaRepairHitCap` is now `"worn-and-candidates"`, so a ranking cached under
+the old rule is not served. The note for fights where not every target is
+level 73 now ends "because this tab works out the hit cap only when every
+target is level 73." No committed recording changes: none runs the worn
+repair (test in the 705 report on this branch).
