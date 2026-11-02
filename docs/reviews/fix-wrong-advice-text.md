@@ -640,3 +640,10 @@ The round reports a code-quality finding in the fix, so by the skill's
 "Round limit" it writes no Disposition table and the merge check was not
 run. Open: R4-CQ1 (needs the code-quality pass, then a focused check of
 it) and R4-1 (a `defer` row to ticket 749 in that round's table).
+
+## Disposition (round 4)
+
+| ID     | Axis          | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                             |
+| ------ | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R4-CQ1 | Code quality  | fixed       | Fork e4bae67e6, re-pinned in 8741a765: the comments at `results_view.ts` (`PaneEmptyReason`), `ResultsPane.tsx` (`rows` prop) and `UpgradesResults.tsx` (`filteredEmpty`) say the empty-state text shows only when the main table and the below-cutoff group are both empty.                                              |
+| R4-1   | Focused check | fixed       | Ticket 749, closed. Fork 4626c5d7b, re-pinned in 8741a765: "No BiS-list item for this slot." and the `no-bis-list-row` reason are removed; such a pane shows "No items to show" / "Try widening your filters." (owner, 2026-11-02: "a generic one that can be used regardless of filters. it doesnt need tobe so long."). |
