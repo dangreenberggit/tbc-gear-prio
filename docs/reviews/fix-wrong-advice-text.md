@@ -6,6 +6,11 @@ Reviewed range: `d7bb429347f8c40b807d0659728714a34edfff90..4421129b5c040a02cb047
 
 Reviewed range: `4421129b5c040a02cb0476af63555808c5cb323c..be968c3822ae6ed03d9c9ae8dd9dbb49d84074c1`
 
+Reviewed range: `be968c3822ae6ed03d9c9ae8dd9dbb49d84074c1..096dbfc1f10ee6ea0c8a318ab9297345f871401f`
+
+Fork range, round 4: `81e803ada3caa3f60ae442771a12665fbefdd7ae..4fd85ca4a435e0f6471b6692bc01f0f2a9bedb3e`
+(commit 4fd85ca4a).
+
 Fork range, round 3: `e3dbf38fa07d224915f0d404b880cf692e4b3bfb..81e803ada3caa3f60ae442771a12665fbefdd7ae`
 (commits eee005acc, 81e803ada).
 
@@ -194,13 +199,14 @@ desktop gate (owner's environment).
 
 ## Code quality
 
-| ID  | Where                                                                             | Finding                                                                                                                                                                                                                            |
-| --- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CQ1 | fork `model/engine/rank.ts:848-872` and `:1091-1111`                              | Possible Duplicated Code: the new worn-gear read (`readStats`, finite-hit check, `hitCapBudgetFrom`, skip `StopRefusedSim`, warn, note) repeats the baseline read. A shared helper in this ported file needs the provenance cycle. |
-| CQ2 | fork `wornMetaInactive` in `rank.ts`; `meta-repair.ts:200`, `:273-278`            | Possible Duplicated Code: it copies the guard in `repairAndMinimize` and re-implements `allGemIds`; an exported predicate from `meta-repair.ts` would stop the two drifting apart.                                                 |
-| CQ3 | fork `model/shown_figure.ts` (twice), `model/set_bonus_tip.ts:82`                 | Possible Duplicated Code: `Math.round(Number(x.toFixed(1)) * 10)` written three times; `shown_figure.ts` could export the helper.                                                                                                  |
-| CQ4 | fork `model/results_view.ts` `PaneRows`, `components/ResultsPane/ResultsPane.tsx` | Possible Primitive Obsession: four booleans that cannot be true together (`noBisListRow`, `noSourceRow`, `ownedBisRow`, `ownedBisList`) drive a nested ternary; one reason union would replace them.                               |
-| CQ5 | `packages/core/test/fork-meta-repair.test.ts`, `wornWithMetaOff` comment          | Comment says the repair "puts Rigid back"; the replaced gem was Enscribed Fire Opal (30584), so it puts Rigid in.                                                                                                                  |
+| ID     | Where                                                                                                                                          | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CQ1    | fork `model/engine/rank.ts:848-872` and `:1091-1111`                                                                                           | Possible Duplicated Code: the new worn-gear read (`readStats`, finite-hit check, `hitCapBudgetFrom`, skip `StopRefusedSim`, warn, note) repeats the baseline read. A shared helper in this ported file needs the provenance cycle.                                                                                                                                                                                                                                                            |
+| CQ2    | fork `wornMetaInactive` in `rank.ts`; `meta-repair.ts:200`, `:273-278`                                                                         | Possible Duplicated Code: it copies the guard in `repairAndMinimize` and re-implements `allGemIds`; an exported predicate from `meta-repair.ts` would stop the two drifting apart.                                                                                                                                                                                                                                                                                                            |
+| CQ3    | fork `model/shown_figure.ts` (twice), `model/set_bonus_tip.ts:82`                                                                              | Possible Duplicated Code: `Math.round(Number(x.toFixed(1)) * 10)` written three times; `shown_figure.ts` could export the helper.                                                                                                                                                                                                                                                                                                                                                             |
+| CQ4    | fork `model/results_view.ts` `PaneRows`, `components/ResultsPane/ResultsPane.tsx`                                                              | Possible Primitive Obsession: four booleans that cannot be true together (`noBisListRow`, `noSourceRow`, `ownedBisRow`, `ownedBisList`) drive a nested ternary; one reason union would replace them.                                                                                                                                                                                                                                                                                          |
+| CQ5    | `packages/core/test/fork-meta-repair.test.ts`, `wornWithMetaOff` comment                                                                       | Comment says the repair "puts Rigid back"; the replaced gem was Enscribed Fire Opal (30584), so it puts Rigid in.                                                                                                                                                                                                                                                                                                                                                                             |
+| R4-CQ1 | fork `model/results_view.ts:81`, `components/ResultsPane/ResultsPane.tsx:15`, `components/UpgradesResults/UpgradesResults.tsx:87-88` (round 4) | Stale comments after 4fd85ca4a: `:81` says `PaneEmptyReason` is what a pane says "when its main table is empty", and `ResultsPane.tsx:15` says "with no main table, `emptyReason` picks the empty state's text"; both now apply only when the group is empty too (`ResultsPane.tsx:45`, and the `paneRows` doc at `results_view.ts:99-101` says so). `UpgradesResults.tsx:87-88` says "each pane says no row comes from the shown sources", but a pane whose group has rows now says nothing. |
 
 ## Summary
 
@@ -246,6 +252,15 @@ commands in the `pre-merge-review` skill step 3, at a5221e29: filed 4
 (745, 746, 747, 748), closed 3 (618, 625, 705). Filed is higher than
 closed because the review found three defects from before this branch
 (746, 747, 748) and the scope doc's Maintenance loop found 745.
+
+Round 4 (2026-11-02, focused check over the ticket 748 fix): the fix is
+correct, its tests catch its removal, and every changed string is true in
+every state checked. The round stops on one code-quality finding in the
+comments the fix left stale (R4-CQ1, under `## Code quality`), so it
+writes no Disposition table and the merge check was not run. One finding
+from before this branch is filed: R4-1, "No BiS-list item for this slot."
+is false when the run left the slot's BiS-list item out (ticket 749); its
+`defer` row goes in the next Disposition table.
 
 ## Disposition
 
@@ -494,7 +509,134 @@ check has run; this section is that check.
 
 ## Disposition (round 3)
 
-| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                                                                                                                                               |
-| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| R3-1 | Focused check | fixed       | Fork 4fd85ca4a, re-pinned in 7718f078: a pane whose main table is empty shows only its closed group when the group has rows, and "No items to show" / "Try widening your filters." when it has none; the group label names no cutoff. Words from the owner (2026-11-02); ticket 748 closed. |
-| B4   | Bookkeeping   | fixed       | a5221e29: ticket 747 now also names `upgrades_tab.assumptions.substitution_in_slot`.                                                                                                                                                                                                        |
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                      |
+| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R3-1 | Focused check | fixed       | Fork 4fd85ca4a, re-pinned in 7718f078: a pane whose main table is empty shows only its closed group when the group has rows, and "No items to show" / "Try widening your filters." when it has none; the group label names no cutoff. Words from the owner (2026-11-02); ticket 748 closed. Superseded in round 4. |
+| B4   | Bookkeeping   | fixed       | a5221e29: ticket 747 now also names `upgrades_tab.assumptions.substitution_in_slot`.                                                                                                                                                                                                                               |
+
+## Focused check (round 4)
+
+Main range `be968c38..096dbfc1`; fork range `81e803ada..4fd85ca4a`
+(`vendor/tbc-new-fork`, branch `fix/wrong-advice-text`). The branch moves
+the fork pin (`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json`
+rc=1), so the fork log was read.
+
+Dispatch note, round 4: requested by the dispatching session on
+2026-11-02 as the next focused check, over the ticket 748 fix (R3-1), with
+the owner's rule for this round: every player-facing string must be true
+in every state it shows in, judged against what else is on screen.
+`codex` was not tried; one fresh `general-task` subagent on Opus (review
+lane), with no part in writing the code, ran the four checks and the
+string check itself and wrote only this file and tickets. A
+`glm-flash-task` helper ran the fork test, type, lint, format and locale
+commands, two mutation runs in a `$TMPDIR` copy of the fork, and the main
+tests, and wrote nothing in either repo. Both trees were clean at
+dispatch (`git status --porcelain` empty in each).
+
+Results:
+
+- **Condition 1: holds.** Main a5221e29 changes tickets 747 and 748 (rows
+  B4 and R3-1 link them), `NEXT` and the map; e6455f9e and 096dbfc1 change
+  only this file and ticket 748; 7718f078 is a fork re-pin (lock and
+  `data/sim-implemented-effects.json` only). Fork 4fd85ca4a names ticket
+  748, R3-1's ticket.
+- **Condition 2: holds.** Every non-test line 4fd85ca4a changes is at a
+  place ticket 748 cites (`upgrades.json:147-148`, `ResultsPane.tsx:41-45`,
+  `UpgradesResults.tsx` comments, the `paneRows` doc) or carries an owner
+  ruling quoted in its Resolution (the group labels and their schema keys:
+  "i dont like the term "the cutoff"").
+- **Condition 3: holds.** At fork `4fd85ca4a`,
+  `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M cec2a7b68 4fd85ca4a`
+  prints only `6 0 ui/app/SimTabsSection.tsx`, and `--name-status ... | cut -f1 | sort | uniq -c`
+  prints `239 A`, `1 M`, the same as round 3. None of the 11 changed files
+  is in `docs/fork-provenance/engine.md` (`grep -c` 0 for each). The lock
+  `commit` and the `forkCommit` both read `4fd85ca4a`.
+- **Check 2 (only what the finding asks): pass,** with R4-CQ1 below.
+- **Check 3 (tests assert the finding): pass.** In a `$TMPDIR` copy,
+  baseline `ResultsPane` tests 21 passed. Deleting
+  `belowCutoff.length > 0 ? null : ` at `ResultsPane.tsx:45` fails 2: "shows
+  only the closed group, with no empty-state message, when the only row
+  gained DPS below the bar" and "shows no empty-state message beside the
+  group when Filter by source emptied the main table". Changing
+  `below_cutoff_group_bar_one` to the plural text fails 2, including "names
+  the bar as a gain in DPS on the group once a ranking is shown, never as a
+  cutoff".
+- **Check 4 (touched tests pass): pass.** Node v22.23.2. Fork
+  `vitest run ui/features/upgrades ui/app`: 85 files, 844 passed, rc=0.
+  `tsc --noEmit` rc=0; `oxlint --max-warnings 0 ./ui` rc=0; `oxfmt --check`
+  on the 11 changed files rc=0 (it checks 10; it skips
+  `schemas/upgrades.schema.json`). `node test-locales.mjs` rc=1 only on
+  `upgrades_tab/set_bonus`, ticket 747, from before this branch. Main
+  `fork-meta-repair.test.ts` and `wowsims-fork-parity.test.ts`: 36 passed,
+  rc=0, run with `node node_modules/vitest/vitest.mjs`; `pnpm -C <pair>
+exec vitest` refused to start ("This project is configured to use
+  12.16.1 of pnpm. Your current pnpm is v11.24.0").
+
+**Is each string true in every state it shows in?** Read from the code at
+fork `4fd85ca4a`; not run in the tab.
+
+- "N items that gain less than 3 DPS" (`_one`/`_other`): the group holds
+  rows that miss the bar, are not owned and are not on a BiS list
+  (`results_view.ts:114`, `:123`). Without Set potential the bar reads
+  `deltaDps`; with it, `deltaDps` plus the set credit
+  (`engine/view.ts:231-245`), the same figure the ΔDPS cell shows
+  (`DeltaCell.tsx:27`, `dpsSortKeyFor`), and `shownTenths` keeps a figure
+  under the bar from reading as the bar (ticket 618). A stopped run carries
+  the cutoff (`StoppedRanking` is a `PartialRanking`, which keeps
+  `cutoff`), so it gets this label too. True. A row that loses DPS is in
+  the group; "gains less than 3 DPS" is still true of it. BiS-list rows
+  that miss the bar sit in the main table, so the label counts the group,
+  not every row under 3 DPS on screen; it does not claim to.
+- "1 more item" / "N more items": only when the row context has no
+  ranking; `ResultsPanes` renders only for a done or stopped run, which
+  always has one (`useResultsView.ts:52`, `:68`). Not reachable in the tab.
+- "No items to show" / "Try widening your filters.": a pane with no main
+  row and no group row and no other reason, and the whole-results state of
+  a done run with no row (`UpgradesResults.tsx:91`, `:96-101`). In each,
+  no result row is on screen. A pane can reach it with rows that are all
+  owned and miss the bar (owned rows show in neither table,
+  `results_view.ts:72`, `:114`), for example a BiS-only slot whose BiS-list
+  item is worn; "No items to show" is still true there, and turning BiS
+  only off shows more. The hint is the generic one the owner asked for.
+- "No rows from the shown sources.": now only when "Filter by source"
+  emptied the pane and the group is empty too (`results_view.ts:118-119`,
+  `ResultsPane.tsx:45`, `:51`). Removing it beside a group is right: there
+  it sat above rows from the shown sources, which made it false. With the
+  group empty, no row from a shown source is on screen, so it is true; the
+  view toggles still show how many sources are hidden.
+- "No BiS-list item for this slot.": **R4-1**, below.
+- **The pane with an empty main table and a closed group.** Its slot tab
+  reads 0 and is dimmed (`ResultsPanes.tsx:72-74`); the count is rows that
+  meet the bar (`slotTabs`), and the pane shows only "N items that gain
+  less than 3 DPS", closed, which says why the count is 0. Under BiS only
+  the group is always empty (every row is on a BiS list, and BiS-list rows
+  that miss the bar go to the main table), so BiS only never shows this
+  pane. Not confusing; no finding.
+
+Findings:
+
+- **R4-1 (from before this branch).** Under BiS only, a slot pane with no
+  BiS-list row says "No BiS-list item for this slot."
+  (`upgrades.json:152`; `noBisListRow` at `results_view.ts:117`). The run's
+  candidates are cut before the sim: by the pre-run Sources settings and
+  the set prune (`settings_pool.ts:208-213`, from `run.ts:115`), and by
+  `poolFor` (missing effect, item-level floor, heroic five-man policy,
+  `pool_source.ts:153-156`); the BiS tag goes only on entries that survive
+  (`:167`). So when the player unticked the source of the slot's BiS-list
+  item, the pane says the slot has none although the BiS list names one.
+  Read from the code; not run in the tab. The text came in with fork
+  `08afcdcce` (2026-10-11) and is in the `dev` pin `05da8b9ab`. Effect:
+  false text, visible, from before this branch. Filed as ticket 749; the
+  fix is player-facing text and needs the owner's words.
+- **R4-CQ1 (code quality, in this branch's fix).** Stale comments, row
+  R4-CQ1 under `## Code quality`. It goes to the code-quality pass.
+
+Bookkeeping applied in this round: B5, the R3-1 row in
+`## Disposition (round 3)` now says "Superseded in round 4", as
+`docs/agents/known-traps.md` "Before writing a review Disposition table"
+asks.
+
+The round reports a code-quality finding in the fix, so by the skill's
+"Round limit" it writes no Disposition table and the merge check was not
+run. Open: R4-CQ1 (needs the code-quality pass, then a focused check of
+it) and R4-1 (a `defer` row to ticket 749 in that round's table).
