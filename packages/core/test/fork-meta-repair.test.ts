@@ -1051,6 +1051,8 @@ type RankedRow = {
 };
 type RunRanking = {
   complete?: boolean;
+  contentHash?: string;
+  baseline?: { metaAdjusted: boolean };
   items: RankedRow[];
   setBonusOffSims?: { skippedSteps: number; gears: number };
   setScreen?: { sets: Array<{ setId: number; pair: { dps?: number } }> };
@@ -1377,6 +1379,88 @@ describe.skipIf(!forkPresent)(
       expect(notes[0]!.field).toBe("Meta gem swaps and the hit cap");
       expect(notes[0]!.detail).toMatch(/always useful/);
       expect(notes[0]!.detail).toMatch(/level 73/);
+    });
+  }
+);
+
+/**
+ * ret-p3-p2's worn gear with the chest's Enscribed Fire Opal (30584) swapped
+ * for Bold, so the meta is off by one yellow and the worn-gear repair runs.
+ * With no hit cap it puts Rigid back; with the baseline's budget, Inscribed.
+ */
+async function wornWithMetaOff(): Promise<SimItemSpec[]> {
+  const e = await engine();
+  const worn = equipmentOf(loadFixture("ret-p3-p2"));
+  const chest = worn[CHEST]!;
+  chest.gems = chest.gems.map((g) => (g === 30584 ? BOLD : g));
+  expect(chest.gems).toEqual([BOLD, BOLD, 28363]);
+  expect(metaOf(e, socketedOf(worn)).status.kind).toBe("inactive");
+  return worn;
+}
+
+describe.skipIf(!forkPresent)(
+  "the worn-gear repair uses the hit cap (705)",
+  () => {
+    it("705-W1: with stats readable, the worn repair reads the un-repaired gear and puts Inscribed, not Rigid, in the chest", async () => {
+      const worn = await wornWithMetaOff();
+      let calls = 0;
+      const run = await runRet({
+        worn,
+        pool: S_POOL,
+        computeStats: () => {
+          calls += 1;
+          return Promise.resolve({
+            stats: [],
+            pseudoStats: pseudoStatsWithHit(BASELINE_HIT_PERCENT),
+          });
+        },
+      });
+      const baselineChest = requestItems(run.requests[0]!)[CHEST]!;
+      expect(baselineChest.gems).toEqual([BOLD, INSCRIBED, 28363]);
+      expect(run.ranking.baseline?.metaAdjusted).toBe(true);
+      expect(calls).toBe(2);
+      expect(requestItems(run.statsRequests[0]!)[CHEST]!.gems).toEqual(
+        worn[CHEST]!.gems
+      );
+    });
+
+    it("705-W2: with no computeStats, the worn repair keeps full weight and puts Rigid in the chest", async () => {
+      const worn = await wornWithMetaOff();
+      const run = await runRet({ worn, pool: S_POOL });
+      const baselineChest = requestItems(run.requests[0]!)[CHEST]!;
+      expect(baselineChest.gems).toEqual([BOLD, RIGID, 28363]);
+      expect(run.ranking.baseline?.metaAdjusted).toBe(true);
+    });
+
+    it("705-W4: when both stats reads fail, the worn repair keeps full weight and the ranking carries one hit-rating note", async () => {
+      const worn = await wornWithMetaOff();
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      let run;
+      try {
+        run = await runRet({
+          worn,
+          pool: S_POOL,
+          computeStats: () => Promise.reject(new Error("worker died")),
+        });
+      } finally {
+        warn.mockRestore();
+      }
+      const baselineChest = requestItems(run.requests[0]!)[CHEST]!;
+      expect(baselineChest.gems).toEqual([BOLD, RIGID, 28363]);
+      const notes = run.ranking.substitutions.filter(isHitCapNote);
+      expect(notes).toHaveLength(1);
+      expect(notes[0]!.field).toBe("Meta gem swaps and your hit rating");
+    });
+
+    it("705-W3: a run that reads stats is keyed apart from rankings whose worn repair used full weight", async () => {
+      const run = await runRet({
+        pool: S_POOL,
+        computeStats: baselineReadOnce(),
+      });
+      expect(run.ranking.contentHash).toContain(
+        '"metaRepairHitCap":"worn-and-candidates"'
+      );
+      expect(run.ranking.contentHash).not.toContain('"metaRepairHitCap":true');
     });
   }
 );
