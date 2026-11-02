@@ -206,6 +206,43 @@ function modelDps(
   return dps;
 }
 
+/**
+ * The model's active set bonuses in the sim's own form, `<set> (<n>pc)`
+ * (`GetActiveSetBonusNames`, sim/core/item_sets.go): a count is a bonus when
+ * the set's table names it, whatever its value. Real pieces and set-kept
+ * copies count; set-less copies do not.
+ */
+function modelSetBonusNames(
+  ids: readonly number[],
+  getSetId: (id: number) => number | undefined,
+  setBonuses: SetBonusTable = SET_BONUSES
+): string[] {
+  const setCounts = new Map<number, number>();
+  for (const id of ids) {
+    if (!id) continue;
+    const setKept = id >= SET_KEPT_OFFSET;
+    if (!setKept && id >= COPY_OFFSET) continue;
+    const setId = getSetId(setKept ? id - SET_KEPT_OFFSET : id);
+    if (setId != null) setCounts.set(setId, (setCounts.get(setId) ?? 0) + 1);
+  }
+  const names: string[] = [];
+  for (const [setId, count] of [...setCounts].sort((a, b) => a[0] - b[0])) {
+    const bonus = setBonuses[setId];
+    if (!bonus) continue;
+    for (const [n, value] of [
+      [2, bonus.b2],
+      [3, bonus.b3],
+      [4, bonus.b4],
+      [6, bonus.b6],
+      [8, bonus.b8],
+    ] as const) {
+      if (value !== undefined && count >= n)
+        names.push(`set ${setId} (${n}pc)`);
+    }
+  }
+  return names;
+}
+
 const FERAL_CHAR = { region: "US" as const, realm: "test", name: "netcase" };
 const FERAL_SUMMARY = {
   reportCode: "net001",
@@ -261,6 +298,15 @@ type Scenario = {
   seeds?: number[] | "engine-default";
   /** `RankInput.iterations`; absent means `ITERATIONS` (ticket 530). */
   iterations?: number;
+  /**
+   * The fake runner also answers `activeSetBonuses` from the scenario's set
+   * table, as the worker runner answers it from the sim (ticket 644).
+   */
+  reportsSetBonuses?: boolean;
+  /** The 0-based `activeSetBonuses` call during which the run's Stop fires. */
+  stopDuringSetBonusRead?: number;
+  /** The fake's `activeSetBonuses` rejects for gear whose equipped ids match. */
+  failSetBonusReadWhen?: (ids: readonly number[]) => boolean;
 };
 
 type ForkRanking = {
@@ -390,6 +436,8 @@ async function runScenario(scenario: Scenario): Promise<{
   callOpts: SimRunOpts[];
   /** Each of those requests, as the fake sim received it (K6B, 511-LR). */
   requests: RaidSimRequest[];
+  /** For each `activeSetBonuses` call, how many sims had run before it. */
+  setBonusReadRuns: number[];
 }> {
   const rankMod = await importForkUpgrades<{
     rankUpgrades: (
@@ -455,8 +503,13 @@ async function runScenario(scenario: Scenario): Promise<{
   const callOpts: SimRunOpts[] = [];
   const requests: RaidSimRequest[] = [];
   const { simCacheKey } = seamMod;
+  /** For each `activeSetBonuses` call, how many sims had run before it. */
+  const setBonusReadRuns: number[] = [];
   const controller =
-    scenario.stopDuringCall === undefined ? undefined : new AbortController();
+    scenario.stopDuringCall === undefined &&
+    scenario.stopDuringSetBonusRead === undefined
+      ? undefined
+      : new AbortController();
   const sim = {
     version: () => Promise.resolve(SIM_VERSION),
     run: (req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation> => {
@@ -489,6 +542,24 @@ async function runScenario(scenario: Scenario): Promise<{
           : {}),
       });
     },
+    ...(scenario.reportsSetBonuses
+      ? {
+          activeSetBonuses: (req: RaidSimRequest): Promise<string[]> => {
+            const ids = equippedIds(req);
+            setBonusReadRuns.push(runCount);
+            if (setBonusReadRuns.length - 1 === scenario.stopDuringSetBonusRead)
+              controller?.abort();
+            if (scenario.failSetBonusReadWhen?.(ids)) {
+              return Promise.reject(
+                new Error("the set-bonus read failed on purpose")
+              );
+            }
+            return Promise.resolve(
+              modelSetBonusNames(ids, getSetId, scenario.setBonuses)
+            );
+          },
+        }
+      : {}),
   };
   void simCacheKey;
 
@@ -518,7 +589,7 @@ async function runScenario(scenario: Scenario): Promise<{
     ...(controller ? { signal: controller.signal } : {}),
   });
 
-  return { ranking, runCount, calls, callOpts, requests };
+  return { ranking, runCount, calls, callOpts, requests, setBonusReadRuns };
 }
 
 /** A full 17-slot worn set, some slots filled by the given specs. */
@@ -3468,9 +3539,10 @@ describe.skipIf(!forkPresent)(
         setBonuses: { ...SET_BONUSES, 462: { b2: 40, b4: 0 } },
         measureBrokenSetValue: true,
       });
+      // No bonus is in reach, so the set has no entry (ticket 644).
       expect(
         (r.setBonuses ?? []).map((b) => [b.setId, b.threshold, b.unmeasured])
-      ).toEqual([[462, 2, "insufficient-pieces"]]);
+      ).toEqual([]);
       expect(r.setStepSims?.gears).toBe(0);
     });
   }
@@ -3498,6 +3570,8 @@ const SR_SCENARIO: Scenario = {
     { itemId: THUNDERHEART.legs, slot: "legs" },
   ],
   measureBrokenSetValue: true,
+  // The production runner always reads the active bonuses.
+  reportsSetBonuses: true,
 };
 
 const SCREEN_PAIR_N = [10, 100, 300, 1000];
@@ -3637,6 +3711,7 @@ describe.skipIf(!forkPresent)(
         interactions: [{ ids: Object.values(JUSTICAR), dps: 17 }],
         measureBrokenSetValue: true,
         setScreen: "record",
+        reportsSetBonuses: true,
       });
       const screen = r.setScreen!;
       expect(screen.sets.map((s) => [s.setId, s.worn, s.reach])).toEqual([
@@ -3967,6 +4042,7 @@ const SB_SCENARIO: Scenario = {
     629: { b2: 20, b4: 0 },
   },
   measureBrokenSetValue: true,
+  reportsSetBonuses: true,
 };
 
 // 511-SD: worn Gauntlets of Malorne (Malorne at 1). Malorne's three pool
@@ -3998,6 +4074,7 @@ const SD_SCENARIO: Scenario = {
   ]),
   setBonuses: { ...SET_BONUSES, 586: { b2: 20, b4: 0 } },
   measureBrokenSetValue: true,
+  reportsSetBonuses: true,
 };
 
 type ScreenRuleMod = {
@@ -4148,24 +4225,10 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
     expect(
       off.calls.filter((ids) => wearsCopyOf(ids, justicar)).length
     ).toBeGreaterThan(2);
-    // One marker entry for the dropped set.
+    // The dropped set has no entry (ticket 644); the screen records it.
     expect(
-      (on.ranking.setBonuses ?? [])
-        .filter((b) => b.setId === 626)
-        .map((b) => ({
-          threshold: b.threshold,
-          packageItemIds: b.packageItemIds,
-          packageDeltaDps: b.packageDeltaDps,
-          unmeasured: b.unmeasured,
-        }))
-    ).toEqual([
-      {
-        threshold: 2,
-        packageItemIds: [],
-        packageDeltaDps: 0,
-        unmeasured: "screened-out",
-      },
-    ]);
+      (on.ranking.setBonuses ?? []).filter((b) => b.setId === 626)
+    ).toEqual([]);
     // Its rows keep their single-swap figure, breaks and crossing, and get
     // no Set potential.
     expect(droppedRowParts(on.ranking, justicar)).toEqual(
@@ -4222,7 +4285,7 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
       [640, true, "top-k"],
       [676, true, "top-k"],
     ]);
-    // The band set's gain side runs; the dropped set has only the marker.
+    // The band set's gain side runs; the dropped set has no entry (644).
     const justicar2 = bonusOf(on.ranking, 626, 2);
     expect(justicar2?.unmeasured).toBeUndefined();
     expect(justicar2?.sameGearDps).toBeCloseTo(20, 9);
@@ -4230,7 +4293,7 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
       (on.ranking.setBonuses ?? [])
         .filter((b) => b.setId === 629)
         .map((b) => [b.threshold, b.unmeasured])
-    ).toEqual([[2, "screened-out"]]);
+    ).toEqual([]);
   });
 
   it("511-SD: a set whose best case loses to current gear is dropped, even below K", async () => {
@@ -4248,7 +4311,9 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
     ).toEqual([
       [586, 0, 2, 20, -4.75],
       [640, 1, 4, 110, -5],
-      [676, 0, 3, 50, 20],
+      // The pool fills 3 Thunderheart slots, but the sim lists no 3pc bonus,
+      // so the reach is the 2pc (ticket 644).
+      [676, 0, 2, 50, 20],
     ]);
     expect(verdictsOf(screen)).toEqual([
       [586, true, "top-k"],
@@ -4279,7 +4344,7 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
       (on.ranking.setBonuses ?? [])
         .filter((b) => b.setId === 640)
         .map((b) => [b.threshold, b.unmeasured])
-    ).toEqual([[2, "screened-out"]]);
+    ).toEqual([]);
   });
 
   it("511-SA: a set whose screen readings failed is kept and measured as with the screen off", async () => {
@@ -4921,6 +4986,7 @@ const STOP_SCENARIOS: ReadonlyArray<readonly [string, Scenario]> = [
       pool: TH_POOL.filter((p) => p.slot !== "hands"),
       measureBrokenSetValue: true,
       setScreen: "on",
+      reportsSetBonuses: true,
     },
   ],
   [
@@ -4933,6 +4999,7 @@ const STOP_SCENARIOS: ReadonlyArray<readonly [string, Scenario]> = [
         { itemId: NEUTRAL.legs[0], slot: "legs" },
       ],
       measureBrokenSetValue: true,
+      reportsSetBonuses: true,
     },
   ],
 ];
@@ -4976,6 +5043,33 @@ describe.skipIf(!forkPresent)("Stop after the candidate loop (533)", () => {
       }
     }, 120_000);
   }
+
+  it("644-S: a Stop during any set-bonus read sends no further sim, writes no warning, and returns the last-candidate Stop result", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      for (const [name, scenario] of STOP_SCENARIOS) {
+        const full = await runScenario(scenario);
+        expect(full.setBonusReadRuns.length, name).toBeGreaterThan(1);
+        const before = await runScenario({
+          ...scenario,
+          stopDuringCall: firstSetPhaseCall(full.calls) - 1,
+        });
+        for (let j = 0; j < full.setBonusReadRuns.length; j++) {
+          warn.mockClear();
+          const at = `${name}, Stop during read ${j}`;
+          const stopped = await runScenario({
+            ...scenario,
+            stopDuringSetBonusRead: j,
+          });
+          expect(stopped.runCount, at).toBe(full.setBonusReadRuns[j]);
+          expect(stopped.ranking, at).toEqual(before.ranking);
+          expect(warn, at).not.toHaveBeenCalled();
+        }
+      }
+    } finally {
+      warn.mockRestore();
+    }
+  }, 120_000);
 
   it("533-R: a Stop during any replication sim sends no further sim and returns the last-candidate Stop result", async () => {
     const scenario: Scenario = {
@@ -5646,3 +5740,205 @@ describe.skipIf(!forkPresent)(
     });
   }
 );
+
+/* ------------------------------------------------------------------ *
+ * Counts a set has no bonus at (ticket 644). Thunderheart Harness 676 has
+ * bonuses at 2 and 4 only (sim/druid/item_sets.go), as SET_BONUSES models.
+ * ------------------------------------------------------------------ */
+
+const countsOf = (ranking: ForkRanking, setId: number) =>
+  (ranking.setBonuses ?? [])
+    .filter((b) => b.setId === setId)
+    .map((b) => b.threshold);
+const crossingCountsOf = (ranking: ForkRanking, setId: number) =>
+  (ranking.crossingGates ?? [])
+    .filter((g) => g.setId === setId)
+    .map((g) => g.count);
+const futureCountsOf = (ranking: ForkRanking, setId: number) =>
+  ranking.items
+    .filter((r) => r.setContext?.setId === setId)
+    .flatMap((r) =>
+      (r.setContext?.futureBonuses ?? []).map((f) => f.threshold)
+    );
+
+describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
+  it("644-A: the gain side tries only the counts the sim lists for the set", async () => {
+    // Scenario kind: a worn set whose pool reaches past its last bonus.
+    // Example: Thunderheart worn at 2 (head, shoulder) with four more
+    // pieces in the pool, so the pool reaches 6.
+    const scenario: Scenario = {
+      worn: wornGear({
+        head: THUNDERHEART.head,
+        shoulder: THUNDERHEART.shoulder,
+      }),
+      pool: [
+        { itemId: THUNDERHEART.chest, slot: "chest" },
+        { itemId: THUNDERHEART.hands, slot: "hands" },
+        { itemId: THUNDERHEART.legs, slot: "legs" },
+        { itemId: THUNDERHEART.wrist, slot: "wrist" },
+      ],
+      measureBrokenSetValue: true,
+    };
+    const unread = await runScenario(scenario);
+    const read = await runScenario({ ...scenario, reportsSetBonuses: true });
+    // Without the sim's list, every count up to the reach is tried.
+    expect(countsOf(unread.ranking, 676)).toEqual([3, 4, 5, 6]);
+    expect(crossingCountsOf(unread.ranking, 676)).toEqual([3]);
+    // With it, only the 4pc.
+    expect(countsOf(read.ranking, 676)).toEqual([4]);
+    expect(crossingCountsOf(read.ranking, 676)).toEqual([]);
+    expect(new Set(futureCountsOf(read.ranking, 676))).toEqual(new Set([4]));
+    // The 4pc itself is measured as before.
+    expect(bonusOf(read.ranking, 676, 4)).toEqual(
+      bonusOf(unread.ranking, 676, 4)
+    );
+  });
+
+  it("644-B: a set with every bonus worn gets no entry, and its rows keep their set detail", async () => {
+    // Scenario kind: the fixture feral-p5-th4pc (ticket 644): Thunderheart
+    // worn at 4 with more pieces in the pool. Before the fix the ranking
+    // listed a Thunderheart entry at 5.
+    const scenario: Scenario = {
+      worn: wornGear({
+        head: THUNDERHEART.head,
+        shoulder: THUNDERHEART.shoulder,
+        chest: THUNDERHEART.chest,
+        hands: THUNDERHEART.hands,
+      }),
+      pool: [
+        { itemId: THUNDERHEART.legs, slot: "legs" },
+        { itemId: THUNDERHEART.wrist, slot: "wrist" },
+        { itemId: THUNDERHEART.waist, slot: "waist" },
+      ],
+      measureBrokenSetValue: true,
+      reportsSetBonuses: true,
+    };
+    const { ranking } = await runScenario(scenario);
+    expect(countsOf(ranking, 676)).toEqual([]);
+    expect(crossingCountsOf(ranking, 676)).toEqual([]);
+    for (const id of [
+      THUNDERHEART.legs,
+      THUNDERHEART.wrist,
+      THUNDERHEART.waist,
+    ]) {
+      const row = thRow(ranking, id);
+      expect(row.setContext?.setId).toBe(676);
+      expect(row.setContext?.piecesWornBefore).toBe(4);
+      expect(row.setContext?.futureBonuses ?? []).toEqual([]);
+    }
+  });
+
+  it("644-C: no ranking entry names a count the set lacks, with the set screen on", async () => {
+    // Scenario kind: the tab's own settings (screen on). Example: 644-A's
+    // gear, and 644-B's.
+    // Exact lists, so a change that dropped every entry fails here too. Worn
+    // at 2, only the 4pc is in reach; worn at 4, no bonus is.
+    for (const [worn, counts] of [
+      [{ head: THUNDERHEART.head, shoulder: THUNDERHEART.shoulder }, [4]],
+      [
+        {
+          head: THUNDERHEART.head,
+          shoulder: THUNDERHEART.shoulder,
+          chest: THUNDERHEART.chest,
+          hands: THUNDERHEART.hands,
+        },
+        [],
+      ],
+    ] as const) {
+      const { ranking } = await runScenario({
+        worn: wornGear(worn),
+        pool: [
+          { itemId: THUNDERHEART.legs, slot: "legs" },
+          { itemId: THUNDERHEART.wrist, slot: "wrist" },
+          { itemId: THUNDERHEART.waist, slot: "waist" },
+          { itemId: THUNDERHEART.feet, slot: "feet" },
+        ],
+        measureBrokenSetValue: true,
+        setScreen: "on",
+        reportsSetBonuses: true,
+      });
+      expect(countsOf(ranking, 676)).toEqual(counts);
+      expect(crossingCountsOf(ranking, 676)).toEqual([]);
+      expect(new Set(futureCountsOf(ranking, 676))).toEqual(new Set(counts));
+    }
+  });
+
+  it("644-D: a set whose bonus read fails gets no entry and no count tried, and a warning names it", async () => {
+    // Scenario kind: 644-A's gear (the pool reaches 6), with the read of the
+    // largest package's gear failing, or the read of the worn gear.
+    const scenario: Scenario = {
+      worn: wornGear({
+        head: THUNDERHEART.head,
+        shoulder: THUNDERHEART.shoulder,
+      }),
+      pool: [
+        { itemId: THUNDERHEART.chest, slot: "chest" },
+        { itemId: THUNDERHEART.hands, slot: "hands" },
+        { itemId: THUNDERHEART.legs, slot: "legs" },
+        { itemId: THUNDERHEART.wrist, slot: "wrist" },
+      ],
+      measureBrokenSetValue: true,
+      reportsSetBonuses: true,
+    };
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      for (const failSetBonusReadWhen of [
+        (ids: readonly number[]) => ids.includes(THUNDERHEART.wrist),
+        () => true,
+      ]) {
+        warn.mockClear();
+        const { ranking } = await runScenario({
+          ...scenario,
+          failSetBonusReadWhen,
+        });
+        expect(countsOf(ranking, 676)).toEqual([]);
+        expect(crossingCountsOf(ranking, 676)).toEqual([]);
+        expect(futureCountsOf(ranking, 676)).toEqual([]);
+        for (const id of [THUNDERHEART.chest, THUNDERHEART.legs]) {
+          expect(thRow(ranking, id).setContext?.setId).toBe(676);
+        }
+        expect(
+          warn.mock.calls.some(([line]) => String(line).includes("set 676"))
+        ).toBe(true);
+      }
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it("644-R: a set whose largest package fails gem repair gets no entry and no count tried, and a warning names it", async () => {
+    // Scenario kind: each piece's single can switch the meta gem on, the
+    // package's gear cannot. Example: Malorne Harness 640 over gemless gear.
+    // The worn Gloves of Dexterous Manipulation have two sockets, so the
+    // Stag-Helm's single has three to recolour for its meta; the package puts
+    // the socketless Gauntlets of Malorne in their place and leaves only the
+    // helm's own, which is too few (as 512-C finds for the Thunderheart Cover).
+    const GLOVES_TWO_SOCKETS = 28506;
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const { ranking } = await runScenario({
+        worn: wornGear({ hands: GLOVES_TWO_SOCKETS }),
+        pool: [
+          { itemId: MALORNE.head, slot: "head" },
+          { itemId: MALORNE.hands, slot: "hands" },
+        ],
+        measureBrokenSetValue: true,
+        reportsSetBonuses: true,
+      });
+      for (const id of [MALORNE.head, MALORNE.hands]) {
+        expect(thRow(ranking, id).setContext?.setId).toBe(640);
+      }
+      expect(countsOf(ranking, 640)).toEqual([]);
+      expect(futureCountsOf(ranking, 640)).toEqual([]);
+      expect(
+        warn.mock.calls.some(([line]) =>
+          String(line).includes(
+            "set 640: its bonus counts were not read, the package's gem repair failed"
+          )
+        )
+      ).toBe(true);
+    } finally {
+      warn.mockRestore();
+    }
+  });
+});

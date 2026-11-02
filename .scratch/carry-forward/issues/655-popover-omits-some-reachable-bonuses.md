@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, follow-on of 336 (scope bucket for the orchestrator to set)
 Type: bug
 Origin: pre-merge review of feat/tab-set-bonus (docs/reviews/feat-tab-set-bonus.md, findings A1 and P1), 2026-10-15
@@ -46,3 +46,87 @@ reachable bonus nowhere. Both behaved this way before that commit.
 3. A `pnpm tab-review` capture at 1280 and 375 px of 29097 on
    `feral-p3-th-hands-legs` with the toggle on and of 30990 on `ret-p3-p2`
    in both states.
+
+## 2026-11-01: the owner's rulings and what was built
+
+### The owner's words, verbatim
+
+Case 1. The session proposed listing the Malorne 4pc under "Not counted" as
+"Malorne 4-piece (adds Mantle and Greaves of Malorne): 11.5 DPS less than
+stopping at the 2-piece." The owner replied:
+
+> "The wording isn't great. It could just show that the 4 piece is that amount (negative) but ehh okk
+> I do not like your wording it's lame"
+
+Case 2. The session offered: "Option A adds a popover that lists each bonus
+under "Not counted". The mock-ups are images 9 and 10 ... They use the words
+"too small to measure", and you can name different words. Option B keeps
+today's behaviour." The owner replied:
+
+> "Case 2 a sounds fine"
+
+### The session's reading and rule (the session's words, not the owner's)
+
+- Reading of the case 1 reply: with the toggle on, list each eligible step
+  past the stop under "Not counted", after the Total, with one figure: that
+  step's gear DPS minus the stop's gear DPS (Malorne 4pc: -11.5). No
+  explanatory sentence. The Total stays the row's figure. Toggle off does not
+  change.
+- Rule: every "Not counted" line, in both toggle states, shows how much the
+  row's figure would change if the tab counted that step in place of what it
+  counts now. Toggle off, Gauntlets of Malorne: 2pc 90.2 DPS more and 4pc 78.7
+  DPS more, against a Total of -110.9. Toggle on: 4pc 11.5 DPS less, against
+  a Total of -20.7. The case 1 line uses the same label and figure format as
+  the toggle-off line.
+
+### What was built
+
+- Case 1: fork `tbc-new-fork@fba7e1ad9` ("List set bonuses past the stop with
+  the toggle on"), re-pinned in `tbc-gear-prio@fe1fb2dc`.
+- Case 2: fork `tbc-new-fork@5b9182ed0` ("Name set bonuses within the noise
+  in the popover"), re-pinned in `tbc-gear-prio@10866ee1`. It replaces the
+  test "gives nothing in either state for a future below the noise gate".
+- `pnpm verify` rc=0 after each re-pin, with node v22.23.2 (logs:
+  `.scratch/agent-reports/2026-11-01-verify-655-case1.log` and
+  `-case2.log` in the pair, gitignored).
+
+Popover text for the recorded rows, from `setBonusTipLines` and
+`setBonusTipText` over `.scratch/655-snapshots/work/th-hands-legs-trim.json`
+and `ret-p2-trim.json` (gitignored; text saved in
+`.scratch/655-snapshots/work/case12-built-popover-text.txt`). The text is from
+the tab's own functions, not from a rendered page:
+
+```
+29097 Gauntlets of Malorne, toggle on:
+  Item stats                          -16.7
+  Breaks Thunderheart Harness 2pc     -94.2
+  Set potential
+  Breastplate of Malorne (2pc)        +90.2
+  Total                               -20.7
+  Not counted
+  Malorne Harness 4pc with Mantle of Malorne, Breastplate of Malorne and Greaves of Malorne   11.5 DPS less
+30990 Lightbringer Breastplate, toggle off and on (the same):
+  Total                               +3.9
+  Not counted
+  Lightbringer Battlegear 2pc         too small to measure
+  Lightbringer Battlegear 4pc         too small to measure
+```
+
+### Captures and close
+
+Check 3 is met. `pnpm tab-review` captured each entry in its own run (a fresh
+browser profile, because the Set potential setting persists between entries),
+from fork 5b9182ed0, at 1280 and 375 px: 29097 on `feral-p3-th-hands-legs`
+with the toggle on, and 30990 on `ret-p3-p2` with the toggle off and on. Each
+run reported `"outcome":"captured","errors":0`, and each `facts.json` shows
+the toggle state named and the popover text quoted above. PNGs (gitignored):
+`.scratch/655-snapshots/case1-built-{1280,375}.png` and
+`case2-built-{off,on}-{1280,375}.png`. Manifests and logs:
+`.scratch/655-snapshots/work/built-runs/`. This sandbox forbids Unix sockets,
+so the runs used the two stand-ins the 2026-11-01 snapshot run used:
+`PATH=/tmp/claude-1000/shim:$PATH` (runs `npx tsx X` as `node --import tsx X`)
+and `PLAYWRIGHT_BROWSERS_PATH=/tmp/claude-1000/pwb` (runs Playwright's
+headless shell). Neither is committed.
+
+Verified by: `tbc-new-fork@5b9182ed0` and `tbc-gear-prio@10866ee1`, with
+`pnpm verify` rc=0 and the captures above.
