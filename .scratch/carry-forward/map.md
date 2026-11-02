@@ -421,3 +421,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 741 `pnpm -C <other checkout>` fails when the two checkouts pin different pnpm versions (pre-merge review chore/pnpm-12.16.1, A3) 2026-11-01
 - 743 An empty read-only `.git/config.lock` in the main checkout blocks every git config write (pre-merge review fix/prepush-git-env, I2) 2026-11-01
 - 744 The pre-push hook clears nothing and still runs verify when `git rev-parse --local-env-vars` fails (pre-merge review fix/prepush-git-env, R2-1) 2026-11-01; CLOSED 2026-11-01, the hook exits 1 when that command fails; `python scripts/check_gate_git_env.py` checks it
+- 745 The tab scope doc has no row for 17 open tickets (filed on branch fix/wrong-advice-text, from the Maintenance loops of docs/upgrades-tab-scope.md) 2026-11-02
+- 746 Meta-gem repair counts hit at full value, with no note, for every spec but ret and feral (pre-merge review fix/wrong-advice-text, D1) 2026-11-02

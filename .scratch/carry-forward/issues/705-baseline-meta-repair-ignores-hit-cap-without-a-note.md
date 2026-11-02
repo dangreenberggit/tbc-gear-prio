@@ -52,5 +52,7 @@ gear gives the worn-gear repair its own hit budget; the cache field
 `metaRepairHitCap` is now `"worn-and-candidates"`, so a ranking cached under
 the old rule is not served. The note for fights where not every target is
 level 73 now ends "because this tab works out the hit cap only when every
-target is level 73." No committed recording changes: none runs the worn
-repair (test in the 705 report on this branch).
+target is level 73." No committed recording changes. The implementer's
+check (a throwaway test, run and deleted, not committed): on each of the
+6 committed recordings, the worn repair with no hit cap and with
+`remaining` -1000, 0 and +1000 made 0 swaps.
