@@ -352,3 +352,26 @@ skill's "Round limit" the review ends here with no `## Disposition
 (round 2)` table. The owner decides: fix R2-CQ6 and R2-CQ7 (a small
 fork change, a re-pin, then a further focused check), or allow them as
 `defer` rows with tickets.
+
+## Disposition (round 2)
+
+The brief that dispatched this rework (2026-11-02) said to fix R2-CQ6 and
+R2-CQ7 and not to run a further round; no further focused check has run.
+
+| ID     | Axis         | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ------ | ------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R2-CQ6 | Code quality | fixed       | Fork 81e803ada: `oxfmt` on `model/set_bonus_tip.ts` (the double blank line and the `line(...)` call); the round-2 re-run command now prints no diff for the file. Re-pinned in de8b0e45.                                                                                                                                                                                                                                                            |
+| R2-CQ7 | Code quality | fixed       | Fork eee005acc: the already-worn reason is gone (row 625 below), so the test "says no BiS-list item before no shown source, and no shown source before no upgrades" (`results_view.test.ts`) pins the order that remains, including the worn-helm-plus-hidden-source pane, which gets `'no-source-row'`; with the first two reasons swapped in `paneRows` it fails. The `.not.toBe` reason assertions are now exact `.toBe`. Re-pinned in de8b0e45. |
+| 625    | Owner        | fixed       | Fork eee005acc reworks ticket 625 after the owner's ruling (below): the `owned-bis-row` and `owned-bis-list` reasons, their locale keys and schema properties are gone, so those panes show "No upgrades found" again, and the hint under it now says "Widen your filters to consider more items." Ticket 625's Done when and Resolution are rewritten. Re-pinned in de8b0e45.                                                                      |
+| B2     | Bookkeeping  | wontfix     | Rewording the round-1 commits would move every fork sha and need another re-pin; the round-1 Disposition table links each one. The round-2 commits (eee005acc, 81e803ada, de8b0e45) name their finding IDs or ticket.                                                                                                                                                                                                                               |
+| B3     | Bookkeeping  | fixed       | Ticket 747 is recorded under `## Focused check (round 2)` above.                                                                                                                                                                                                                                                                                                                                                                                    |
+
+The owner's words on ticket 625, 2026-11-02: "I think the issue is "phase
+or content filter" is too specific and narrown". Earlier in the same
+exchange, on the text that replaced "No upgrades found": "This sounds
+dumb" and "This isn't for an item the users character already has
+equipped". Background: `.scratch/agent-reports/2026-11-02-general-task-owner-meaning-625.md`
+in the main checkout.
+
+The round-1 CQ4 row says `emptyReason` has five values; after eee005acc
+it has three (`no-bis-list-row`, `no-source-row`, `no-upgrades`).

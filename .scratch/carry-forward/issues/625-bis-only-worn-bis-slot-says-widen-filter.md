@@ -32,16 +32,27 @@ owned BiS-list row in `view.rows`, so the slot kept its tab and showed the
 same text (`git -C vendor/tbc-new-fork show c4696b091:ui/features/upgrades/model/results_view.ts`,
 `slotTabs` and `paneRows`).
 
-Done when: under BiS only, a slot whose BiS-list rows are all owned shows a
-text that says so (for example "You already have this slot's BiS-list
-item."), with a test in `results_view.test.ts` or `ResultsPanes.test.tsx`,
-and the locale key has its property in `schemas/upgrades.schema.json`.
+Done when: the "No upgrades found" body names no single filter. The owner
+ruled on 2026-11-02: "I think the issue is "phase or content filter" is too
+specific and narrown". In the same exchange the owner rejected the earlier
+fix, the text "You already wear a BiS-list item in this slot." ("This sounds
+dumb"; "This isn't for an item the users character already has equipped").
+So a BiS-only pane whose BiS-list rows are all worn keeps the generic empty
+state, and the body reads "Every candidate simmed at or below your current
+gear. Widen your filters to consider more items." A test in
+`ResultsPane.test.tsx` pins the new body, and a test in
+`results_view.test.ts` pins that such a pane gets the `no-upgrades` reason.
 
 ## Resolution
 
-Verified by: tbc-new-fork@10e2d0f98; `cd vendor/tbc-new-fork && node node_modules/vitest/vitest.mjs run ui/features/upgrades/model/results_view.test.ts ui/features/upgrades/components/ResultsPane/ResultsPane.test.tsx`
-Closed on branch `fix/wrong-advice-text` (2026-11-02). Under BiS only, a slot
-pane whose BiS-list rows are all worn now shows "You already wear a BiS-list
-item in this slot." and the Shopping list pane in the same state shows "You
-already wear every BiS-list item that was simmed." The tests include one on
-the `ret-p3-p2` recording's neck pane.
+Verified by: tbc-new-fork@eee005acc; `cd vendor/tbc-new-fork && node node_modules/vitest/vitest.mjs run ui/features/upgrades/model/results_view.test.ts ui/features/upgrades/components/ResultsPane/ResultsPane.test.tsx`
+Closed on branch `fix/wrong-advice-text` (2026-11-02), reworked after the
+owner's ruling above. Fork eee005acc removes the `owned-bis-row` and
+`owned-bis-list` empty reasons, their locale keys and schema properties, so
+those panes show "No upgrades found" again. It changes the body under that
+heading, in the slot panes and in the whole-results empty state, from
+"Every candidate simmed at or below your current gear. Widen the phase or
+content filter to consider more items." to "Every candidate simmed at or
+below your current gear. Widen your filters to consider more items." The
+`ret-p3-p2` recording's neck pane under BiS only is pinned to `no-upgrades`.
+Re-pinned in main de8b0e45.
