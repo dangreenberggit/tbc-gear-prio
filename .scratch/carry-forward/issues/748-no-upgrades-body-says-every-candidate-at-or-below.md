@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/fix-wrong-advice-text.md (round 3, R3-1)
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
@@ -51,3 +51,43 @@ fork `2c88a1192` (2026-10-08). That branch changed only the second sentence
 The body under "No upgrades found" is true in each case above, the owner has
 approved the words (player-facing text, one plain sentence in player words),
 and a test pins the body for a pane with a below-cutoff row that gained DPS.
+
+## Resolution
+
+Closed on branch `fix/wrong-advice-text`, 2026-11-02.
+
+Verified by: `tbc-new-fork@4fd85ca4a`, re-pinned in `tbc-gear-prio@7718f078`;
+`npx vitest run ui/features/upgrades ui/app` in the pair's fork (85 files,
+844 tests passed) and `pnpm verify` in the pair (exit 0, its fork tests at
+4fd85ca4a: 68 files, 761 tests passed).
+
+The owner's rulings, 2026-11-02, word for word as the coordinator passed them on:
+
+- "q5: the recommednation is fine. correct the line that precedes this branch so it's accurate"
+  (the recommendation was "Nothing beat your current gear by the cutoff.";
+  that sentence is false under BiS only, so it was not used)
+- "neither. a generic one that can be used regardless of filters. it doesnt need tobe so long."
+- "i dont like the term "the cutoff". they dont know a cutoff exists and we shouldnt have to explain it either. the wrods should just be better"
+- "there could be upgrades but below the cutoff. so it's now lying. that's not a solutjuon either"
+  (the owner then approved the design below)
+- "the gorup shouldnt start open"
+
+What changed (fork `assets/locales/en/upgrades.json`, `ResultsPane.tsx`):
+
+- A pane whose main table is empty but whose below-cutoff group has rows
+  shows no empty-state message, only the group, closed, under its label.
+- A pane with no row at all, and the whole-results empty state, show
+  "No items to show" / "Try widening your filters." (was "No upgrades found" /
+  "Every candidate simmed at or below your current gear. Widen your filters to
+  consider more items.").
+- The group label is "1 item that gains less than {{abs}} DPS" /
+  "{{count}} items that gain less than {{abs}} DPS" (was "{{count}} item(s)
+  below the {{abs}} DPS cutoff"), and "1 more item" / "{{count}} more items"
+  when no ranking is known (was "{{count}} item(s) below the cutoff"); the
+  tab always has the ranking, so that second form shows only in tests.
+
+The test `ResultsPane.test.tsx`, "shows only the closed group, with no
+empty-state message, when the only row gained DPS below the bar", pins case 1
+(`fixtureRow(5)`, +2.91 under 3 DPS). Case 3 cannot happen: BiS only is
+offered only when some row is on a BiS list (`results_view.ts` `offeredToggles`,
+`appliedToggles`).

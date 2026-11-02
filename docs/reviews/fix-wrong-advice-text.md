@@ -494,7 +494,7 @@ check has run; this section is that check.
 
 ## Disposition (round 3)
 
-| ID   | Axis          | Disposition | Ticket / note                                                                                                                               |
-| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| R3-1 | Focused check | defer       | .scratch/carry-forward/issues/748-no-upgrades-body-says-every-candidate-at-or-below.md — from before this branch; the words need the owner. |
-| B4   | Bookkeeping   | fixed       | a5221e29: ticket 747 now also names `upgrades_tab.assumptions.substitution_in_slot`.                                                        |
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                                                                                                                                               |
+| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R3-1 | Focused check | fixed       | Fork 4fd85ca4a, re-pinned in 7718f078: a pane whose main table is empty shows only its closed group when the group has rows, and "No items to show" / "Try widening your filters." when it has none; the group label names no cutoff. Words from the owner (2026-11-02); ticket 748 closed. |
+| B4   | Bookkeeping   | fixed       | a5221e29: ticket 747 now also names `upgrades_tab.assumptions.substitution_in_slot`.                                                                                                                                                                                                        |
