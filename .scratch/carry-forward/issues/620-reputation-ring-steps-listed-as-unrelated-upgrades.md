@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
 Type: task
 Origin: SME reads of ticket 254 output (live tab capture .scratch/rank-reports/sme-254-tab-boundary.png on fork 316326a95; report .scratch/rank-reports/sme-254-slamaltman.html from .scratch/rank-reports/stage2-close-slamaltman.json), triaged 2026-10-11
@@ -39,7 +39,51 @@ a time is game knowledge; hypothesis, untested here.
 
 ## Acceptance
 
-- [ ] Rows from one quest-upgrade chain are shown as steps of one item, each
+- [x] Rows from one quest-upgrade chain are shown as steps of one item, each
       naming its standing, in the report and in the tab.
-- [ ] Whether lower steps are collapsed is decided and recorded in this
+- [x] Whether lower steps are collapsed is decided and recorded in this
       ticket.
+
+## Owner rulings (2026-11-03, verbatim)
+
+- On ring steps: "each step as its own item, which is true, being displayed
+  that way, is fine. showing i level seems like a fine idea"
+- On the half about the command-line ranking report in this repo: "we are
+  working on the upgrades tab, not other shit in tbc gear prio (is that "shit
+  repo"?) but rather the upgrades tab and the fork."
+
+The analysis behind the rulings is
+`.scratch/agent-reports/2026-11-03-general-task-620-ruling-prep.md`
+(gitignored), option B. It also corrects this ticket: the tab reads wowsims'
+db.json, which gives the 28 ring-step items no source and no standing, so the
+tab cannot name a standing without a second item source; and the Violet Eye
+rings have the same problem (8 rows named "Violet Signet").
+
+## Closing note
+
+- **Grouping the steps and naming standings (acceptance 1, tab half):** closed
+  by the first ruling. Each step stays its own row. No steps are collapsed or
+  hidden, which answers acceptance 2.
+- **The report half (acceptance 1, "in the report"):** closed by the second
+  ruling, out of scope.
+- **What was built instead:** every row of the Upgrades tab, in the main table
+  and in the fold-out of items that gain less than 3 DPS, shows "ILvl N" under
+  the item name, beside its badges. "ILvl" is the word wowsims' gear picker
+  uses for its item-level column, and N is read as the picker reads it (db.json
+  `scalingOptions` key 0). Two "Band of Eternity" rows now read "ILvl 136" and
+  "ILvl 135". The level does not follow standing order (Honored 29299 is 136,
+  Revered 29300 is 135, db.json), so the tab still does not say which standing
+  a row needs. An item the site's database gives no level shows no line.
+
+Verified by: tbc-new-fork@594d07f66 (the item-level line) and
+tbc-gear-prio@70b66f35, with these commands from the pair root:
+
+```
+env -C vendor/tbc-new-fork npx vitest run ui/features/upgrades/components/ResultsTable/ResultRow.test.tsx -t "item.level"
+pnpm layout-gate:check
+```
+
+The vitest run passes the three item-level cases in `ResultRow.test.tsx`; the
+layout gate passes check 22 (every row shows its item level on one line below
+the name, at least 2 px clear) at 375, 653, 768 and 1280 on all six mock
+fixtures.
