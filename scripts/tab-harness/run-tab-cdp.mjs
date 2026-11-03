@@ -439,7 +439,9 @@ const readResults = `(async () => {
 				item: text(tds[1]).split('\\n')[0].trim(),
 				slot: text(slot),
 				dps: number(text(dps).split('\\n')[0]),
-				source: text(tds[4]),
+				// The cell joins a zone to its "(N)" with a no-break space so it never wraps alone (ticket 607);
+				// the desktop gate keys rows on this text, so it reads a plain space as the golden recorded it.
+				source: text(tds[4]).replace(/\\u00a0/g, ' '),
 				belowCutoff: inGroup || tr.getAttribute('data-not-upgrade') === 'true',
 			};
 		});
