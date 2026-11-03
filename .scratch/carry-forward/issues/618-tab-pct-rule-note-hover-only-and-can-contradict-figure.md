@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
 Type: bug
 Origin: SME reads of ticket 254 output (live tab capture .scratch/rank-reports/sme-254-tab-boundary.png on fork 316326a95; report .scratch/rank-reports/sme-254-slamaltman.html from .scratch/rank-reports/stage2-close-slamaltman.json), triaged 2026-10-11
@@ -46,3 +46,13 @@ The original ticket (SME read of ticket 254's output) found the "by % rule"
 note readable only by mouse hover, not naming the bar in DPS, and able to
 sit beside a figure at or above the absolute bar. The note is gone
 (tbc-new-fork@be3d703a1), and the group title now names the bar in DPS.
+
+## Resolution
+
+Verified by: tbc-new-fork@e707b1403; `cd vendor/tbc-new-fork && node node_modules/vitest/vitest.mjs run ui/features/upgrades/model/shown_figure.test.ts ui/features/upgrades/utils/format.test.ts ui/features/upgrades/components/ResultsTable/ResultRow.test.tsx ui/features/upgrades/model/set_bonus_tip.test.ts`
+Closed on branch `fix/wrong-advice-text` (2026-11-02). A positive figure
+below the cutoff bar that would round to the bar now shows one tenth under
+it ("+2.9" for 2.96 against 3), in the cell, in the set-bonus popover's total
+and the receipt lines that add up to it, and in the Set potential popover's
+line marked as the row's figure, with Set potential on and off. Every other
+figure is unchanged.
