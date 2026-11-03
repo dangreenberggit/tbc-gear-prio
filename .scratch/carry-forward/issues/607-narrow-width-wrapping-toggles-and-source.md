@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b
 Type: task
 Origin: Chunk 3b step 7 regression check (commit c5741e2c)
@@ -45,3 +45,37 @@ upstream edit.
 - At 653, 768 and 1280 px "(N)" never sits alone on a line in the Source
   column.
 - A `pnpm tab-review` capture of each, at the four widths.
+
+## Closed (2026-11-03)
+
+Fixed on branch `fix/narrow-width-607-603` by fork commit
+`tbc-new-fork@2bedbf6b7`, pinned in `data/wowsims-fork.lock.json`. No
+upstream file changed.
+
+1. The two toggles and "Filter by source" are one wrapping group after the
+   "View options" title (`ViewToggles.tsx`). At 375 px the title sits on
+   its own line and both toggles share the next line.
+2. The Source cell draws every boss drop itself, as it already did for
+   overrun npc names, and joins the zone and its difficulty mark with a
+   no-break space (`SourceCell.tsx`, `zoneWithMark` and `keepMarkWithZone`
+   in `utils/format.ts`). A narrow cell now breaks "Tempest Keep (N)" as
+   "Tempest" / "Keep (N)". Row heights still vary with the source text;
+   the acceptance did not ask for equal heights.
+
+The layout gate now checks both: check 20 (both toggles on one line) and
+check 21 (no Source line holds only a mark), at all four widths. Against
+the unfixed fork `13a980cf3` both failed on every fixture that has them.
+
+Verified by:
+
+```
+PATH=/tmp/claude-1000/shim:$PATH PLAYWRIGHT_BROWSERS_PATH=/tmp/claude-1000/pwb pnpm layout-gate:check
+PATH=/tmp/claude-1000/shim:$PATH PLAYWRIGHT_BROWSERS_PATH=/tmp/claude-1000/pwb pnpm tab-review .scratch/agent-reports/2026-11-03-tab-review/manifest.json
+```
+
+Both run from the pair's main worktree. The layout gate passed with exit 0
+on 2026-11-03. The captures `607-toggles-post-run-<w>-0.png`,
+`607-source-offhand-post-run-<w>-0.png` and
+`607-source-many-post-run-<w>-0.png` for w = 375, 653, 768 and 1280 are
+in that gitignored folder; a fresh checkout rebuilds them with the second
+command.
