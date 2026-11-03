@@ -133,7 +133,7 @@ const check = (id, width, ok, detail) => {
 // run counts what each measured at each width across all fixtures and fails
 // the check where the count stays 0 (the ticket 425 lesson).
 const subjects = new Map();
-const measuredSubjects = (id, width, count) => {
+const addToSubjectCount = (id, width, count) => {
   if (!subjects.has(id)) subjects.set(id, new Map());
   const byWidth = subjects.get(id);
   byWidth.set(width, (byWidth.get(width) ?? 0) + count);
@@ -245,7 +245,10 @@ const postRunExpression = `(async () => {
 			if (lines.some(l => MARK.test(l.text))) markCells++;
 			if (lines.some(l => LONE_MARK.test(l.text.trim()))) loneMark.push(lines.map(l => l.text.trim()).join(' / '));
 		}
-		// The gap is measured to the name's last line of text, so a badge pulled up into that line counts as a gap below zero rather than as a badge beside the name.
+		// A badge counts as below the name when its top is past the middle of the name's last line of text; one higher up
+		// sits beside the name and is skipped. The gap is measured to that line's bottom, so a badge pulled partly up into
+		// it reads as a gap below zero. ItemNameCell puts the badges in a grid row of their own, so a skipped badge means
+		// that layout broke; if every badge were skipped, the empty-count guard after the fixture loop fails the check.
 		const itemName = tr.querySelector('[data-testid="upgrades-item-name"]');
 		const nameLines = itemName ? (() => { const r = document.createRange(); r.selectNodeContents(itemName); return [...r.getClientRects()].filter(x => x.width > 0); })() : [];
 		const lastLine = nameLines.at(-1);
@@ -501,18 +504,18 @@ function judgePostRun(width, m, facts) {
       columnGap: m.columnGap,
     });
   if (BADGE_WIDTHS.includes(width)) {
-    measuredSubjects(19, width, m.badgeGaps.measured);
+    addToSubjectCount(19, width, m.badgeGaps.measured);
     check(19, width, m.badgeGaps.tight.length === 0, m.badgeGaps);
   }
   const bothToggles = m.toggleTops.length === 2;
-  measuredSubjects(20, width, bothToggles ? 1 : 0);
+  addToSubjectCount(20, width, bothToggles ? 1 : 0);
   check(
     20,
     width,
     !bothToggles || Math.abs(m.toggleTops[0] - m.toggleTops[1]) <= TOL,
     { toggleTops: m.toggleTops }
   );
-  measuredSubjects(21, width, m.marks.cells);
+  addToSubjectCount(21, width, m.marks.cells);
   check(21, width, m.marks.loneCount === 0, m.marks);
   facts.push({
     fact: "a1-below-cutoff-column-offsets",
