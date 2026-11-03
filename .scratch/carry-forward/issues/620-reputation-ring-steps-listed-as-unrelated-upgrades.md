@@ -39,10 +39,13 @@ a time is game knowledge; hypothesis, untested here.
 
 ## Acceptance
 
-- [x] Rows from one quest-upgrade chain are shown as steps of one item, each
-      naming its standing, in the report and in the tab.
+- [ ] ~~Rows from one quest-upgrade chain are shown as steps of one item, each
+      naming its standing, in the report and in the tab.~~ Not built: the
+      owner's 2026-11-03 rulings below set it aside.
 - [x] Whether lower steps are collapsed is decided and recorded in this
       ticket.
+- [x] Added by the first ruling: every Upgrades-tab row shows its item level
+      under its name.
 
 ## Owner rulings (2026-11-03, verbatim)
 
@@ -55,9 +58,11 @@ a time is game knowledge; hypothesis, untested here.
 The analysis behind the rulings is
 `.scratch/agent-reports/2026-11-03-general-task-620-ruling-prep.md`
 (gitignored), option B. It also corrects this ticket: the tab reads wowsims'
-db.json, which gives the 28 ring-step items no source and no standing, so the
-tab cannot name a standing without a second item source; and the Violet Eye
-rings have the same problem (8 rows named "Violet Signet").
+db.json, which gives the 32 ring-step items (29276-29291 and 29294-29309) no
+source and no standing, so the tab cannot name a standing without a second
+item source; 28 of them reach the pool, because the pool keeps epics only and
+the 4 Friendly Violet Signets are rare. The Violet Eye rings have the same
+problem (8 rows named "Violet Signet").
 
 ## Closing note
 
@@ -72,8 +77,17 @@ rings have the same problem (8 rows named "Violet Signet").
   uses for its item-level column, and N is read as the picker reads it (db.json
   `scalingOptions` key 0). Two "Band of Eternity" rows now read "ILvl 136" and
   "ILvl 135". The level does not follow standing order (Honored 29299 is 136,
-  Revered 29300 is 135, db.json), so the tab still does not say which standing
+  Revered 29300 is 135: levels from db.json, standings from
+  `data/atlasloot_sources.json`), so the tab still does not say which standing
   a row needs. An item the site's database gives no level shows no line.
+- **What the level does not tell apart:** it separates the steps of one ring
+  chain, not steps of different chains. The four Scale of the Sands chains
+  give 12 "Band of Eternity" items only four levels in db.json: 128 (29294,
+  29298, 29302, 29307), 136 (29295, 29299, 29303, 29306), 135 (29300, 29304)
+  and 144 (29296, 29308). So four rows still read "Band of Eternity" and
+  "ILvl 136", four read "Band of Eternity" and "ILvl 128", and only the
+  Wowhead tooltip tells the rows of each group apart. The 8 "Violet
+  Signet" rows show two levels, 110 and 120.
 
 Verified by: tbc-new-fork@594d07f66 (the item-level line) and
 tbc-gear-prio@70b66f35, with these commands from the pair root:
