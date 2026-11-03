@@ -6,6 +6,11 @@ Fork range (vendor/tbc-new-fork, branch `fix/narrow-width-607`):
 `13a980cf39b81b08f065e90dd000f710a2160e83..2bedbf6b7cdc14428f76a71a8776e11fbed06768`
 (one commit; the lock names `2bedbf6b7` with `"pushed": false`).
 
+Reviewed range: `f8ea455a523384deb75e2ea33db2a58413a140b0..d06482d599f7ec7e8f5079b174d60b35a9943b94`
+
+Round 2 fork range: `2bedbf6b7cdc14428f76a71a8776e11fbed06768..b88572dc42912efe8d21760c42be7304e3985cb1`
+(one commit; the lock names `b88572dc4` with `"pushed": false`).
+
 ## Dispatch note
 
 - Tooling check: `python scripts/check_merge_ready.py --product-files`
@@ -181,3 +186,60 @@ Tickets so far: filed 0, closed 2 (603, 607).
 | P3  | Spec      | wontfix     | Within 607's ask (the tab's own cell, no upstream file changed); the test gap it opens is A1                                                   |
 | S6  | Standards | wontfix     | The tip is green and the next commit fixes it; the broken gate is outside `pnpm verify`; rewriting branch history to split it buys nothing now |
 | S7  | Standards | wontfix     | A habit already in the repo (ticket 655); the commands record what ran on this machine, which is what `Verified by:` is for                    |
+
+## Focused check (round 2)
+
+Ranges: main `f8ea455a..d06482d5` (commits `1bcb372b`, `d06482d5`);
+fork `2bedbf6b7..b88572dc4` (one commit). One fresh `general-task` agent
+on Opus ran the check and wrote nothing.
+
+1. **Conditions 1 to 3: fail on condition 1.**
+   - `1bcb372b` changes only this file and ticket 607; it passes.
+   - Fork `b88572dc4` names A1, S2, S3 and S5 in its message; it passes.
+   - `d06482d5` names only A1 ("whose new test compares the Source cell's
+     copy of upstream's drop link with upstream (review A1)"). It also
+     holds the A2 comment and the S4 rename in
+     `scripts/tab-harness/test-layout.mjs`, and it is not a re-pin as
+     `docs/agents/pre-merge-review-project.md` § Focused check defines one,
+     because it changes a file under `scripts/`.
+   - Condition 2 holds except for R2-2 below. Condition 3 holds:
+     `git -C vendor/tbc-new-fork diff --name-only --diff-filter=M cec2a7b68 <c>`
+     lists only `ui/app/SimTabsSection.tsx` at both `2bedbf6b7` and
+     `b88572dc4`.
+2. **Only what each finding asks: pass, with R2-2.** The A2 comment
+   (`test-layout.mjs:248-251`) matches the code and the empty-count guard;
+   no `measuredSubjects` is left in `scripts/`; S5 cuts the two comments;
+   the A1 note in `docs/fork-upstream-touchpoints.md` names the copy. S2:
+   `zoneWithMark` gives the same output as before for all 13
+   `DungeonDifficulty` values and for 999 (a temporary vitest run, rc 0,
+   42 cases); `Unknown` is one of `DIFFICULTY_MARKS`.
+3. **Each new test asserts its finding: pass.** `SourceCell.test.tsx`
+   compares the whole `outerHTML` of the tab's link with upstream
+   `ItemSource`'s (class, href, rel, target, `data-whtticon`, zone and mark
+   line, boss and category line). It also asserts `&nbsp;(`, so it fails
+   when `dropSource` falls back to `ItemSource`. The mutation run
+   `.scratch/agent-reports/2026-11-03-sourcecell-test-mismatch.txt`
+   (gitignored) failed 1 of 4 cases with the category separator changed.
+   Not covered (hypothesis, untested): every case has `otherName: ''`, so a
+   change upstream makes to the order of its `npc` and `otherName` branches
+   would not fail it.
+4. **Tests the fixes touch pass.** Node v22.23.2;
+   `npx vitest run ui/features/upgrades/components/ResultsTable ui/features/upgrades/utils`
+   in the fork: rc 0, 12 files, 139 tests.
+
+Findings:
+
+- **R2-1 (bookkeeping).** `d06482d5`'s message does not name A2 or S4,
+  the fixes it holds in `scripts/tab-harness/test-layout.mjs`.
+- **R2-2 (not bookkeeping; no change in behaviour).** Fork
+  `ui/features/upgrades/utils/format.ts:116` changes `NO_BREAK_SPACE` from
+  the raw character to `' '`. S3 cited only `format.test.ts`, and
+  round 1's Standards report said the raw character in `format.ts` was not
+  a finding. The value is the same: the old line held the bytes C2 A0
+  (`git show 2bedbf6b7:ui/features/upgrades/utils/format.ts | od -c`).
+
+Outcome: condition 1 failed and the check found a finding that is not
+bookkeeping, so the skill's Round limit rule applies. The review stops
+here: there is no round-2 Disposition table and no merge check. A1 and
+the code-quality rows A2 and S2-S5 have no Disposition row yet. The owner
+decides what happens next.
