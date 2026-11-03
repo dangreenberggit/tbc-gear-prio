@@ -43,8 +43,9 @@
 //         "(N)" (ticket 607);
 //     (22) every row, in the main table and the below-cutoff group, shows
 //         its item level on one line below the name's last line of text,
-//         at least 2 px clear of it (ticket 620: two reputation-ring steps
-//         share a name, and the level tells the rows apart);
+//         at least 2 px clear of it (ticket 620: the level tells two steps
+//         of one reputation-ring chain apart; steps of different chains can
+//         share a name and a level);
 //     19-22 also fail at a width where no fixture gave them anything to
 //     measure, so they cannot pass with nothing checked (ticket 425);
 //     the A1 fact: how far each below-cutoff column sits from its head;
