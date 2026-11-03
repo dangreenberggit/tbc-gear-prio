@@ -8,6 +8,11 @@ Reviewed range: `4421129b5c040a02cb0476af63555808c5cb323c..be968c3822ae6ed03d9c9
 
 Reviewed range: `be968c3822ae6ed03d9c9ae8dd9dbb49d84074c1..096dbfc1f10ee6ea0c8a318ab9297345f871401f`
 
+Reviewed range: `096dbfc1f10ee6ea0c8a318ab9297345f871401f..40051a16c572453c3c4a6d9b8f01182e4a1d296a`
+
+Fork range, round 5: `4fd85ca4a435e0f6471b6692bc01f0f2a9bedb3e..4626c5d7b3908d2b690fefc7cae39b62938ffbd9`
+(commits e4bae67e6, 4626c5d7b).
+
 Fork range, round 4: `81e803ada3caa3f60ae442771a12665fbefdd7ae..4fd85ca4a435e0f6471b6692bc01f0f2a9bedb3e`
 (commit 4fd85ca4a).
 
@@ -261,6 +266,15 @@ writes no Disposition table and the merge check was not run. One finding
 from before this branch is filed: R4-1, "No BiS-list item for this slot."
 is false when the run left the slot's BiS-list item out (ticket 749); its
 `defer` row goes in the next Disposition table.
+
+Round 5 (2026-11-02, focused check over the R4-CQ1 comment fix and the
+ticket 749 fix): both fixes are correct, the touched tests pass, and every
+remaining empty-state text is true in every state checked. The new
+`hadRowBeforeSourceCut` guard is needed and its slot arm is tested, but
+its `tab === SHOPPING_LIST_TAB` arm is not: R5-1, a missing test in lines
+this branch wrote, so the round stops there, writes no Disposition table,
+and the merge check was not run. Bookkeeping B6 (the R4-CQ1 row's wording)
+is applied.
 
 ## Disposition
 
@@ -643,7 +657,151 @@ it) and R4-1 (a `defer` row to ticket 749 in that round's table).
 
 ## Disposition (round 4)
 
-| ID     | Axis          | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                             |
-| ------ | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| R4-CQ1 | Code quality  | fixed       | Fork e4bae67e6, re-pinned in 8741a765: the comments at `results_view.ts` (`PaneEmptyReason`), `ResultsPane.tsx` (`rows` prop) and `UpgradesResults.tsx` (`filteredEmpty`) say the empty-state text shows only when the main table and the below-cutoff group are both empty.                                              |
-| R4-1   | Focused check | fixed       | Ticket 749, closed. Fork 4626c5d7b, re-pinned in 8741a765: "No BiS-list item for this slot." and the `no-bis-list-row` reason are removed; such a pane shows "No items to show" / "Try widening your filters." (owner, 2026-11-02: "a generic one that can be used regardless of filters. it doesnt need tobe so long."). |
+| ID     | Axis          | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                   |
+| ------ | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R4-CQ1 | Code quality  | fixed       | Fork e4bae67e6, re-pinned in 8741a765: the comments at `results_view.ts` (`PaneEmptyReason`) and `ResultsPane.tsx` (`rows` prop) say the empty-state text shows only when the main table and the below-cutoff group are both empty, and the one at `UpgradesResults.tsx` (`filteredEmpty`) says each pane can say why it is empty (`paneRows`). |
+| R4-1   | Focused check | fixed       | Ticket 749, closed. Fork 4626c5d7b, re-pinned in 8741a765: "No BiS-list item for this slot." and the `no-bis-list-row` reason are removed; such a pane shows "No items to show" / "Try widening your filters." (owner, 2026-11-02: "a generic one that can be used regardless of filters. it doesnt need tobe so long.").                       |
+
+## Focused check (round 5)
+
+Main range `096dbfc1..40051a16`; fork range `4fd85ca4a..4626c5d7b`
+(`vendor/tbc-new-fork`, branch `fix/wrong-advice-text`). The branch moves
+the fork pin (`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json`
+rc=1), so the fork log was read.
+
+Dispatch note, round 5: requested by the dispatching session on
+2026-11-02 as the next focused check, over the R4-CQ1 comment fix and the
+ticket 749 fix, with the owner's rule for this round: every player-facing
+string must be true in every state it shows in, judged against what else
+is on screen, and no "cutoff" in player text. `codex` was not tried; one
+fresh `general-task` subagent on Opus (review lane), with no part in
+writing the code, ran the four checks and the string check itself and
+wrote only this file. A `glm-flash-task` helper ran the fork test, type,
+lint, format and locale commands and four mutation runs in a `$TMPDIR`
+copy of the fork, and wrote nothing in either repo. Both trees were clean
+at dispatch (`git status --porcelain` empty in each).
+
+Results:
+
+- **Condition 1: holds.** Main ef04f0a7 changes this file, ticket 749
+  (row R4-1 links it), `NEXT` and the map; 40051a16 changes only this file
+  and ticket 749; 8741a765 is a fork re-pin (`data/wowsims-fork.lock.json`
+  and `data/sim-implemented-effects.json`, one line each for the commit,
+  plus the lock's `_comment`). Fork e4bae67e6 names R4-CQ1; 4626c5d7b names
+  ticket 749, R4-1's ticket.
+- **Condition 2: holds.** e4bae67e6 changes only the three comments R4-CQ1
+  cites. 4626c5d7b removes the key, its schema entry and its
+  `EMPTY_BODY_KEYS` line (`upgrades.json:152`, `ResultsPane.tsx:51`, both
+  cited by ticket 749), the `no-bis-list-row` reason and the `bisOnly` flag
+  only it read (`results_view.ts:117`, cited; `grep` finds no other reader
+  of `bisOnly` under `ui/`), and adds `hadRowBeforeSourceCut` on the next
+  line, which keeps the job the removed `noBisListRow` did for a slot with
+  no row before the source cut.
+- **Condition 3: holds.** At fork `4626c5d7b`,
+  `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M cec2a7b68 4626c5d7b`
+  prints only `6 0 ui/app/SimTabsSection.tsx`, and `--name-status ... | cut -f1 | sort | uniq -c`
+  prints `239 A`, `1 M`, the same as round 4. None of the 7 changed files
+  is in `docs/fork-provenance/engine.md` (`grep -c` 0 for each). The lock
+  `commit` and the `forkCommit` both read `4626c5d7b`.
+- **Check 2 (only what the finding asks): pass.** The 749 fix removes the
+  false text and its reason and nothing else on screen changes, except
+  through the guard below, which is needed.
+- **Check 3 (tests assert the finding): pass for the 749 text; see R5-1
+  for the guard.** `ResultsPanes.test.tsx` "under BiS only gives a slot
+  with no BiS-list row the generic empty text, never that the slot has no
+  BiS-list item" pins the on-screen text. The ticket's "Done when" asks for
+  a slot whose BiS-list item the Sources settings left out of the run; the
+  test's chest slot has no BiS-list row, and `paneRows` reads only the
+  run's rows, so the two cannot differ on screen. Agreed. Mutation runs in
+  a `$TMPDIR` copy, `vitest run ui/features/upgrades/model/results_view.test.ts ui/features/upgrades/components`:
+  control 205 passed, 1 skipped, rc=0. M1, `(rows.length === 0 && hadRowBeforeSourceCut)`
+  to `rows.length === 0` at `results_view.ts:120`: 1 fails, "under BiS
+  only, says no row comes from the shown sources only for a slot that had
+  a BiS-list row before the source cut". M3,
+  `view.slotsBeforeSourceCut?.includes(tab) === true` to `true` at `:119`:
+  the same test fails. M2, dropping `tab === SHOPPING_LIST_TAB ||` at
+  `:119`: every test passes (R5-1).
+- **Check 4 (touched tests pass): pass.** Node v22.23.2. Fork
+  `npx vitest run ui/features/upgrades ui/app`: 85 files, 844 passed, rc=0.
+  `tsc --noEmit` rc=0; `oxlint --max-warnings 0 ./ui` rc=0; `oxfmt --check`
+  on the 7 changed files rc=0. `node test-locales.mjs` rc=1 only on
+  `upgrades_tab/set_bonus` ("must NOT have additional properties"), ticket
+  747, from before this branch. Main `fork-meta-repair.test.ts` and
+  `wowsims-fork-parity.test.ts` with `node node_modules/vitest/vitest.mjs`:
+  36 passed, rc=0.
+
+**The `hadRowBeforeSourceCut` guard** (`results_view.ts:119-121`).
+
+- Needed: yes. Without it, removing `noBisListRow` would leave
+  `sourceCutEmptied = rows.length === 0 || ...`, so under BiS only with a
+  source hidden, a slot that had no BiS-list row before the cut would say
+  "No rows from the shown sources.", blaming the filter for a pane BiS
+  only emptied. M1 shows the test sees this.
+- Correct: yes. `sourcesView` builds `slotsBeforeSourceCut` from the rows
+  it is given (`:222`), which under BiS only are already the BiS-list rows
+  (`resultsViewFor` cuts BiS only first, `:246`), so it names exactly the
+  slots that had a BiS-list row. Without BiS only every slot tab comes from
+  a row before the cut (`tabSlots`, `:221`), so the guard changes nothing
+  there. The Upgrades pane arm is right because `sourcesView` sets
+  `sourcesHidden` only when it cut at least one row (`:219`), so that pane
+  always had a row before the cut.
+- Tested: the slot arm, yes (M1, M3). The Upgrades pane arm, no (R5-1).
+
+**Is each remaining empty text true in every state it shows in?** Read
+from the code at fork `4626c5d7b`; not run in the tab. No player text
+under `upgrades_tab.results` contains "cutoff" (`assets/locales/en/upgrades.json:144-157`).
+
+- "No items to show" / "Try widening your filters.": a pane with no main
+  row, no group row and no source-cut reason, and the whole-results state
+  of a done run with no row and no hidden source (`UpgradesResults.tsx:91`,
+  `:96-101`). The new state from 749 is a BiS-only slot with no BiS-list
+  row: nothing is on screen, and BiS only is on, so the hint names a
+  filter the player can widen. True. The state where no filter can be
+  widened needs a slot whose every candidate is worn: `owned` means
+  equipped (`engine/rank.ts:1330`) and the pool is every item the player
+  can equip at the phase (`pool_source.ts:210-222` `buildPool`, from
+  `db.getAllItems()`), so a slot tab almost always has an unworn row in its
+  main table or group (hypothesis, untested: not driven in the tab).
+- "No rows from the shown sources.": now only when "Filter by source"
+  emptied the pane, the group is empty, and the pane had a row before the
+  cut (a slot in `slotsBeforeSourceCut`, or the Upgrades pane). With the
+  group empty, no row from a shown source is on screen, so it is true.
+  One state reads oddly but stays true: under BiS only, a slot whose one
+  BiS-list row is worn shows "No items to show" (ticket 625); hiding that
+  row's source changes the text to "No rows from the shown sources." This
+  comes from the `rows.length === 0` arm, which is older than this branch,
+  and ticket 648's rule covers only a cut that leaves rows behind. No
+  finding.
+- "N items that gain less than 3 DPS" and "1 more item" / "N more items":
+  not changed in this range; round 4 judged them.
+- "No ranking yet", "Rows appear here as their sims finish." and "No
+  candidate list for Phase N": not changed on this branch (the last came in
+  with fork af93190ba, an ancestor of the `dev` pin `05da8b9ab`); not
+  judged in this round.
+
+Findings:
+
+- **R5-1 (missing test, in this branch's fix).** Fork
+  `ui/features/upgrades/model/results_view.ts:119`: the
+  `tab === SHOPPING_LIST_TAB ||` arm of `hadRowBeforeSourceCut` has no
+  test; with it removed every test passes (M2). It decides the Upgrades
+  pane's text when "Filter by source" removes every row of a run whose
+  rows all missed the bar (so `panesWithMainBeforeSourceCut` is empty):
+  with the arm the pane says "No rows from the shown sources.", without it
+  "No items to show". Both texts are true there, so nothing on screen is
+  wrong today; the arm is new code in 4626c5d7b with nothing to keep it.
+  Suggested fix: one `results_view.test.ts` case, a ranking whose rows are
+  all below the bar and not on a BiS list, `bySource` hiding every source,
+  expecting `paneRows(view, SHOPPING_LIST_TAB).emptyReason` to be
+  `'no-source-row'`, run once with the arm removed to see it fail. By the
+  skill's step 3 a missing test this branch introduced blocks the merge
+  until it is fixed or the owner allows a deferral.
+
+Bookkeeping applied in this round: B6, the R4-CQ1 row in
+`## Disposition (round 4)` said all three comments say the empty text
+shows only when both tables are empty; the `UpgradesResults.tsx` one says
+each pane can say why it is empty (`paneRows`). The row now says so.
+
+The round reports a finding other than bookkeeping, so by the skill's
+"Round limit" it writes no Disposition table and the merge check was not
+run. Open: R5-1 (one test, then a focused check of it).
