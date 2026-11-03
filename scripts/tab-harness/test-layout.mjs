@@ -41,7 +41,11 @@
 //         neither wraps alone under the "View options" title (ticket 607);
 //     (21) no line of a Source cell holds only a difficulty mark such as
 //         "(N)" (ticket 607);
-//     19-21 also fail at a width where no fixture gave them anything to
+//     (22) every row, in the main table and the below-cutoff group, shows
+//         its item level on one line below the name's last line of text,
+//         at least 2 px clear of it (ticket 620: two reputation-ring steps
+//         share a name, and the level tells the rows apart);
+//     19-22 also fail at a width where no fixture gave them anything to
 //     measure, so they cannot pass with nothing checked (ticket 425);
 //     the A1 fact: how far each below-cutoff column sits from its head;
 //     axe once, at 653, on one fixture only (mock-set-bonus when it is
@@ -129,7 +133,7 @@ const check = (id, width, ok, detail) => {
   );
 };
 
-// Checks 19-21 pass on a fixture that has nothing for them to measure, so the
+// Checks 19-22 pass on a fixture that has nothing for them to measure, so the
 // run counts what each measured at each width across all fixtures and fails
 // the check where the count stays 0 (the ticket 425 lesson).
 const subjects = new Map();
@@ -188,6 +192,7 @@ const postRunExpression = `(async () => {
 		await sleep(200);
 	}
 	const multiLine = [], clipped = [], pastCell = [], figureOutside = [], midWord = [], badgeGaps = [], loneMark = [];
+	const ilvlLines = { measured: 0, missing: [], wrapped: [], tight: [] };
 	let markCells = 0;
 	const MARK = /\\([^()\\s]+\\)/, LONE_MARK = /^\\([^()\\s]+\\)$/;
 	let firstDelta = null;
@@ -258,6 +263,16 @@ const postRunExpression = `(async () => {
 			if (b.top >= lastLine.top + lastLine.height / 2) gaps.push(b.top - lastLine.bottom);
 		}
 		if (gaps.length > 0) badgeGaps.push({ item: itemName.textContent.slice(0, 40), gap: Math.round(Math.min(...gaps) * 10) / 10 });
+		// Check 22: every fixture row is a preset item that db.json gives a level, so a row without the line is a defect.
+		const ilvl = tr.querySelector('[data-testid="upgrades-item-ilvl"]');
+		const rowName = itemName?.textContent.slice(0, 40) ?? tr.dataset.itemId;
+		if (!ilvl || !lastLine) ilvlLines.missing.push(rowName);
+		else {
+			ilvlLines.measured++;
+			const gap = Math.round((ilvl.getBoundingClientRect().top - lastLine.bottom) * 10) / 10;
+			if (lineCount(ilvl) > 1) ilvlLines.wrapped.push(rowName + ': ' + ilvl.textContent);
+			if (gap < BADGE_GAP_MIN) ilvlLines.tight.push({ item: rowName, gap });
+		}
 		for (const td of tr.children) checkCell(td);
 		for (const el of tr.querySelectorAll('*')) if (isClipped(el)) clipped.push(name(el));
 		if (below) {
@@ -287,6 +302,7 @@ const postRunExpression = `(async () => {
 		figureOutside: figureOutside.slice(0, 10), midWord: midWord.slice(0, 10), firstDelta,
 		badgeGaps: { measured: badgeGaps.length, tight: badgeGaps.filter(g => g.gap < BADGE_GAP_MIN).slice(0, 10), min: badgeGaps.length ? Math.min(...badgeGaps.map(g => g.gap)) : null },
 		marks: { cells: markCells, lone: loneMark.slice(0, 10), loneCount: loneMark.length },
+		ilvl: { measured: ilvlLines.measured, missing: ilvlLines.missing.slice(0, 10), missingCount: ilvlLines.missing.length, wrapped: ilvlLines.wrapped.slice(0, 10), tight: ilvlLines.tight.slice(0, 10) },
 		toggleTops: ['upgrades-view-set-potential', 'upgrades-view-only-bis'].map(byTestId).filter(shown).map(el => Math.round(el.getBoundingClientRect().top)),
 		counts: [multiLine.length, clipped.length, pastCell.length, figureOutside.length, midWord.length],
 		a1: { measuredRows: groupRowsMeasured, offsets, maxAbs: Math.max(0, ...offsets.map(Math.abs)) },
@@ -517,6 +533,15 @@ function judgePostRun(width, m, facts) {
   );
   addToSubjectCount(21, width, m.marks.cells);
   check(21, width, m.marks.loneCount === 0, m.marks);
+  addToSubjectCount(22, width, m.ilvl.measured);
+  check(
+    22,
+    width,
+    m.ilvl.missingCount === 0 &&
+      m.ilvl.wrapped.length === 0 &&
+      m.ilvl.tight.length === 0,
+    m.ilvl
+  );
   facts.push({
     fact: "a1-below-cutoff-column-offsets",
     fixture: currentFixture,
