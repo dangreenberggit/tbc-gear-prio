@@ -208,6 +208,24 @@ Tickets: this range filed 0 and closed 1 (620)
 and the `Status: closed` count). Against `dev...HEAD`, which includes the
 stacked branch, filed 0 and closed 3 (603, 607, 620).
 
+Merge check (`pnpm merge-to-dev --check-only`, logs under `$TMPDIR/r620/`
+of the reviewing agent, not kept):
+
+- Run 1 at `df22da24`, load average 21 at the start: verify passed
+  (`gates: 1573 ran, 0 skipped`, layout skipped on the unchanged digest
+  `d91768075a97`); merge-ready failed on the A2 Disposition row, whose
+  backquoted `||` the parser read as column breaks. `59bbbbdb` rewrote
+  the row.
+- Run 2 at `59bbbbdb`, load 45 at the start: rc 1 at the verify step,
+  "vitest exited nonzero, but its JSON report lists no failed test or
+  file"; the report says `success: true`, 1529 passed, 2 todo, 0 failed.
+- Run 3 (the one rerun), load 48 at the start: rc 1, same step, same
+  message. `packages/core/test/fork-meta-repair.test.ts` took 133 s and
+  143 s as a whole file in runs 2 and 3; ticket 683 (closed) traced the
+  same message to a long synchronous case in that file. That machine load brings back ticket 683's RPC timeout is a
+  hypothesis, untested: `run_verify.mjs` prints only the JSON report's
+  failures, so vitest's own error line is not in the log.
+
 ## Disposition
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                     |
