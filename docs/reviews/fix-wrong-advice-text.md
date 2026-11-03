@@ -805,3 +805,9 @@ each pane can say why it is empty (`paneRows`). The row now says so.
 The round reports a finding other than bookkeeping, so by the skill's
 "Round limit" it writes no Disposition table and the merge check was not
 run. Open: R5-1 (one test, then a focused check of it).
+
+## Disposition (round 5)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ---- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R5-1 | Focused check | fixed       | Fork 13a980cf3, re-pinned in 85c7ee8d: `results_view.test.ts` "says the Upgrades pane has no row from the shown sources when the filter hid every row, all of them below the cutoff" (two rows below the cutoff, on no BiS list, both sources hidden) expects `'no-source-row'`. With the `tab === SHOPPING_LIST_TAB` arm of `hadRowBeforeSourceCut` removed it fails (`expected 'no-upgrades' to be 'no-source-row'`). |
