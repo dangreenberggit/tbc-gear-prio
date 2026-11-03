@@ -64,7 +64,11 @@ upstream file changed.
 
 The layout gate now checks both: check 20 (both toggles on one line) and
 check 21 (no Source line holds only a mark), at all four widths. Against
-the unfixed fork `13a980cf3` both failed on every fixture that has them.
+the unfixed fork `13a980cf3` check 20 failed at 375 px on all six
+fixtures, and check 21 failed on four of them; the other two
+(`mock-dropped-list`, `mock-set-bonus`) had no mark that wrapped alone
+(`.scratch/agent-reports/2026-11-03-layout-red-unfixed-fork.txt`,
+gitignored).
 
 Verified by:
 
@@ -77,5 +81,6 @@ Both run from the pair's main worktree. The layout gate passed with exit 0
 on 2026-11-03. The captures `607-toggles-post-run-<w>-0.png`,
 `607-source-offhand-post-run-<w>-0.png` and
 `607-source-many-post-run-<w>-0.png` for w = 375, 653, 768 and 1280 are
-in that gitignored folder; a fresh checkout rebuilds them with the second
-command.
+in that gitignored folder. The `manifest.json` the second command reads
+is gitignored too, so another checkout needs a new `pnpm tab-review`
+manifest to rebuild them.
