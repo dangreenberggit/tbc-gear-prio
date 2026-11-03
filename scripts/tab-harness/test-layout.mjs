@@ -35,6 +35,14 @@
 //         popup (the component's own rule), and above it otherwise, never
 //         left or below, inside the viewport either way (ticket 605; the
 //         ticket 495 ruling, kept by Q-606-popover-side);
+//     (19) at 375 and 653, a BiS badge below an item name clears the name's
+//         last line of text by at least 2 px (tickets 423 and 603);
+//     (20) the "Set potential" and "BiS only" toggles share one line, so
+//         neither wraps alone under the "View options" title (ticket 607);
+//     (21) no line of a Source cell holds only a difficulty mark such as
+//         "(N)" (ticket 607);
+//     19-21 also fail at a width where no fixture gave them anything to
+//     measure, so they cannot pass with nothing checked (ticket 425);
 //     the A1 fact: how far each below-cutoff column sits from its head;
 //     axe once, at 653, on one fixture only (mock-set-bonus when it is
 //     rendered, else the first), as before the pass had more than one.
@@ -69,6 +77,9 @@ const POST_RUN_AXE_WIDTH = 653;
 const PHONE_WIDTH = 375;
 const TOL = 2; // px of sub-pixel slack
 const MIN_COLUMN_GAP = 8;
+// Ticket 423: the owner saw the BiS tag crowd the item name at phone width.
+const BADGE_GAP_MIN = 2;
+const BADGE_WIDTHS = [375, 653];
 // Check 17 expects the side by the fork's SetBonusPopover.tsx `sideFor` rule:
 // right when the room right of the figure holds the widest popup (30rem), its
 // 10 px gap and the 6 px Base UI's flip keeps from the window's edge; above
@@ -118,9 +129,20 @@ const check = (id, width, ok, detail) => {
   );
 };
 
+// Checks 19-21 pass on a fixture that has nothing for them to measure, so the
+// run counts what each measured at each width across all fixtures and fails
+// the check where the count stays 0 (the ticket 425 lesson).
+const subjects = new Map();
+const measuredSubjects = (id, width, count) => {
+  if (!subjects.has(id)) subjects.set(id, new Map());
+  const byWidth = subjects.get(id);
+  byWidth.set(width, (byWidth.get(width) ?? 0) + count);
+};
+
 // Page-side helpers, prepended to every measuring expression.
 const PAGE_HELPERS = `
 	const TOL = ${TOL};
+	const BADGE_GAP_MIN = ${BADGE_GAP_MIN};
 	const sleep = ms => new Promise(r => setTimeout(r, ms));
 	const waitFor = async (fn, ms) => { const end = Date.now() + ms; while (Date.now() < end) { const v = fn(); if (v) return v; await sleep(100); } return fn(); };
 	const root = document.querySelector(${JSON.stringify(ROOT)});
@@ -165,7 +187,9 @@ const postRunExpression = `(async () => {
 		await waitFor(() => group.querySelector(${JSON.stringify(`[data-testid="upgrades-results-table"] ${RESULT_ROW}`)}), 5000);
 		await sleep(200);
 	}
-	const multiLine = [], clipped = [], pastCell = [], figureOutside = [], midWord = [];
+	const multiLine = [], clipped = [], pastCell = [], figureOutside = [], midWord = [], badgeGaps = [], loneMark = [];
+	let markCells = 0;
+	const MARK = /\\([^()\\s]+\\)/, LONE_MARK = /^\\([^()\\s]+\\)$/;
 	let firstDelta = null;
 	const tables = [...pane.querySelectorAll('[data-testid="upgrades-results-table"]')];
 	const rows = paneRowCount(pane);
@@ -207,6 +231,30 @@ const postRunExpression = `(async () => {
 				if (text[i - 1] !== ' ' && text[i] !== ' ' && text[i - 1] !== '-') midWord.push(text.slice(0, i) + '|' + text.slice(i));
 			}
 		}
+		const source = slot?.nextElementSibling;
+		if (source) {
+			const lines = [];
+			const walker = document.createTreeWalker(source, NodeFilter.SHOW_TEXT);
+			for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+				for (let i = 0; i < node.length; i++) {
+					const top = charTop(node, i);
+					const line = lines.find(l => Math.abs(l.top - top) <= TOL);
+					if (line) line.text += node.data[i]; else lines.push({ top, text: node.data[i] });
+				}
+			}
+			if (lines.some(l => MARK.test(l.text))) markCells++;
+			if (lines.some(l => LONE_MARK.test(l.text.trim()))) loneMark.push(lines.map(l => l.text.trim()).join(' / '));
+		}
+		// The gap is measured to the name's last line of text, so a badge pulled up into that line counts as a gap below zero rather than as a badge beside the name.
+		const itemName = tr.querySelector('[data-testid="upgrades-item-name"]');
+		const nameLines = itemName ? (() => { const r = document.createRange(); r.selectNodeContents(itemName); return [...r.getClientRects()].filter(x => x.width > 0); })() : [];
+		const lastLine = nameLines.at(-1);
+		const gaps = [];
+		for (const badge of lastLine ? tr.querySelectorAll('[data-testid="upgrades-bis-badge"]') : []) {
+			const b = badge.getBoundingClientRect();
+			if (b.top >= lastLine.top + lastLine.height / 2) gaps.push(b.top - lastLine.bottom);
+		}
+		if (gaps.length > 0) badgeGaps.push({ item: itemName.textContent.slice(0, 40), gap: Math.round(Math.min(...gaps) * 10) / 10 });
 		for (const td of tr.children) checkCell(td);
 		for (const el of tr.querySelectorAll('*')) if (isClipped(el)) clipped.push(name(el));
 		if (below) {
@@ -234,6 +282,9 @@ const postRunExpression = `(async () => {
 	return {
 		pane: pane.id, rows, multiLine: multiLine.slice(0, 10), clipped: clipped.slice(0, 10), pastCell: pastCell.slice(0, 10),
 		figureOutside: figureOutside.slice(0, 10), midWord: midWord.slice(0, 10), firstDelta,
+		badgeGaps: { measured: badgeGaps.length, tight: badgeGaps.filter(g => g.gap < BADGE_GAP_MIN).slice(0, 10), min: badgeGaps.length ? Math.min(...badgeGaps.map(g => g.gap)) : null },
+		marks: { cells: markCells, lone: loneMark.slice(0, 10), loneCount: loneMark.length },
+		toggleTops: ['upgrades-view-set-potential', 'upgrades-view-only-bis'].map(byTestId).filter(shown).map(el => Math.round(el.getBoundingClientRect().top)),
 		counts: [multiLine.length, clipped.length, pastCell.length, figureOutside.length, midWord.length],
 		a1: { measuredRows: groupRowsMeasured, offsets, maxAbs: Math.max(0, ...offsets.map(Math.abs)) },
 		columnGap: Math.round(card.left - left.right), cardBesideResults: card.top < left.bottom && card.left > left.left,
@@ -449,6 +500,20 @@ function judgePostRun(width, m, facts) {
     check(13, width, m.cardBesideResults && m.columnGap >= MIN_COLUMN_GAP, {
       columnGap: m.columnGap,
     });
+  if (BADGE_WIDTHS.includes(width)) {
+    measuredSubjects(19, width, m.badgeGaps.measured);
+    check(19, width, m.badgeGaps.tight.length === 0, m.badgeGaps);
+  }
+  const bothToggles = m.toggleTops.length === 2;
+  measuredSubjects(20, width, bothToggles ? 1 : 0);
+  check(
+    20,
+    width,
+    !bothToggles || Math.abs(m.toggleTops[0] - m.toggleTops[1]) <= TOL,
+    { toggleTops: m.toggleTops }
+  );
+  measuredSubjects(21, width, m.marks.cells);
+  check(21, width, m.marks.loneCount === 0, m.marks);
   facts.push({
     fact: "a1-below-cutoff-column-offsets",
     fixture: currentFixture,
@@ -537,6 +602,12 @@ async function main() {
       console.log(`fixture ${name}: ${fixtureMs[name]} ms`);
     }
     currentFixture = null;
+    for (const [id, byWidth] of subjects)
+      for (const [width, count] of byWidth)
+        if (count === 0)
+          check(id, width, false, {
+            error: "no fixture gave this check anything to measure",
+          });
     fixtureDoneAt = performance.now();
   } finally {
     client.close();
