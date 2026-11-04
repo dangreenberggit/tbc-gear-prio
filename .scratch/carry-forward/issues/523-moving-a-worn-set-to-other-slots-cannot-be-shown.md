@@ -331,4 +331,4 @@ now comes from wowsims at run time (ADR-0038). This ticket stays open: the
 next step is to re-run `.scratch/stage-gate/523-move-scan/move_scan.py`
 (gitignored) against the new pool.
 
-2026-11-03 (p45 DPS pass, docs/live-runs/2026-11-03-p45-dps-pass.md): at phase 5 the balance, elemental and warlock tabs show the new head, chest, hand and leg pieces of wowsims' own P5 presets as losses of 36 to 108 DPS, because each single swap breaks the worn 4-piece T6 bonus that the presets keep by moving it to the Sunwell wrist, waist and feet (.scratch/handoffs/sme-rank-judgment-452-p5-casters.md F3).
+2026-11-03 (p45 DPS pass): at phase 5, on the balance, elemental, warlock and feralcat tabs, a single swap into a slot of the worn 4-piece T6 set shows as a loss; the slots and values per spec are in row 523 of docs/live-runs/2026-11-03-p45-dps-pass.md § Known defects seen again. Handoffs: .scratch/handoffs/sme-rank-judgment-452-p5-casters.md F3, -p5-physical.md § Rows that look fine (feral).
