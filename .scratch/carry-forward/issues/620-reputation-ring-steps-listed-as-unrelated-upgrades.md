@@ -43,3 +43,7 @@ a time is game knowledge; hypothesis, untested here.
       naming its standing, in the report and in the tab.
 - [ ] Whether lower steps are collapsed is decided and recorded in this
       ticket.
+
+## Comments
+
+2026-11-03 (p45 DPS pass, docs/live-runs/2026-11-03-p45-dps-pass.md): all 22 phase 4/5 runs of the 11 DPS specs list reputation-ring steps (Band of Eternity, Violet Signet) as separate rows with the same name (.scratch/handoffs/sme-rank-judgment-452-p4-casters.md F4, -p4-physical.md K2, -p5-casters.md F5, -p5-physical.md K2).
