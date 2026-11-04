@@ -1,7 +1,7 @@
 Status: open
-Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (DPS spec list)
 Type: task
 Origin: docs/live-runs/2026-11-03-p45-dps-pass.md (SME handoff .scratch/handoffs/sme-rank-judgment-452-p4-casters.md)
+Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (DPS spec list)
 Blocks: none
 Blocked by: none
 Related: 452, 620
@@ -21,15 +21,24 @@ reputation ring; these are different items that share a name.
   `311 | Trinket 1 | Mark of the Champion | -69.3`.
 - balance p5: `529 | Trinket 2 | Mark of the Champion | -93.7` and
   `530 | Trinket 2 | Mark of the Champion | -93.7`.
-- Every one of the 22 run JSONs has two or more rows named
-  `Mark of the Champion`, `Sergeant's Heavy Cape` and
-  `Sergeant's Heavy Cloak` (a name count over each file's `rows`).
+- Every one of the 22 run JSONs has exactly two rows named
+  `Mark of the Champion`, two named `Sergeant's Heavy Cape` and two named
+  `Sergeant's Heavy Cloak`. Re-run from the main checkout; each line
+  prints `[2, 2, 2]`:
+
+  ```
+  python3 -I -c "import json,glob,collections as c; n=('Mark of the Champion',\"Sergeant's Heavy Cape\",\"Sergeant's Heavy Cloak\"); [print(f.split('/')[-1], [c.Counter(r['item'] for r in json.load(open(f))['rows'])[x] for x in n]) for f in sorted(glob.glob('.scratch/agent-reports/2026-11-03-p45-runs/*-p[45].json'))]"
+  ```
 
 ## Game fact and source
 
-- Repo data (db.json, read by the SME): Mark of the Champion is 23206 and
-  23207, with different effects (spells 29112 and 29113, a melee and a
-  caster version); Sergeant's Heavy Cape is 28378 and 28379 (identical
+- Mark of the Champion: db.json gives two items, 23206 and 23207, each
+  with only an effect named "Champion of the Dawn" (29112, 29113) and no
+  stats. The engine gives them different effects: 23206 +150 attack power
+  against Undead and Demons
+  (`vendor/tbc-new-fork/sim/common/tbc/items_trinkets.go:737-738`), 23207
+  +85 spell damage against them (`:760-761`).
+- Repo data (db.json, read by the SME): Sergeant's Heavy Cape is 28378 and 28379 (identical
   stats); Sergeant's Heavy Cloak is 28377 and 28380. None has a
   `factionRestriction` in db.json.
 - Game: the capes and cloaks are an Alliance and a Horde version.

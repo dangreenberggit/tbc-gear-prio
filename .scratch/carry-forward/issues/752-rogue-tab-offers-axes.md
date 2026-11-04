@@ -1,7 +1,7 @@
 Status: open
-Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (DPS spec list)
 Type: task
 Origin: docs/live-runs/2026-11-03-p45-dps-pass.md (SME handoff .scratch/handoffs/sme-rank-judgment-452-p4-physical.md)
+Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (DPS spec list)
 Blocks: none
 Blocked by: none
 Related: 452

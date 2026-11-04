@@ -1,7 +1,7 @@
 Status: open
-Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (DPS spec list)
 Type: task
 Origin: docs/live-runs/2026-11-03-p45-dps-pass.md (SME handoff .scratch/handoffs/sme-rank-judgment-452-p4-casters.md)
+Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (DPS spec list)
 Blocks: none
 Blocked by: none
 Related: 452
@@ -25,16 +25,19 @@ with each spell cast, as the SME recalls, the tab prices it too high.
 | shadow p4, p5 | `Trinket 1 \| Eye of the Dead \| 0.8` | worn |
 | elemental p4 | `-13.4` | `-19` |
 | elemental p5 | `-11` | `-19.9` |
-| warlock p4 | `Trinket 2 \| Eye of the Dead \| 1.4` | no row |
+| warlock p4 | `Trinket 2 \| Eye of the Dead \| 1.4` | worn |
 | warlock p5 | `-26.9` | `-28.8` |
 
 ## Game fact and source
 
-- Repo data: db.json item 23047 `itemEffects` is
-  `{"stats":{"4":450,"5":150}, "effectDurationMs":30000}`, with no charge or
-  decay field. The engine registers it as `shared.NewSimpleStatActive(23047)`
-  (`vendor/tbc-new-fork/sim/common/tbc/stat_bonus_cds_auto_gen.go:179`). Both
-  read by the SME (p4-casters F2).
+- Repo data: db.json item 23047 has one `itemEffects` entry with
+  `buffName` "The Eye of the Dead (28780)", `effectDurationMs` 30000,
+  `scalingOptions."0".stats` `{"4": 450, "5": 150}` and `onUse.cooldownMs`
+  120000, and no charge or decay field. The engine registers it as
+  `shared.NewSimpleStatActive(23047)`
+  (`vendor/tbc-new-fork/sim/common/tbc/stat_bonus_cds_auto_gen.go:179`).
+  Read by the SME (p4-casters F2) and again with `python3 -I` on
+  `vendor/tbc-new-fork/assets/database/db.json` for the round-1 review fix.
 - Game: the bonus shrinks with each spell cast, and the item is a healer
   trinket. **Recalled, unverified**; the repo holds no tooltip text for its
   spell.
