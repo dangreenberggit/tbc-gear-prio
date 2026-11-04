@@ -169,3 +169,5 @@ everyone else.
       written where the control lives.
 
 ## Comments
+
+2026-11-03 (p45 DPS pass, docs/live-runs/2026-11-03-p45-dps-pass.md): no second Ring of Ancient Knowledge is offered on the balance, mage and elemental tabs at phase 4, or on balance and mage at phase 5; wowsims' own P4 elemental preset makes exactly that swap (.scratch/handoffs/sme-rank-judgment-452-p4-casters.md F3, -p5-casters.md F4).
