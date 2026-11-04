@@ -87,3 +87,11 @@ work runs as stage `tab-checks-without-sims`. Scope unchanged.
 gate inputs; six are frozen engine test data under
 `packages/core/test/fixtures/tab-recordings/`, two were deleted; the gate
 renders six made-up fixtures from `pnpm tab-fixtures:mock`.
+
+2026-11-03, stage `p45-dps-pass-452`: the phase 4 and phase 5 live pass
+over the 11 DPS specs ran (22 runs, all counted; report
+`docs/live-runs/2026-11-03-p45-dps-pass.md`, SME handoffs
+`.scratch/handoffs/sme-rank-judgment-452-{p4,p5}-{casters,physical}.md`).
+Tickets filed: 750, 751, 752, 753. Q-452-golden (does the 2026-10-24 ruling
+also cover the desktop gate's single ret golden?) is open for the owner.
+Whether to close or re-slice this epic is the owner's decision.
