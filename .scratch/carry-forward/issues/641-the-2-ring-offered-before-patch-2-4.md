@@ -25,3 +25,7 @@ Re-run: `python -c "import json;d={i['id']:i for i in json.load(open('vendor/wow
 Done when: 34837 (and any other sourceless item the check finds was added
 after its db phase) appears only in lists of its real content phase, with
 the source of the corrected phase cited.
+
+## Comments
+
+2026-11-03 (p45 DPS pass, docs/live-runs/2026-11-03-p45-dps-pass.md): The 2 Ring is still offered on all six physical DPS tabs at phases 4 and 5 (feralcat p4 `15 | Ring 2 | The 2 Ring | -7.2`; .scratch/handoffs/sme-rank-judgment-452-p4-physical.md K1, -p5-physical.md K1).
