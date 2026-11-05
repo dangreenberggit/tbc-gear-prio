@@ -4,6 +4,8 @@ Reviewed range: `cf8e37a176f4aa0cb45e4a036567483e1bf2b4b7..e4956a638aaf780907b00
 
 Reviewed range: `e4956a638aaf780907b00068c39463d0774a24ae..b2d864cffd2daca5463b3fb98123c3a48e881f7b`
 
+Reviewed range: `b2d864cffd2daca5463b3fb98123c3a48e881f7b..5a00aa3aa7f81a58d64c06def86a9cae4163b5bb`
+
 Dispatch note, round 1:
 
 - Requested by the dispatching session on 2026-11-03. The tree was clean at
@@ -406,3 +408,54 @@ reviewed the work; its view, with the sources it gave):
   list stays and only the dagger is added, a further round would probably
   find more, because checking it means diffing all 13 preset pairs again
   (the assessor's view, untested).
+
+## Focused check (round 3)
+
+Range: `b2d864cf..5a00aa3a` (8e18cf7b, the round-2 record in this file
+only, and 5a00aa3a, the fix). The dispatching session started this round
+under `~/.claude/AGENTS.md` § Review round limits: every open finding asked
+for a wording change, so one further round runs and the review then stops
+whatever it finds. No other repo range; the fork pin does not move.
+Dispatch note, round 3: the dispatcher checked the three edits itself with
+a direct diff, as the assessor suggested, and dispatched no fresh agent,
+because the fix is three sentences in three files.
+
+1. Conditions: **pass.** 5a00aa3a names R2-2, R2-3 and R2-4 in its
+   message; 8e18cf7b edits only this file. `git diff -w --stat
+8e18cf7b..5a00aa3a` shows 3 files, 6 insertions, 6 deletions; the rest
+   of the commit is the table padding lint-staged rewrote in the report.
+2. Scope: **pass.** Each edit is the text the round-2 section suggested:
+   - R2-3: report lines 11-12 now introduce the list as "Some of the
+     exceptions"; no item was added or removed.
+   - R2-2: report row 523 no longer has "New pieces for other slots are
+     gains, for example warlock Sunfire Robe +52.7."
+   - R2-4: both K1 rows (`p4-physical.md:22`, `p5-physical.md:23`) end
+     with "Whether phase 5 is its real phase is for 641 to settle."
+3. Each fix against the data: **pass.** The edits remove two claims and
+   add one hedge; they add no number, count or game fact. `git grep -n -i
+"exceptions\|other slots are gains\|every exception" 5a00aa3a` over the
+   report, the four handoffs and tickets 452 and 523 finds only the new
+   "Some of the exceptions" line, so no other text still says the list is
+   complete or that the other-slot pieces are gains.
+4. Tests: none on this branch.
+
+No new finding. Round 3 is the last round.
+
+## Disposition (round 3)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                                                                             |
+| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1   | Adversarial   | fixed       | 58f6ff47, 82904825, 5a00aa3a: the Verdict lists the exceptions found, introduced as "Some of the exceptions", so it no longer claims completeness (round 2 R2-3).                                                         |
+| A2   | Adversarial   | fixed       | 58f6ff47, 82904825, efd400b5, 5a00aa3a: report row 641, ticket 641's entry and both K1 rows give The 2 Ring one row in each of the 22 runs and say whether phase 5 is its real phase is for 641 to settle (round 2 R2-4). |
+| D3   | Domain        | fixed       | 58f6ff47, efd400b5, 5a00aa3a: row 523 gives the losing set slots per spec, feralcat included, and no longer says the other-slot pieces are gains (round 2 R2-2).                                                          |
+| R2-1 | Focused check | wontfix     | Not a defect: feralcat-p5.json has Thunderheart Treads `belowCutoff` false at +3.4, so all 8 gains are above the cutoff, as `p5-physical.md:10` says.                                                                     |
+| R2-2 | Focused check | fixed       | 5a00aa3a: sentence deleted from report row 523.                                                                                                                                                                           |
+| R2-3 | Focused check | fixed       | 5a00aa3a: "Some of the exceptions" at report lines 11-12.                                                                                                                                                                 |
+| R2-4 | Focused check | fixed       | 5a00aa3a: sentence added to both K1 rows.                                                                                                                                                                                 |
+| R2-5 | Focused check | wontfix     | Bookkeeping: efd400b5's message omits P1, which the P1 row already cites; rewording would rewrite the reviewed commits.                                                                                                   |
+
+Tickets after the last table: filed 5, closed 0 (`git diff --name-status
+dev...HEAD -- '.scratch/carry-forward/issues/*.md'` gives 5 `A` rows; the
+`Status:` count command gives 0; merge base `cf8e37a1`). Filed is higher
+than closed because this branch records what the 22 runs showed and closes
+nothing.
