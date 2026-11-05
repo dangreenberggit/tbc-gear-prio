@@ -42,3 +42,42 @@ owner saw that stated and approved it as shown.
 - No old/new trial run (review 1 and review 2 blocking item). The owner
   approved without one. The first real use is the rework of the
   round-limits change.
+
+## Round-limits change (r18)
+
+Reviewed change: the r18 text of the round-limits change, commit
+`28f443d` (branch `r18-rewrite`) in the gitignored draft repo
+`.scratch/round-limits-r16/scratch-o14/` on the main checkout, plus
+fixes F1 and F2 below. The owner approved it on 2026-11-05 ("Sure rec
+is fine"). It changes `docs/agents/home/AGENTS.md`, the
+`pre-merge-review` and `stage-gate` skills under `docs/agents/home/skills/`,
+`docs/agents/orchestration.md` and
+`docs/agents/pre-merge-review-project.md`. It limits how many review
+rounds run before the work stops and goes to the user.
+
+### Review passes
+
+The reports are gitignored files on the main checkout, under
+`.scratch/round-limits-r16/r18-review/`.
+
+1. R18, `2026-11-04-review-round-limits-r18.md`, full path on `0768ed2`:
+   0 blocking, 2 should fix, 1 minor. The old/new trial run passed.
+   R18-1 (a further round whose commits fail the focused-check
+   conditions got two opposite actions) and R18-2 (a commit that edits
+   or closes an existing ticket stopped the focused check) were fixed
+   by rewording in `28f443d`. R18-3 (the project `AGENTS.md` keeps a
+   closed list of when an overseer may spawn another) is not real on
+   `dev`: that list exists only on branch `chore/729-test-result`.
+2. R18 fix review, `2026-11-04-review-round-limits-r18-fix.md`, fix path
+   on `28f443d`: R18-1 and R18-2 are gone. It found F1 (should fix: the
+   wording "ticket files" may not cover the ticket counter `NEXT` and
+   the ticket map, so a commit that files a ticket could stop the
+   focused check) and F2 (minor: a sentence quoted the old start of a
+   paragraph that the fix changed). Both are fixed in this commit, with
+   the owner's approval on 2026-11-05.
+
+Both reviews also raised problems in text that the change did not
+touch. Those were checked separately; four are real and became tickets
+796 to 799 (commit `a2df89f6` on branch `chore/729-test-result`). The
+check is `.scratch/agent-reports/2026-11-05-general-task-unchanged-text-tickets.md`
+on the main checkout.

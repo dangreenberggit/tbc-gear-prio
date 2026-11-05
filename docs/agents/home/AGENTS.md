@@ -185,6 +185,38 @@ committed sources with the pinned toolchain; the working tree must match
 byte-compare gates, read a real CI run; do not predict from a local story
 about another OS.
 
+# Review round limits
+
+The `pre-merge-review` and `stage-gate` skills and § Changing agent
+instructions each name a last review round. The limit exists to stop
+review loops; it is not a hard block. When the last round leaves
+findings open, stop and give the user the choice. A further round that
+the user chooses is again a last round. You may go on without asking
+only when every open finding asks for a wording change that leaves
+what each step, rule and line of code does the same: make those
+changes, run one further round, and then stop whatever it finds.
+
+Before it reports the stop, the agent that runs the review spawns one
+`general-task` on Opus that neither wrote nor reviewed the work. The
+prompt gives it the review reports, the open findings and what the
+fixes changed, and says that this is one narrow investigation, that it
+writes no files, and that each answer names its source and says
+whether it was checked. The assessor answers:
+
+- Has something gone wrong? For example, each fix adds text or code
+  in which the next review finds new gaps.
+- Would doing less, better, fix it: rewriting, shortening or removing
+  the part at fault instead of adding to it?
+- Would another round likely settle the open findings, or only find
+  more?
+
+Tell the user each open finding and what the review found. Give the
+assessor's answers as its view, with its sources, and check a claim
+before you build on it. The user decides what happens next, for
+example a further round, a rewrite, a different writer, or a fresh
+start. A real defect still unfixed when the work ends gets a ticket
+then (§ Findings and fixes).
+
 # Changing agent instructions
 
 In this section, agent instructions means `AGENTS.md` and `CLAUDE.md`
@@ -203,8 +235,9 @@ Before you show the text, review that exact text: one reviewer runs the
 review read. When the text or where it goes changes, review the changed
 text again the same way before you show it. A change can come from a
 review finding, a fix made during the review, or the user's feedback.
-When the review of a fix finds more to fix, stop: show the text as that
-review read it, and list those findings as open. The proposal gives the
+The review of a fix is the last round (§ Review round limits). When it
+finds more to fix, show the text as the last review read it, and list
+the open findings. The proposal gives the
 exact text and where it goes, and says what reviewed it: for each
 review, the path that ran (light, full or fix), what it found and what
 was fixed after it; and what is still open, including a blocking
@@ -296,8 +329,9 @@ pays the top price tier for a `grep`. Pick the type by the job
   hard implementation. It holds the judgment itself and hands
   **workhorse jobs** (searches, plain reads, command runs, measurements,
   small or modest coding) to the workhorse lane in blocks. It spawns
-  another overseer only for judgment work it delegates: a review axis, a
-  chunk of a plan, oversight of a worker set.
+  another overseer only for judgment work it delegates, such as a review
+  axis, a chunk of a plan, oversight of a worker set, or the assessment
+  in § Review round limits.
 - The **workhorse lane** does one block whose result the prompt fixes
   or names, and spawns nothing (model-policy § Workhorse jobs). When the
   harness lists the GLM types, `glm-flash-task` takes every workhorse

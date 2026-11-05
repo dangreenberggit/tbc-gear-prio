@@ -35,8 +35,9 @@ name.
 
 ## Focused check
 
-**Other repo:** the fork, `git -C vendor/tbc-new-fork log -p <fork-from>..HEAD`
-(`<fork-from>` is the end of the fork range the last round recorded).
+**Other repo:** the fork, `git -C vendor/tbc-new-fork log -p <fork-from>..<fork-to>`,
+where `<fork-from>` and `<fork-to>` are the `commit` values in
+`data/wowsims-fork.lock.json` at the round's `<from-sha>` and `<through-sha>`.
 When `git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json` exits 0, the
 branch never moves the fork pin: skip the fork log and treat the
 wowsims-file condition below as holding.
@@ -44,9 +45,11 @@ wowsims-file condition below as holding.
 **Commit kind:** a fork re-pin: it changes `data/wowsims-fork.lock.json`,
 and every other file it changes is under `data/` or `docs/`.
 
-**Condition:** the wowsims-file check that this review file records (the
-commands in `docs/fork-upstream-touchpoints.md`) gives the same output at
-the new fork tip.
+**Condition:** the round's fork range leaves the fork's changes to upstream
+wowsims files as they were: no fork commit in it edits an upstream file,
+and no upstream merge in it changes a file that the fork modifies.
+`docs/fork-upstream-touchpoints.md` § How to reproduce every number here
+shows how to list those files.
 
 ## Review file
 
@@ -57,9 +60,9 @@ review Disposition table"
 
 ## Tickets
 
-**New ticket:** `.scratch/carry-forward/issues/<NN>-<slug>.md`
-(`Status: open`, `Origin:`, `Blocks: phase-N`). See
-`docs/agents/issue-tracker.md`.
+**New ticket:** `.scratch/carry-forward/issues/<NN>-<slug>.md`, with the
+header lines that `docs/agents/issue-tracker.md` § Carry-forward tickets
+lists.
 
 **Ticket path pattern:** `.scratch/carry-forward/issues/*.md`
 
