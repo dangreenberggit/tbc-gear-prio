@@ -101,3 +101,7 @@ The vitest run passes the three item-level cases in `ResultRow.test.tsx`; the
 layout gate passes check 22 (every row shows its item level on one line below
 the name, at least 2 px clear) at 375, 653, 768 and 1280 on all six mock
 fixtures.
+
+## Comments
+
+2026-11-03 (p45 DPS pass, on fork `13a980cf3`, before the item-level line (tbc-new-fork@594d07f66)): all 22 phase 4/5 runs of the 11 DPS specs list reputation-ring steps (Band of Eternity, Violet Signet) as separate rows with the same name. Details: row 620 in docs/live-runs/2026-11-03-p45-dps-pass.md § Known defects seen again; .scratch/handoffs/sme-rank-judgment-452-p4-casters.md F4, -p4-physical.md K2, -p5-casters.md F5, -p5-physical.md K2.

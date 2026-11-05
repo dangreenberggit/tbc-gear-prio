@@ -36,11 +36,11 @@ command.
 
 - **It prints nothing:** every changed file is agent tooling. Run
   `instruction-review` in place of this skill, and stop here.
-- **It prints files:** the branch is mixed. Run this skill on the printed
-  files only: in steps 1 and 2, end every `git diff` and `git log -p` of
-  this repo with `-- <the printed files>`. Run
-  `instruction-review` on the other changed files. Write both
-  lists in the review file's dispatch note. When every printed file only
+- **It prints files:** run this skill on the printed files only: in
+  steps 1 and 2, end every `git diff` and `git log -p` of this repo
+  with `-- <the printed files>`. Run `instruction-review` on any other
+  changed files, and write both lists in the review file's dispatch
+  note. When every printed file only
   wires in agent tooling (for example a `package.json` script line, or a
   lint ignore for a tooling folder), run no axes: run
   `instruction-review` on every changed file, and write the review file
@@ -154,11 +154,12 @@ file's dispatch note. Every other branch gets the full axes.
 Before dispatching round 2, test three conditions against
 `git log -p <from-sha>..<through-sha>` (this round's `Reviewed range:` line
 from step 1), the log of each other repo that the values file
-§ Focused check names (from the end of the range the last round recorded
-for it), and this review file. When
-all three hold, run the focused check below. When any condition fails, or
-cannot be settled from those sources, do not run the three axes: stop as
-"Round limit" says.
+§ Focused check names (over the range that section gives), and this
+review file. When all three hold, run the focused check below. When any
+condition fails, or cannot be settled from those sources, do not run
+the focused check: delete the `Reviewed range:` line that step 1 wrote
+for it, because no round read those commits, and stop as "Round limit"
+says.
 
 1. Every commit, in every log, is one of these:
    - a fix for findings that an earlier round in this file raised, named by
@@ -168,11 +169,10 @@ cannot be settled from those sources, do not run the three axes: stop as
      its commit message;
    - a commit of a kind that the values file § Focused check adds;
    - a commit that changes only whitespace or line wrapping;
-   - a commit that changes only this review file or tickets its Disposition
-     rows link.
+   - a commit that only edits this review file, or files, edits or closes tickets.
 2. Every changed line outside tests, comments, docs and the commits of
-   the kinds that § Focused check adds is at a place that a fixed finding
-   cites.
+   the last three kinds in condition 1 is at a place that a fixed
+   finding cites.
 3. Every condition that the values file § Focused check adds holds.
 
 Dispatch one fresh agent on the review lane, picked by the "Try in order"
@@ -180,7 +180,7 @@ list above. Give it the main range, each other repo's range, the findings and ti
 the commits fix, and these four checks:
 
 1. Conditions 1 to 3 above hold.
-2. The diff changes only what each finding asks for.
+2. The fix commits change only what each finding asks for.
 3. Each new test asserts its finding. Where the ticket or the commit message
    records a run with the fix reverted, the test failed in that run.
 4. The tests that the fixes touch pass.
@@ -210,20 +210,17 @@ failed or what the agent found, and stop as "Round limit" says.
 
 A round is one line of this file that starts with `Reviewed range:`.
 Round 1 is the full review, or the small-change lane. The agent that
-handles this review's findings makes every fix for round 1's findings,
-the code-quality pass included (step 3), before it dispatches round 2.
-Round 2 is the focused check above. Prefer to stop there: the limit
-exists to stop review loops, but it is not a hard block. When something
-is not yet figured out and a further round seems like it could be
-needed, that choice should likely go to the user. Findings still open
-after round 2 may be a sign that the agent under review keeps getting
-things wrong. Consider a review of why; it may or may not be needed.
-That review asks whether there is a basic problem in that agent's
-approach, or more issues just keep turning up.
+handles this review's findings has every fix for round 1's findings
+made, the code-quality pass included (step 3), before it dispatches
+round 2. Round 2 is the focused check above, and it is the last round
+(`~/.claude/AGENTS.md` § Review round limits). A further round is
+another focused check, or, when its commits cannot pass the
+conditions in "Focused check (round 2)", a full review of them in
+round 1's form.
 
-Skip round 2 when every commit since round 1's `<through-sha>` only
-changes whitespace or line wrapping, only changes this review file or
-tickets its Disposition rows link, or applies a bookkeeping fix. The
+Skip round 2 when every commit since round 1's `<through-sha>` is of
+the last two kinds in condition 1 of "Focused check (round 2)", or
+applies a bookkeeping fix. The
 code-quality pass is not on this list: round 2 reads it. Do not skip
 round 2 while a "fixed before merge" finding (step 3) has no
 fix commit; when such a finding cannot be fixed now, stop as the next
@@ -231,29 +228,25 @@ paragraph says. The agent that handles this review's findings decides,
 and writes the skip and the output of
 `git log --oneline <through-sha>..HEAD` in `## Summary`.
 
-When round 2, or a further round the user chose, cannot run (one of the
-three conditions in "Focused check (round 2)" fails or cannot be
-settled), when one of its four checks fails, or when it reports any
-finding other than bookkeeping — for example a fix that is wrong or
+When round 2 cannot run (one of the three conditions in "Focused
+check (round 2)" fails or cannot be settled), or when the last round
+fails a check or reports any finding other than bookkeeping — for
+example a fix that is wrong or
 missing, a new data loss or silent wrong result, a loud failure, or a
-code-quality finding in the lines the fixes wrote, prefer to end the
-review there. Commit the review file as it stands, do not run step 4,
-and in place of step 5 report to the user which finding, which fix, what
-the check found, and the likely cause, labelled `hypothesis, untested`
-unless you checked it. Say whether a further round seems like it could
-be needed, and whether a review of why seems worth running. The user
-decides what happens next, for example a further round, a review of why,
-a dedicated quality pass, a different writer, or a fresh round 1 for new
-work.
+code-quality finding in the lines the fixes wrote, the review ends
+there: commit the review file as it stands, do not run step 4, and in
+place of step 5 report as `~/.claude/AGENTS.md` § Review round limits
+says.
 
-When round 2 passes or is skipped, give each open finding its outcome.
+When round 2 or a further round passes, or round 2 is skipped, give
+each open finding its outcome.
 When round 2 is skipped, write these outcomes in round 1's
 `## Disposition` table, editing rows as the Disposition rules in the
 values file § Review file say.
 
 - a "fixed before merge" finding that is still open: end the review as
-  the "When round 2 cannot run" paragraph above says, and report it to
-  the user as blocking the merge;
+  the paragraph above that starts "When round 2 cannot run" says, and
+  report it to the user as blocking the merge;
 - a finding that step 3 says blocks the merge, still open, that the owner
   has not allowed to be deferred: write no Disposition row for it yet;
   list it in `## Summary` as blocking the merge and report it as step 5
@@ -362,7 +355,7 @@ it as `wontfix` with the reason. Append a one-liner
 to the ticket map that the values file § Tickets names when filing tickets.
 
 When the review's last Disposition table is written and its tickets are
-committed (round 2's table, or round 1's when round 2 is skipped), count
+committed (the last round's table), count
 the tickets this branch filed and closed, and write both numbers in
 `## Summary`. `<tickets>` is the ticket path pattern that the values file
 § Tickets names. Filed is the number of `A` rows in

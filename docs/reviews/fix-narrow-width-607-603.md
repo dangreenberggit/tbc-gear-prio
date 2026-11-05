@@ -6,10 +6,14 @@ Fork range (vendor/tbc-new-fork, branch `fix/narrow-width-607`):
 `13a980cf39b81b08f065e90dd000f710a2160e83..2bedbf6b7cdc14428f76a71a8776e11fbed06768`
 (one commit; the lock names `2bedbf6b7` with `"pushed": false`).
 
-Reviewed range: `f8ea455a523384deb75e2ea33db2a58413a140b0..d06482d599f7ec7e8f5079b174d60b35a9943b94`
+Reviewed range: `f8ea455a523384deb75e2ea33db2a58413a140b0..b073d1febd68fccc83f1c15e0b4f575ab3faada3`
 
-Round 2 fork range: `2bedbf6b7cdc14428f76a71a8776e11fbed06768..b88572dc42912efe8d21760c42be7304e3985cb1`
-(one commit; the lock names `b88572dc4` with `"pushed": false`).
+Round 2 fork range: `2bedbf6b7cdc14428f76a71a8776e11fbed06768..7c261c5410cb4bdaf55b0e5a62fc4cc4c2c43aa5`
+(one commit; the lock names `7c261c541` with `"pushed": false`). The first
+run of round 2 read main `f8ea455a..d06482d5` and fork
+`2bedbf6b7..b88572dc4`; the owner ruled on 2026-11-03 that the history be
+made right, and those unpushed commits were rewritten (see
+`## Focused check (round 2)`).
 
 ## Dispatch note
 
@@ -176,6 +180,11 @@ code-quality pass before round 2; they get Disposition rows after it.
 
 Tickets so far: filed 0, closed 2 (603, 607).
 
+After round 2 (re-run on the rewritten history): A1 and the code-quality
+rows are fixed, and the review ends with no open finding (`## Disposition
+(round 2)`). This branch filed 0 tickets and closed 2 (603, 607), by the
+skill's two commands over `cf8e37a1...HEAD`.
+
 ## Disposition
 
 | ID  | Axis      | Disposition | Ticket / note                                                                                                                                  |
@@ -243,3 +252,56 @@ bookkeeping, so the skill's Round limit rule applies. The review stops
 here: there is no round-2 Disposition table and no merge check. A1 and
 the code-quality rows A2 and S2-S5 have no Disposition row yet. The owner
 decides what happens next.
+
+### Re-run on the rewritten history
+
+The owner ruled on 2026-11-03 that the fix for R2-1 and R2-2 is to make
+the history right (the ruling reached this review through the
+coordinating agent; its exact words are not quoted here). The unpushed
+commits were rewritten: fork `b88572dc4` → `7c261c541` (amend, same
+tree), main `d06482d5` → `c362f3b9`, and this file's commit `890a3364` →
+`b073d1fe` (cherry-picked, same content). A fresh `general-task` agent on
+Opus ran the four checks again over main `f8ea455a..b073d1fe` and fork
+`2bedbf6b7..7c261c541`, and wrote nothing.
+
+1. **Conditions 1 to 3: pass.**
+   - `1bcb372b` and `b073d1fe` change only this file and ticket 607.
+   - `c362f3b9` names A1, A2 and S4 and the re-pin, and holds no fixed row
+     it does not name.
+   - Fork `7c261c541` names A1, S2, S3 and S5, and says "The same  
+     escape replaces the raw character in format.ts (same value)", which
+     is the R2-2 line.
+   - Condition 3: the list of modified upstream files is the same at
+     `2bedbf6b7` and `7c261c541` (only `ui/app/SimTabsSection.tsx`).
+2. **Only what each finding asks: pass.** The `format.ts:116` escape
+   (R2-2) is the one line no round-1 finding cited; the fork commit now
+   records it, as the owner's ruling asked.
+3. **Each new test asserts its finding: pass.** As in the first run;
+   `git diff --quiet 7c261c541 b88572dc4` gives rc 0, so the fork tree the
+   mutation run `2026-11-03-sourcecell-test-mismatch.txt` tested is
+   unchanged.
+4. **Tests the fixes touch pass.** Node v22.23.2;
+   `npx vitest run ui/features/upgrades/components/ResultsTable ui/features/upgrades/utils`
+   in the fork: rc 0, 12 files, 139 tests.
+
+Also checked: `git diff --stat d06482d5 c362f3b9` lists only
+`data/sim-implemented-effects.json` and `data/wowsims-fork.lock.json`; the
+lock names `7c261c5410cb…` with `"pushed": false`, and
+`sim-implemented-effects.json` names the same fork commit;
+`git branch -r --contains` prints nothing for the new commits; `grep -cP
+'\xa0'` over the fork's `format.ts` and `format.test.ts` gives 0.
+
+The first run's outcome paragraph above is superseded by this re-run.
+
+## Disposition (round 2)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                                  |
+| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A1   | Adversarial   | fixed       | Fork `7c261c541` adds `SourceCell.test.tsx`, which compares the tab's drop link with upstream `ItemSource`'s; `c362f3b9` names the copy in `docs/fork-upstream-touchpoints.md` |
+| A2   | Adversarial   | fixed       | `c362f3b9`: check 19's comment says a badge in the upper half of the name's last line is skipped, and why the empty-count guard covers it                                      |
+| S2   | Standards     | fixed       | Fork `7c261c541`: `zoneWithMark` goes through `keepMarkWithZone`; same output for all 13 difficulties and an unknown one                                                       |
+| S3   | Standards     | fixed       | Fork `7c261c541`: `format.test.ts` writes the no-break space as ` `                                                                                                            |
+| S4   | Standards     | fixed       | `c362f3b9`: `measuredSubjects` is now `addToSubjectCount`                                                                                                                      |
+| S5   | Standards     | fixed       | Fork `7c261c541`: the two doc comments that restated the code are cut                                                                                                          |
+| R2-1 | Focused check | fixed       | Rewritten `c362f3b9`'s message names A1, A2, S4 and the re-pin                                                                                                                 |
+| R2-2 | Focused check | fixed       | Rewritten fork `7c261c541`'s message records the `format.ts:116` escape (same value), as the owner's 2026-11-03 ruling asked                                                   |
