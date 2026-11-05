@@ -25,8 +25,9 @@ tool calls itself:
 Everything else goes to a subagent: reading code or docs, running `pnpm`
 or any other `git` command, editing files, and committing. To run
 `pre-merge-review`, spawn one subagent to run the whole skill. Allow it to
-write `docs/reviews/` and `.scratch/carry-forward/` and to commit them,
-and have it return the review file's path and its summary.
+write `docs/reviews/`, `.scratch/carry-forward/` and
+`docs/upgrades-tab-scope.md` and to commit them, and have it return the
+review file's path and its summary.
 
 ## Who spawns whom
 

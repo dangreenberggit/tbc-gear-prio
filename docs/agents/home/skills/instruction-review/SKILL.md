@@ -29,6 +29,11 @@ types and models to spawn, and which review covers code.
 - **Light path:** a wording edit of one line that changes no rule (no
   change to who does what, when, or with what). Do check 1 only, with
   one reader.
+- **Fix path:** the change only fixes problems that an earlier review
+  of the same change found. For each fixed problem, rerun only the
+  check that found it, on the changed sentences. The earlier trial
+  still covers everything else. List problems in unchanged sentences
+  in a separate table.
 - **Full path:** everything else, including any new file, new or changed
   rule, hook or setting. Do checks 1, 2 and 3, then the rubric pass.
 
@@ -44,14 +49,18 @@ List every action you will take because of this text and every action
 you will leave out, and quote the sentence behind each one." Keep the
 intent out of its prompt.
 
-Compare the cold reader's answer with the intent. Each of these is a
-finding: an action the intent did not mean, a meant action it left out,
-a sentence it quoted for a reason the author did not mean. Agents read a
-plain statement of fact in instructions as an order, so check every
-statement of fact the cold reader acted on.
+Compare the cold reader's answer with what the author intended. A
+finding is any of these: the reader does something the author did not
+intend; it leaves out something the author intended; it quotes a
+sentence for a reason the author did not intend; or it does the right
+thing only by going against what a sentence says. If the reader calls
+a sentence unclear but still does the right thing, put the sentence in
+**Notes**: it is still badly written, and the fix is to rewrite it.
+Agents treat a plain statement of fact in instructions as an order, so
+check every statement of fact the cold reader acted on.
 
-Done when every changed sentence is either acted on as meant in the cold
-reader's answer or listed as a finding.
+Done when, for every changed sentence, the cold reader did what the
+author intended or the sentence is listed as a finding.
 
 ## Check 2: clashes with other files
 
@@ -81,7 +90,7 @@ A change that alters what an agent does is done only after one trial
 run: a fresh agent does the real job once with the new text and once
 with the old text as baseline, on the same input. This is the
 skill-creator baseline method (snapshot the old version, run both,
-compare). Pass means the new run shows the meant behaviour and the old
+compare). Pass means the new run shows the intended behaviour and the old
 run does not, or, for a change meant to keep behaviour, both runs match.
 
 If a trial is on record, cite it and check that it ran the current
@@ -115,7 +124,10 @@ check 1 finding.
 ## Report
 
 A findings table: check, `file:line`, quoted text, what an agent will
-do wrong, severity (blocks, should fix, minor), and evidence (the cold
-reader's quote, both clashing quotes, or the trial output). After the
-table: the cold reader's answer as returned, the check 2 file table, and
-the trial status.
+do wrong, how that can happen and what it costs when it does, severity
+(blocks, should fix, minor) based on those two, and evidence (the cold
+reader's quote, both clashing quotes, or the trial output). If you
+cannot say how a problem can happen or what it costs, it is not a
+finding. After the table:
+the **Notes** list, the cold reader's answer as returned, the check 2
+file table, and the trial status.
