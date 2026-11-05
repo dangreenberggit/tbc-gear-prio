@@ -241,6 +241,13 @@ of the reviewing agent, not kept):
   brings back ticket 683's RPC timeout is a hypothesis, untested:
   `run_verify.mjs` prints only the JSON report's failures, so vitest's
   own error line is not in the log. Ticket 795 records it.
+- Round 2, at `564b92be`, load average 0.4 at the start: rc 0,
+  `gates: 1573 ran, 0 skipped`, layout skipped on the unchanged digest
+  `bdf129b3e72b`, `disposition rows: 17 parsed of 17` and `merge-ready:
+ok` by both the branch's and dev's copy, `check-only: ok (not
+merging)`. Advisory only: open tickets 452 and 577 name
+  `test-layout.mjs` and `run-tab-cdp.mjs`, which this branch and the
+  stacked one change; neither ticket is about the item-level line.
 
 ## Disposition
 
