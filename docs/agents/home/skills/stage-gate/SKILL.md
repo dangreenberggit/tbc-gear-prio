@@ -222,7 +222,8 @@ background work`, write `returned (<status>, waiting)`.
      stops and tells the user.
 
    - `note`: the SHAs that steps 1 and 5 record, each question and
-     answer of step 5, and filed ticket ids with the new HEAD.
+     answer of step 5, each further round (step 4), and filed ticket ids
+     with the new HEAD.
 
    Write the reason on every line. Write `evidence: none` when you
    checked nothing.
@@ -329,7 +330,7 @@ background work`, write `returned (<status>, waiting)`.
      claim → loop back: respawn `gate-planner` with brief + plan +
      review + the id of each chunk that the latest review covers (the
      last field of that `gate-reviewer`'s `spawn` line), for a revision,
-     then spawn a `gate-reviewer` for a re-review
+     run Gate A, then spawn a `gate-reviewer` for a re-review
      (step 3). Loop back a second time only when the
      re-review after the first loop-back has a `blocking` finding or a
      refuted load-bearing claim. After the revision of the second
@@ -357,48 +358,51 @@ background work`, write `returned (<status>, waiting)`.
      Each chunk gets its first review, on the plan that gives it steps,
      and at most two more, each after a revision of that plan. A review
      or revision of a plan counts for every chunk that plan gives steps.
-     The session
-     spawns no fourth `gate-reviewer` for a chunk. The **Unasked-changes
-     check** below is not one of these reviews: it does not count toward
-     the three, and the rules of **Review limit per chunk** for a chunk's
-     third review do not apply to it. It is the one exception because it checks only claims and steps that no
-     review has seen, and no revision follows it, so it cannot lead to
-     another review. The session counts
+     A chunk's third review is its last round (`~/.claude/AGENTS.md`
+     § Review round limits). The session spawns no further
+     `gate-reviewer` for the chunk unless a further round follows: one
+     `gate-planner` revision and its re-review, which is again the
+     chunk's last round. The **Unasked-changes check** below is not one
+     of these reviews: it does not count toward the three, and the rules
+     of **Review limit per chunk** for a chunk's last round do not apply
+     to it, because it checks only claims and steps that no review has
+     seen. The session counts
      the reviews and the loop-backs of each chunk separately; the round
      number `<n>` counts every review in the stage, so it is not this
      count. Where another rule in step 4 says otherwise, this rule wins.
-     When the third review of a chunk (its `# Round <n>` section in
+     When the last round of a chunk (its `# Round <n>` section in
      `plan-review.md`) has a `blocking` finding or a refuted
-     load-bearing claim, the session spawns no revision: it stops, gives
-     the user the open findings, and states any contradiction between
-     seats without resolving it. When that review has `material`
-     findings only, the session spawns one `gate-planner` revision for
-     them, runs Gate A, and spawns no further `gate-reviewer` for that
-     chunk.
+     load-bearing claim, the session spawns no revision and follows
+     `~/.claude/AGENTS.md` § Review round limits. When that review has
+     `material` findings only, the session spawns one `gate-planner`
+     revision for them, runs Gate A, and spawns no further
+     `gate-reviewer` for that chunk.
    - After Gate A passes on a revision that no re-review follows, the
      session checks `plan.md` against the result the revision prompt
      stated for each `material` finding and logs each one `fixed`, with
      the plan step as evidence. A `material` finding that `plan.md` does
-     not meet goes to the user.
+     not meet goes to the user as `~/.claude/AGENTS.md` § Review round
+     limits says.
    - **Unasked-changes check.** This check is for a chunk's last
      revision, the one that step 4 follows with no further
      `gate-reviewer` for that chunk. The session runs it at most once for
-     each chunk, and only when the `## Decisions` section of that
+     each such revision, and only when the `## Decisions` section of that
      `gate-planner`'s final message has lines that start with `- added:`
      or `- changed:`. Once Gate A passes on that revision, the session
      first checks the revision's `material` findings against `plan.md`,
      as it does for a revision that no re-review follows. Then it spawns
      one `gate-reviewer` with the spawn prompt that step 3 gives for this
-     check. No revision follows this review. When it has a `blocking` finding or a refuted load-bearing
-     claim, the session stops and gives the user the open findings. Each
-     `material` finding goes to the user. Each `minor` finding gets a
+     check. When it has a `blocking` or `material` finding or a refuted
+     load-bearing claim, the session follows `~/.claude/AGENTS.md`
+     § Review round limits. Each `minor` finding gets a
      `row R<n>-<id> | advisory` line in `decision-log.md`.
    - In every revision prompt, the session states, for each `blocking`
      and `material` finding, the result `plan.md` must reach. When a
      revision prompt repeats a way of doing a step, or a command, that a
      `gate-reviewer` or a researcher's report suggested, the session
      marks it `hypothesis, untested` in that prompt.
-   - Proceed when: no blocking finding stands; every `material` finding is
+   - Proceed when: no `blocking` finding and no refuted load-bearing
+     claim stands; every `material` finding is
      fixed in the plan or accepted in `decision-log.md` with a reason;
      every `minor` finding has a `row R<n>-<id> | advisory` line in
      `decision-log.md`. A revision prompt lists `blocking` and `material`
@@ -433,9 +437,10 @@ chunk>.md` (`mv`), log `git rev-parse HEAD` in a `note` line, and
    subagent makes it), use it as the shared checkout for every chunk, pass
    its path to each executor as the checkout path, and run this step's git
    checks with `git -C <checkout path>`.
-   Append its final message to `execution-report.md` under the chunk id,
-   and log the chunk id, its base SHA and the executor's agent id in
-   `decision-log.md`. A fresh executor per chunk keeps each context small.
+   When you spawn the executor, log the chunk id, its base SHA and its
+   agent id in `decision-log.md`; when it returns, append its final
+   message to `execution-report.md` under the chunk id. A fresh executor
+   per chunk keeps each context small.
    **Gate C between chunks.** A chunk whose handoff `Status` is not
    `success`, or whose ledger has a `flag` or `stop` row, goes to Gate C
    before the next chunk starts, and the next chunk starts when step 6
@@ -491,8 +496,9 @@ chunk>.md` (`mv`), log `git rev-parse HEAD` in a `note` line, and
 7. **Hand off.** The normal loop resumes: the project's review step, then
    wait for the user's ask before its merge command
    (`docs/agents/stage-gate-project.md` § Hand off). Stage artifacts stay
-   in the stage folder. Chunks that
-   have not run when the stage ends become tickets: spawn one judgment
+   in the stage folder. Chunks that have not run when the stage ends,
+   and each real defect that the stage found and did not fix, become
+   tickets: spawn one judgment
    agent (`docs/agents/stage-gate-project.md` § Worker lanes) to file
    them per that file's § Tickets and commit them, and log their ids and
    the new `git rev-parse HEAD`. Name the tickets in the reply, and say
@@ -511,14 +517,17 @@ fresh SHA, and name any dirty paths in the prompt as probably the
 earlier executor's unfinished work. Every stage artifact is on disk the
 moment its stage ends, so a fresh session resumes from
 `decision-log.md`: the last logged gate is where you are. In a fresh
-session, a `gate-planner` with no final message after its last
-`started` or `resumed` line was cut off: respawn that `gate-planner`
-with the same prompt. A fresh session counts a chunk's reviews (step 4,
-**Review limit per chunk**) as the number of different round numbers on
-the `gate-reviewer` `spawn` lines that name that chunk, leaving out
-the lines marked `unasked-changes`. It needs no loop-back count: each
-loop-back is followed by a review, so the review limit also limits the
-loop-backs.
+session, a `gate-planner` or `gate-reviewer` with no final message
+after its last `started` or `resumed` line was cut off: respawn it with
+the same prompt, and a `gate-reviewer` with the same round number. A
+fresh session counts a chunk's reviews (step 4, **Review limit per
+chunk**) as the number of different round numbers on the
+`gate-reviewer` `spawn` lines that name that chunk, leaving out the
+lines marked `unasked-changes`. After a `note` line that records a
+further round for the chunk, its next review is its last round,
+whatever the count. It needs no loop-back
+count: each loop-back is followed by a review, so the review limit also
+limits the loop-backs.
 
 ## Run log (Claude Code)
 
@@ -542,4 +551,5 @@ never stops a run; say so in the hand-off reply.
 - Resolve a judgment-level contradiction between seats by silently picking
   a side — have a subagent re-run the command that settles it, or hand it
   to the user.
-- Carry a `blocking` finding into step 5 under any wording.
+- Carry a `blocking` finding or a refuted load-bearing claim into step 5
+  under any wording.
