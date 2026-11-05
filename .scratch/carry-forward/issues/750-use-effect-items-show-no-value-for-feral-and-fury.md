@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: docs/live-runs/2026-11-03-p45-dps-pass.md (SME handoff .scratch/handoffs/sme-rank-judgment-452-p4-physical.md)
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (DPS spec list)
@@ -70,3 +70,14 @@ whoever picks this up to settle with the owner. A change to an existing
 wowsims file needs the owner's OK of that exact edit.
 
 ## Comments
+
+- 2026-11-05: closed as wontfix on the owner's words: "close the tickets.
+  this has nothing to do with the fork as a feature branch". The fault is
+  in the wowsims rotation files; the tab sims the page's rotation as the
+  site does (ADR-0038). Cause, for anyone who reopens it: the Fury and
+  feral APLs have no `autocastOtherCooldowns` action, and the engine fires
+  an item cooldown only when the APL names it or autocasts it
+  (`vendor/tbc-new-fork/sim/core/apl.go:280-288`). In scratch sims, adding
+  `{"action":{"autocastOtherCooldowns":{}}},` to both APLs gave these items
+  value with no change in default DPS. Notes (gitignored):
+  `.scratch/agent-reports/2026-11-05-general-task-750-apl-use-effects.md`.

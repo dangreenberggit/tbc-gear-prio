@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: docs/live-runs/2026-11-03-p45-dps-pass.md (SME handoff .scratch/handoffs/sme-rank-judgment-452-p4-physical.md)
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (DPS spec list)
@@ -51,3 +51,14 @@ change to the existing wowsims file needs the owner's OK of that exact
 edit, so where the fix goes is the owner's call.
 
 ## Comments
+
+- 2026-11-05: closed as wontfix on the owner's words: "close the tickets.
+  this has nothing to do with the fork as a feature branch". The fault is
+  in the wowsims class table, which the site's gear picker uses too.
+  Source for the game fact: Blizzard's rogue class page captured on
+  2 April 2008 (TBC) lists "Allowable Weapons: Daggers, Thrown, Swords
+  (with training), Bows (with training), Crossbows (with training), Maces
+  (with training), Fist Weapons (with training), Guns (with training)",
+  with no axes
+  (https://web.archive.org/web/20080402020516id_/http://www.worldofwarcraft.com/info/classes/rogue/).
+  Every axe row sits far below the cutoff.

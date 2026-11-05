@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: task
 Origin: docs/live-runs/2026-11-03-p45-dps-pass.md (SME handoff .scratch/handoffs/sme-rank-judgment-452-p4-casters.md)
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (DPS spec list)
@@ -60,3 +60,16 @@ wowsims data gap, not ours to fill."
 (`docs/adr/0038-fork-pool-comes-from-wowsims-at-run-time.md:85-87`).
 
 ## Comments
+
+- 2026-11-05: closed as wontfix on the owner's words: "close the tickets.
+  this has nothing to do with the fork as a feature branch". The fault is
+  in the wowsims engine, so the site prices the item the same way.
+  Source for the game fact: Wowhead's TBC tooltip for spell 28780 reads
+  "Increases healing done by the next 5 spells by up to 450 and damage
+  done by up to 150 for 30 sec."
+  (`curl -s 'https://nether.wowhead.com/tbc/tooltip/spell/28780'`), and
+  the client data gives the buff `ProcCharges 5`
+  (`curl -s 'https://wago.tools/db2/SpellAuraOptions/csv?build=2.5.6.70577&filter%5BSpellID%5D=28780'`).
+  So the engine's flat 30-second buff prices it too high. A patch that
+  models the charges is in the gitignored notes
+  `.scratch/agent-reports/2026-11-05-general-task-751-eye-of-the-dead.md`.
