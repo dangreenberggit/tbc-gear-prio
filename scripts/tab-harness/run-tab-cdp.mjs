@@ -561,7 +561,8 @@ const loadPreset = (tabName, chipName, specName) => `(async () => {
 	};
 	const gearChips = () => [...document.querySelectorAll('[data-testid="saved-data-set-chip"]')]
 		.filter(c=>c.offsetParent && blockTitle(c)==='Gear Sets');
-	const names = chips => chips.map(c=>(specOf(c) === null ? '' : '['+specOf(c)+'] ')+c.textContent.trim()).join(' | ');
+	const label = (spec, chip) => (spec === null ? '' : '['+spec+'] ')+chip;
+	const names = chips => chips.map(c=>label(specOf(c), c.textContent.trim())).join(' | ');
 	const matches = () => gearChips().filter(c=>c.textContent.trim()===chipWant && (specWant === null || specOf(c)===specWant));
 	const visibleChips = async t => {
 		t?.click();
@@ -598,7 +599,7 @@ const loadPreset = (tabName, chipName, specName) => `(async () => {
 	}
 	await wf(()=>matches().length > 0,30000);
 	const found = matches();
-	const wanted = (specWant === null ? '' : '['+specWant+'] ')+chipWant;
+	const wanted = label(specWant, chipWant);
 	if (!found.length) return {error:'no Gear Sets chip '+wanted+(want === null ? '' : ' under '+want)+'; visible: '+names(gearChips())+tabNote};
 	if (found.length > 1) return {error:'Gear Sets chip '+chipWant+' is found '+found.length+' times ('+names(found)+'); name its spec with --preset-spec'};
 	const chip = found[0];
