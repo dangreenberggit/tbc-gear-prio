@@ -109,10 +109,17 @@ the `--iterations` flag.
 Ticket 522's cold-worker check adds opt-in flags. Without them the run is
 unchanged:
 
-- `--preset-tab <name> --preset <chip>` loads a Gear Sets preset before the
-  Upgrades tab opens (the picker is in the Gear tab, hidden once another tab is
-  active). `--preset "?"` lists that phase tab's chips, or every tab's with
-  `--preset-tab "?"`, and exits 1 before any sim.
+- `--preset <chip>` loads a Gear Sets preset before the Upgrades tab opens (the
+  picker is in the Gear tab, hidden once another tab is active). Add
+  `--preset-tab <name>` to click that phase tab first; leave it out on a page
+  with no phase tabs (balance, shadow, elemental, warlock, rogue,
+  enhancement). Add `--preset-spec <spec>` where two specs on one page have a
+  set of the same name (hunter, warrior), for example
+  `--preset-spec Survival --preset "DW - 6% hit"`; without it such a name
+  stops the run. `--preset "?"` lists the chips (a chip under a spec label as
+  `[Spec] chip`), every phase tab's with `--preset-tab "?"`, and exits 1
+  before any sim. The readback's `presetWorn` lists the item names the Gear
+  tab shows 1.5 s after the click.
 - `--wasm-concurrency N` sets `__tbc_new_wasmconcurrency` before navigation; at
   1 the page does not split its sim, so its DPS is comparable bit for bit.
 - `--capture-requests <dir>` wraps `WorkerPool.prototype.raidSimAsync` before
@@ -125,7 +132,8 @@ unchanged:
   which upstream renders in the settings dialog; whether that input is in the
   DOM while the dialog is closed is untested on the React page.
 
-New readback fields: `presetTab`, `preset`, `wasmConcurrency`, `captureError`,
+New readback fields: `presetTab`, `preset`, `presetSpec`, `presetWorn`,
+`wasmConcurrency`, `captureError`,
 `tabSimCalls`, `pageSimCalls`, `calls`, `tabBaseline`,
 `tabBaselineMatchesDisplay`, `tabBaselineRequest`, `pageRequest`, `pageDps`,
 `pagePlayerDps`, `pageSeed`, `pageIterations`, `pageError`, `dpsDiff`,
