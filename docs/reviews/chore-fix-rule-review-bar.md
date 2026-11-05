@@ -81,3 +81,25 @@ touch. Those were checked separately; four are real and became tickets
 796 to 799 (commit `a2df89f6` on branch `chore/729-test-result`). The
 check is `.scratch/agent-reports/2026-11-05-general-task-unchanged-text-tickets.md`
 on the main checkout.
+
+## Disposition
+
+Rows cover the findings of the four reviews above. Review 1's six notes
+and review 2's seven notes are not findings under the skill. The problems
+in unchanged text (tickets 796 to 799) are not this branch's findings.
+
+| ID    | Axis               | Disposition | Ticket / note                                                                                                                                                                      |
+| ----- | ------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F-1   | Fix rule, review 1 | fixed       | Fixed by the redraft (§ Review passes); review 2 says "No longer applies".                                                                                                         |
+| F-2   | Fix rule, review 1 | fixed       | Fixed by the redraft (§ Review passes). Review 2 left a part as note N-3, on the word "raised"; the approved fix path (instruction-review `SKILL.md`:32) no longer uses that word. |
+| F-3   | Fix rule, review 1 | fixed       | Fixed by the redraft (§ Review passes); review 2 says "No longer applies".                                                                                                         |
+| F-4   | Fix rule, review 1 | wontfix     | No old/new trial run. The owner approved the text without one (§ Open); review 2 carried it as R2-4.                                                                               |
+| R2-1  | Fix rule, review 2 | fixed       | The approved text deletes the sentences behind it (§ Review passes).                                                                                                               |
+| R2-2  | Fix rule, review 2 | fixed       | The approved text deletes the sentences behind it (§ Review passes).                                                                                                               |
+| R2-3  | Fix rule, review 2 | fixed       | The approved text deletes the sentences behind it (§ Review passes).                                                                                                               |
+| R2-4  | Fix rule, review 2 | wontfix     | Same item as F-4: no trial run; the owner approved without one (§ Open).                                                                                                           |
+| R18-1 | Round limits, R18  | fixed       | Reworded in draft commit `28f443d`, landed in `d91cca0f`; the R18 fix review says "Gone".                                                                                          |
+| R18-2 | Round limits, R18  | fixed       | Reworded in draft commit `28f443d`, landed in `d91cca0f`; the R18 fix review says "Gone" for ticket edits and closes, with the rest raised as F1.                                  |
+| R18-3 | Round limits, R18  | wontfix     | Not real on `dev`: the closed overseer list it names exists only on branch `chore/729-test-result`.                                                                                |
+| F1    | Round limits, fix  | fixed       | Fixed in `d91cca0f` with the owner's approval on 2026-11-05.                                                                                                                       |
+| F2    | Round limits, fix  | fixed       | Fixed in `d91cca0f` with the owner's approval on 2026-11-05.                                                                                                                       |
