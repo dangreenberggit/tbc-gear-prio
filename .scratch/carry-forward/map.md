@@ -430,3 +430,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 795 `pnpm verify` fails under high machine load while every test passes, and prints no vitest error (pre-merge review feat/620-item-level, merge check runs 2 and 3) 2026-11-03
 - 796 The paired-worktrees route for a new fork pin fails when `dev` is checked out in another worktree or the pair is under `.scratch/` (merge of feat/620-item-level) 2026-11-05
 - 797 After a between-chunk Gate C sends a row to `rework`, the stage-gate skill gives no way to start the next chunk (draft-review finding, checked on dev 7f223cd5) 2026-11-05
+- 798 The stage-gate skill has no way to re-plan a step that turns out wrong during the build (deferred from the stage-gate ban fix; draft-3 review findings 1-4) 2026-11-05
