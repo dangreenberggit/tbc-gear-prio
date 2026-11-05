@@ -42,16 +42,19 @@
 //   Readback: iterationsRequested. Two timings are always recorded: firstRowS
 //   (Run click to the first results-table row) and clickToDoneS (click to Took).
 //
-// The flags below exist for ticket 522's cold-worker check: does the tab's
-// baseline sim get exactly the page's own Simulate DPS for the same gear? None
-// of them changes the default path, which pnpm desktop-gate:check drives.
+// The flags below are opt-in. The desktop gate (pnpm desktop-gate:check,
+// scripts/check_desktop_tab.py) passes --preset-tab and --preset to start from
+// a gear preset; the other flags exist for ticket 522's cold-worker check: does
+// the tab's baseline sim get exactly the page's own Simulate DPS for the same
+// gear?
 // --preset <chip> loads a Gear Sets preset before the Upgrades tab opens; the
 //   picker lives in the Gear tab, whose chips are hidden once another tab is
 //   active. --preset "?" lists the chips and exits 1 before any sim; a chip
 //   under a spec label is listed as "[Spec] chip".
 // --preset-tab <name> first clicks that phase tab above the Gear Sets chips.
-//   Leave it out on a page with no phase tabs (balance, shadow, elemental,
-//   warlock, rogue, enhancement); the chips the page shows are used.
+//   A page with phase tabs needs it: without it the run stops and names the
+//   tabs. Leave it out on a page with no phase tabs (balance, shadow,
+//   elemental, warlock, rogue, enhancement); the chips the page shows are used.
 //   --preset-tab "?" with --preset "?" lists the chips of every phase tab.
 // --preset-spec <spec> takes the chip under that spec's label, for a page
 //   where two specs have a gear set of the same name (hunter, warrior):
@@ -128,6 +131,10 @@ function parseArgs(argv) {
     throw new Error("--preset-tab and --preset-spec need --preset <chip>");
   if (args.presetTab === "?" && args.preset !== "?")
     throw new Error('--preset-tab "?" needs --preset "?"');
+  if (args.presetSpec !== null && args.preset === "?")
+    throw new Error(
+      '--preset-spec does not work with --preset "?"; the list names each chip\'s spec'
+    );
   if (args.wasmConcurrency !== null && !(args.wasmConcurrency >= 1))
     throw new Error("--wasm-concurrency needs a positive integer");
   if (args.pageSim && !args.captureRequests)
@@ -585,6 +592,9 @@ const loadPreset = (tabName, chipName, specName) => `(async () => {
 	} else {
 		const chips = await visibleChips(null);
 		if (chipWant === '?') return {list: (tabsOf().length ? 'shown on load: ' : '')+names(chips)};
+		// The phase shown on load depends on the browser profile, so a chip name
+		// that exists in several phases would load whichever one that is.
+		if (tabsOf().length) return {error:'this page has phase tabs; name one with --preset-tab; tabs: '+[...new Set(tabsOf().map(t=>t.textContent.trim()))].join(' | ')};
 	}
 	await wf(()=>matches().length > 0,30000);
 	const found = matches();

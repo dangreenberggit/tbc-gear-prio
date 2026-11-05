@@ -106,13 +106,15 @@ first `[data-testid="upgrades-result-row"]` (via a
 **`clickToDoneS`** — click to the `Took` status. **`iterationsRequested`** echoes
 the `--iterations` flag.
 
-Ticket 522's cold-worker check adds opt-in flags. Without them the run is
-unchanged:
+Opt-in flags. The desktop gate (`scripts/check_desktop_tab.py`) passes
+`--preset-tab` and `--preset` to start from a gear preset; the other flags
+exist for ticket 522's cold-worker check:
 
 - `--preset <chip>` loads a Gear Sets preset before the Upgrades tab opens (the
   picker is in the Gear tab, hidden once another tab is active). Add
-  `--preset-tab <name>` to click that phase tab first; leave it out on a page
-  with no phase tabs (balance, shadow, elemental, warlock, rogue,
+  `--preset-tab <name>` to click that phase tab first; a page with phase tabs
+  needs it, and without it the run stops and names the tabs. Leave it out on a
+  page with no phase tabs (balance, shadow, elemental, warlock, rogue,
   enhancement). Add `--preset-spec <spec>` where two specs on one page have a
   set of the same name (hunter, warrior), for example
   `--preset-spec Survival --preset "DW - 6% hit"`; without it such a name
