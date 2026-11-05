@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b
 Type: task
 Origin: Chunk 3b step 7 regression check (commit c5741e2c), follow-up to ticket 425's closing note
@@ -42,3 +42,31 @@ known defect.
   the fixture has a badge below its name (the 425 lesson), or the fixture
   is chosen so that one does.
 - One gate run that shows the assertion reading real rows.
+
+## Closed (2026-11-03)
+
+`scripts/tab-harness/test-layout.mjs` check 19 measures, at 375 and 653,
+the gap between each BiS badge below an item name and the name's last line
+of text, and fails under 2 px. Checks 19-21 also fail at a width where no
+fixture gave them anything to measure (the 425 lesson).
+
+The check found a real defect. The React tab had lost the row gap that
+ticket 423's fix added, so every badge sat 0.5 px below the name's text on
+every fixture (red run against fork `13a980cf3`). Fork commit
+`tbc-new-fork@2bedbf6b7` gives the name and its badges a 4 px row gap
+again (`ItemNameCell.tsx`, `gap-y-1`); the gate then read a 4 px gap on 3
+to 19 rows per fixture.
+
+The empty-subject guard was shown failing for check 20 with a fixture that
+had no BiS rows. For check 19 it could not be shown that way: a badge from
+the page's selected gear sets stays even when every BiS tag is removed.
+Check 19 uses the same guard code.
+
+Verified by:
+
+```
+PATH=/tmp/claude-1000/shim:$PATH PLAYWRIGHT_BROWSERS_PATH=/tmp/claude-1000/pwb pnpm layout-gate:check
+```
+
+Run from the pair's main worktree on branch `fix/narrow-width-607-603`;
+it passed with exit 0 on 2026-11-03.
