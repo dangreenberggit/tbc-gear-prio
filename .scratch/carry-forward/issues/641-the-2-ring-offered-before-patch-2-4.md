@@ -25,3 +25,7 @@ Re-run: `python -c "import json;d={i['id']:i for i in json.load(open('vendor/wow
 Done when: 34837 (and any other sourceless item the check finds was added
 after its db phase) appears only in lists of its real content phase, with
 the source of the corrected phase cited.
+
+## Comments
+
+2026-11-03 (p45 DPS pass): The 2 Ring has one row in each of the 22 phase 4/5 runs, on all 11 DPS tabs. Whether phase 5 is its real phase is for this ticket to settle. Details: row 641 in docs/live-runs/2026-11-03-p45-dps-pass.md § Known defects seen again; .scratch/handoffs/sme-rank-judgment-452-p4-physical.md K1, -p5-physical.md K1, -p4-casters.md § Rows that look fine.
