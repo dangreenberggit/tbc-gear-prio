@@ -429,3 +429,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 754 The tab harness cannot load a gear preset on the six spec pages with no phase tabs, or a gear set whose name another spec on the page uses (pre-merge review feat/p45-dps-pass-452, round 1, S3/P3) 2026-11-03
 - 795 `pnpm verify` fails under high machine load while every test passes, and prints no vitest error (pre-merge review feat/620-item-level, merge check runs 2 and 3) 2026-11-03
 - 796 The paired-worktrees route for a new fork pin fails when `dev` is checked out in another worktree or the pair is under `.scratch/` (merge of feat/620-item-level) 2026-11-05
+- 797 After a between-chunk Gate C sends a row to `rework`, the stage-gate skill gives no way to start the next chunk (draft-review finding, checked on dev 7f223cd5) 2026-11-05
