@@ -132,7 +132,11 @@ fix ends as an open ticket, never only in a report, a review row or a
 log. When a ticket's own check passes, close it without asking. Before
 you propose or relay a fix, check that it uses the direct signal when
 one exists, removes the failure instead of making it rarer, and beats
-the simpler options, doing nothing included.
+the simpler options, doing nothing included. If a fix seems to need
+more words or code, the original is probably unclear. First try to
+rewrite, shorten or remove the part that caused the problem, and judge
+the fix by whether the result is clearer. If the fix still adds words
+or code, say why a rewrite is not enough.
 
 **An exit code is not evidence that work happened.** A stopped
 background task reports exit 0, and a command that ran in the wrong
@@ -202,9 +206,9 @@ review finding, a fix made during the review, or the user's feedback.
 When the review of a fix finds more to fix, stop: show the text as that
 review read it, and list those findings as open. The proposal gives the
 exact text and where it goes, and says what reviewed it: for each
-review, the path that ran (light or full), what it found and what was
-fixed after it; and what is still open, including a blocking finding
-such as no trial run.
+review, the path that ran (light, full or fix), what it found and what
+was fixed after it; and what is still open, including a blocking
+finding such as no trial run.
 
 Subagents receive the root `CLAUDE.md` / `AGENTS.md` text from when the
 parent session started, so an edit to those files reaches subagents only
