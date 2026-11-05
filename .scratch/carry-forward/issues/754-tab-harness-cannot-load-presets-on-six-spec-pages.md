@@ -54,34 +54,66 @@ hunter page's Survival set.
 
 ### Closed on fix/754-harness-presets, 2026-11-05
 
-`--preset` no longer needs `--preset-tab`: without it no phase tab is
-clicked and the chips the page shows are used. `--preset-spec <spec>` takes
-the chip under that spec's label (the `preset-group-label` text, such as
-`Survival`). A chip name found under more than one spec now stops the run
-with a message that names each spec, where the old harness loaded the first
-one. Both runs below used the dev servers (`node scripts/dev-tab.mjs
-backend` and `frontend`) started from a `dev` checkout whose fork was at
-`b603564ee`, the lock's commit.
+`--preset` no longer needs `--preset-tab` on a page with no phase tabs:
+no phase tab is clicked and the chips the page shows are used. On a page
+with phase tabs, `--preset` without `--preset-tab` stops the run and names
+the tabs. `--preset-spec <spec>` takes the chip under that spec's label
+(the `preset-group-label` text, such as `Survival`). A chip name found
+under more than one spec stops the run with a message that names each
+spec, where the old harness loaded the first one.
 
-Verified by: these two runs, from the branch's checkout, rc 0 each:
+Verified by: the runs below, on commit `f06d9997` (the harness files clean
+in `git status`), from the `.scratch/wt-754-harness` worktree. Each log
+records the commit. Every command ran inside one shell call,
+`.scratch/agent-reports/754-runs-r2/run-batch.sh`, that starts the dev
+servers, runs the harness and stops the servers, because each sandboxed
+Bash call has its own network namespace. The settings the runs needed:
+
+- Servers from the `.scratch/wt-global-lane-split` checkout of `dev`,
+  whose fork is at `b603564ee` (the lock's commit) with `dist/` built:
+  `GOFLAGS=-buildvcs=false node scripts/dev-tab.mjs backend` and
+  `TBC_TAB_TYPE_CHECKER=0 node scripts/dev-tab.mjs frontend`.
+- Harness: `PLAYWRIGHT_BROWSERS_PATH=/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-03-p45-runs/pwshim`.
+  That folder is in the main checkout's `.scratch/`, gitignored
+  (`.gitignore` line `.scratch/*`). Its
+  `chromium-1200/chrome-linux64/chrome` is a symlink to
+  `~/.cache/ms-playwright/chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell`.
+  Whether the harness finds a browser without it was not tested.
+
+The two "Done when" runs, rc 0 each:
 ```
-node scripts/tab-harness/run-tab-cdp.mjs --origin http://localhost:5173 --page /tbc/druid/balance/ --phase 4 --preset 'Phase 3' --out .scratch/agent-reports/754-runs/balance-p4-phase3.json
-node scripts/tab-harness/run-tab-cdp.mjs --origin http://localhost:5173 --page /tbc/hunter/dps/ --phase 4 --candidates 40 --preset-tab 'Phase 3' --preset-spec Survival --preset 'DW - 6% hit' --out .scratch/agent-reports/754-runs/hunter-survival-p4-cap40.json
+node scripts/tab-harness/run-tab-cdp.mjs --origin http://localhost:5173 --page /tbc/druid/balance/ --phase 4 --preset 'Phase 3' --out .scratch/agent-reports/754-runs-r2/balance-p4-phase3.json
+node scripts/tab-harness/run-tab-cdp.mjs --origin http://localhost:5173 --page /tbc/hunter/dps/ --phase 4 --candidates 40 --preset-tab 'Phase 3' --preset-spec Survival --preset 'DW - 6% hit' --out .scratch/agent-reports/754-runs-r2/hunter-survival-p4-cap40.json
 ```
 
-The output files are gitignored and exist only in the
-`.scratch/wt-754-harness` worktree. The balance run loaded the `Phase 3`
-chip on a page with no phase tabs: `presetWorn` starts with Thunderheart
-Headguard, and `baselineDps` 2173.9 and 721 rows equal the 2026-11-03
-patched-copy run (`docs/live-runs/2026-11-03-p45-dps-pass.md`). The hunter
-run's `presetWorn` starts with Gronnstalker's Helmet (item 31003), the head
-of `phase_3/sv/dw_6p.gear.json`; the Beast Mastery set of the same name has
-Cursed Vision of Sargeras (32235). Its `baselineDps` is 3441, against 3530
-for the Beast Mastery start on 2026-11-03. Without `--preset-spec` the same
-call stops with "Gear Sets chip DW - 6% hit is found 2 times".
+The balance page's own start gear is its `Phase 3` set
+(`ui/specs/druid/balance/spec.ts:58` in the fork), so that run cannot
+show that the click loaded anything. The same is true of the other five
+pages with no phase tabs. So each of those six pages also has a run that
+loads a set other than its start gear, `--phase 3 --candidates 10` with
+`--preset 'Phase 2'` (balance, elemental), `'P2 Preset'` (shadow on
+`/tbc/priest/dps/`, enhancement), `'P2 Swords'` (rogue) or `T5`
+(warlock). Each run's `presetWorn` holds every item of that preset's gear
+set file, for example `Nordrassil Headpiece` first for balance
+(`gear_sets/p2_a.gear.json`). Shadow's bracers, item 24692 with a random
+suffix, show as `Elementalist Bracelets of Shadow Wrath`. Warrior Arms ran with `--phase 4
+--candidates 10 --preset-tab 'Phase 3' --preset-spec Arms --preset BIS`
+and wore `p3_arms.gear.json` (`Onslaught Battle-Helm` first; the Fury set
+of that name starts with `Cursed Vision of Sargeras`). The hunter run wore
+`phase_3/sv/dw_6p.gear.json` (`Gronnstalker's Helmet` first; the Beast
+Mastery set starts with `Cursed Vision of Sargeras`).
 
-The ret call in `scripts/check_desktop_tab.py` keeps its flags. Run on the
-same servers with `--page /tbc/paladin/retribution/ --phase 4 --candidates
-40 --preset-tab 'Phase 3' --preset P3`, it gave `rows`, `aboveCutoffItems`
-and `baselineDps` equal to `data/desktop-gate/golden-ret-p4-cap40.json`
-(`.scratch/agent-reports/754-runs/ret-p4-p3-cap40.json`).
+The same hunter call without `--preset-spec` stops with "Gear Sets chip DW
+- 6% hit is found 2 times", and with `--preset-spec Survival` but no
+`--preset-tab` it stops with "this page has phase tabs; name one with
+--preset-tab".
+
+The desktop gate's ret call (`scripts/check_desktop_tab.py`: `--phase 4
+--candidates 40 --preset-tab 'Phase 3' --preset P3` on
+`/tbc/paladin/retribution/`) gave `rows`, `aboveCutoffItems` and
+`baselineDps` equal to `data/desktop-gate/golden-ret-p4-cap40.json`.
+
+Output files, gitignored, in the `.scratch/wt-754-harness` worktree under
+`.scratch/agent-reports/754-runs-r2/`: logs `errors-and-lists.harness.log`,
+`loads.harness.log`, `loads-nondefault.harness.log`; one JSON per run;
+the item checks `compare.out` and `compare-nondefault.out`.
