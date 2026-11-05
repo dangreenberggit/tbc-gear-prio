@@ -603,7 +603,7 @@ This is evidence **for** Dean's position and against the deferral, on the axis t
 
 ## 9. Orchestration
 
-Lanes per `docs/agents/model-policy.md`: workhorse = Sonnet, review = Opus, design = Fable (this file only). The **execution orchestrator is an Opus session started by the human with this plan** — the top-level agent of its own session (`AGENTS.md` § Parallel agents); it names the model on every spawn and never backgrounds workers without a disk handoff. Handoffs under `.scratch/handoffs/wowsims-tab/candidate-pool/<slice>/HANDOFF.md`; in-flight state in `.../PROCESS.md`. Use the `parallel-phase` skill for the fan-outs; its disjointness rule is verified by listing files, not eyeballing.
+Lanes per `docs/agents/model-policy.md`: workhorse = Sonnet, review = Opus, design = Fable (this file only). The **execution orchestrator is an Opus session started by the human with this plan** — the top-level agent of its own session; it names the model on every spawn and never backgrounds workers without a disk handoff. Handoffs under `.scratch/handoffs/wowsims-tab/candidate-pool/<slice>/HANDOFF.md`; in-flight state in `.../PROCESS.md`. Use the `parallel-phase` skill for the fan-outs; its disjointness rule is verified by listing files, not eyeballing.
 
 ### 9.1 Slices
 

@@ -3,7 +3,8 @@
 Read the entry for what you are **about to do** — each heading is the
 action that arms the trap. The _Symptom_ line doubles as the after-the-fact
 index when something already broke. Environment basics live in
-`AGENTS.md` § CLI environment — this file covers only what that section
+`~/.claude/AGENTS.md` § This machine (staged in
+`docs/agents/home/AGENTS.md`) — this file covers only what that section
 does not. The commands below are for the WSL (Ubuntu) dev host.
 
 ## Before running node / pnpm / test commands
@@ -18,29 +19,12 @@ which runs the version in `package.json`'s `packageManager`. Mass test
 failure is a Node-version symptom before it is a code regression. Confirm
 `node --version` and `pnpm --version` before diagnosing test output.
 
-In WSL, `/usr/local/bin` is the one directory on every process's PATH, so
-each tool the project runs is linked there: `node`, `npm`, `npx`,
-`corepack` and `pnpm` through `~/.local/node-default` (a symlink to an nvm
-version folder; nvm's default alias is `system`), and `go`, `gofmt`,
-`protoc` and `protoc-gen-go` straight to `~/.local/go/bin`,
-`~/.local/protoc/bin` and `~/go/bin`. `python` is `/usr/bin/python` from
-the apt package `python-is-python3`. So any shell finds them: login,
-interactive, `bash -c`, `wsl.exe -e`, `t3code.service` and the git hooks
-each of those runs. To upgrade, replace the files behind a link, with no
-sudo: repoint `~/.local/node-default`, unpack a new Go or protoc into its
-folder, or `go install google.golang.org/protobuf/cmd/protoc-gen-go@<ver>`.
-
-T3 reads PATH from `bash -ilc` once, when it starts, puts it in front of
-its own, and passes it to every Claude Code process it launches; Claude
-Code's Bash tool takes its PATH from that process. Measured on 2026-10-18:
-T3 started before nvm's default became `system`, so its PATH still has
-`~/.nvm/versions/node/v22.17.1/bin` ahead of `/usr/local/bin`, and
-`command -v node` there names that folder (same version today). A headless
-`claude -p` run in that environment found the same node, go, protoc,
-protoc-gen-go and python as a login shell. So after a change to
-`~/.profile`, `~/.bashrc`, the nvm default or `~/.local/node-default`,
-restart T3 when `C:\Users\<user>\.local\bin\t3-safe-off.ps1 -Check -Json`
-says it is idle; until then its agents keep the PATH from T3's start.
+How every shell finds `node`, `pnpm`, `go`, `protoc` and `python`, and
+when to restart T3 after a PATH change, is in `~/.claude/AGENTS.md`
+§ This machine. To upgrade, replace
+the files behind a link, with no sudo: repoint `~/.local/node-default`,
+unpack a new Go or protoc into its folder, or
+`go install google.golang.org/protobuf/cmd/protoc-gen-go@<ver>`.
 
 Check the setup in a new WSL terminal, from the repo root. The `readlink`
 lines must print what their comments say, where `<v>` is the
@@ -105,17 +89,11 @@ for an edit you know was small (a 4-line schema edit staging as ~18k
 lines; a 2-hash `sed` rewriting all 182 lines of a file); or a reviewer
 reports CRLF where HEAD is LF.
 
-A rewrite that changes a whole file's line endings does this: a script that
-writes LF over one of the CRLF files (`git ls-files --eol | grep i/crlf`
-lists them), or a Windows editor
-saving over the `\\wsl.localhost\...` path as CRLF. Edit text files with the
-harness Edit tool, which preserves endings. After
-any scripted or generated write, read `git diff --stat` before committing:
-a line count near the file's length means endings flipped — confirm the
-real change with `git diff --ignore-cr-at-eol`, rewrite the file back to
-the endings HEAD has, then commit.
+The cause, the check after a scripted write, and the rules for generated
+artifacts and CI byte-compare gates are in `~/.claude/AGENTS.md` § Shell
+and tool habits.
 
-The Python generators no longer do this (ticket 283, fixed by 399 on
+The Python generators no longer flip endings (ticket 283, fixed by 399 on
 2026-09-15 across fourteen write sites). **Keep it that way when you add
 one:** a Python write to a tracked file needs an explicit `newline=`. Text
 mode defaults to the platform's endings, and `pnpm fork-universes:check`
@@ -125,12 +103,6 @@ changed. Use `newline="\n"` when your code builds the text
 (`generate_item_gem_index.py:281`), `newline=""` when you hand the handle
 to `json.dump` or a `csv` writer (`sync_wowsims.py:493`). Both give LF.
 Scratch and tempdir writes need neither, and `"wb"` cannot take one.
-
-When changing committed **generated** artifacts: regenerate from the
-committed sources with the pinned toolchain; the working tree must match
-`HEAD` (or you must document which side is wrong) before commit. For CI
-byte-compare gates, read a real CI run; do not predict from a local story
-about another OS.
 
 ## Before editing a ported engine file
 
@@ -198,8 +170,8 @@ difference. Nothing in `pnpm verify` reads either field, so a hand edit there
 is invisible to every gate.
 
 For a sha pin `fetch_wowsimcli.py` **builds from source** — it needs `go`,
-`protoc` and `protoc-gen-go` on PATH (see "Before running node / pnpm / test
-commands"), and it hard-fails without them where it used to
+`protoc` and `protoc-gen-go` on PATH (see `~/.claude/AGENTS.md` § This
+machine), and it hard-fails without them where it used to
 download a zip. CI never runs it, so CI will not tell you.
 
 The fork gates (`equip-eligibility`, `ep-presets`, `meta-conditions`,

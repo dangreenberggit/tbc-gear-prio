@@ -2,31 +2,14 @@
 
 The values that the `stage-gate` skill and its seats read for this repo,
 one section per kind. Lanes and spawning rules in full:
-`docs/agents/model-policy.md` § Workhorse jobs and
-`docs/agents/orchestration.md` § Who spawns whom.
+`~/.claude/model-policy.md` § Workhorse jobs and § Who spawns whom.
 
 ## Planner
 
 The `gate-planner` reads only this section.
 
-**Workhorse types:** `glm-flash-task` (no model argument) when the
-harness lists it, except a job that could reach secrets, session logs
-(`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*`
-or `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
-types, Private data), else `discrete-task` (model `sonnet` at the call
-site).
-
-**Block size:** a block is worth a helper when it would otherwise take
-you more than about five tool calls (hypothesis, untested: the
-break-even is not measured). Run in place a check whose output decides
-your next step, and anything under that bound
-(`docs/agents/model-policy.md` § Workhorse jobs).
-
-**Name the model on every spawn:** every type except a GLM type
-(`glm-flash-task` here), which takes no model argument. A helper you
-spawn with no model can run on your own model, Fable, which is the top
-price tier (`docs/agents/model-policy.md` § Lane is per job, not per
-parent).
+**Workhorse types and block size:** `~/.claude/model-policy.md` § Workhorse
+jobs. **Naming the model on every spawn:** § Claude Code of the same file.
 
 **Judgment agent:** `general-task` (`model: "opus"`)
 
@@ -84,28 +67,10 @@ The only commands you run are the ones that
 
 **Judgment agent:** `general-task` (`model: "opus"`)
 
-### Session
-
-**Workhorse types:** the type `docs/agents/model-policy.md` § Workhorse
-jobs names
-
-### Reviewer
-
-**Workhorse types:** `glm-flash-task` (no model argument) when the
-harness lists it, except a job that could reach secrets, session logs
-(`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*`
-or `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
-types, Private data), else `discrete-task` (model `sonnet` at the call
-site) (`docs/agents/model-policy.md` § Workhorse jobs).
+**Workhorse types** (the session, the Reviewer and the Executor):
+`~/.claude/model-policy.md` § Workhorse jobs.
 
 ### Executor
-
-**Workhorse types:** `glm-flash-task` (no model argument) when the
-harness lists it, except a job that could reach secrets, session logs
-(`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*`
-or `~/.t3`, which goes to `discrete-task` (model-policy § GLM worker
-types, Private data), else `discrete-task` (`model: "sonnet"`)
-(`docs/agents/model-policy.md` § Workhorse jobs).
 
 **Parallel-phase workers:** An extremely simple slice (see
 `simple-task`) goes to `simple-task` (`model: "sonnet"`). Every other
@@ -185,4 +150,4 @@ gitignored; main checkout only).
 
 **SKILL.md step 2, never revert:** ticket 261
 
-**Subagent helpers run in the foreground (`.claude/hooks/subagent-foreground-helpers.py`):** ticket 712
+**Subagent helpers run in the foreground (`~/.claude/hooks/subagent-foreground-helpers.py`, staged in `docs/agents/home/hooks/`):** ticket 712

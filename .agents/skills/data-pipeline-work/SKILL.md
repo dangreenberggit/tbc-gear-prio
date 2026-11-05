@@ -73,8 +73,8 @@ the generator emits the same bytes twice is a separate question, and the answer
 is two runs into temp paths and a `cmp`.
 
 A **cross-platform** claim needs a CI log you have read — per
-`docs/agents/known-traps.md` § Before any scripted or generated file edit,
-do not predict it from a local run. Ticket 69 is the worked
+`~/.claude/AGENTS.md` § Shell and tool habits, do not predict it from a
+local run. Ticket 69 is the worked
 example: byte identity on Windows stayed open until a Linux CI run confirmed
 it.
 
