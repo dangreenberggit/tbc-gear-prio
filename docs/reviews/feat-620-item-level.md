@@ -6,6 +6,11 @@ Fork range (vendor/tbc-new-fork, branch `feat/620-item-level`):
 `7c261c5410cb4bdaf55b0e5a62fc4cc4c2c43aa5..594d07f66cb75d7c19f1835b69679d54225d0194`
 (one commit; the lock names `594d07f66` with `"pushed": false`).
 
+Reviewed range: `b5251c3923f3ba28210df57e6b0c4e83a0cb4440..76559172eea1c35a94081cf1e505435df795d768`
+
+Round 2 fork range: `594d07f66cb75d7c19f1835b69679d54225d0194..b603564eed544d5e9f62fbc3950309dd65921110`
+(one commit; the lock names `b603564ee` with `"pushed": false`).
+
 The branch is stacked on `fix/narrow-width-607-603` (tip `b073d1fe`), which
 has its own review, `docs/reviews/fix-narrow-width-607-603.md`. This review
 reads only the range above.
@@ -200,13 +205,23 @@ the item level (A1, S2, SP1); the sourceless count corrected to 32, 28
 in the pool (D2); the standing source named (S3, ticket half); the
 cross-chain fact added (D1, ticket half).
 
-Round 2 is still needed: CQ1-CQ5 wait for the code-quality pass and get
-their Disposition rows after it.
+Round 1 left CQ1-CQ5 for the code-quality pass (fork `b603564ee`, main
+`085fc8b4`). Round 2, the focused check below, passed with no finding,
+and its Disposition table gives CQ1-CQ5 their rows. No finding is open,
+and no finding blocks the merge.
 
-Tickets: this range filed 0 and closed 1 (620)
-(`git diff --name-status b073d1fe...b5251c39 -- '.scratch/carry-forward/issues/*.md'`
+Merge note from the coordinator (2026-11-05): the p45 branch also edits
+ticket 620, `.scratch/carry-forward/issues/NEXT` and
+`.scratch/carry-forward/map.md`, and merges before this branch. At this
+branch's merge, keep 620's closed text and append p45's Comments entry
+after it, take the higher `NEXT`, and keep both `map.md` lines.
+
+Tickets, counted after round 2 at `76559172`: this branch's own range
+filed 1 (795) and closed 1 (620)
+(`git diff --name-status b073d1fe...HEAD -- '.scratch/carry-forward/issues/*.md'`
 and the `Status: closed` count). Against `dev...HEAD`, which includes the
-stacked branch, filed 0 and closed 3 (603, 607, 620).
+stacked branch, filed 1 and closed 3 (603, 607, 620). Ticket 795 is open:
+`pnpm verify` fails under high load while every test passes.
 
 Merge check (`pnpm merge-to-dev --check-only`, logs under `$TMPDIR/r620/`
 of the reviewing agent, not kept):
@@ -222,9 +237,10 @@ of the reviewing agent, not kept):
 - Run 3 (the one rerun), load 48 at the start: rc 1, same step, same
   message. `packages/core/test/fork-meta-repair.test.ts` took 133 s and
   143 s as a whole file in runs 2 and 3; ticket 683 (closed) traced the
-  same message to a long synchronous case in that file. That machine load brings back ticket 683's RPC timeout is a
-  hypothesis, untested: `run_verify.mjs` prints only the JSON report's
-  failures, so vitest's own error line is not in the log.
+  same message to a long synchronous case in that file. That machine load
+  brings back ticket 683's RPC timeout is a hypothesis, untested:
+  `run_verify.mjs` prints only the JSON report's failures, so vitest's
+  own error line is not in the log. Ticket 795 records it.
 
 ## Disposition
 
@@ -240,3 +256,53 @@ of the reviewing agent, not kept):
 | S6  | Standards   | wontfix     | Not a defect: `ItemNameCell` already takes `quality` as a plain value, and `ilvl` follows that prop; passing the whole item would change the cell's inputs beyond this ticket.                                                                                                                                                    |
 | S7  | Standards   | wontfix     | The commit is written; the command and its log are in the implementer's report (`2026-11-03-layout-gate-check-2.txt`). Rewriting history for a body line is not worth it.                                                                                                                                                         |
 | SP1 | Spec        | fixed       | Same finding as A1; fixed there.                                                                                                                                                                                                                                                                                                  |
+
+## Focused check (round 2)
+
+Main range `b5251c39..76559172`; fork range `594d07f66..b603564ee`. One
+fresh `general-task` agent on Opus ran it, told to write nothing.
+
+- **Conditions.** C1 holds: `df22da24`, `59bbbbdb` and `3ea4b0a0` edit
+  only this review file and ticket 620; `76559172` files ticket 795 and
+  edits `NEXT` and `map.md`; fork `b603564ee` names CQ1-CQ5 in its
+  message; `085fc8b4` is the code-quality pass with a re-pin (its message
+  names CQ1-CQ5 and CQ2), not a plain re-pin, because
+  `scripts/tab-harness/test-layout.mjs` is outside `data/` and `docs/`.
+  C2 holds: the only non-test changes are comments (`ItemNameCell.tsx:49-50`,
+  `test-layout.mjs:46-48`) and the pin fields (`commit` and one appended
+  `_comment` sentence in the lock, `forkCommit` in
+  `sim-implemented-effects.json`). C3 holds: `b603564ee` is not a merge,
+  and `git -C vendor/tbc-new-fork diff --numstat --diff-filter=M cec2a7b68
+b603564ee` prints only `6 0 ui/app/SimTabsSection.tsx`, as at
+  `594d07f66`.
+- **Check 1, conditions hold:** PASS.
+- **Check 2, fixes change only what each finding asks:** PASS. The new
+  comments are true against db.json and `data/atlasloot_sources.json`
+  (each Scale of the Sands chain's steps have different levels; 29299 is
+  Honored, 29300 Revered).
+- **Check 3, tests assert their findings:** PASS. The CQ1 test now
+  compares each rendered line with the picker's heading and the level
+  from `itemsTabData` (fork `ui/features/gear/model/item_data.ts`), so a
+  different number in the tab fails its `toEqual`.
+- **Check 4, touched tests pass:** PASS. `npx vitest run
+ui/features/upgrades/components/ResultsTable/ResultRow.test.tsx` in the
+  fork: Node v22.23.2, 20 of 20 passed, rc 0.
+  `python3 scripts/check_layout_gate.py --print-hash` prints
+  `bdf129b3…e963`, equal to `testedTabHash`. The only changed digest
+  inputs are `ItemNameCell.tsx` and `test-layout.mjs`, both comment-only
+  (`ResultRow.test.tsx` is not a digest input:
+  `check_layout_gate.py:266` skips `.test.` names), so the
+  `--update-baseline` in `085fc8b4` stands without a measured run.
+- **Findings:** none.
+
+## Disposition (round 2)
+
+| ID  | Axis      | Disposition | Ticket / note                                                                                                                                                            |
+| --- | --------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CQ1 | Standards | fixed       | Fork `b603564ee`: the test compares the tab's line with the gear picker's heading and `itemsTabData` level. Round 2 check 3.                                             |
+| CQ2 | Domain    | fixed       | Fork `b603564ee` (`ItemNameCell.tsx`, `ResultRow.test.tsx`) and main `085fc8b4` (`test-layout.mjs`): the level tells two steps of one chain apart, not different chains. |
+| CQ3 | Standards | fixed       | Fork `b603564ee`: the test comment names db.json for levels and `atlasloot_sources.json` for standings.                                                                  |
+| CQ4 | Standards | fixed       | Fork `b603564ee`: the test name and comment say what the assertions check (after the name, outside the link). Same finding as S4.                                        |
+| CQ5 | Standards | fixed       | Fork `b603564ee`: one shared ring context and a `notUpgrade` option on `renderRow`. Same finding as S5.                                                                  |
+| S4  | Standards | fixed       | Same finding as CQ4; fixed there.                                                                                                                                        |
+| S5  | Standards | fixed       | Same finding as CQ5; fixed there.                                                                                                                                        |
