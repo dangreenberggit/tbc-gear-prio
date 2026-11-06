@@ -1,12 +1,12 @@
-Status: blocked
+Status: open
 Type: bug
 Origin: docs/live-runs/2026-11-06-survival-arms-p45.md (SME report .scratch/agent-reports/2026-11-06-general-task-sme-arms.md, draft N1)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
 Blocks: none
-Blocked by: owner ruling (step 1 below)
+Blocked by: none
 Related: 452, 528, 690, 799, ADR-0038
 
-# The other build's BiS picks show as BiS losses on the Arms and Survival tabs
+# The other build's BiS picks show as BiS losses on the warrior and hunter DPS pages
 
 ## What the player sees
 
@@ -71,43 +71,41 @@ two pages.
 
 ## Steps
 
-1. **Owner ruling, Q-810-bis-build: "Should BiS tags follow only the
-   loaded build's sets?"** The agent does not decide this.
-   - **Yes.** The Arms tab tags only Arms sets, and the Survival tab only
-     Survival sets. Costs: a fork change to how the pool picks BiS sets,
-     a re-pin, and an amendment to ADR-0038 § Preset phase and BiS tags.
-     The tab also needs a signal for which build is loaded. Two
-     candidates, neither checked: the talent rule ticket 803 added
-     (fork `ui/features/upgrades/model/data/data.ts`,
-     `TALENT_VARIANT_BY_SPEC`), which picks a talent tree, not a group,
-     and puts Arms - Kebab under Arms although upstream groups that build
-     with Fury's gear (`.scratch/agent-reports/2026-11-06-general-task-803-sv-arms-ep-weights.md`,
-     § Signal); or the `group` of the gear set the player loaded, which
-     the page may not keep once the player changes a piece (hypothesis,
-     untested).
-   - **No.** ADR-0038 stands and no code changes. Cost: on these two
-     pages the main table keeps showing the other build's picks as BiS
-     losses (five rows on Arms at phase 4, one at phase 5, five on
-     Survival at each phase in these runs). A smaller change fits under
-     this answer: name the group on such a badge ("BIS (Fury)") so the
-     player can tell whose pick it is; the rows stay in the main table.
-2. Build what step 1 rules, with a fork test, and re-pin
-   (`docs/agents/paired-worktrees.md` § Re-pin after a fork change).
-3. Run `arms-p4` again, or a fixture with both groups' sets, and read the
-   main table.
+1. **Owner ruling, 2026-11-06, verbatim:** "this choice isnt clear. it
+   should use the tags wowsims has for that site (for example i think all
+   dps warriors are probably one site with two talent preset options, not
+   different tabs)". Asked in chat on Q-810-bis-build, which offered: tag
+   only the loaded build's sets; no change; or name the build on the badge.
+   - What wowsims has (`.scratch/agent-reports/2026-11-06-general-task-810-wowsims-tags.md`,
+     fork at `3d8c215f8`, read, not seen on screen): warrior DPS and hunter
+     DPS are one page each. Their gear presets and builds carry a `group`
+     tag (Fury or Arms; Beast Mastery or Survival), and the gear tab shows
+     the sets under those group headings (`PresetGroupPicker.tsx:39-77`).
+     wowsims has no BiS field; its only "BiS" text is the warrior sets'
+     name "BIS" and a hover note (`preset_utils.ts:62`). It does not record
+     which build or talent preset the player loaded (`proto/ui.proto:319-337`).
+   - So the tag the tab can take from wowsims is the gear set's `group`.
+     Counting only "the loaded build's" sets would need a guess that is
+     not a wowsims tag, which the ruling rules out.
+   - Agent's reading of the ruling, to confirm with the owner: on a page
+     whose gear presets have more than one group, every BiS badge names
+     its group, for example "BIS (Fury)" or "DW - 6% hit (Survival)". The
+     rows stay where they are today. Today the badge adds the group only
+     when two sets share a name and phase (`settings_pool.ts:240-246`),
+     and the pool's fallback "BiS" badge does not carry the group
+     (`pool_source.ts:148`).
+2. Build that in the fork, with a fork test for a two-group page, and
+   re-pin (`docs/agents/paired-worktrees.md` § Re-pin after a fork change).
+   Amend ADR-0038 § Preset phase and BiS tags to say the badge names
+   wowsims's group.
+3. Check a warrior DPS run with the Arms build at phase 4 (the
+   `arms-p4-r2` setup) and read the main table's badges.
 
 ## Done when
 
-The owner has ruled on step 1, and one of these holds:
-
-- Yes: on the Arms tab at phase 4, no row for an item that appears only
-  in Fury's sets shows a BiS tag or sits in the main table below the
-  cutoff, and the same on the Survival tab for Beast Mastery's items; a
-  fork test covers both pages; ADR-0038 says so.
-- No, with group names on badges: such a row's badge names its group,
-  with a fork test.
-- No, unchanged: ADR-0038 records that both builds' sets count on these
-  pages, and this ticket is closed `wontfix`.
+On the warrior and hunter DPS pages, every BiS badge names the wowsims
+`group` of the set it comes from; a fork test covers a two-group page;
+ADR-0038 says so.
 
 ## Evidence
 
@@ -120,3 +118,9 @@ The owner has ruled on step 1, and one of these holds:
   `ui/specs/hunter/dps/gear_sets/phase_4/bm/` and `phase_4/sv/`.
 - SME reports: `.scratch/agent-reports/2026-11-06-general-task-sme-arms.md`
   (N1), `.scratch/agent-reports/2026-11-06-general-task-sme-survival.md`.
+
+## Comments
+
+- 2026-11-06: the owner's answer to Q-810-bis-build (quoted in step 1)
+  replaced the three options this ticket held. Status moved from
+  `blocked` to `open`.
