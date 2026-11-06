@@ -14,11 +14,13 @@ On the warrior page with the Arms build loaded (Arms talents, the Phase 3
 "BIS" Arms gear, ranking phase 4), the main results table lists five items
 under the six upgrades, each below the cutoff with a loss: Dreadboots of
 the Legion -6.3, Choker of Endless Nightmares -9.4, Cursed Vision of
-Sargeras -16.1, Grips of Silent Justice -17 and Midnight Chestguard -29.6
-(`arms-p4.json` rows 6-10). All five are in the phase-4 Fury set and in
-no phase-4 Arms set. At phase 5 the main table also lists Angelista's
-Revenge +1.3 (`arms-p5.json` row 22), which is only in the phase-5 Fury
-set.
+Sargeras -16.1, Grips of Silent Justice -17.6 and Midnight Chestguard
+-29.6 (`arms-p4-r2.json` rows 6-10). All five are in the phase-4 Fury set
+and in no phase-4 Arms set. At phase 5 the main table also lists
+Angelista's Revenge +1.3 (`arms-p5-r2.json` row 22), which is only in the
+phase-5 Fury set. These rows are from the Arms runs done again with the
+P3 Arms EP weights (review finding D1); the first runs, `arms-p4.json`
+and `arms-p5.json`, had the same rows, with Grips at -17.
 
 The hunter page with the Survival build loaded shows the same with Beast
 Mastery's picks. At phase 4 the main table lists Stormrage Signet Ring
@@ -31,7 +33,7 @@ from phase 4 (assumptions line: "BiS tags: from P4 sets, ranking P5" at
 phase 5). The Survival SME report did not flag these rows.
 
 Each run's assumptions line lists both builds' sets, for example
-`sets: preset:4:Fury/BIS, preset:4:Arms/BIS` in `arms-p4.json`.
+`sets: preset:4:Fury/BIS, preset:4:Arms/BIS` in `arms-p4-r2.json`.
 
 What the badge on these rows reads was not recorded: the run JSON has no
 badge field. From the code, a badge names the group only when two
@@ -43,7 +45,9 @@ no "(Fury)" (hypothesis, untested on screen).
 Check: `python3 -I .scratch/agent-reports/2026-11-06-452b-runs/bis-group-check.py`
 from the worktree root of `feat/452-survival-arms` (the run folder is
 gitignored; it exists only in that worktree). It prints each
-below-cutoff main-table row and which build's sets hold the item.
+below-cutoff main-table row and which build's sets hold the item. It
+reads the first Arms runs; with `arms-p4-r2` and `arms-p5-r2` in its run
+list it prints the same Fury-only rows.
 
 ## Why it happens
 
@@ -108,8 +112,9 @@ The owner has ruled on step 1, and one of these holds:
 ## Evidence
 
 - Run JSON (gitignored, only in the `feat/452-survival-arms` worktree):
-  `.scratch/agent-reports/2026-11-06-452b-runs/arms-p4.json`,
-  `arms-p5.json`, `survival-p4.json`, `survival-p5.json`.
+  `.scratch/agent-reports/2026-11-06-452b-runs/arms-p4-r2.json`,
+  `arms-p5-r2.json`, `survival-p4.json`, `survival-p5.json`; the
+  superseded Arms runs `arms-p4.json`, `arms-p5.json`.
 - Gear sets: fork `ui/specs/warrior/dps/gear_sets/p4_fury.gear.json`,
   `p5_fury.gear.json`, `p4_arms.gear.json`, `p5_arms.gear.json`;
   `ui/specs/hunter/dps/gear_sets/phase_4/bm/` and `phase_4/sv/`.
