@@ -432,3 +432,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 797 After a between-chunk Gate C sends a row to `rework`, the stage-gate skill gives no way to start the next chunk (draft-review finding, checked on dev 7f223cd5) 2026-11-05
 - 798 The stage-gate skill has no way to re-plan a step that turns out wrong during the build (deferred from the stage-gate ban fix; draft-3 review findings 1-4) 2026-11-05
 - 842 The made-up tab fixtures write a melee hit cap (Precision 3/3, expertise) into every fixture, the caster ones included; nothing shows it yet (pre-merge review feat/452-spec-page-scans, round 1, D2) 2026-11-06
+- 843 The layout gate skips when one of a page's two fixtures fails to load, so that fixture's case is never checked (pre-merge review feat/452-spec-page-scans, round 1, A1) 2026-11-06
