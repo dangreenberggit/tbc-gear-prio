@@ -59,13 +59,15 @@ and the data and harness READMEs found the rest of this list.
   `packages/core/src/pool.ts`.
 - **Waits for the owner (agent instructions):** `sme-rank-review`
   `SKILL.md:11,28,56`, in both `.claude/skills/` and `.agents/skills/`,
-  asks the reviewer to judge as a ret player. Proposed text: Q-452-sme-skill
-  in session F's handoff. Line 69 ("e.g. ret ranged slot is a libram") is
+  asks the reviewer to judge as a ret player. Proposed text: Q-452-sme-skill,
+  in `.scratch/handoffs/2026-11-06-452-sme-skill-proposal.md` in session F's
+  worktree (gitignored), and in session F's handoff. Line 69 ("e.g. ret ranged slot is a libram") is
   one example among others and stays.
 - **Code facts, left:** the gear-set and preset paths in
   `scripts/sync_wowsims.py`, `scripts/check_sync_wowsims.py`,
   `scripts/check_ep_presets.py`, `scripts/build_feral_skeleton.py`,
-  `scripts/tab-fixtures/record.mjs`; the default page in
+  `scripts/tab-fixtures/record.mjs`; the page map in
+  `scripts/tab-harness/page-coverage.test.mjs:12`; the default page in
   `run-tab-cdp.mjs`, `test-tab-harness.mjs` (`PAGE_PATH`) and
   `scripts/tab-harness/README.md:95`; the ret-only before-run state in
   `test-review.mjs:13` and `scripts/tab-harness/README.md:21`; the

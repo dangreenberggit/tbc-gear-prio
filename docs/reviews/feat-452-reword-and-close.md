@@ -160,3 +160,19 @@ in this range (`git diff --name-status a094a28b..HEAD --
 closed counts go here when the last Disposition table is written. The
 Disposition table is written by the agent that handles these findings,
 after the fixes; the merge check (step 4) was not run.
+
+## Disposition
+
+| ID    | Axis        | Disposition | Ticket / note                                                                                   |
+| ----- | ----------- | ----------- | ----------------------------------------------------------------------------------------------- |
+| I1    | Instruction | fixed       | 452's closing sentence now says it closes only when every bar line is met on `dev` (802 step 3) |
+| I4    | Instruction | fixed       | the I1 fix points back at the existing bar, so no new rule needs a trial run                    |
+| I2    | Instruction | fixed       | 802 names `.scratch/handoffs/2026-11-06-452-sme-skill-proposal.md` in session F's worktree      |
+| P2/I3 | Spec        | fixed       | 452 names E's branch and says what Q-452e-r1 and Q-452d-review ask                              |
+| P3    | Spec        | fixed       | 452 says the owner "could see no separate site route" and points at the quote                   |
+| P1    | Spec        | fixed       | 802 lists `page-coverage.test.mjs:12` among the code facts                                      |
+| A1    | Adversarial | fixed       | `data/pools/README.md` says "for each of phases 2 to 5"                                         |
+| S2    | Standards   | fixed       | `pool.ts` comment wrapped to 80 columns                                                         |
+| S3    | Standards   | fixed       | harness README: "on the spec page that `--page` names (by default the ret page)"                |
+| S4/P4 | Standards   | fixed       | headers of `run-tab-cdp.mjs` and `assemble_universe.py` reworded; 452's wording line lists them |
+| S1    | Standards   | wontfix     | rewording `a29ea0ca`'s subject would rewrite the sha this review's range names                  |

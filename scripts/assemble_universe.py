@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-assemble_universe.py — build phase-scoped ret candidate universes (sub-phase 4).
+assemble_universe.py — build phase-scoped candidate universes for one spec
+(`--spec`, default ret; sub-phase 4).
 
 Merges db.json sources, AtlasLoot parse, two-hop token map, and Wowhead ret lists.
 D7 eligibility is implemented here (leather/mail/librams allowed; not plate-only).

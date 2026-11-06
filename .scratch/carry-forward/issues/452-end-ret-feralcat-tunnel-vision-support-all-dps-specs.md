@@ -166,10 +166,13 @@ work stands:
   in `scripts/check_desktop_tab.py` on that branch). Ticket 800 is still
   open there.
 - **Page checks on more than one spec page (bullet 2) and the a11y ratchet
-  on each spec's tab (bullet 3):** E's branch scans all 11 spec pages;
-  ticket 801 is closed on it. Survival and Arms have no page of their own
-  (owner, 2026-11-06), so the hunter and warrior pages cover them. E's
-  merge waits on owner question Q-452e-r1.
+  on each spec's tab (bullet 3):** E's branch `feat/452-spec-page-scans`
+  scans all 11 spec pages; ticket 801 is closed on it. The owner could see
+  no separate site route for Survival or Arms (2026-11-06, quoted above),
+  so the hunter and warrior pages cover them. E's merge waits on owner
+  question Q-452e-r1: how check 23 should learn the fork's spec ids, which
+  it reads today from the text of `run.ts` with a regex (session E's
+  handoff).
 - **EP presets per spec (bullet 2):** `pnpm ep-presets:check` is in
   `pnpm verify`; ticket 803 (Survival and Arms weights) is closed on B's
   branch `feat/452-survival-arms`, with 799.
@@ -178,12 +181,16 @@ work stands:
   the owner as Q-452-bar-universes; there is no ruling yet.
 - **Pool and meta-gem repair per spec:** tickets 746 and 804 are closed on
   D's branch `feat/452-meta-repair-hit-cap`. D's merge waits on owner
-  question Q-452d-review.
+  question Q-452d-review: what to do with the two open round-2 findings in
+  `docs/reviews/feat-452-meta-repair-hit-cap.md` on that branch.
 - **Wording (bullet 4):** this branch rewords `data/pools/README.md`,
-  `scripts/tab-harness/README.md` and a comment in
-  `packages/core/src/pool.ts`. The `sme-rank-review` skill frames each
+  `scripts/tab-harness/README.md`, a comment in `packages/core/src/pool.ts`
+  and the header comments of `scripts/tab-harness/run-tab-cdp.mjs` and
+  `scripts/assemble_universe.py`. The `sme-rank-review` skill frames each
   review as a ret player (lines 11, 28 and 56); that text waits for the
   owner's approval (Q-452-sme-skill), so 802 stays open.
 
-452 closes when 799, 800, 746, 801, 803 and 804 are closed on `dev`, 802 is
-closed, and Q-452-bar-universes is answered.
+452 closes only when every bar line above is met on `dev` (802 step 3).
+Today that needs 799, 800, 746, 801, 803 and 804 closed on `dev`, 802
+closed, the owner's answer to Q-452-bar-universes, and any work that answer
+asks for.
