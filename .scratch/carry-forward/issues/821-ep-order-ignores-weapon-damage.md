@@ -54,8 +54,10 @@ engine files with twins in this repo (`packages/core/src/stats.ts`,
 `docs/agents/known-traps.md` § Before editing a ported engine file.
 
 The core twins cannot follow the fork as they are: the core's item data,
-`data/items/index.json`, has no weapon-damage field (the union of its items'
-keys, read with python on 2026-11-06, holds none). The plan for this ticket
+`data/items/index.json`, has no weapon-damage field (`python3 -I -c "import
+json; d=json.load(open('data/items/index.json')); print(len(d),
+sorted(set().union(*(i.keys() for i in d.values()))))"` printed 8249 items and
+15 keys on 2026-11-06, none of them weapon damage). The plan for this ticket
 picks one of two
 options and says which: add weapon damage to the core's item data through
 the data pipeline, so the twins stay at parity; or record a divergence in

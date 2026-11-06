@@ -20,9 +20,7 @@ items are simmed, but the list leaves owned rows out, and no other armour,
 ring or trinket is in the first 40. Hand types are db.json's `handType` for
 each row's name. The committed golden
 `data/desktop-gate/golden-enh-p4-cap40.json` (fork `b603564ee`) holds this
-run; re-run it with `pnpm desktop-gate:check --spec enh`, which rebuilds the
-desktop binary (`make wowsimtbc`) first; the pair's `dist/` must already be
-built.
+run; re-run it with `pnpm desktop-gate:check --spec enh`.
 
 The uncapped default (`candidateCap` 0, ticket 363) prices every candidate, so
 its numbers are right. A capped run shows the wrong rows: it spends its 40

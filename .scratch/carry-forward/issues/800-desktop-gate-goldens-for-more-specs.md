@@ -166,6 +166,7 @@ every committed golden and passed twice in a row (rc 0 both times, every spec
 PASS on (a)-(f) and (h)). `check_desktop_tab_verdict.py` covers the
 multi-spec tables. The README points to the code's numbers (`GATED` in
 `scripts/check_desktop_tab.py`) instead of copying them. That meets "The
-README states the same numbers as the code": the README states none, so none
+README states the same numbers as the code": the README states none of the
+current counts, so none
 can differ. Left: the branch's
 `pre-merge-review` file, which the session that runs the review writes.

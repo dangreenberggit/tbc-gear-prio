@@ -199,6 +199,142 @@ New findings:
 - **J9** (minor) ticket 800:137,151 name the old table names; its
   Done-when and status line disagree on whether the README states numbers.
 
+## Round 3 (owner-chosen further round, 2026-11-06)
+
+The owner chose a fix round after round 2 ("Then launch a session to focus on them and fix them"). Session D oversaw it from its own worktree, because the sandbox cannot write to C's: fix commits `6512a6fe` (R1), `5e24572d` (R2, J2, J3) and `36e7e96c` (J1, J3-J9) sit on `a87d82cf` on `feat/452-meta-repair-hit-cap`. Round 3 is a last round (`~/.claude/AGENTS.md` § Review round limits).
+
+## Focused check (round 3)
+
+Range `a87d82cf8cad80fb0a3910e807ca62fa29640b12..36e7e96c499961c9a26af98067200db6cdc8fbe2`
+(`6512a6fe` R1, `5e24572d` R2 J2 J3, `36e7e96c` J1 J3-J9), read in session
+D's worktree. No other repo: the range does not move the fork pin
+(`git diff --quiet a87d82cf..36e7e96c -- data/wowsims-fork.lock.json`, rc 0).
+One fresh `general-task` agent on Opus, scoped to the product files
+`scripts/check_desktop_tab_verdict.py`, `PLAN.md` and
+`data/desktop-gate/README.md`; a separate agent reads
+`docs/agents/upstream-catch-up.md` and the tickets (all of `36e7e96c`).
+
+1. Conditions hold and each finding is fixed: **pass**. `6512a6fe`
+   touches only the verdict script (a test), `5e24572d` only `PLAN.md`
+   and the README (docs); each commit names its finding IDs
+   (`git show --stat`). R1: `run_harness_problems()` runs the real
+   `run_harness` with a stub `subprocess` over five cases (unknown spec,
+   harness rc 3, rc 0 with no JSON and a stale file, rc 0 with JSON that
+   does not parse, rc 0 with valid JSON). R2: `PLAN.md:921` now points at
+   `capped_rows[40]` of `GATED[("ret", 4)]` in `scripts/check_desktop_tab.py`,
+   which is `{40: 40}` (`check_desktop_tab.py:197`). J2: README steps now
+   re-run the whole command (step 2) before the commit that records that
+   run's lines (step 3). J3 (README half): step 1 says what to do when (e)
+   refuses the write on a count the change is meant to move.
+2. Fixes change only what each finding asks: **pass**. The test adds only
+   `run_harness_problems()`, its two imports and its count in `main()`.
+   The PLAN change is the one pointer; the value 40 is kept. The README
+   change is the step reorder (J2) and the new paragraph plus "the `GATED`
+   change if step 1 needed one" in step 3 (J3). The README's facts match
+   the code: (e)'s line prints `rowCount` (`check_desktop_tab.py:767`), and
+   the comment above `GATED` says how `expected_eligible` and `pool_cap`
+   are derived (`check_desktop_tab.py:145-164`).
+3. The new test asserts its finding: **pass**. In a copy under `$TMPDIR`
+   (`git archive 36e7e96c` of the two scripts and `data/desktop-gate`),
+   each of the four `raise HarnessFailed(` in `run_harness`
+   (`check_desktop_tab.py:392, 401, 404, 408`), changed one at a time to
+   `raise SystemExit(2)`, made the verdict script exit 1 with one FAIL
+   line, on that raise's own case. Removing the `unlink`
+   (`check_desktop_tab.py:398`) made the stale-file case fail (it returned
+   the stale `{'rowCount': 1}`), rc 1. Unchanged copy: rc 0. This matches
+   the run recorded in `6512a6fe`'s message.
+4. Touched tests pass: **pass**. `python3 scripts/check_desktop_tab_verdict.py; echo rc=$?`
+   on `36e7e96c` → `check_desktop_tab_verdict.py ok (22 verdict cases, 4
+gated specs)`, rc 0 (17 cases before plus 5). Python 3.10.12. The
+   desktop gate was not run (session D runs it next).
+
+Findings: none in the product files.
+
+Bookkeeping note (no finding): round 2's through-sha is `31e90cad`. The one
+commit between it and this range's start, `a87d82cf`, adds only
+`docs/reviews/feat-452-desktop-goldens.md` (`git diff --stat
+31e90cad..a87d82cf`). So the `Reviewed range:` line for this round can read
+`31e90cad794648549d3db5956e8201c8177ebb5c..36e7e96c499961c9a26af98067200db6cdc8fbe2`,
+which keeps the chain unbroken.
+
+## Instruction review (round 3, fix path)
+
+Scope: fix commit `36e7e96c` (range `5e24572d..36e7e96c`) to
+`docs/agents/upstream-catch-up.md` and tickets 800, 820 and 821 under
+`.scratch/carry-forward/issues/`. Checked against
+`data/desktop-gate/README.md` as of `5e24572d` and against the code each
+changed sentence cites. J2 and the README half of J3 are product files and
+were reviewed separately.
+
+**All of J1 and J3-J9 are fixed.** Each fix changes only what its finding
+asked. Two cold readers (Opus, fresh context) read the changed text: one as
+the catch-up agent with `enh` and `rogue` red after a re-pin meant to move
+only enh, and one as the planner of tickets 820 and 821. Both did what the
+fixes intend.
+
+- **J1 fixed.** `upstream-catch-up.md:450-453`. The cold reader held the
+  re-pin, regenerated only enh's golden through README § Regenerating a
+  golden, treated rogue as a defect, re-ran the whole gate and committed
+  the green run's lines. The new text agrees with README:91-92 ("A red gate
+  is a finding, not a prompt to regenerate") and README:129-131
+  (regenerating is legitimate only when a change is meant to move that
+  spec).
+- **J3 (ticket half) fixed.** Tickets 820:72-75 and 821:64-67 no longer copy
+  the moved-count rule. They point at README § Regenerating a golden, whose
+  step 1 covers a refused write (README:136-143 at `5e24572d`). The planner
+  reader followed that step for a refused write.
+- **J4 fixed.** 820:61-64 now says "for any spec whose worn off hand is
+  filled". 820:50-53 cites `clearOffHandForTwoHander` at
+  `model/engine/rank.ts:4154-4183`. Checked at fork `b603564ee`: the
+  function starts at 4154 and ends at 4183. It tests only the slot index,
+  the hand type and whether the off hand is filled, and has no spec
+  parameter. `simSlotsForPoolSlot` (`pool.ts:300-327`) gives a two-hander
+  `["mainhand"]` for every spec.
+- **J5 fixed.** 820:72-74 now says to re-record every gated golden that
+  moves, with rogue named.
+- **J6 fixed.** 821:56-62. The fact checks out:
+  `python3 -I -c "import json; d=json.load(open('data/items/index.json')); print(sorted(set().union(*(i.keys() for i in d.values()))))"`
+  prints 15 keys for 8249 items, with no weapon-damage key.
+  `docs/fork-provenance/engine.md` has the provenance table and already
+  holds "adapted" rows (for example `cap-profile.ts` "fork-only"), so option
+  (b) follows existing practice.
+- **J7 fixed, but the new clause is wrong** (see K1). The first half is
+  right: `build()` (`scripts/check_desktop_tab.py:304-311`) runs only
+  `make -C vendor/tbc-new-fork wowsimtbc`.
+- **J8 fixed.** 820:74-75 and 821:66-67 add "update or remove the `enh`
+  entry" in README § Known defects of a golden. That section exists at
+  README:109-118 and holds an `enh` entry.
+- **J9 fixed.** 800:137 and 800:151 use the `GATED` field names, which match
+  `GatedRun` (`check_desktop_tab.py:120-132`). The status at 800:167-169 says
+  how it meets the Done-when sentence at 800:93. That Done-when sentence is
+  unchanged.
+
+New findings:
+
+- **K1** (minor) `820:23-25` "which rebuilds the desktop binary (`make
+wowsimtbc`) first; the pair's `dist/` must already be built". The second
+  half is false. In the fork's `makefile` at `b603564ee`, `wowsimtbc:
+binary_dist devserver` (:139) and `binary_dist: $(OUT_DIR)/.dirstamp`
+  (:124) make `make wowsimtbc` build `dist/tbc` itself, including the
+  bundle (`npx vite build`, :24-36) and `lib.wasm.gz` (:97). How it goes
+  wrong: an agent that re-runs the enh case first runs a separate `dist/`
+  build that is not needed. Cost: a few minutes of duplicate build, and a
+  false fact in a ticket. Fix: delete the build clause and end the sentence
+  at "re-run it with `pnpm desktop-gate:check --spec enh`." The build is the
+  gate's own business.
+- **K2** (minor) `821:57-58` "the union of its items' keys, read with python
+  on 2026-11-06". This names no command a reader can re-run
+  (`~/.claude/AGENTS.md` § Sources on important claims). The planner reader
+  flagged it. Fix: replace the parenthetical with the one-line command given
+  under J6 above.
+- **K3** (minor) `800:168-169` "the README states none, so none can differ".
+  README:57-74 states ret's earlier pin values (917, 1178, 1121, 39), which
+  are labelled as history. How it goes wrong: a reader who checks the claim
+  finds numbers in the README and has to work out that they are history.
+  Cost: low. Fix: "the README states none of the current counts".
+
+K1-K3 are wording only (they change no step, rule or code), so under § Review round limits they were fixed in the next commit and get one further check; the cold readers' notes stay in the gitignored report `.scratch/agent-reports/2026-11-06-general-task-452c-round3-instruction.md` in D's worktree.
+
 ## Summary
 
 Round 2 is the last round (`~/.claude/AGENTS.md` § Review round limits)
