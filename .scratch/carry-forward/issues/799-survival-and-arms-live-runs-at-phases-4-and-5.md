@@ -3,7 +3,7 @@ Type: task
 Origin: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md (slicing, 2026-11-06, slice B)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
 Blocks: none
-Blocked by: none
+Blocked by: 803
 Related: 452, 754, 803
 
 # Run and judge Survival hunter and Arms warrior at phases 4 and 5
@@ -13,34 +13,44 @@ Related: 452, 754, 803
 The owner ruled on 2026-11-06 that Survival hunter and Arms warrior are in
 the epic's spec list (452 Notes). The p45 pass ran the other 11 specs and
 left these two: "Survival and Arms runs after ticket 754 is fixed"
-(`docs/live-runs/2026-11-03-p45-dps-pass.md:234-235`). Ticket 754 is
-closed, so the harness can now load a gear set whose name another spec on
-the same page also uses.
+(`docs/live-runs/2026-11-03-p45-dps-pass.md:234-235`). Ticket 754
+(`.scratch/carry-forward/issues/754-tab-harness-cannot-load-presets-on-six-spec-pages.md`)
+is closed, so the harness can now load a gear set whose name another spec
+on the same page also uses.
+
+Slice B works ticket 803 first, in the same pair: today these two pages
+gem candidates with the Beast Mastery and Fury EP weights, and runs made
+before the fix would judge that known defect again.
 
 ## What to do
 
-Four uncapped live runs: Survival at phases 4 and 5, Arms at phases 4 and
-5. Each run starts from the preset gear of the phase before the phase it
-ranks (owner rule, ticket 560 brief, quoted in
-`scripts/check_desktop_tab.py:101-102`). The fork's gear sets are under
-`vendor/tbc-new-fork/ui/specs/hunter/dps/gear_sets/phase_*/sv/` and
-`vendor/tbc-new-fork/ui/specs/warrior/dps/gear_sets/*_arms.gear.json`.
+Four uncapped live runs, after 803 is fixed: Survival at phases 4 and 5,
+Arms at phases 4 and 5. Each run starts from the preset gear of the phase
+before the phase it ranks (owner rule, ticket 560 brief, quoted in
+`scripts/check_desktop_tab.py:101-102`). In the fork:
+
+- Survival phase 4 starts from `ui/specs/hunter/dps/gear_sets/phase_3/sv/`,
+  phase 5 from `phase_4/sv/`.
+- Arms phase 4 starts from `ui/specs/warrior/dps/gear_sets/p3_arms.gear.json`,
+  phase 5 from `p4_arms.gear.json`.
+
+If a start set is missing or the harness cannot select it, stop and report
+it; do not start from another set.
 
 Judge each run with the `sme-rank-review` skill, as the p45 pass did, and
-write a dated report under `docs/live-runs/`. File a ticket for each new
-defect. Follow the p45 report's § Setup for the run commands, and ticket
-754's Comments for running from the sandbox (one script that starts the
-servers, runs the harness and stops the servers).
+write a dated report under `docs/live-runs/` in the p45 report's form.
+File a ticket for each defect that no open ticket covers. Follow the p45
+report's § Setup for the run commands, and ticket 754's Comments for
+running from the sandbox (one script that starts the servers, runs the
+harness and stops the servers).
 
-Ticket 803: these pages use the Beast Mastery and Fury EP weights for the
-candidate prefilter and the gem fill. Give the SME judges that fact, so a
-row that looks wrong because of it is counted against 803.
-
-Wall time to expect: in the p45 pass, hunter runs took 1400-1552 s each
-and the warrior batch of 2 runs took 1424 s (`docs/live-runs/2026-11-03-p45-dps-pass.md`
-§ Wall time).
+Wall time to expect: in the p45 pass the two hunter runs took 1552 s and
+1547 s, while they shared a wave with enhancement, and the warrior batch
+of 2 runs took 1424 s (`docs/live-runs/2026-11-03-p45-dps-pass.md`, run
+table and § Wall time).
 
 ## Done when
 
-The four runs are counted and judged, the report is committed, each new
-defect has a ticket, and the branch's review file exists.
+803 is closed on the branch. The four runs finish, each has an SME
+verdict, the report is committed, each new defect has a ticket, and the
+branch's `pre-merge-review` file exists.
