@@ -402,7 +402,10 @@ def run_harness(out_path: Path, candidates: int, spec: str, phase: int) -> dict:
             f"harness exited {proc.returncode} (no clean run to judge).")
     if not out_path.is_file():
         raise HarnessFailed(f"harness wrote no JSON at {out_path}.")
-    return json.loads(out_path.read_text(encoding="utf-8"))
+    try:
+        return json.loads(out_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as e:
+        raise HarnessFailed(f"harness JSON at {out_path} does not parse: {e}.")
 
 
 # --- T1-T4 comparison -------------------------------------------------------
@@ -762,9 +765,9 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
             and eligible == expected and eligible <= cap)
     mark("e", e_ok,
          f"rowCount={rb.get('rowCount')} expected={expected_rows or 'unpinned'} "
-         f"eligibleCount={eligible} EXPECTED_ELIGIBLE={expected or 'unpinned'} "
+         f"eligibleCount={eligible} expected_eligible={expected or 'unpinned'} "
          f"cap={cap or 'unpinned'} "
-         f"(uncapped uses FULL_ROWS={full_rows}, C14 false)")
+         f"(uncapped uses full_rows={full_rows}, C14 false)")
 
     mark("f", not rb.get("panicHit"), f"panicHit={rb.get('panicHit')}")
 
