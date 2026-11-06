@@ -154,12 +154,24 @@ before round 2:
 - **Bookkeeping (ticket wording):** I2 (name the handoff path, or copy
   the proposed text into 802 so it is tracked), P1, P2/I3, P3.
 
-No finding asks for an edit to an agent file. No ticket filed or closed
-in this range (`git diff --name-status a094a28b..HEAD --
-'.scratch/carry-forward/issues/*.md'` shows two `M` rows); the filed and
-closed counts go here when the last Disposition table is written. The
-Disposition table is written by the agent that handles these findings,
-after the fixes; the merge check (step 4) was not run.
+No finding asks for an edit to an agent file.
+
+Round 2 (focused check over `a29ea0ca..d81284b1`) passed all four checks
+with no finding, so the review ends with round 1's Disposition table and
+an empty round 2 table.
+
+Tickets in this branch's range (`a094a28b..HEAD`, the skill's two
+commands with that range in place of `dev...HEAD`): **0 filed** (no `A`
+row from `git diff --name-status a094a28b..HEAD --
+'.scratch/carry-forward/issues/*.md'`), **0 closed** (the `Status:` grep
+counts 0). Tickets 452 and 802 stay open by design: 452 waits on the
+slice branches reaching `dev`, and 802 on the owner's approval of the
+`sme-rank-review` text (Q-452-sme-skill).
+
+The merge check (step 4) was not run as part of this review: it needs
+`vendor/tbc-new-fork`, which this worktree lacks, and it is the owner's
+step at merge time. An earlier run here, at the caller's request, exited
+1 with `pnpm verify` refusing because the fork is absent.
 
 ## Disposition
 
@@ -176,3 +188,46 @@ after the fixes; the merge check (step 4) was not run.
 | S3    | Standards   | fixed       | harness README: "on the spec page that `--page` names (by default the ret page)"                |
 | S4/P4 | Standards   | fixed       | headers of `run-tab-cdp.mjs` and `assemble_universe.py` reworded; 452's wording line lists them |
 | S1    | Standards   | wontfix     | rewording `a29ea0ca`'s subject would rewrite the sha this review's range names                  |
+
+## Focused check (round 2)
+
+Reviewed range: `a29ea0cacee6ef72f3cacab1f4a30c245024c6f7..d81284b1506cfc61c4c8730916c59ac2123c1c3b`
+
+Main range: `git log -p a29ea0ca..d81284b1` (`e92548ee` adds this file;
+`d81284b1` fixes round 1, message "Fixes I1, I4, I2, P2/I3, P3, P1, A1,
+S2, S3 and S4/P4; S1 is wontfix"). Other repo: none; the fork pin does
+not move (`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json`
+exits 0), so the fork log is skipped and the fork condition holds.
+`d81284b1` has the same tree as an earlier fix commit, `6863f71a`, which
+was redone only to put the IDs in its message.
+
+One fresh `general-task` agent on Opus ran the four checks.
+
+1. Conditions 1 to 3 hold: **PASS**. `e92548ee` edits only this file;
+   `d81284b1` names every ID; the only changed lines outside docs and
+   tickets are comments at `pool.ts:155` (S2), `assemble_universe.py:3`
+   (P4) and `run-tab-cdp.mjs:2` (S4), each cited by its finding.
+2. The fixes change only what each finding asks for: **PASS**. The new
+   Q-452e-r1 text matches `page-coverage.mjs:10` on
+   `feat/452-spec-page-scans`; the Q-452d-review text matches
+   `docs/reviews/feat-452-meta-repair-hit-cap.md:343` on D's branch;
+   `--spec` defaults to `ret` (`assemble_universe.py:2893-2897`); the
+   handoff path in 802 exists and is gitignored (`git check-ignore -v`).
+3. Each new test asserts its finding: **PASS** (the fixes add no test).
+4. The tests the fixes touch pass: **PASS** (the fixes touch no test).
+   Checked instead with node v22.23.2: `npx prettier --check` on the
+   changed product files and this file, `node --check run-tab-cdp.mjs`
+   and a Python `ast` parse of `assemble_universe.py`, all rc 0.
+
+Disposition rows: each of round 1's 11 rows says what `d81284b1` did.
+
+Findings: none. Notes, not findings: `run-tab-cdp.mjs:2` is 89 columns
+and `802:63` is 100, but both files already had lines over 80 before
+the fixes (84 and 3 at `a29ea0ca`, `awk 'length>80'`) and Prettier
+passes; 452 sources Q-452e-r1 to session E's handoff only, and could
+also cite R1 in E's tracked review.
+
+## Disposition (round 2)
+
+| ID  | Axis | Disposition | Ticket / note |
+| --- | ---- | ----------- | ------------- |
