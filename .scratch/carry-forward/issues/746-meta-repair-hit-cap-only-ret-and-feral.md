@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/fix-wrong-advice-text.md (round 1, D1)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -52,3 +52,41 @@ merge account, then rewrite it with `pnpm desktop-gate:check --spec <spec>
 --update-golden` and give the reason in the commit body
 (`data/desktop-gate/README.md` § Regenerating a golden). The branch's
 `pre-merge-review` file is part of done.
+
+2026-11-06 (closed, slice D executor): fixed in fork commit
+`b8f9f7f45` "Give every spec a meta-repair hit policy" on fork branch
+`feat/452-meta-repair-hit-cap`, carried into this repo by the
+main-repo commit "Re-pin the fork for the hit policy and phase-1
+cells" on `feat/452-meta-repair-hit-cap` (the commit that closes this
+ticket). `cap-profile.ts` now gives every spec a required `repair`
+policy, so a spec with neither a budget nor a note is a compile error.
+Per spec:
+
+- Ret and feral: a budget on pseudo-stat 12 (melee hit percent), cap
+  9, Improved Faerie Fire subtracted, as before.
+- Mage, shadow, ele and warlock: a budget on pseudo-stat 13 (spell hit
+  percent), cap 16, no Faerie Fire term. Slot 13 is the hit every spell
+  shares, so the budget never undervalues hit for any spell. It does
+  price at full weight the hit between a school-talented spell's cap
+  and 16: mage Arcane spells 6-16, Frostbolt 10-16, Fire Blast 13-16;
+  shadow's Shadow spells 6-16; ele's Nature and Fire spells 10-16.
+  The warlock is exact.
+- Rogue, enh and warrior (Arms too, since Arms and Fury share the
+  warrior spec id): the note. Dual-wield white swings add 19% miss, so
+  hit past 9% still cuts misses for every vendored dual-wield set.
+- Hunter: the note. The default rotation weaves melee, and with a
+  dual-wield set those white swings get the same 19%.
+- Balance: the note. While the sim measures stats, Balance of Power
+  adds a flat 4% spell hit inside every spell-hit slot, so no slot
+  gives the plain "cap minus hit percent"; Faerie Fire and Insect
+  Swarm are outside its mask.
+
+The note specs show one sentence in "Items left out and other notes":
+"If gems were swapped to turn your meta gem on, hit rating was counted
+at full value, with no hit cap applied for this spec." The desktop
+gate passed on ret, mage, rogue and enh after the re-pin; no golden
+moved.
+
+Verified by: tbc-new-fork@b8f9f7f45179c2ef8e0280e07b30765f962570d1;
+`node_modules/.bin/vitest run --configLoader runner packages/core/test/fork-meta-repair.test.ts`
+(38 passed); `pnpm fork-tests:check`

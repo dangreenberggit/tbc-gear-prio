@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md (slice A audit of the per-spec checks, 2026-11-06)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -40,3 +40,35 @@ carries both.
 The cells fixture has a phase-1 cell for each of the 11 spec ids, each of
 its numbers (`exclude`, `include`, `bisRows`) measured independently, the `_comment` says how, the test expects 55
 cells, and the re-pin is on the branch.
+
+## Comments
+
+2026-11-06 (closed, slice D executor): fixed in fork commit
+`24f6575ca` "Pin the phase-1 pool of every spec" on fork branch
+`feat/452-meta-repair-hit-cap`, carried into this repo by the
+main-repo commit "Re-pin the fork for the hit policy and phase-1
+cells" on `feat/452-meta-repair-hit-cap` (the commit that closes this
+ticket). The fork's history has no line saying phase 1 was left out
+on purpose; the old phase-1 lines are about the p2-p5 candidate lists
+that ADR-0038:222 replaced.
+
+The numbers come from the script that measured the 44 existing cells,
+`measure_pool_rule.py` (2026-10-17), found in the main checkout at
+`/home/daniel/Code/lulz/tbc-gear-prio/.scratch/stage-gate/tab-wowsims-items/poolrule/`
+and copied into this slice's stage folder
+`.scratch/stage-gate/452d-meta-repair-hit-cap/poolrule/` (gitignored).
+It reads `db.json`, the presets and the gear JSON itself and imports
+nothing from `pool_source.ts`. Edits to the copy: `REPO`/`PAIR` set to
+the worktree; the missing-effects count assert (450) replaced by a
+print (449 today); the universe read falls back to an empty universe
+when a cell's file is absent (no phase-1 universe file exists; the
+universe feeds only the comparison columns, never the pool sizes); and
+ticket 686's BiS rule (every preset of the phase counts as BiS). Run
+with `--picker --default-run`, it first reproduced all 44 committed
+cells exactly, then measured the 11 phase-1 cells with no further
+edit. The fixture now holds 55 cells, its `_comment` records the
+method, and `pool_source.test.ts` expects 55.
+
+Verified by: tbc-new-fork@24f6575ca21e75bcf0df78e3e2ad593671a22a20;
+`vendor/tbc-new-fork/node_modules/.bin/vitest run --root vendor/tbc-new-fork ui/features/upgrades/model/pool_source.test.ts`
+(124 passed)

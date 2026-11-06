@@ -39,6 +39,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 /** `Stat.StatMeleeHitRating` in the fork's proto (`proto/common.ts`). */
 const MELEE_HIT = 20;
+/** `Stat.StatSpellHitRating` in the fork's proto (`proto/common.ts`). */
+const SPELL_HIT = 12;
 
 /**
  * The ret-p3-p2 baseline's `meleeHitPercent_final` against level 73 with no
@@ -56,10 +58,13 @@ type CapProfileMod = {
   ) => HitCapBudget | undefined;
 };
 
-/** A pseudo-stat array whose `PseudoStatMeleeHitPercent` (12) is `percent`. */
-function pseudoStatsWithHit(percent: number): number[] {
-  const out = new Array<number>(13).fill(0);
-  out[12] = percent;
+/**
+ * A pseudo-stat array whose `slot` is `percent`: 12 is
+ * `PseudoStatMeleeHitPercent`, 13 `PseudoStatSpellHitPercent`.
+ */
+function pseudoStatsWithHit(percent: number, slot = 12): number[] {
+  const out = new Array<number>(25).fill(0);
+  out[slot] = percent;
   return out;
 }
 
@@ -115,9 +120,9 @@ describe.skipIf(!forkPresent)("repair hit budget (535)", () => {
     expect(budget?.remaining).toBeCloseTo(-4.69, 2);
   });
 
-  it("535-B4: a spec without a repair cap (rogue, mage) gets no budget", async () => {
+  it("535-B4: a full-weight spec (rogue, enh, warrior, hunter, balance) gets no budget", async () => {
     const m = await load();
-    for (const spec of ["rogue", "mage"]) {
+    for (const spec of ["rogue", "enh", "warrior", "hunter", "balance"]) {
       expect(
         m.hitCapBudgetFrom(
           m.capProfileFor(spec),
@@ -139,6 +144,18 @@ describe.skipIf(!forkPresent)("repair hit budget (535)", () => {
         )
       ).toBeUndefined();
     }
+  });
+
+  it("535-B6: a caster's budget reads slot 13 and ignores Faerie Fire", async () => {
+    // (16 − 10) × 12.615385 = 75.69: Improved Faerie Fire is physical only.
+    const m = await load();
+    const budget = m.hitCapBudgetFrom(
+      m.capProfileFor("mage"),
+      budgetRequest("TristateEffectImproved"),
+      pseudoStatsWithHit(10, 13)
+    );
+    expect(budget?.stat).toBe(SPELL_HIT);
+    expect(budget?.remaining).toBeCloseTo(75.69, 2);
   });
 });
 
@@ -1105,9 +1122,12 @@ type RetRun = {
   skeleton?: RaidSimRequest;
   /** Called with each request `run` receives, before it answers. */
   onRun?: (req: RaidSimRequest) => void;
+  /** The spec the run ranks for; defaults to `"ret"`. */
+  spec?: string;
 };
 
 async function runRet(o: RetRun) {
+  const spec = o.spec ?? "ret";
   const rankMod = await importForkUpgrades<{
     rankUpgrades: (
       input: Record<string, unknown>,
@@ -1142,9 +1162,7 @@ async function runRet(o: RetRun) {
     provenance: { ...fightRef, sourceID: 1 },
   };
   const gear = new gearMod.RecordedGearSource({
-    fights: new Map([
-      [gearMod.characterFightKey(RET_CHAR, "ret"), [RET_FIGHT]],
-    ]),
+    fights: new Map([[gearMod.characterFightKey(RET_CHAR, spec), [RET_FIGHT]]]),
     gear: new Map([[gearMod.fightGearKey(fightRef), loggedGear]]),
   });
   const pool = o.pool.map((p) => ({
@@ -1185,7 +1203,7 @@ async function runRet(o: RetRun) {
   const ranking = await rankMod.rankUpgrades(
     {
       character: RET_CHAR,
-      spec: "ret",
+      spec,
       maxPhase: 3,
       fight: fightRef,
       iterations: 1000,
@@ -1257,6 +1275,10 @@ const HIT_CAP_FIELDS = [
 type Note = { field: string; detail: string };
 const isHitCapNote = (s: Note) => HIT_CAP_FIELDS.includes(s.field);
 const isSetVersionNote = (s: Note) => s.field === "Set bonuses and the hit cap";
+/** The note a full-weight spec gets (ticket 746). */
+const FULL_WEIGHT_DETAIL =
+  "If gems were swapped to turn your meta gem on, hit rating was counted " +
+  "at full value, with no hit cap applied for this spec.";
 
 describe.skipIf(!forkPresent)(
   "rankUpgrades reads the baseline hit (535)",
@@ -1379,6 +1401,23 @@ describe.skipIf(!forkPresent)(
       expect(notes[0]!.field).toBe("Meta gem swaps and the hit cap");
       expect(notes[0]!.detail).toMatch(/always useful/);
       expect(notes[0]!.detail).toMatch(/level 73/);
+    });
+
+    it("535-S6: a full-weight spec gets the full-weight note", async () => {
+      const run = await runRet({ pool: S_POOL, spec: "rogue" });
+      const notes = run.ranking.substitutions.filter(
+        (s) => s.detail === FULL_WEIGHT_DETAIL
+      );
+      expect(notes).toEqual([
+        { field: "Meta gem swaps and the hit cap", detail: FULL_WEIGHT_DETAIL },
+      ]);
+    });
+
+    it("535-S7: ret without a stats read gets no full-weight note", async () => {
+      const run = await runRet({ pool: S_POOL, spec: "ret" });
+      expect(
+        run.ranking.substitutions.filter((s) => s.detail === FULL_WEIGHT_DETAIL)
+      ).toEqual([]);
     });
   }
 );
