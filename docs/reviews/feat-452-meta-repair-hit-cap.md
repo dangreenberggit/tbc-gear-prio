@@ -1,6 +1,7 @@
 # Pre-merge review — feat/452-meta-repair-hit-cap
 
 Reviewed range: `128a80689b20ce595883533e7d9b74373db08654..7cbcbd83d068ff5860382d61b805b12c2402b26f`
+Reviewed range: `7cbcbd83d068ff5860382d61b805b12c2402b26f..eaef9cbe8985e6a86797f52a20c3f0512e5bf113`
 
 Dispatch note (round 1): the branch stacks on `feat/452-desktop-goldens`
 (slice C), whose review in `docs/reviews/feat-452-desktop-goldens.md`
@@ -254,3 +255,91 @@ Every "Done when" item of tickets 746 and 804 is met. The sub-agent found no mis
 | Q2 (S5) | `packages/core/test/fork-meta-repair.test.ts:1110,1129` | `RetRun` / `runRet` now also run rogue; the name no longer says what it runs                                     |
 | Q3 (S6) | 535-B4/B6 and fork `cap-profile.test.ts`                | the same budget rule is asserted in both repos                                                                   |
 | Q4 (S7) | fork `cap-profile.ts` `hitCapBudgetFrom`, `rank.ts`     | the Faerie Fire term keys on `hitStat` while the slot is on `RepairPolicy`; `repair.kind` tested in three places |
+
+## Round 1 fixes
+
+Fork `6bab26253` (A1: each candidate whose swap turns the meta off gets its own stats read; D1: elemental moves to full weight; A3, D2, P2 comments), fork `8b16e4bc5` (P1), main `eaef9cbe` (re-pin with the engine.md rows, S1; tests for A1 and A2; Q1, Q2; tickets 830 for A4 and 831 for I2; I1, I3-I7). Q3 and Q4 not changed (reasons in `.scratch/agent-reports/2026-11-06-general-task-452d-review-fixes.md`, gitignored, this worktree). Desktop gate after the fix re-pin: PASS on ret, mage, rogue and enh, no golden regenerated.
+
+## Focused check (round 2)
+
+**Conclusion:** All four checks pass. The A1 fix is correct, and its test fails when the fix is turned off. I re-ran that myself. Two Low findings remain, both in the error path that A1 added. Under the skill's "Round limit" section, the review stops at round 2 and the user decides.
+
+**Ranges**
+
+- Main repo: `7cbcbd83d068ff5860382d61b805b12c2402b26f..eaef9cbe8985e6a86797f52a20c3f0512e5bf113`. `e2c964d2` adds only the review file. `eaef9cbe` is the fix re-pin.
+- Fork (`vendor/tbc-new-fork`): `24f6575ca21e75bcf0df78e3e2ad593671a22a20..8b16e4bc541208397cdeb6cfcf4e56814242ecf1`, which holds `6bab26253` and `8b16e4bc5`. The lock `commit` at the two ends is `24f6575c…` and `8b16e4bc…` (`git show <sha>:data/wowsims-fork.lock.json`).
+
+**Check 1: the three conditions — pass.**
+
+- **Condition 1 (each commit is an allowed kind):**
+  - `e2c964d2` only edits the review file.
+  - `eaef9cbe` names its findings by ID in its message (A1, A2, Q1, Q2, S1, A4, I1-I7).
+  - `6bab26253` names A1, D1, A3, D2 and P2. `8b16e4bc5` names P1.
+  - The fork range has no merge commits (`git log --merges` prints 0).
+- **Condition 2 (changed code sits where a fixed finding points):** the code lines outside tests, comments and docs are:
+  - the `candidateRepairGems` closure and its call site in `rank.ts`. This is the candidate-loop budget that A1 cites.
+  - the ele `repair: FULL_WEIGHT` line (D1 cites `cap-profile.ts:396`).
+  - the fixture `_comment` (P1).
+  - the lock and `forkCommit` lines (the re-pin kind).
+  - `engine.md` changes only two hashes and one note. `git diff --word-diff` shows the other 36 lines are table re-padding.
+- **Condition 3 (no upstream wowsims file edited):** all four changed fork files are under `ui/features/upgrades/`. None exists at `branchedFrom` `cec2a7b6` (`git cat-file -e` prints "no" for each, and `ls-tree` of that folder lists 0 files).
+
+**Check 2: each fix changes only what its finding asks — pass.**
+
+- **The A1 formula is right.** `rank.ts:1226-1281` uses `missed = simHit(cand) − baselineSimHit − (gearHit(pre.swapped) − baselineGearHit)`. This is the same formula and the same tolerance that `versionGears` uses (`rank.ts:1189-1194`).
+  - The read and the gear hit both use the same pre-repair gear (`candidateSwapPreRepair`), so gem, item and enchant hit cancel out.
+  - The read runs only when the swap turns the meta off. `repairHitCap` has no effect anywhere else: its only reader is `rank.ts:4108`, and `repairAndMinimize` returns early when the meta is active (`meta-repair.ts:290-297`).
+- **The failure path works as described.** On a failed read, `hitCapReadFailed` warns, sets `hitCapFailed` so the ranking is not cached (`rank.ts:847-855`, `:1884`), and adds the "could not be read" note once. That candidate and every later one get full-weight gems.
+- **A Stop during the read ends cleanly.** Stop rethrows `StopRefusedSim`, `runCandidate` returns, and `aborted` is re-read after the pool, so the run is partial and not cached (`rank.ts:1606`, `:1867-1879`).
+- **Exceptions behave as before.** `composeFor` throws outside the `try`, as the later `composeFor(swapped)` already did.
+- **The seven changed older tests still test what they tested.**
+  - `baselineReadOnce` rejected any second read (test file `:1246-1260`), so it had to go. Its replacement, `gearHitReads`, gives a zero "missed" value with no set bonus.
+  - 535-S5 still passes with `baselineReadOnce`, which shows no candidate reads happen when there is no budget.
+  - 705-W1 now checks that read 2 is the baseline request.
+  - 538-H still shows that the second run is not served from the cache.
+  - 535-V4 now counts only package reads (`versionReads === 1`). This is the same claim as the old `statsRequests` length of 2.
+  - 535-V7 changes only wording.
+- **The other fixes are confirmed:**
+  - Ele moved to full weight (D1).
+  - The comment fixes are in place (A3, D2, P2). The default warlock talents `-20500301332101-…` put no point in Affliction, so they take no Suppression (`presets.ts:101`).
+  - `engine.md` hashes equal the sha256 of `rank.ts` and `cap-profile.ts` at `8b16e4bc5`.
+  - `forkCommit` equals the lock commit.
+  - No commit body has a line over 72 characters.
+
+**Check 3: each new test asserts its finding — pass.** In a copy of both repos under `$TMPDIR` (since deleted), I added `return gems;` at the top of `candidateRepairGems`.
+
+- Both `746-A1` tests then failed and the other 39 tests passed, 746-A2 among them (`$TMPDIR/mut1.txt`). This matches the fixer's record.
+- I did not re-run the fixer's slot-12 mutation for 746-A2 (unverified by me). By reading the test, slot 12 would fail the read, fall back to full weight, and put Great Dawnstone in the `localBudget: -10` run, which would fail that test.
+
+**Check 4: the touched tests pass — pass.**
+
+- Fork suite: `node --version` printed v22.23.2. `vitest run --root <fork> ui/features/upgrades` gave 67 files and 781/781 tests, rc 0 (`$TMPDIR/fork-vitest.txt`).
+- Main-repo `fork-meta-repair.test.ts`: 41/41 in the `$TMPDIR` copy, with `node_modules` linked inside the copy only (`$TMPDIR/main-vitest.txt`). The fixer's own run, `fixround/check-vitest-fork-meta-repair.txt`, also shows 41/41.
+
+**Findings**
+
+- **R1 — Low — no test covers the new failure path.** Location: fork `ui/features/upgrades/model/engine/rank.ts:1272-1280`, plus the Stop return at `:1410-1417`.
+  - I replaced the whole `catch` body (set the flag, add the note, use full weight) with `return gems;`. All 41 tests in `fork-meta-repair.test.ts` still passed (`$TMPDIR/mut2.txt`).
+  - `grep` finds no test that mentions "candidate hit not read". The Stop return during a candidate read is also untested.
+  - Every other read failure has its own test: worn (705-W4), baseline (535-S3/S4) and version (535-V4).
+- **R2 — Low — after a mid-run read failure, the ranking mixes two hit rules and one note is not true for every row.** Location: `rank.ts:1251` and `:1273-1279`.
+  - Candidates read before the failure keep a capped budget. Candidates after it get full weight.
+  - The note then says hit rating "was treated as always useful, because your hit rating could not be read" (`hitRatingUnreadNote`, `rank.ts:4392-4399`). That is false for the rows repaired before the failure.
+  - With `concurrency > 1`, which rows get full weight depends on which reads finish first. This breaks `runCandidate`'s promise that output is the same at any concurrency, but only on this failure path, and that ranking is not cached.
+  - The closest existing path, `versionGears`, keeps the run's budget on a failed read and gives a note that is true (`rank.ts:1213-1222`, `setBonusHitUnreadNote`).
+  - Suggested fix (hypothesis, untested): on a failed candidate read, return `gems` (the run's budget, as the code did before A1) with a note in the same style as the set-bonus note.
+  - The worn-read failure path from ticket 705 already leaves the same false sentence when the baseline read succeeds, so this pattern existed before this branch.
+
+**Working tree — not a finding.**
+
+- The fork tree is clean.
+- In the main repo, the only change is the review file's second `Reviewed range:` line, which is step 1's write.
+- The untracked dotfiles that `git status` lists are sandbox `/dev/null` bind mounts (`crw-rw-rw- nobody`, and they appear in `/proc/self/mountinfo`), as round 1 also found.
+
+No report file: the prompt forbids writes in either repo, so the whole report is above.
+
+## Summary
+
+Round 2 is the last round (`~/.claude/AGENTS.md` § Review round limits). Its four checks passed, but it reported two findings in the failure path that A1's fix added: R1 (no test covers a failed candidate read) and R2 (after a mid-run read failure, earlier rows keep the hit cap, later rows get full weight, and the "hit rating could not be read" note is false for the earlier rows). So the review stops here for the owner's choice (Q-452d-review). No Disposition table yet; step 4 (merge check) not run.
+
+The round-1 fixer listed three changes outside the findings, not made: the set phase's first-step check could pair with the candidate's own request (it loses information, gives no wrong number); ticket 535's closed "Limits" section still lists the single-swap set limit as current; the test file header line "Each case names its ticket 535 test id" is stale.
