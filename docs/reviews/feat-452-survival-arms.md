@@ -168,10 +168,65 @@ Findings:
 
 Round 2 was the last round and reported findings other than
 bookkeeping (R2 and R3, code quality, in lines the round-1 fixes wrote),
-so the review stops here (`~/.claude/AGENTS.md` § Review round limits):
-no Disposition table yet, and the merge check (step 4) did not run. The
-owner chooses the next step. Every round-1 finding has a fix commit or a
-recorded reason (S6 and the rest of S5 are in ticket 811; D2, S4 and S7
-were judged not to need a change).
+so the review stopped there (`~/.claude/AGENTS.md` § Review round
+limits). The owner chose one further round (§ Round 2 fixes); round 3
+passed with no findings (§ Focused check (round 3)), and every finding
+has its row in § Disposition (round 3).
 
-Tickets this branch filed: 2 (810, 811). Closed: 2 (803, 799).
+Tickets this branch filed: 2 (810, 811). Closed: 2 (803, 799). Open
+after the review: 810 (waits on an owner ruling) and 811 (S5, S6).
+
+## Round 2 fixes
+
+The owner chose a further round on 2026-11-06 ("452b: 1 is fine",
+answering the option: one short fix pass for R2 and R3, then a focused
+check). Fork `5d1ecb595..3d8c215f8`: `3d8c215f8` (R2: the comment above
+`EP_WEIGHTS_PHASE_BY_SET` names each source of the phases once; R3:
+`specId` removed from `AssumptionsContext`, so `epWeightsSet` switches the
+pool and EP-weights lines, and the flat-cutoff test asserts the EP line).
+Main: `64fd78f1` (this file's round 2 and ticket 799 closed), `bbff8fd5`
+(re-pin). With `epWeightsSet` dropped from `assumptionsContextOf`, a
+`run_session.test.ts` test failed (1 of 11). R1 and R4 need no change.
+
+Reviewed range: `b5eb34738e7b21a9a702b96de352995fbe17e2c8..bbff8fd50310b6614d7cb6e965812a209b09a428`
+
+## Focused check (round 3)
+
+One fresh `general-task` agent on Opus. Fork range `5d1ecb595..3d8c215f8`.
+
+1. Conditions hold: **pass.** `bbff8fd5` is a fork re-pin; `64fd78f1`
+   edits this file, closes ticket 799 (its Done when holds) and changes
+   one line of the live-run report to record that close; fork `3d8c215f8`
+   names R2 and R3. Every changed code line is at a place R2 or R3 cites.
+   No upstream wowsims file changed.
+2. Fixes in scope: **pass.** Production output is unchanged:
+   `epWeightsSetFor` always returns a set, so the set is undefined exactly
+   when the spec was.
+3. Test asserts R3: **pass.** `run_session.test.ts:146-166` expects the
+   pool-source line, which is now built only inside `if (epWeightsSet)`.
+4. Touched tests pass: **pass.** `vitest run ui/features/upgrades/model`
+   26 files, 437 tests; fork `tsc --noEmit` rc 0; node v22.23.2.
+
+No findings.
+
+## Disposition (round 3)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                     |
+| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | fork `3e72c5033`: the variant set needs more than zero points and strictly the most; `data.test.ts` covers `[]`, `[0]`, `[0,0,0]` and a tie                       |
+| A2  | Adversarial | fixed       | fork `3e72c5033`: the test that compared two JSON files is removed; the `it.each` identity test stays                                                             |
+| A3  | Adversarial | fixed       | fork `3e72c5033`: the assumptions test tells Arms (P3) from Fury (P1)                                                                                             |
+| D1  | Domain      | fixed       | fork `3e72c5033`, main `b23c5bef`: Arms bundles `P3_ARMS_EP_PRESET` with the true reason; both Arms runs redone and re-judged (`b5eb3473`)                        |
+| D2  | Domain      | wontfix     | the talent rule gives every upstream build the set its name says; Kebab getting the Arms set is a recorded choice (live-run report, ticket 810)                   |
+| S1  | Standards   | fixed       | same fix as A1                                                                                                                                                    |
+| S2  | Standards   | fixed       | main `b23c5bef`, fork `3e72c5033`: the notes cite `ui/specs/{hunter,warrior}/dps/spec.ts`                                                                         |
+| S3  | Standards   | fixed       | main `62d5862c`: ticket 810's sentence rewritten                                                                                                                  |
+| S4  | Standards   | wontfix     | the report and ticket 810 say the run files exist only in this worktree; the chain-B handoff gives the owner a `cp -a` to keep them before the worktree is pruned |
+| S5  | Standards   | defer       | `.scratch/carry-forward/issues/811-talent-points-counted-in-three-places.md` — fork `5db390483` passes the set on; the two talent reads remain                    |
+| S6  | Standards   | defer       | `.scratch/carry-forward/issues/811-talent-points-counted-in-three-places.md` — the harness copy stays until the page exposes the count                            |
+| S7  | Standards   | wontfix     | `NEXT` 812 follows the chain's reserved ranges (B files from 810-819)                                                                                             |
+| P1  | Spec        | fixed       | main `62d5862c`: ticket 799 records the `--build` change to its run commands                                                                                      |
+| R1  | Focused     | wontfix     | the comment change was correct; R2's rewrite in `3d8c215f8` replaced the sentence                                                                                 |
+| R2  | Focused     | fixed       | fork `3d8c215f8`: the comment names each phase source once                                                                                                        |
+| R3  | Focused     | fixed       | fork `3d8c215f8`: `specId` removed, `epWeightsSet` switches the lines; a session test fails without it                                                            |
+| R4  | Focused     | wontfix     | bookkeeping: `a92fdc2f1` has the same tree as `5d1ecb595`, as the lock `_comment` and the live-run report say                                                     |
