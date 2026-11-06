@@ -65,3 +65,9 @@ weight would value a wasted hit gem higher on Arms than on Fury
 does not record which gems the tab chose. Sources:
 `docs/live-runs/2026-11-06-survival-arms-p45.md`,
 `.scratch/agent-reports/2026-11-06-general-task-sme-arms.md` § Q3 and K3.
+
+2026-11-06: the tab's Arms set is now `P3_ARMS_EP_PRESET`, with hit
+weight 1.01 (stat 20 in `data/presets/warrior/arms-p3.ep-weights.json`;
+review finding D1 of `feat/452-survival-arms`). That replaces the premise
+of the comment above, which priced Arms hit at 1.81 from the P1 set: the
+Arms set now prices hit below Fury's 1.45, not above it.

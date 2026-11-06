@@ -76,6 +76,15 @@ the new weight files and pass, and the re-pin is on the branch.
   so the Survival change moves no weight today. New files:
   `data/presets/hunter/sv-p1.ep-weights.json`,
   `data/presets/warrior/arms-p1.ep-weights.json` and their fork copies.
+- 2026-11-06: after review round 1 of `feat/452-survival-arms`, the Arms
+  set is `P3_ARMS_EP_PRESET` (hit weight 1.01, stat 20 in
+  `data/presets/warrior/arms-p3.ep-weights.json`), in place of
+  `P1_ARMS_EP_PRESET` and `arms-p1.ep-weights.json` above (finding D1).
+  The reason "as Fury and every other spec" above was false: ret bundles
+  its P2 set. Upstream's own Arms builds for phases 3-5 use the P3 set,
+  and the page opens at phase 3. A talents list with no points in the
+  Arms or Survival tree now keeps the spec's own set (finding A1). Fork
+  `3e72c5033`, main repo `b23c5bef`.
 
 Verified by: tbc-new-fork@786a08f96, test "ranks %s with that build’s own
 EP weights" in `ui/features/upgrades/model/run.test.ts`, which failed for

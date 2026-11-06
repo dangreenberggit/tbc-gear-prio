@@ -96,8 +96,8 @@ two pages.
 
 The owner has ruled on step 1, and one of these holds:
 
-- Yes: on the Arms tab at phase 4 no row of an item that is only in
-  Fury's sets carries a BiS tag or sits in the main table below the
+- Yes: on the Arms tab at phase 4, no row for an item that appears only
+  in Fury's sets shows a BiS tag or sits in the main table below the
   cutoff, and the same on the Survival tab for Beast Mastery's items; a
   fork test covers both pages; ADR-0038 says so.
 - No, with group names on badges: such a row's badge names its group,

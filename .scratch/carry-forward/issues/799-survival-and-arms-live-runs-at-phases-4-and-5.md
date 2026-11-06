@@ -68,3 +68,11 @@ branch's `pre-merge-review` file exists.
   tabs). Comments added to 750 and 746. Still open here: the branch's
   `pre-merge-review` file, and a whole `pnpm verify`, which this sandbox
   cannot run (read-only `node_modules`).
+- 2026-11-06: the run commands differ from the ones under "What to do".
+  Each run added `--build <chip>`, which loads the site's Survival or
+  Arms "Preset Configurations" build before the gear chip (harness flag
+  added in commit `12014bfe`). A gear chip changes only the gear, so
+  without it the page kept its Beast Mastery or Fury talents. The build
+  also sets the rotation, buffs, consumables and encounter, so the runs
+  use the build's values for those too (`docs/live-runs/2026-11-06-survival-arms-p45.md`,
+  "Build chip, then gear chip").
