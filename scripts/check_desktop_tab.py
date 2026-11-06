@@ -63,6 +63,7 @@ import time
 import urllib.error
 import urllib.request
 from pathlib import Path
+from typing import Callable
 
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
@@ -81,15 +82,17 @@ GOLDEN_FIELDS = ("rows", "aboveCutoffItems", "baselineDps")
 def golden_note(spec: str, phase: int, candidates: int, preset: str) -> str:
     return (
         "Golden readback for scripts/check_desktop_tab.py check (h): rows, "
-        f"aboveCutoffItems and baselineDps of a known-good {spec} phase-{phase} "
+        f"aboveCutoffItems and baselineDps of a {spec} phase-{phase} "
         f"cap-{candidates} run from the {preset} gear preset on the desktop "
-        "(HTTP) transport. The gate fails when a run differs from these "
-        "three fields; every other field here is provenance. Regenerate ONLY when a "
-        "change is meant to alter the tab's output (fork re-pin, pool rule change, "
-        "intended ranking change) and after the printed diff is explained: pnpm "
+        "(HTTP) transport. The file records the output of a run that passed "
+        "checks (a)-(f); it does not say the ranking is right. A known defect "
+        "of a spec's golden is listed in README.md beside this file. The gate "
+        "fails when a run differs from these three fields; every other field "
+        "here is provenance. Regenerate ONLY when a change is meant to alter "
+        "this spec's output (fork re-pin, pool rule change, intended ranking "
+        "change) and after the printed diff is explained: pnpm "
         f"desktop-gate:check --spec {spec} --update-golden, then commit with the "
-        "reason in the body. A red gate is a finding, not a prompt to regenerate. "
-        "See README.md beside this file."
+        "reason in the body. A red gate is a finding, not a prompt to regenerate."
     )
 
 
@@ -205,7 +208,8 @@ FULL_ROWS: dict[str, dict[int, int]] = {}
 # - mage, "Arcane - Staff" (16 worn items): the pane shows 38, so 2 worn items
 #   are inside the first 40.
 # - rogue, "P3 Swords" (17 worn): 33, so 7 are inside.
-# - enh, "P3 Preset" (17 worn): 40, so none is. Its first 40 are all weapons,
+# - enh, "P3 Preset" (16 distinct worn ids; 32262 is worn in both hands, and
+#   the cap keeps worn items by id, rank.ts equippedIds): 40, so none is. Its first 40 are all weapons,
 #   most of them two-handers, and every row is a loss (ticket 820): the
 #   golden prices weapon swaps for a dual-wielder, not its armour.
 # Which worn items fall inside was not listed; only the counts were measured.
@@ -355,25 +359,27 @@ def harness_args(out_path: Path, candidates: int, spec: str, phase: int) -> list
     ]
 
 
+class HarnessFailed(Exception):
+    """The harness gave no readback to judge for one spec."""
+
+
 def run_harness(out_path: Path, candidates: int, spec: str, phase: int) -> dict:
     SCRATCH.mkdir(parents=True, exist_ok=True)
     args = harness_args(out_path, candidates, spec, phase)
     if args is None:
-        eprint(f"{CHECK_NAME}: no start preset or page pinned for {spec} phase "
-               f"{phase} (START_PRESET, SPEC_PAGE) -- the gate runs only where "
-               "both are.")
-        raise SystemExit(2)
+        raise HarnessFailed(
+            f"no start preset or page pinned for {spec} phase {phase} "
+            "(START_PRESET, SPEC_PAGE) -- the gate runs only where both are.")
     # Delete any prior readback first: the harness writes --out only on a clean
     # finish, so a crash before that write would otherwise leave a stale passing
     # JSON on this fixed gitignored path and we would judge the old run.
     out_path.unlink(missing_ok=True)
     proc = subprocess.run(args, check=False)  # harness measures; we judge the JSON
     if proc.returncode != 0:
-        eprint(f"{CHECK_NAME}: harness exited {proc.returncode} (no clean run to judge).")
-        raise SystemExit(2)
+        raise HarnessFailed(
+            f"harness exited {proc.returncode} (no clean run to judge).")
     if not out_path.is_file():
-        eprint(f"{CHECK_NAME}: harness wrote no JSON at {out_path}.")
-        raise SystemExit(2)
+        raise HarnessFailed(f"harness wrote no JSON at {out_path}.")
     return json.loads(out_path.read_text(encoding="utf-8"))
 
 
@@ -739,12 +745,22 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
     return all(checks.values()), checks
 
 
+Harness = Callable[[Path, int, str, int], dict]
+
+
 def check_spec(spec: str, phase: int, candidates: int, bytes_rc: int,
-               update_golden: bool, full: bool) -> int:
-    """Run and judge one spec: 0 pass, 1 fail, 2 could not run (h)."""
+               update_golden: bool, full: bool,
+               harness: Harness = run_harness) -> int:
+    """Run and judge one spec: 0 pass, 1 fail, 2 could not run (the harness
+    gave no readback, or (h) found no golden). `harness` is the seam the
+    verdict checks replace with a stand-in."""
     started = time.monotonic()
     print(f"{CHECK_NAME}: {spec}: running harness (candidates={candidates})...")
-    rb = run_harness(SCRATCH / f"last-run-{spec}.json", candidates, spec, phase)
+    try:
+        rb = harness(SCRATCH / f"last-run-{spec}.json", candidates, spec, phase)
+    except HarnessFailed as exc:
+        print(f"{CHECK_NAME}: {spec}: could not run -- {exc}")
+        return 2
     print(f"{CHECK_NAME}: {spec}: assertions:")
     gate_ok, _ = assert_gate(rb, candidates, spec, phase)
 
@@ -778,6 +794,18 @@ def check_spec(spec: str, phase: int, candidates: int, bytes_rc: int,
             rc = 0 if gate_passed(bytes_rc, gate_ok, golden_rc) else 1
     print(f"{CHECK_NAME}: {spec}: wall {time.monotonic() - started:.0f} s.")
     return rc
+
+
+def check_specs(specs: list[str], phase: int, candidates: int, bytes_rc: int,
+                update_golden: bool, full: bool,
+                harness: Harness = run_harness) -> dict[str, int]:
+    """Each spec's exit code, in run order. One spec that could not run does
+    not stop the next: every spec gets a verdict and overall_rc decides."""
+    return {
+        spec: check_spec(spec, phase, candidates, bytes_rc, update_golden,
+                         full, harness)
+        for spec in specs
+    }
 
 
 def main() -> int:
@@ -832,11 +860,8 @@ def main() -> int:
         if brc == 2:
             return 2
         candidates = 0 if args.full else args.candidates
-        rcs = {
-            spec: check_spec(spec, args.phase, candidates, brc,
-                             args.update_golden, args.full)
-            for spec in specs
-        }
+        rcs = check_specs(specs, args.phase, candidates, brc,
+                          args.update_golden, args.full)
         if brc != 0:
             print("  (bytes) FAIL: the served bundle differs from dist/tbc; "
                   "the mismatch list is printed above.")
