@@ -451,10 +451,12 @@ transport and cannot pass on a page served by vite. It is deliberately **not** i
 nothing else catches a re-pin that breaks the embedded transport. A red gate
 blocks the re-pin.
 
-Check (h) compares the run against
-`<pair>/data/desktop-gate/golden-ret-p4-cap40.json`; a re-pin that changes the
-tab's output regenerates it with `--update-golden` and explains the diff in the
-commit body.
+The command runs every gated spec (ret, mage, rogue and enhancement, about 90 s
+in all) and check (h) compares each run against its golden,
+`<pair>/data/desktop-gate/golden-<spec>-p4-cap40.json`
+(`<pair>/data/desktop-gate/README.md` lists them). A re-pin that changes a
+spec's output regenerates that golden with `--spec <spec> --update-golden` and
+explains the diff in the commit body.
 
 ### 6. The tag trigger
 

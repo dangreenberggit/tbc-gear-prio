@@ -1,0 +1,323 @@
+{
+  "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a known-good mage phase-4 cap-40 run from the Arcane - Staff gear preset on the desktop (HTTP) transport. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter the tab's output (fork re-pin, pool rule change, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --spec mage --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate. See README.md beside this file.",
+  "recordedAt": "2026-11-06T19:06:02.325Z",
+  "forkCommit": "b603564eed544d5e9f62fbc3950309dd65921110",
+  "cpuCount": 20,
+  "candidatesRequested": 40,
+  "spec": "mage",
+  "phase": 4,
+  "elapsedS": 8.6,
+  "rows": [
+    {
+      "rank": "1",
+      "item": "Brooch of Nature's Mercy",
+      "slot": "Neck",
+      "dps": 21.1,
+      "source": "Zul'Aman (N)\nAkil'zon",
+      "belowCutoff": false
+    },
+    {
+      "rank": "2",
+      "item": "Dark Iron Smoking Pipe",
+      "slot": "Trinket 1",
+      "dps": 20,
+      "source": "Source not recorded",
+      "belowCutoff": false
+    },
+    {
+      "rank": "1",
+      "item": "Wand of the Forgotten Star",
+      "slot": "Ranged",
+      "dps": 0.2,
+      "source": "Tempest Keep (N)\nHigh Astromancer Solarian",
+      "belowCutoff": true
+    },
+    {
+      "rank": "2",
+      "item": "Mana Attuned Band",
+      "slot": "Ring 1",
+      "dps": -0.3,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "3",
+      "item": "Translucent Spellthread Necklace",
+      "slot": "Neck",
+      "dps": -5.5,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "4",
+      "item": "Wand of Prismatic Focus",
+      "slot": "Ranged",
+      "dps": -8.7,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "5",
+      "item": "Naaru-Blessed Life Rod",
+      "slot": "Ranged",
+      "dps": -10,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "6",
+      "item": "Tirisfal Wand of Ascendancy",
+      "slot": "Ranged",
+      "dps": -13.4,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "7",
+      "item": "Focused Mana Bindings",
+      "slot": "Wrist",
+      "dps": -13.4,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "8",
+      "item": "Belt of Blasting",
+      "slot": "Waist",
+      "dps": -15.9,
+      "source": "Tailoring",
+      "belowCutoff": true
+    },
+    {
+      "rank": "9",
+      "item": "Blue Suede Shoes",
+      "slot": "Feet",
+      "dps": -17.8,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "10",
+      "item": "Boots of Blasting",
+      "slot": "Feet",
+      "dps": -20.8,
+      "source": "Tailoring",
+      "belowCutoff": true
+    },
+    {
+      "rank": "11",
+      "item": "Band of Eternity",
+      "slot": "Ring 1",
+      "dps": -21.4,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "12",
+      "item": "Voodoo-woven Belt",
+      "slot": "Waist",
+      "dps": -23.1,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "13",
+      "item": "Ring of Captured Storms",
+      "slot": "Ring 1",
+      "dps": -25,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "14",
+      "item": "Ruby Drape of the Mysticant",
+      "slot": "Back",
+      "dps": -28.4,
+      "source": "Karazhan (N)\nPrince Malchezaar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "15",
+      "item": "Cord of Screaming Terrors",
+      "slot": "Waist",
+      "dps": -28.6,
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
+      "belowCutoff": true
+    },
+    {
+      "rank": "16",
+      "item": "Brooch of Unquenchable Fury",
+      "slot": "Neck",
+      "dps": -31,
+      "source": "Karazhan (N)\nMoroes",
+      "belowCutoff": true
+    },
+    {
+      "rank": "17",
+      "item": "Ruby Slippers",
+      "slot": "Feet",
+      "dps": -42.6,
+      "source": "Karazhan (N)\nThe Wizard of Oz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "18",
+      "item": "Band of Crimson Fury",
+      "slot": "Ring 1",
+      "dps": -46.9,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "19",
+      "item": "Cowl of the Illidari High Lord",
+      "slot": "Head",
+      "dps": -48.7,
+      "source": "Black Temple (N)\nIllidan Stormrage",
+      "belowCutoff": true
+    },
+    {
+      "rank": "20",
+      "item": "Robe of the Shadow Council",
+      "slot": "Chest",
+      "dps": -61.7,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "21",
+      "item": "Robes of Rhonin",
+      "slot": "Chest",
+      "dps": -62.2,
+      "source": "Hyjal Summit (N)\nArchimonde",
+      "belowCutoff": true
+    },
+    {
+      "rank": "22",
+      "item": "Robe of Departed Spirits",
+      "slot": "Chest",
+      "dps": -62.2,
+      "source": "Zul'Aman (N)\nHalazzi",
+      "belowCutoff": true
+    },
+    {
+      "rank": "23",
+      "item": "Vestments of the Sea-Witch",
+      "slot": "Chest",
+      "dps": -64,
+      "source": "Serpentshrine Cavern (N)\nLady Vashj",
+      "belowCutoff": true
+    },
+    {
+      "rank": "24",
+      "item": "Gauntlets of the Sun King",
+      "slot": "Hands",
+      "dps": -64.8,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "25",
+      "item": "Blood-cursed Shoulderpads",
+      "slot": "Shoulders",
+      "dps": -69.7,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "26",
+      "item": "Vengeful Gladiator's Battle Staff",
+      "slot": "Main Hand",
+      "dps": -72.7,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "27",
+      "item": "Pendant of the Violet Eye",
+      "slot": "Trinket 1",
+      "dps": -73.3,
+      "source": "Karazhan (N)\nShade of Aran",
+      "belowCutoff": true
+    },
+    {
+      "rank": "28",
+      "item": "Robes of the Tempest",
+      "slot": "Chest",
+      "dps": -76.5,
+      "source": "Black Temple (N) · Illidan Stormrage",
+      "belowCutoff": true
+    },
+    {
+      "rank": "29",
+      "item": "Cowl of the Tempest",
+      "slot": "Head",
+      "dps": -79.9,
+      "source": "Hyjal Summit (N) · Archimonde",
+      "belowCutoff": true
+    },
+    {
+      "rank": "30",
+      "item": "Gloves of the Aldor",
+      "slot": "Hands",
+      "dps": -81.5,
+      "source": "Karazhan (N) · The Curator",
+      "belowCutoff": true
+    },
+    {
+      "rank": "31",
+      "item": "Mantle of the Elven Kings",
+      "slot": "Shoulders",
+      "dps": -81.7,
+      "source": "Tempest Keep\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "32",
+      "item": "Mantle of the Tempest",
+      "slot": "Shoulders",
+      "dps": -86.9,
+      "source": "Black Temple (N) · Mother Shahraz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "33",
+      "item": "Gloves of the Tempest",
+      "slot": "Hands",
+      "dps": -87.4,
+      "source": "Hyjal Summit (N) · Azgalor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "34",
+      "item": "Cowl of the Grand Engineer",
+      "slot": "Head",
+      "dps": -127.2,
+      "source": "Tempest Keep (N)\nVoid Reaver",
+      "belowCutoff": true
+    },
+    {
+      "rank": "35",
+      "item": "Hood of Hexing",
+      "slot": "Head",
+      "dps": -128.8,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "36",
+      "item": "Uni-Mind Headdress",
+      "slot": "Head",
+      "dps": -151.1,
+      "source": "Karazhan (N)\nNetherspite",
+      "belowCutoff": true
+    }
+  ],
+  "aboveCutoffItems": [
+    "Brooch of Nature's Mercy",
+    "Dark Iron Smoking Pipe"
+  ],
+  "baselineDps": 2794,
+  "rowCount": 38,
+  "aboveCutoff": 2
+}

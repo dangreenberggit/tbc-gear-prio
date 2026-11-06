@@ -22,9 +22,9 @@ Signal S4 and its check (g) are removed: they counted "[upgrades] screening
 fell back" console lines, which nothing prints since the bulk screening pass
 was deleted (ticket 567). The other letters keep their meaning.
 
-and a comparison of the run's ranking output against a committed golden readback
-(h), which is the only automatic check on DPS values, row order and the
-above-cutoff set. See `data/desktop-gate/README.md`.
+and a comparison of each gated spec's ranking output against its committed
+golden readback (h), which is the only automatic check on DPS values, row order
+and the above-cutoff set. See `data/desktop-gate/README.md`.
 
 **Not in `pnpm verify`** (the brief's C23): this needs go, make and Chrome, and
 CI has none. Run it by hand before a fork re-pin that `dev` will receive
@@ -32,14 +32,15 @@ CI has none. Run it by hand before a fork re-pin that `dev` will receive
 
 Modes:
   (default)         build (make wowsimtbc) unless --no-build, start the packaged
-                    binary on :3333, run the byte check + the harness at
-                    --candidates (default 40), assert (a)-(f) and (h). --full uncaps and
-                    skips (h) (no golden for an uncapped run). A byte mismatch
-                    fails the gate.
+                    binary on :3333, run the byte check, then for every gated
+                    spec (START_PRESET at --phase) run the harness at
+                    --candidates (default 40) and assert (a)-(f) and (h).
+                    --spec S runs one spec. --full uncaps and skips (h) (no
+                    golden for an uncapped run). A byte mismatch fails the gate.
   --serve-args S    extra flags for the server (e.g. "--usefs=true --wasm=true"
                     for the N1 negative).
   --update-golden   after the byte check and (a)-(f) pass, rewrite the committed
-                    golden readback for this spec/phase/cap. A deliberate act -- read
+                    golden readback of each spec run. A deliberate act -- read
                     data/desktop-gate/README.md first.
   --bytes-only      just the Q1 byte comparison of dist/tbc against the origin.
   --compare A B     just T1-T4 on two existing readback JSONs (--cross-transport
@@ -77,17 +78,19 @@ GOLDEN_DIR = ROOT / "data/desktop-gate"
 # coverage this check exists to provide.
 GOLDEN_FIELDS = ("rows", "aboveCutoffItems", "baselineDps")
 
-GOLDEN_NOTE = (
-    "Golden readback for scripts/check_desktop_tab.py check (h): rows, "
-    "aboveCutoffItems and baselineDps of a known-good ret phase-4 cap-40 run "
-    "from the P3 gear preset on the desktop (HTTP) transport. The gate fails when a run differs from these "
-    "three fields; every other field here is provenance. Regenerate ONLY when a "
-    "change is meant to alter the tab's output (fork re-pin, pool rule change, "
-    "intended ranking change) and after the printed diff is explained: pnpm "
-    "desktop-gate:check --update-golden, then commit with the reason in the "
-    "body. A red gate is a finding, not a prompt to regenerate. See README.md "
-    "beside this file."
-)
+def golden_note(spec: str, phase: int, candidates: int, preset: str) -> str:
+    return (
+        "Golden readback for scripts/check_desktop_tab.py check (h): rows, "
+        f"aboveCutoffItems and baselineDps of a known-good {spec} phase-{phase} "
+        f"cap-{candidates} run from the {preset} gear preset on the desktop "
+        "(HTTP) transport. The gate fails when a run differs from these "
+        "three fields; every other field here is provenance. Regenerate ONLY when a "
+        "change is meant to alter the tab's output (fork re-pin, pool rule change, "
+        "intended ranking change) and after the printed diff is explained: pnpm "
+        f"desktop-gate:check --spec {spec} --update-golden, then commit with the "
+        "reason in the body. A red gate is a finding, not a prompt to regenerate. "
+        "See README.md beside this file."
+    )
 
 
 def golden_path(spec: str, phase: int, candidates: int) -> Path:
@@ -103,9 +106,30 @@ ORIGIN = f"http://localhost:{PORT}"
 # Pre-raid -- there is no phase-4 preset (vendor/tbc-new-fork/ui/specs/paladin/
 # retribution/presets.ts) -- so phase 5 has no previous-phase start gear and
 # the gate ranks phase 4 from the P3 preset (session ruling Q-560-desktop-phase).
+# The other specs start from the presets the 2026-11-03 phase-4 pass chose by
+# the same rule (docs/live-runs/2026-11-03-p45-dps-pass.md). Mage's phase-3 tab
+# also has "Arcane - Sword"; the staff is kept because a worn two-hander is
+# what makes the tab hold out a caster's off-hand items and one-handers (ticket
+# 700). Why these specs are gated: ticket 800.
 # The pair is (preset phase tab, preset name), as run-tab-cdp.mjs takes them.
+# The tab is None for a page with no phase tabs, where the harness must not be
+# given --preset-tab (run-tab-cdp.mjs, "--preset-tab").
 DESKTOP_PHASE = 4
-START_PRESET = {"ret": {4: ("Phase 3", "P3")}}
+START_PRESET: dict[str, dict[int, tuple[str | None, str]]] = {
+    "ret": {4: ("Phase 3", "P3")},
+    "mage": {4: ("Phase 3", "Arcane - Staff")},
+    "rogue": {4: (None, "P3 Swords")},
+    "enh": {4: (None, "P3 Preset")},
+}
+
+# Keys are the fork's spec ids (model/engine/types.ts SpecId), which the pool
+# fixture's cell names also use ("enh-p4").
+SPEC_PAGE = {
+    "ret": "/tbc/paladin/retribution/",
+    "mage": "/tbc/mage/dps/",
+    "rogue": "/tbc/rogue/dps/",
+    "enh": "/tbc/shaman/enhancement/",
+}
 
 # Pinned eligible-candidate count and its upper bound. Since ticket 505 the tab
 # builds the ret-p4 pool at run time from the wowsims db
@@ -129,8 +153,32 @@ START_PRESET = {"ret": {4: ("Phase 3", "P3")}}
 # them). If a run reads another number, explain the filter responsible before
 # changing this; a change to the pool rule, the hand rule, the start preset or
 # the db must re-measure it.
-EXPECTED_ELIGIBLE = {"ret": {4: 1014}}
-POOL_CAP = {"ret": {4: 1175}}
+# The other specs follow the same rules, with their cells of the same fixture:
+# - mage-p4: exclude 610, include 640. "Arcane - Staff" wears 32374 Zhar'doom,
+#   Greatstaff of the Devourer, a two-hander: 610 - 31 off-hand-only - 63
+#   one-handers = 516.
+# - rogue-p4: exclude 826, include 867. "P3 Swords" wears 32837 and 32838
+#   Warglaive of Azzinoth in the two hands, so the hand rule removes nothing:
+#   826.
+# - enh-p4: exclude 1039, include 1092. "P3 Preset" wears two 32262 Syphon of
+#   the Nathrezim, one-handers: 1039.
+# The off-hand and one-hander counts come from listing each exclude pool
+# (testing/db_pool.ts dbPoolFor(spec, 4, "exclude"), whose size the fixture
+# pins) and reading each weapon's handType in db.json; the same count gives
+# ret's 30 and 74. No pool holds a Kael'thas legendary, which the count also
+# leaves out (engine/kael-temp.ts).
+EXPECTED_ELIGIBLE = {
+    "ret": {4: 1014},
+    "mage": {4: 516},
+    "rogue": {4: 826},
+    "enh": {4: 1039},
+}
+POOL_CAP = {
+    "ret": {4: 1175},
+    "mage": {4: 640},
+    "rogue": {4: 867},
+    "enh": {4: 1092},
+}
 
 # Measured full-pool row count for the --full branch of assertion (e): an
 # uncapped run lands fewer rows than eligible candidates, because screened-out
@@ -152,7 +200,21 @@ FULL_ROWS: dict[str, dict[int, int]] = {}
 # at the same fork (`forkCommit`), holds 40 rows (`rowCount`). A change to the pool,
 # the EP order or the preset gear can move it; re-measure and explain before
 # changing it.
-CAPPED_ROWS = {"ret": {4: {40: 40}}}
+# The other specs, measured on the desktop binary at fork b603564ee on
+# 2026-11-06 (ticket 800), with the same reading of the count:
+# - mage, "Arcane - Staff" (16 worn items): the pane shows 38, so 2 worn items
+#   are inside the first 40.
+# - rogue, "P3 Swords" (17 worn): 33, so 7 are inside.
+# - enh, "P3 Preset" (17 worn): 40, so none is. Its first 40 are all weapons,
+#   most of them two-handers, and every row is a loss (ticket 820): the
+#   golden prices weapon swaps for a dual-wielder, not its armour.
+# Which worn items fall inside was not listed; only the counts were measured.
+CAPPED_ROWS = {
+    "ret": {4: {40: 40}},
+    "mage": {4: {40: 38}},
+    "rogue": {4: {40: 33}},
+    "enh": {4: {40: 40}},
+}
 
 # Tolerances (plan §Approach; out of scope to edit these in response to a
 # failure -- a failure is a finding and a ticket).
@@ -261,23 +323,29 @@ def start_server(serve_args: list[str]) -> subprocess.Popen:
     raise SystemExit(2)
 
 
-def run_harness(out_path: Path, candidates: int, spec: str, phase: int) -> dict:
-    SCRATCH.mkdir(parents=True, exist_ok=True)
+def gated_specs(phase: int) -> list[str]:
+    return [spec for spec, by_phase in START_PRESET.items() if phase in by_phase]
+
+
+def harness_args(out_path: Path, candidates: int, spec: str, phase: int) -> list[str] | None:
+    """The harness command for one spec, or None when the spec has no pinned
+    start preset or page at this phase."""
     start = START_PRESET.get(spec, {}).get(phase)
-    if start is None:
-        eprint(f"{CHECK_NAME}: no start preset pinned for {spec} phase {phase} "
-               "(START_PRESET) -- the gate runs only where one is.")
-        raise SystemExit(2)
+    page = SPEC_PAGE.get(spec)
+    if start is None or page is None:
+        return None
     preset_tab, preset = start
-    args = [
+    tab_args = [] if preset_tab is None else ["--preset-tab", preset_tab]
+    return [
         "node",
         str(HARNESS),
         "--origin",
         ORIGIN,
+        "--page",
+        page,
         "--phase",
         str(phase),
-        "--preset-tab",
-        preset_tab,
+        *tab_args,
         "--preset",
         preset,
         "--candidates",
@@ -285,9 +353,19 @@ def run_harness(out_path: Path, candidates: int, spec: str, phase: int) -> dict:
         "--out",
         str(out_path),
     ]
+
+
+def run_harness(out_path: Path, candidates: int, spec: str, phase: int) -> dict:
+    SCRATCH.mkdir(parents=True, exist_ok=True)
+    args = harness_args(out_path, candidates, spec, phase)
+    if args is None:
+        eprint(f"{CHECK_NAME}: no start preset or page pinned for {spec} phase "
+               f"{phase} (START_PRESET, SPEC_PAGE) -- the gate runs only where "
+               "both are.")
+        raise SystemExit(2)
     # Delete any prior readback first: the harness writes --out only on a clean
     # finish, so a crash before that write would otherwise leave a stale passing
-    # JSON on these two fixed gitignored paths and we would judge the old run.
+    # JSON on this fixed gitignored path and we would judge the old run.
     out_path.unlink(missing_ok=True)
     proc = subprocess.run(args, check=False)  # harness measures; we judge the JSON
     if proc.returncode != 0:
@@ -478,8 +556,8 @@ def check_golden(rb: dict, spec: str, phase: int, candidates: int) -> int:
     if not path.is_file():
         rel = path.relative_to(ROOT).as_posix()
         print(f"  (h) FAIL: no golden at {rel}. Run \"pnpm desktop-gate:check "
-              "--update-golden\" once, read data/desktop-gate/README.md, and "
-              "commit the file.")
+              f"--spec {spec} --update-golden\" once, read "
+              "data/desktop-gate/README.md, and commit the file.")
         return 2
     golden = json.loads(path.read_text(encoding="utf-8"))
     if all(rb.get(f) == golden.get(f) for f in GOLDEN_FIELDS):
@@ -505,7 +583,7 @@ def write_golden(rb: dict, spec: str, phase: int, candidates: int) -> None:
             print(f"{CHECK_NAME}: the golden is about to CHANGE. The diff:")
             print_golden_diff(rb, existing)
     doc = {
-        "_note": GOLDEN_NOTE,
+        "_note": golden_note(spec, phase, candidates, START_PRESET[spec][phase][1]),
         "recordedAt": rb.get("recordedAt"),
         "forkCommit": fork_head(),
         "cpuCount": os.cpu_count(),
@@ -584,6 +662,14 @@ def gate_passed(bytes_rc: int, gate_ok: bool, golden_rc: int) -> bool:
     return bytes_rc == 0 and gate_ok and golden_rc == 0
 
 
+def overall_rc(spec_rcs: list[int]) -> int:
+    """One exit code for every spec run: 2 when any could not run, since a
+    spec nobody judged must not read as a pass or a plain failure."""
+    if 2 in spec_rcs:
+        return 2
+    return 1 if any(spec_rcs) else 0
+
+
 def golden_refusal(bytes_rc: int, gate_ok: bool) -> str | None:
     """Why --update-golden must not write, or None when it may."""
     if bytes_rc != 0:
@@ -653,6 +739,47 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
     return all(checks.values()), checks
 
 
+def check_spec(spec: str, phase: int, candidates: int, bytes_rc: int,
+               update_golden: bool, full: bool) -> int:
+    """Run and judge one spec: 0 pass, 1 fail, 2 could not run (h)."""
+    started = time.monotonic()
+    print(f"{CHECK_NAME}: {spec}: running harness (candidates={candidates})...")
+    rb = run_harness(SCRATCH / f"last-run-{spec}.json", candidates, spec, phase)
+    print(f"{CHECK_NAME}: {spec}: assertions:")
+    gate_ok, _ = assert_gate(rb, candidates, spec, phase)
+
+    # --update-golden: the byte check and (a)-(f) gate the write, which
+    # stops a served bundle that is not dist, or a *broken* run
+    # (timeout, panic, wrong worker, wrong row count) from becoming a
+    # golden. It does NOT stop a ranking regression -- that preserves shape
+    # and passes (a)-(f). Value-level correctness rests on the developer
+    # reading the diff printed above.
+    if update_golden:
+        refusal = golden_refusal(bytes_rc, gate_ok)
+        if refusal:
+            print(f"{CHECK_NAME}: {spec}: refusing to write a golden -- {refusal}")
+            rc = 1
+        else:
+            write_golden(rb, spec, phase, candidates)
+            rc = 0
+    else:
+        if full:
+            print("  (h) skipped: no golden for an uncapped run")
+            golden_rc = 0
+        elif not gate_ok:
+            print("  (h) skipped -- (a)-(f) did not all pass.")
+            golden_rc = 0
+        else:
+            golden_rc = check_golden(rb, spec, phase, candidates)
+        if golden_rc == 2:
+            print(f"{CHECK_NAME}: {spec}: could not run (h).")
+            rc = 2
+        else:
+            rc = 0 if gate_passed(bytes_rc, gate_ok, golden_rc) else 1
+    print(f"{CHECK_NAME}: {spec}: wall {time.monotonic() - started:.0f} s.")
+    return rc
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--build", dest="build", action="store_true", default=True)
@@ -667,7 +794,9 @@ def main() -> int:
     ap.add_argument("--origin", default=ORIGIN)
     ap.add_argument("--compare", nargs=2, metavar=("A", "B"))
     ap.add_argument("--cross-transport", action="store_true")
-    ap.add_argument("--spec", default="ret")
+    ap.add_argument("--spec", default=None,
+                    help="one spec id (default: every spec in START_PRESET at "
+                         "--phase)")
     ap.add_argument("--phase", type=int, default=DESKTOP_PHASE)
     args = ap.parse_args()
 
@@ -688,6 +817,11 @@ def main() -> int:
     if args.bytes_only:
         return bytes_check(args.origin)
 
+    specs = [args.spec] if args.spec else gated_specs(args.phase)
+    if not specs:
+        eprint(f"{CHECK_NAME}: no spec has a start preset at phase {args.phase} "
+               "(START_PRESET).")
+        return 2
     serve_args = args.serve_args.split() if args.serve_args else []
     if args.build:
         build()
@@ -698,44 +832,20 @@ def main() -> int:
         if brc == 2:
             return 2
         candidates = 0 if args.full else args.candidates
-        main_json = SCRATCH / "last-run.json"
-        print(f"{CHECK_NAME}: running harness (candidates={candidates})...")
-        rb = run_harness(main_json, candidates, args.spec, args.phase)
-        print(f"{CHECK_NAME}: assertions:")
-        gate_ok, checks = assert_gate(rb, candidates, args.spec, args.phase)
-
-        # --update-golden: the byte check and (a)-(f) gate the write, which
-        # stops a served bundle that is not dist, or a *broken* run
-        # (timeout, panic, wrong worker, wrong row count) from becoming a
-        # golden. It does NOT stop a ranking regression -- that preserves shape
-        # and passes (a)-(f). Value-level correctness rests on the developer
-        # reading the diff printed above.
-        if args.update_golden:
-            refusal = golden_refusal(brc, gate_ok)
-            if refusal:
-                print(f"{CHECK_NAME}: refusing to write a golden -- {refusal}")
-                return 1
-            write_golden(rb, args.spec, args.phase, candidates)
-            return 0
-
-        if args.full:
-            print("  (h) skipped: no golden for an uncapped run")
-            golden_rc = 0
-        elif not gate_ok:
-            print("  (h) skipped -- (a)-(f) did not all pass.")
-            golden_rc = 0
-        else:
-            golden_rc = check_golden(rb, args.spec, args.phase, candidates)
-
+        rcs = {
+            spec: check_spec(spec, args.phase, candidates, brc,
+                             args.update_golden, args.full)
+            for spec in specs
+        }
         if brc != 0:
             print("  (bytes) FAIL: the served bundle differs from dist/tbc; "
                   "the mismatch list is printed above.")
-        if golden_rc == 2:
-            print(f"{CHECK_NAME}: could not run (h).")
-            return 2
-        overall = gate_passed(brc, gate_ok, golden_rc)
-        print(f"{CHECK_NAME}: {'PASS' if overall else 'FAIL'}.")
-        return 0 if overall else 1
+        rc = overall_rc(list(rcs.values()))
+        verdicts = ", ".join(
+            f"{spec} {('PASS', 'FAIL', 'COULD NOT RUN')[r]}" for spec, r in rcs.items()
+        )
+        print(f"{CHECK_NAME}: {('PASS', 'FAIL', 'COULD NOT RUN')[rc]} ({verdicts}).")
+        return rc
     finally:
         server.terminate()
         try:

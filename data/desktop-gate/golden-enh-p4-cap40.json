@@ -1,0 +1,336 @@
+{
+  "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a known-good enh phase-4 cap-40 run from the P3 Preset gear preset on the desktop (HTTP) transport. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter the tab's output (fork re-pin, pool rule change, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --spec enh --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate. See README.md beside this file.",
+  "recordedAt": "2026-11-06T19:07:01.341Z",
+  "forkCommit": "b603564eed544d5e9f62fbc3950309dd65921110",
+  "cpuCount": 20,
+  "candidatesRequested": 40,
+  "spec": "enh",
+  "phase": 4,
+  "elapsedS": 18.5,
+  "rows": [
+    {
+      "rank": "1",
+      "item": "Vengeful Gladiator's Gavel",
+      "slot": "Main Hand",
+      "dps": -470.7,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "2",
+      "item": "Vengeful Gladiator's Spellblade",
+      "slot": "Main Hand",
+      "dps": -470.7,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "3",
+      "item": "Amani Punisher",
+      "slot": "Main Hand",
+      "dps": -472.2,
+      "source": "Zul'Aman (N)\nAkil'zon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "4",
+      "item": "Merciless Gladiator's Spellblade",
+      "slot": "Main Hand",
+      "dps": -473.5,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "5",
+      "item": "Merciless Gladiator's Gavel",
+      "slot": "Main Hand",
+      "dps": -473.5,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "6",
+      "item": "Hammer of Judgement",
+      "slot": "Main Hand",
+      "dps": -483,
+      "source": "Hyjal Summit\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "7",
+      "item": "The Maelstrom's Fury",
+      "slot": "Main Hand",
+      "dps": -486.4,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "8",
+      "item": "Soul Cleaver",
+      "slot": "Main Hand",
+      "dps": -546.4,
+      "source": "Black Temple (N)\nTeron Gorefiend",
+      "belowCutoff": true
+    },
+    {
+      "rank": "9",
+      "item": "Torch of the Damned",
+      "slot": "Main Hand",
+      "dps": -551.3,
+      "source": "Black Temple (N)\nReliquary of the Lost",
+      "belowCutoff": true
+    },
+    {
+      "rank": "10",
+      "item": "Vengeful Gladiator's Decapitator",
+      "slot": "Main Hand",
+      "dps": -552.4,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "11",
+      "item": "Bloodmoon",
+      "slot": "Main Hand",
+      "dps": -568.4,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "12",
+      "item": "Vengeful Gladiator's Bonegrinder",
+      "slot": "Main Hand",
+      "dps": -574.4,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "13",
+      "item": "Trollbane",
+      "slot": "Main Hand",
+      "dps": -591.5,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": true
+    },
+    {
+      "rank": "14",
+      "item": "Merciless Gladiator's Decapitator",
+      "slot": "Main Hand",
+      "dps": -594.6,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "15",
+      "item": "Mooncleaver",
+      "slot": "Main Hand",
+      "dps": -604.3,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "16",
+      "item": "Ethereum Nexus-Reaver",
+      "slot": "Main Hand",
+      "dps": -604.9,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "17",
+      "item": "Stormherald",
+      "slot": "Main Hand",
+      "dps": -606.1,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "18",
+      "item": "Gorehowl",
+      "slot": "Main Hand",
+      "dps": -611.9,
+      "source": "Karazhan (N)\nPrince Malchezaar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "19",
+      "item": "Merciless Gladiator's Bonegrinder",
+      "slot": "Main Hand",
+      "dps": -617.4,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "20",
+      "item": "Gladiator's Decapitator",
+      "slot": "Main Hand",
+      "dps": -635.1,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "21",
+      "item": "Deep Thunder",
+      "slot": "Main Hand",
+      "dps": -641.1,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "22",
+      "item": "Lunar Crescent",
+      "slot": "Main Hand",
+      "dps": -642.8,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "23",
+      "item": "Legacy",
+      "slot": "Main Hand",
+      "dps": -650.5,
+      "source": "Karazhan (N)\nThe Wizard of Oz",
+      "belowCutoff": true
+    },
+    {
+      "rank": "24",
+      "item": "Gladiator's Bonegrinder",
+      "slot": "Main Hand",
+      "dps": -656.9,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "25",
+      "item": "Thunder",
+      "slot": "Main Hand",
+      "dps": -673.1,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "26",
+      "item": "Felsteel Reaper",
+      "slot": "Main Hand",
+      "dps": -675,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "27",
+      "item": "Chancellor's Decapitator",
+      "slot": "Main Hand",
+      "dps": -675.4,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "28",
+      "item": "Chancellor's Bonegrinder",
+      "slot": "Main Hand",
+      "dps": -694.9,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "29",
+      "item": "Fel Hardened Maul",
+      "slot": "Main Hand",
+      "dps": -709,
+      "source": "Blacksmithing",
+      "belowCutoff": true
+    },
+    {
+      "rank": "30",
+      "item": "Chancellor's Maul",
+      "slot": "Main Hand",
+      "dps": -843.9,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "31",
+      "item": "Zhar'doom, Greatstaff of the Devourer",
+      "slot": "Main Hand",
+      "dps": -849.3,
+      "source": "Black Temple (N)\nIllidan Stormrage",
+      "belowCutoff": true
+    },
+    {
+      "rank": "32",
+      "item": "Staff of Primal Fury",
+      "slot": "Main Hand",
+      "dps": -852.5,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "33",
+      "item": "The Nexus Key",
+      "slot": "Main Hand",
+      "dps": -858.4,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "34",
+      "item": "Terestian's Stranglestaff",
+      "slot": "Main Hand",
+      "dps": -870.7,
+      "source": "Karazhan (N)\nTerestian Illhoof",
+      "belowCutoff": true
+    },
+    {
+      "rank": "35",
+      "item": "Vengeful Gladiator's Staff",
+      "slot": "Main Hand",
+      "dps": -941,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "36",
+      "item": "Merciless Gladiator's Maul",
+      "slot": "Main Hand",
+      "dps": -951.1,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "37",
+      "item": "Vengeful Gladiator's Battle Staff",
+      "slot": "Main Hand",
+      "dps": -956.7,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "38",
+      "item": "Vengeful Gladiator's War Staff",
+      "slot": "Main Hand",
+      "dps": -962.6,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "39",
+      "item": "Merciless Gladiator's War Staff",
+      "slot": "Main Hand",
+      "dps": -965.2,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "40",
+      "item": "Gladiator's Maul",
+      "slot": "Main Hand",
+      "dps": -965.6,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    }
+  ],
+  "aboveCutoffItems": [],
+  "baselineDps": 2543.4,
+  "rowCount": 40,
+  "aboveCutoff": 0
+}
