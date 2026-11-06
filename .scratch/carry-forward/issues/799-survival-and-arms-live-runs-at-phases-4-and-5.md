@@ -58,3 +58,13 @@ table and § Wall time).
 803 is closed on the branch. The four runs finish, each has an SME
 verdict, the report is committed, each new defect has a ticket, and the
 branch's `pre-merge-review` file exists.
+
+## Comments
+
+- 2026-11-06: the four runs finished and each has an SME verdict
+  (`trust-with-caveats` for all four). Report:
+  `docs/live-runs/2026-11-06-survival-arms-p45.md`. New ticket: 810 (the
+  other build's BiS picks show as BiS losses on the Arms and Survival
+  tabs). Comments added to 750 and 746. Still open here: the branch's
+  `pre-merge-review` file, and a whole `pnpm verify`, which this sandbox
+  cannot run (read-only `node_modules`).

@@ -81,3 +81,18 @@ wowsims file needs the owner's OK of that exact edit.
   `{"action":{"autocastOtherCooldowns":{}}},` to both APLs gave these items
   value with no change in default DPS. Notes (gitignored):
   `.scratch/agent-reports/2026-11-05-general-task-750-apl-use-effects.md`.
+- 2026-11-06: the same loss shows on the Arms warrior tab
+  (`docs/live-runs/2026-11-06-survival-arms-p45.md`). Rows, from
+  `.scratch/agent-reports/2026-11-06-452b-runs/arms-p4.json` and
+  `arms-p5.json` (gitignored, only in the `feat/452-survival-arms`
+  worktree): Earthstrike, Jom Gabbar, Talisman of Ascendance and Icon of
+  the Silver Crescent all score -62.6 at phase 4 (rows 477-491) and -91.7
+  at phase 5 (rows 773-787); Bulwark of Kings -47.9 against Bulwark of the
+  Ancient Kings -24.7 at phase 4 (rows 240, 129); Cloudkeeper Legplates
+  -112.1 at phase 4 (row 764) and -116.2 at phase 5 (row 945). The Arms
+  rotation file has the same gap as Fury's:
+  `vendor/tbc-new-fork/ui/specs/warrior/dps/apls/arms.apl.json` lists
+  28485 and 33831 but not 21180, 23570, 28484 or 14554, and has no
+  `autocastOtherCooldowns` (`grep -o '"itemId": *[0-9]*'`, `grep -c`).
+  SME report: `.scratch/agent-reports/2026-11-06-general-task-sme-arms.md`
+  K1. Recorded for completeness; the wontfix stands.
