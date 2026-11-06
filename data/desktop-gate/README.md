@@ -1,9 +1,10 @@
 # Desktop gate goldens
 
-`golden-<spec>-p<phase>-cap<N>.json` is a recorded ranking output from a
-known-good run of the upgrades tab on the desktop (HTTP) transport, one file per
-gated spec. Check (h) of `scripts/check_desktop_tab.py` compares each spec's run
-against its file.
+`golden-<spec>-p<phase>-cap<N>.json` is the recorded ranking output of one run
+of the upgrades tab on the desktop (HTTP) transport, one file per gated spec.
+The run passed checks (a)-(f); the file does not say its ranking is right (see
+"Known defects of a golden" below). Check (h) of `scripts/check_desktop_tab.py`
+compares each spec's run against its file.
 
 ## Which runs are gated: four specs at phase 4, cap 40
 
@@ -24,14 +25,21 @@ a pin or a golden, or a golden on disk belongs to no gated spec.
 
 The wall times are the gate's own per-spec lines (harness start to verdict) on
 2026-11-06, fork `b603564ee`, 20 cores. The whole command, build included, took
-90-91 s.
+90-91 s. Those runs were in an agent's sandbox, where the harness failed with
+`cdp timeout` until `PLAYWRIGHT_BROWSERS_PATH` pointed at a headless-shell
+copy of Chrome,
+`/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-03-p45-runs/pwshim`
+(gitignored, on that machine only).
 
 - **Why these specs.** Ret was the only gated spec until ticket 800. Mage is the
   caster: spell hit cap, and its start preset wears a staff, so the tab holds
   out off-hand items and one-handers for a caster (ticket 700). Rogue is a
   physical melee spec that dual-wields, on a page with no phase tabs.
   Enhancement is the hybrid: a spec whose weights value both spell damage and
-  physical stats (`data/presets/enh/p3.ep-weights.json`), and it dual-wields.
+  physical stats, and it dual-wields. The weights are the ones the tab reads,
+  `enh-fallback.ep-weights.json` (fork `ui/features/upgrades/model/data/data.ts:18,48`):
+  spell damage 0.56, nature damage 0.4 and intellect 0.08 beside attack power
+  1.0.
   Ret also values spell damage, but wears a two-hander. Ticket 800 has the
   evidence.
 - **The rule.** A live run starts from the gear preset of the phase *before*
@@ -86,7 +94,9 @@ The wall times are the gate's own per-spec lines (harness start to verdict) on
   (fork `b603564ee`, ticket 800): mage 38, rogue 33 and enhancement 40, so 2,
   7 and 0 of their worn items fall inside the first 40. Enhancement's first 40
   are all weapons, most of them two-handers, and every row is a loss (ticket
-  820), so its golden checks weapon swaps for a dual-wielder.
+  820). All 40 are main-hand rows, so the enhancement golden does not check
+  how a dual-wielder's off-hand items are priced; rogue's golden holds
+  off-hand rows.
 - **Where the run's values are explained.** The phase-4 golden's rows and
   `baselineDps`, against the old phase-5 golden, are explained in the commit
   that writes the golden and in the ticket-560 stage's `desktop-gate.md`. The
@@ -106,18 +116,6 @@ rows when the gate was written.
 **A red gate is a finding, not a prompt to regenerate.** It means the tab's
 output changed. Find out why before you touch this file.
 
-**Regenerating is a deliberate act.** It is legitimate when a change is *meant*
-to alter the output — a fork re-pin, a pool rule change, an intended ranking
-change. Run `pnpm desktop-gate:check --spec <id> --update-golden` for each
-spec whose output changed, read the diff it prints,
-and commit the new file with the reason the output changed in the commit body.
-The write is gated on checks (a)-(f) passing ((g) removed), which stops a
-*broken* run (timeout, panic, wrong worker, wrong row count) from becoming a
-golden. It does **not** stop a ranking regression: that preserves shape and
-passes (a)-(f). The
-only thing standing between a regression and a committed golden is you reading
-the printed diff.
-
 **Without a golden the gate exits 2** ("could not run") and names the missing
 path. It never passes silently and never writes one on its own. `--full` skips
 (h) — an uncapped golden would cost a full-pool run per regeneration.
@@ -132,3 +130,39 @@ should be checked against these two fields first.
 The gate is never run by CI, by `pnpm verify`, or by either git hook — its only
 entry point is `pnpm desktop-gate:check`. A mismatch can only surface on a
 developer's own machine, on demand, with the diagnostic in front of them.
+
+## Known defects of a golden
+
+A golden records what the tab output, defects included. A spec not listed
+here has no known defect recorded.
+
+- **`enh`:** the capped run prices only main-hand weapons, and every row is a
+  loss. The EP order that picks the first 40 ignores weapon damage (ticket
+  821) and prices a two-hander against the main hand alone (ticket 820).
+
+## Recording a run
+
+Paste each spec's `(h)` line, which names its golden, and the command's final
+`desktop-gate:` line, which gives each spec's verdict: five lines when four
+specs are gated. They go in the stage's `desktop-gate.md` when the work has a stage, and
+in the commit body when it has none.
+
+## Regenerating a golden
+
+**Regenerating is a deliberate act.** It is legitimate only when a change is
+*meant* to alter that spec's output — a fork re-pin, a pool rule change, an
+intended ranking change. For each such spec:
+
+1. Run `pnpm desktop-gate:check --spec <id> --update-golden`, where `<id>` is
+   the spec id in the table above, and read the diff it prints.
+2. Commit the new file with the reason the output changed in the commit
+   body.
+3. Re-run the whole command, `pnpm desktop-gate:check`, and record that
+   green run's lines as "Recording a run" says.
+
+The write is gated on checks (a)-(f) passing ((g) removed), which stops a
+*broken* run (timeout, panic, wrong worker, wrong row count) from becoming a
+golden. It does **not** stop a ranking regression: that preserves shape and
+passes (a)-(f). The
+only thing standing between a regression and a committed golden is you reading
+the printed diff.

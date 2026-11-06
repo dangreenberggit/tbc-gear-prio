@@ -443,20 +443,11 @@ A recorded-fixture miss (`no recording for sim key`) is a **stop-and-report**, n
 a re-record.
 
 Before a fork re-pin that `dev` will receive (ADR-0036 Consequence 1), hand-run
-`pnpm -C <pair> desktop-gate:check` and paste its
-assertion lines (a)–(f) and (h) ((g) removed) into the commit body or the stage's `desktop-gate.md`. It
-proves the upgrades tab still runs on the packaged desktop binary over the HTTP
-transport and cannot pass on a page served by vite. It is deliberately **not** in
-`pnpm verify` — it needs `go`, `make` and Chrome, none of which CI has — so
-nothing else catches a re-pin that breaks the embedded transport. A red gate
-blocks the re-pin.
-
-The command runs every gated spec (ret, mage, rogue and enhancement, about 90 s
-in all) and check (h) compares each run against its golden,
-`<pair>/data/desktop-gate/golden-<spec>-p4-cap40.json`
-(`<pair>/data/desktop-gate/README.md` lists them). A re-pin that changes a
-spec's output regenerates that golden with `--spec <spec> --update-golden` and
-explains the diff in the commit body.
+`pnpm -C <pair> desktop-gate:check`; a red gate blocks the re-pin. It is not in
+`pnpm verify` (it needs `go`, `make` and Chrome, none of which CI has), so
+nothing else catches a re-pin that breaks the embedded transport. The command
+checks every golden that `<pair>/data/desktop-gate/README.md` lists by spec id,
+and recording the run and regenerating a golden follow that README.
 
 ### 6. The tag trigger
 
