@@ -396,6 +396,8 @@ export function startRunExpression() {
 // Keyed by the fork's spec id (`SPEC_ID_BY_PROTO_SPEC` in
 // ui/features/upgrades/model/run.ts). Survival and Arms have no page of their
 // own: they are specs on the hunter and warrior pages.
+// packages/core/test/fork-spec-pages.test.ts fails when a spec the tab ranks
+// has no entry here.
 export const PAGE_PATH_BY_SPEC = {
   ret: "/tbc/paladin/retribution/",
   feral: "/tbc/druid/feralcat/",

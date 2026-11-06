@@ -52,11 +52,11 @@
 //     axe at 653 on every fixture, so each spec page is scanned after a
 //     result (ticket 801);
 //   (23) with every fixture rendered, each spec page in PAGE_PATH_BY_SPEC had
-//     a fixture that was measured, and each spec id the fork's tab ranks
-//     (SPEC_ID_BY_PROTO_SPEC in run.ts) has a page in PAGE_PATH_BY_SPEC, so
-//     no page drops out of the checks above unnoticed (ticket 801;
-//     page-coverage.mjs). A page whose fixture failed to load fails here,
-//     so the run is a failure, not "unmeasured".
+//     a fixture that was measured, so no page drops out of the checks above
+//     unnoticed (ticket 801; page-coverage.mjs). A page whose fixture failed
+//     to load fails here, so the run is a failure, not "unmeasured". That
+//     each spec the fork's tab ranks has a page in PAGE_PATH_BY_SPEC is a
+//     vitest test, packages/core/test/fork-spec-pages.test.ts.
 //
 // An unbaselined critical or serious WCAG violation fails the gate
 // (TBC_A11Y_BASELINE holds the accepted debt). The verdict is one
@@ -78,7 +78,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { forkSpecIdsFrom, pageCoverage } from "./page-coverage.mjs";
+import { pageCoverage } from "./page-coverage.mjs";
 import { RESULT_ROW, ROW_HELPERS } from "./rows.mjs";
 import * as H from "./test-tab-harness.mjs";
 
@@ -440,15 +440,6 @@ function fixturePaths() {
   return files.map((f) => path.join(FIXTURE_DIR, f));
 }
 
-function readForkSpecIds() {
-  const file = path.join(H.FORK_ROOT, "ui/features/upgrades/model/run.ts");
-  try {
-    return forkSpecIdsFrom(fs.readFileSync(file, "utf8"));
-  } catch (err) {
-    return { error: `cannot read ${file}: ${err.message}` };
-  }
-}
-
 async function setWidth(send, width) {
   await send("Emulation.setDeviceMetricsOverride", {
     width,
@@ -664,7 +655,6 @@ async function main() {
       const unmeasured = new Set(unmeasuredFixtures.map((u) => u.fixture));
       const coverage = pageCoverage({
         pagePathBySpec: H.PAGE_PATH_BY_SPEC,
-        fork: readForkSpecIds(),
         fixtures: fixtures.map((f) => ({
           spec: JSON.parse(f.text).spec,
           measured: !unmeasured.has(f.name),
