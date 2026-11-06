@@ -19,7 +19,9 @@ guess at. Line numbers are at `a094a28b`.
   "relying on **our** terms", including "weapon-damage-in-EP". Both readers
   read this as a clash and stopped quoting fields.
 - **U3:** line 77-78, "For a weapon, weapon damage is the dominant term", is
-  not true for caster weapons, which the skill now judges (epic 452).
+  not true for caster weapons, which the skill now judges (epic 452). A
+  second cold reader said it is also wrong for feral cat, whose cat-form
+  attacks do not use the weapon's damage (game knowledge, unverified).
 - **U4:** the handoff template (lines 46-57) names one "character" and says
   nothing about a review that covers several specs, such as
   `.scratch/handoffs/sme-rank-judgment-452-p4-casters.md`.
