@@ -53,8 +53,15 @@ engine files with twins in this repo (`packages/core/src/stats.ts`,
 `packages/core/src/candidate-order.ts`); a change follows
 `docs/agents/known-traps.md` § Before editing a ported engine file.
 
-A change to the order can move every gated golden. Before re-recording a
-golden, re-measure that spec's `capped_rows` (`GATED`) in
-`scripts/check_desktop_tab.py` (`--update-golden` refuses to write while
-check (e) fails), then follow `data/desktop-gate/README.md` § Regenerating a
+The core twins cannot follow the fork as they are: the core's item data,
+`data/items/index.json`, has no weapon-damage field (the union of its items'
+keys, read with python on 2026-11-06, holds none). The plan for this ticket
+picks one of two
+options and says which: add weapon damage to the core's item data through
+the data pipeline, so the twins stay at parity; or record a divergence in
+the port's provenance row (`docs/fork-provenance/engine.md`) with the reason.
+
+A change to the order can move every gated golden. Re-record each golden
+that moves as `data/desktop-gate/README.md` § Regenerating a golden says,
+and update or remove the `enh` entry in that README's § Known defects of a
 golden.

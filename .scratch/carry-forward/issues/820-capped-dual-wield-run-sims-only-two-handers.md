@@ -20,8 +20,9 @@ items are simmed, but the list leaves owned rows out, and no other armour,
 ring or trinket is in the first 40. Hand types are db.json's `handType` for
 each row's name. The committed golden
 `data/desktop-gate/golden-enh-p4-cap40.json` (fork `b603564ee`) holds this
-run; re-run it with `pnpm desktop-gate:check --spec enh`, which builds the
-pair first.
+run; re-run it with `pnpm desktop-gate:check --spec enh`, which rebuilds the
+desktop binary (`make wowsimtbc`) first; the pair's `dist/` must already be
+built.
 
 The uncapped default (`candidateCap` 0, ticket 363) prices every candidate, so
 its numbers are right. A capped run shows the wrong rows: it spends its 40
@@ -45,8 +46,11 @@ put weapons first:
 - **The smaller cause, this ticket: a two-hander is compared with the main
   hand alone.** A two-hander can only take the main hand
   (`model/engine/pool.ts:271-283` `itemFitsSimSlot`, `:300-327`
-  `simSlotsForPoolSlot`), so for a dual-wielder its delta subtracts the worn
-  main hand only, not the off-hand item it also removes. Pricing two-handers
+  `simSlotsForPoolSlot`), so its delta subtracts the worn main hand only,
+  not the off-hand item it also removes. The sim clears a filled off hand
+  for every spec (`model/engine/rank.ts:4154-4183` `clearOffHandForTwoHander` checks no
+  spec), so a caster with an off-hand item is priced the same way as a
+  dual-wielder. Pricing two-handers
   against both worn hands still leaves 39 weapons in the first 40, by the
   domain reviewer's rebuild of the order (`docs/reviews/feat-452-desktop-goldens.md`
   D1; not re-run for this ticket). So fixing this ticket alone leaves the
@@ -54,9 +58,10 @@ put weapons first:
 
 ## Done when
 
-A capped run for a dual-wield spec prices a two-hander against both worn
-weapons, or the tab says in one plain sentence that the candidate order ranks
-two-handers against the main hand alone.
+A capped run for any spec whose worn off hand is filled prices a two-hander
+against both the worn main hand and the worn off-hand item, or the tab says in
+one plain sentence that the candidate order ranks two-handers against the
+main hand alone.
 
 The order is a ported engine file with a twin in this repo:
 `packages/core/src/candidate-order.ts` beside the fork's
@@ -64,9 +69,7 @@ The order is a ported engine file with a twin in this repo:
 `docs/agents/known-traps.md` § Before editing a ported engine file (parity
 test, provenance row, fork commit, re-pin, `pnpm verify`).
 
-Then, before the enhancement golden is re-recorded, re-measure
-`capped_rows` of `GATED[("enh", 4)]` in `scripts/check_desktop_tab.py` on the desktop
-binary and explain the new count in its comment: `--update-golden` refuses to
-write while check (e) fails on the old count. Then re-record the golden with
-`pnpm desktop-gate:check --spec enh --update-golden` and explain its diff
-(`data/desktop-gate/README.md` § Regenerating a golden).
+Then re-record every gated golden that moves as `data/desktop-gate/README.md`
+§ Regenerating a golden says: enhancement's, and rogue's too if it moves,
+since rogue also dual-wields. Update or remove the `enh` entry in that
+README's § Known defects of a golden.

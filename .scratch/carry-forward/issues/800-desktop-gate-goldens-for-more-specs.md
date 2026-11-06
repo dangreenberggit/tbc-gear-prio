@@ -134,7 +134,7 @@ the code. The branch's `pre-merge-review` file exists.
 
 **Numbers** (derivations in the comments of `scripts/check_desktop_tab.py`):
 
-| Spec | Start preset | `EXPECTED_ELIGIBLE` | `POOL_CAP` | `CAPPED_ROWS` at 40 |
+| Spec | Start preset | `expected_eligible` | `pool_cap` | `capped_rows` at 40 |
 | ---- | ------------ | ------------------- | ---------- | ------------------- |
 | mage | Phase 3 / Arcane - Staff | 610 - 31 - 63 = 516 | 640 | 38 |
 | rogue | (no tab) / P3 Swords | 826 | 867 | 33 |
@@ -148,7 +148,7 @@ The eligible counts were derived from the fixture and db.json before this
 branch's gate runs, and matched them. They were not new numbers: the
 2026-11-03 p45 table had already published 516, 826 and 1039 from that
 pass's runs (`docs/live-runs/2026-11-03-p45-dps-pass.md:87,99,103`).
-`CAPPED_ROWS` is measured.
+`capped_rows` is measured.
 
 **Wall time** (`python3 scripts/check_desktop_tab.py`, the command
 `pnpm desktop-gate:check` runs, one invocation, build included, 20 cores; the
@@ -165,5 +165,7 @@ committed; hybrid is defined, with a golden. `pnpm desktop-gate:check` checks
 every committed golden and passed twice in a row (rc 0 both times, every spec
 PASS on (a)-(f) and (h)). `check_desktop_tab_verdict.py` covers the
 multi-spec tables. The README points to the code's numbers (`GATED` in
-`scripts/check_desktop_tab.py`) instead of copying them. Left: the branch's
+`scripts/check_desktop_tab.py`) instead of copying them. That meets "The
+README states the same numbers as the code": the README states none, so none
+can differ. Left: the branch's
 `pre-merge-review` file, which the session that runs the review writes.

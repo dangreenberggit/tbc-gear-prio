@@ -443,11 +443,14 @@ A recorded-fixture miss (`no recording for sim key`) is a **stop-and-report**, n
 a re-record.
 
 Before a fork re-pin that `dev` will receive (ADR-0036 Consequence 1), hand-run
-`pnpm -C <pair> desktop-gate:check`; a red gate blocks the re-pin. It is not in
-`pnpm verify` (it needs `go`, `make` and Chrome, none of which CI has), so
-nothing else catches a re-pin that breaks the embedded transport. The command
-checks every golden that `<pair>/data/desktop-gate/README.md` lists by spec id,
-and recording the run and regenerating a golden follow that README.
+`pnpm -C <pair> desktop-gate:check`. It is not in `pnpm verify` (it needs
+`go`, `make` and Chrome, none of which CI has), so nothing else catches a
+re-pin that breaks the embedded transport. The command checks every golden
+that `<pair>/data/desktop-gate/README.md` lists by spec id, and recording the
+run follows that README. A red gate blocks the re-pin until each red spec is
+explained. A spec the re-pin is meant to change gets its golden regenerated as
+that README's § Regenerating a golden says; any other red spec is a defect to
+fix before the re-pin.
 
 ### 6. The tag trigger
 
