@@ -6,7 +6,7 @@
       "selector": "[data-testid=\"upgrades-item-name\"].text-quality-epic",
       "match": "css",
       "mayNotFire": true,
-      "reason": "ticket 840, a fix is owed: an epic item name is #a335ee (--color-quality-epic, upstream's ui/styles/theme/colors.css) on the page background #15171e, which axe measures at 3.66:1 against the 4.5:1 WCAG AA asks for 14 px text (impact serious). Seen on four mock-many-rows names on the feral page at 375 px in ticket 801's pnpm tab-review run, after the review's pane clip. axe marks most item names incomplete because it cannot work out their background, so whether this fires depends on what is in view; the layout gate's 653 px scan did not show it on any of the 11 spec pages (mayNotFire). The entry matches on rule and selector, so it accepts this violation on every spec page and at every width."
+      "reason": "ticket 840, a fix is owed: an epic item name is #a335ee (--color-quality-epic, upstream's ui/styles/theme/colors.css) on the page background #15171e, which axe measures at 3.66:1 against the 4.5:1 WCAG AA asks for 14 px text (impact serious). Seen on four mock-many-rows names on the feral page at 375 px in ticket 801's pnpm tab-review run, after the review's pane clip. axe marks most item names incomplete, so whether this fires depends on what is in view (hypothesis, untested); the layout gate's 653 px scan did not show it on any of the 11 spec pages (mayNotFire). The entry matches on rule and selector, so it accepts this violation on every spec page and at every width."
     },
     {
       "ruleId": "heading-order",
