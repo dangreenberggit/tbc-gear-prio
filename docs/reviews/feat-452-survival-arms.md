@@ -95,3 +95,83 @@ ticket.
   The runs need it (a gear chip leaves Beast Mastery or Fury talents), but
   it also changes rotation, buffs, consumables and encounter against the
   p45 runs, and ticket 799 does not record that its run commands changed.
+
+## Code quality
+
+| ID  | Finding                                                                                       | Pass                                                                                                                                             |
+| --- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| S5  | `specId` and talent points travel together through four functions; the talents are read twice | fork `5db390483`: the EP set is worked out once and passed on, the `= []` default is gone; the two reads in `run.ts` and `run_session.ts` remain |
+| S6  | `run-tab-cdp.mjs` `readCharacter` copies the fork's `getTalentTreePoints`                     | not changed: the page exposes no player handle on `window`, and the harness may not import from `vendor/`                                        |
+
+## Round 1 fixes
+
+Fork `786a08f96..5d1ecb595`: `3e72c5033` (A1, S1, D1, A2, A3, fork copies
+for S2), `5db390483` (S5), `5d1ecb595` (a comment that followed D1: the
+variant sets' phases come from the upstream preset names). Main
+`418162e5..b5eb3473`: `b23c5bef` (D1, S2, re-pin), `62d5862c` (S3, P1,
+notes in 746 and 803), `d187e0fc`, `49c32e07`, `ba7cca4e` (re-pins),
+`b5eb3473` (the live-run report and tickets 810 and 750 now cite the Arms
+re-runs with the P3 set, D1; ticket 811 filed for S5 and S6).
+
+D1 changed the Arms EP set from P1 to P3, so both Arms runs were redone
+(`arms-p4-r2.json`, `arms-p5-r2.json`). Baselines are equal; the phase 4
+above-cutoff set is unchanged; at phase 5 Leggings of the Immortal Night
+went from +2.4 to +3.3 and crossed the 3 DPS cutoff. The Arms SME judged
+both re-runs "pass with notes" (`.scratch/agent-reports/2026-11-06-general-task-sme-arms.md`
+§ Round 2 runs). A trade-off D1 brings: an Arms run that ranks phase 1 or
+2 now uses the P3 set, though upstream's P1 and P2 Arms builds use the P1
+set; the assumptions line says "written for P3".
+
+Reviewed range: `418162e53d371bf45dd9a9e17da0d716c0605118..b5eb34738e7b21a9a702b96de352995fbe17e2c8`
+
+## Focused check (round 2)
+
+One fresh `general-task` agent on Opus. Fork range `786a08f96..5d1ecb595`.
+
+1. Conditions hold: **pass.** Every commit in both ranges is a fix
+   naming its finding IDs, the code-quality pass (S5), a fork re-pin, or a
+   ticket and docs edit. Every changed code line is at a place a finding
+   cites. No upstream wowsims file changed (`git diff --numstat
+--diff-filter=M cec2a7b68 <end>` prints only `6 0
+ui/app/SimTabsSection.tsx` at both ends).
+2. Fixes in scope: **pass**, with R1 and R2 below.
+3. Tests assert their findings: **pass.** `data/data.test.ts` covers A1
+   (the fixer's reverted run failed 2 of 5); the A3 test now tells Arms
+   (P3) from Fury (P1); A2's test was removed.
+4. Touched tests pass: **pass.** `vitest run ui/features/upgrades/model`
+   26 files, 437 tests; `check_ep_presets.py` "22 files match";
+   `sync_fork_universes.py --check` "22 bundled copies byte-match"; node
+   v22.23.2.
+
+The Arms re-run numbers in the live-run report and tickets 810 and 750
+were recomputed from the run files and are stated truly.
+
+Findings:
+
+- **R1 (beyond scope, low):** fork `data.ts:102-104` (`5d1ecb595`) names
+  D1, but the comment fix came from the fixer's own note, not from what
+  D1 asks. Comment only.
+- **R2 (code quality, low):** the same sentence, "That file has no entry
+  for the two talent variants", follows a mention of
+  `docs/fork-provenance/data.md` and so reads as that file; it means
+  `ep-weights-by-phase.json`.
+- **R3 (code quality, low):** fork `assumptions.ts:36` and
+  `run_session.ts:65-68`, from S5. The EP-weights line now appears only
+  when the optional `epWeightsSet` is passed, and no session test checks
+  that the session passes it. The live Arms run shows the line today
+  (`arms-p5-r2.json` `assumptionsLine`).
+- **R4 (bookkeeping, informational):** main `49c32e07` pins fork
+  `a92fdc2f1`, now reachable only from the fork's reflog; its tree equals
+  `5d1ecb595`'s, as the lock `_comment` and the live-run report say.
+
+## Summary
+
+Round 2 was the last round and reported findings other than
+bookkeeping (R2 and R3, code quality, in lines the round-1 fixes wrote),
+so the review stops here (`~/.claude/AGENTS.md` § Review round limits):
+no Disposition table yet, and the merge check (step 4) did not run. The
+owner chooses the next step. Every round-1 finding has a fix commit or a
+recorded reason (S6 and the rest of S5 are in ticket 811; D2, S4 and S7
+were judged not to need a change).
+
+Tickets this branch filed: 2 (810, 811). Closed: 2 (803, 799).

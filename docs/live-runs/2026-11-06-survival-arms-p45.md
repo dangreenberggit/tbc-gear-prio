@@ -304,8 +304,8 @@ for the phases this tool ships)."
   phase 5 runs with SME verdicts.
 - Left for bullet 1: nothing from these runs. Ticket 810 is a defect the
   runs found; it does not block the spec list.
-- Left for ticket 799: its Done when also needs the branch's
-  `pre-merge-review` file.
+- Ticket 799 is closed: the review file is
+  `docs/reviews/feat-452-survival-arms.md`.
 - Open before any push or merge of this branch: a whole `pnpm verify`.
   It did not run whole in this sandbox: typecheck, lint and test fail on
   the read-only `node_modules`, and `pnpm install` cannot run (803 report
