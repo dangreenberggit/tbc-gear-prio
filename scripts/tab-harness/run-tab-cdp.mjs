@@ -548,6 +548,9 @@ const loadPreset = (tabName, chipName, specName) => `(async () => {
 	const chipWant = ${JSON.stringify(chipName)};
 	const specWant = ${JSON.stringify(specName)};
 	const tabsOf = () => [...document.querySelectorAll('[data-testid="preset-group-phase-tabs"] button')];
+	// The page renders the phase tabs more than once; the first button of each
+	// name is the one that changes the visible chips.
+	const tabNamesOf = tabs => [...new Set(tabs.map(t=>t.textContent.trim()))];
 	const blockTitle = c => {
 		for (let p = c.parentElement; p; p = p.parentElement) {
 			const t = p.querySelector(':scope > [data-testid="content-block-title"], :scope > * > [data-testid="content-block-title"]');
@@ -556,8 +559,8 @@ const loadPreset = (tabName, chipName, specName) => `(async () => {
 		return null;
 	};
 	const specOf = c => {
-		const label = c.closest('[data-testid="saved-data-presets"]')?.previousElementSibling;
-		return label?.matches('[data-testid="preset-group-label"]') ? label.textContent.trim() : null;
+		const heading = c.closest('[data-testid="saved-data-presets"]')?.previousElementSibling;
+		return heading?.matches('[data-testid="preset-group-label"]') ? heading.textContent.trim() : null;
 	};
 	const gearChips = () => [...document.querySelectorAll('[data-testid="saved-data-set-chip"]')]
 		.filter(c=>c.offsetParent && blockTitle(c)==='Gear Sets');
@@ -573,9 +576,7 @@ const loadPreset = (tabName, chipName, specName) => `(async () => {
 	if (want !== null) {
 		if(!await wf(()=>tabsOf().length > 0,30000)) return {error:'no preset phase tabs after 30 s; on a page without them, leave out --preset-tab'};
 		const tabs = tabsOf();
-		// The page renders the phase tabs more than once; the first button of each
-		// name is the one that changes the visible chips.
-		const tabNames = [...new Set(tabs.map(t=>t.textContent.trim()))];
+		const tabNames = tabNamesOf(tabs);
 		tabNote = '; tabs: '+tabNames.join(' | ');
 		if (chipWant === '?') {
 			const listed = [];
@@ -595,7 +596,7 @@ const loadPreset = (tabName, chipName, specName) => `(async () => {
 		if (chipWant === '?') return {list: (tabsOf().length ? 'shown on load: ' : '')+names(chips)};
 		// The phase shown on load depends on the browser profile, so a chip name
 		// that exists in several phases would load whichever one that is.
-		if (tabsOf().length) return {error:'this page has phase tabs; name one with --preset-tab; tabs: '+[...new Set(tabsOf().map(t=>t.textContent.trim()))].join(' | ')};
+		if (tabsOf().length) return {error:'this page has phase tabs; name one with --preset-tab; tabs: '+tabNamesOf(tabsOf()).join(' | ')};
 	}
 	await wf(()=>matches().length > 0,30000);
 	const found = matches();
