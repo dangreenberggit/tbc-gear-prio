@@ -54,7 +54,7 @@ engine files with twins in this repo (`packages/core/src/stats.ts`,
 `docs/agents/known-traps.md` § Before editing a ported engine file.
 
 A change to the order can move every gated golden. Before re-recording a
-golden, re-measure that spec's `CAPPED_ROWS` in
+golden, re-measure that spec's `capped_rows` (`GATED`) in
 `scripts/check_desktop_tab.py` (`--update-golden` refuses to write while
 check (e) fails), then follow `data/desktop-gate/README.md` § Regenerating a
 golden.

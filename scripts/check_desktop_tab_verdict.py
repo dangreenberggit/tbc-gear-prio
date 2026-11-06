@@ -58,8 +58,8 @@ def passing_readback(spec: str) -> dict:
         "done": True,
         "runTimedOut": False,
         "candidatesRequested": CAP,
-        "eligibleCount": g.EXPECTED_ELIGIBLE[spec][g.DESKTOP_PHASE],
-        "rowCount": g.CAPPED_ROWS[spec][g.DESKTOP_PHASE][CAP],
+        "eligibleCount": g.GATED[(spec, g.DESKTOP_PHASE)].expected_eligible,
+        "rowCount": g.GATED[(spec, g.DESKTOP_PHASE)].capped_rows[CAP],
         "panicHit": False,
     }
 
@@ -71,22 +71,20 @@ def gate_ok(rb: dict, spec: str) -> bool:
 
 
 def table_problems() -> list[str]:
-    """Every gated spec has every pinned number, a page and one golden, and
+    """Every gated spec's counts fit together and it has one golden, and
     every committed golden belongs to a gated spec, so the default run checks
     each golden on disk."""
     phase = g.DESKTOP_PHASE
     specs = g.gated_specs(phase)
     problems = [] if len(specs) > 1 else [f"gated_specs({phase}) gave {specs}"]
     for spec in specs:
-        eligible = g.EXPECTED_ELIGIBLE.get(spec, {}).get(phase)
-        cap = g.POOL_CAP.get(spec, {}).get(phase)
-        rows = g.CAPPED_ROWS.get(spec, {}).get(phase, {}).get(CAP)
-        if spec not in g.SPEC_PAGE:
-            problems.append(f"{spec}: no SPEC_PAGE")
-        if eligible is None or cap is None or eligible > cap:
-            problems.append(f"{spec}: EXPECTED_ELIGIBLE {eligible} / POOL_CAP {cap}")
+        run = g.GATED[(spec, phase)]
+        if run.expected_eligible > run.pool_cap:
+            problems.append(f"{spec}: expected_eligible {run.expected_eligible} "
+                            f"> pool_cap {run.pool_cap}")
+        rows = run.capped_rows.get(CAP)
         if rows is None or rows > CAP:
-            problems.append(f"{spec}: CAPPED_ROWS at cap {CAP} is {rows}")
+            problems.append(f"{spec}: capped_rows at cap {CAP} is {rows}")
         path = g.golden_path(spec, phase, CAP)
         if not path.is_file():
             problems.append(f"{spec}: no golden at {path.name}")
@@ -110,10 +108,12 @@ def harness_problems() -> list[str]:
     for spec in g.gated_specs(g.DESKTOP_PHASE):
         args = g.harness_args(out, CAP, spec, g.DESKTOP_PHASE)
         if args is None:
-            continue  # no SPEC_PAGE: table_problems names it
-        preset_tab, preset = g.START_PRESET[spec][g.DESKTOP_PHASE]
+            problems.append(f"{spec}: harness_args gave no command")
+            continue
+        run = g.GATED[(spec, g.DESKTOP_PHASE)]
+        preset_tab, preset = run.preset_tab, run.preset
         page = args[args.index("--page") + 1] if "--page" in args else None
-        if page != g.SPEC_PAGE[spec]:
+        if page != run.page:
             problems.append(f"{spec}: harness --page {page}")
         if args[args.index("--preset") + 1] != preset:
             problems.append(f"{spec}: harness --preset is not {preset!r}")
@@ -135,7 +135,7 @@ def assertion_problems() -> list[str]:
         try:
             rb = passing_readback(spec)
         except KeyError:
-            continue  # table_problems names the missing pin
+            continue  # table_problems names the missing cap-40 row count
 
         if not gate_ok(rb, spec):
             problems.append(f"{spec}: (a)-(f) fail on its pinned numbers")
@@ -197,24 +197,22 @@ def check_spec_problems() -> tuple[list[str], int]:
         return problems, 0  # table_problems names the missing pin or golden
     broken = {**good, "panicHit": True}
     uncapped = {**passing_readback(spec), "candidatesRequested": 0,
-                "rowCount": g.EXPECTED_ELIGIBLE[spec][phase]}
+                "rowCount": g.GATED[(spec, phase)].expected_eligible}
     absent = g.ROOT / "data/desktop-gate/golden-absent-for-verdict-check.json"
 
-    # (name, readback, bytes_rc, update_golden, full, candidates,
+    # (name, readback, bytes_rc, update_golden, candidates,
     #  want rc, want golden writes, want check_golden calls)
     cases = [
-        ("--update-golden after (a)-(f) fail", broken, 0, True, False, CAP,
-         1, 0, 0),
-        ("--update-golden after a byte mismatch", good, 1, True, False, CAP,
-         1, 0, 0),
-        ("--full", uncapped, 0, False, True, 0, 0, 0, 0),
-        ("(a)-(f) fail", broken, 0, False, False, CAP, 1, 0, 0),
+        ("--update-golden after (a)-(f) fail", broken, 0, True, CAP, 1, 0, 0),
+        ("--update-golden after a byte mismatch", good, 1, True, CAP, 1, 0, 0),
+        ("--full", uncapped, 0, False, 0, 0, 0, 0),
+        ("(a)-(f) fail", broken, 0, False, CAP, 1, 0, 0),
     ]
-    for name, rb, brc, update, full, cand, want, writes, goldens in cases:
+    for name, rb, brc, update, cand, want, writes, goldens in cases:
         calls["write"].clear()
         calls["golden"].clear()
         with patched(write_golden=fake_write, check_golden=fake_golden):
-            got = quietly(g.check_spec, spec, phase, cand, brc, update, full,
+            got = quietly(g.check_spec, spec, phase, cand, brc, update,
                           harness_giving(rb))
         seen = (got, len(calls["write"]), len(calls["golden"]))
         if seen != (want, writes, goldens):
@@ -222,7 +220,7 @@ def check_spec_problems() -> tuple[list[str], int]:
                             f"{seen}, want {(want, writes, goldens)}")
 
     with patched(write_golden=fake_write, golden_path=lambda *_a: absent):
-        got = quietly(g.check_spec, spec, phase, CAP, 0, False, False,
+        got = quietly(g.check_spec, spec, phase, CAP, 0, False,
                       harness_giving(good))
     if got != 2:
         problems.append(f"check_spec with no golden gave {got}, want 2")
@@ -238,7 +236,7 @@ def check_spec_problems() -> tuple[list[str], int]:
 
     with patched(write_golden=fake_write):
         got = quietly(g.check_specs, ["ret", "mage"], phase, CAP, 0, False,
-                      False, crash_first)
+                      crash_first)
     if got != {"ret": 2, "mage": 0} or ran != ["ret", "mage"]:
         problems.append(f"check_specs after a harness crash gave {got} "
                         f"(harness ran for {ran}), want "

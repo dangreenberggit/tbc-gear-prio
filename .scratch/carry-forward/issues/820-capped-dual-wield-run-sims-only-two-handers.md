@@ -65,7 +65,7 @@ The order is a ported engine file with a twin in this repo:
 test, provenance row, fork commit, re-pin, `pnpm verify`).
 
 Then, before the enhancement golden is re-recorded, re-measure
-`CAPPED_ROWS["enh"][4][40]` in `scripts/check_desktop_tab.py` on the desktop
+`capped_rows` of `GATED[("enh", 4)]` in `scripts/check_desktop_tab.py` on the desktop
 binary and explain the new count in its comment: `--update-golden` refuses to
 write while check (e) fails on the old count. Then re-record the golden with
 `pnpm desktop-gate:check --spec enh --update-golden` and explain its diff
