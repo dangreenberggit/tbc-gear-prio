@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Verified by: `python scripts/check_layout_gate.py` on tbc-gear-prio@eee6cb82 (all 11 fixtures measured, `PASS (23)`, `layout gate: PASSED`); review `docs/reviews/feat-452-spec-page-scans.md` § Merge account
 Type: task
 Origin: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md (slicing, 2026-11-06, slice E)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md

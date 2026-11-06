@@ -130,3 +130,32 @@ Finding:
 Round 2 is the last round. R1 is open, so the review stops here for the
 owner's choice (`~/.claude/AGENTS.md` § Review round limits). The merge
 check (step 4) was not run.
+
+## Merge account
+
+What ticket 801 asks the merge account to hold. The evidence files are
+gitignored and sit in this worktree's
+`.scratch/agent-reports/801-runs/`.
+
+- **Layout gate wall time.** Before the branch (`c229d129`, 6 fixture
+  pages): harness 102.4 s, fixture pages 94.5 s (`layout-before.txt`;
+  the gate itself skipped on that unchanged tree).
+  After the round 1 fixes (`eee6cb82`, before the code-quality pass, 11 fixture pages):
+  `check_layout_gate.py` 185.5 s in total, harness 183.8 s, fixture
+  pages 176.1 s (`review-fixes/gate-final.txt`). The per-page times
+  were 14.0 s to 21.1 s. `mock-many-rows` took the longest, at 21.1 s.
+  These times leave out the bundle build. In this sandbox the build was
+  done by hand (`serve-and-run.sh`); `pnpm merge-to-dev` does the build
+  itself.
+- **Captures.** One `pnpm tab-review` run at `e9f771ad` captured all 11
+  pages at 375 and 1280 px, 22 PNGs, with the verdict `captured`
+  (`tab-review/`, `tab-review.txt`). That run came before the D1 fix,
+  so `801-enhancement-*` shows the gloves under "Waist". Only
+  `801-shadow-post-run-1280-0.png` has been looked at by eye.
+- **Layout lock.** Each green gate run here advanced
+  `data/wowsims-fork-layout.lock.json`, and each was restored, because
+  the runs used a hand-built bundle and the sandbox's Chromium shim.
+  `pnpm merge-to-dev` runs the gate again and commits the lock.
+- **Tickets.** This branch filed 840, 841, 842 and 843 and closed 801.
+  It filed more than it closed: three of the four record problems that
+  this branch's checks found on other code.
