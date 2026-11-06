@@ -553,3 +553,9 @@ never stops a run; say so in the hand-off reply.
   to the user.
 - Carry a `blocking` finding or a refuted load-bearing claim into step 5
   under any wording.
+- Put anything in an executor's prompt, or a later message to it, that
+  differs from the plan: no extra steps, no changed steps, no
+  "skip step N". The prompt names the plan and the chunk; it does not
+  alter the steps. If a step is wrong, have a `gate-planner` revise
+  `plan.md`, and review the revision as step 4 says. Once an executor
+  has started on that plan, bring the wrong step to the user instead.
