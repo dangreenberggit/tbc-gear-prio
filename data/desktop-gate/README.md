@@ -132,10 +132,20 @@ intended ranking change. For each such spec:
 
 1. Run `pnpm desktop-gate:check --spec <id> --update-golden`, where `<id>` is
    the spec id in the table above, and read the diff it prints.
-2. Commit the new file with the reason the output changed in the commit
-   body.
-3. Re-run the whole command, `pnpm desktop-gate:check`, and record that
-   green run's lines as "Recording a run" says.
+
+   If it refuses to write because check (e) fails on a count the change is
+   meant to move, update that spec's `GATED` entry and the comment above it
+   in `scripts/check_desktop_tab.py`, then run step 1 again. Derive
+   `expected_eligible` and `pool_cap` from the pool fixture as the comment
+   above `GATED` says; never copy them from the run, which would test the
+   code against itself. `capped_rows` is measured on the desktop binary: the
+   refused run's (e) line prints its `rowCount`. Explain in the comment why
+   each count moved.
+2. Re-run the whole command, `pnpm desktop-gate:check`, and check that every
+   spec passes.
+3. Commit the new golden, and the `GATED` change if step 1 needed one. Put
+   the reason the output changed in the commit body, and record the green
+   run's lines from step 2 as "Recording a run" says.
 
 The write is gated on checks (a)-(f) passing ((g) removed), which stops a
 *broken* run (timeout, panic, wrong worker, wrong row count) from becoming a
