@@ -91,3 +91,63 @@ hybrid is defined (with a golden, or with the reason none is needed). One
 command checks every golden and passes twice in a row. The verdict unit
 tests cover the multi-spec tables. The README states the same numbers as
 the code. The branch's `pre-merge-review` file exists.
+
+## Comments
+
+2026-11-06, branch `feat/452-desktop-goldens`, fork `b603564ee` (the pin).
+
+**Specs chosen.** Three new goldens: mage, rogue and enhancement (spec ids
+`mage`, `rogue`, `enh`), beside ret. The evidence:
+
+- **Caster: mage.** It has a spell hit cap (`cap-profile.ts` `mage`, 16%, with
+  Arcane Focus as its hit talent) and no `repairCap`, so slice D (746) can
+  change it. Its phase-4 start preset, "Arcane - Staff", wears 32374
+  Zhar'doom, a two-hander, so the run holds out 31 off-hand-only items and 63
+  one-handers: the caster two-hander case of ticket 700. Balance and warlock
+  also wear that staff (balance's eligible count shows the same hold-out).
+  Mage's spell hit weight is higher than balance's in this repo's copies
+  (`data/presets/mage/fallback.ep-weights.json` stat 12 at 2.36,
+  `balance/p3` at 1.91), so a hit-cap change is likelier to move a mage row
+  (hypothesis, untested). The gate starts mage from a phase tab, as ret does;
+  rogue and enhancement cover pages without one.
+- **Melee: rogue.** Physical only, dual-wields (`pool.ts` `DUAL_WIELD_SPECS`),
+  and its page has no phase tabs, so it covers the gate's new no-`--preset-tab`
+  path. It is a dual-wield spec with no `repairCap`, which slice D needs.
+- **Hybrid: enhancement.** Hybrid here means a spec whose EP weights value
+  both spell damage and physical stats, so items of both kinds compete in one
+  ranking. By that reading of `data/presets/*/` the hybrids are ret (spell
+  damage 0.16 beside attack power 0.42, `ret/p3`) and enhancement (spell
+  damage 0.48, nature damage 0.35 and intellect 0.1 beside attack power 1.0,
+  `enh/p3`). Hunter's weights give intellect 0.01 and no spell damage, so it
+  is not a hybrid by this reading. Ret already had a golden, but it wears a
+  two-hander; enhancement adds the dual-wield hybrid. Its cap-40 golden turned
+  out to hold weapons only (ticket 820), so it checks weapon swaps for a
+  dual-wielder, including spell-damage weapons, not its armour.
+
+**Numbers** (derivations in the comments of `scripts/check_desktop_tab.py`):
+
+| Spec | Start preset | `EXPECTED_ELIGIBLE` | `POOL_CAP` | `CAPPED_ROWS` at 40 |
+| ---- | ------------ | ------------------- | ---------- | ------------------- |
+| mage | Phase 3 / Arcane - Staff | 610 - 31 - 63 = 516 | 640 | 38 |
+| rogue | (no tab) / P3 Swords | 826 | 867 | 33 |
+| enh | (no tab) / P3 Preset | 1039 | 1092 | 40 |
+
+The exclude and include sizes are the fixture's `mage-p4`, `rogue-p4` and
+`enh-p4` cells. The hand-rule counts come from listing each exclude pool with
+the fork's `testing/db_pool.ts` `dbPoolFor(spec, 4, "exclude")` and reading
+each weapon's `handType` in db.json; the same count gives ret's 30 and 74.
+The eligible counts were derived before any run and then matched the runs.
+`CAPPED_ROWS` is measured.
+
+**Wall time** (`python3 scripts/check_desktop_tab.py`, the command
+`pnpm desktop-gate:check` runs, one invocation, build included, 20 cores; the
+sandbox needed `PLAYWRIGHT_BROWSERS_PATH` pointed at a headless-shell shim): 91 s and 90 s on two runs. Per spec, the gate's own lines: ret 18 s,
+mage 15 s, rogue 32-33 s, enh 24 s. So the three new goldens add about 72 s to
+the re-pin step.
+
+**Done-when status.** Goldens for a caster and a second melee spec are
+committed; hybrid is defined, with a golden. `pnpm desktop-gate:check` checks
+every committed golden and passed twice in a row (rc 0 both times, every spec
+PASS on (a)-(f) and (h)). `check_desktop_tab_verdict.py` covers the
+multi-spec tables. The README states the code's numbers. Left: the branch's
+`pre-merge-review` file, which the session that runs the review writes.
