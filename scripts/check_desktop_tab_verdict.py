@@ -16,6 +16,8 @@ import contextlib
 import io
 import json
 import sys
+import tempfile
+import types
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -244,6 +246,51 @@ def check_spec_problems() -> tuple[list[str], int]:
     return problems, len(cases) + 2
 
 
+def run_harness_problems() -> tuple[list[str], int]:
+    """The real run_harness with a stub subprocess: each way the harness gives
+    nothing to judge must raise HarnessFailed, which check_specs turns into
+    rc 2 for that spec and goes on; a SystemExit would stop every later spec.
+    Returns (problems, cases run)."""
+    problems: list[str] = []
+    spec, phase = "ret", g.DESKTOP_PHASE
+    readback = {"rowCount": 1}
+
+    # (name, spec, harness rc, what the harness writes at --out or None,
+    #  want: "HarnessFailed" or the parsed readback)
+    cases = [
+        ("unknown spec", "no-such-spec", 0, json.dumps(readback), "HarnessFailed"),
+        ("harness rc 3", spec, 3, json.dumps(readback), "HarnessFailed"),
+        ("rc 0, no JSON, stale file before", spec, 0, None, "HarnessFailed"),
+        ("rc 0, JSON does not parse", spec, 0, "not json", "HarnessFailed"),
+        ("rc 0, valid JSON", spec, 0, json.dumps(readback), readback),
+    ]
+    with tempfile.TemporaryDirectory() as tmp:
+        scratch = Path(tmp)
+        out = scratch / "readback.json"
+        for name, s, rc, written, want in cases:
+            # A stale passing readback from an earlier run: run_harness must
+            # delete it, or a harness that writes nothing would be judged on it.
+            out.write_text(json.dumps(readback), encoding="utf-8")
+
+            def fake_run(args: list[str], written: str | None = written,
+                         rc: int = rc, **_kw: object):
+                if written is not None:
+                    Path(args[args.index("--out") + 1]).write_text(
+                        written, encoding="utf-8")
+                return types.SimpleNamespace(returncode=rc)
+
+            stub = types.SimpleNamespace(run=fake_run)
+            with patched(SCRATCH=scratch, subprocess=stub):
+                got = quietly(g.run_harness, out, CAP, s, phase)
+            if want == "HarnessFailed":
+                ok = isinstance(got, str) and got.startswith("raised HarnessFailed")
+            else:
+                ok = got == want
+            if not ok:
+                problems.append(f"run_harness {name} gave {got!r}, want {want!r}")
+    return problems, len(cases)
+
+
 def main() -> int:
     problems = [
         f"gate_passed{args} gave {got}, want {want}"
@@ -260,12 +307,14 @@ def main() -> int:
     ] + table_problems() + harness_problems() + assertion_problems()
     spec_problems, spec_cases = check_spec_problems()
     problems += spec_problems
+    harness_run_problems, harness_run_cases = run_harness_problems()
+    problems += harness_run_problems
     for p in problems:
         print(f"  FAIL: {p}", file=sys.stderr)
     if problems:
         return 1
     count = (len(CASES) + len(GOLDEN_CASES) + len(OVERALL_CASES)
-             + spec_cases)
+             + spec_cases + harness_run_cases)
     print(f"check_desktop_tab_verdict.py ok ({count} verdict cases, "
           f"{len(g.gated_specs(g.DESKTOP_PHASE))} gated specs)")
     return 0
