@@ -4,7 +4,7 @@ Origin: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
 Blocks: none
 Blocked by: none
-Related: 452, 754
+Related: 452, 754, 803
 
 # Run and judge Survival hunter and Arms warrior at phases 4 and 5
 
@@ -31,6 +31,10 @@ write a dated report under `docs/live-runs/`. File a ticket for each new
 defect. Follow the p45 report's § Setup for the run commands, and ticket
 754's Comments for running from the sandbox (one script that starts the
 servers, runs the harness and stops the servers).
+
+Ticket 803: these pages use the Beast Mastery and Fury EP weights for the
+candidate prefilter and the gem fill. Give the SME judges that fact, so a
+row that looks wrong because of it is counted against 803.
 
 Wall time to expect: in the p45 pass, hunter runs took 1400-1552 s each
 and the warrior batch of 2 runs took 1424 s (`docs/live-runs/2026-11-03-p45-dps-pass.md`

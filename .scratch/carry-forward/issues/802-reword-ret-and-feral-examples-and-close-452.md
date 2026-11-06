@@ -3,7 +3,7 @@ Type: task
 Origin: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md (slicing, 2026-11-06, slice F)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
 Blocks: none
-Blocked by: 799, 800, 746, 801
+Blocked by: 799, 800, 746, 801, 803, 804
 Related: 452
 
 # Reword docs that name ret and feral as the only examples, then close epic 452

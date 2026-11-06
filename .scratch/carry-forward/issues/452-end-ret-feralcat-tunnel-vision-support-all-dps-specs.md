@@ -136,3 +136,12 @@ C, 800 (desktop-gate goldens for more specs); D, 746 (meta-gem repair at
 the hit cap for every spec); E, 801 (axe and visual-review scans on every
 spec page); F, 802 (reword ret-and-feral examples, then check this bar and
 close).
+
+2026-11-06, slice A audit of the per-spec checks (EP presets, universes,
+sim-implemented effects, pool), read at fork `b603564ee`, the current pin.
+`pnpm verify` runs every one of these checks (`package.json`, `verify:steps`).
+The tab no longer reads `data/universes` or the sim-implemented-effects
+file (ADR-0038), so checking those per spec matters only to the CLI. Two
+gaps in what the tab uses, filed: 803 (Survival and Arms pages gem with
+Beast Mastery and Fury EP weights) and 804 (no check pins any spec's
+phase-1 pool). Neither is in the session chain; 802 waits on both.
