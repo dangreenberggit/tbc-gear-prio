@@ -47,7 +47,7 @@ describe the tree as it was when they ran.
 | `warlock-fallback.ep-weights.json` | `data/presets/warlock/fallback.ep-weights.json` |
 | `warrior-fallback.ep-weights.json` | `data/presets/warrior/fallback.ep-weights.json` |
 | `warrior-p2.ep-weights.json`       | `data/presets/warrior/p2.ep-weights.json`       |
-| `warrior-arms-p1.ep-weights.json`  | `data/presets/warrior/arms-p1.ep-weights.json`  |
+| `warrior-arms-p3.ep-weights.json`  | `data/presets/warrior/arms-p3.ep-weights.json`  |
 | `tier-exchange.json`               | `data/two-hop/tier-exchange.json`               |
 
 ## Refresh, 2026-08-16 (ticket 211)
@@ -881,11 +881,22 @@ pnpm fork-universes:check
 The tab bundled one EP-weight set per spec id, so a Survival hunter got the
 Beast Mastery set and an Arms warrior the Fury set. Two copies are added:
 `hunter-sv-p1.ep-weights.json` (`P1_SV_EP_PRESET`) and
-`warrior-arms-p1.ep-weights.json` (`P1_ARMS_EP_PRESET`). `data.ts` picks
-one of them when the page's talents put the most points in the Survival or
-the Arms tree (`player.getTalentTreePoints()`), and the spec's own set
-otherwise. Arms bundles the P1 set only, the lowest-phase set, as Fury and
-every other spec do; the assumptions line says when a run's phase is later.
+`warrior-arms-p3.ep-weights.json` (`P3_ARMS_EP_PRESET`). `data.ts` picks
+one of them when the page's talents put strictly more points in the
+Survival or the Arms tree than in each other tree
+(`player.getTalentTreePoints()`), and the spec's own set otherwise.
+
+Arms bundles the P3 set because upstream's own Arms builds for phases 3, 4
+and 5 use it (`P3_PRESET_BUILD_ARMS` to `P5_PRESET_BUILD_ARMS`,
+`ui/specs/warrior/dps/presets.ts:446-480`), and the page opens at phase 3
+(`CURRENT_PHASE`, `ui/sim/constants/other.ts:12`; `currentPhase` in
+`data/wowsims.lock.json`), the phase the tab ranks by default. The
+assumptions line says when a run ranks another phase. The first version of
+this change bundled `P1_ARMS_EP_PRESET` as `warrior-arms-p1.ep-weights.json`,
+on the false reason that every spec bundles its lowest-phase set (ret
+bundles `ret-p2`); review finding D1 of `feat/452-survival-arms` replaced it
+the same day. Its hit weight (stat 20) was 1.81; the P3 set's is 1.01.
+
 At this pin the SV numbers equal the BM numbers; the copy has its own source
 so that `pnpm ep-presets:check` catches a later upstream change to one of
 them. The notes in `hunter-fallback.ep-weights.json`,
