@@ -41,9 +41,10 @@ note saying so. How much this moves a ranking: hypothesis, untested.
 Survival and Arms are not separate pages, so the tab must tell them from
 Beast Mastery and Fury from the page's state. Find the direct signal the
 page already holds (for example its talents) before you design anything;
-do not guess from gear. Which Arms weights apply at which phase follows
-the tab's existing phase table for EP weights (`EP_WEIGHTS_PHASE_BY_SPEC`
-in `data.ts`).
+do not guess from gear. The tab bundles one weight set per spec, and
+`EP_WEIGHTS_PHASE_BY_SPEC` (`data.ts:65-77`) records only the phase that
+set was written for, for the disclosure. Arms has two sets (P1 and P3);
+choose which to bundle, or whether to bundle both by phase, and say why.
 
 The weights live in two places: `data/presets/<spec>/*.ep-weights.json` in
 this repo, which `pnpm ep-presets:check` verifies against the fork

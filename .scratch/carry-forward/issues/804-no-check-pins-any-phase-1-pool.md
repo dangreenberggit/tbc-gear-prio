@@ -26,7 +26,7 @@ phase-1 pool passes `pnpm verify`, for every spec.
 
 ## How
 
-Measure each phase-1 size independently of `pool_source.ts`. The
+Measure each number of each phase-1 cell independently of `pool_source.ts`. The
 fixture's `_comment` warns: "A size copied without that check pins
 whatever the code does". The script that measured the existing cells is
 not in any checkout (same `_comment`), so write the measurement down in
@@ -37,6 +37,6 @@ carries both.
 
 ## Done when
 
-The cells fixture has a phase-1 cell for each of the 11 spec ids, each
-measured independently, the `_comment` says how, the test expects 55
+The cells fixture has a phase-1 cell for each of the 11 spec ids, each of
+its numbers (`exclude`, `include`, `bisRows`) measured independently, the `_comment` says how, the test expects 55
 cells, and the re-pin is on the branch.

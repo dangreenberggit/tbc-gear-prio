@@ -27,11 +27,13 @@ Related: 452
 3. Check the epic's bar ("What 'done' looks like" and "What would close
    this" in 452) against `dev`, line by line. The slice A audit (452
    Notes, 2026-11-06) found that the tab no longer reads the universes or
-   the sim-effects file, so that part of bullet 2 is judged for the tab
-   by 803 and 804. Close 452, with a `Verified by:` line, if every bar
-   line is met and every other slice ticket (799, 800, 746, 801, 803,
-   804) is closed on `dev`. Otherwise add a note to 452 that names what
-   is still open, and leave it open.
+   the sim-effects file. Reading that part of bullet 2 as "what the tab
+   uses" is the agents' reading, not an owner ruling: unless the owner
+   has ruled on it by then, put it to the owner as a question labelled
+   Q-452-bar-universes and leave 452 open. Close 452, with a
+   `Verified by:` line, only if every bar line is met and every other
+   slice ticket (799, 800, 746, 801, 803, 804) is closed on `dev`.
+   Otherwise add a note to 452 that names what is still open.
 
 Run `python scripts/check_merge_ready.py --product-files`: if it prints
 nothing, the branch gets `instruction-review`, otherwise

@@ -128,14 +128,16 @@ owner has not commented on this answer; slice C acts on it.
 The spec list (bullet 1) is these 13 specs: balance, mage, shadow,
 elemental, warlock, feral cat, ret, rogue, hunter (Beast Mastery), Survival
 hunter, enhancement, warrior (Fury) and Arms warrior. Survival and Arms are
-not separate site routes (the owner's words above); in the fork they are
-the hunter and warrior pages with their own gear sets.
+not separate site routes, as far as the owner could see ("dont see to be
+different website routes", above); in the fork they are the hunter and
+warrior pages with their own gear sets.
 
 Slices, worked by a chain of sessions in this order (one branch each, no
 merge without the owner's ask): A, this note and the slice tickets, plus
-an audit of the per-spec checks; B, 799 (Survival and Arms live runs);
+an audit of the per-spec checks; B, 799 (Survival and Arms live runs,
+with 803 first);
 C, 800 (desktop-gate goldens for more specs); D, 746 (meta-gem repair at
-the hit cap for every spec); E, 801 (axe and visual-review scans on every
+the hit cap for every spec, with 804); E, 801 (axe and visual-review scans on every
 spec page); F, 802 (reword ret-and-feral examples, then check this bar and
 close). B, C and E branch off A's branch, D off C's branch, and F comes
 last. The order is the chain's; each ticket's `Blocked by:` line names

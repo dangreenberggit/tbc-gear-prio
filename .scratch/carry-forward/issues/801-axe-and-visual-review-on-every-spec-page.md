@@ -40,25 +40,30 @@ spec pages that serve the 13 in-scope specs (Survival and Arms use the
 hunter and warrior pages; 452 Notes, 2026-11-06). The before-run scan may
 stay on ret. Add page paths for balance, shadow and elemental, and add
 fixtures in `packages/core/test/tab-fixtures/make-mock-fixtures.ts` for
-the five specs that have none, so the layout checks and the after-run
-capture reach every page too.
+the five specs that have none, so the layout checks reach every page
+too. Today a fixture stands for "one UI difference we expect between
+specs" (`make-mock-fixtures.ts:4-5`, `data/tab-fixtures/README.md:5-7`);
+fixtures per page change that design, so update both texts. Then run
+`pnpm tab-review` once with a manifest that names a fixture on each of
+the 11 pages, and link the captures in the merge account.
 
 Use made-up fixtures only: owner ruling 2026-10-24, "tab page checks use
 made-up results and no sim recordings" (epic 452 Notes).
 
 A real a11y violation on a new page becomes an entry in the a11y baseline
 (`TBC_A11Y_BASELINE`) that names a new ticket. Do not fix it in this
-slice.
+slice. A baseline entry matches on rule and selector, not page, so it
+accepts that violation on every page; say so in the ticket.
 
 `pnpm merge-to-dev` runs the layout gate whenever the tab layout source
 changed since its last green run (`scripts/check_layout_gate.py`,
-`run()`), so each extra page adds wall time to those merges. Time
-`pnpm layout-gate:check` once before and once after the change, and
-report both.
+`run()`), so each extra page adds wall time to those merges. The gate
+skips on an unchanged tree, so time one full run after the change and
+report the time per fixture page from its output, and the total.
 
 ## Done when
 
-The after-run axe scan runs on each of the 11 spec pages, and the layout
-checks and the after-run capture reach each of them. Each new violation
-has a baseline entry that names a ticket. Both wall times are in the merge
-account, and the branch's `pre-merge-review` file exists.
+The after-run axe scan and the layout checks run on each of the 11 spec
+pages, and one `tab-review` run captured each of them. Each new violation
+has a baseline entry that names a ticket. The gate's wall time is in the
+merge account, and the branch's `pre-merge-review` file exists.

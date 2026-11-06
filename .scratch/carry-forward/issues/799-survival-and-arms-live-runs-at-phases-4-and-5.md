@@ -27,12 +27,15 @@ before the fix would judge that known defect again.
 Four uncapped live runs, after 803 is fixed: Survival at phases 4 and 5,
 Arms at phases 4 and 5. Each run starts from the preset gear of the phase
 before the phase it ranks (owner rule, ticket 560 brief, quoted in
-`scripts/check_desktop_tab.py:101-102`). In the fork:
+`scripts/check_desktop_tab.py:101-102`). The harness flags
+(`scripts/tab-harness/run-tab-cdp.mjs:50-62`):
 
-- Survival phase 4 starts from `ui/specs/hunter/dps/gear_sets/phase_3/sv/`,
-  phase 5 from `phase_4/sv/`.
-- Arms phase 4 starts from `ui/specs/warrior/dps/gear_sets/p3_arms.gear.json`,
-  phase 5 from `p4_arms.gear.json`.
+- Survival phase 4: `--preset-tab "Phase 3" --preset-spec Survival --preset "DW - 6% hit"`;
+  phase 5 the same with `"Phase 4"`. This is the chip Beast Mastery ran
+  with in the p45 pass (its run table).
+- Arms phase 4: `--preset-tab "Phase 3" --preset-spec Arms --preset "BIS"`;
+  phase 5 the same with `"Phase 4"`. Check the spec label with
+  `--preset "?"`, which lists the chips as "[Spec] chip".
 
 If a start set is missing or the harness cannot select it, stop and report
 it; do not start from another set.
@@ -42,7 +45,8 @@ write a dated report under `docs/live-runs/` in the p45 report's form.
 File a ticket for each defect that no open ticket covers. Follow the p45
 report's § Setup for the run commands, and ticket 754's Comments for
 running from the sandbox (one script that starts the servers, runs the
-harness and stops the servers).
+harness and stops the servers). Start the servers from slice B's pair,
+whose fork has 803's fix, not from the checkout ticket 754 names.
 
 Wall time to expect: in the p45 pass the two hunter runs took 1552 s and
 1547 s, while they shared a wave with enhancement, and the warrior batch

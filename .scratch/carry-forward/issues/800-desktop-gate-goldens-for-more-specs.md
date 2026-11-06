@@ -22,9 +22,8 @@ takes `--spec` (`:670`).
 
 So a change that moves another spec's DPS values or row order passes the
 gate. Spec-specific paths that a ret golden cannot reach include the
-meta-gem repair at the hit cap (ticket 746) and the caster side of the
-two-hander hold-out (closed ticket 700); the ret golden covers only the
-melee side.
+meta-gem repair at the hit cap (ticket 746) and a caster's gear and pool
+in the two-hander hold-out (closed ticket 700).
 
 The owner's 2026-11-06 ruling on Q-452-golden and the answer to it are in
 epic 452's Notes: the gate is a sim-output test, so the golden part of the
@@ -45,11 +44,17 @@ For each new spec:
   (`docs/live-runs/2026-11-03-p45-dps-pass.md:85-105`), which already
   follows the previous-phase rule.
 - Cap: 40, as for ret.
-- `EXPECTED_ELIGIBLE`, `POOL_CAP` and `CAPPED_ROWS`: derive each from the
-  fork's `ui/features/upgrades/model/pool_source.cells.fixture.json` and
-  the rules the ret comments name (`check_desktop_tab.py:110-155`), and
-  write the derivation in a comment as ret's does. Do not copy a value from
-  the run being checked: that tests the code against itself.
+- `EXPECTED_ELIGIBLE` and `POOL_CAP`: derive each from the fork's
+  `ui/features/upgrades/model/pool_source.cells.fixture.json` and the
+  rules the ret comment names (`check_desktop_tab.py:110-133`), and write
+  the derivation in a comment as ret's does. Do not copy a value from the
+  run being checked: that tests the code against itself.
+- `CAPPED_ROWS`: measured on the desktop binary, as ret's was, then
+  explained in a comment the way ret's is (`:143-155`).
+- Pages with no phase tabs (balance, shadow, elemental, warlock, rogue,
+  enhancement) take no `--preset-tab` (`scripts/tab-harness/run-tab-cdp.mjs:54-57`),
+  but the gate always passes one (`check_desktop_tab.py:271-282`); change
+  that for those specs.
 - The golden: `pnpm desktop-gate:check --spec <spec> --update-golden`
   (`check_desktop_tab.py:41`), after reading the printed diff
   (`data/desktop-gate/README.md:67-79`).
@@ -57,7 +62,7 @@ For each new spec:
 Make one command check every committed golden. Extend the verdict unit
 tests (`scripts/check_desktop_tab_verdict.py`) to cover the multi-spec
 tables. Update `data/desktop-gate/README.md` and
-`docs/agents/upstream-catch-up.md:454-458`, which names only the ret
+`docs/agents/upstream-catch-up.md:454-457`, which names only the ret
 golden.
 
 Fix this mismatch on the way. `data/desktop-gate/README.md:24-26` says
@@ -75,7 +80,7 @@ what 746 changes per spec.
 
 The gate is not in `pnpm verify`. It runs by hand before a fork re-pin that
 `dev` will receive (`scripts/check_desktop_tab.py:30`;
-`docs/agents/upstream-catch-up.md:96` and `:446-455`). Each new golden adds
+`docs/agents/upstream-catch-up.md:96` and `:445-452`). Each new golden adds
 a run to that step. The ret cap-40 run took `elapsedS: 13` (golden file);
 measure and report the wall time of each new golden.
 
