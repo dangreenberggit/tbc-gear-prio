@@ -169,10 +169,9 @@ work stands:
   on each spec's tab (bullet 3):** E's branch `feat/452-spec-page-scans`
   scans all 11 spec pages; ticket 801 is closed on it. The owner could see
   no separate site route for Survival or Arms (2026-11-06, quoted above),
-  so the hunter and warrior pages cover them. E's merge waits on owner
-  question Q-452e-r1: how check 23 should learn the fork's spec ids, which
-  it reads today from the text of `run.ts` with a regex (session E's
-  handoff).
+  so the hunter and warrior pages cover them. E's review is done
+  (`docs/reviews/feat-452-spec-page-scans.md` on that branch); the owner
+  settled its last question on 2026-11-06 (session E's handoff).
 - **EP presets per spec (bullet 2):** `pnpm ep-presets:check` is in
   `pnpm verify`; ticket 803 (Survival and Arms weights) is closed on B's
   branch `feat/452-survival-arms`, with 799.
