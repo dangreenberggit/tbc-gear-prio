@@ -333,14 +333,101 @@ binary_dist devserver` (:139) and `binary_dist: $(OUT_DIR)/.dirstamp`
   finds numbers in the README and has to work out that they are history.
   Cost: low. Fix: "the README states none of the current counts".
 
-K1-K3 are wording only (they change no step, rule or code), so under § Review round limits they were fixed in the next commit and get one further check; the cold readers' notes stay in the gitignored report `.scratch/agent-reports/2026-11-06-general-task-452c-round3-instruction.md` in D's worktree.
+K1-K3 are wording only (they change no step, rule or code), so under § Review round limits they were fixed in the same commit (`96d40d2c`) and get one further check; the cold readers' notes stay in the gitignored report `.scratch/agent-reports/2026-11-06-general-task-452c-round3-instruction.md` in D's worktree.
+
+## Further check of `96d40d2c` (K1-K3 wording)
+
+One further check of `96d40d2c`, allowed by § Review round limits for
+wording-only findings, found three wording findings. All three are fixed in
+the commit that adds this section (subject `Close the 800 review: N1-N3 and
+Disposition`). No further review round runs.
+
+- **N1** (should fix) `821:57-60`: the inline python command wrapped inside
+  the string after `import`, so pasting the raw text failed with a
+  SyntaxError. Fixed: the command is on one line in its own fenced code
+  block; the claim (8249 items, 15 keys on 2026-11-06, none of them weapon
+  damage) is kept.
+- **N2** (minor) the old `## Summary` said round 2 ends the review. Fixed:
+  the Summary below is rewritten.
+- **N3** (minor) the K1-K3 paragraph above said "fixed in the next commit".
+  Fixed: "fixed in the same commit (`96d40d2c`)".
 
 ## Summary
 
-Round 2 is the last round (`~/.claude/AGENTS.md` § Review round limits)
-and it reported findings that are not bookkeeping (R1, a missing test;
-J4 and J6, ticket scope), so the review stops here for the owner's
-choice. No Disposition table yet; step 4 (merge check) not run. A3 (the
-untracked dotfiles) is not a defect: they are the sandbox's `/dev/null`
-masks (character devices). Ticket 821 filed by this review; 820 filed by
-the branch.
+The review ends here. Round 2 stopped at the round limit; the owner chose
+round 3 as a further last round. Round 3 closed R1, R2 and J1-J9. Its
+wording findings K1-K3 were fixed in `96d40d2c`, and the one further check
+of that commit found N1-N3, fixed in the commit that adds the Disposition
+table below. No review round runs after that check.
+
+Not run on the fix commits:
+
+- The desktop gate (`pnpm desktop-gate:check`). Its last run (all four specs
+  PASS, rc 0) predates `31e90cad` and every later commit. Session D runs it
+  next, as K1 step 1 of its stage
+  (`.scratch/stage-gate/452d-meta-repair-hit-cap/plan.md`).
+- The merge check (`pnpm merge-to-dev --check-only`) and the whole
+  `pnpm verify`. Neither can run in this sandbox; they are owner steps.
+
+A3 (the untracked dotfiles) is not a defect: they are the sandbox's
+`/dev/null` masks (character devices). Ticket 821 was filed by this review;
+820 was filed by the branch.
+
+## Disposition (round 3)
+
+| ID  | Axis               | Disposition | Ticket / note                                                                                                                                                                             |
+| --- | ------------------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial        | fixed       | `eb09c16d`: the `PLAN.md` box claims the ret WASM run only                                                                                                                                |
+| A2  | Adversarial        | fixed       | `594375fa`: a harness failure gives that spec "could not run" and the loop goes on; `31e90cad`: the same for an unparseable readback; `6512a6fe` tests `run_harness` (R1)                 |
+| A3  | Adversarial        | wontfix     | not a defect: the untracked dotfiles are the sandbox's `/dev/null` masks (character devices, `stat -c %F`); none is committed                                                             |
+| D1  | Domain             | defer       | `.scratch/carry-forward/issues/821-ep-order-ignores-weapon-damage.md` — `63b25c4b` rewrote ticket 820 to name the main cause and filed 821 for it                                         |
+| D2  | Domain             | fixed       | `eb09c16d`: the README cites the enh weights the tab reads                                                                                                                                |
+| D3  | Domain             | fixed       | `594375fa`: the script says enh wears 16 distinct ids                                                                                                                                     |
+| S1  | Standards          | fixed       | same fix as A2 (`594375fa`, `31e90cad`)                                                                                                                                                   |
+| S2  | Standards          | fixed       | `594375fa`: `harness_problems` skips a spec with no `SPEC_PAGE`                                                                                                                           |
+| S3  | Standards          | fixed       | `594375fa`: the golden `_note` names `--spec`                                                                                                                                             |
+| S4  | Standards          | fixed       | same fix as A1 (`eb09c16d`)                                                                                                                                                               |
+| S5  | Standards          | fixed       | `497397b1`: the README points to `GATED`                                                                                                                                                  |
+| S6  | Standards          | fixed       | `497397b1`: one `GatedRun` record per spec in `GATED`; `31e90cad` renames the stale (e) labels                                                                                            |
+| S7  | Standards          | fixed       | `497397b1`: `VERDICT_WORDS`                                                                                                                                                               |
+| S8  | Standards          | fixed       | `497397b1`: the `full` parameter removed                                                                                                                                                  |
+| S9  | Standards          | fixed       | `594375fa`: `check_spec` takes a stand-in harness; verdict cases cover its branches                                                                                                       |
+| S10 | Standards          | fixed       | `497397b1`: the claim is gone from the README; the script comment counts 33 of 40                                                                                                         |
+| P1  | Spec               | fixed       | same fix as S3 (`594375fa`)                                                                                                                                                               |
+| P2  | Spec               | fixed       | `594375fa`: no "known-good" in the golden notes; `eb09c16d`: none in the README, and enh's defect is listed there                                                                         |
+| P3  | Spec               | fixed       | same fix as A1 (`eb09c16d`)                                                                                                                                                               |
+| P4  | Spec               | fixed       | same fix as S2 (`594375fa`)                                                                                                                                                               |
+| P5  | Spec               | fixed       | same fix as A2 (`594375fa`, `31e90cad`)                                                                                                                                                   |
+| I0  | Instruction        | wontfix     | a paper trial ran in round 2 (two fresh Opus readers, pass) and round 3's cold reader re-ran the catch-up case; a live trial needs a re-pin that moves a golden, and this branch has none |
+| I1  | Instruction        | fixed       | `eb09c16d`: `upstream-catch-up.md` points at the README, which holds the steps                                                                                                            |
+| I2  | Instruction        | fixed       | `eb09c16d` (same change as I1)                                                                                                                                                            |
+| I3  | Instruction        | fixed       | `eb09c16d` (same change as I1)                                                                                                                                                            |
+| I4  | Instruction        | fixed       | `63b25c4b`: ticket 820 names the ported-file twin                                                                                                                                         |
+| I5  | Instruction        | fixed       | `63b25c4b`: ticket 820 says to re-measure `CAPPED_ROWS["enh"]`                                                                                                                            |
+| I6  | Instruction        | defer       | `.scratch/carry-forward/issues/821-ep-order-ignores-weapon-damage.md` — filed in `63b25c4b`                                                                                               |
+| I7  | Instruction        | fixed       | `63b25c4b`: ticket 820 wording                                                                                                                                                            |
+| I8  | Instruction        | fixed       | `63b25c4b`: ticket 820 wording                                                                                                                                                            |
+| I9  | Instruction        | fixed       | `63b25c4b`: ticket 820 wording                                                                                                                                                            |
+| I10 | Instruction        | fixed       | `eb09c16d` (README), `63b25c4b` (ticket 800), `497397b1` (script comment): enh holds main-hand rows only                                                                                  |
+| I11 | Instruction        | fixed       | `63b25c4b`: ticket 800 wording                                                                                                                                                            |
+| I12 | Instruction        | fixed       | `63b25c4b`: ticket 800 wording                                                                                                                                                            |
+| I13 | Instruction        | fixed       | `eb09c16d`, `63b25c4b`: the sandbox browser path                                                                                                                                          |
+| I14 | Instruction        | fixed       | `63b25c4b`: ticket 800 and ticket 746 pointers                                                                                                                                            |
+| I15 | Instruction        | fixed       | `eb09c16d` (same change as I1)                                                                                                                                                            |
+| R1  | Focused (round 2)  | fixed       | `6512a6fe`: `run_harness_problems()` covers each raise in `run_harness`                                                                                                                   |
+| R2  | Focused (round 2)  | fixed       | `5e24572d`: `PLAN.md:921` points at `GATED[("ret", 4)]`                                                                                                                                   |
+| J1  | Instruction (r2)   | fixed       | `36e7e96c`: `upstream-catch-up.md` agrees with the README                                                                                                                                 |
+| J2  | Instruction (r2)   | fixed       | `5e24572d`: the README re-runs the whole command before the commit                                                                                                                        |
+| J3  | Instruction (r2)   | fixed       | `5e24572d` (README step 1), `36e7e96c` (tickets 820 and 821 point at it)                                                                                                                  |
+| J4  | Instruction (r2)   | fixed       | `36e7e96c`: ticket 820 covers every spec whose off hand is filled                                                                                                                         |
+| J5  | Instruction (r2)   | fixed       | `36e7e96c`: ticket 820 re-records every golden that moves                                                                                                                                 |
+| J6  | Instruction (r2)   | fixed       | `36e7e96c`: ticket 821 says what the core twins get                                                                                                                                       |
+| J7  | Instruction (r2)   | fixed       | `36e7e96c`; its wrong added clause was K1, fixed in `96d40d2c`                                                                                                                            |
+| J8  | Instruction (r2)   | fixed       | `36e7e96c`: tickets 820 and 821 update README § Known defects                                                                                                                             |
+| J9  | Instruction (r2)   | fixed       | `36e7e96c`: ticket 800 uses the `GATED` field names                                                                                                                                       |
+| K1  | Instruction (r3)   | fixed       | `96d40d2c`: the build clause is gone from ticket 820                                                                                                                                      |
+| K2  | Instruction (r3)   | fixed       | `96d40d2c`: ticket 821 gives the command                                                                                                                                                  |
+| K3  | Instruction (r3)   | fixed       | `96d40d2c`: ticket 800 says "none of the current counts"                                                                                                                                  |
+| N1  | Further check (r3) | fixed       | the commit that adds this table: the command is on one line in its own code block                                                                                                         |
+| N2  | Further check (r3) | fixed       | the commit that adds this table: the Summary is rewritten                                                                                                                                 |
+| N3  | Further check (r3) | fixed       | the commit that adds this table: "fixed in the same commit"                                                                                                                               |
