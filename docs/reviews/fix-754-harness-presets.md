@@ -4,6 +4,8 @@ Reviewed range: `b04649232eb0a4946fa202a8b187b934318140f3..02d5e25814bdcb6eb0e84
 
 Reviewed range: `02d5e25814bdcb6eb0e8423c10cec221a28ef6ac..22a67b322fba607ad92743485274c3655f245611`
 
+Reviewed range: `22a67b322fba607ad92743485274c3655f245611..e318e0282371ff95de7eafba02072444d8b2282d`
+
 ## Dispatch note
 
 - Tooling check: `python scripts/check_merge_ready.py --product-files`
@@ -112,10 +114,51 @@ P5 (the closing note's evidence rests on the full `presetWorn` list).
 builds the tab-name list with a second copy of the expression already in
 `tabNames`/`tabNote` at `:576-577`. No effect on results today.
 
+### Stop after round 2
+
+Round 2 was the last round and reported F1, a code-quality finding in the
+lines the A1 fix wrote, so the review stopped (`~/.claude/AGENTS.md`
+§ Review round limits) and the owner chose the further round below.
+
+## Focused check (round 3)
+
+The owner chose to fix F1 on 2026-11-05 ("Ok" to the recommended option:
+one helper, plus renaming the inner `label` in `specOf`). Commit
+`e318e028` adds `tabNamesOf` (`run-tab-cdp.mjs:553`), uses it at `:579`
+and `:599`, and renames `specOf`'s local to `heading`. One fresh
+`general-task` agent on Opus checked `22a67b32..e318e028`:
+
+1. **Commits: pass.** `8a7a4e12` only adds this review file; `e318e028`
+   names F1 and changes only the harness script.
+2. **Changed lines only where F1 points, plus the rename: pass.**
+3. **Behaviour unchanged: pass.** The helper reads only buttons each
+   branch already waited for (`:577`, `:599`).
+4. **Syntax and runs: pass.** `node --check` rc 0 on v22.23.2.
+   `754-runs-r2/f1-recheck.harness.log` (HEAD `e318e028`, harness files
+   clean) shows the A1 error, the duplicate-name error, the `?` listing
+   and a Survival load (rc 0; `presetSpec` Survival, `presetTab`
+   Phase 3, first worn item Gronnstalker's Helmet).
+
+No findings.
+
+## Disposition
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                   |
+| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | `2fe2f6c7`: `--preset` without `--preset-tab` on a page with phase tabs stops with an error naming the tabs.                    |
+| A2  | Adversarial | fixed       | All runs redone on the committed file; logs record HEAD (`754-runs-r2/`).                                                       |
+| S1  | Standards   | wontfix     | Not a defect: both specs' chips render in one pass (`PresetGroupPicker.tsx:53-64`, fork `b603564e`), confirmed in round 2.      |
+| S2  | Standards   | fixed       | `2fe2f6c7`: header comment and README say what the desktop gate passes.                                                         |
+| S3  | Standards   | fixed       | `f06d9997`: one `label` helper; `specOf` called once per chip.                                                                  |
+| S4  | Standards   | fixed       | `2fe2f6c7`: `--preset-spec` with `--preset '?'` is refused.                                                                     |
+| P1  | Spec        | fixed       | Same as A2.                                                                                                                     |
+| P2  | Spec        | fixed       | The no-`--preset-spec` hunter call re-run on the committed file (`errors-and-lists.harness.log`, `f1-recheck.harness.log`).     |
+| P3  | Spec        | fixed       | Load runs on all six no-tab pages (default and non-default sets), hunter Survival and warrior Arms (`754-runs-r2/`).            |
+| P4  | Spec        | fixed       | `22a67b32`: ticket 754's `Verified by:` gives every command and environment setting, and where the gitignored workaround lives. |
+| P5  | Spec        | wontfix     | Small; the closing note's evidence rests on the full `presetWorn` list, confirmed in round 2.                                   |
+| F1  | Round 2     | fixed       | `e318e028`: one `tabNamesOf` helper; round 3 passed.                                                                            |
+
 ## Summary
 
-Round 2 is the last round and reported F1, a code-quality finding in the
-lines the A1 fix wrote, so the review stops here (`~/.claude/AGENTS.md`
-§ Review round limits). Every round-1 finding is fixed or has a checked
-`wontfix` reason; F1 is the only open finding. The merge check was not
-run.
+Three rounds. Every finding is fixed or has a checked `wontfix` reason;
+none is deferred. Tickets: this branch filed 0 and closed 1 (754).
