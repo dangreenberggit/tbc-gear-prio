@@ -91,3 +91,42 @@ spec pages and made-up items. No `codex` on `PATH`; the axes run as
 | S3  | `make-mock-fixtures.ts:183-188`, `:301-362`                                                                                                                                                               | The `FixtureName` union repeats the `FIXTURES` keys, and the five new entries repeat `size: 24, belowCutoff: 4`. |
 | S4  | `test-layout.mjs:119,135-137,575-578,583-588`                                                                                                                                                             | The "fixture name or nothing" value is built in three places.                                                    |
 | P3  | `data/tab-fixtures/README.md:16`, `scripts/tab-harness/README.md:23`                                                                                                                                      | The docs write "653 px" where the code uses `POST_RUN_AXE_WIDTH`.                                                |
+
+## Focused check (round 2)
+
+Reviewed range: `e9f771ad052bb5786e5bfeead15733d1feb73f20..a3a23d6972a0c2c061654ce91268d7d00e24a559`
+
+Fork range: none. `git diff --quiet c229d129...HEAD -- data/wowsims-fork.lock.json`
+exits 0, so the branch never moves the fork pin.
+
+One fresh `general-task` agent on Opus ran the four checks.
+
+1. Conditions 1 to 3 hold: **PASS**. Each commit names its finding IDs,
+   is the code-quality pass (`a3a23d69`, S2 S3 S4 P3), or only files or
+   edits tickets or this file.
+2. The fixes change only what each finding asks for: **PASS**. The D1
+   override moves 4 of 1714 preset entries, all enhancement belt and
+   gloves. A paired slot (ring, trinket, weapon) cannot move.
+3. Each new test asserts its finding: **PASS**. The fixer recorded no
+   gate run with the A1 fix reverted and saved no output for the D1
+   revert run. The checker's own probe applied the D1 rule to the old
+   `mock-enhancement.json` and the rule fired.
+4. The tests the fixes touch pass: **PASS** (vitest
+   `page-coverage.test.mjs` 9/9, generator `--check`,
+   `check_tab_fixtures.py`, `tsc`; node v22.23.2).
+
+Finding:
+
+- **R1** (a silent wrong result in lines the fixes wrote, not reachable
+  with today's file). `forkSpecIdsFrom` in
+  `scripts/tab-harness/page-coverage.mjs:10-15` takes the body of
+  `SPEC_ID_BY_PROTO_SPEC` up to the first `}` and reads only quoted
+  values. In edited copies of the map, a `}` inside a comment dropped
+  every entry after it, and an unquoted value was skipped without an
+  error. In both cases check 23 can pass while a fork spec has no page.
+  A commented-out entry was read as a ranked spec, which blocks the gate
+  for no reason. The real `run.ts` parses to all 11 ids.
+
+Round 2 is the last round. R1 is open, so the review stops here for the
+owner's choice (`~/.claude/AGENTS.md` § Review round limits). The merge
+check (step 4) was not run.
