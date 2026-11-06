@@ -168,6 +168,11 @@ counts 0). Tickets 452 and 802 stay open by design: 452 waits on the
 slice branches reaching `dev`, and 802 on the owner's approval of the
 `sme-rank-review` text (Q-452-sme-skill).
 
+After round 2, session F filed one ticket in its own commit: 850 (four
+unclear rules in the `sme-rank-review` skill, U2-U5 of the review of the
+Q-452-sme-skill text). That commit adds only the ticket, `NEXT` (851) and
+this paragraph.
+
 The merge check (step 4) was not run as part of this review: it needs
 `vendor/tbc-new-fork`, which this worktree lacks, and it is the owner's
 step at merge time. An earlier run here, at the caller's request, exited
