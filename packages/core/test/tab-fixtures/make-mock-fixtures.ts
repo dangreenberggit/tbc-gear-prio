@@ -1,9 +1,12 @@
 /**
  * Writes the made-up Upgrades-tab results under `data/tab-fixtures/` that the
  * tab's page checks render (layout gate, `pnpm tab-review`,
- * `pnpm tab-fixtures:smoke`). Each file covers one UI difference we expect
- * between specs and loads on one spec page that has it, so a page check never
- * needs a sim recording (stage tab-checks-without-sims).
+ * `pnpm tab-fixtures:smoke`), so a page check never needs a sim recording
+ * (stage tab-checks-without-sims). Each file loads on one spec page, and every
+ * spec page the tab ranks has at least one, so the page checks reach every
+ * page (ticket 801). The first six each also cover one UI difference we expect
+ * between specs, on a spec page that has it; the other five are plain results
+ * for the pages those six do not open.
  *
  * The figures are made up. The rows are real: every row is an (item id, slot)
  * pair read from the spec's own preset gear files, so icons and quality
@@ -12,7 +15,7 @@
  * gear: the piece counts come from the gear, and the bonus counts from the
  * fork's Go set definitions. The output is deterministic.
  *
- *   pnpm tab-fixtures:mock            # write the six files
+ *   pnpm tab-fixtures:mock            # write the eleven files
  *   pnpm tab-fixtures:mock --check    # exit 1 when a file differs or is missing
  *
  * Needs the fork clone (`vendor/` is gitignored); `--check` skips without it.
@@ -177,7 +180,12 @@ type FixtureName =
   | "mock-long-names"
   | "mock-set-bonus"
   | "mock-many-rows"
-  | "mock-dropped-list";
+  | "mock-dropped-list"
+  | "mock-balance"
+  | "mock-shadow"
+  | "mock-elemental"
+  | "mock-warlock"
+  | "mock-enhancement";
 
 type Spec = {
   name: FixtureName;
@@ -289,6 +297,68 @@ const FIXTURES: Spec[] = [
     size: 12,
     belowCutoff: 2,
     droppedList: true,
+  },
+  // The specs above have a page each; these give the other spec pages a
+  // result, so the page checks and the after-run axe scan reach them too.
+  {
+    ...PLAIN,
+    name: "mock-balance",
+    spec: "balance",
+    specDir: "druid/balance",
+    gearPreset: "gear_sets/p2_a.gear.json",
+    race: "RaceTauren",
+    baselineDps: 1500,
+    covers: "The balance druid page.",
+    size: 24,
+    belowCutoff: 4,
+  },
+  {
+    ...PLAIN,
+    name: "mock-shadow",
+    spec: "shadow",
+    specDir: "priest/dps",
+    gearPreset: "gear_sets/p2.gear.json",
+    race: "RaceUndead",
+    baselineDps: 1450,
+    covers: "The shadow priest page.",
+    size: 24,
+    belowCutoff: 4,
+  },
+  {
+    ...PLAIN,
+    name: "mock-elemental",
+    spec: "ele",
+    specDir: "shaman/elemental",
+    gearPreset: "gear_sets/p2.gear.json",
+    race: "RaceTroll",
+    baselineDps: 1550,
+    covers: "The elemental shaman page.",
+    size: 24,
+    belowCutoff: 4,
+  },
+  {
+    ...PLAIN,
+    name: "mock-warlock",
+    spec: "warlock",
+    specDir: "warlock/dps",
+    gearPreset: "gear_sets/t5.gear.json",
+    race: "RaceUndead",
+    baselineDps: 1650,
+    covers: "The warlock page.",
+    size: 24,
+    belowCutoff: 4,
+  },
+  {
+    ...PLAIN,
+    name: "mock-enhancement",
+    spec: "enh",
+    specDir: "shaman/enhancement",
+    gearPreset: "gear_sets/p2.gear.json",
+    race: "RaceOrc",
+    baselineDps: 1750,
+    covers: "The enhancement shaman page.",
+    size: 24,
+    belowCutoff: 4,
   },
 ];
 

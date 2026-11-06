@@ -3,7 +3,7 @@
 
 A fixture under `data/tab-fixtures/` is a small made-up `Ranking` written by
 `packages/core/test/tab-fixtures/make-mock-fixtures.ts`
-(`pnpm tab-fixtures:mock`), one per UI difference between specs. The layout
+(`pnpm tab-fixtures:mock`), at least one for each spec page. The layout
 gate, `pnpm tab-review` and `pnpm tab-fixtures:smoke` render these files, so
 no page check needs a sim recording (stage tab-checks-without-sims).
 

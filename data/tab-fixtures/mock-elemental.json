@@ -1,0 +1,610 @@
+{
+  "schemaVersion": 1,
+  "forkSha": "0000000000000000000000000000000000000000",
+  "forkDirty": false,
+  "madeUp": true,
+  "generator": "packages/core/test/tab-fixtures/make-mock-fixtures.ts",
+  "covers": "The elemental shaman page.",
+  "spec": "ele",
+  "phase": 3,
+  "preset": "shaman/elemental/gear_sets/p2.gear.json",
+  "gear": {
+    "items": [
+      {
+        "id": 29035,
+        "enchant": 3002,
+        "gems": [
+          34220,
+          24059
+        ]
+      },
+      {
+        "id": 30015
+      },
+      {
+        "id": 29037,
+        "enchant": 2982,
+        "gems": [
+          28123,
+          24059
+        ]
+      },
+      {
+        "id": 28797,
+        "enchant": 2621
+      },
+      {
+        "id": 30169,
+        "enchant": 2661,
+        "gems": [
+          30555,
+          28120,
+          24059
+        ]
+      },
+      {
+        "id": 29918,
+        "enchant": 2650
+      },
+      {
+        "id": 28780,
+        "enchant": 2937,
+        "gems": [
+          30588,
+          31116
+        ]
+      },
+      {
+        "id": 30038,
+        "gems": [
+          28118,
+          24030
+        ]
+      },
+      {
+        "id": 30172,
+        "enchant": 2748,
+        "gems": [
+          24059
+        ]
+      },
+      {
+        "id": 30067,
+        "enchant": 2940
+      },
+      {
+        "id": 30667,
+        "enchant": 2928
+      },
+      {
+        "id": 30109,
+        "enchant": 2928
+      },
+      {
+        "id": 29370
+      },
+      {
+        "id": 28785
+      },
+      {
+        "id": 29988,
+        "enchant": 2669
+      },
+      {},
+      {
+        "id": 28248
+      }
+    ]
+  },
+  "recordedAt": "1970-01-01T00:00:00.000Z",
+  "iterations": 0,
+  "ranking": {
+    "contentHash": "made-up:mock-elemental",
+    "cutoff": {
+      "absDps": 3
+    },
+    "fight": {
+      "reportCode": "made-up",
+      "fightId": 0,
+      "encounterName": "Made-up fixture",
+      "route": "report-events"
+    },
+    "baseline": {
+      "dps": 1550,
+      "stdev": 120,
+      "metaAdjusted": false
+    },
+    "assumptions": {
+      "maxPhase": 3,
+      "seeds": [
+        1,
+        2,
+        3
+      ],
+      "iterations": 0,
+      "race": "RaceTroll",
+      "presetId": "ele/made-up",
+      "standing": []
+    },
+    "substitutions": [],
+    "caps": {
+      "hit": {
+        "rating": 83.31,
+        "capRating": 141.92,
+        "gap": 58.61,
+        "capUncertainty": 15.77,
+        "assumedRace": "RaceTroll",
+        "talentHitAssumed": {
+          "talent": "Precision",
+          "points": 3,
+          "maxPoints": 3
+        }
+      },
+      "expertise": {
+        "rating": 95,
+        "capRating": null,
+        "gap": null
+      }
+    },
+    "items": [
+      {
+        "rank": 1,
+        "itemId": 29037,
+        "name": "Cyclone Shoulderguards",
+        "slot": "shoulder",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 39.5,
+        "deltaPct": 2.55,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 2,
+        "itemId": 29035,
+        "name": "Cyclone Faceguard",
+        "slot": "head",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 37.61,
+        "deltaPct": 2.43,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "sources": [
+          {
+            "kind": "unknown"
+          },
+          {
+            "kind": "heroic",
+            "dungeon": "The Shattered Halls"
+          },
+          {
+            "kind": "pvp",
+            "via": "arena"
+          }
+        ]
+      },
+      {
+        "rank": 3,
+        "itemId": 28785,
+        "name": "The Lightning Capacitor",
+        "slot": "trinket",
+        "slotChoice": "trinket2",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Terestian Illhoof"
+        },
+        "deltaDps": 35.71,
+        "deltaPct": 2.3,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "owned": true
+      },
+      {
+        "rank": 4,
+        "itemId": 29305,
+        "name": "Band of the Eternal Sage",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 33.82,
+        "deltaPct": 2.18,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [
+          "Alt"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 5,
+        "itemId": 27465,
+        "name": "Mana-Etched Gloves",
+        "slot": "hands",
+        "source": {
+          "kind": "raid",
+          "zone": "Hellfire Ramparts",
+          "boss": "Omor the Unscarred"
+        },
+        "deltaDps": 31.92,
+        "deltaPct": 2.06,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 6,
+        "itemId": 28770,
+        "name": "Nathrezim Mindblade",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
+        },
+        "deltaDps": 30.03,
+        "deltaPct": 1.94,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 7,
+        "itemId": 29520,
+        "name": "Netherstrike Belt",
+        "slot": "waist",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 28.13,
+        "deltaPct": 1.81,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 8,
+        "itemId": 28134,
+        "name": "Brooch of Heightened Potential",
+        "slot": "neck",
+        "source": {
+          "kind": "raid",
+          "zone": "Shadow Labyrinth",
+          "boss": "Blackheart the Inciter"
+        },
+        "deltaDps": 26.24,
+        "deltaPct": 1.69,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 9,
+        "itemId": 28248,
+        "name": "Totem of the Void",
+        "slot": "ranged",
+        "source": {
+          "kind": "raid",
+          "zone": "The Mechanar"
+        },
+        "deltaDps": 24.34,
+        "deltaPct": 1.57,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 10,
+        "itemId": 28406,
+        "name": "Sigil-Laced Boots",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "The Arcatraz",
+          "boss": "Harbinger Skyriss"
+        },
+        "deltaDps": 22.45,
+        "deltaPct": 1.45,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 11,
+        "itemId": 29268,
+        "name": "Mazthoril Honor Shield",
+        "slot": "weapon",
+        "slotChoice": "offhand",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 20.55,
+        "deltaPct": 1.33,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 12,
+        "itemId": 29369,
+        "name": "Shawl of Shifting",
+        "slot": "back",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 18.66,
+        "deltaPct": 1.2,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 13,
+        "itemId": 29367,
+        "name": "Ring of Cryptic Dreams",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 16.76,
+        "deltaPct": 1.08,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 14,
+        "itemId": 28753,
+        "name": "Ring of Recurrence",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan"
+        },
+        "deltaDps": 14.87,
+        "deltaPct": 0.96,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 15,
+        "itemId": 29126,
+        "name": "Seer's Signet",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 12.97,
+        "deltaPct": 0.84,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 16,
+        "itemId": 28797,
+        "name": "Brute Cloak of the Ogre-Magi",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Gruul's Lair",
+          "boss": "High King Maulgar"
+        },
+        "deltaDps": 11.08,
+        "deltaPct": 0.71,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 17,
+        "itemId": 28762,
+        "name": "Adornment of Stolen Souls",
+        "slot": "neck",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
+        },
+        "deltaDps": 9.18,
+        "deltaPct": 0.59,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 18,
+        "itemId": 27683,
+        "name": "Quagmirran's Eye",
+        "slot": "trinket",
+        "slotChoice": "trinket2",
+        "source": {
+          "kind": "raid",
+          "zone": "The Slave Pens",
+          "boss": "Quagmirran"
+        },
+        "deltaDps": 7.29,
+        "deltaPct": 0.47,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 19,
+        "itemId": 29521,
+        "name": "Netherstrike Bracers",
+        "slot": "wrist",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 5.39,
+        "deltaPct": 0.35,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 20,
+        "itemId": 29519,
+        "name": "Netherstrike Breastplate",
+        "slot": "chest",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 3.5,
+        "deltaPct": 0.23,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 617,
+          "setName": "Netherstrike Armor",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": 3,
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": 3.5,
+          "singleBreaks": [
+            {
+              "setId": 635,
+              "setName": "Cataclysm Regalia",
+              "threshold": 2,
+              "dps": 11
+            }
+          ],
+          "futureBonuses": [
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 29520,
+                  "name": "Netherstrike Belt"
+                },
+                {
+                  "itemId": 29521,
+                  "name": "Netherstrike Bracers"
+                }
+              ],
+              "stepGearDps": 16,
+              "stepGearSe": 2
+            }
+          ]
+        }
+      },
+      {
+        "rank": null,
+        "itemId": 29918,
+        "name": "Mindstorm Wristbands",
+        "slot": "wrist",
+        "source": {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Al'ar"
+        },
+        "deltaDps": 2.9,
+        "deltaPct": 0.19,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29370,
+        "name": "Icon of the Silver Crescent",
+        "slot": "trinket",
+        "slotChoice": "trinket1",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 1.57,
+        "deltaPct": 0.1,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 28780,
+        "name": "Soul-Eater's Handwraps",
+        "slot": "hands",
+        "source": {
+          "kind": "raid",
+          "zone": "Magtheridon's Lair",
+          "boss": "Magtheridon"
+        },
+        "deltaDps": 0.23,
+        "deltaPct": 0.01,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 28517,
+        "name": "Boots of Foretelling",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Maiden of Virtue"
+        },
+        "deltaDps": -1.1,
+        "deltaPct": -0.07,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      }
+    ],
+    "complete": true,
+    "durationMs": 60000
+  }
+}

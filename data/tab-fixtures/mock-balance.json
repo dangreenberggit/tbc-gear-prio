@@ -1,0 +1,614 @@
+{
+  "schemaVersion": 1,
+  "forkSha": "0000000000000000000000000000000000000000",
+  "forkDirty": false,
+  "madeUp": true,
+  "generator": "packages/core/test/tab-fixtures/make-mock-fixtures.ts",
+  "covers": "The balance druid page.",
+  "spec": "balance",
+  "phase": 3,
+  "preset": "druid/balance/gear_sets/p2_a.gear.json",
+  "gear": {
+    "items": [
+      {
+        "id": 30233,
+        "enchant": 29191,
+        "gems": [
+          24059,
+          34220
+        ]
+      },
+      {
+        "id": 30015
+      },
+      {
+        "id": 30235,
+        "enchant": 28886,
+        "gems": [
+          24056,
+          24059
+        ]
+      },
+      {
+        "id": 28797,
+        "enchant": 33150
+      },
+      {
+        "id": 30231,
+        "enchant": 24003,
+        "gems": [
+          24030,
+          24030,
+          24030
+        ]
+      },
+      {
+        "id": 29918,
+        "enchant": 22534
+      },
+      {
+        "id": 30232,
+        "enchant": 28272
+      },
+      {
+        "id": 30038,
+        "gems": [
+          24056,
+          24059
+        ]
+      },
+      {
+        "id": 24262,
+        "enchant": 24274,
+        "gems": [
+          24030,
+          24030,
+          24030
+        ]
+      },
+      {
+        "id": 30067,
+        "enchant": 35297
+      },
+      {
+        "id": 28753,
+        "enchant": 22536
+      },
+      {
+        "id": 29302,
+        "enchant": 22536
+      },
+      {
+        "id": 29370
+      },
+      {
+        "id": 27683
+      },
+      {
+        "id": 29988,
+        "enchant": 22560
+      },
+      {},
+      {
+        "id": 32387
+      }
+    ]
+  },
+  "recordedAt": "1970-01-01T00:00:00.000Z",
+  "iterations": 0,
+  "ranking": {
+    "contentHash": "made-up:mock-balance",
+    "cutoff": {
+      "absDps": 3
+    },
+    "fight": {
+      "reportCode": "made-up",
+      "fightId": 0,
+      "encounterName": "Made-up fixture",
+      "route": "report-events"
+    },
+    "baseline": {
+      "dps": 1500,
+      "stdev": 120,
+      "metaAdjusted": false
+    },
+    "assumptions": {
+      "maxPhase": 3,
+      "seeds": [
+        1,
+        2,
+        3
+      ],
+      "iterations": 0,
+      "race": "RaceTauren",
+      "presetId": "balance/made-up",
+      "standing": []
+    },
+    "substitutions": [],
+    "caps": {
+      "hit": {
+        "rating": 83.31,
+        "capRating": 141.92,
+        "gap": 58.61,
+        "capUncertainty": 15.77,
+        "assumedRace": "RaceTauren",
+        "talentHitAssumed": {
+          "talent": "Precision",
+          "points": 3,
+          "maxPoints": 3
+        }
+      },
+      "expertise": {
+        "rating": 95,
+        "capRating": null,
+        "gap": null
+      }
+    },
+    "items": [
+      {
+        "rank": 1,
+        "itemId": 21848,
+        "name": "Spellfire Robe",
+        "slot": "chest",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 39.5,
+        "deltaPct": 2.63,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 2,
+        "itemId": 21846,
+        "name": "Spellfire Belt",
+        "slot": "waist",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 37.61,
+        "deltaPct": 2.51,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "sources": [
+          {
+            "kind": "crafted",
+            "profession": "Tailoring"
+          },
+          {
+            "kind": "heroic",
+            "dungeon": "The Shattered Halls"
+          },
+          {
+            "kind": "pvp",
+            "via": "arena"
+          }
+        ]
+      },
+      {
+        "rank": 3,
+        "itemId": 27796,
+        "name": "Mana-Etched Spaulders",
+        "slot": "shoulder",
+        "source": {
+          "kind": "raid",
+          "zone": "The Slave Pens",
+          "boss": "Quagmirran"
+        },
+        "deltaDps": 35.71,
+        "deltaPct": 2.38,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "owned": true
+      },
+      {
+        "rank": 4,
+        "itemId": 28770,
+        "name": "Nathrezim Mindblade",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
+        },
+        "deltaDps": 33.82,
+        "deltaPct": 2.25,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [
+          "Alt"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 5,
+        "itemId": 28134,
+        "name": "Brooch of Heightened Potential",
+        "slot": "neck",
+        "source": {
+          "kind": "raid",
+          "zone": "Shadow Labyrinth",
+          "boss": "Blackheart the Inciter"
+        },
+        "deltaDps": 31.92,
+        "deltaPct": 2.13,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 6,
+        "itemId": 28406,
+        "name": "Sigil-Laced Boots",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "The Arcatraz",
+          "boss": "Harbinger Skyriss"
+        },
+        "deltaDps": 30.03,
+        "deltaPct": 2,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 7,
+        "itemId": 24250,
+        "name": "Bracers of Havok",
+        "slot": "wrist",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 28.13,
+        "deltaPct": 1.88,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 8,
+        "itemId": 27518,
+        "name": "Ivory Idol of the Moongoddess",
+        "slot": "ranged",
+        "source": {
+          "kind": "raid",
+          "zone": "The Shattered Halls",
+          "boss": "Grand Warlock Nethekurse"
+        },
+        "deltaDps": 26.24,
+        "deltaPct": 1.75,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 9,
+        "itemId": 29095,
+        "name": "Pauldrons of Malorne",
+        "slot": "shoulder",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 24.34,
+        "deltaPct": 1.62,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 10,
+        "itemId": 28766,
+        "name": "Ruby Drape of the Mysticant",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
+        },
+        "deltaDps": 22.45,
+        "deltaPct": 1.5,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 11,
+        "itemId": 27981,
+        "name": "Sethekk Oracle Cloak",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Sethekk Halls",
+          "boss": "Talon King Ikiss"
+        },
+        "deltaDps": 20.55,
+        "deltaPct": 1.37,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 12,
+        "itemId": 28753,
+        "name": "Ring of Recurrence",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan"
+        },
+        "deltaDps": 18.66,
+        "deltaPct": 1.24,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 13,
+        "itemId": 29093,
+        "name": "Antlers of Malorne",
+        "slot": "head",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 16.76,
+        "deltaPct": 1.12,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 14,
+        "itemId": 24266,
+        "name": "Spellstrike Hood",
+        "slot": "head",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 14.87,
+        "deltaPct": 0.99,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 15,
+        "itemId": 28797,
+        "name": "Brute Cloak of the Ogre-Magi",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Gruul's Lair",
+          "boss": "High King Maulgar"
+        },
+        "deltaDps": 12.97,
+        "deltaPct": 0.86,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 16,
+        "itemId": 29172,
+        "name": "Ashyen's Gift",
+        "slot": "finger",
+        "slotChoice": "finger1",
+        "source": {
+          "kind": "rep",
+          "faction": "Faction 942",
+          "standing": "Friendly"
+        },
+        "deltaDps": 11.08,
+        "deltaPct": 0.74,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 17,
+        "itemId": 21847,
+        "name": "Spellfire Gloves",
+        "slot": "hands",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 9.18,
+        "deltaPct": 0.61,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 552,
+          "setName": "Wrath of Spellfire",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": 3,
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": 9.18,
+          "singleBreaks": [
+            {
+              "setId": 643,
+              "setName": "Nordrassil Regalia",
+              "threshold": 4,
+              "dps": 21.25
+            }
+          ],
+          "futureBonuses": [
+            {
+              "threshold": 3,
+              "piecesNeeded": 3,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 21846,
+                  "name": "Spellfire Belt"
+                },
+                {
+                  "itemId": 21848,
+                  "name": "Spellfire Robe"
+                }
+              ],
+              "stepGearDps": 21.68,
+              "stepGearSe": 2
+            }
+          ]
+        }
+      },
+      {
+        "rank": 18,
+        "itemId": 28762,
+        "name": "Adornment of Stolen Souls",
+        "slot": "neck",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
+        },
+        "deltaDps": 7.29,
+        "deltaPct": 0.49,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 19,
+        "itemId": 27683,
+        "name": "Quagmirran's Eye",
+        "slot": "trinket",
+        "slotChoice": "trinket2",
+        "source": {
+          "kind": "raid",
+          "zone": "The Slave Pens",
+          "boss": "Quagmirran"
+        },
+        "deltaDps": 5.39,
+        "deltaPct": 0.36,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 20,
+        "itemId": 28227,
+        "name": "Sparking Arcanite Ring",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "raid",
+          "zone": "Old Hillsbrad Foothills",
+          "boss": "Epoch Hunter"
+        },
+        "deltaDps": 3.5,
+        "deltaPct": 0.23,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": null,
+        "itemId": 29271,
+        "name": "Talisman of Kalecgos",
+        "slot": "weapon",
+        "slotChoice": "offhand",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 2.9,
+        "deltaPct": 0.19,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 24262,
+        "name": "Spellstrike Pants",
+        "slot": "legs",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 1.57,
+        "deltaPct": 0.1,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 28517,
+        "name": "Boots of Foretelling",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Maiden of Virtue"
+        },
+        "deltaDps": 0.23,
+        "deltaPct": 0.02,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 23554,
+        "name": "Eternium Runed Blade",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "crafted",
+          "profession": "Blacksmithing"
+        },
+        "deltaDps": -1.1,
+        "deltaPct": -0.07,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      }
+    ],
+    "complete": true,
+    "durationMs": 60000
+  }
+}
