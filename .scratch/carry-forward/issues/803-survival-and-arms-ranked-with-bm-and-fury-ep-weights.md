@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md (slice A audit of the per-spec checks, 2026-11-06)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -59,3 +59,31 @@ change). This ticket is worked in slice B (ticket 799), before its runs.
 A Survival run and an Arms run use their own spec's EP weights, shown by a
 fork test. `pnpm ep-presets:check` and `pnpm fork-universes:check` cover
 the new weight files and pass, and the re-pin is on the branch.
+
+## Comments
+
+- 2026-11-06: closed on branch `feat/452-survival-arms`. The tab now picks
+  the EP-weight set from the page's talents
+  (`player.getTalentTreePoints()`): a hunter whose Survival tree has
+  strictly the most points takes `P1_SV_EP_PRESET`, a warrior whose Arms
+  tree has strictly the most points takes `P1_ARMS_EP_PRESET`, and every
+  other build keeps its spec's set (`ui/features/upgrades/model/data/data.ts`,
+  `epWeightsFor` and `epWeightsDisclosureFor`). An Arms - Kebab build
+  (Mortal Strike with two one-handers, 33 Arms points) takes the Arms set.
+  Arms bundles the P1 set only, as Fury and every other spec bundle one
+  set; the assumptions line says when a run ranks a later phase. At fork
+  b603564ee `P1_SV_EP_PRESET` has the same numbers as `P1_BM_EP_PRESET`,
+  so the Survival change moves no weight today. New files:
+  `data/presets/hunter/sv-p1.ep-weights.json`,
+  `data/presets/warrior/arms-p1.ep-weights.json` and their fork copies.
+
+Verified by: tbc-new-fork@786a08f96, test "ranks %s with that build’s own
+EP weights" in `ui/features/upgrades/model/run.test.ts`, which failed for
+the Survival, Arms and Arms - Kebab builds before the change and passes
+after. These passed on the branch:
+
+```bash
+pnpm fork-tests:check      # 69 test files passed at fork commit 786a08f96b74
+pnpm ep-presets:check      # 22 files match the fork symbols they name
+pnpm fork-universes:check  # 22 bundled copies byte-match their data/ sources
+```
