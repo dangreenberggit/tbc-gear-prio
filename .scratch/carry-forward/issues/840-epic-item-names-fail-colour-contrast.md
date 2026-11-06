@@ -46,19 +46,27 @@ name in this run.
 it). A baseline entry matches on rule and selector, not on page or
 width, so it accepts this violation on every spec page and at every
 width, in both the layout gate and `pnpm tab-review`. Remove the entry
-when this ticket closes.
+when a fix closes this ticket.
 
 ## What to decide
 
 The item-quality colours are WoW's own and come from upstream's theme
 file, so changing them is an edit to a wowsims file, which needs the
 owner's OK of that exact edit. The choices include: a lighter epic and
-rare shade only inside the tab; a darker background behind the tab's
-rows; or wontfix, with the reason in the baseline entry.
+rare shade only inside the tab; or wontfix, with the reason in the
+baseline entry. A darker background alone cannot reach 4.5:1: on pure
+black, epic `#a335ee` gives 4.30:1 and rare `#0070dd` gives 4.36:1.
+The owner picks one of these.
+
+Until then, the baseline entry accepts every contrast failure on an
+epic item name, on every page, at every width and on any background.
+Because it has `mayNotFire: true`, no stale-baseline warning will show
+after a fix, so the entry stays until someone removes it.
 
 ## Done when
 
-An epic and a rare item name in the results table both reach 4.5:1
-against their background, measured by axe on a tab-review run that
-shows them, and the baseline entry is gone; or the owner rules wontfix
-and the baseline entry gives that reason.
+On a tab-review run that shows an epic and a rare item name in the
+results table, axe lists both names under passes, not incomplete, and
+the baseline entry is gone; or the owner rules wontfix and the baseline
+entry gives that reason. No fixture is known to show a rare item name,
+so the fixer may need to add one.
