@@ -4,7 +4,7 @@ Origin: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
 Blocks: none
 Blocked by: none
-Related: 452, 746
+Related: 452, 746, 820, 821
 
 # The desktop gate checks the ranking output of ret only
 
@@ -57,7 +57,7 @@ For each new spec:
   that for those specs.
 - The golden: `pnpm desktop-gate:check --spec <spec> --update-golden`
   (`check_desktop_tab.py:41`), after reading the printed diff
-  (`data/desktop-gate/README.md:67-79`).
+  (`data/desktop-gate/README.md` § Regenerating a golden).
 
 Make one command check every committed golden. Extend the verdict unit
 tests (`scripts/check_desktop_tab_verdict.py`) to cover the multi-spec
@@ -104,7 +104,10 @@ the code. The branch's `pre-merge-review` file exists.
   change it. Its phase-4 start preset, "Arcane - Staff", wears 32374
   Zhar'doom, a two-hander, so the run holds out 31 off-hand-only items and 63
   one-handers: the caster two-hander case of ticket 700. Balance and warlock
-  also wear that staff (balance's eligible count shows the same hold-out).
+  also wear that staff. Balance's eligible count shows a hold-out too, of a
+  different size: 841 in its exclude pool (fixture `balance-p4`), 737
+  eligible (`docs/live-runs/2026-11-03-p45-dps-pass.md:85`), so 104 held out
+  against mage's 94.
   Mage's spell hit weight is higher than balance's in this repo's copies
   (`data/presets/mage/fallback.ep-weights.json` stat 12 at 2.36,
   `balance/p3` at 1.91), so a hit-cap change is likelier to move a mage row
@@ -121,8 +124,9 @@ the code. The branch's `pre-merge-review` file exists.
   `enh/p3`). Hunter's weights give intellect 0.01 and no spell damage, so it
   is not a hybrid by this reading. Ret already had a golden, but it wears a
   two-hander; enhancement adds the dual-wield hybrid. Its cap-40 golden turned
-  out to hold weapons only (ticket 820), so it checks weapon swaps for a
-  dual-wielder, including spell-damage weapons, not its armour.
+  out to hold main-hand weapons only (tickets 820 and 821), including
+  spell-damage weapons, so it does not check how a dual-wielder's off-hand
+  items are priced. Rogue's golden holds the off-hand rows (3 of its 33).
 
 **Numbers** (derivations in the comments of `scripts/check_desktop_tab.py`):
 
@@ -136,12 +140,19 @@ The exclude and include sizes are the fixture's `mage-p4`, `rogue-p4` and
 `enh-p4` cells. The hand-rule counts come from listing each exclude pool with
 the fork's `testing/db_pool.ts` `dbPoolFor(spec, 4, "exclude")` and reading
 each weapon's `handType` in db.json; the same count gives ret's 30 and 74.
-The eligible counts were derived before any run and then matched the runs.
+The eligible counts were derived from the fixture and db.json before this
+branch's gate runs, and matched them. They were not new numbers: the
+2026-11-03 p45 table had already published 516, 826 and 1039 from that
+pass's runs (`docs/live-runs/2026-11-03-p45-dps-pass.md:87,99,103`).
 `CAPPED_ROWS` is measured.
 
 **Wall time** (`python3 scripts/check_desktop_tab.py`, the command
 `pnpm desktop-gate:check` runs, one invocation, build included, 20 cores; the
-sandbox needed `PLAYWRIGHT_BROWSERS_PATH` pointed at a headless-shell shim): 91 s and 90 s on two runs. Per spec, the gate's own lines: ret 18 s,
+agent's sandbox needed `PLAYWRIGHT_BROWSERS_PATH` set to the headless-shell
+copy of Chrome at
+`/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-03-p45-runs/pwshim`,
+or the harness failed with `cdp timeout`,
+`.scratch/agent-reports/800-runs/measure-1.log`): 91 s and 90 s on two runs. Per spec, the gate's own lines: ret 18 s,
 mage 15 s, rogue 32-33 s, enh 24 s. So the three new goldens add about 72 s to
 the re-pin step.
 

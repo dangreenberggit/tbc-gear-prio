@@ -50,5 +50,5 @@ second only tells the player about it. The plan picks one per spec and
 says why. When the change moves a golden, report each spec's diff in the
 merge account, then rewrite it with `pnpm desktop-gate:check --spec <spec>
 --update-golden` and give the reason in the commit body
-(`data/desktop-gate/README.md:67-79`). The branch's `pre-merge-review`
-file is part of done.
+(`data/desktop-gate/README.md` § Regenerating a golden). The branch's
+`pre-merge-review` file is part of done.
