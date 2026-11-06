@@ -152,7 +152,7 @@ export type PoolEntry = {
   bisSets?: string[];
 };
 
-/** Row layout from `data/universes/ret-p*.json` before normalization. */
+/** Row layout from `data/universes/<spec>-p<phase>.json` before normalization. */
 export type UniverseEntry = {
   itemId: number;
   name: string;

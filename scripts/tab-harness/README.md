@@ -49,7 +49,8 @@ to it marks the layout baseline stale and `pnpm layout-gate:check` re-measures.
 ## `run-tab-cdp.mjs`
 
 The durable CDP harness for the desktop-transport gate, promoted from Chunk 1's
-throwaway `ret-p5-run.mjs`. It drives a full or capped ret upgrades run against
+throwaway `ret-p5-run.mjs`. It drives a full or capped upgrades run on one
+spec page (`--page`, default the ret page) against
 **any origin the caller already serves** — the WASM page under `http-server`, or
 the packaged desktop binary on `:3333` — and writes a readback JSON recording
 what the tab actually did, not what the origin implies. `scripts/check_desktop_tab.py` (`pnpm desktop-gate:check`) drives it and judges
