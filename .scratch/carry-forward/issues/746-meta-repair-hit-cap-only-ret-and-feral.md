@@ -53,24 +53,31 @@ merge account, then rewrite it with `pnpm desktop-gate:check --spec <spec>
 (`data/desktop-gate/README.md` § Regenerating a golden). The branch's
 `pre-merge-review` file is part of done.
 
-2026-11-06 (closed, slice D executor): fixed in fork commit
-`b8f9f7f45` "Give every spec a meta-repair hit policy" on fork branch
-`feat/452-meta-repair-hit-cap`, carried into this repo by the
-main-repo commit "Re-pin the fork for the hit policy and phase-1
-cells" on `feat/452-meta-repair-hit-cap` (the commit that closes this
-ticket). `cap-profile.ts` now gives every spec a required `repair`
-policy, so a spec with neither a budget nor a note is a compile error.
-Per spec:
+2026-11-06 (closed, slice D executor; updated after review round 1):
+fixed in fork commit `b8f9f7f45` "Give every spec a meta-repair hit
+policy" on fork branch `feat/452-meta-repair-hit-cap`, carried into this
+repo by the main-repo commit "Re-pin fork for the hit policy and
+phase-1 cells" (`00269b01`). The branch's pre-merge review is
+`docs/reviews/feat-452-meta-repair-hit-cap.md`. Its round-1 findings
+are fixed in fork commit `6bab26253` "Read each candidate's own hit for
+meta repair", carried in by the main-repo commit "Re-pin fork for the
+review round-1 fixes" (the commit that updates this comment).
+`cap-profile.ts` gives every spec a required `repair` policy (it
+replaced the optional `repairCap`), so a spec with neither a budget nor
+a note is a compile error. Per spec:
 
 - Ret and feral: a budget on pseudo-stat 12 (melee hit percent), cap
   9, Improved Faerie Fire subtracted, as before.
-- Mage, shadow, ele and warlock: a budget on pseudo-stat 13 (spell hit
+- Mage, shadow and warlock: a budget on pseudo-stat 13 (spell hit
   percent), cap 16, no Faerie Fire term. Slot 13 is the hit every spell
   shares, so the budget never undervalues hit for any spell. It does
-  price at full weight the hit between a school-talented spell's cap
-  and 16: mage Arcane spells 6-16, Frostbolt 10-16, Fire Blast 13-16;
-  shadow's Shadow spells 6-16; ele's Nature and Fire spells 10-16.
-  The warlock is exact.
+  price at full weight the hit between a talented spell's cap and 16:
+  mage Arcane spells 6-16, Frostbolt 10-16, Fire Blast 13-16; shadow's
+  Shadow spells 6-16; with Affliction talents, the warlock's Affliction
+  spells, which Suppression caps earlier. The page's default warlock
+  talents are Destruction, which take no Suppression. Ticket 831 holds
+  this gap. The caps 9 and 16 and their sim sources are in the
+  `cap-profile.ts` doc comment.
 - Rogue, enh and warrior (Arms too, since Arms and Fury share the
   warrior spec id): the note. Dual-wield white swings add 19% miss, so
   hit past 9% still cuts misses for every vendored dual-wield set.
@@ -80,13 +87,38 @@ Per spec:
   adds a flat 4% spell hit inside every spell-hit slot, so no slot
   gives the plain "cap minus hit percent"; Faerie Fire and Insect
   Swarm are outside its mask.
+- Elemental (review D1): the note. Totem of Wrath, when talented, adds
+  3% spell hit inside the stats read, but in combat only while the
+  totem is down, and a Fire Elemental cancels it for 120 s.
 
-The note specs show one sentence in "Items left out and other notes":
-"If gems were swapped to turn your meta gem on, hit rating was counted
-at full value, with no hit cap applied for this spec." The desktop
-gate passed on ret, mage, rogue and enh after the re-pin; no golden
-moved.
+For every budget spec, a candidate whose swap turns the meta off now
+gets its own stats read, and its repair budget moves by the hit that
+read shows beyond the gear change (review A1). So a swap that breaks or
+completes a set with a hit bonus no longer repairs on a budget that
+misses that bonus. This also removes the ret and feral limit in ticket
+535's close ("An item row whose single swap changes a set's count keeps
+the local budget"). On the mage desktop-gate run (phase 4, 40
+candidates) the harness counted 5 more non-sim requests (55 before, 60
+after; read as the candidates' stats reads, hypothesis, untested), the
+same 65 sims, a run time within run-to-run noise (8.6 s before; 10.2,
+8.5 and 8.8 s after) and no row moved.
 
-Verified by: tbc-new-fork@b8f9f7f45179c2ef8e0280e07b30765f962570d1;
-`node_modules/.bin/vitest run --configLoader runner packages/core/test/fork-meta-repair.test.ts`
-(38 passed); `pnpm fork-tests:check`
+The note sentence is "If gems were swapped to turn your meta gem on,
+hit rating was counted at full value, with no hit cap applied for this
+spec." Nobody saw it on screen: the fixture screenshot ends above the
+"Items left out and other notes" list. Tests check it: the fork's
+`SubstitutionsList.test.tsx` ("shows every engine line as one plain
+sentence") and main-repo case 535-S6 in
+`packages/core/test/fork-meta-repair.test.ts`. The desktop gate passed
+on ret, mage, rogue and enh (all four goldens) after each re-pin; no
+golden moved.
+
+A spec on a runner without `computeStats` (the CLI) repairs at full
+weight with no note; ticket 830 holds that.
+
+Verified by: tbc-new-fork@6bab26253283be19d4adf328bf3db5a901b26937;
+`node_modules/.bin/vitest run --root . --configLoader runner packages/core/test/fork-meta-repair.test.ts`
+(41 passed; in the agent sandbox the worktree has no `node_modules`, so
+it needs `ln -s /home/daniel/Code/lulz/tbc-gear-prio/node_modules node_modules`
+first, and `--configLoader runner` because that `node_modules` is
+read-only); `pnpm fork-tests:check`

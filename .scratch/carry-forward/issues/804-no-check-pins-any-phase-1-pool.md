@@ -46,17 +46,22 @@ cells, and the re-pin is on the branch.
 2026-11-06 (closed, slice D executor): fixed in fork commit
 `24f6575ca` "Pin the phase-1 pool of every spec" on fork branch
 `feat/452-meta-repair-hit-cap`, carried into this repo by the
-main-repo commit "Re-pin the fork for the hit policy and phase-1
-cells" on `feat/452-meta-repair-hit-cap` (the commit that closes this
-ticket). The fork's history has no line saying phase 1 was left out
-on purpose; the old phase-1 lines are about the p2-p5 candidate lists
-that ADR-0038:222 replaced.
+main-repo commit "Re-pin fork for the hit policy and phase-1 cells"
+(`00269b01`) on `feat/452-meta-repair-hit-cap`. The fork's history has
+no line saying phase 1 was left out on purpose: `git -C
+vendor/tbc-new-fork show f3bb99a11 | grep -in "phase 1\|phase-1"` prints
+only a unit-test mock, the removed p2-p5 candidate-list comment and
+test, and three `db.json` item names, and `git -C vendor/tbc-new-fork
+log --format='%h %s' -- ui/features/upgrades/model/pool_source.cells.fixture.json ui/features/upgrades/model/pool_source.test.ts`
+lists no commit that left it out. The old phase-1 lines are about the
+p2-p5 candidate lists that ADR-0038:222 replaced.
 
 The numbers come from the script that measured the 44 existing cells,
 `measure_pool_rule.py` (2026-10-17), found in the main checkout at
 `/home/daniel/Code/lulz/tbc-gear-prio/.scratch/stage-gate/tab-wowsims-items/poolrule/`
 and copied into this slice's stage folder
-`.scratch/stage-gate/452d-meta-repair-hit-cap/poolrule/` (gitignored).
+`.scratch/stage-gate/452d-meta-repair-hit-cap/poolrule/`. Both folders
+are gitignored, so no fresh clone holds the script.
 It reads `db.json`, the presets and the gear JSON itself and imports
 nothing from `pool_source.ts`. Edits to the copy: `REPO`/`PAIR` set to
 the worktree; the missing-effects count assert (450) replaced by a
