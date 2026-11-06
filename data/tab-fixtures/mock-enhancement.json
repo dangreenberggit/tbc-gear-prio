@@ -168,7 +168,7 @@
         "rank": 2,
         "itemId": 28776,
         "name": "Liar's Tongue Gloves",
-        "slot": "waist",
+        "slot": "hands",
         "source": {
           "kind": "raid",
           "zone": "Magtheridon's Lair",
@@ -373,7 +373,7 @@
         "rank": 11,
         "itemId": 29516,
         "name": "Ebon Netherscale Belt",
-        "slot": "hands",
+        "slot": "waist",
         "source": {
           "kind": "crafted",
           "profession": "Leatherworking"
@@ -407,7 +407,7 @@
         "rank": 13,
         "itemId": 25685,
         "name": "Fel Leather Gloves",
-        "slot": "waist",
+        "slot": "hands",
         "source": {
           "kind": "crafted",
           "profession": "Leatherworking"

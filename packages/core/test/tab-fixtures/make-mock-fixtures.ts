@@ -155,7 +155,13 @@ type MockFixture = {
   ranking: MockRanking;
 };
 
-type DbItem = { id: number; name: string; setId?: number; setName?: string };
+type DbItem = {
+  id: number;
+  name: string;
+  type?: number;
+  setId?: number;
+  setName?: string;
+};
 type DbSource = {
   drop?: { zoneId?: number; npcId?: number };
   crafted?: { profession?: number };
@@ -422,14 +428,51 @@ function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
 }
 
-/** Every distinct (item id, slot) pair worn in the spec's preset files. */
-function presetPairs(specDir: string): Pair[] {
+// db.json `type`, the fork's `ItemType` in proto/common.proto (0 is unknown).
+const SLOT_BY_ITEM_TYPE: ReadonlyArray<ItemSlot | undefined> = [
+  undefined,
+  "head",
+  "neck",
+  "shoulder",
+  "back",
+  "chest",
+  "wrist",
+  "hands",
+  "waist",
+  "legs",
+  "feet",
+  "finger",
+  "trinket",
+  "weapon",
+  "ranged",
+];
+
+const isSimOrderName = (s: string): s is SimOrderName =>
+  (SIM_ORDER as readonly string[]).includes(s);
+
+/**
+ * Every distinct (item id, slot) pair worn in the spec's preset files. A
+ * preset can list an item at another slot's index (upstream's enhancement
+ * p1 and preraid sets swap the belt and the gloves), so a one-slot item
+ * takes its slot from its type.
+ */
+function presetPairs(
+  specDir: string,
+  typeSlot: (itemId: number) => ItemSlot | undefined
+): Pair[] {
   const seen = new Map<string, Pair>();
   for (const file of gearFiles(join(SPECS_DIR, specDir, "gear_sets"))) {
     const gear = readJson<GearFile>(file);
     gear.items.forEach((entry, i) => {
-      const simSlot = SIM_ORDER[i];
-      if (!entry.id || !simSlot) return;
+      const indexSlot = SIM_ORDER[i];
+      if (!entry.id || !indexSlot) return;
+      const typed = typeSlot(entry.id);
+      const simSlot =
+        typed !== undefined &&
+        typed !== poolSlotFor(indexSlot) &&
+        isSimOrderName(typed)
+          ? typed
+          : indexSlot;
       const slot = poolSlotFor(simSlot);
       const key = `${entry.id}:${slot}`;
       if (!seen.has(key))
@@ -528,6 +571,11 @@ class Builder {
     return this.items.get(id) ?? { id, name: `Item ${id}` };
   }
 
+  typeSlot(id: number): ItemSlot | undefined {
+    const type = this.items.get(id)?.type;
+    return type === undefined ? undefined : SLOT_BY_ITEM_TYPE[type];
+  }
+
   source(id: number): MockSource {
     const first = this.item(id).sources?.[0];
     if (first?.drop) {
@@ -564,7 +612,7 @@ class Builder {
     const gear = readJson<GearFile>(
       join(SPECS_DIR, spec.specDir, spec.gearPreset)
     );
-    const pairs = presetPairs(spec.specDir);
+    const pairs = presetPairs(spec.specDir, (id) => this.typeSlot(id));
     const setRoles = this.setRoles(spec, pairs, gear);
     const required = [
       ...new Set([
@@ -1032,6 +1080,12 @@ class Builder {
     const keys = rows.map((r) => `${r.itemId}:${r.slot}`);
     const dup = keys.find((k, i) => keys.indexOf(k) !== i);
     this.rule(n, dup === undefined, `row key ${dup} appears twice`);
+    const misSlotted = rows.find((r) => r.slot !== this.typeSlot(r.itemId));
+    this.rule(
+      n,
+      misSlotted === undefined,
+      `row ${misSlotted?.itemId} has slot ${misSlotted?.slot}, which is not its item type's slot in db.json`
+    );
     if (spec.size !== "all")
       this.rule(n, rows.length === spec.size, `has ${spec.size} rows`);
     this.rule(
