@@ -5,16 +5,17 @@ in seconds with no backend and no sim run (ticket 504). The figures are made
 up and mean nothing; the rows are real items from the spec's own preset gear
 files, so icons and quality colours resolve. Each file loads on one spec
 page, and every spec page the tab ranks has at least one, so the page checks
-below reach all 11 pages (ticket 801). The first six files in the table each
-also cover one UI difference we expect between specs, on a page that has it;
-the other five are plain results for the pages those six do not open.
+below reach every page (ticket 801). A file whose row in the table names a UI
+difference also covers that difference, on a page that has it; a file whose
+row says "none" is a plain result for a page the others do not open.
 
 The tab's automatic page checks render these files and no sim recording:
 
 - the layout gate (`pnpm layout-gate:check`) runs its before-run checks on the
   ret page at four widths, then renders every file here on its own spec's
-  page, with an axe scan at 653 px on each, and fails when a spec page has
-  no file here;
+  page, with an axe scan on each at 653 px (`POST_RUN_AXE_WIDTH` in
+  `scripts/tab-harness/test-layout.mjs`), and fails when a spec page has no
+  file here;
 - `pnpm tab-review` renders the file a manifest entry names with
   `"fixture": "<name>"`;
 - `pnpm tab-fixtures:smoke` opens every file once.
@@ -51,12 +52,12 @@ one piece short of a bonus, and a crossing row needs that.
 
 ## The generator
 
-`packages/core/test/tab-fixtures/make-mock-fixtures.ts` writes all eleven files.
+`packages/core/test/tab-fixtures/make-mock-fixtures.ts` writes every file here.
 It is deterministic and needs the fork clone (`vendor/tbc-new-fork`), because
 it reads the preset gear files and the item database there.
 
 ```sh
-pnpm tab-fixtures:mock            # write the eleven files
+pnpm tab-fixtures:mock            # write every file
 pnpm tab-fixtures:mock --check    # exit 1 when a file differs, is missing, or is not one it writes
 ```
 

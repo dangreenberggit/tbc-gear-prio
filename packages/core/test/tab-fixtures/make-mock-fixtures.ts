@@ -4,9 +4,9 @@
  * `pnpm tab-fixtures:smoke`), so a page check never needs a sim recording
  * (stage tab-checks-without-sims). Each file loads on one spec page, and every
  * spec page the tab ranks has at least one, so the page checks reach every
- * page (ticket 801). The first six each also cover one UI difference we expect
- * between specs, on a spec page that has it; the other five are plain results
- * for the pages those six do not open.
+ * page (ticket 801). The entries at the top of `FIXTURES` each also cover one
+ * UI difference we expect between specs, on a spec page that has it; the plain
+ * entries after them are results for the pages those do not open.
  *
  * The figures are made up. The rows are real: every row is an (item id, slot)
  * pair read from the spec's own preset gear files, so icons and quality
@@ -15,7 +15,7 @@
  * gear: the piece counts come from the gear, and the bonus counts from the
  * fork's Go set definitions. The output is deterministic.
  *
- *   pnpm tab-fixtures:mock            # write the eleven files
+ *   pnpm tab-fixtures:mock            # write every file
  *   pnpm tab-fixtures:mock --check    # exit 1 when a file differs or is missing
  *
  * Needs the fork clone (`vendor/` is gitignored); `--check` skips without it.
@@ -180,21 +180,8 @@ type Pair = {
   key: string;
 };
 
-type FixtureName =
-  | "mock-offhand"
-  | "mock-ranged"
-  | "mock-long-names"
-  | "mock-set-bonus"
-  | "mock-many-rows"
-  | "mock-dropped-list"
-  | "mock-balance"
-  | "mock-shadow"
-  | "mock-elemental"
-  | "mock-warlock"
-  | "mock-enhancement";
-
-type Spec = {
-  name: FixtureName;
+type Spec<Name extends string = FixtureName> = {
+  name: Name;
   spec: string;
   specDir: string;
   gearPreset: string;
@@ -214,13 +201,15 @@ type Spec = {
 const CUTOFF_DPS = 3;
 
 const PLAIN = {
+  size: 24,
+  belowCutoff: 4,
   names: "short",
   setRows: { breaks: 1, crossing: false },
   removesWornItem: false,
   droppedList: false,
 } as const;
 
-const FIXTURES: Spec[] = [
+const FIXTURES = [
   {
     ...PLAIN,
     name: "mock-offhand",
@@ -231,8 +220,6 @@ const FIXTURES: Spec[] = [
     baselineDps: 1850,
     covers:
       "Off-hand rows: weapons ranked for the off-hand slot beside main-hand rows.",
-    size: 24,
-    belowCutoff: 4,
   },
   {
     ...PLAIN,
@@ -243,8 +230,6 @@ const FIXTURES: Spec[] = [
     race: "RaceDwarf",
     baselineDps: 1700,
     covers: "The ranged slot: bows ranked in their own slot.",
-    size: 24,
-    belowCutoff: 4,
   },
   {
     ...PLAIN,
@@ -256,8 +241,6 @@ const FIXTURES: Spec[] = [
     baselineDps: 1600,
     covers:
       "Long item names (60-80 characters) that must wrap only between words, and a removes-worn-item line.",
-    size: 24,
-    belowCutoff: 4,
     names: "long",
     removesWornItem: true,
   },
@@ -273,8 +256,6 @@ const FIXTURES: Spec[] = [
     baselineDps: 1800,
     covers:
       "Set-bonus rows: pieces whose swap breaks a worn bonus, one that completes a bonus, and bonuses a row can reach with more pieces.",
-    size: 24,
-    belowCutoff: 4,
     setRows: { breaks: 3, crossing: true },
   },
   {
@@ -315,8 +296,6 @@ const FIXTURES: Spec[] = [
     race: "RaceTauren",
     baselineDps: 1500,
     covers: "The balance druid page.",
-    size: 24,
-    belowCutoff: 4,
   },
   {
     ...PLAIN,
@@ -327,8 +306,6 @@ const FIXTURES: Spec[] = [
     race: "RaceUndead",
     baselineDps: 1450,
     covers: "The shadow priest page.",
-    size: 24,
-    belowCutoff: 4,
   },
   {
     ...PLAIN,
@@ -339,8 +316,6 @@ const FIXTURES: Spec[] = [
     race: "RaceTroll",
     baselineDps: 1550,
     covers: "The elemental shaman page.",
-    size: 24,
-    belowCutoff: 4,
   },
   {
     ...PLAIN,
@@ -351,8 +326,6 @@ const FIXTURES: Spec[] = [
     race: "RaceUndead",
     baselineDps: 1650,
     covers: "The warlock page.",
-    size: 24,
-    belowCutoff: 4,
   },
   {
     ...PLAIN,
@@ -363,10 +336,10 @@ const FIXTURES: Spec[] = [
     race: "RaceOrc",
     baselineDps: 1750,
     covers: "The enhancement shaman page.",
-    size: 24,
-    belowCutoff: 4,
   },
-];
+] as const satisfies readonly Spec<string>[];
+
+type FixtureName = (typeof FIXTURES)[number]["name"];
 
 const PROFESSIONS: Record<number, string> = {
   1: "Alchemy",

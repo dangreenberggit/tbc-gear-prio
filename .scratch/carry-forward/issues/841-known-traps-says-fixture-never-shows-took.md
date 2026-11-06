@@ -21,7 +21,7 @@ every fixture's ranking.
 Ticket 801 fixed the same false sentence in `data/tab-fixtures/README.md`.
 It did not edit `known-traps.md`, which was outside that slice's paths.
 The advice itself, "wait for result rows and no stale banner", is still
-right (`data/tab-fixtures/README.md:85-88`).
+right (`data/tab-fixtures/README.md:86-89`).
 
 ## Done when
 

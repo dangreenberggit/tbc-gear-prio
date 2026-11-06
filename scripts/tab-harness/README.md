@@ -19,10 +19,10 @@ directory.
   per-ticket visual capture and the Stop check. `scripts/check_layout_gate.py`
   and `scripts/check_tab_review.py` run the first two. The layout gate renders
   the ret page before a run, then each made-up fixture in `data/tab-fixtures/`
-  (`pnpm tab-fixtures:mock`) on its own spec's page, with an axe scan at
-  653 px on each. The gate fails when a spec page in `PAGE_PATH_BY_SPEC` has
-  no fixture that was measured, or when a spec id the fork's tab ranks
-  (`SPEC_ID_BY_PROTO_SPEC` in `run.ts`) has no page there
+  (`pnpm tab-fixtures:mock`) on its own spec's page, with an axe scan on
+  each at `POST_RUN_AXE_WIDTH` (653 px). The gate fails when a spec page in
+  `PAGE_PATH_BY_SPEC` has no fixture that was measured, or when a spec id the
+  fork's tab ranks (`SPEC_ID_BY_PROTO_SPEC` in `run.ts`) has no page there
   (`page-coverage.mjs`); `--fixture <name-or-path>` renders one file only.
 - `tab_fixtures.mjs` and `vite.config.mjs`: the dev server's fixture index and
   autoload, added to upstream's Vite config without editing it.

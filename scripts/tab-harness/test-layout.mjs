@@ -113,6 +113,7 @@ const results = [];
 // Module-level, like `results`, so the crash handler sees a11y failures found
 // before the crash.
 const violations = [];
+const fixtureField = (name) => (name == null ? {} : { fixture: name });
 const reportedViolations = () =>
   violations.map(
     ({ id, selector, impact, state, width, fixture, fail, baselined }) => ({
@@ -121,7 +122,7 @@ const reportedViolations = () =>
       impact,
       state,
       width,
-      ...(fixture === undefined ? {} : { fixture }),
+      ...fixtureField(fixture),
       fail: !!fail,
       baselined: !!baselined,
     })
@@ -133,7 +134,7 @@ const check = (id, width, ok, detail) => {
     check: id,
     width,
     ok,
-    ...(currentFixture === null ? {} : { fixture: currentFixture }),
+    ...fixtureField(currentFixture),
     ...(detail === undefined ? {} : { detail }),
   });
   const where = currentFixture === null ? "" : ` [${currentFixture}]`;
@@ -598,7 +599,7 @@ async function main() {
         ...v,
         state,
         width,
-        ...(currentFixture === null ? {} : { fixture: currentFixture }),
+        ...fixtureField(currentFixture),
       });
     console.log(
       `axe [${where}] ${cls.fail.length} failing, ${cls.warn.length} warning (${ms} ms)`
