@@ -26,7 +26,8 @@
 //   node scripts/tab-harness/run-tab-cdp.mjs --origin http://localhost:3333 [--page /tbc/paladin/retribution/]
 //        [--phase 3] [--candidates N] [--iterations N] [--timeout-ms 2700000]
 //        [--out out.json] [--trace-tail] [--force-fallback]
-//        [--preset-tab <name> --preset <chip|?>] [--wasm-concurrency N]
+//        [--preset <chip|?> [--preset-tab <name|?>] [--preset-spec <spec>]]
+//        [--wasm-concurrency N]
 //        [--capture-requests <dir> [--page-sim]]
 //
 // Every element is found by its data-testid (the React tab, ticket 560). The
@@ -41,13 +42,26 @@
 //   Readback: iterationsRequested. Two timings are always recorded: firstRowS
 //   (Run click to the first results-table row) and clickToDoneS (click to Took).
 //
-// The flags below exist for ticket 522's cold-worker check: does the tab's
-// baseline sim get exactly the page's own Simulate DPS for the same gear? None
-// of them changes the default path, which pnpm desktop-gate:check drives.
-// --preset-tab <name> --preset <chip> loads a Gear Sets preset before the
-//   Upgrades tab opens; the picker lives in the Gear tab, whose chips are hidden
-//   once another tab is active. --preset "?" lists the chips of that phase tab
-//   (or of every tab with --preset-tab "?") and exits 1 before any sim.
+// The flags below are opt-in. The desktop gate (pnpm desktop-gate:check,
+// scripts/check_desktop_tab.py) passes --preset-tab and --preset to start from
+// a gear preset; the other flags exist for ticket 522's cold-worker check: does
+// the tab's baseline sim get exactly the page's own Simulate DPS for the same
+// gear?
+// --preset <chip> loads a Gear Sets preset before the Upgrades tab opens; the
+//   picker lives in the Gear tab, whose chips are hidden once another tab is
+//   active. --preset "?" lists the chips and exits 1 before any sim; a chip
+//   under a spec label is listed as "[Spec] chip".
+// --preset-tab <name> first clicks that phase tab above the Gear Sets chips.
+//   A page with phase tabs needs it: without it the run stops and names the
+//   tabs. Leave it out on a page with no phase tabs (balance, shadow,
+//   elemental, warlock, rogue, enhancement); the chips the page shows are used.
+//   --preset-tab "?" with --preset "?" lists the chips of every phase tab.
+// --preset-spec <spec> takes the chip under that spec's label, for a page
+//   where two specs have a gear set of the same name (hunter, warrior):
+//   --preset-spec Survival --preset "DW - 6% hit". Without it, a name found
+//   under more than one spec stops the run rather than load the wrong set.
+//   Readback: presetTab, preset, presetSpec, and presetWorn (the item names
+//   the Gear tab shows 1.5 s after the click).
 // --wasm-concurrency N sets the page's wasm worker count before navigation; at 1
 //   the page does not split its sim, and a split run gives different floats.
 // --capture-requests <dir> records every WorkerPool.raidSimAsync request and its
@@ -82,6 +96,7 @@ function parseArgs(argv) {
     forceFallback: false,
     presetTab: null,
     preset: null,
+    presetSpec: null,
     wasmConcurrency: null,
     captureRequests: null,
     pageSim: false,
@@ -99,6 +114,7 @@ function parseArgs(argv) {
     else if (a === "--force-fallback") args.forceFallback = true;
     else if (a === "--preset-tab") args.presetTab = argv[++i];
     else if (a === "--preset") args.preset = argv[++i];
+    else if (a === "--preset-spec") args.presetSpec = argv[++i];
     else if (a === "--wasm-concurrency")
       args.wasmConcurrency = parseInt(argv[++i], 10);
     else if (a === "--capture-requests") args.captureRequests = argv[++i];
@@ -108,10 +124,17 @@ function parseArgs(argv) {
     }
   }
   if (!args.origin) throw new Error("--origin <url> is required");
-  if ((args.presetTab === null) !== (args.preset === null))
-    throw new Error("--preset-tab and --preset go together");
+  if (
+    args.preset === null &&
+    (args.presetTab !== null || args.presetSpec !== null)
+  )
+    throw new Error("--preset-tab and --preset-spec need --preset <chip>");
   if (args.presetTab === "?" && args.preset !== "?")
     throw new Error('--preset-tab "?" needs --preset "?"');
+  if (args.presetSpec !== null && args.preset === "?")
+    throw new Error(
+      '--preset-spec does not work with --preset "?"; the list names each chip\'s spec'
+    );
   if (args.wasmConcurrency !== null && !(args.wasmConcurrency >= 1))
     throw new Error("--wasm-concurrency needs a positive integer");
   if (args.pageSim && !args.captureRequests)
@@ -513,43 +536,77 @@ const readPoolSize = `(() => {
 // must run before `activate`: the picker is in the Gear tab, and once the
 // Upgrades tab is active its chips fail the offsetParent filter. On a fresh
 // page the chips render seconds after the phase tabs, so they are polled.
-const loadPreset = (tabName, chipName) => `(async () => {
+// A page whose gear presets name no phase shows no phase tabs, and some of
+// those render Gear Sets as a plain saved-data panel outside
+// preset-group-picker, so a chip's block is found by the nearest ancestor that
+// holds a block title. A page whose presets name more than one group (hunter,
+// warrior: one per spec) puts a preset-group-label before each group's chips.
+const loadPreset = (tabName, chipName, specName) => `(async () => {
 	${WF}
 	const sleep = ms => new Promise(r=>setTimeout(r,ms));
+	const want = ${JSON.stringify(tabName)};
+	const chipWant = ${JSON.stringify(chipName)};
+	const specWant = ${JSON.stringify(specName)};
 	const tabsOf = () => [...document.querySelectorAll('[data-testid="preset-group-phase-tabs"] button')];
-	if(!await wf(()=>tabsOf().length > 0,30000)) return {error:'no preset phase tabs after 30 s'};
-	const tabs = tabsOf();
-	const tabNames = tabs.map(t=>t.textContent.trim());
-	const gearChips = () => [...document.querySelectorAll('[data-testid="preset-group-picker"] [data-testid="content-block"]')]
-		.filter(s=>s.querySelector('[data-testid="content-block-title"]')?.textContent.trim()==='Gear Sets')
-		.flatMap(s=>[...s.querySelectorAll('[data-testid="saved-data-set-chip"]')])
-		.filter(c=>c.offsetParent);
+	// The page renders the phase tabs more than once; the first button of each
+	// name is the one that changes the visible chips.
+	const tabNamesOf = tabs => [...new Set(tabs.map(t=>t.textContent.trim()))];
+	const blockTitle = c => {
+		for (let p = c.parentElement; p; p = p.parentElement) {
+			const t = p.querySelector(':scope > [data-testid="content-block-title"], :scope > * > [data-testid="content-block-title"]');
+			if (t) return t.textContent.trim();
+		}
+		return null;
+	};
+	const specOf = c => {
+		const heading = c.closest('[data-testid="saved-data-presets"]')?.previousElementSibling;
+		return heading?.matches('[data-testid="preset-group-label"]') ? heading.textContent.trim() : null;
+	};
+	const gearChips = () => [...document.querySelectorAll('[data-testid="saved-data-set-chip"]')]
+		.filter(c=>c.offsetParent && blockTitle(c)==='Gear Sets');
+	const label = (spec, chip) => (spec === null ? '' : '['+spec+'] ')+chip;
+	const names = chips => chips.map(c=>label(specOf(c), c.textContent.trim())).join(' | ');
+	const matches = () => gearChips().filter(c=>c.textContent.trim()===chipWant && (specWant === null || specOf(c)===specWant));
 	const visibleChips = async t => {
-		t.click();
+		t?.click();
 		await wf(()=>gearChips().length > 0,30000);
 		return gearChips();
 	};
-	const names = chips => chips.map(c=>c.textContent.trim()).join(' | ');
-	const want = ${JSON.stringify(tabName)};
-	const chipWant = ${JSON.stringify(chipName)};
-	if (chipWant === '?') {
-		const listed = [];
-		for (const t of tabs) {
-			const name = t.textContent.trim();
-			if (want !== '?' && name !== want) continue;
-			listed.push(name+': '+names(await visibleChips(t)));
+	let tabNote = '';
+	if (want !== null) {
+		if(!await wf(()=>tabsOf().length > 0,30000)) return {error:'no preset phase tabs after 30 s; on a page without them, leave out --preset-tab'};
+		const tabs = tabsOf();
+		const tabNames = tabNamesOf(tabs);
+		tabNote = '; tabs: '+tabNames.join(' | ');
+		if (chipWant === '?') {
+			const listed = [];
+			for (const name of tabNames) {
+				if (want !== '?' && name !== want) continue;
+				const t = tabs.find(b=>b.textContent.trim()===name);
+				listed.push(name+': '+names(await visibleChips(t)));
+			}
+			if (!listed.length) return {error:'no preset phase tab '+want+tabNote};
+			return {list: listed.join('; ')};
 		}
-		if (!listed.length) return {error:'no preset phase tab '+want+'; tabs: '+tabNames.join(' | ')};
-		return {list: listed.join('; ')};
+		const tab = tabs.find(t=>t.textContent.trim()===want);
+		if (!tab) return {error:'no preset phase tab '+want+tabNote};
+		await visibleChips(tab);
+	} else {
+		const chips = await visibleChips(null);
+		if (chipWant === '?') return {list: (tabsOf().length ? 'shown on load: ' : '')+names(chips)};
+		// The phase shown on load depends on the browser profile, so a chip name
+		// that exists in several phases would load whichever one that is.
+		if (tabsOf().length) return {error:'this page has phase tabs; name one with --preset-tab; tabs: '+tabNamesOf(tabsOf()).join(' | ')};
 	}
-	const tab = tabs.find(t=>t.textContent.trim()===want);
-	if (!tab) return {error:'no preset phase tab '+want+'; tabs: '+tabNames.join(' | ')};
-	await visibleChips(tab);
-	const chip = await wf(()=>gearChips().find(c=>c.textContent.trim()===chipWant),30000);
-	if (!chip) return {error:'no Gear Sets chip '+chipWant+' under '+want+'; visible: '+names(gearChips())+'; tabs: '+tabNames.join(' | ')};
+	await wf(()=>matches().length > 0,30000);
+	const found = matches();
+	const wanted = label(specWant, chipWant);
+	if (!found.length) return {error:'no Gear Sets chip '+wanted+(want === null ? '' : ' under '+want)+'; visible: '+names(gearChips())+tabNote};
+	if (found.length > 1) return {error:'Gear Sets chip '+chipWant+' is found '+found.length+' times ('+names(found)+'); name its spec with --preset-spec'};
+	const chip = found[0];
 	(chip.querySelector('[data-testid="saved-data-set-name"]') ?? chip).click();
 	await sleep(1500);
-	const worn = [...document.querySelectorAll('[data-testid="gear-picker-root"] [data-testid="item-picker-name"]')].map(e=>e.textContent.trim()).filter(Boolean).slice(0,5);
+	const worn = [...document.querySelectorAll('[data-testid="gear-picker-root"] [data-testid="item-picker-name"]')].map(e=>e.textContent.trim()).filter(Boolean);
 	return {ok:true, worn};
 })()`;
 
@@ -911,16 +968,18 @@ async function main() {
     await psend("Page.navigate", { url: `${args.origin}${args.page}` });
     await sleep(500);
 
+    let presetWorn = null;
     if (args.preset !== null) {
       const loaded = await evaluate(
         psend,
         pageSession,
-        loadPreset(args.presetTab, args.preset)
+        loadPreset(args.presetTab, args.preset, args.presetSpec)
       );
       if (loaded?.list !== undefined)
         throw new Error(`preset list: ${loaded.list}`);
       if (!loaded?.ok)
         throw new Error(`preset load failed: ${loaded?.error ?? "unknown"}`);
+      presetWorn = loaded.worn;
     }
 
     const act = await evaluate(psend, pageSession, activate);
@@ -1048,7 +1107,12 @@ async function main() {
 
     if (counterChanges !== null) out.counterChanges = counterChanges;
     if (args.preset !== null)
-      Object.assign(out, { presetTab: args.presetTab, preset: args.preset });
+      Object.assign(out, {
+        presetTab: args.presetTab,
+        preset: args.preset,
+        presetSpec: args.presetSpec,
+        presetWorn,
+      });
     if (args.wasmConcurrency !== null)
       out.wasmConcurrency = args.wasmConcurrency;
     if (args.captureRequests) {
