@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md (slicing, 2026-11-06, slice C)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -170,3 +170,14 @@ README states the same numbers as the code": the README states none of the
 current counts, so none
 can differ. Left: the branch's
 `pre-merge-review` file, which the session that runs the review writes.
+
+2026-11-06, closed: the branch's review is
+`docs/reviews/feat-452-desktop-goldens.md` (rounds 1-3 and a further
+check of the wording fixes; Disposition table of 54 rows, 2 deferred to
+ticket 821). The whole desktop gate passed on the closing commit's parent
+`128a8068`: `PASS (ret PASS, mage PASS, rogue PASS, enh PASS)`, rc 0, run
+by session D before its own fork change.
+
+Verified by: docs/reviews/feat-452-desktop-goldens.md;
+tbc-gear-prio@128a80689b20ce595883533e7d9b74373db08654;
+`PLAYWRIGHT_BROWSERS_PATH=<pwshim> pnpm desktop-gate:check`

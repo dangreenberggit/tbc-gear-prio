@@ -2,6 +2,8 @@
 
 Reviewed range: `c229d1299ce6e094021345372ab7959d618a07ca..560acb56da538fda27722e8437d7640fd4c47a52`
 Reviewed range: `560acb56da538fda27722e8437d7640fd4c47a52..31e90cad794648549d3db5956e8201c8177ebb5c`
+Reviewed range: `31e90cad794648549d3db5956e8201c8177ebb5c..36e7e96c499961c9a26af98067200db6cdc8fbe2`
+Reviewed range: `36e7e96c499961c9a26af98067200db6cdc8fbe2..96d40d2c025bb4c8e3917f95ae188056181c02d7`
 
 Dispatch note (round 1): the branch stacks on `chore/452-slice-tickets`
 (head `c229d129`, reviewed there by `instruction-review`), so round 1
