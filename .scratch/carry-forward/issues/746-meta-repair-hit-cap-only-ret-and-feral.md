@@ -35,3 +35,11 @@ plain sentence, for the specs without one, that its gem swaps count hit
 at full value. The cap values to use come from the engine; the domain
 reviewer cited `sim/core/target.go:393,394,401` for 16% spell and 9%
 physical at level 73 (hypothesis, untested by the filer).
+
+## Comments
+
+2026-11-06: this ticket is slice D of epic 452 (452 Notes, 2026-11-06).
+It runs after slice C (ticket 800, desktop-gate goldens for more specs)
+and on C's branch, so the new goldens show what this change does to each
+spec's ranking. The line numbers above are at fork `8a58f4af0`; check
+them against the current pin in `data/wowsims-fork.lock.json`.
