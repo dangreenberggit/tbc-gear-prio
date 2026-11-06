@@ -71,41 +71,38 @@ two pages.
 
 ## Steps
 
-1. **Owner ruling, 2026-11-06, verbatim:** "this choice isnt clear. it
-   should use the tags wowsims has for that site (for example i think all
-   dps warriors are probably one site with two talent preset options, not
-   different tabs)". Asked in chat on Q-810-bis-build, which offered: tag
-   only the loaded build's sets; no change; or name the build on the badge.
-   - What wowsims has (`.scratch/agent-reports/2026-11-06-general-task-810-wowsims-tags.md`,
-     fork at `3d8c215f8`, read, not seen on screen): warrior DPS and hunter
-     DPS are one page each. Their gear presets and builds carry a `group`
-     tag (Fury or Arms; Beast Mastery or Survival), and the gear tab shows
-     the sets under those group headings (`PresetGroupPicker.tsx:39-77`).
-     wowsims has no BiS field; its only "BiS" text is the warrior sets'
-     name "BIS" and a hover note (`preset_utils.ts:62`). It does not record
-     which build or talent preset the player loaded (`proto/ui.proto:319-337`).
-   - So the tag the tab can take from wowsims is the gear set's `group`.
-     Counting only "the loaded build's" sets would need a guess that is
-     not a wowsims tag, which the ruling rules out.
-   - Agent's reading of the ruling, to confirm with the owner: on a page
-     whose gear presets have more than one group, every BiS badge names
-     its group, for example "BIS (Fury)" or "DW - 6% hit (Survival)". The
-     rows stay where they are today. Today the badge adds the group only
-     when two sets share a name and phase (`settings_pool.ts:240-246`),
-     and the pool's fallback "BiS" badge does not carry the group
-     (`pool_source.ts:148`).
-2. Build that in the fork, with a fork test for a two-group page, and
-   re-pin (`docs/agents/paired-worktrees.md` § Re-pin after a fork change).
-   Amend ADR-0038 § Preset phase and BiS tags to say the badge names
-   wowsims's group.
-3. Check a warrior DPS run with the Arms build at phase 4 (the
-   `arms-p4-r2` setup) and read the main table's badges.
+1. **Owner rulings, 2026-11-06, verbatim.** First: "it should use the
+   tags wowsims has for that site (for example i think all dps warriors
+   are probably one site with two talent preset options, not different
+   tabs)". Then, asked to choose between keeping these rows with a label
+   that says "BIS (Fury)" or "BIS (Arms)", and hiding the other build's
+   rows by a guess from the talents: "label".
+   - Why a label and not hiding: wowsims does not save which build the
+     player loaded, only talents and gear (`proto/ui.proto:319-337`), so
+     hiding would rest on the tab's own guess. The headings "Fury",
+     "Arms", "Beast Mastery" and "Survival" are what wowsims's gear tab
+     shows above each gear set (the preset's `group` field,
+     `PresetGroupPicker.tsx:39-77`). Source:
+     `.scratch/agent-reports/2026-11-06-general-task-810-wowsims-tags.md`,
+     read at fork `3d8c215f8`, not seen on screen.
+2. In the fork, make the label on a row whose item comes from a gear set
+   add that set's wowsims heading, on a page whose gear sets sit under
+   more than one heading: "BIS (Fury)", "DW - 6% hit (Survival)". Today
+   the label adds the heading only when two sets share a name and phase
+   (`settings_pool.ts:240-246`), and the plain "BiS" label the pool falls
+   back to does not know the heading (`pool_source.ts:148`). Pages with
+   one heading keep today's labels. Add a fork test for the warrior page,
+   and re-pin (`docs/agents/paired-worktrees.md` § Re-pin after a fork
+   change). Amend ADR-0038 § Preset phase and BiS tags to say so.
+3. Look at a warrior DPS run with the Arms build at phase 4 (the
+   `arms-p4-r2` setup) and read the labels in the main table on screen.
 
 ## Done when
 
-On the warrior and hunter DPS pages, every BiS badge names the wowsims
-`group` of the set it comes from; a fork test covers a two-group page;
-ADR-0038 says so.
+On the warrior and hunter DPS pages, every label that marks an item from
+a wowsims gear set also names that set's heading (Fury, Arms, Beast
+Mastery, Survival); the rows stay where they are; a fork test covers the
+warrior page; ADR-0038 says so.
 
 ## Evidence
 
@@ -124,3 +121,5 @@ ADR-0038 says so.
 - 2026-11-06: the owner's answer to Q-810-bis-build (quoted in step 1)
   replaced the three options this ticket held. Status moved from
   `blocked` to `open`.
+- 2026-11-06: the owner chose "label" (step 1). Steps and Done when
+  rewritten in plain words.
