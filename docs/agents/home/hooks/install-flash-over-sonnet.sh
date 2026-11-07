@@ -71,14 +71,19 @@ install() {
     # the hook joins that entry instead of adding a second one.
     [ "$n" -le 1 ] || { echo "want at most one PreToolUse Agent entry in $ROUTER, found $n" >&2; exit 1; }
     backup "$ROUTER"
+    # Write through a symlink: mv onto the link itself would replace it with a
+    # regular file and cut it off from what it points at.
+    local real rc
+    real="$(readlink -f "$ROUTER")"
     jq --arg c "$COMMAND" '
       .hooks //= {} | .hooks.PreToolUse //= [] |
       if any(.hooks.PreToolUse[]; .matcher == "Agent")
       then .hooks.PreToolUse |= map(if .matcher == "Agent" then .hooks = ((.hooks // []) + [{"type": "command", "command": $c, "timeout": 10}]) else . end)
       else .hooks.PreToolUse += [{"matcher": "Agent", "hooks": [{"type": "command", "command": $c, "timeout": 10}]}]
-      end' "$ROUTER" > "$ROUTER.new"
-    chmod --reference="$ROUTER" "$ROUTER.new"
-    mv "$ROUTER.new" "$ROUTER"
+      end' "$real" > "$real.new" || {
+      rc=$?; rm -f "$real.new"; echo "jq failed; $ROUTER is unchanged" >&2; exit "$rc"; }
+    chmod --reference="$real" "$real.new"
+    mv "$real.new" "$real"
     echo "wired in $ROUTER"
   fi
   check
