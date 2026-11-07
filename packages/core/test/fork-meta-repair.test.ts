@@ -4,14 +4,15 @@
  *
  * The fork's repair picks, by exact search, the best set of recolours that
  * switches the meta back on, counting every socket bonus the recolours switch
- * on or off. On ret and feral, when the runner can read character stats, hit
- * counts only up to the character's remaining hit cap. These cases check that
- * against literals from the `/computeStats` readings and probe results in
+ * on or off. For a spec with a hit budget (ret and feral on melee hit; mage,
+ * shadow and warlock on spell hit), when the runner can read character
+ * stats, hit counts only up to the character's remaining hit cap. These cases
+ * check that against literals from the `/computeStats` readings and probe results in
  * ticket 535's comment of 2026-10-03
  * (`.scratch/carry-forward/issues/535-meta-repair-may-add-dead-hit-gems-to-set-gear.md`),
  * and against a brute force written in test code (`meta-repair-oracle.ts`).
  *
- * Each case names its ticket 535 test id. Skips when the fork clone is absent
+ * Each case names the ticket and test id it checks. Skips when the fork clone is absent
  * (`vendor/` is gitignored), like the other fork-gated suites.
  */
 
@@ -39,6 +40,8 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 /** `Stat.StatMeleeHitRating` in the fork's proto (`proto/common.ts`). */
 const MELEE_HIT = 20;
+/** `Stat.StatSpellHitRating` in the fork's proto (`proto/common.ts`). */
+const SPELL_HIT = 12;
 
 /**
  * The ret-p3-p2 baseline's `meleeHitPercent_final` against level 73 with no
@@ -56,10 +59,13 @@ type CapProfileMod = {
   ) => HitCapBudget | undefined;
 };
 
-/** A pseudo-stat array whose `PseudoStatMeleeHitPercent` (12) is `percent`. */
-function pseudoStatsWithHit(percent: number): number[] {
-  const out = new Array<number>(13).fill(0);
-  out[12] = percent;
+/**
+ * A pseudo-stat array whose `slot` is `percent`: 12 is
+ * `PseudoStatMeleeHitPercent`, 13 `PseudoStatSpellHitPercent`.
+ */
+function pseudoStatsWithHit(percent: number, slot = 12): number[] {
+  const out = new Array<number>(25).fill(0);
+  out[slot] = percent;
   return out;
 }
 
@@ -115,9 +121,16 @@ describe.skipIf(!forkPresent)("repair hit budget (535)", () => {
     expect(budget?.remaining).toBeCloseTo(-4.69, 2);
   });
 
-  it("535-B4: a spec without a repair cap (rogue, mage) gets no budget", async () => {
+  it("535-B4: a full-weight spec (rogue, enh, warrior, hunter, balance, ele) gets no budget", async () => {
     const m = await load();
-    for (const spec of ["rogue", "mage"]) {
+    for (const spec of [
+      "rogue",
+      "enh",
+      "warrior",
+      "hunter",
+      "balance",
+      "ele",
+    ]) {
       expect(
         m.hitCapBudgetFrom(
           m.capProfileFor(spec),
@@ -139,6 +152,18 @@ describe.skipIf(!forkPresent)("repair hit budget (535)", () => {
         )
       ).toBeUndefined();
     }
+  });
+
+  it("535-B6: a caster's budget reads slot 13 and ignores Faerie Fire", async () => {
+    // (16 − 10) × 12.615385 = 75.69: Improved Faerie Fire is physical only.
+    const m = await load();
+    const budget = m.hitCapBudgetFrom(
+      m.capProfileFor("mage"),
+      budgetRequest("TristateEffectImproved"),
+      pseudoStatsWithHit(10, 13)
+    );
+    expect(budget?.stat).toBe(SPELL_HIT);
+    expect(budget?.remaining).toBeCloseTo(75.69, 2);
   });
 });
 
@@ -1090,7 +1115,7 @@ function requestItems(req: RaidSimRequest): SimItemSpec[] {
   );
 }
 
-type RetRun = {
+type SpecRun = {
   /** The worn gear; defaults to the ret-p3-p2 fixture's. */
   worn?: SimItemSpec[];
   pool: Array<{ itemId: number; slot: string }>;
@@ -1105,9 +1130,18 @@ type RetRun = {
   skeleton?: RaidSimRequest;
   /** Called with each request `run` receives, before it answers. */
   onRun?: (req: RaidSimRequest) => void;
+  /** The spec the run ranks for; defaults to `"ret"`. */
+  spec?: string;
+  /** The EP weights; defaults to ret's. */
+  epWeights?: Record<string, number>;
+  /** The run's `simDatabaseFor`, which `composeFor` calls for every request. */
+  simDatabaseFor?: (
+    equipment: readonly SimItemSpec[]
+  ) => Readonly<Record<string, unknown>> | undefined;
 };
 
-async function runRet(o: RetRun) {
+async function runSpec(o: SpecRun) {
+  const spec = o.spec ?? "ret";
   const rankMod = await importForkUpgrades<{
     rankUpgrades: (
       input: Record<string, unknown>,
@@ -1142,9 +1176,7 @@ async function runRet(o: RetRun) {
     provenance: { ...fightRef, sourceID: 1 },
   };
   const gear = new gearMod.RecordedGearSource({
-    fights: new Map([
-      [gearMod.characterFightKey(RET_CHAR, "ret"), [RET_FIGHT]],
-    ]),
+    fights: new Map([[gearMod.characterFightKey(RET_CHAR, spec), [RET_FIGHT]]]),
     gear: new Map([[gearMod.fightGearKey(fightRef), loggedGear]]),
   });
   const pool = o.pool.map((p) => ({
@@ -1185,7 +1217,7 @@ async function runRet(o: RetRun) {
   const ranking = await rankMod.rankUpgrades(
     {
       character: RET_CHAR,
-      spec: "ret",
+      spec,
       maxPhase: 3,
       fight: fightRef,
       iterations: 1000,
@@ -1198,11 +1230,12 @@ async function runRet(o: RetRun) {
       store: o.store ?? new storeMod.MemoryStore(),
       clock: () => new Date("2026-10-03T12:00:00.000Z"),
       raidSimSkeleton: o.skeleton ?? retSkeleton,
-      epWeights: retWeights,
+      epWeights: o.epWeights ?? retWeights,
       pool,
       ...(o.measureBrokenSetValue ? { measureBrokenSetValue: true } : {}),
       ...(o.setScreen ? { setScreen: o.setScreen } : {}),
       ...(o.controller ? { signal: o.controller.signal } : {}),
+      ...(o.simDatabaseFor ? { simDatabaseFor: o.simDatabaseFor } : {}),
     }
   );
   return { ranking, requests, statsRequests, worn };
@@ -1232,6 +1265,22 @@ function baselineReadOnce(): (
   };
 }
 
+/**
+ * A `computeStats` that reads hit from the request's gear, with no set
+ * bonus: the baseline reads `BASELINE_HIT_PERCENT`, and each candidate's own
+ * read moves from there with its gear hit.
+ */
+async function gearHitReads(): Promise<
+  (req: RaidSimRequest) => Promise<StatsObservation>
+> {
+  const stats = await scriptedStats({
+    baselineGearHit: 52,
+    baselineHitPercent: BASELINE_HIT_PERCENT,
+    bonusHit: {},
+  });
+  return (req) => Promise.resolve(stats(req));
+}
+
 /** The (from, to) pairs of every request whose chest is `chestId`. */
 function chestRequestChanges(
   requests: readonly RaidSimRequest[],
@@ -1257,14 +1306,18 @@ const HIT_CAP_FIELDS = [
 type Note = { field: string; detail: string };
 const isHitCapNote = (s: Note) => HIT_CAP_FIELDS.includes(s.field);
 const isSetVersionNote = (s: Note) => s.field === "Set bonuses and the hit cap";
+/** The note a full-weight spec gets (ticket 746). */
+const FULL_WEIGHT_DETAIL =
+  "If gems were swapped to turn your meta gem on, hit rating was counted " +
+  "at full value, with no hit cap applied for this spec.";
 
 describe.skipIf(!forkPresent)(
   "rankUpgrades reads the baseline hit (535)",
   () => {
     it("535-S1: with the baseline's hit read, the capped row gets two Inscribed and the uncapped row two Rigid", async () => {
-      const run = await runRet({
+      const run = await runSpec({
         pool: S_POOL,
-        computeStats: baselineReadOnce(),
+        computeStats: await gearHitReads(),
       });
       const capped = chestRequestChanges(run.requests, run.worn, 32365);
       expect(capped.length).toBeGreaterThan(0);
@@ -1284,7 +1337,7 @@ describe.skipIf(!forkPresent)(
     });
 
     it("535-S2: a runner with no computeStats repairs at full weight: two Rigid on both rows", async () => {
-      const run = await runRet({ pool: S_POOL });
+      const run = await runSpec({ pool: S_POOL });
       for (const chestId of [32365, 30907]) {
         const changes = chestRequestChanges(run.requests, run.worn, chestId);
         expect(changes.length).toBeGreaterThan(0);
@@ -1299,7 +1352,7 @@ describe.skipIf(!forkPresent)(
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       let failed;
       try {
-        failed = await runRet({
+        failed = await runSpec({
           pool: S_POOL,
           store,
           computeStats: () => Promise.reject(new Error("worker died")),
@@ -1321,10 +1374,10 @@ describe.skipIf(!forkPresent)(
           expect(c).toEqual([`${BOLD}->${RIGID}`, `${BOLD}->${RIGID}`]);
         }
       }
-      const again = await runRet({
+      const again = await runSpec({
         pool: S_POOL,
         store,
-        computeStats: baselineReadOnce(),
+        computeStats: await gearHitReads(),
       });
       const capped = chestRequestChanges(again.requests, again.worn, 32365);
       expect(capped.length).toBeGreaterThan(0);
@@ -1337,7 +1390,7 @@ describe.skipIf(!forkPresent)(
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       let failed;
       try {
-        failed = await runRet({
+        failed = await runSpec({
           pool: S_POOL,
           computeStats: () => Promise.reject(new Error("worker died")),
         });
@@ -1350,9 +1403,9 @@ describe.skipIf(!forkPresent)(
       expect(notes[0]!.detail).toMatch(/always useful/);
       expect(notes[0]!.detail).toMatch(/worker died/);
 
-      const good = await runRet({
+      const good = await runSpec({
         pool: S_POOL,
-        computeStats: baselineReadOnce(),
+        computeStats: await gearHitReads(),
       });
       expect(good.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
     });
@@ -1362,7 +1415,7 @@ describe.skipIf(!forkPresent)(
         encounter: { targets: Array<{ level: number }> };
       };
       for (const t of skeleton.encounter.targets) t.level = 72;
-      const run = await runRet({
+      const run = await runSpec({
         pool: S_POOL,
         skeleton,
         computeStats: baselineReadOnce(),
@@ -1379,6 +1432,23 @@ describe.skipIf(!forkPresent)(
       expect(notes[0]!.field).toBe("Meta gem swaps and the hit cap");
       expect(notes[0]!.detail).toMatch(/always useful/);
       expect(notes[0]!.detail).toMatch(/level 73/);
+    });
+
+    it("535-S6: a full-weight spec gets the full-weight note", async () => {
+      const run = await runSpec({ pool: S_POOL, spec: "rogue" });
+      const notes = run.ranking.substitutions.filter(
+        (s) => s.detail === FULL_WEIGHT_DETAIL
+      );
+      expect(notes).toEqual([
+        { field: "Meta gem swaps and the hit cap", detail: FULL_WEIGHT_DETAIL },
+      ]);
+    });
+
+    it("535-S7: ret without a stats read gets no full-weight note", async () => {
+      const run = await runSpec({ pool: S_POOL, spec: "ret" });
+      expect(
+        run.ranking.substitutions.filter((s) => s.detail === FULL_WEIGHT_DETAIL)
+      ).toEqual([]);
     });
   }
 );
@@ -1404,7 +1474,7 @@ describe.skipIf(!forkPresent)(
     it("705-W1: with stats readable, the worn repair reads the un-repaired gear and puts Inscribed, not Rigid, in the chest", async () => {
       const worn = await wornWithMetaOff();
       let calls = 0;
-      const run = await runRet({
+      const run = await runSpec({
         worn,
         pool: S_POOL,
         computeStats: () => {
@@ -1418,16 +1488,18 @@ describe.skipIf(!forkPresent)(
       const baselineChest = requestItems(run.requests[0]!)[CHEST]!;
       expect(baselineChest.gems).toEqual([BOLD, INSCRIBED, 28363]);
       expect(run.ranking.baseline?.metaAdjusted).toBe(true);
-      expect(calls).toBe(2);
+      // The worn gear's read, then the baseline's; candidate reads follow.
+      expect(calls).toBeGreaterThanOrEqual(2);
       expect(requestItems(run.statsRequests[0]!)[CHEST]!.gems).toEqual(
         worn[CHEST]!.gems
       );
+      expect(gearKey(run.statsRequests[1]!)).toBe(gearKey(run.requests[0]!));
     });
 
     it("705-W5: with stats readable and hit under the cap, the worn repair keeps Rigid in the chest", async () => {
       const worn = await wornWithMetaOff();
       // Two hit percent under the baseline's leaves about 31 rating of room, more than Rigid's 8.
-      const run = await runRet({
+      const run = await runSpec({
         worn,
         pool: S_POOL,
         computeStats: () =>
@@ -1445,7 +1517,7 @@ describe.skipIf(!forkPresent)(
 
     it("705-W2: with no computeStats, the worn repair keeps full weight and puts Rigid in the chest", async () => {
       const worn = await wornWithMetaOff();
-      const run = await runRet({ worn, pool: S_POOL });
+      const run = await runSpec({ worn, pool: S_POOL });
       const baselineChest = requestItems(run.requests[0]!)[CHEST]!;
       expect(baselineChest.gems).toEqual([BOLD, RIGID, 28363]);
       expect(run.ranking.baseline?.metaAdjusted).toBe(true);
@@ -1456,7 +1528,7 @@ describe.skipIf(!forkPresent)(
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       let run;
       try {
-        run = await runRet({
+        run = await runSpec({
           worn,
           pool: S_POOL,
           computeStats: () => Promise.reject(new Error("worker died")),
@@ -1472,9 +1544,9 @@ describe.skipIf(!forkPresent)(
     });
 
     it("705-W3: a run that reads stats is keyed apart from rankings whose worn repair used full weight", async () => {
-      const run = await runRet({
+      const run = await runSpec({
         pool: S_POOL,
-        computeStats: baselineReadOnce(),
+        computeStats: await gearHitReads(),
       });
       expect(run.ranking.contentHash).toContain(
         '"metaRepairHitCap":"worn-and-candidates"'
@@ -1501,12 +1573,20 @@ const realId = (id: number) => id % SET_LESS_OFFSET;
  * that counts at least two pieces (a real piece or a set-kept copy; a
  * set-less copy counts toward no set). The baseline reads
  * `baselineHitPercent`, so the hit percent moves with the gear from there.
+ * `hit` names the rating, the pseudo-stat slot and the rating per percent;
+ * the default is melee hit in slot 12.
  */
 async function scriptedStats(o: {
   baselineGearHit: number;
   baselineHitPercent: number;
   bonusHit: Readonly<Record<number, number>>;
+  hit?: { stat: number; slot: number; ratingPerPercent: number };
 }) {
+  const hit = o.hit ?? {
+    stat: MELEE_HIT,
+    slot: 12,
+    ratingPerPercent: RATING_PER_HIT_PERCENT,
+  };
   const e = await engine();
   return (req: RaidSimRequest): StatsObservation => {
     const items = requestItems(req);
@@ -1524,12 +1604,13 @@ async function scriptedStats(o: {
     for (const [setId, n] of counts) {
       if (n >= 2) bonus += o.bonusHit[setId] ?? 0;
     }
-    const hit = e.caps.gearHitRating(mapped, MELEE_HIT) + bonus;
+    const rating = e.caps.gearHitRating(mapped, hit.stat) + bonus;
     return {
       stats: [],
       pseudoStats: pseudoStatsWithHit(
-        (hit - o.baselineGearHit) / RATING_PER_HIT_PERCENT +
-          o.baselineHitPercent
+        (rating - o.baselineGearHit) / hit.ratingPerPercent +
+          o.baselineHitPercent,
+        hit.slot
       ),
     };
   };
@@ -1600,7 +1681,7 @@ const gearKey = (req: RaidSimRequest) =>
 
 async function brRun(
   bonusHit: number,
-  extra: Partial<RetRun> = {},
+  extra: Partial<SpecRun> = {},
   read?: (req: RaidSimRequest, call: number) => Promise<StatsObservation>
 ) {
   const stats = await scriptedStats({
@@ -1609,7 +1690,7 @@ async function brRun(
     bonusHit: { [BURNING_RAGE]: bonusHit },
   });
   let call = 0;
-  return runRet({
+  return runSpec({
     pool: BR_POOL,
     measureBrokenSetValue: true,
     setScreen: "on",
@@ -1649,7 +1730,7 @@ describe.skipIf(!forkPresent)("Stop ends a stats read (538)", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     let stopped;
     try {
-      stopped = await runRet({
+      stopped = await runSpec({
         pool: S_POOL,
         store,
         controller,
@@ -1668,12 +1749,12 @@ describe.skipIf(!forkPresent)("Stop ends a stats read (538)", () => {
     expect(stopped.ranking.complete).toBe(false);
     // No ranking was cached: a second run on the same store reads the hit
     // again instead of returning a stored ranking.
-    const again = await runRet({
+    const again = await runSpec({
       pool: S_POOL,
       store,
-      computeStats: baselineReadOnce(),
+      computeStats: await gearHitReads(),
     });
-    expect(again.statsRequests).toHaveLength(1);
+    expect(again.statsRequests.length).toBeGreaterThan(0);
     expect(again.ranking.complete).toBe(true);
   });
 });
@@ -1720,14 +1801,25 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       baselineHitPercent: BASELINE_HIT_PERCENT,
       bonusHit: { [BURNING_RAGE]: 20 },
     });
+    // A version read is of the package: both Ragesteel pieces worn. The
+    // baseline and the candidates' own reads wear at most one.
+    const isPackage = (req: RaidSimRequest) => {
+      const ids = requestItems(req).map((spec) => realId(spec.id ?? 0));
+      return (
+        ids.includes(RAGESTEEL_SHOULDERS) && ids.includes(RAGESTEEL_BREASTPLATE)
+      );
+    };
+    let versionReads = 0;
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     let failed;
     try {
-      failed = await brRun(20, { store }, (req, call) =>
-        call === 2
+      failed = await brRun(20, { store }, (req) => {
+        if (!isPackage(req)) return Promise.resolve(stats(req));
+        versionReads += 1;
+        return versionReads === 1
           ? Promise.reject(new Error("worker died"))
-          : Promise.resolve(stats(req))
-      );
+          : Promise.resolve(stats(req));
+      });
       const versionWarnings = warn.mock.calls.filter((args) =>
         String(args[0]).startsWith("[upgrades] meta repair: set version")
       );
@@ -1736,7 +1828,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       warn.mockRestore();
     }
     expect(failed.ranking.complete).toBe(true);
-    expect(failed.statsRequests).toHaveLength(2);
+    expect(versionReads).toBe(1);
     const notes = failed.ranking.substitutions.filter(isSetVersionNote);
     expect(notes).toHaveLength(1);
     expect(notes[0]!.detail).toMatch(
@@ -1857,11 +1949,11 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     expect(new Set(keys).size).toBe(keys.length);
   });
 
-  it("535-V7: a first step whose gear before has set hit the candidate loop missed is skipped, not mismeasured", async () => {
-    // Oracle: a first step's split pairs with the candidate loop's sim.
-    // Here the row's single swap completes Justicar 2pc, whose hit the
-    // candidate loop's budget missed, so `versionGears`' entry 0 is a
-    // rebuild the candidate loop never simmed, and the split is skipped.
+  it("535-V7: a first step whose gear before has set hit the run's budget missed is skipped, not mismeasured", async () => {
+    // Oracle: a first step's split pairs with the gear before built on the
+    // run's budget. Here the row's single swap completes Justicar 2pc, whose
+    // hit that budget misses, so `versionGears`' entry 0 is a rebuild that
+    // differs from it, and the split is skipped.
     const s = await stepScenario("V7");
     const e = s.e;
     const legs = SIM_ORDER.indexOf("legs");
@@ -2023,7 +2115,7 @@ async function stepScenario(kind: "V6" | "V7") {
     ...(kind === "V6" ? [{ itemId: JUSTICAR.hands, slot: "hands" }] : []),
     { itemId: JUSTICAR.legs, slot: "legs" },
   ];
-  const run = await runRet({
+  const run = await runSpec({
     worn,
     pool,
     measureBrokenSetValue: true,
@@ -2033,3 +2125,257 @@ async function stepScenario(kind: "V6" | "V7") {
   });
   return { e, worn, gems, run };
 }
+
+/* ------------------------------------------------------------------ *
+ * A candidate's own stats read, on a caster too (746 review A1, A2)
+ * ------------------------------------------------------------------ */
+
+const MANA_ETCHED = { set: 658, crown: 28193, gloves: 27465 } as const;
+/** Mana-Etched Regalia 2pc: +35 spell hit rating (`sim/common/tbc/items_sets.go:83-88`). */
+const MANA_ETCHED_HIT = 35;
+/** The ret fixture's hands, 29947: no sockets, no set. */
+const RET_HANDS = 29947;
+const SPELL_HIT_RATING_PER_PERCENT = 12.615385;
+const GREAT_DAWNSTONE = 31861; // 8 spell hit, yellow
+const RUNED = 24030; // Runed Living Ruby, spell damage, red
+const HEAD = SIM_ORDER.indexOf("head");
+const HANDS = SIM_ORDER.indexOf("hands");
+
+/**
+ * The ret-p3-p2 gear with Mana-Etched Crown (holding the ret meta) and the
+ * Gloves, whose Nightseye is the meta's second blue: a warlock wearing the
+ * 2pc. The ret hands as a candidate break the set and turn the meta off, and
+ * with warlock weights the repair puts Great Dawnstone in the boots when 8
+ * spell hit rating fits the budget and a no-hit yellow when it does not.
+ */
+async function warlockRun(o: {
+  bonusHit: number;
+  /** The candidate's budget on the run's baseline budget moved by gear hit. */
+  localBudget: number;
+}) {
+  const e = await engine();
+  const worn = equipmentOf(loadFixture("ret-p3-p2"));
+  worn[HEAD] = { id: MANA_ETCHED.crown, gems: [RUNED, 32409] };
+  worn[HANDS] = { id: MANA_ETCHED.gloves, gems: [RUNED, NIGHTSEYE] };
+  expect(metaOf(e, socketedOf(worn)).status.kind).toBe("active");
+  const weights = e.data.epWeightsFor("warlock") as Record<string, number>;
+  const gems = e.cg.gemContext(e.gems.gemsForPhase(3), weights, "warlock");
+  const pre = e.rank.candidateSwapPreRepair(worn, HANDS, RET_HANDS, gems);
+  expect(metaOf(e, pre.socketed).status.kind).toBe("inactive");
+  const wornGearHit = e.caps.gearHitRating(worn, SPELL_HIT);
+  const gearChange = e.caps.gearHitRating(pre.swapped, SPELL_HIT) - wornGearHit;
+  // (16 − baseline %) × rating per % − gear change = localBudget.
+  const baselineHitPercent =
+    16 - (o.localBudget + gearChange) / SPELL_HIT_RATING_PER_PERCENT;
+  const stats = await scriptedStats({
+    // The baseline wears the 2pc, so its read holds the bonus.
+    baselineGearHit: wornGearHit + o.bonusHit,
+    baselineHitPercent,
+    bonusHit: { [MANA_ETCHED.set]: o.bonusHit },
+    hit: {
+      stat: SPELL_HIT,
+      slot: 13,
+      ratingPerPercent: SPELL_HIT_RATING_PER_PERCENT,
+    },
+  });
+  const run = await runSpec({
+    worn,
+    pool: [{ itemId: RET_HANDS, slot: "hands" }],
+    spec: "warlock",
+    epWeights: weights,
+    computeStats: (req) => Promise.resolve(stats(req)),
+  });
+  const rows = run.requests
+    .map(requestItems)
+    .filter((items) => items[HANDS]?.id === RET_HANDS);
+  expect(rows.length).toBeGreaterThan(0);
+  return { run, rows };
+}
+
+describe.skipIf(!forkPresent)(
+  "a candidate's repair reads its own hit (746 review)",
+  () => {
+    it("746-A2: a caster's repair charges spell hit against the slot-13 budget", async () => {
+      // Oracle: the read holds spell hit in slot 13 only. 10 rating over the
+      // cap keeps Great Dawnstone out; 30 under it lets one in.
+      const over = await warlockRun({ bonusHit: 0, localBudget: -10 });
+      for (const items of over.rows) {
+        expect(holdsGem(items, GREAT_DAWNSTONE)).toBe(false);
+      }
+      const under = await warlockRun({ bonusHit: 0, localBudget: 30 });
+      for (const items of under.rows) {
+        expect(holdsGem(items, GREAT_DAWNSTONE)).toBe(true);
+      }
+    });
+
+    it("746-A1: a candidate that breaks a spell hit set repairs on its own read, which counts the lost bonus", async () => {
+      // Oracle: the run's budget moved by gear hit leaves −10, but the swap
+      // also loses the 2pc's 35 spell hit, so the candidate's own read gives
+      // 25 and Great Dawnstone fits.
+      const run = await warlockRun({
+        bonusHit: MANA_ETCHED_HIT,
+        localBudget: -10,
+      });
+      for (const items of run.rows) {
+        expect(holdsGem(items, GREAT_DAWNSTONE)).toBe(true);
+      }
+    });
+
+    it("746-A1: a melee candidate that completes a hit set repairs on its own read", async () => {
+      // Oracle: V7's Leggings row completes Justicar 2pc (+40, scripted),
+      // which the run's budget misses; the row's sim wears the layout repaired
+      // on that budget minus 40, not the one on the run's budget.
+      const s = await stepScenario("V7");
+      const legs = SIM_ORDER.indexOf("legs");
+      const cap = s.gems.repairHitCap!;
+      const own = s.e.rank.candidateSwapWithRepairs(
+        s.worn,
+        legs,
+        JUSTICAR.legs,
+        {
+          ...s.gems,
+          repairHitCap: {
+            ...cap,
+            baselineRemaining: cap.baselineRemaining - V_BONUS_HIT,
+          },
+        }
+      ).equipment;
+      const runBudget = s.e.rank.candidateSwapWithRepairs(
+        s.worn,
+        legs,
+        JUSTICAR.legs,
+        s.gems
+      ).equipment;
+      const rows = s.run.requests
+        .map(requestItems)
+        .filter((items) =>
+          items.every((spec, i) =>
+            i === legs
+              ? spec.id === JUSTICAR.legs
+              : (spec.id ?? 0) === (s.worn[i]!.id ?? 0)
+          )
+        );
+      expect(rows.length).toBeGreaterThan(0);
+      for (const items of rows) {
+        expect(items.map((x) => x.gems)).toEqual(own.map((x) => x.gems));
+        expect(items.map((x) => x.gems)).not.toEqual(
+          runBudget.map((x) => x.gems)
+        );
+      }
+    });
+
+    it("746-R1: a failed candidate read fails that candidate's sim and leaves the others on their budgets", async () => {
+      // Oracle: the read is a sim-worker call, so its failure is that
+      // candidate's failed sim. Heartshatter still repairs on the budget (two
+      // Inscribed; full weight would put Rigid in), and no row is said to
+      // have repaired without the hit read.
+      const reads = await gearHitReads();
+      const run = await runSpec({
+        pool: S_POOL,
+        computeStats: (req) =>
+          requestItems(req)[CHEST]?.id === 30907
+            ? Promise.reject(new Error("worker died"))
+            : reads(req),
+      });
+      expect(run.ranking.items.map((r) => r.itemId)).toEqual([32365]);
+      const capped = chestRequestChanges(run.requests, run.worn, 32365);
+      expect(capped.length).toBeGreaterThan(0);
+      for (const c of capped) {
+        expect(c).toEqual([`${BOLD}->${INSCRIBED}`, `${BOLD}->${INSCRIBED}`]);
+      }
+      expect(chestRequestChanges(run.requests, run.worn, 30907)).toEqual([]);
+      expect(
+        run.ranking.substitutions.filter((s) => s.field === "item 30907")
+      ).toEqual([
+        {
+          field: "item 30907",
+          slot: "chest",
+          detail:
+            "This item was not ranked in this slot, because its sim failed." +
+            "\nitem 30907, slot chest: worker died",
+        },
+      ]);
+      expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
+    });
+
+    it("746-R1b: a Stop during a candidate read ends the run as a partial, uncached ranking with no failed-sim row", async () => {
+      // Oracle: Stop makes the read reject with StopRefusedSim, which
+      // runCandidate returns on, so 30907 is left to the Stop placeholder
+      // (simmed: false) and is not dropped as a failed sim.
+      const store = await newStore();
+      const controller = new AbortController();
+      const reads = await gearHitReads();
+      const stopped = await runSpec({
+        pool: S_POOL,
+        store,
+        controller,
+        computeStats: (req) => {
+          if (requestItems(req)[CHEST]?.id !== 30907) return reads(req);
+          controller.abort();
+          return new Promise<StatsObservation>(() => {});
+        },
+      });
+      expect(controller.signal.aborted).toBe(true);
+      expect(stopped.ranking.complete).toBe(false);
+      expect(
+        stopped.ranking.items.find((r) => r.itemId === 30907)
+      ).toMatchObject({ simmed: false });
+      expect(
+        stopped.ranking.substitutions.filter(
+          (s) => s.field === "item 30907" || /item 30907/.test(s.detail)
+        )
+      ).toEqual([]);
+      // No ranking was cached: a second run on the same store reads the hit
+      // again instead of returning a stored ranking.
+      const again = await runSpec({ pool: S_POOL, store, computeStats: reads });
+      expect(again.statsRequests.length).toBeGreaterThan(0);
+      expect(again.ranking.complete).toBe(true);
+    });
+
+    it("746-R3: a code error beside a candidate read fails the run; it is not that candidate's failed sim", async () => {
+      // Oracle: only the read's own failure becomes a failed-sim row. The
+      // throw stands in for a bug in the request built for 30907's read,
+      // after its swap; it must reach the caller unchanged.
+      const bug = new TypeError("code bug");
+      await expect(
+        runSpec({
+          pool: S_POOL,
+          computeStats: await gearHitReads(),
+          simDatabaseFor: (equipment) => {
+            if (equipment[CHEST]?.id === 30907) throw bug;
+            return undefined;
+          },
+        })
+      ).rejects.toBe(bug);
+    });
+
+    it("746-R4: a candidate read that gives no hit number fails that candidate's sim, not the run", async () => {
+      // Oracle: a hit value that is not a finite number is a failed read, so
+      // turning it into a number must sit inside the read's catch. 30907 gets
+      // the failed-sim row; Heartshatter is still ranked.
+      const reads = await gearHitReads();
+      const run = await runSpec({
+        pool: S_POOL,
+        computeStats: (req) =>
+          requestItems(req)[CHEST]?.id === 30907
+            ? Promise.resolve({
+                stats: [],
+                pseudoStats: new Array<number>(25).fill(NaN),
+              })
+            : reads(req),
+      });
+      expect(run.ranking.items.map((r) => r.itemId)).toEqual([32365]);
+      expect(
+        run.ranking.substitutions.filter((s) => s.field === "item 30907")
+      ).toEqual([
+        {
+          field: "item 30907",
+          slot: "chest",
+          detail:
+            "This item was not ranked in this slot, because its sim failed." +
+            "\nitem 30907, slot chest: hit percent read as NaN",
+        },
+      ]);
+    });
+  }
+);

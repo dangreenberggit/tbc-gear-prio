@@ -447,3 +447,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 812 Pre-merge review round 1 gives the reviewers only the main repo's diff; the fork (the tab's code) gets no round-1 review by the text (round-limits r18 fix review, U4) 2026-11-05
 - 813 Pre-merge focused check condition 1, "the ticket it names", has two readings that give opposite actions on a fix commit whose message names nothing (round-limits r18 fix review, U1) 2026-11-05
 - 814 Pre-merge review: a test-gate gap fits both "fixed before merge" and "a missing test", so the same finding can block the merge or be deferred (round-limits r18 review, PMR reader T4) 2026-11-05
+- 830 A budget spec ranked without a stats read (the CLI) repairs hit at full weight and says nothing (pre-merge review feat/452-meta-repair-hit-cap, round 1, A4) 2026-11-06
+- 831 The caster hit budget values hit past a talented spell's cap at full weight, with no note (pre-merge review feat/452-meta-repair-hit-cap, round 1, I2) 2026-11-06
