@@ -176,8 +176,9 @@ work stands:
   `pnpm verify`; ticket 803 (Survival and Arms weights) is closed on B's
   branch `feat/452-survival-arms`, with 799.
 - **Universes and the sim-effects file per spec (bullet 2):** the tab reads
-  neither (ADR-0038). Whether this part means "what the tab uses" is put to
-  the owner as Q-452-bar-universes; there is no ruling yet.
+  neither (ADR-0038). Met: asked whether this line counts as done because
+  only the old command-line tool uses those files, the owner answered
+  "old items; yes" (2026-11-06).
 - **Pool and meta-gem repair per spec:** tickets 746 and 804 are closed on
   D's branch `feat/452-meta-repair-hit-cap`. D's merge waits on owner
   question Q-452d-review: what to do with the two open round-2 findings in
@@ -186,10 +187,10 @@ work stands:
   `scripts/tab-harness/README.md`, a comment in `packages/core/src/pool.ts`
   and the header comments of `scripts/tab-harness/run-tab-cdp.mjs` and
   `scripts/assemble_universe.py`. The `sme-rank-review` skill frames each
-  review as a ret player (lines 11, 28 and 56); that text waits for the
-  owner's approval (Q-452-sme-skill), so 802 stays open.
+  review as a ret player (lines 11, 28 and 56). The owner approved the
+  proposed text on 2026-11-06 ("reviewer instructions: yes"); it lands when
+  the owner runs the apply script, because session F's sandbox cannot
+  write `.claude/skills/`. 802 stays open until then.
 
 452 closes only when every bar line above is met on `dev` (802 step 3).
-Today that needs 799, 800, 746, 801, 803 and 804 closed on `dev`, 802
-closed, the owner's answer to Q-452-bar-universes, and any work that answer
-asks for.
+Today that needs 799, 800, 746, 801, 803, 804 and 802 closed on `dev`.
