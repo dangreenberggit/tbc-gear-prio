@@ -42,3 +42,11 @@ agent instructions").
 
 - The sentence at `SKILL.md:164-166` has one reading, and a cold reader
   given `485f217f` decides condition 1 the same way the author means.
+
+## Comments
+
+### 2026-11-06: renumbered from 797
+
+Filed as 797 in commit `a2df89f6` on branch `chore/729-test-result`.
+`dev` had given 797 to another ticket, so this one became 813 when
+that branch merged into `dev`.

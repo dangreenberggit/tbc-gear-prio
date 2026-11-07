@@ -426,9 +426,11 @@ file contention, worker prompt. This file stays the chronological log.
 - 747 The tab locale schema lacks `set_bonus.tip_too_small`, so the fork locale check fails (found while fixing fix/wrong-advice-text round 1) 2026-11-02
 - 748 "No upgrades found" says every candidate simmed at or below your gear when some simmed above it (pre-merge review fix/wrong-advice-text, round 3, R3-1) 2026-11-02
 - 749 Under BiS only, "No BiS-list item for this slot." shows when the run left out the slot's BiS-list item (pre-merge review fix/wrong-advice-text, round 4, R4-1) 2026-11-02
-- 796 Pre-merge review round 1 gives the reviewers only the main repo's diff; the fork (the tab's code) gets no round-1 review by the text (round-limits r18 fix review, U4) 2026-11-05
-- 797 Pre-merge focused check condition 1, "the ticket it names", has two readings that give opposite actions on a fix commit whose message names nothing (round-limits r18 fix review, U1) 2026-11-05
-- 798 Pre-merge review: a test-gate gap fits both "fixed before merge" and "a missing test", so the same finding can block the merge or be deferred (round-limits r18 review, PMR reader T4) 2026-11-05
+- 754 The tab harness cannot load a gear preset on the six spec pages with no phase tabs, or a gear set whose name another spec on the page uses (pre-merge review feat/p45-dps-pass-452, round 1, S3/P3) 2026-11-03
+- 795 `pnpm verify` fails under high machine load while every test passes, and prints no vitest error (pre-merge review feat/620-item-level, merge check runs 2 and 3) 2026-11-03
+- 796 The paired-worktrees route for a new fork pin fails when `dev` is checked out in another worktree or the pair is under `.scratch/` (merge of feat/620-item-level) 2026-11-05
+- 797 After a between-chunk Gate C sends a row to `rework`, the stage-gate skill gives no way to start the next chunk (draft-review finding, checked on dev 7f223cd5) 2026-11-05
+- 798 The stage-gate skill has no way to re-plan a step that turns out wrong during the build (deferred from the stage-gate ban fix; draft-3 review findings 1-4) 2026-11-05
 - 799 Paired-worktrees older route runs `wt:unpair` before a `--fork-detached` pair's fork commits are on a branch; unpair refuses and its `--force` hint strands them (review-rounds study, control U8) 2026-11-05
 - 800 A tooling-only branch's `instruction-review` report saved as `docs/reviews/<branch>.md` fails `merge-ready` with "review has no ## Disposition section"; no doc asks that route for the table (merge attempt of chore/fix-rule-review-bar) 2026-11-05
 - 801 `pnpm merge-to-dev` runs verify in the branch's worktree, which fails in a plain worktree with no `node_modules`; no doc says how to set one up for merge, and docs-only branches have no lighter gate (merge attempt of chore/fix-rule-review-bar) 2026-11-05
@@ -442,3 +444,6 @@ file contention, worker prompt. This file stays the chronological log.
 - 809 The plan reviewer's dry-run step points at "§ Worker lanes, Reviewer" and a private-data exception that do not exist; apply the approved routing row 36e once 7e2ebae0, 683bf83b, 79160874 reach `dev` (review of chore/808-one-routing-source, R808-2) 2026-11-06
 - 810 pnpm 12 takes its store lock in `/run/user/1000`, read-only in the agent sandbox, so `pnpm install`/`verify` fail there unless `XDG_RUNTIME_DIR` points at a writable folder; record it in known-traps.md (routing-apply report) 2026-11-06
 - 811 Two sentences made inaccurate by the routing change: the parallel-phase adapter says model-policy § Claude Code "defines each agent type", and global model-policy says the repo's `AGENTS.md` names where repo values live (review of chore/808-one-routing-source, R808-6, R808-7) 2026-11-06
+- 812 Pre-merge review round 1 gives the reviewers only the main repo's diff; the fork (the tab's code) gets no round-1 review by the text (round-limits r18 fix review, U4) 2026-11-05
+- 813 Pre-merge focused check condition 1, "the ticket it names", has two readings that give opposite actions on a fix commit whose message names nothing (round-limits r18 fix review, U1) 2026-11-05
+- 814 Pre-merge review: a test-gate gap fits both "fixed before merge" and "a missing test", so the same finding can block the merge or be deferred (round-limits r18 review, PMR reader T4) 2026-11-05

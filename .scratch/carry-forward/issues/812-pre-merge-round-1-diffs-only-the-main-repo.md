@@ -58,3 +58,11 @@ file edit needs the owner's approval of the exact text (global rule
 - A dry run of round 1 on a past pair branch (for example
   `feat/tab-set-bonus`) gives the axes the fork range from the text
   alone.
+
+## Comments
+
+### 2026-11-06: renumbered from 796
+
+Filed as 796 in commit `a2df89f6` on branch `chore/729-test-result`.
+`dev` had given 796 to another ticket, so this one became 812 when
+that branch merged into `dev`.

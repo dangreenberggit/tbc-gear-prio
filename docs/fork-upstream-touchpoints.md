@@ -132,6 +132,17 @@ The two title strings use short top-level keys (`tab_title`, `tab_badge` in
 file is formatted, from the fork root:
 `node node_modules/oxfmt/bin/oxfmt --check ui/app/SimTabsSection.tsx`.
 
+## Tab code that copies upstream code
+
+These are new files, not edits, but each copies an upstream branch, so a
+catch-up that changes that branch must change the copy too.
+
+- `ui/features/upgrades/components/ResultsTable/SourceCell.tsx` `dropSource`
+  copies the drop-with-npc branch of upstream's
+  `ui/features/gear/components/SelectorModal/ItemSource.tsx`;
+  `SourceCell.test.tsx` fails when the two differ beyond the no-break space
+  before the difficulty mark (ticket 607).
+
 ## Back to upstream's text
 
 The branch changed 19 upstream files at one time or another

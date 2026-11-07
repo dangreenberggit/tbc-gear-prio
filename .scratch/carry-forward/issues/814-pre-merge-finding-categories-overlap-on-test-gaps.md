@@ -44,3 +44,11 @@ agent instructions").
 
 - The skill's categories give one outcome for a gate that skips a test,
   and a cold reader given R2-1 picks the category the author means.
+
+## Comments
+
+### 2026-11-06: renumbered from 798
+
+Filed as 798 in commit `a2df89f6` on branch `chore/729-test-result`.
+`dev` had given 798 to another ticket, so this one became 814 when
+that branch merged into `dev`.
