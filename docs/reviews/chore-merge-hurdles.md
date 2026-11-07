@@ -6,6 +6,8 @@ Reviewed range: `5ce0825b1466b9a17567c61b3ada5fb13aefae30..f6005cf8a31e555b64140
 
 Reviewed range: `f6005cf8a31e555b64140e473ed7dd74489afaa5..309b910e82c3638b26d758e5e0d439ef84cc2e90`
 
+Reviewed range: `309b910e82c3638b26d758e5e0d439ef84cc2e90..e61184ea0dd138f2118ac1a69b95182bf174d07e`
+
 Dispatch note: `python scripts/check_merge_ready.py --product-files`
 printed `package.json`, `scripts/check_merge_ready.py`,
 `scripts/check_merge_to_dev.py`, `scripts/check_worktree_cleanup.py`,
@@ -220,16 +222,47 @@ worktrees are left out of the paste line, and who picks the names) were
 fixed in the paragraph.
 
 Round 3 is again a last round and reported findings that are not
-bookkeeping, so the review stops here; step 4 was not run.
+bookkeeping, so the review stopped there. An assessor judged that a
+12-line rewrite of the name handling settles all five, and that a narrow
+check of it would settle them where a full round would only find more.
+The owner chose that on 2026-11-07: "A sounds ok".
+
+## Focused check (round 4)
+
+The owner chose a further, narrow round. Range `309b910e..e61184ea`:
+`dfcd3c56` (review file and doc wording), `49ef9d2a` (names compare as
+`Path.resolve()` on both sides with no lower-casing, relative to pnpm's
+`INIT_CWD` when set; a repeated name counts once; the paste line quotes
+names with `shlex.quote` and carries `--include-t3`; one test per
+finding) and `e61184ea` (the tests drop an inherited `INIT_CWD`, which
+had made `pnpm verify` fail). One fresh `general-task` (Opus) agent
+checked it.
+
+1. **Conditions: pass.** Every changed code line is at a place R3-F1 to
+   R3-F5 cite.
+2. **Probes: pass.** Each of the five findings, re-run in a throwaway
+   repo, now behaves correctly; a pasted line with `'sp ace'` and
+   `--include-t3` removed both worktrees through `bash -c`. The agent
+   also confirmed in a scratch package that `pnpm` runs a script from the
+   package root and sets `INIT_CWD` to the folder it was typed in.
+3. **Tests assert their findings: pass.** Six mutants in copies (one per
+   fix, two for R3-F5) each fail `check_worktree_cleanup.py`.
+4. **Touched tests pass:** `check_worktree_cleanup.py` (6 checks), rc 0;
+   `pnpm verify` with `TBC_VERIFY_WITHOUT_FORK=1` rc 0 at `e61184ea`.
+
+Findings: none.
 
 ## Summary
 
 Round 1 found one data-loss bug in `pnpm wt:cleanup --remove` (A1) and
-three smaller holes (A2-A4), all fixed with tests in `578cec41` and
-`a823168e`. The doc wording found by the instruction review is fixed in
-`3b4d2002` (IR1-IR3). Round 2 found that the A2 fix, which keeps a
-worktree where a session runs, is weaker than its row says (R2-1 to
-R2-4); those are open and go to the owner.
+three smaller holes (A2-A4), fixed with tests in `578cec41` and
+`a823168e`; the instruction review's wording points are fixed in
+`3b4d2002` (IR1-IR3). Round 2 found the A2 fix, a process scan, could
+not tell that a session still uses a worktree (R2-1 to R2-4); on the
+owner's choice `309b910e` deleted it and `--remove` now acts only on
+named worktrees. Round 3 found five small name-handling problems
+(R3-F1 to R3-F5), fixed in `49ef9d2a` and `e61184ea`; round 4 found
+none.
 
 Tickets: filed 4 (833-836), closed 3 (833-835): `git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`
 shows four `A` rows, and three added `Status: closed` lines. Ticket 836
@@ -240,7 +273,7 @@ stays open.
 | ID  | Axis               | Disposition | Ticket / note                                                                                                                                                     |
 | --- | ------------------ | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | A1  | Adversarial        | fixed       | `578cec41`: a `.scratch/` folder path from `ls-files` (a nested repo) now keeps the worktree; test `nested`                                                       |
-| A2  | Adversarial        | fixed       | `578cec41`: a process whose folder is inside the worktree keeps it (Linux `/proc`); the worktree is read again after the copy                                     |
+| A2  | Adversarial        | fixed       | Superseded in round 3: `309b910e` removed the process scan of `578cec41`; `--remove` acts only on worktrees the owner names, the owner's choice of 2026-11-07     |
 | A3  | Adversarial        | fixed       | `578cec41`: unknown `vendor/` folders keep the worktree; test `vendor`                                                                                            |
 | A4  | Adversarial        | fixed       | `a823168e`: a branch lock identical to dev's is not refused; `check_fork_pin_refusal_skips_a_lock_identical_to_devs`                                              |
 | SP1 | Spec               | wontfix     | Gitignored file in the main checkout, which this session cannot write; the owner's one-line command is in the session's final reply                               |
@@ -255,3 +288,17 @@ stays open.
 | CQ3 | Standards          | wontfix     | One throwaway-repo helper per check script is the repo's convention; a shared module would make three check scripts depend on it                                  |
 | CQ4 | Standards          | fixed       | Code-quality commit: `T3_PATH_PART` and `REPORTS_PREFIX` in `scripts/worktree_cleanup.py`                                                                         |
 | CQ5 | Standards          | wontfix     | One caller already holds the five values as locals; a bundle type adds code for one call                                                                          |
+
+## Disposition (rounds 2 to 4)
+
+| ID    | Axis          | Disposition | Ticket / note                                                                                             |
+| ----- | ------------- | ----------- | --------------------------------------------------------------------------------------------------------- |
+| R2-1  | Focused check | fixed       | `309b910e`: the process scan is gone; `--remove` acts only on named worktrees                             |
+| R2-2  | Focused check | fixed       | `309b910e`: `own_process_tree` is gone with the process scan                                              |
+| R2-3  | Focused check | fixed       | `309b910e`: the re-read is gone; naming a worktree is the owner's statement that no session writes there  |
+| R2-4  | Focused check | fixed       | `309b910e`: no process check is left for a worktree subagent to slip past                                 |
+| R3-F1 | Focused check | fixed       | `49ef9d2a`: the paste line carries `--include-t3`; the list-mode check pastes it and the T3 worktree goes |
+| R3-F2 | Focused check | fixed       | `49ef9d2a`: names compare as resolved paths, case-sensitive; `check_name_forms`                           |
+| R3-F3 | Focused check | fixed       | `49ef9d2a`: `shlex.quote` in the paste line; the `sp ace` worktree in the checks                          |
+| R3-F4 | Focused check | fixed       | `49ef9d2a`: a repeated name counts once; `check_name_forms`                                               |
+| R3-F5 | Focused check | fixed       | `49ef9d2a`, `e61184ea`: relative names resolve from pnpm's `INIT_CWD`; `check_name_forms`                 |
