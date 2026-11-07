@@ -180,7 +180,8 @@ The stdin trial through the wired command in a fake home
   (R808-3);
 - `Sonnet because: web`: silent, rc 0.
 
-No live session has fired the hook (R808-1).
+At review time no live session had fired the hook (R808-1). The live
+trial ran after install; its result is under Disposition.
 
 ## Check 4: the install scripts
 
@@ -248,19 +249,34 @@ TBC_VERIFY_WITHOUT_FORK=1 pnpm -C <wt> verify` gave rc=0. The
 
 ## Disposition
 
-R808-1 stays open: the review's trial ("Trial to run for R808-1") needs
-the owner to run `install-routing.sh` and then a session on the
-"Claude + GLM workers" card. `open` is not one of the gate's three words
-on purpose, so `pnpm merge-ready` fails on this row until the trial has
-run and the row says what it showed.
+R808-1: the owner ran `install-routing.sh` at 89315aef (backups in
+`~/.claude/backups/routing-20261107T034108Z/`). Every installed file
+compared `same`, and `install-flash-over-sonnet.sh --check` gave rc 0
+with 57 of 57 cases. A new T3 child session on the "Claude + GLM
+workers" card (Opus 5.5) then ran the trial under "Trial to run for
+R808-1", word for word:
 
-| ID     | Axis             | Disposition | Ticket / note                                                                                                                                          |
-| ------ | ---------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| R808-1 | 3 (trial)        | open        | Live trial after the owner runs `install-routing.sh`, then a session on the "Claude + GLM workers" card; the trial is under "Trial to run for R808-1". |
-| R808-2 | 2 (clash)        | defer       | `.scratch/carry-forward/issues/809-gate-reviewer-dry-run-points-at-missing-section.md` — row 36e, after 7e2ebae0, 683bf83b, 79160874 reach `dev`       |
-| R808-3 | 1 (hook text)    | fixed       | 06d4781c: the sentence names the placeholder from the reason's own bullet in § Sonnet reasons; a case per token                                        |
-| R808-4 | hook code        | fixed       | 06d4781c: `UnicodeDecodeError` fails open with one log line; a not-UTF-8 case                                                                          |
-| R808-5 | install script   | fixed       | 584367cd: writes through a symlinked settings file and removes `.new` when `jq` fails; fake-home runs under `$TMPDIR`                                  |
-| R808-6 | 2 (pointer)      | defer       | `.scratch/carry-forward/issues/811-two-pointers-made-inaccurate-by-routing-change.md` — needs the owner's approval of exact text                       |
-| R808-7 | 2 (pointer)      | defer       | `.scratch/carry-forward/issues/811-two-pointers-made-inaccurate-by-routing-change.md` — needs the owner's approval of exact text                       |
-| R808-8 | 2 (install docs) | fixed       | 8ef43bec: the install block copies the hook, and the README names both install scripts with `install-routing.sh` as the one command                    |
+1. `discrete-task`, `model: "sonnet"`, prompt "Run `ls`.": refused with
+   "PreToolUse:Agent hook error: flash-over-sonnet: this Sonnet spawn was
+   refused because its prompt's first non-blank line is not
+   `Sonnet because: <reason>` …", the § Refusal paragraph in full.
+2. The same spawn with the first line "Sonnet because: web": ran on
+   `claude-sonnet-5-5` and listed `/home/daniel/setup`.
+3. `glm-flash-task` with no model: ran on `z-ai/glm-5.3-flash`. Its
+   first tool call was `Read ~/.claude/routing.md`, and its second was
+   `ls`. Source: the worker's transcript,
+   `~/.claude_router/projects/-home-daniel-setup/a610e643-ceaf-4b0a-81dd-927da818a5ca/subagents/agent-a3cbaea336731a384.jsonl`.
+
+An earlier child session in the same hour gave the same three results
+for `simple-task` with "Sonnet because: test".
+
+| ID     | Axis             | Disposition | Ticket / note                                                                                                                                       |
+| ------ | ---------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R808-1 | 3 (trial)        | fixed       | Live trial after install, on the "Claude + GLM workers" card: spawn 1 refused with the § Refusal text, spawns 2 and 3 ran; details above the table. |
+| R808-2 | 2 (clash)        | defer       | `.scratch/carry-forward/issues/809-gate-reviewer-dry-run-points-at-missing-section.md` — row 36e, after 7e2ebae0, 683bf83b, 79160874 reach `dev`    |
+| R808-3 | 1 (hook text)    | fixed       | 06d4781c: the sentence names the placeholder from the reason's own bullet in § Sonnet reasons; a case per token                                     |
+| R808-4 | hook code        | fixed       | 06d4781c: `UnicodeDecodeError` fails open with one log line; a not-UTF-8 case                                                                       |
+| R808-5 | install script   | fixed       | 584367cd: writes through a symlinked settings file and removes `.new` when `jq` fails; fake-home runs under `$TMPDIR`                               |
+| R808-6 | 2 (pointer)      | defer       | `.scratch/carry-forward/issues/811-two-pointers-made-inaccurate-by-routing-change.md` — needs the owner's approval of exact text                    |
+| R808-7 | 2 (pointer)      | defer       | `.scratch/carry-forward/issues/811-two-pointers-made-inaccurate-by-routing-change.md` — needs the owner's approval of exact text                    |
+| R808-8 | 2 (install docs) | fixed       | 8ef43bec: the install block copies the hook, and the README names both install scripts with `install-routing.sh` as the one command                 |
