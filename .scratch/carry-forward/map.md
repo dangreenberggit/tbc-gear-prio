@@ -450,3 +450,7 @@ file contention, worker prompt. This file stays the chronological log.
 - 830 A budget spec ranked without a stats read (the CLI) repairs hit at full weight and says nothing (pre-merge review feat/452-meta-repair-hit-cap, round 1, A4) 2026-11-06
 - 831 The caster hit budget values hit past a talented spell's cap at full weight, with no note (pre-merge review feat/452-meta-repair-hit-cap, round 1, I2) 2026-11-06
 - 832 Tickets 799-804, 810 and 811 each have two files on dev: the 452 chain and dev both allocated them, and the merges kept both (merge of the 452 chain) 2026-11-06
+- 833 merge-to-dev refused a branch with no fork for any dev lock change; now only a new pinned commit with a fork or a lock edit (chore/merge-hurdles) 2026-11-07
+- 834 merge-ready let a branch bring a ticket number the merge result already has (chore/merge-hurdles) 2026-11-07
+- 835 nothing removed worktrees whose branch dev contains; pnpm wt:cleanup (chore/merge-hurdles) 2026-11-07
+- 836 paired-worktrees "Land it on dev" reads as if only a pair can use it (pre-merge review chore/merge-hurdles, instruction-review cold readers) 2026-11-07
