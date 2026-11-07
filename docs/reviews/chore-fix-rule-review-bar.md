@@ -78,15 +78,18 @@ The reports are gitignored files on the main checkout, under
 
 Both reviews also raised problems in text that the change did not
 touch. Those were checked separately; four are real and became tickets
-796 to 799 (commit `a2df89f6` on branch `chore/729-test-result`). The
-check is `.scratch/agent-reports/2026-11-05-general-task-unchanged-text-tickets.md`
+812, 813, 814 and 799 (filed as 796 to 799 in commit `a2df89f6` on
+branch `chore/729-test-result`; 796 to 798 were renumbered to 812 to 814
+when that branch merged into `dev`, because `dev` had used those
+numbers). The check is `.scratch/agent-reports/2026-11-05-general-task-unchanged-text-tickets.md`
 on the main checkout.
 
 ## Disposition
 
 Rows cover the findings of the four reviews above. Review 1's six notes
 and review 2's seven notes are not findings under the skill. The problems
-in unchanged text (tickets 796 to 799) are not this branch's findings.
+in unchanged text (tickets 799 and 812 to 814) are not this branch's
+findings.
 
 | ID    | Axis               | Disposition | Ticket / note                                                                                                                                                                      |
 | ----- | ------------------ | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
