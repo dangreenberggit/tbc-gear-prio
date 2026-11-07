@@ -741,7 +741,27 @@ def check_fork_pin_refusal_holds_for_a_branch_that_changed_the_lock() -> list[st
         return _refused("real named run, branch and dev re-pinned", rc, out, _FORK_PIN_REFUSAL)
 
 
+def check_fork_pin_refusal_skips_a_lock_identical_to_devs() -> list[str]:
+    """Review finding A4: the branch and dev wrote the same lock, so git
+    merges it with no conflict and a branch with no fork merges."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _fork_pin_scratch(Path(tmp))
+        wt = s.branch("chore/samepin")
+        s.write(wt, _LOCK, _lock_text("b" * 40, False, "pin b"))
+        s.commit(wt, "branch re-pins")
+        s.write(s.main, _LOCK, _lock_text("b" * 40, False, "pin b"))
+        s.commit(s.main, "dev re-pins the same")
+        s.write(wt, "docs/agents/foo.md", "tooling\n")
+        s.commit(wt, "tooling")
+        rc, out = s.merge_to_dev(s.main, "chore/samepin")
+        problems = _passed("real named run, branch and dev wrote the same lock", rc, out)
+        if _FORK_PIN_REFUSAL in out:
+            problems.append(f"the fork-pin refusal fired for identical locks: {out[-300:]!r}")
+        return problems
+
+
 CHECKS = (
+    check_fork_pin_refusal_skips_a_lock_identical_to_devs,
     check_fork_pin_refusal_skips_a_branch_with_no_fork_and_no_lock_edit,
     check_fork_pin_refusal_holds_for_a_worktree_with_a_fork,
     check_fork_pin_refusal_ignores_a_lock_change_that_keeps_the_commit,

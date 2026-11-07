@@ -346,7 +346,11 @@ def fork_pin_problem(wt: Path, target: str, base: str, dev_sha: str, tip: str) -
             f"dev's {FORK_LOCK} pins a new fork commit since {target} forked, so the "
             f"fork in {wt} no longer matches dev's pin; {see}"
         )
-    if git_out("diff", "--name-only", base, tip, "--", FORK_LOCK).strip():
+    # A lock the branch set to exactly dev's merges with no conflict.
+    same_as_dev = subprocess.run(
+        _resolve_cmd(["git", "diff", "--quiet", tip, dev_sha, "--", FORK_LOCK]), cwd=ROOT
+    ).returncode == 0
+    if not same_as_dev and git_out("diff", "--name-only", base, tip, "--", FORK_LOCK).strip():
         return (
             f"dev's {FORK_LOCK} pins a new fork commit since {target} forked, and "
             f"{target} changed that file too, so merging dev would conflict on it; {see}"
