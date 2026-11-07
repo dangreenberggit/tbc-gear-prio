@@ -83,3 +83,5 @@ branch's `pre-merge-review` file exists.
   `docs/reviews/feat-452-survival-arms.md` exists. Still open before any
   push or merge of the branch: a whole `pnpm verify` (not part of this
   ticket's Done when).
+
+Verified by: docs/reviews/feat-452-survival-arms.md (the branch review the closing note names) and docs/live-runs/2026-11-06-survival-arms-p45.md
