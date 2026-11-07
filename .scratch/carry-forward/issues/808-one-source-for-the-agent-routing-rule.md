@@ -82,3 +82,28 @@ of the same rule.
 When the ticket closes, its closing note needs a `Verified by:` line
 (`docs/agents/issue-tracker.md` § Closing a ticket), for example a `grep`
 that finds the routing rule's full text in `routing.md` only.
+
+## Comments
+
+### 2026-11-06: the change is on branch `chore/808-one-routing-source`
+
+The owner approved the routing change on 2026-11-06 ("i think my answer
+is yolo yes"). It is applied on branch `chore/808-one-routing-source`
+(worktree `/home/daniel/Code/lulz/tbc-wt/808-routing-source`), in these
+commits on top of `dev` 51184ca9:
+
+- 287beedc Stage routing.md as the one routing source
+- d3fbb0f4 Point repo agent docs at routing.md
+- 249ee3c3 Add flash-over-sonnet hook that reads routing.md
+- 37e507d1 Add install-routing.sh for the owner
+- 06d4781c Name each reason's placeholder in the hook refusal
+- 584367cd Keep the router settings link when wiring the hook
+- 8ef43bec Name the routing install scripts in the README
+- 89315aef Record the 808 review and its dispositions
+
+Its review is `docs/reviews/chore-808-one-routing-source.md` on that
+branch. One approved row is not applied: row 36e, for
+`.claude/agents/gate-reviewer.md`, waits on commits that are only on
+`chore/729-test-result`; ticket 809 holds it. Nothing is installed in
+the real home yet: the owner runs
+`bash /home/daniel/Code/lulz/tbc-wt/808-routing-source/docs/agents/home/install-routing.sh`.

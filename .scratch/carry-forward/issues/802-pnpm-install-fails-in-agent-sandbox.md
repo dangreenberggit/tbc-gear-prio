@@ -48,3 +48,12 @@ Either an agent in the sandbox can run `pnpm install` in a new worktree
 the docs that tell agents to install or make a pair say the step must
 run outside the sandbox and give the owner one command to paste. A
 change to the sandbox settings is the owner's decision.
+
+## Comments
+
+### 2026-11-06: ticket 810 names the lock path
+
+Ticket 810 reports the same `ERR_PNPM_STORE_DIR_OPEN_OPERATION_LOCK`
+error with the lock in `/run/user/1000`, which the sandbox mounts
+read-only, and `XDG_RUNTIME_DIR` set to a writable folder as the
+workaround. If that holds, the store-folder cause above is not the one.
