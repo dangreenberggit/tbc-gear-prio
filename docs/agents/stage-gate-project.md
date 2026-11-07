@@ -2,16 +2,17 @@
 
 The values that the `stage-gate` skill and its seats read for this repo,
 one section per kind. Lanes and spawning rules in full:
-`~/.claude/model-policy.md` § Workhorse jobs and § Who spawns whom.
+`~/.claude/routing.md`.
 
 ## Planner
 
 The `gate-planner` reads only this section.
 
-**Workhorse types and block size:** `~/.claude/model-policy.md` § Workhorse
-jobs. **Naming the model on every spawn:** § Claude Code of the same file.
+**Workhorse types:** `~/.claude/routing.md` § Decision table. **Block
+size:** `~/.claude/model-policy.md` § Workhorse jobs. **Naming the model
+on every spawn:** § Claude Code of the same file.
 
-**Judgment agent:** `general-task` (`model: "opus"`)
+**Judgment agent:** `~/.claude/routing.md` § Decision table.
 
 **Gate command** (the Verify recipe runs it): `pnpm verify`
 
@@ -65,16 +66,14 @@ The only commands you run are the ones that
 
 ## Worker lanes
 
-**Judgment agent:** `general-task` (`model: "opus"`)
+**Judgment agent:** `~/.claude/routing.md` § Decision table.
 
 **Workhorse types** (the session, the Reviewer and the Executor):
-`~/.claude/model-policy.md` § Workhorse jobs.
+`~/.claude/routing.md` § Decision table.
 
 ### Executor
 
-**Parallel-phase workers:** An extremely simple slice (see
-`simple-task`) goes to `simple-task` (`model: "sonnet"`). Every other
-slice goes to `general-task` (`model: "opus"`).
+**Parallel-phase workers:** A slice's type: routing.md § Decision table.
 
 ## Checkouts
 

@@ -1,6 +1,6 @@
 ---
 name: general-task
-description: Lead-lane work (oversight, judgment, hard implementation, a parallel-phase worker, an investigation) and review-lane work (a review axis) on Opus at effort high. Spawn with model "opus" named at the call site. Searches, reads, command runs, measurements and small or modest coding go to the workhorse types (model-policy § Workhorse jobs); when unsure whether a job needs judgment, use this type.
+description: 'Overseer on Opus at effort high: a review axis, a plan''s execution, oversight of workers, an investigation, debugging, hard implementation. Spawn with model "opus". Which jobs go to another type: ~/.claude/routing.md § Decision table.'
 model: opus
 effort: high
 ---
@@ -13,17 +13,11 @@ reports).
 
 When your prompt says your job is one narrow lookup or one narrow
 investigation, hold the judgment yourself and spawn no other overseer.
-Hand blocks of searches, plain reads, named command runs and
-measurements to a workhorse type, with the exact list of what to return:
-`glm-flash-task` (no model argument) when the harness lists it, except a job that could reach
-secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
-`~/.t3` other than the git checkouts in `~/.t3/worktrees/`, which goes
-to `discrete-task` (model-policy § GLM worker
-types, Private data), else
-`discrete-task` (model `sonnet` at the call site)
-(`~/.claude/model-policy.md` § Workhorse jobs). For any other research
-task, split its independent questions across your own `general-task`
-subagents (model `opus`) and judge what each one returns. Split until
+Hand workhorse jobs to the workhorse lane in blocks; which type:
+`~/.claude/routing.md` § Decision table. Block size, and what to run in
+place: `~/.claude/model-policy.md` § Workhorse jobs. For any other
+research task, split its independent questions across your own subagents
+and judge what each one returns. Split until
 each question is narrow enough for one agent to answer from its own
 reads and its helpers' returns, and put this sentence in every
 subagent's prompt: "Your job is one narrow investigation: hold the
