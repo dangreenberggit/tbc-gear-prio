@@ -35,3 +35,20 @@ plain sentence, for the specs without one, that its gem swaps count hit
 at full value. The cap values to use come from the engine; the domain
 reviewer cited `sim/core/target.go:393,394,401` for 16% spell and 9%
 physical at level 73 (hypothesis, untested by the filer).
+
+## Comments
+
+2026-11-06: this ticket is slice D of epic 452 (452 Notes, 2026-11-06),
+worked with ticket 804 in one pair so one re-pin carries both. Its branch
+is made from slice C's branch (ticket 800, desktop-gate goldens for more
+specs), or from `dev` if C has merged. The line numbers above are at fork
+`8a58f4af0`; check them against the current pin in
+`data/wowsims-fork.lock.json`.
+
+Of the two ways out in "Done when", the first fixes the defect and the
+second only tells the player about it. The plan picks one per spec and
+says why. When the change moves a golden, report each spec's diff in the
+merge account, then rewrite it with `pnpm desktop-gate:check --spec <spec>
+--update-golden` and give the reason in the commit body
+(`data/desktop-gate/README.md:67-79`). The branch's `pre-merge-review`
+file is part of done.
