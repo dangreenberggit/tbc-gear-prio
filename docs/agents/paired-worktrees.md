@@ -236,14 +236,17 @@ into the main checkout's.
 **Other worktrees.** `pnpm wt:cleanup` lists every worktree of this repo:
 its branch, whether `dev` contains it, whether `git status` is clean, and
 the gitignored files under `.scratch/` it holds, such as agent reports.
-It changes nothing. `pnpm wt:cleanup --remove` copies those files to
+It changes nothing, and it ends with a `pnpm wt:cleanup --remove <names>`
+line naming every clean, merged worktree it may remove. `--remove` acts
+only on the worktrees named after it, because no check can tell that a
+session has finished with a worktree; name only worktrees no session
+still uses. For each one it copies those files to
 `.scratch/worktree-archive/<folder name>/` in the main checkout, then runs
-`git worktree remove` on each clean, merged worktree. It keeps the main
-checkout, the worktree that holds `dev`, pairs (it names the `pnpm
-wt:unpair` command for each) and T3's worktrees under `~/.t3/worktrees`,
-because a T3 thread may still use one; `--include-t3` removes those too.
-The full list of what it keeps is `keep_reason` in
-`scripts/worktree_cleanup.py`.
+`git worktree remove`. Even when named, it keeps the main checkout, the
+worktree that holds `dev`, pairs (it names the `pnpm wt:unpair` command
+for each) and T3's worktrees under `~/.t3/worktrees`, because a T3 thread
+may still use one; `--include-t3` lets a named one go too. The full list
+of what it keeps is `keep_reason` in `scripts/worktree_cleanup.py`.
 
 Remove pairs only with `pnpm wt:unpair`. On its own, `git worktree remove`
 drops the registration and then leaves a pair's main folder half-deleted

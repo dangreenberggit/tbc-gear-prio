@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""List this repo's worktrees and, with --remove, remove the merged ones.
+"""List this repo's worktrees and, with --remove, remove the named ones.
 
-    pnpm wt:cleanup                          # list only; changes nothing
-    pnpm wt:cleanup --files                  # also list every report file
-    pnpm wt:cleanup --remove                 # archive reports, then remove
-    pnpm wt:cleanup --remove --include-t3    # T3's worktrees too
+    pnpm wt:cleanup                                # list only; changes nothing
+    pnpm wt:cleanup --files                        # also list every report file
+    pnpm wt:cleanup --remove <name> [<name> ...]   # archive reports, then remove
+    pnpm wt:cleanup --include-t3 --remove <name>   # a T3 worktree too
 
 Four tools make worktrees in four places (T3 under ~/.t3/worktrees, Claude
 Code under .claude/worktrees, agents under .scratch/wt-*, `pnpm wt:pair`
@@ -13,18 +13,23 @@ gitignored agent reports under `.scratch/` that exist nowhere else.
 
 For each worktree the list shows its branch, whether `dev` contains its
 HEAD, whether `git status` is clean, and the gitignored files under
-`.scratch/` it holds (the reports). `--remove` copies those reports to
+`.scratch/` it holds (the reports), and ends with a `pnpm wt:cleanup
+--remove ...` line naming every worktree `keep_reason` lets it take.
+`--remove` acts only on the worktrees named on its command line: neither
+git nor the process list can tell that a session has finished with a
+worktree (review findings A2 and R2-1 to R2-4), so the owner decides. A
+name is a worktree's folder name, or its path when two share a folder
+name; an unknown or shared name stops the run before it changes anything.
+For each named worktree it copies the reports to
 `<main checkout>/.scratch/worktree-archive/<worktree folder name>/`, then
-runs `git worktree remove` (never `--force`) on each worktree that
-`keep_reason` does not keep. It keeps the main checkout, the worktree that
-holds `dev`, the one it runs from, locked ones, pairs (they need `pnpm
-wt:unpair`, which also removes the fork worktree), unmerged or dirty ones,
-ones holding ignored work it cannot archive (a git repo under `.scratch/`,
-an unknown folder under `vendor/`, any other ignored file that is not
-build output), and ones where a running process has its folder (a live
-session). It reads each worktree again after copying its reports. T3 binds threads
-to worktrees under ~/.t3/worktrees, and this script cannot see which, so it
-keeps all of them unless --include-t3 is given.
+runs `git worktree remove` (never `--force`), unless `keep_reason` keeps
+it: the main checkout, the worktree that holds `dev`, the one it runs
+from, locked ones, pairs (they need `pnpm wt:unpair`, which also removes
+the fork worktree), unmerged or dirty ones, and ones holding ignored work
+it cannot archive (a git repo under `.scratch/`, an unknown folder under
+`vendor/`, any other ignored file that is not build output). T3 binds
+threads to worktrees under ~/.t3/worktrees, and this script cannot see
+which, so it keeps all of them unless --include-t3 is given.
 
 Branches are kept; delete merged ones with `git branch -d`.
 """
@@ -33,7 +38,6 @@ from __future__ import annotations
 
 import argparse
 import filecmp
-import os
 import shutil
 import subprocess
 import sys
@@ -70,8 +74,6 @@ class Worktree:
     clean: bool
     reports: list[str] = field(default_factory=list)
     other_ignored: list[str] = field(default_factory=list)
-    # None when the running processes cannot be listed.
-    processes: list[str] | None = field(default_factory=list)
 
 
 def keep_reason(wt: Worktree, include_t3: bool) -> str | None:
@@ -96,10 +98,6 @@ def keep_reason(wt: Worktree, include_t3: bool) -> str | None:
         return "uncommitted or untracked files"
     if wt.other_ignored:
         return "ignored files this script does not archive: " + ", ".join(wt.other_ignored[:5])
-    if wt.processes is None:
-        return "cannot list running processes (no /proc), so cannot tell whether a session uses it"
-    if wt.processes:
-        return "a running process has its folder inside it: " + "; ".join(wt.processes[:3])
     return None
 
 
@@ -120,42 +118,6 @@ def split_ignored(listed: list[str], is_empty) -> tuple[list[str], list[str]]:
     return reports, other
 
 
-def own_process_tree() -> set[int]:
-    """This process and the ones that started it: a shell started inside a
-    worktree is not a session using it."""
-    pids, pid = set(), os.getpid()
-    while pid > 1 and pid not in pids:
-        pids.add(pid)
-        try:
-            stat = Path(f"/proc/{pid}/stat").read_text()
-        except OSError:
-            break
-        pid = int(stat.rpartition(")")[2].split()[1])
-    return pids
-
-
-def processes_in(path: Path, own: set[int]) -> list[str] | None:
-    """`pid N: command` for each process whose current folder is `path` or
-    below it, or None without /proc. A Claude Code or T3 session runs with
-    its worktree as its folder, so this is the direct sign that one is still
-    writing there (review finding A2)."""
-    proc = Path("/proc")
-    if not proc.is_dir():
-        return None
-    found = []
-    for entry in proc.iterdir():
-        if not entry.name.isdigit() or int(entry.name) in own:
-            continue
-        try:
-            cwd = Path(os.readlink(entry / "cwd"))
-            cmd = (entry / "cmdline").read_bytes().replace(b"\0", b" ").decode(errors="replace").strip()
-        except OSError:
-            continue
-        if cwd == path or path in cwd.parents:
-            found.append(f"pid {entry.name}: {cmd[:80]}")
-    return found
-
-
 # worktree_pair has git() and git_ok() too, but its git() raises Refusal,
 # which this script does not catch, and decodes strictly, so a file name
 # that is not UTF-8 would crash the listing.
@@ -170,7 +132,7 @@ def git_ok(cwd: Path, *args: str) -> bool:
     return subprocess.run(["git", *args], cwd=cwd, capture_output=True).returncode == 0
 
 
-def read_worktree(entry: dict[str, str], main: Path, here: Path, own: set[int]) -> Worktree:
+def read_worktree(entry: dict[str, str], main: Path, here: Path) -> Worktree:
     path = Path(entry["worktree"])
     branch_ref = entry.get("branch", "")
     branch = branch_ref.removeprefix("refs/heads/") or None
@@ -215,7 +177,6 @@ def read_worktree(entry: dict[str, str], main: Path, here: Path, own: set[int]) 
         wt.other_ignored += [
             f"vendor/{n}/" for n in worktree_pair.unknown_vendor_folders(sorted(p.name for p in vendor.iterdir()))
         ]
-    wt.processes = processes_in(path, own)
     return wt
 
 
@@ -243,8 +204,7 @@ def describe(wt: Worktree, reason: str | None, show_files: bool) -> list[str]:
         lines.append(f"  reports: {report_summary(wt.reports) if wt.reports else 'none'}")
         if show_files:
             lines += [f"    {rel}" for rel in wt.reports]
-    action = "archives its reports, then removes it" if wt.reports else "removes it"
-    lines.append(f"  --remove: {'keeps it: ' + reason if reason else action}")
+    lines.append(f"  --remove: {'keeps it: ' + reason if reason else 'may take it'}")
     return lines
 
 
@@ -265,10 +225,33 @@ def archive_problem(wt: Worktree, archive: Path) -> str | None:
     return None
 
 
+def resolve_names(names: list[str], paths: list[Path]) -> tuple[list[Path], list[str]]:
+    """(the worktrees `names` pick, one problem per name that picks none or
+    several). Pure. A name is a folder name, or a path."""
+    picked, problems = [], []
+    for name in names:
+        hits = [p for p in paths if p.name == name or worktree_pair.same_path(str(p), str(Path(name).absolute()))]
+        if len(hits) == 1:
+            picked.append(hits[0])
+        elif not hits:
+            problems.append(f"no worktree is named {name!r}")
+        else:
+            problems.append(f"{name!r} names {len(hits)} worktrees ({', '.join(map(str, hits))}); give the path")
+    return picked, problems
+
+
+def paste_name(path: Path, paths: list[Path]) -> str:
+    """The shortest name `resolve_names` maps back to `path` alone."""
+    return path.name if sum(p.name == path.name for p in paths) == 1 else str(path)
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--remove", action="store_true", help="archive reports, then remove each worktree the list says it removes")
-    ap.add_argument("--include-t3", action="store_true", help="with --remove, treat T3's worktrees like the others")
+    ap.add_argument(
+        "--remove", nargs="+", metavar="NAME",
+        help="archive reports, then remove these worktrees (a folder name, or a path when two share one)",
+    )
+    ap.add_argument("--include-t3", action="store_true", help="with --remove, let a named T3 worktree go too")
     ap.add_argument("--files", action="store_true", help="list every report file")
     args = ap.parse_args(argv)
 
@@ -281,40 +264,43 @@ def main(argv: list[str] | None = None) -> int:
         raise SystemExit(f"FAIL: no local branch {INTEGRATION_BRANCH}")
     here = Path(git(cwd, "rev-parse", "--show-toplevel").strip())
     entries = [e for e in worktree_pair.parse_worktrees(git(main_path, "worktree", "list", "--porcelain")) if "bare" not in e]
-    own = own_process_tree()
-
+    paths = [Path(e["worktree"]) for e in entries]
     archive = main_path / ARCHIVE_REL
-    removable = 0
-    failed = 0
-    # Each worktree is read just before it is acted on, and read again after
-    # its reports are copied, so a report written meanwhile is not lost.
-    for entry in entries:
-        wt = read_worktree(entry, main_path, here, own)
-        reason = keep_reason(wt, args.include_t3)
-        if args.remove and reason is None:
-            reason = archive_problem(wt, archive)
+
+    if not args.remove:
+        takeable = []
+        for entry in entries:
+            wt = read_worktree(entry, main_path, here)
+            reason = keep_reason(wt, args.include_t3)
+            print("\n".join(describe(wt, reason, args.files)) + "\n")
             if reason is None:
-                again = read_worktree(entry, main_path, here, own)
-                reason = keep_reason(again, args.include_t3)
-                if reason is None and again.reports != wt.reports:
-                    reason = "its report files changed while they were copied; run this again"
-        print("\n".join(describe(wt, reason, args.files)))
-        if reason is not None:
-            print()
+                takeable.append(paste_name(wt.path, paths))
+        print(f"--remove may take {len(takeable)} of {len(entries)} worktrees; it archives their reports in {archive}")
+        if takeable:
+            print("Name only worktrees no session still uses:")
+            print("pnpm wt:cleanup --remove " + " ".join(takeable))
+        return 0
+
+    picked, problems = resolve_names(args.remove, paths)
+    if problems:
+        raise SystemExit("FAIL: " + "; ".join(problems) + ". Nothing was changed.")
+    removed = failed = 0
+    for entry in entries:
+        if not any(worktree_pair.same_path(entry["worktree"], str(p)) for p in picked):
             continue
-        removable += 1
-        if args.remove:
+        wt = read_worktree(entry, main_path, here)
+        reason = keep_reason(wt, args.include_t3) or archive_problem(wt, archive)
+        print("\n".join(describe(wt, reason, args.files)))
+        if reason is None:
             r = subprocess.run(["git", "-C", str(main_path), "worktree", "remove", str(wt.path)], capture_output=True, text=True)
             if r.returncode == 0:
+                removed += 1
                 print(f"  removed; reports kept in {archive / wt.path.name}" if wt.reports else "  removed")
             else:
                 failed += 1
                 print(f"  git worktree remove failed: {r.stderr.strip()}")
         print()
-    verb = "removed" if args.remove else "--remove would remove"
-    print(f"{verb} {removable - failed} of {len(entries)} worktrees" + (f"; {failed} failed" if failed else ""))
-    if not args.remove and removable:
-        print(f"reports would go to {archive}")
+    print(f"removed {removed} of {len(picked)} named worktrees" + (f"; {failed} failed" if failed else ""))
     return 1 if failed else 0
 
 

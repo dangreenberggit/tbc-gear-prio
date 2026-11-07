@@ -48,8 +48,6 @@ def check_keep_rule() -> list[str]:
         ("not merged", _wt(merged=False), False, "not merged"),
         ("dirty", _wt(clean=False), False, "uncommitted"),
         ("other ignored files", _wt(other_ignored=[".env"]), False, ".env"),
-        ("a session runs there", _wt(processes=["pid 7: claude"]), False, "pid 7"),
-        ("processes cannot be listed", _wt(processes=None), False, "cannot list"),
         ("main checkout, even with the flag", _wt(is_main=True, t3=True), True, "main checkout"),
     )
     problems = []
@@ -181,9 +179,19 @@ def _build(tmp: Path) -> tuple[_Repo, dict[str, Path]]:
     wts["vendor"] = r.add("vendor-work", "feat/vendor")
     r.write(wts["vendor"], "vendor/mywork/notes.txt", "notes\n")
     r.write(wts["vendor"], "vendor/wowsims/x.json", "{}\n")
-    # Review finding A2: a session still runs there.
-    wts["busy"] = r.add("busy", "feat/busy")
+    # Review finding A2: a session may still write here, so only the
+    # owner's naming it lets --remove take it.
+    wts["unnamed"] = r.add("unnamed", "feat/unnamed")
     return r, wts
+
+
+def _names(wts: dict[str, Path], *leave_out: str) -> list[str]:
+    """Each worktree's folder name, or its path when two share a name."""
+    return [
+        str(path) if path.name == "same" else path.name
+        for key, path in wts.items()
+        if key not in leave_out
+    ]
 
 
 def check_list_mode_changes_nothing() -> list[str]:
@@ -200,18 +208,17 @@ def check_list_mode_changes_nothing() -> list[str]:
         ):
             if want not in out:
                 problems.append(f"list mode output lacks {want!r}: {out[-600:]!r}")
+        paste = [line for line in out.splitlines() if line.startswith("pnpm wt:cleanup --remove ")]
+        want = ["merged", str(wts["same-a"]), str(wts["same-b"]), "unnamed"]
+        if len(paste) != 1 or sorted(paste[0].split()[3:]) != sorted(want):
+            problems.append(f"list mode paste line: got {paste}, want the names {want}")
         return problems
 
 
 def check_remove_mode_keeps_all_but_clean_merged() -> list[str]:
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         r, wts = _build(Path(tmp))
-        session = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(120)"], cwd=wts["busy"])
-        try:
-            rc, out = r.run("--remove")
-        finally:
-            session.kill()
-            session.wait()
+        rc, out = r.run("--remove", "main", "wt-dev", *_names(wts, "unnamed"))
         problems = [] if rc == 0 else [f"remove mode: rc={rc} {out[-600:]!r}"]
         listed = r.listed()
         gone = {"merged", "same-a"}
@@ -235,11 +242,9 @@ def check_remove_mode_keeps_all_but_clean_merged() -> list[str]:
             problems.append("remove mode archived a T3 worktree it keeps")
         if not (wts["nested"] / ".scratch" / "inner" / "work.txt").is_file():
             problems.append("remove mode deleted a repo nested under .scratch/")
-        if "running process" not in out:
-            problems.append(f"remove mode did not say why it kept busy: {out[-600:]!r}")
         if "archive already has" not in out:
             problems.append(f"remove mode did not say why it kept b/same: {out[-600:]!r}")
-        rc, out = r.run("--remove", "--include-t3")
+        rc, out = r.run("--include-t3", "--remove", "t3-1")
         if str(wts["t3"]) in r.listed():
             problems.append(f"--include-t3 kept the T3 worktree: {out[-400:]!r}")
         got = archive / "t3-1" / ".scratch" / "agent-reports" / "r.md"
@@ -248,11 +253,28 @@ def check_remove_mode_keeps_all_but_clean_merged() -> list[str]:
         return problems
 
 
+def check_remove_mode_refuses_bad_names() -> list[str]:
+    """An unknown name, or a folder name two worktrees share, stops the run
+    before anything is copied or removed."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        r, wts = _build(Path(tmp))
+        before = r.listed()
+        problems = []
+        for argv, want in ((("merged", "nope"), "nope"), (("merged", "same"), "same")):
+            rc, out = r.run("--remove", *argv)
+            if rc == 0 or want not in out:
+                problems.append(f"--remove {' '.join(argv)}: want a refusal naming {want!r}; rc={rc} {out[-300:]!r}")
+            if r.listed() != before or (r.main / ".scratch" / "worktree-archive").exists():
+                problems.append(f"--remove {' '.join(argv)} removed or archived something")
+        return problems
+
+
 CHECKS = (
     check_keep_rule,
     check_report_and_ignored_split,
     check_list_mode_changes_nothing,
     check_remove_mode_keeps_all_but_clean_merged,
+    check_remove_mode_refuses_bad_names,
 )
 
 

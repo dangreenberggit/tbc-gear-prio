@@ -32,17 +32,22 @@ unless a flag says otherwise.
 
 ## Closed
 
-`pnpm wt:cleanup` (`scripts/worktree_cleanup.py`) lists; `pnpm
-wt:cleanup --remove` archives every gitignored file under `.scratch/`
+`pnpm wt:cleanup` (`scripts/worktree_cleanup.py`) lists, and prints a
+`pnpm wt:cleanup --remove <names>` line for every worktree it may take.
+`--remove` acts only on the worktrees named after it: the pre-merge
+review found that no process or git check can tell that a session has
+finished with a worktree (`docs/reviews/chore-merge-hurdles.md`, A2 and
+R2-1 to R2-4), and the owner chose naming on 2026-11-07 ("sure 1 is
+fine"). For each named worktree it archives every gitignored file under `.scratch/`
 (except Claude Code's `.cc-writes` markers and `__pycache__`) to
 `<main checkout>/.scratch/worktree-archive/<folder name>/`, then runs
 `git worktree remove` without `--force`. It also keeps pairs (they need
 `pnpm wt:unpair`), locked worktrees, the one it runs from, and any
 worktree holding ignored files outside `.scratch/` that are not build
-output or empty sandbox stubs. `--include-t3` removes T3's worktrees too;
+output or empty sandbox stubs. `--include-t3` lets a named T3 worktree go;
 the script cannot see which ones a T3 thread uses, so it keeps all of
 them by default. `pnpm verify` runs `scripts/check_worktree_cleanup.py`.
 
 The removing mode was run only on throwaway repos in those checks, never
 on the real repo. List mode on the real repo on 2026-11-07 said
-`--remove` would remove 12 of 32 worktrees.
+`--remove` may take 12 of 32 worktrees.
