@@ -386,18 +386,26 @@ export function startRunExpression() {
 
 // ---------------------------------------------------------------------------
 // Tab fixtures: a finished Ranking the page loads without a run. The files in
-// data/tab-fixtures/ are made up by `pnpm tab-fixtures:mock`, one per UI
-// difference between specs, each loaded on its own spec's page; a recording
-// made by hand (`pnpm tab-fixtures:record`) loads the same way. The page's
-// loader exists only on the dev server and in builds made with
+// data/tab-fixtures/ are made up by `pnpm tab-fixtures:mock`, at least one per
+// spec page below, each loaded on its own spec's page; a recording made by
+// hand (`pnpm tab-fixtures:record`) loads the same way. The page's loader
+// exists only on the dev server and in builds made with
 // VITE_TBC_TAB_FIXTURES=1.
 // ---------------------------------------------------------------------------
 
+// Keyed by the fork's spec id (`SPEC_ID_BY_PROTO_SPEC` in
+// ui/features/upgrades/model/run.ts). Survival and Arms have no page of their
+// own: they are specs on the hunter and warrior pages.
+// packages/core/test/fork-spec-pages.test.ts fails when a spec the tab ranks
+// has no entry here.
 export const PAGE_PATH_BY_SPEC = {
   ret: "/tbc/paladin/retribution/",
   feral: "/tbc/druid/feralcat/",
+  balance: "/tbc/druid/balance/",
   warlock: "/tbc/warlock/dps/",
   enh: "/tbc/shaman/enhancement/",
+  ele: "/tbc/shaman/elemental/",
+  shadow: "/tbc/priest/dps/",
   rogue: "/tbc/rogue/dps/",
   hunter: "/tbc/hunter/dps/",
   mage: "/tbc/mage/dps/",

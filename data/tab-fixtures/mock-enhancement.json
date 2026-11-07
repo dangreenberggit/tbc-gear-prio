@@ -1,0 +1,611 @@
+{
+  "schemaVersion": 1,
+  "forkSha": "0000000000000000000000000000000000000000",
+  "forkDirty": false,
+  "madeUp": true,
+  "generator": "packages/core/test/tab-fixtures/make-mock-fixtures.ts",
+  "covers": "The enhancement shaman page.",
+  "spec": "enh",
+  "phase": 3,
+  "preset": "shaman/enhancement/gear_sets/p2.gear.json",
+  "gear": {
+    "items": [
+      {
+        "id": 30190,
+        "enchant": 29192,
+        "gems": [
+          32409,
+          24058
+        ]
+      },
+      {
+        "id": 30017
+      },
+      {
+        "id": 30055,
+        "enchant": 28888,
+        "gems": [
+          24027
+        ]
+      },
+      {
+        "id": 29994,
+        "enchant": 368
+      },
+      {
+        "id": 30185,
+        "enchant": 24003,
+        "gems": [
+          24027,
+          24054,
+          24058
+        ]
+      },
+      {
+        "id": 30091,
+        "enchant": 2647,
+        "gems": [
+          24027
+        ]
+      },
+      {
+        "id": 30189,
+        "enchant": 684
+      },
+      {
+        "id": 30106,
+        "gems": [
+          24027,
+          24054
+        ]
+      },
+      {
+        "id": 30192,
+        "enchant": 29535,
+        "gems": [
+          24027
+        ]
+      },
+      {
+        "id": 30039,
+        "enchant": 28279
+      },
+      {
+        "id": 29997
+      },
+      {
+        "id": 30052
+      },
+      {
+        "id": 28830
+      },
+      {
+        "id": 29383
+      },
+      {
+        "id": 32944,
+        "enchant": 22559
+      },
+      {
+        "id": 29996,
+        "enchant": 22559
+      },
+      {
+        "id": 27815
+      }
+    ]
+  },
+  "recordedAt": "1970-01-01T00:00:00.000Z",
+  "iterations": 0,
+  "ranking": {
+    "contentHash": "made-up:mock-enhancement",
+    "cutoff": {
+      "absDps": 3
+    },
+    "fight": {
+      "reportCode": "made-up",
+      "fightId": 0,
+      "encounterName": "Made-up fixture",
+      "route": "report-events"
+    },
+    "baseline": {
+      "dps": 1750,
+      "stdev": 120,
+      "metaAdjusted": false
+    },
+    "assumptions": {
+      "maxPhase": 3,
+      "seeds": [
+        1,
+        2,
+        3
+      ],
+      "iterations": 0,
+      "race": "RaceOrc",
+      "presetId": "enh/made-up",
+      "standing": []
+    },
+    "substitutions": [],
+    "caps": {
+      "hit": {
+        "rating": 83.31,
+        "capRating": 141.92,
+        "gap": 58.61,
+        "capUncertainty": 15.77,
+        "assumedRace": "RaceOrc",
+        "talentHitAssumed": {
+          "talent": "Precision",
+          "points": 3,
+          "maxPoints": 3
+        }
+      },
+      "expertise": {
+        "rating": 95,
+        "capRating": null,
+        "gap": null
+      }
+    },
+    "items": [
+      {
+        "rank": 1,
+        "itemId": 29515,
+        "name": "Ebon Netherscale Breastplate",
+        "slot": "chest",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 39.5,
+        "deltaPct": 2.26,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 2,
+        "itemId": 28776,
+        "name": "Liar's Tongue Gloves",
+        "slot": "hands",
+        "source": {
+          "kind": "raid",
+          "zone": "Magtheridon's Lair",
+          "boss": "Magtheridon"
+        },
+        "deltaDps": 37.61,
+        "deltaPct": 2.15,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "sources": [
+          {
+            "kind": "raid",
+            "zone": "Magtheridon's Lair",
+            "boss": "Magtheridon"
+          },
+          {
+            "kind": "heroic",
+            "dungeon": "The Shattered Halls"
+          },
+          {
+            "kind": "pvp",
+            "via": "arena"
+          }
+        ]
+      },
+      {
+        "rank": 3,
+        "itemId": 28741,
+        "name": "Skulker's Greaves",
+        "slot": "legs",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Netherspite"
+        },
+        "deltaDps": 35.71,
+        "deltaPct": 2.04,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "owned": true
+      },
+      {
+        "rank": 4,
+        "itemId": 25686,
+        "name": "Fel Leather Boots",
+        "slot": "feet",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 33.82,
+        "deltaPct": 1.93,
+        "se": 0.7,
+        "seMethod": "independent",
+        "bisTags": [
+          "Alt"
+        ],
+        "belowCutoff": false
+      },
+      {
+        "rank": 5,
+        "itemId": 29996,
+        "name": "Rod of the Sun King",
+        "slot": "weapon",
+        "slotChoice": "offhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Kael'thas Sunstrider"
+        },
+        "deltaDps": 31.92,
+        "deltaPct": 1.82,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 6,
+        "itemId": 28224,
+        "name": "Wastewalker Helm",
+        "slot": "head",
+        "source": {
+          "kind": "raid",
+          "zone": "Old Hillsbrad Foothills",
+          "boss": "Epoch Hunter"
+        },
+        "deltaDps": 30.03,
+        "deltaPct": 1.72,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false,
+        "setContext": {
+          "setId": 659,
+          "setName": "Wastewalker Armor",
+          "piecesWornBefore": 0,
+          "piecesAfterSwap": 1,
+          "nextThreshold": 2,
+          "crossesThreshold": false,
+          "stepRanking": true,
+          "singleDeltaDps": 30.03,
+          "singleBreaks": [
+            {
+              "setId": 636,
+              "setName": "Cataclysm Harness",
+              "threshold": 4,
+              "dps": 17.75
+            }
+          ],
+          "futureBonuses": [
+            {
+              "threshold": 2,
+              "piecesNeeded": 2,
+              "dps": 24,
+              "sameGearDps": 24,
+              "sameGearSe": 2.1,
+              "partnerRule": "close-calls",
+              "pieces": [
+                {
+                  "itemId": 27797,
+                  "name": "Wastewalker Shoulderpads"
+                }
+              ],
+              "stepGearDps": 42.53,
+              "stepGearSe": 2
+            }
+          ]
+        }
+      },
+      {
+        "rank": 7,
+        "itemId": 28757,
+        "name": "Ring of a Thousand Marks",
+        "slot": "finger",
+        "slotChoice": "finger2",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Prince Malchezaar"
+        },
+        "deltaDps": 28.13,
+        "deltaPct": 1.61,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 8,
+        "itemId": 24259,
+        "name": "Vengeance Wrap",
+        "slot": "back",
+        "source": {
+          "kind": "crafted",
+          "profession": "Tailoring"
+        },
+        "deltaDps": 26.24,
+        "deltaPct": 1.5,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 9,
+        "itemId": 29040,
+        "name": "Cyclone Helm",
+        "slot": "head",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 24.34,
+        "deltaPct": 1.39,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 10,
+        "itemId": 29994,
+        "name": "Thalassian Wildercloak",
+        "slot": "back",
+        "source": {
+          "kind": "raid",
+          "zone": "Tempest Keep",
+          "boss": "Kael'thas Sunstrider"
+        },
+        "deltaDps": 22.45,
+        "deltaPct": 1.28,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 11,
+        "itemId": 29516,
+        "name": "Ebon Netherscale Belt",
+        "slot": "waist",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 20.55,
+        "deltaPct": 1.17,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 12,
+        "itemId": 28288,
+        "name": "Abacus of Violent Odds",
+        "slot": "trinket",
+        "slotChoice": "trinket2",
+        "source": {
+          "kind": "raid",
+          "zone": "The Mechanar",
+          "boss": "Pathaleon the Calculator"
+        },
+        "deltaDps": 18.66,
+        "deltaPct": 1.07,
+        "se": 0.5,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 13,
+        "itemId": 25685,
+        "name": "Fel Leather Gloves",
+        "slot": "hands",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": 16.76,
+        "deltaPct": 0.96,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 14,
+        "itemId": 27797,
+        "name": "Wastewalker Shoulderpads",
+        "slot": "shoulder",
+        "source": {
+          "kind": "raid",
+          "zone": "Auchenai Crypts",
+          "boss": "Avatar of the Martyred"
+        },
+        "deltaDps": 14.87,
+        "deltaPct": 0.85,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 15,
+        "itemId": 28830,
+        "name": "Dragonspine Trophy",
+        "slot": "trinket",
+        "slotChoice": "trinket1",
+        "source": {
+          "kind": "raid",
+          "zone": "Gruul's Lair",
+          "boss": "Gruul the Dragonkiller"
+        },
+        "deltaDps": 12.97,
+        "deltaPct": 0.74,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 16,
+        "itemId": 28308,
+        "name": "Gladiator's Cleaver",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 11.08,
+        "deltaPct": 0.63,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 17,
+        "itemId": 28545,
+        "name": "Edgewalker Longboots",
+        "slot": "feet",
+        "source": {
+          "kind": "raid",
+          "zone": "Karazhan",
+          "boss": "Moroes"
+        },
+        "deltaDps": 9.18,
+        "deltaPct": 0.52,
+        "se": 1,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 18,
+        "itemId": 29043,
+        "name": "Cyclone Shoulderplates",
+        "slot": "shoulder",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 7.29,
+        "deltaPct": 0.42,
+        "se": 0.4,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 19,
+        "itemId": 29383,
+        "name": "Bloodlust Brooch",
+        "slot": "trinket",
+        "slotChoice": "trinket2",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 5.39,
+        "deltaPct": 0.31,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": 20,
+        "itemId": 27872,
+        "name": "The Harvester of Souls",
+        "slot": "weapon",
+        "slotChoice": "offhand",
+        "source": {
+          "kind": "raid",
+          "zone": "Auchenai Crypts",
+          "boss": "Exarch Maladaar"
+        },
+        "deltaDps": 3.5,
+        "deltaPct": 0.2,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": false
+      },
+      {
+        "rank": null,
+        "itemId": 27815,
+        "name": "Totem of the Astral Winds",
+        "slot": "ranged",
+        "source": {
+          "kind": "raid",
+          "zone": "Mana-Tombs",
+          "boss": "Pandemonius"
+        },
+        "deltaDps": 2.9,
+        "deltaPct": 0.17,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [
+          "BiS"
+        ],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29348,
+        "name": "The Bladefist",
+        "slot": "weapon",
+        "slotChoice": "mainhand",
+        "source": {
+          "kind": "raid",
+          "zone": "The Shattered Halls",
+          "boss": "Warchief Kargath Bladefist"
+        },
+        "deltaDps": 1.57,
+        "deltaPct": 0.09,
+        "se": 0.8,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29381,
+        "name": "Choker of Vile Intent",
+        "slot": "neck",
+        "source": {
+          "kind": "unknown"
+        },
+        "deltaDps": 0.23,
+        "deltaPct": 0.01,
+        "se": 0.6,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      },
+      {
+        "rank": null,
+        "itemId": 29517,
+        "name": "Ebon Netherscale Bracers",
+        "slot": "wrist",
+        "source": {
+          "kind": "crafted",
+          "profession": "Leatherworking"
+        },
+        "deltaDps": -1.1,
+        "deltaPct": -0.06,
+        "se": 0.9,
+        "seMethod": "independent",
+        "bisTags": [],
+        "belowCutoff": true
+      }
+    ],
+    "complete": true,
+    "durationMs": 60000
+  }
+}

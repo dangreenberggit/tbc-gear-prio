@@ -454,3 +454,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 834 merge-ready let a branch bring a ticket number the merge result already has (chore/merge-hurdles) 2026-11-07
 - 835 nothing removed worktrees whose branch dev contains; pnpm wt:cleanup (chore/merge-hurdles) 2026-11-07
 - 836 paired-worktrees "Land it on dev" reads as if only a pair can use it (pre-merge review chore/merge-hurdles, instruction-review cold readers) 2026-11-07
+- 842 The made-up tab fixtures write a melee hit cap (Precision 3/3, expertise) into every fixture, the caster ones included; nothing shows it yet (pre-merge review feat/452-spec-page-scans, round 1, D2) 2026-11-06
+- 843 The layout gate skips when one of a page's two fixtures fails to load, so that fixture's case is never checked (pre-merge review feat/452-spec-page-scans, round 1, A1) 2026-11-06

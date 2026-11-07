@@ -3,14 +3,19 @@
 Each `*.json` file here is a made-up Upgrades-tab result. The tab renders it
 in seconds with no backend and no sim run (ticket 504). The figures are made
 up and mean nothing; the rows are real items from the spec's own preset gear
-files, so icons and quality colours resolve. Each file covers one UI
-difference we expect between specs, and loads on one spec page that has it.
+files, so icons and quality colours resolve. Each file loads on one spec
+page, and every spec page the tab ranks has at least one, so the page checks
+below reach every page (ticket 801). A file whose row in the table names a UI
+difference also covers that difference, on a page that has it; a file whose
+row says "none" is a plain result for a page the others do not open.
 
 The tab's automatic page checks render these files and no sim recording:
 
 - the layout gate (`pnpm layout-gate:check`) runs its before-run checks on the
   ret page at four widths, then renders every file here on its own spec's
-  page;
+  page, with an axe scan on each at 653 px (`POST_RUN_AXE_WIDTH` in
+  `scripts/tab-harness/test-layout.mjs`), and fails when a spec page has no
+  file here;
 - `pnpm tab-review` renders the file a manifest entry names with
   `"fixture": "<name>"`;
 - `pnpm tab-fixtures:smoke` opens every file once.
@@ -23,10 +28,17 @@ The tab's automatic page checks render these files and no sim recording:
 | `mock-set-bonus.json`    | `/tbc/warrior/dps/`         | rows whose swap breaks a worn set bonus, and one that completes a bonus       |
 | `mock-many-rows.json`    | `/tbc/druid/feralcat/`      | a table long enough that only part of it is rendered at once                  |
 | `mock-dropped-list.json` | `/tbc/paladin/retribution/` | a long "Items left out and other notes" list: two headings and ten item lines |
+| `mock-balance.json`      | `/tbc/druid/balance/`       | none: a plain result for this page                                            |
+| `mock-shadow.json`       | `/tbc/priest/dps/`          | none: a plain result for this page                                            |
+| `mock-elemental.json`    | `/tbc/shaman/elemental/`    | none: a plain result for this page                                            |
+| `mock-warlock.json`      | `/tbc/warlock/dps/`         | none: a plain result for this page                                            |
+| `mock-enhancement.json`  | `/tbc/shaman/enhancement/`  | none: a plain result for this page                                            |
 
 Every file also holds at least one set-bonus row with a popover, one BiS row
 below the cutoff, one owned row and one row with three sources. Each file's
-`covers` field says the same thing as the table.
+`covers` field says the same thing as the table, or names its page.
+Survival hunter and Arms warrior have no page of their own: they are specs on
+the hunter and warrior pages.
 
 The set-bonus rows are swaps the game allows on the file's gear: a row breaks
 only a bonus that is active, from a slot that holds a piece of that set; its
@@ -40,12 +52,12 @@ one piece short of a bonus, and a crossing row needs that.
 
 ## The generator
 
-`packages/core/test/tab-fixtures/make-mock-fixtures.ts` writes all six files.
+`packages/core/test/tab-fixtures/make-mock-fixtures.ts` writes every file here.
 It is deterministic and needs the fork clone (`vendor/tbc-new-fork`), because
 it reads the preset gear files and the item database there.
 
 ```sh
-pnpm tab-fixtures:mock            # write the six files
+pnpm tab-fixtures:mock            # write every file
 pnpm tab-fixtures:mock --check    # exit 1 when a file differs, is missing, or is not one it writes
 ```
 
@@ -61,7 +73,7 @@ its compare, so only the schema is checked there.
 | ---------------------- | ------------------------------------------------------------------------------- |
 | `schemaVersion`        | `1`                                                                             |
 | `madeUp`               | always `true` here                                                              |
-| `generator`, `covers`  | the generator's path, and one sentence naming the UI difference                 |
+| `generator`, `covers`  | the generator's path, and one sentence naming the UI difference or the page     |
 | `forkSha`, `forkDirty` | 40 zeros and `false`: no fork commit produced these figures                     |
 | `spec`, `phase`        | engine spec id (the page the file loads on) and the page phase                  |
 | `preset`               | the preset gear file `gear` is copied from, under the fork's `ui/specs/`        |
@@ -71,9 +83,10 @@ its compare, so only the schema is checked there.
 | `ranking`              | a `Ranking` object holding the fields the tab reads                             |
 
 Loading a fixture sets the page phase, then the gear, then shows the ranking as
-a finished, current run. The page must be on the fixture's spec. "Took" never
-appears for a fixture load, because no run happened; a load is settled when the
-results table has rows and there is no stale banner.
+a finished, current run. The page must be on the fixture's spec. The "Took"
+time a fixture shows is its made-up `durationMs`, not a run's, so never wait
+for it; a load is settled when the results table has rows and there is no
+stale banner.
 
 ## Looking at one (the storybook)
 

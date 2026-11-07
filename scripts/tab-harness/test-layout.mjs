@@ -11,10 +11,10 @@
 //     (3) below `xl` the run card sits above the results;
 //     axe on the tab.
 //   then for each fixture -- every data/tab-fixtures/*.json (the made-up
-//   results from `pnpm tab-fixtures:mock`, one per UI difference between
-//   specs), or only the one `--fixture <name-or-path>` or TBC_TAB_FIXTURE
-//   names -- on that fixture's own spec page, at each width, in the open
-//   pane with its below-cutoff group open:
+//   results from `pnpm tab-fixtures:mock`, at least one for each spec page in
+//   PAGE_PATH_BY_SPEC), or only the one `--fixture <name-or-path>` or
+//   TBC_TAB_FIXTURE names -- on that fixture's own spec page, at each width,
+//   in the open pane with its below-cutoff group open:
 //     (15) the open pane has result rows, so the checks below measured some
 //         (the fixture loader settles on a row anywhere on the page);
 //         only the rows in view are rendered (ticket 565), so the per-row
@@ -49,8 +49,14 @@
 //     19-22 also fail at a width where no fixture gave them anything to
 //     measure, so they cannot pass with nothing checked (ticket 425);
 //     the A1 fact: how far each below-cutoff column sits from its head;
-//     axe once, at 653, on one fixture only (mock-set-bonus when it is
-//     rendered, else the first), as before the pass had more than one.
+//     axe at 653 on every fixture, so each spec page is scanned after a
+//     result (ticket 801);
+//   (23) with every fixture rendered, each spec page in PAGE_PATH_BY_SPEC had
+//     a fixture that was measured, so no page drops out of the checks above
+//     unnoticed (ticket 801; page-coverage.mjs). A page whose fixture failed
+//     to load fails here, so the run is a failure, not "unmeasured". That
+//     each spec the fork's tab ranks has a page in PAGE_PATH_BY_SPEC is a
+//     vitest test, packages/core/test/fork-spec-pages.test.ts.
 //
 // An unbaselined critical or serious WCAG violation fails the gate
 // (TBC_A11Y_BASELINE holds the accepted debt). The verdict is one
@@ -72,6 +78,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { pageCoverage } from "./page-coverage.mjs";
 import { RESULT_ROW, ROW_HELPERS } from "./rows.mjs";
 import * as H from "./test-tab-harness.mjs";
 
@@ -100,24 +107,26 @@ const FIXTURE_DIR = path.resolve(
   "data",
   "tab-fixtures"
 );
-const AXE_FIXTURE = "mock-set-bonus.json";
-
 class Unmeasured extends Error {}
 
 const results = [];
 // Module-level, like `results`, so the crash handler sees a11y failures found
 // before the crash.
 const violations = [];
+const fixtureField = (name) => (name == null ? {} : { fixture: name });
 const reportedViolations = () =>
-  violations.map(({ id, selector, impact, state, width, fail, baselined }) => ({
-    id,
-    selector,
-    impact,
-    state,
-    width,
-    fail: !!fail,
-    baselined: !!baselined,
-  }));
+  violations.map(
+    ({ id, selector, impact, state, width, fixture, fail, baselined }) => ({
+      id,
+      selector,
+      impact,
+      state,
+      width,
+      ...fixtureField(fixture),
+      fail: !!fail,
+      baselined: !!baselined,
+    })
+  );
 // The fixture the post-run checks are measuring; null during the pre-run pass.
 let currentFixture = null;
 const check = (id, width, ok, detail) => {
@@ -125,12 +134,13 @@ const check = (id, width, ok, detail) => {
     check: id,
     width,
     ok,
-    ...(currentFixture === null ? {} : { fixture: currentFixture }),
+    ...fixtureField(currentFixture),
     ...(detail === undefined ? {} : { detail }),
   });
   const where = currentFixture === null ? "" : ` [${currentFixture}]`;
+  const at = width === null ? "" : ` @${width}`;
   console.log(
-    `${ok ? "PASS" : "FAIL"} (${id}) @${width}${where}${detail === undefined ? "" : ` ${JSON.stringify(detail)}`}`
+    `${ok ? "PASS" : "FAIL"} (${id})${at}${where}${detail === undefined ? "" : ` ${JSON.stringify(detail)}`}`
   );
 };
 
@@ -560,9 +570,6 @@ async function main() {
     name: path.basename(p),
     text: fs.readFileSync(p, "utf8"),
   }));
-  const axeFixture = fixtures.some((f) => f.name === AXE_FIXTURE)
-    ? AXE_FIXTURE
-    : fixtures[0].name;
   const fixtureMs = {};
   const unmeasuredFixtures = [];
   const matched = new Set();
@@ -571,18 +578,25 @@ async function main() {
     const { violations: found, ms } = await H.axeRun(send, ROOT);
     const cls = H.a11yClassify(found, baseline);
     for (const i of cls.matched) matched.add(i);
+    const where =
+      currentFixture === null
+        ? `${state} ${width}`
+        : `${state} ${width} ${currentFixture}`;
     for (const v of [
       ...cls.fail.map((f) => ({ ...f, fail: true })),
       ...cls.warn,
     ])
-      violations.push({ ...v, state, width });
+      violations.push({
+        ...v,
+        state,
+        width,
+        ...fixtureField(currentFixture),
+      });
     console.log(
-      `axe [${state} ${width}] ${cls.fail.length} failing, ${cls.warn.length} warning (${ms} ms)`
+      `axe [${where}] ${cls.fail.length} failing, ${cls.warn.length} warning (${ms} ms)`
     );
     for (const f of cls.fail)
-      console.log(
-        `FAIL a11y [${state} ${width}] ${f.id} ${f.selector} (${f.impact})`
-      );
+      console.log(`FAIL a11y [${where}] ${f.id} ${f.selector} (${f.impact})`);
   };
 
   let preRunAt = startedAt;
@@ -616,7 +630,7 @@ async function main() {
         for (const width of WIDTHS) {
           await setWidth(send, width);
           judgePostRun(width, await H.evaluate(send, postRunExpression), facts);
-          if (width === POST_RUN_AXE_WIDTH && name === axeFixture)
+          if (width === POST_RUN_AXE_WIDTH)
             await audit(send, "post-run", width);
           // Last at each width: the open popover must not be in the page when
           // the other checks measure it.
@@ -637,6 +651,18 @@ async function main() {
           check(id, width, false, {
             error: "no fixture gave this check anything to measure",
           });
+    if (!askedFixture(process.argv.slice(2))) {
+      const unmeasured = new Set(unmeasuredFixtures.map((u) => u.fixture));
+      const coverage = pageCoverage({
+        pagePathBySpec: H.PAGE_PATH_BY_SPEC,
+        fixtures: fixtures.map((f) => ({
+          spec: JSON.parse(f.text).spec,
+          measured: !unmeasured.has(f.name),
+        })),
+      });
+      const { ok, ...detail } = coverage;
+      check(23, null, ok, detail);
+    }
     fixtureDoneAt = performance.now();
   } finally {
     client.close();

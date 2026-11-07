@@ -1,9 +1,12 @@
 /**
  * Writes the made-up Upgrades-tab results under `data/tab-fixtures/` that the
  * tab's page checks render (layout gate, `pnpm tab-review`,
- * `pnpm tab-fixtures:smoke`). Each file covers one UI difference we expect
- * between specs and loads on one spec page that has it, so a page check never
- * needs a sim recording (stage tab-checks-without-sims).
+ * `pnpm tab-fixtures:smoke`), so a page check never needs a sim recording
+ * (stage tab-checks-without-sims). Each file loads on one spec page, and every
+ * spec page the tab ranks has at least one, so the page checks reach every
+ * page (ticket 801). The entries at the top of `FIXTURES` each also cover one
+ * UI difference we expect between specs, on a spec page that has it; the plain
+ * entries after them are results for the pages those do not open.
  *
  * The figures are made up. The rows are real: every row is an (item id, slot)
  * pair read from the spec's own preset gear files, so icons and quality
@@ -12,7 +15,7 @@
  * gear: the piece counts come from the gear, and the bonus counts from the
  * fork's Go set definitions. The output is deterministic.
  *
- *   pnpm tab-fixtures:mock            # write the six files
+ *   pnpm tab-fixtures:mock            # write every file
  *   pnpm tab-fixtures:mock --check    # exit 1 when a file differs or is missing
  *
  * Needs the fork clone (`vendor/` is gitignored); `--check` skips without it.
@@ -152,7 +155,13 @@ type MockFixture = {
   ranking: MockRanking;
 };
 
-type DbItem = { id: number; name: string; setId?: number; setName?: string };
+type DbItem = {
+  id: number;
+  name: string;
+  type?: number;
+  setId?: number;
+  setName?: string;
+};
 type DbSource = {
   drop?: { zoneId?: number; npcId?: number };
   crafted?: { profession?: number };
@@ -171,16 +180,8 @@ type Pair = {
   key: string;
 };
 
-type FixtureName =
-  | "mock-offhand"
-  | "mock-ranged"
-  | "mock-long-names"
-  | "mock-set-bonus"
-  | "mock-many-rows"
-  | "mock-dropped-list";
-
-type Spec = {
-  name: FixtureName;
+type Spec<Name extends string = FixtureName> = {
+  name: Name;
   spec: string;
   specDir: string;
   gearPreset: string;
@@ -200,13 +201,15 @@ type Spec = {
 const CUTOFF_DPS = 3;
 
 const PLAIN = {
+  size: 24,
+  belowCutoff: 4,
   names: "short",
   setRows: { breaks: 1, crossing: false },
   removesWornItem: false,
   droppedList: false,
 } as const;
 
-const FIXTURES: Spec[] = [
+const FIXTURES = [
   {
     ...PLAIN,
     name: "mock-offhand",
@@ -217,8 +220,6 @@ const FIXTURES: Spec[] = [
     baselineDps: 1850,
     covers:
       "Off-hand rows: weapons ranked for the off-hand slot beside main-hand rows.",
-    size: 24,
-    belowCutoff: 4,
   },
   {
     ...PLAIN,
@@ -229,8 +230,6 @@ const FIXTURES: Spec[] = [
     race: "RaceDwarf",
     baselineDps: 1700,
     covers: "The ranged slot: bows ranked in their own slot.",
-    size: 24,
-    belowCutoff: 4,
   },
   {
     ...PLAIN,
@@ -242,8 +241,6 @@ const FIXTURES: Spec[] = [
     baselineDps: 1600,
     covers:
       "Long item names (60-80 characters) that must wrap only between words, and a removes-worn-item line.",
-    size: 24,
-    belowCutoff: 4,
     names: "long",
     removesWornItem: true,
   },
@@ -259,8 +256,6 @@ const FIXTURES: Spec[] = [
     baselineDps: 1800,
     covers:
       "Set-bonus rows: pieces whose swap breaks a worn bonus, one that completes a bonus, and bonuses a row can reach with more pieces.",
-    size: 24,
-    belowCutoff: 4,
     setRows: { breaks: 3, crossing: true },
   },
   {
@@ -290,7 +285,61 @@ const FIXTURES: Spec[] = [
     belowCutoff: 2,
     droppedList: true,
   },
-];
+  // The specs above have a page each; these give the other spec pages a
+  // result, so the page checks and the after-run axe scan reach them too.
+  {
+    ...PLAIN,
+    name: "mock-balance",
+    spec: "balance",
+    specDir: "druid/balance",
+    gearPreset: "gear_sets/p2_a.gear.json",
+    race: "RaceTauren",
+    baselineDps: 1500,
+    covers: "The balance druid page.",
+  },
+  {
+    ...PLAIN,
+    name: "mock-shadow",
+    spec: "shadow",
+    specDir: "priest/dps",
+    gearPreset: "gear_sets/p2.gear.json",
+    race: "RaceUndead",
+    baselineDps: 1450,
+    covers: "The shadow priest page.",
+  },
+  {
+    ...PLAIN,
+    name: "mock-elemental",
+    spec: "ele",
+    specDir: "shaman/elemental",
+    gearPreset: "gear_sets/p2.gear.json",
+    race: "RaceTroll",
+    baselineDps: 1550,
+    covers: "The elemental shaman page.",
+  },
+  {
+    ...PLAIN,
+    name: "mock-warlock",
+    spec: "warlock",
+    specDir: "warlock/dps",
+    gearPreset: "gear_sets/t5.gear.json",
+    race: "RaceUndead",
+    baselineDps: 1650,
+    covers: "The warlock page.",
+  },
+  {
+    ...PLAIN,
+    name: "mock-enhancement",
+    spec: "enh",
+    specDir: "shaman/enhancement",
+    gearPreset: "gear_sets/p2.gear.json",
+    race: "RaceOrc",
+    baselineDps: 1750,
+    covers: "The enhancement shaman page.",
+  },
+] as const satisfies readonly Spec<string>[];
+
+type FixtureName = (typeof FIXTURES)[number]["name"];
 
 const PROFESSIONS: Record<number, string> = {
   1: "Alchemy",
@@ -352,14 +401,51 @@ function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T;
 }
 
-/** Every distinct (item id, slot) pair worn in the spec's preset files. */
-function presetPairs(specDir: string): Pair[] {
+// db.json `type`, the fork's `ItemType` in proto/common.proto (0 is unknown).
+const SLOT_BY_ITEM_TYPE: ReadonlyArray<ItemSlot | undefined> = [
+  undefined,
+  "head",
+  "neck",
+  "shoulder",
+  "back",
+  "chest",
+  "wrist",
+  "hands",
+  "waist",
+  "legs",
+  "feet",
+  "finger",
+  "trinket",
+  "weapon",
+  "ranged",
+];
+
+const isSimOrderName = (s: string): s is SimOrderName =>
+  (SIM_ORDER as readonly string[]).includes(s);
+
+/**
+ * Every distinct (item id, slot) pair worn in the spec's preset files. A
+ * preset can list an item at another slot's index (upstream's enhancement
+ * p1 and preraid sets swap the belt and the gloves), so a one-slot item
+ * takes its slot from its type.
+ */
+function presetPairs(
+  specDir: string,
+  typeSlot: (itemId: number) => ItemSlot | undefined
+): Pair[] {
   const seen = new Map<string, Pair>();
   for (const file of gearFiles(join(SPECS_DIR, specDir, "gear_sets"))) {
     const gear = readJson<GearFile>(file);
     gear.items.forEach((entry, i) => {
-      const simSlot = SIM_ORDER[i];
-      if (!entry.id || !simSlot) return;
+      const indexSlot = SIM_ORDER[i];
+      if (!entry.id || !indexSlot) return;
+      const typed = typeSlot(entry.id);
+      const simSlot =
+        typed !== undefined &&
+        typed !== poolSlotFor(indexSlot) &&
+        isSimOrderName(typed)
+          ? typed
+          : indexSlot;
       const slot = poolSlotFor(simSlot);
       const key = `${entry.id}:${slot}`;
       if (!seen.has(key))
@@ -458,6 +544,11 @@ class Builder {
     return this.items.get(id) ?? { id, name: `Item ${id}` };
   }
 
+  typeSlot(id: number): ItemSlot | undefined {
+    const type = this.items.get(id)?.type;
+    return type === undefined ? undefined : SLOT_BY_ITEM_TYPE[type];
+  }
+
   source(id: number): MockSource {
     const first = this.item(id).sources?.[0];
     if (first?.drop) {
@@ -494,7 +585,7 @@ class Builder {
     const gear = readJson<GearFile>(
       join(SPECS_DIR, spec.specDir, spec.gearPreset)
     );
-    const pairs = presetPairs(spec.specDir);
+    const pairs = presetPairs(spec.specDir, (id) => this.typeSlot(id));
     const setRoles = this.setRoles(spec, pairs, gear);
     const required = [
       ...new Set([
@@ -962,6 +1053,12 @@ class Builder {
     const keys = rows.map((r) => `${r.itemId}:${r.slot}`);
     const dup = keys.find((k, i) => keys.indexOf(k) !== i);
     this.rule(n, dup === undefined, `row key ${dup} appears twice`);
+    const misSlotted = rows.find((r) => r.slot !== this.typeSlot(r.itemId));
+    this.rule(
+      n,
+      misSlotted === undefined,
+      `row ${misSlotted?.itemId} has slot ${misSlotted?.slot}, which is not its item type's slot in db.json`
+    );
     if (spec.size !== "all")
       this.rule(n, rows.length === spec.size, `has ${spec.size} rows`);
     this.rule(
