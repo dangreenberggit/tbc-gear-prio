@@ -18,7 +18,17 @@ write made inside a script or an interpreter one-liner. The
 The files are versioned here, and **the user runs the install in their own
 terminal**, from inside a checkout of the branch that holds the change. It checks
 every source first, writes each copy next to its target as `.new`, and
-moves the copies into place only when all are written:
+moves the copies into place only when all are written.
+
+For the routing change, one command installs everything, the hook's
+wiring included: `bash docs/agents/home/install-routing.sh`.
+
+- `install-routing.sh` copies `routing.md`, the global files and the agent
+  files for both cards, then runs the next script.
+- `hooks/install-flash-over-sonnet.sh` copies `hooks/flash-over-sonnet.py`
+  and wires it in `~/.claude_router/settings.json`; `--check` prints what is installed.
+
+The block below copies files only and wires no hook:
 
 ```bash
 bash <<'EOF'
@@ -31,6 +41,7 @@ pairs=(
   "$S/routing.md"                         "$HOME/.claude/routing.md"
   "$S/hooks/bash-footguns.sh"             "$HOME/.claude/hooks/bash-footguns.sh"
   "$S/hooks/subagent-foreground-helpers.py" "$HOME/.claude/hooks/subagent-foreground-helpers.py"
+  "$S/hooks/flash-over-sonnet.py"         "$HOME/.claude/hooks/flash-over-sonnet.py"
 )
 while IFS= read -r -d '' f; do
   pairs+=("$S/skills/$f" "$HOME/.claude/skills/$f")
