@@ -24,6 +24,9 @@ HOME_STAGED = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__
 STAGED_HOOK = os.path.join(HOME_STAGED, "hooks", "flash-over-sonnet.py")
 STAGED_ROUTING = os.path.join(HOME_STAGED, "routing.md")
 REASONS = ["private:", "web", "cold read", "test", "glm wall retry", "caller order:"]
+PLACEHOLDERS = ["path or what", "", "", "", "", "the quoted ban"]
+PRIVATE_EMPTY = "`private:` needs `<path or what>` filled in, not left blank or as a placeholder."
+CALLER_EMPTY = "`caller order:` needs `<the quoted ban>` filled in, not left blank or as a placeholder."
 
 
 def arg(name, default):
@@ -109,7 +112,9 @@ def main():
         spec.loader.exec_module(hook)
         with open(ROUTING, encoding="utf-8") as f:
             tokens, refusal = hook.parse_routing(f.read())
-        c.check("parser reads the reasons of the routing file", tokens == REASONS, "got %r" % tokens)
+        c.check("parser reads the reasons of the routing file", list(tokens or []) == REASONS, "got %r" % tokens)
+        c.check("parser reads each reason's placeholder from its bullet",
+                tokens == dict(zip(REASONS, PLACEHOLDERS)), "got %r" % tokens)
         c.check("parser reads the Refusal paragraph", refusal == REFUSAL, "got %r" % refusal)
         c.check("refusal names the missing line and the routing file",
                 "`Sonnet because: <reason>`" in REFUSAL and "~/.claude/routing.md" in REFUSAL)
@@ -133,12 +138,19 @@ def main():
         c.deny("website", sonnet("Sonnet because: website"), "The reason `website` is not on the list.")
         c.deny("testing", sonnet("Sonnet because: testing"), "The reason `testing` is not on the list.")
         c.deny("private with no colon", sonnet("Sonnet because: private"), "The reason `private` is not on the list.")
-        c.deny("private with an empty path", sonnet("Sonnet because: private:   "),
-               "`private:` needs the path or the content, not a placeholder.")
-        c.deny("private with the placeholder", sonnet("Sonnet because: private: <path>"),
-               "`private:` needs the path or the content, not a placeholder.")
-        c.deny("caller order with no ban quoted", sonnet("Sonnet because: caller order:  "),
-               "`caller order:` needs the path or the content, not a placeholder.")
+        c.deny("private with an empty path", sonnet("Sonnet because: private:   "), PRIVATE_EMPTY)
+        c.deny("private with the placeholder", sonnet("Sonnet because: private: <path>"), PRIVATE_EMPTY)
+        c.deny("caller order with no ban quoted", sonnet("Sonnet because: caller order:  "), CALLER_EMPTY)
+        c.deny("caller order with the placeholder", sonnet("Sonnet because: caller order: <the quoted ban>"),
+               CALLER_EMPTY)
+        no_placeholder = os.path.join(home, "no-placeholder.md")
+        with open(ROUTING, encoding="utf-8") as f:
+            text = f.read()
+        with open(no_placeholder, "w", encoding="utf-8") as f:
+            f.write(text.replace("`caller order: <the quoted ban>`", "`caller order:`"))
+        c.deny("colon reason whose bullet shows no placeholder", sonnet("Sonnet because: caller order:"),
+               "`caller order:` needs its value filled in, not left blank or as a placeholder.",
+               routing=no_placeholder)
 
         # Let through
         c.silent("private with path", sonnet("Sonnet because: private: ~/.t3/caches"))
@@ -175,8 +187,11 @@ def main():
         with open(no_refusal, "w", encoding="utf-8") as f:
             f.write(text.replace("\n## Refusal\n", "\n## Refused\n"))
         missing = os.path.join(home, "missing.md")
+        not_utf8 = os.path.join(home, "not-utf8.md")
+        with open(not_utf8, "wb") as f:
+            f.write(b"\xff\xfe")
         for name, path in (("§ Sonnet reasons missing", no_reasons), ("§ Refusal missing", no_refusal),
-                           ("routing file missing", missing)):
+                           ("routing file missing", missing), ("routing file not UTF-8", not_utf8)):
             before = sum(1 for _ in open(log)) if os.path.exists(log) else 0
             c.silent(name + ": spawn goes ahead", payload(), routing=path)
             after = sum(1 for _ in open(log)) if os.path.exists(log) else 0

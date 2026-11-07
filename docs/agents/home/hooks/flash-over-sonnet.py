@@ -16,7 +16,7 @@ copy, for the tests.
 
 The hook must never stop a spawn because of its own fault, so any error
 prints nothing, exits 0, and the spawn goes ahead. A routing file that is
-missing or lacks a section also lets the spawn through, and leaves one line in
+missing, not UTF-8, or lacks a section also lets the spawn through, and leaves one line in
 ~/.local/state/agent-guard/flash-over-sonnet.jsonl so the gap is seen.
 Standard library only and no child processes, as in
 subagent-foreground-helpers.py.
@@ -62,19 +62,21 @@ def section(text, heading):
 
 
 def parse_routing(text):
-    """Return (tokens, refusal) from the routing file's text; None for a part not found."""
+    """Return (tokens, refusal) from the routing file's text; None for a part not found.
+
+    tokens maps each reason to the placeholder its bullet shows after it
+    ("" when the bullet has none), so a refusal can name what is missing."""
     tokens = None
     reasons = section(text, "Sonnet reasons")
     if reasons is not None:
-        tokens = []
+        tokens = {}
         for line in reasons:
             if not line.startswith("- `"):
                 continue
-            inner = line[3:]
-            end = min(i for i in (inner.find("<"), inner.find("`"), len(inner)) if i >= 0)
-            token = inner[:end].strip()
+            token, _, placeholder = line[3:].split("`", 1)[0].partition("<")
+            token = token.strip()
             if token:
-                tokens.append(token)
+                tokens[token] = placeholder.rstrip(">").strip()
         tokens = tokens or None
     refusal = None
     body = section(text, "Refusal")
@@ -119,7 +121,8 @@ def judge(line, tokens):
         elif after == "" or after[0] in SEPARATORS:
             return None
     if placeholder is not None:
-        return "`%s` needs the path or the content, not a placeholder." % placeholder
+        what = "`<%s>`" % tokens[placeholder] if tokens[placeholder] else "its value"
+        return "`%s` needs %s filled in, not left blank or as a placeholder." % (placeholder, what)
     return "The reason `%s` is not on the list." % rest
 
 
@@ -138,8 +141,8 @@ def decide(data):
     try:
         with open(path, encoding="utf-8") as f:
             tokens, refusal = parse_routing(f.read())
-    except OSError:
-        log_gap(path, "routing file not readable")
+    except (OSError, UnicodeDecodeError) as e:
+        log_gap(path, "routing file not readable: " + type(e).__name__)
         return None
     if tokens is None or refusal is None:
         log_gap(path, "section not found: " + ", ".join(
