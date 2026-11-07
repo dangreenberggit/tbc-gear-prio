@@ -131,7 +131,7 @@ read fails the run, as it did before the R1 fix (case 746-R3).
 
 Verified by: tbc-new-fork@09d86beeeeae0d9fad38d463cf325ed4c2ec93b2;
 `node_modules/.bin/vitest run --root . --configLoader runner packages/core/test/fork-meta-repair.test.ts`
-(44 passed; in the agent sandbox the worktree has no `node_modules`, so
+(45 passed; in the agent sandbox the worktree has no `node_modules`, so
 it needs `ln -s /home/daniel/Code/lulz/tbc-gear-prio/node_modules node_modules`
 first, and `--configLoader runner` because that `node_modules` is
 read-only); `pnpm fork-tests:check`

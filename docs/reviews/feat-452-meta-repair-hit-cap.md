@@ -3,6 +3,7 @@
 Reviewed range: `128a80689b20ce595883533e7d9b74373db08654..7cbcbd83d068ff5860382d61b805b12c2402b26f`
 Reviewed range: `7cbcbd83d068ff5860382d61b805b12c2402b26f..eaef9cbe8985e6a86797f52a20c3f0512e5bf113`
 Reviewed range: `eaef9cbe8985e6a86797f52a20c3f0512e5bf113..cf683e59920cc644d41e25a8a0fb6c924d638548`
+Reviewed range: `cf683e59920cc644d41e25a8a0fb6c924d638548..11c913c1e30d402e6b5c5bd49acd9cceb06769a0`
 
 Dispatch note (round 1): the branch stacks on `feat/452-desktop-goldens`
 (slice C), whose review in `docs/reviews/feat-452-desktop-goldens.md`
@@ -405,8 +406,127 @@ Round 3 ran because the owner chose a further round after round 2 hit the round 
 
 **Working tree — not a finding.** The fork tree is clean (`git status --short` prints 0 lines). In the main repo, this round wrote only the third `Reviewed range:` line and this section.
 
+## Focused check (round 4)
+
+**Conclusion:** All four checks pass. The fix for R3-1 and R3-2 does what the owner chose: only a failed candidate hit read becomes that item's "sim failed" row, and a code error beside the read fails the run again. Test 746-R3 fails on the old code and on two mutations of the new code. Every way the read itself can fail, including `hitPercentOf`'s throw on a value that is not a finite number, is inside the narrowed `try`. Moving `composeFor` changes nothing for a candidate whose meta stays on or for a spec with no budget. One Low finding: R4-1, no test fails when `hitPercentOf` is moved out of the `try`. The code is correct today; only the test is missing. This is the last round, so the review stops here and the owner decides.
+
+Round 4 ran because the owner chose a further round after round 3. It is the last round.
+
+**Ranges**
+
+- Main repo: `cf683e59920cc644d41e25a8a0fb6c924d638548..11c913c1e30d402e6b5c5bd49acd9cceb06769a0`.
+  - `09a55d07` changes only this review file (67 lines added, `git show --stat`).
+  - `11c913c1` is the re-pin. It changes the lock, `data/sim-implemented-effects.json`, `docs/fork-provenance/engine.md`, the test file (test 746-R3 and a `simDatabaseFor` option on `runSpec`) and ticket 746.
+- Fork (`vendor/tbc-new-fork`): `707e67f077542c28d98171db2a27fb77b73476ae..09d86beeeeae0d9fad38d463cf325ed4c2ec93b2`. One commit, `09d86beee`, which changes only `ui/features/upgrades/model/engine/rank.ts` (32 lines added, 9 deleted). The lock's `commit` value is `707e67f0…` at `09a55d07` and `09d86bee…` at `11c913c1` (`git show <sha>:data/wowsims-fork.lock.json`).
+
+**Check 1: the three conditions — pass, with one note.**
+
+- **Condition 1 (each commit is an allowed kind):** `09d86beee` names R3-1 and R3-2 in its message, and `11c913c1` names fork `09d86beee`, R3-1 and R3-2. `09a55d07` only edits this review file. The fork range has no merge commits (`git log --merges` prints 0).
+- **Condition 2 (changed code sits where a fixed finding points):** in `rank.ts` at `09d86bee`:
+  - `:825`, the `hitCapFailed` comment, which R3-2 cites.
+  - `:1253-1263` in `candidateRepairGems` and `:1411`/`:1417` in `runCandidate`'s read `catch`, which R3-1 cites (`:1237-1268` and `:1398-1411` before the fix).
+  - Note: the new class `CandidateHitReadFailed` (`:3833-3845`) is not at a cited line, but R3-1's suggested fix asks for "a dedicated error class".
+  - Outside the code: the lock (`commit`, and a provenance sentence appended to `_comment`); `data/sim-implemented-effects.json`, whose only changed value is `forkCommit` (a JSON compare in Python); and `engine.md`, whose only word-level changes are the `rank.ts` hash `f3df180f…` → `95c465d8…` and one provenance note (`git diff --word-diff=porcelain`). `95c465d8…` is the sha256 of `rank.ts` at `09d86bee`.
+- **Condition 3 (no upstream wowsims file edited):** `rank.ts` does not exist at `branchedFrom` `cec2a7b6` (`git cat-file -e` fails; the commit itself exists), so it is a fork-only file.
+
+**Check 2: the fix changes only what its findings ask — pass.** Each of the fixer's claims, checked in `git -C vendor/tbc-new-fork show 09d86beee` and `rank.ts` at `09d86bee`:
+
+- `composeFor(pre.swapped)` runs before the `try` (`:1253`). The `try` wraps only `hitPercentOf(await readStats(deps.sim, request, deps.signal), budgetSlot)` (`:1255-1260`). `StopRefusedSim` is rethrown as is, and any other error is thrown again as `CandidateHitReadFailed` (`:1260-1263`).
+- `CandidateHitReadFailed` keeps the original error in `readonly cause` and takes its message (`:3838-3845`), so the row text is unchanged: 746-R1 still asserts "…because its sim failed.\nitem 30907, slot chest: worker died" and passes.
+- The TS2554 reason is true. With `tsc --lib es2021`, `super("m", { cause })` gives `error TS2554: Expected 0-1 arguments, but got 2.`; with `--lib es2022` it compiles (a one-line probe file under `$TMPDIR`). The fork's lib is `["DOM", "es2021", "DOM.Iterable"]`.
+- `runCandidate`'s `catch` returns on `StopRefusedSim`, rethrows anything that is not a `CandidateHitReadFailed` (`:1411`), and only then pushes the `kind: "sim"` skip.
+- The `hitCapFailed` comment now reads "A worn, baseline or set-version stats read failed, so this run's ranking is not cached (ticket 535)", the text R3-2 suggested (`:825`).
+- No other comment in `rank.ts` still says that any candidate error becomes a failed sim (`grep -n -i "candidate.*read\|read.*candidate"`).
+
+**The caller's two questions.**
+
+- **Is every way a candidate read can fail still inside the `try`? Yes.**
+  - `readStats` (`:3869-3897`) is inside it whole: the Stop check before the read, a synchronous throw or a rejection from `sim.computeStats`, and the race against Stop.
+  - `hitPercentOf`'s throw on a value that is not a finite number (`:3852-3855`) is inside it too. A probe test in a `$TMPDIR` copy, in which 30907's read returns `NaN` for every pseudo-stat, passes on `09d86bee`: 32365 is ranked, and 30907 gets the row "…because its sim failed.\nitem 30907, slot chest: hit percent read as NaN".
+  - The code left outside the `try` is `candidateSwapPreRepair`, `inactiveMeta`, `composeFor` before it, and `gearHitRating` and the budget sum after it. None of them calls the sim.
+  - A side effect of wrapping `readStats` whole: a code error inside `readStats` itself, such as in its listener or its log line, would also become a failed-sim row. Not a finding: that code is part of the read.
+- **Does moving `composeFor` change behaviour for a candidate whose meta stays on, or for a spec with no budget? No.**
+  - With no budget (`!cap`, `budgetSlot === undefined`, `baselineSimHit === undefined` or no `computeStats`), the function returns `gems` at `:1242-1250`, before `composeFor`, as before.
+  - When the meta stays on, it returns `gems` at `:1252`, before `composeFor`, as before.
+  - When the meta goes off, `composeFor` still runs once, right before `readStats`, in the same order as the old inline argument. The only change is the one R3-1 asked for: an error from it now fails the run, as at `8b16e4bc`. This matches the candidate's own sim, where `composeFor(swapped)` (`:1442`) is also outside the sim `catch`.
+
+**Check 3: each new test asserts its finding — pass.** All runs used a copy of both repos under `$TMPDIR`, with the probe test above added. `node --version` printed v22.23.2 in each run. Each mutation was applied to a fresh copy of `rank.ts` at `09d86bee`.
+
+| `rank.ts` in the copy                                                       | Result                 | Failing tests     |
+| --------------------------------------------------------------------------- | ---------------------- | ----------------- |
+| `09d86bee` as committed                                                     | 45 passed (44 + probe) | none              |
+| `707e67f0` (before the fix)                                                 | 1 failed, 44 passed    | 746-R3            |
+| the `if (!(err instanceof CandidateHitReadFailed)) throw err;` line removed | 1 failed, 44 passed    | 746-R3            |
+| `composeFor(pre.swapped)` moved back into the `try`                         | 1 failed, 44 passed    | 746-R3            |
+| `throw new CandidateHitReadFailed(err)` replaced with `throw err`           | 2 failed, 43 passed    | 746-R1, probe     |
+| `hitPercentOf` moved out of the `try`, after it                             | 1 failed, 44 passed    | probe only (R4-1) |
+
+- On `707e67f0`, 746-R3 fails with "promise resolved … instead of rejecting": the old code turned the injected `TypeError` into a row. This matches the fixer's claim.
+- 746-R3 reaches the read path, not the candidate's own sim: if the injected throw reached only `:1442`, the run would reject on `707e67f0` as well.
+
+**Check 4: the touched tests pass — pass.**
+
+- In the worktree (with the `node_modules` link, since removed), `packages/core/test/fork-meta-repair.test.ts`: 44/44, rc 0.
+- Fork `vitest run ui/features/upgrades`: 67 files and 781/781 tests, rc 0. The fixer's `pnpm fork-tests:check` log reports 70 files and 799 tests at `09d86beeeeae` (it adds the `UpgradesTabBody` test files), and `pnpm fork-lint:check` reports "fork type-check clean" (`.scratch/stage-gate/452d-meta-repair-hit-cap/r3/check-fork-*-after-commit.txt`). I did not re-run those two checks.
+- The desktop gate the fixer ran ends `desktop-gate: PASS (ret PASS, mage PASS, rogue PASS, enh PASS).` and `gate rc=0` (`.scratch/stage-gate/452d-meta-repair-hit-cap/desktop-gate-after-r3.txt`). It built go module `v0.0.154-0.20261107030914-09d86beeeeae`, so it ran on the fixed fork. I did not re-run it. Its first lines show a failed `pnpm` install (read-only store lock), as in round 3; the gate went on and passed.
+
+**Findings**
+
+- **R4-1 — Low — no test fails when `hitPercentOf` is moved out of the narrowed `try`.** Location: fork `rank.ts:1253-1263`; test file `packages/core/test/fork-meta-repair.test.ts` (746 review block).
+  - Before this fix, the broad `catch` in `runCandidate` turned any error into the row, so where `hitPercentOf` sat did not matter. Now only a `CandidateHitReadFailed` becomes the row, so `hitPercentOf` must stay inside the `try`. 746-R1 covers only a rejected read.
+  - Mutation (table above): with `hitPercentOf` moved after the `try`, all 44 tests pass. In that state a read that returns a value that is not a finite number would fail the whole run, not only that item. The failure would be loud, not silent.
+  - Suggested fix (hypothesis, untested beyond the probe run): add the probe as a test. In a `runSpec` on `S_POOL`, 30907's read returns `NaN` for every pseudo-stat. The test expects the items to be `[32365]` and 30907's row to read "This item was not ranked in this slot, because its sim failed.\nitem 30907, slot chest: hit percent read as NaN". It passes on `09d86bee` and fails with the mutation.
+
+**Working tree — not a finding.** The fork tree is clean (`git status --short` prints 0 lines). In the main repo, the only tracked change is this round's `Reviewed range:` line and this section. The untracked dotfiles are the sandbox stubs that round 1 described.
+
 ## Summary
 
-Round 2 is the last round (`~/.claude/AGENTS.md` § Review round limits). Its four checks passed, but it reported two findings in the failure path that A1's fix added: R1 (no test covers a failed candidate read) and R2 (after a mid-run read failure, earlier rows keep the hit cap, later rows get full weight, and the "hit rating could not be read" note is false for the earlier rows). So the review stops here for the owner's choice (Q-452d-review). No Disposition table yet; step 4 (merge check) not run.
+**The review is closed.** Every finding of the four rounds has a Disposition row below: 23 `fixed`, 6 `wontfix` and 2 `defer` (tickets 830 and 831, both open).
+
+**What was reviewed.** Round 1 was the full review: the adversarial, domain and standards+spec axes, plus `instruction-review` of the closes of tickets 746 and 804. It read main `128a8068..7cbcbd83` and fork `b603564ee..24f6575ca`, the hit policy for every spec (ticket 746) and the phase-1 pool cells (ticket 804). Rounds 2, 3 and 4 were focused checks of the fix commits, each over the `Reviewed range:` line above it. The round-1 fixes are listed in "Round 1 fixes".
+
+**Round 2** passed its four checks and found two Low findings in the failure path that A1's fix added. R1: no test covered a failed per-candidate hit read. R2: after such a failure, rows read before it kept the hit cap, later rows got full weight, and the "hit rating could not be read" note was false for the earlier rows. The owner asked "tell me why its our job to handle failures in the sim that would affect any other use of the sim elsewhere in the app" and then said "ok" to deleting the fallback. Fork `707e67f07` (re-pin `db6ed1bc`) makes a failed candidate read that item's failed-sim row, with no full-weight fallback; tests 746-R1 and 746-R1b cover it.
+
+**Round 3** ran because the owner chose a further round. It passed its four checks and found two Low findings. R3-1: the new `catch` turned any error in `candidateRepairGems`, code errors included, into a failed-sim row. R3-2: the `hitCapFailed` comment still said every failed stats read keeps the ranking out of the cache. The owner answered "option 1". Fork `09d86beee` (re-pin `11c913c1`) catches only the read's own error and fixes the comment; test 746-R3 covers it.
+
+**Round 4** ran because the owner chose a further round. It passed its four checks and found one Low finding. R4-1: no test failed when `hitPercentOf` was moved out of the narrowed `try`. The owner ruled on 2026-11-06: "probe sounds fine. idk why another gap is so expected but whatevs, we'll see". The round-4 probe is now test 746-R4, with no further round. It passes on fork `09d86beee` (45/45 in `packages/core/test/fork-meta-repair.test.ts`) and fails when `hitPercentOf` is moved after the `try` (1 failed, 44 passed). Logs: `.scratch/stage-gate/452d-meta-repair-hit-cap/r4/` (gitignored, this worktree).
+
+**Tickets.** By the skill's count over `dev...HEAD`, this branch filed 10 tickets and closed 3 (746, 804 and 800). Those numbers include the tickets of the slices this branch stacks on; inside its own range (`128a8068..HEAD`) it filed 2 (830, 831). Filed is higher than closed because the stacked slices filed follow-up tickets for epic 452.
 
 The round-1 fixer listed three changes outside the findings, not made: the set phase's first-step check could pair with the candidate's own request (it loses information, gives no wrong number); ticket 535's closed "Limits" section still lists the single-swap set limit as current; the test file header line "Each case names its ticket 535 test id" is stale.
+
+## Disposition
+
+| ID   | Axis               | Disposition | Ticket / note                                                                                                                                                                                                                                                                               |
+| ---- | ------------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1   | Adversarial        | fixed       | fork `6bab26253`: each candidate whose swap turns the meta off gets its own hit read; tests 746-A1 (caster set break, melee set completion) in `eaef9cbe`                                                                                                                                   |
+| A2   | Adversarial        | fixed       | test 746-A2 (warlock, spell hit in slot 13) in `eaef9cbe`                                                                                                                                                                                                                                   |
+| A3   | Adversarial        | fixed       | fork `6bab26253`: the `cap-profile.ts` comment names only mage, priest and warlock, and calls Nature's Guidance permanent                                                                                                                                                                   |
+| A4   | Adversarial        | defer       | `.scratch/carry-forward/issues/830-budget-spec-without-stats-read-repairs-at-full-weight-silently.md` — the CLI path only; the tab's runner always has `computeStats`                                                                                                                       |
+| D1   | Domain             | fixed       | fork `6bab26253`: elemental moves to full weight and shows the note                                                                                                                                                                                                                         |
+| D2   | Domain             | fixed       | fork `6bab26253`: the comment adds the binary-spell exception                                                                                                                                                                                                                               |
+| S1   | Standards          | fixed       | `eaef9cbe`, `db6ed1bc` and `11c913c1` each commit the `engine.md` rows with the lock; the earlier split `00269b01` + `7cbcbd83` stays in history (no rewrite asked)                                                                                                                         |
+| S2   | Standards          | wontfix     | fork `b8f9f7f45` is under every later fork commit and the lock; rewrapping its body would change every later fork sha for a style nit                                                                                                                                                       |
+| S3   | Standards          | wontfix     | the subject of `7cbcbd83` stays in history because the S1 squash was not made; a style nit, and the later re-pins use descriptive subjects                                                                                                                                                  |
+| S4   | Standards          | fixed       | same as Q1                                                                                                                                                                                                                                                                                  |
+| S5   | Standards          | fixed       | same as Q2                                                                                                                                                                                                                                                                                  |
+| S6   | Standards          | wontfix     | same as Q3                                                                                                                                                                                                                                                                                  |
+| S7   | Standards          | wontfix     | same as Q4                                                                                                                                                                                                                                                                                  |
+| P1   | Spec               | fixed       | fork `8b16e4bc5`: the fixture `_comment` says once where the pool-rule script is                                                                                                                                                                                                            |
+| P2   | Spec               | fixed       | fork `6bab26253`: the comment says Affliction spells reach the cap earlier with Suppression; the default warlock talents are Destruction                                                                                                                                                    |
+| I1   | Instruction review | fixed       | `eaef9cbe`: ticket 746 names this review file as the branch's review                                                                                                                                                                                                                        |
+| I2   | Instruction review | defer       | `.scratch/carry-forward/issues/831-caster-budget-prices-hit-past-a-talented-spells-cap.md` — hit between a school-talented spell's cap and 16% is priced at full weight                                                                                                                     |
+| I3   | Instruction review | fixed       | `eaef9cbe`: tickets 746 and 804 quote the real subject of `00269b01`                                                                                                                                                                                                                        |
+| I4   | Instruction review | fixed       | `eaef9cbe`: ticket 804 gives the C11 search commands                                                                                                                                                                                                                                        |
+| I5   | Instruction review | fixed       | `eaef9cbe`: ticket 746 says nobody saw the note on screen and names the tests that check it                                                                                                                                                                                                 |
+| I6   | Instruction review | fixed       | `eaef9cbe`: ticket 746's `Verified by:` command says it needs the `node_modules` link and `--configLoader runner` in the sandbox                                                                                                                                                            |
+| I7   | Instruction review | fixed       | `eaef9cbe`: ticket 804 says both the original script and the copy are gitignored                                                                                                                                                                                                            |
+| Q1   | Code quality       | fixed       | `eaef9cbe`: the test file header lists the budget specs                                                                                                                                                                                                                                     |
+| Q2   | Code quality       | fixed       | `eaef9cbe`: `RetRun` and `runRet` renamed `SpecRun` and `runSpec`                                                                                                                                                                                                                           |
+| Q3   | Code quality       | wontfix     | the two copies run in different gates (`fork-tests:check` and the main vitest file); deleting either saves about 25 lines and removes one gate's check of the policy (`.scratch/agent-reports/2026-11-06-general-task-452d-review-fixes.md`, gitignored, § Per finding)                     |
+| Q4   | Code quality       | wontfix     | `hitStat` says which rating the spec gems and so whether Improved Faerie Fire applies; `hitPercentPseudoStat` says which read slot. Merging them adds a field or a lookup and removes no failure mode (same report)                                                                         |
+| R1   | Round 2            | fixed       | fork `707e67f07` (re-pin `db6ed1bc`); tests 746-R1 (`db6ed1bc`) and 746-R1b (`cf683e59`). Owner: "tell me why its our job to handle failures in the sim that would affect any other use of the sim elsewhere in the app", then "ok" to deleting the fallback                                |
+| R2   | Round 2            | fixed       | fork `707e67f07`: a failed candidate read is that item's failed-sim row; the full-weight fallback and its note are gone. Owner: "tell me why its our job to handle failures in the sim that would affect any other use of the sim elsewhere in the app", then "ok" to deleting the fallback |
+| R3-1 | Round 3            | fixed       | fork `09d86beee` (re-pin `11c913c1`): only the read's own error becomes the failed-sim row; test 746-R3. Owner: "option 1"                                                                                                                                                                  |
+| R3-2 | Round 3            | fixed       | fork `09d86beee`: the `hitCapFailed` comment names only the worn, baseline and set-version reads. Owner: "option 1"                                                                                                                                                                         |
+| R4-1 | Round 4            | fixed       | test 746-R4 in the commit "Close the hit-policy review with test 746-R4". Owner, 2026-11-06: "probe sounds fine. idk why another gap is so expected but whatevs, we'll see"                                                                                                                 |

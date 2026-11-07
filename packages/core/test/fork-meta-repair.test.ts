@@ -2348,5 +2348,34 @@ describe.skipIf(!forkPresent)(
         })
       ).rejects.toBe(bug);
     });
+
+    it("746-R4: a candidate read that gives no hit number fails that candidate's sim, not the run", async () => {
+      // Oracle: a hit value that is not a finite number is a failed read, so
+      // turning it into a number must sit inside the read's catch. 30907 gets
+      // the failed-sim row; Heartshatter is still ranked.
+      const reads = await gearHitReads();
+      const run = await runSpec({
+        pool: S_POOL,
+        computeStats: (req) =>
+          requestItems(req)[CHEST]?.id === 30907
+            ? Promise.resolve({
+                stats: [],
+                pseudoStats: new Array<number>(25).fill(NaN),
+              })
+            : reads(req),
+      });
+      expect(run.ranking.items.map((r) => r.itemId)).toEqual([32365]);
+      expect(
+        run.ranking.substitutions.filter((s) => s.field === "item 30907")
+      ).toEqual([
+        {
+          field: "item 30907",
+          slot: "chest",
+          detail:
+            "This item was not ranked in this slot, because its sim failed." +
+            "\nitem 30907, slot chest: hit percent read as NaN",
+        },
+      ]);
+    });
   }
 );
