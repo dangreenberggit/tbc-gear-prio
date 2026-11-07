@@ -2,6 +2,7 @@
 
 Reviewed range: `128a80689b20ce595883533e7d9b74373db08654..7cbcbd83d068ff5860382d61b805b12c2402b26f`
 Reviewed range: `7cbcbd83d068ff5860382d61b805b12c2402b26f..eaef9cbe8985e6a86797f52a20c3f0512e5bf113`
+Reviewed range: `eaef9cbe8985e6a86797f52a20c3f0512e5bf113..cf683e59920cc644d41e25a8a0fb6c924d638548`
 
 Dispatch note (round 1): the branch stacks on `feat/452-desktop-goldens`
 (slice C), whose review in `docs/reviews/feat-452-desktop-goldens.md`
@@ -337,6 +338,72 @@ Fork `6bab26253` (A1: each candidate whose swap turns the meta off gets its own 
 - The untracked dotfiles that `git status` lists are sandbox `/dev/null` bind mounts (`crw-rw-rw- nobody`, and they appear in `/proc/self/mountinfo`), as round 1 also found.
 
 No report file: the prompt forbids writes in either repo, so the whole report is above.
+
+## Focused check (round 3)
+
+**Conclusion:** All four checks pass. The fix for R1 and R2 does what the owner asked: a failed candidate hit read is now that item's failed sim, and the full-weight fallback is gone. Both new tests fail when their fix is removed. I re-ran both mutations myself. Two Low findings remain. R3-1: the new `catch` turns every error in `candidateRepairGems` into a "sim failed" row, code errors included, not only a failed read. R3-2: one comment still says that any failed stats read keeps the ranking out of the cache. This is the last round, so the review stops here and the owner decides.
+
+Round 3 ran because the owner chose a further round after round 2 hit the round limit. It is the last round.
+
+**Ranges**
+
+- Main repo: `eaef9cbe8985e6a86797f52a20c3f0512e5bf113..cf683e59920cc644d41e25a8a0fb6c924d638548`.
+  - `497e5b7f` adds only round 2 to this review file.
+  - `2b3f5627`, and the merge `bd6057f2` that brings it in, change only ticket 800 and slice C's review file `docs/reviews/feat-452-desktop-goldens.md` (2 `Reviewed range:` lines).
+  - `db6ed1bc` is the re-pin. It also adds test 746-R1.
+  - `cf683e59` adds test 746-R1b and a note in ticket 746.
+- Fork (`vendor/tbc-new-fork`): `8b16e4bc541208397cdeb6cfcf4e56814242ecf1..707e67f077542c28d98171db2a27fb77b73476ae`. This range has one commit, `707e67f07`, and it changes only `ui/features/upgrades/model/engine/rank.ts` (28 lines added, 34 deleted). The lock's `commit` value is `8b16e4bc…` at `eaef9cbe` and `707e67f0…` at `db6ed1bc` (`git show <sha>:data/wowsims-fork.lock.json`).
+
+**Check 1: the three conditions — pass, with two notes.**
+
+- **Condition 1 (each commit is an allowed kind):**
+  - `707e67f07` names R1 and R2 in its message. `db6ed1bc` names fork `707e67f07`, R1 and R2.
+  - The fork range has no merge commits (`git log --merges` prints 0).
+  - Note 1: `2b3f5627`/`bd6057f2` edit another branch's review file. The condition's list names only "this review file", but these lines only record slice C's review rounds. I count them as record-only.
+  - Note 2: `cf683e59`'s message ("Test a Stop during a candidate hit read") names no finding ID. It changes only a test and ticket 746. The ticket's new note names R1, R2 and case 746-R1b. The test covers the Stop return that round 2's R1 called untested.
+- **Condition 2 (changed code sits where a fixed finding points):** the only code change outside tests and docs is in `rank.ts`. It changes `candidateRepairGems` (R2 cites `:1251`, `:1273-1279`) and the read `catch` in `runCandidate` (R1 cites `:1410-1417`). The other changed files are:
+  - the lock and `forkCommit` lines.
+  - `engine.md`. Its only change is the `rank.ts` hash, `e9536f51…` → `f3df180f…`, plus one provenance note; the other lines are table re-padding (`git diff --word-diff=porcelain`). `f3df180f…` is the sha256 of `rank.ts` at `707e67f0`.
+- **Condition 3 (no upstream wowsims file edited):** `rank.ts` does not exist at `branchedFrom` `cec2a7b6` (`git cat-file -e` fails), so it is a fork-only file.
+
+**Check 2: the fix changes only what its findings ask — pass, except R3-1.**
+
+- **What the fixer claimed, confirmed in `git -C vendor/tbc-new-fork diff 8b16e4bc..707e67f0`:**
+  - `candidateReadsOff`, the full-weight copy (`fullWeight`) and the `hitCapReadFailed` call for candidate reads are gone.
+  - On an error, `runCandidate` pushes a `{kind: "sim"}` candidate skip and goes on to the item's next slot (`rank.ts:1400-1411`). The failed-sim path for the candidate's own sim does the same (`:1436-1446`).
+  - A Stop during the read still returns on `StopRefusedSim` (`:1402`).
+  - `candidateSkipSubstitution` gives the row "This item was not ranked in this slot, because its sim failed." plus the error text (`:4322-4331`).
+- **R2 is gone.** A failed read changes only its own candidate, so no candidate is moved to full weight. No note that is false for some rows is added. The result no longer depends on which reads finish first, because `candidateSkips` is sorted by item id (`:1641`). Test 746-R1 checks that Heartshatter (32365) still repairs to two Inscribed on the budget while 30907's read fails.
+- **Caching, as the caller asked.** A ranking that holds a failed-read row is now cached. That is what a failed candidate sim already does: the only cache gates are `aborted` and `hitCapFailed` (`rank.ts:1861`, `:1878`), and the failed-sim path sets neither. The store is one `MemoryStore` per mounted tab (`model/run.ts:60-66`). So pressing Run again with the same settings shows the same failed row and does not retry, until the tab remounts or a setting changes. This applies equally to both kinds of failed row, and it follows the owner's ruling that a failed read is the item's failed sim. It is not a defect of this fix. Caching rankings that hold failed-sim rows existed before this branch. If that should change, it is one ticket covering both paths. A `grep` of `.scratch/carry-forward/issues/` for failure and cache wording found no such ticket (unverified absence).
+- **R3-1 (below):** the `catch` covers more than the read.
+
+**Check 3: each new test asserts its finding — pass.** All runs were in a copy of both repos under `$TMPDIR` (since deleted). `node --version` printed v22.23.2 in each run.
+
+- `rank.ts` from `8b16e4bc` (before the fix): 746-R1 fails and 42 tests pass, 746-R1b among them.
+- `rank.ts` at `707e67f0` with the line `if (err instanceof StopRefusedSim) return;` removed from the read `catch`: 746-R1b fails and 42 tests pass.
+- These match the fixer's claims and its logs in `.scratch/stage-gate/452d-meta-repair-hit-cap/r1r2/` (`746-R1b-mutated.log`, `vitest-reverted.txt`).
+
+**Check 4: the touched tests pass — pass.**
+
+- Main-repo `packages/core/test/fork-meta-repair.test.ts`: 43/43, rc 0.
+- Fork suite `vitest run ui/features/upgrades`: 67 files and 781/781 tests, rc 0.
+- The desktop gate the fixer ran ends `desktop-gate: PASS (ret PASS, mage PASS, rogue PASS, enh PASS)`, `gate rc=0` (`.scratch/stage-gate/452d-meta-repair-hit-cap/desktop-gate-after-r1r2.txt`). It built go module `…-707e67f07754`, so it ran on the fixed fork. I did not re-run it. Its first lines show a failed `pnpm` install (read-only store lock); the gate went on and passed.
+
+**Findings**
+
+- **R3-1 — Low — the new `catch` turns any error before or after the read into "its sim failed", code errors included.** Location: fork `rank.ts:1398-1411` (the call site) and `:1237-1268` (`candidateRepairGems`).
+  - In round 2's code, `runCandidate` rethrew every error from `candidateRepairGems` except `StopRefusedSim`. The new `catch` turns all of them into a failed-sim row. Besides the read, that function calls `candidateSwapPreRepair`, `inactiveMeta`, `composeFor` and `gearHitRating`. For budget specs, when the swap turns the meta off, an exception in any of them is now shown as "This item was not ranked in this slot, because its sim failed." with the error text, and the run completes.
+  - The two other `catch` blocks in `runCandidate` are narrow. The sim `catch` wraps only `deps.sim.run` (`:1436`), and `composeFor(swapped)` sits outside it (`:1433`). The repair `catch` rethrows anything that is not a `MetaRepairError` (`:1423`).
+  - Mutation: I added `if (itemId === 30907) throw new TypeError("code bug");` after `candidateSwapPreRepair` and ran a probe in which no read fails.
+    - With `707e67f0`: the run completed, ranked only 32365, and gave 30907 the row "…because its sim failed.\nitem 30907, slot chest: code bug".
+    - With `8b16e4bc`: the run failed with `TypeError: code bug`.
+  - Effect: only a code bug reaches this path. The error text shows in the row, so the result is not silent, but the row names the wrong cause, and one bug becomes one row per affected item in place of one loud failure. The fix comment and commit message describe only a failed read, so this is more than R1 and R2 asked for.
+  - Suggested fix (hypothesis, untested): catch only the read's own error. For example, `candidateRepairGems` could rethrow a failed `readStats`/`hitPercentOf` as a dedicated error class, and `runCandidate` would turn only that class into the `kind: "sim"` skip and rethrow everything else, as the repair `catch` does.
+- **R3-2 — Low — one comment still says that any failed stats read keeps the ranking out of the cache.** Location: fork `rank.ts:825`, `/** A stats read failed, so this run's ranking is not cached (ticket 535). */` on `hitCapFailed`.
+  - Since `707e67f0`, a failed candidate read does not set `hitCapFailed`, and its ranking is cached (Check 2). Only the worn, baseline and set-version reads set the flag (`:850`, `:1213`).
+  - Suggested text: "A worn, baseline or set-version stats read failed, so this run's ranking is not cached (ticket 535)."
+
+**Working tree — not a finding.** The fork tree is clean (`git status --short` prints 0 lines). In the main repo, this round wrote only the third `Reviewed range:` line and this section.
 
 ## Summary
 
