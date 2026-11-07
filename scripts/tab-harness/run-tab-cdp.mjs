@@ -27,6 +27,7 @@
 //        [--phase 3] [--candidates N] [--iterations N] [--timeout-ms 2700000]
 //        [--out out.json] [--trace-tail] [--force-fallback]
 //        [--preset <chip|?> [--preset-tab <name|?>] [--preset-spec <spec>]]
+//        [--build <chip|?>]
 //        [--wasm-concurrency N]
 //        [--capture-requests <dir> [--page-sim]]
 //
@@ -62,6 +63,18 @@
 //   under more than one spec stops the run rather than load the wrong set.
 //   Readback: presetTab, preset, presetSpec, and presetWorn (the item names
 //   the Gear tab shows 1.5 s after the click).
+// --build <chip> (needs --preset) first loads a Preset Configurations chip:
+//   the site's talents, rotation, buffs and encounter for one spec and phase.
+//   A gear chip changes only gear, so without it the hunter page runs Beast
+//   Mastery talents and the warrior page Fury talents. It takes the chip under
+//   the same --preset-tab and --preset-spec as the gear chip, which loads after
+//   it, so the run still starts from the gear set:
+//   --preset-tab "Phase 3" --preset-spec Survival --build "DW - 6% hit" --preset "DW - 6% hit".
+//   --build "?" lists the chips and exits 1 before any sim.
+//   Readback: build. Every run also records character (the talents string,
+//   points per tree and rotation the page holds just before Run) and
+//   assumptionsLine (the tab's "[upgrades] assumptions" console line, which
+//   names the EP weights' phase).
 // --wasm-concurrency N sets the page's wasm worker count before navigation; at 1
 //   the page does not split its sim, and a split run gives different floats.
 // --capture-requests <dir> records every WorkerPool.raidSimAsync request and its
@@ -75,6 +88,7 @@ import { createServer } from "node:net";
 import fsp from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { exitOnSignals, killTree } from "../process-group.mjs";
 import { findChromium } from "./chromium.mjs";
@@ -83,7 +97,7 @@ import { RESULT_ROW, ROW_HELPERS } from "./rows.mjs";
 const WIDTH = 1280;
 const HEIGHT = 1400;
 
-function parseArgs(argv) {
+export function parseArgs(argv) {
   const args = {
     origin: null,
     page: "/tbc/paladin/retribution/",
@@ -97,6 +111,7 @@ function parseArgs(argv) {
     presetTab: null,
     preset: null,
     presetSpec: null,
+    build: null,
     wasmConcurrency: null,
     captureRequests: null,
     pageSim: false,
@@ -115,6 +130,7 @@ function parseArgs(argv) {
     else if (a === "--preset-tab") args.presetTab = argv[++i];
     else if (a === "--preset") args.preset = argv[++i];
     else if (a === "--preset-spec") args.presetSpec = argv[++i];
+    else if (a === "--build") args.build = argv[++i];
     else if (a === "--wasm-concurrency")
       args.wasmConcurrency = parseInt(argv[++i], 10);
     else if (a === "--capture-requests") args.captureRequests = argv[++i];
@@ -124,16 +140,22 @@ function parseArgs(argv) {
     }
   }
   if (!args.origin) throw new Error("--origin <url> is required");
+  const listing = args.preset === "?" || args.build === "?";
   if (
     args.preset === null &&
+    args.build !== "?" &&
     (args.presetTab !== null || args.presetSpec !== null)
   )
     throw new Error("--preset-tab and --preset-spec need --preset <chip>");
-  if (args.presetTab === "?" && args.preset !== "?")
-    throw new Error('--preset-tab "?" needs --preset "?"');
-  if (args.presetSpec !== null && args.preset === "?")
+  if (args.build !== null && args.build !== "?" && args.preset === null)
     throw new Error(
-      '--preset-spec does not work with --preset "?"; the list names each chip\'s spec'
+      "--build needs --preset <chip>; the gear chip loads after the build so the run starts from that gear set"
+    );
+  if (args.presetTab === "?" && !listing)
+    throw new Error('--preset-tab "?" needs --preset "?" or --build "?"');
+  if (args.presetSpec !== null && listing)
+    throw new Error(
+      '--preset-spec does not work with --preset "?" or --build "?"; the list names each chip\'s spec'
     );
   if (args.wasmConcurrency !== null && !(args.wasmConcurrency >= 1))
     throw new Error("--wasm-concurrency needs a positive integer");
@@ -390,6 +412,36 @@ const preRun = `(() => {
 	};
 })()`;
 
+// The talents and rotation the run sims, from the settings the page saves to
+// localStorage at load and 300 ms after each change (fork
+// ui/sim/state/persistence.ts); the page puts no handle to its player on
+// window. The browser profile is new each run, so the one key is this page's.
+// Points per tree are counted as the page's getTalentTreePoints counts them
+// (fork ui/sim/proto/utils.ts); the tab picks the Survival or Arms EP weights
+// from them.
+const readCharacter = `(async () => {
+	await new Promise(r=>setTimeout(r,1000));
+	const keys = Object.keys(localStorage).filter(k=>k.endsWith('__currentSettings__'));
+	if (keys.length !== 1) return {error:'expected one saved-settings key, found '+keys.length+': '+keys.join(' | ')};
+	let saved;
+	try { saved = JSON.parse(localStorage.getItem(keys[0])); } catch (e) { return {error:'saved settings are not JSON: '+e}; }
+	const player = saved?.player ?? {};
+	const talentsString = player.talentsString ?? '';
+	const trees = talentsString.split('-');
+	if (trees.length === 2) trees.push('0');
+	const rotation = player.rotation ?? {};
+	let simple = rotation.simple?.specRotationJson ?? null;
+	try { if (simple !== null) simple = JSON.parse(simple); } catch { /* kept as the stored text */ }
+	return {
+		settingsKey: keys[0],
+		talentsString,
+		talentPointsByTree: trees.map(t=>[...t].reduce((n,c)=>n+(parseInt(c,10)||0),0)),
+		rotationType: rotation.type ?? null,
+		simpleRotation: simple,
+		aplActions: (rotation.priorityList ?? []).length,
+	};
+})()`;
+
 const clickRun = `(async () => {
 	const btn = document.querySelector('[data-testid="upgrades-run-button"]');
 	if(!btn) return {error:'no run button'};
@@ -541,9 +593,12 @@ const readPoolSize = `(() => {
 // preset-group-picker, so a chip's block is found by the nearest ancestor that
 // holds a block title. A page whose presets name more than one group (hunter,
 // warrior: one per spec) puts a preset-group-label before each group's chips.
-const loadPreset = (tabName, chipName, specName) => `(async () => {
+// `block` is the chips' block title: "Gear Sets", or "Preset Configurations"
+// for --build, whose chips sit in the same phase-filtered picker.
+const loadPreset = (block, tabName, chipName, specName) => `(async () => {
 	${WF}
 	const sleep = ms => new Promise(r=>setTimeout(r,ms));
+	const blockWant = ${JSON.stringify(block)};
 	const want = ${JSON.stringify(tabName)};
 	const chipWant = ${JSON.stringify(chipName)};
 	const specWant = ${JSON.stringify(specName)};
@@ -562,15 +617,15 @@ const loadPreset = (tabName, chipName, specName) => `(async () => {
 		const heading = c.closest('[data-testid="saved-data-presets"]')?.previousElementSibling;
 		return heading?.matches('[data-testid="preset-group-label"]') ? heading.textContent.trim() : null;
 	};
-	const gearChips = () => [...document.querySelectorAll('[data-testid="saved-data-set-chip"]')]
-		.filter(c=>c.offsetParent && blockTitle(c)==='Gear Sets');
+	const blockChips = () => [...document.querySelectorAll('[data-testid="saved-data-set-chip"]')]
+		.filter(c=>c.offsetParent && blockTitle(c)===blockWant);
 	const label = (spec, chip) => (spec === null ? '' : '['+spec+'] ')+chip;
 	const names = chips => chips.map(c=>label(specOf(c), c.textContent.trim())).join(' | ');
-	const matches = () => gearChips().filter(c=>c.textContent.trim()===chipWant && (specWant === null || specOf(c)===specWant));
+	const matches = () => blockChips().filter(c=>c.textContent.trim()===chipWant && (specWant === null || specOf(c)===specWant));
 	const visibleChips = async t => {
 		t?.click();
-		await wf(()=>gearChips().length > 0,30000);
-		return gearChips();
+		await wf(()=>blockChips().length > 0,30000);
+		return blockChips();
 	};
 	let tabNote = '';
 	if (want !== null) {
@@ -601,8 +656,8 @@ const loadPreset = (tabName, chipName, specName) => `(async () => {
 	await wf(()=>matches().length > 0,30000);
 	const found = matches();
 	const wanted = label(specWant, chipWant);
-	if (!found.length) return {error:'no Gear Sets chip '+wanted+(want === null ? '' : ' under '+want)+'; visible: '+names(gearChips())+tabNote};
-	if (found.length > 1) return {error:'Gear Sets chip '+chipWant+' is found '+found.length+' times ('+names(found)+'); name its spec with --preset-spec'};
+	if (!found.length) return {error:'no '+blockWant+' chip '+wanted+(want === null ? '' : ' under '+want)+'; visible: '+names(blockChips())+tabNote};
+	if (found.length > 1) return {error:blockWant+' chip '+chipWant+' is found '+found.length+' times ('+names(found)+'); name its spec with --preset-spec'};
 	const chip = found[0];
 	(chip.querySelector('[data-testid="saved-data-set-name"]') ?? chip).click();
 	await sleep(1500);
@@ -936,6 +991,15 @@ async function main() {
     }
   });
 
+  // The tab prints its run assumptions, the EP weights' phase among them, only
+  // to the console (fork ui/features/upgrades/model/run_session.ts).
+  const assumptionsLines = [];
+  client.on(pageSession, "Runtime.consoleAPICalled", (params) => {
+    const first = params.args?.[0]?.value;
+    if (typeof first === "string" && first.startsWith("[upgrades] assumptions"))
+      assumptionsLines.push(first);
+  });
+
   let out;
   let tail = [];
   let captureFiles = null;
@@ -968,12 +1032,29 @@ async function main() {
     await psend("Page.navigate", { url: `${args.origin}${args.page}` });
     await sleep(500);
 
+    if (args.build !== null) {
+      const built = await evaluate(
+        psend,
+        pageSession,
+        loadPreset(
+          "Preset Configurations",
+          args.presetTab,
+          args.build,
+          args.presetSpec
+        )
+      );
+      if (built?.list !== undefined)
+        throw new Error(`build list: ${built.list}`);
+      if (!built?.ok)
+        throw new Error(`build load failed: ${built?.error ?? "unknown"}`);
+    }
+
     let presetWorn = null;
     if (args.preset !== null) {
       const loaded = await evaluate(
         psend,
         pageSession,
-        loadPreset(args.presetTab, args.preset, args.presetSpec)
+        loadPreset("Gear Sets", args.presetTab, args.preset, args.presetSpec)
       );
       if (loaded?.list !== undefined)
         throw new Error(`preset list: ${loaded.list}`);
@@ -1012,6 +1093,7 @@ async function main() {
 
     const pre = await evaluate(psend, pageSession, preRun);
     const pool = await evaluate(psend, pageSession, readPoolSize);
+    const character = await evaluate(psend, pageSession, readCharacter);
 
     // Arm the one-shot Worker throw after the page has settled and the factory
     // pool exists, and before Run.
@@ -1097,6 +1179,8 @@ async function main() {
       forcedFallback: args.forceFallback,
       forceFallbackRemaining,
       phaseSet: phase.phaseSet,
+      character,
+      assumptionsLine: assumptionsLines.at(-1) ?? null,
       eligibleCountSource: '[data-testid="upgrades-eligible-count"] data-count',
       done: !!done.done,
       runTimedOut: !!done.timeout,
@@ -1113,6 +1197,7 @@ async function main() {
         presetSpec: args.presetSpec,
         presetWorn,
       });
+    if (args.build !== null) out.build = args.build;
     if (args.wasmConcurrency !== null)
       out.wasmConcurrency = args.wasmConcurrency;
     if (args.captureRequests) {
@@ -1208,7 +1293,10 @@ async function main() {
   process.exit(out.done && !out.panicHit && out.runner !== null ? 0 : 1);
 }
 
-main().catch((e) => {
-  console.error("crashed:", e.stack || e.message);
-  process.exit(1);
-});
+// Imported by its test for parseArgs, it must not start a browser.
+if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+  main().catch((e) => {
+    console.error("crashed:", e.stack || e.message);
+    process.exit(1);
+  });
+}

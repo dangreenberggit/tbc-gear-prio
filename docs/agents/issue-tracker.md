@@ -26,6 +26,18 @@ doing that pick the same number and merge cleanly under different
 filenames (it happened: two 232s and two 233s on 2026-08-19). Editing
 `NEXT` forces the collision into a git conflict instead.
 
+**A conflict on `NEXT` means both sides used the same numbers.** Do not
+resolve it by keeping the higher value: both sides' tickets then land
+with the same numbers (ticket 832). Keep `dev`'s tickets as they are.
+Renumber each ticket the branch added, starting at the number in `dev`'s
+`NEXT`. Update each reference the branch made to the old number; a
+reference on `dev` means `dev`'s ticket and stays (commit `18f6b642` is
+an example). Then set `NEXT` past the last number used. `pnpm merge-ready` and `pnpm
+merge-to-dev` fail when a ticket the branch adds has the number of
+another ticket in the merge result (`ticket_number_problems` in
+`scripts/check_merge_ready.py`). They do not judge numbers the branch did
+not add, so the duplicates already on `dev` (ticket 832) block nothing.
+
 Each file starts with these lines (machine-readable; `pnpm merge-to-dev` / `merge-ready` parse them):
 
 ```

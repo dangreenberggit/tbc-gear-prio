@@ -26,8 +26,8 @@ paths: an `@` import loads at start and would undo the saving.
   under `data/`:** the `data-pipeline-work` skill.
 - **Spawning an agent, fanning out, stage-gating, or ending an
   investigation:** `docs/agents/orchestration.md`. **Which model and
-  agent type:** `~/.claude/model-policy.md`; this repo's values are in
-  `docs/agents/model-policy.md`.
+  agent type:** `~/.claude/routing.md`; this repo's card limits:
+  `docs/agents/model-policy.md` § GLM worker types.
 - **Judging a ranking, shortlist or pool output:** the `sme-rank-review`
   skill; its audience is the engineering team, not players.
 - **A plan, a ticket, a skill, an agent definition, `AGENTS.md`,
@@ -88,11 +88,13 @@ loop, step 4).
 
 ## Spawning
 
-The spawning rules are global (`~/.claude/AGENTS.md` § Spawning, staged
-in `docs/agents/home/AGENTS.md`); this repo's values are in
-`docs/agents/model-policy.md`. In this repo a workhorse type also stops
+The rule is `~/.claude/routing.md` (staged in
+`docs/agents/home/routing.md`). In this repo a workhorse type also stops
 and returns `NEEDS_JUDGMENT` for an edit under `data/` or
-`vendor/tbc-new-fork`, `.githooks/` or `scripts/`. It runs `node --version`
+`vendor/tbc-new-fork`, `.githooks/` or `scripts/`. A workhorse type also
+returns `NEEDS_JUDGMENT: <trap>` for any action
+`docs/agents/known-traps.md` names a trap for. A workhorse type may run a
+`node`, `pnpm` or test command that writes no tracked file. It runs `node --version`
 in the same shell command as each `node`, `pnpm` or test command, for
 example `node --version; pnpm verify`; if it does not print v22, it
 discards the command's result and returns

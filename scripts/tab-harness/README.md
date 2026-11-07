@@ -21,9 +21,11 @@ directory.
   the ret page before a run, then each made-up fixture in `data/tab-fixtures/`
   (`pnpm tab-fixtures:mock`) on its own spec's page, with an axe scan on
   each at `POST_RUN_AXE_WIDTH` (653 px). The gate fails when a spec page in
-  `PAGE_PATH_BY_SPEC` has no fixture that was measured, or when a spec id the
-  fork's tab ranks (`SPEC_ID_BY_PROTO_SPEC` in `run.ts`) has no page there
-  (`page-coverage.mjs`); `--fixture <name-or-path>` renders one file only.
+  `PAGE_PATH_BY_SPEC` has no fixture that was measured (`page-coverage.mjs`);
+  `--fixture <name-or-path>` renders one file only. A vitest test,
+  `packages/core/test/fork-spec-pages.test.ts`, asks the fork's tab code
+  (`specIdFor` in `run.ts`) which specs it ranks and fails when one has no
+  page in `PAGE_PATH_BY_SPEC`.
 - `tab_fixtures.mjs` and `vite.config.mjs`: the dev server's fixture index and
   autoload, added to upstream's Vite config without editing it.
 - `run-tab-cdp.mjs`: the desktop-transport gate's driver, below.
@@ -108,7 +110,11 @@ Two timing fields are recorded on every run: **`firstRowS`** — Run click to th
 first `[data-testid="upgrades-result-row"]` (via a
 `MutationObserver` installed before the click; `null` if no row lands) — and
 **`clickToDoneS`** — click to the `Took` status. **`iterationsRequested`** echoes
-the `--iterations` flag.
+the `--iterations` flag. **`character`** is the talents string, points per tree
+and rotation the page holds just before Run, read from the settings it saves to
+localStorage; the tab picks the Survival or Arms EP weights from the points per
+tree. **`assumptionsLine`** is the tab's `[upgrades] assumptions` console line
+for the run, `null` if none was printed.
 
 Opt-in flags. The desktop gate (`scripts/check_desktop_tab.py`) passes
 `--preset-tab` and `--preset` to start from a gear preset; the other flags
@@ -126,6 +132,16 @@ exist for ticket 522's cold-worker check:
   `[Spec] chip`), every phase tab's with `--preset-tab "?"`, and exits 1
   before any sim. The readback's `presetWorn` lists the item names the Gear
   tab shows 1.5 s after the click.
+- `--build <chip>` (needs `--preset`) first loads a Preset Configurations chip,
+  the site's talents, rotation, buffs, consumables and encounter for one spec
+  and phase. A gear chip changes only gear, so without a build the hunter page
+  runs Beast Mastery talents and the warrior page Fury talents. The build chip
+  is taken under the same `--preset-tab` and `--preset-spec` as the gear chip,
+  and the gear chip loads after it, so the run still starts from the gear set:
+  `--preset-tab "Phase 3" --preset-spec Survival --build "DW - 6% hit" --preset "DW - 6% hit"`,
+  or `--preset-tab "Phase 3" --preset-spec Arms --build Arms --preset BIS`.
+  `--build "?"` lists the chips like `--preset "?"`. The readback's `build`
+  echoes the flag.
 - `--wasm-concurrency N` sets `__tbc_new_wasmconcurrency` before navigation; at
   1 the page does not split its sim, so its DPS is comparable bit for bit.
 - `--capture-requests <dir>` wraps `WorkerPool.prototype.raidSimAsync` before
@@ -139,7 +155,7 @@ exist for ticket 522's cold-worker check:
   DOM while the dialog is closed is untested on the React page.
 
 New readback fields: `presetTab`, `preset`, `presetSpec`, `presetWorn`,
-`wasmConcurrency`, `captureError`,
+`build`, `wasmConcurrency`, `captureError`,
 `tabSimCalls`, `pageSimCalls`, `calls`, `tabBaseline`,
 `tabBaselineMatchesDisplay`, `tabBaselineRequest`, `pageRequest`, `pageDps`,
 `pagePlayerDps`, `pageSeed`, `pageIterations`, `pageError`, `dpsDiff`,

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md (slicing, 2026-11-06, slice B)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -58,3 +58,30 @@ table and § Wall time).
 803 is closed on the branch. The four runs finish, each has an SME
 verdict, the report is committed, each new defect has a ticket, and the
 branch's `pre-merge-review` file exists.
+
+## Comments
+
+- 2026-11-06: the four runs finished and each has an SME verdict
+  (`trust-with-caveats` for all four). Report:
+  `docs/live-runs/2026-11-06-survival-arms-p45.md`. New ticket: 810 (the
+  other build's BiS picks show as BiS losses on the Arms and Survival
+  tabs). Comments added to 750 and 746. Still open here: the branch's
+  `pre-merge-review` file, and a whole `pnpm verify`, which this sandbox
+  cannot run (read-only `node_modules`).
+- 2026-11-06: the run commands differ from the ones under "What to do".
+  Each run added `--build <chip>`, which loads the site's Survival or
+  Arms "Preset Configurations" build before the gear chip (harness flag
+  added in commit `12014bfe`). A gear chip changes only the gear, so
+  without it the page kept its Beast Mastery or Fury talents. The build
+  also sets the rotation, buffs, consumables and encounter, so the runs
+  use the build's values for those too (`docs/live-runs/2026-11-06-survival-arms-p45.md`,
+  "Build chip, then gear chip").
+- 2026-11-06: closed. Done when holds: 803 is closed; the four runs (the
+  Arms runs redone with the P3 set after review finding D1) each have an
+  SME verdict; the report `docs/live-runs/2026-11-06-survival-arms-p45.md`
+  is committed; the one new defect has ticket 810; the review file
+  `docs/reviews/feat-452-survival-arms.md` exists. Still open before any
+  push or merge of the branch: a whole `pnpm verify` (not part of this
+  ticket's Done when).
+
+Verified by: docs/reviews/feat-452-survival-arms.md (the branch review the closing note names) and docs/live-runs/2026-11-06-survival-arms-p45.md

@@ -131,6 +131,68 @@ Round 2 is the last round. R1 is open, so the review stops here for the
 owner's choice (`~/.claude/AGENTS.md` § Review round limits). The merge
 check (step 4) was not run.
 
+## Focused check (round 3)
+
+Reviewed range: `a094a28bf2f8ea8b9b3d7bd1b78ab7c0b0cf7bc4..19696dc6436e6a7cbee57820778f66236575907d`
+
+The owner chose a further round for R1 (2026-11-06, in chat). Asked "can
+I make the test ask the tab's code directly? If loading that code turns
+out to need a change in tbc-new-fork, I'll stop and ask you first", the
+owner answered "oh thats insane. yes". Fix commit `19696dc6`. No fork
+change.
+
+The fix replaces the text reader with
+`packages/core/test/fork-spec-pages.test.ts`. That test calls the
+fork's exported `specIdFor` for every proto `Spec` value and asserts
+that each id it returns has a `PAGE_PATH_BY_SPEC` entry. One fresh
+`general-task` agent on Opus ran the four checks.
+
+1. Only a fix for an earlier finding (R1, in the commit subject), at the
+   places R1 and A3 cite: **PASS**.
+2. Changes only what R1 asks for: **PASS**. The text reader and its 5
+   tests are removed; the A1 part of check 23 and its 4 tests stay.
+3. The new test asserts R1: **PASS**. With `mage` removed from
+   `PAGE_PATH_BY_SPEC`, it failed with `Received ["mage"]`
+   (`.scratch/agent-reports/801-runs/r1-fix/2-fail-mage-removed.txt`).
+   Reading zero specs, or failing to import, fails the suite.
+4. The tests pass: **PASS** (vitest, 2 files and 6 tests; `tsc --build
+packages/core/tsconfig.test.json`; node v22.23.2).
+
+No findings. The test skips when the fork is absent, as every other fork
+test here does (`describe.skipIf`).
+
+## Summary
+
+Round 1 found two silent wrong results (A1, D1); both are fixed. Round 2
+left R1, and the owner chose a further round; round 3 passed with no
+findings. This branch filed 4 tickets (840, 841, 842, 843) and closed 1
+(801). It filed more than it closed because the new checks found
+problems in code outside this branch's change.
+
+## Disposition (round 3)
+
+| ID  | Axis          | Disposition | Ticket / note                                                                                                                             |
+| --- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial   | fixed       | `891f03db`: check 23 counts only measured fixtures; a fault-injected run printed `layout gate: FAILED`                                    |
+| A2  | Adversarial   | wontfix     | Ticket 801 prescribes a rule-and-selector baseline entry; ticket 840 states the entry's scope and says to remove it when a fix closes 840 |
+| A3  | Adversarial   | fixed       | `891f03db`, then superseded in round 3 by `19696dc6` (the test asks the fork's `specIdFor`)                                               |
+| D1  | Domain        | fixed       | `37a74160`: the slot comes from the item type; the generator refuses a mismatched row                                                     |
+| D2  | Domain        | defer       | `.scratch/carry-forward/issues/842-mock-fixtures-give-casters-a-melee-hit-cap.md` — nothing renders the block today                       |
+| S1  | Standards     | fixed       | `167b4f12`: the cause is labelled "hypothesis, untested"                                                                                  |
+| S2  | Standards     | fixed       | `a3a23d69` code-quality pass                                                                                                              |
+| S3  | Standards     | fixed       | `a3a23d69` code-quality pass                                                                                                              |
+| S4  | Standards     | fixed       | `a3a23d69` code-quality pass                                                                                                              |
+| P1  | Spec          | wontfix     | The rewritten "Took" sentence is correct; no effect                                                                                       |
+| P2  | Spec          | wontfix     | Check 23 supports 801's "Done when"; it fails when it should                                                                              |
+| P3  | Spec          | fixed       | `a3a23d69` code-quality pass                                                                                                              |
+| P4  | Spec          | fixed       | Same as A3; `19696dc6`                                                                                                                    |
+| I1  | Instruction   | fixed       | `231dba6a`: the darker-background option removed, with the figures                                                                        |
+| I2  | Instruction   | fixed       | `231dba6a`: "Remove the entry when a fix closes this ticket"                                                                              |
+| I3  | Instruction   | fixed       | `231dba6a`: "Done when" needs axe passes, and notes that no fixture shows a rare item                                                     |
+| I4  | Instruction   | fixed       | `231dba6a`: ticket 841 cites `data/tab-fixtures/README.md` for the banner                                                                 |
+| I5  | Instruction   | wontfix     | No trial run: a trial of a ticket is working the ticket; two cold-reader dry runs were done instead                                       |
+| R1  | Focused check | fixed       | `19696dc6`; round 3 passed                                                                                                                |
+
 ## Merge account
 
 What ticket 801 asks the merge account to hold. The evidence files are

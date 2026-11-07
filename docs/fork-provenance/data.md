@@ -1,9 +1,9 @@
 # Data copy provenance
 
-The fork's `ui/features/upgrades/model/data/` folder holds 20 JSON files.
-Each one is a byte-for-byte copy of a file this repo owns: 19 EP-weight
+The fork's `ui/features/upgrades/model/data/` folder holds 22 JSON files.
+Each one is a byte-for-byte copy of a file this repo owns: 21 EP-weight
 copies and `tier-exchange.json`, the tier-token and Sunmote exchange file.
-The folder holds no other item data. The table below lists all 20 files.
+The folder holds no other item data. The table below lists all 22 files.
 `python scripts/sync_fork_universes.py --check` (`pnpm fork-universes:check`,
 part of `pnpm verify`) compares each copy with its source byte for byte, and
 fails on any JSON file in that folder that the table does not list.
@@ -35,6 +35,7 @@ describe the tree as it was when they ran.
 | `balance-p3.ep-weights.json`       | `data/presets/balance/p3.ep-weights.json`       |
 | `balance-p4.ep-weights.json`       | `data/presets/balance/p4.ep-weights.json`       |
 | `hunter-fallback.ep-weights.json`  | `data/presets/hunter/fallback.ep-weights.json`  |
+| `hunter-sv-p1.ep-weights.json`     | `data/presets/hunter/sv-p1.ep-weights.json`     |
 | `mage-fallback.ep-weights.json`    | `data/presets/mage/fallback.ep-weights.json`    |
 | `mage-p2.ep-weights.json`          | `data/presets/mage/p2.ep-weights.json`          |
 | `shadow-fallback.ep-weights.json`  | `data/presets/shadow/fallback.ep-weights.json`  |
@@ -46,6 +47,7 @@ describe the tree as it was when they ran.
 | `warlock-fallback.ep-weights.json` | `data/presets/warlock/fallback.ep-weights.json` |
 | `warrior-fallback.ep-weights.json` | `data/presets/warrior/fallback.ep-weights.json` |
 | `warrior-p2.ep-weights.json`       | `data/presets/warrior/p2.ep-weights.json`       |
+| `warrior-arms-p3.ep-weights.json`  | `data/presets/warrior/arms-p3.ep-weights.json`  |
 | `tier-exchange.json`               | `data/two-hop/tier-exchange.json`               |
 
 ## Refresh, 2026-08-16 (ticket 211)
@@ -872,4 +874,38 @@ Verify:
 pnpm atlasloot:regen:check                     # tank-healer-tokens.json among the outputs
 python scripts/generate_fork_exchange.py --check
 pnpm fork-universes:check
+```
+
+## Survival and Arms EP weights, 2026-11-06 (ticket 803)
+
+The tab bundled one EP-weight set per spec id, so a Survival hunter got the
+Beast Mastery set and an Arms warrior the Fury set. Two copies are added:
+`hunter-sv-p1.ep-weights.json` (`P1_SV_EP_PRESET`) and
+`warrior-arms-p3.ep-weights.json` (`P3_ARMS_EP_PRESET`). `data.ts` picks
+one of them when the page's talents put strictly more points in the
+Survival or the Arms tree than in each other tree
+(`player.getTalentTreePoints()`), and the spec's own set otherwise.
+
+Arms bundles the P3 set because upstream's own Arms builds for phases 3, 4
+and 5 use it (`P3_PRESET_BUILD_ARMS` to `P5_PRESET_BUILD_ARMS`,
+`ui/specs/warrior/dps/presets.ts:446-480`), and the page opens at phase 3
+(`CURRENT_PHASE`, `ui/sim/constants/other.ts:12`; `currentPhase` in
+`data/wowsims.lock.json`), the phase the tab ranks by default. The
+assumptions line says when a run ranks another phase. The first version of
+this change bundled `P1_ARMS_EP_PRESET` as `warrior-arms-p1.ep-weights.json`,
+on the false reason that every spec bundles its lowest-phase set (ret
+bundles `ret-p2`); review finding D1 of `feat/452-survival-arms` replaced it
+the same day. Its hit weight (stat 20) was 1.81; the P3 set's is 1.01.
+
+At this pin the SV numbers equal the BM numbers; the copy has its own source
+so that `pnpm ep-presets:check` catches a later upstream change to one of
+them. The notes in `hunter-fallback.ep-weights.json`,
+`warrior-fallback.ep-weights.json` and `warrior-p2.ep-weights.json` changed
+with their sources, so those three copies were refreshed too.
+
+Verify:
+
+```bash
+pnpm ep-presets:check                          # 22 files match the fork symbols they name
+pnpm fork-universes:check                      # 22 bundled copies byte-match
 ```

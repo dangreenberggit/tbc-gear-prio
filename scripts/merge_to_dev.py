@@ -29,8 +29,9 @@ checked out, such as the main folder while <branch> sits in a pair):
      Refuse a branch dev already contains.
   2. If dev has commits <branch> lacks, merge dev into <branch> in that
      worktree (a conflict is aborted there and reported). Refuse instead
-     when dev's fork lock changed since <branch> forked: the worktree's fork
-     would no longer match the lock (docs/agents/paired-worktrees.md). After this, dev is
+     when dev's fork lock pins a new commit since <branch> forked and the
+     worktree has a fork or <branch> changed the lock (`fork_pin_problem`,
+     docs/agents/paired-worktrees.md). After this, dev is
      an ancestor of <branch>, so the merge into dev produces exactly
      <branch>'s tree, and the gates below check the merge result. That merge
      commit stays on <branch> even when a later gate fails.
@@ -73,6 +74,7 @@ merge: `TBC_ALLOW_DEV_MERGE=1 git merge --no-ff <branch>`.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -315,6 +317,47 @@ def worktree_problem(wt: Path, target: str, head: str) -> str | None:
     return None
 
 
+def pinned_fork_commit(rev: str) -> str | None:
+    """The `commit` that the fork lock names at `rev`; None with no lock."""
+    shown = subprocess.run(
+        _resolve_cmd(["git", "show", f"{rev}:{FORK_LOCK}"]),
+        cwd=ROOT, capture_output=True, text=True, encoding="utf-8", errors="replace",
+    )
+    if shown.returncode != 0:
+        return None
+    try:
+        return json.loads(shown.stdout).get("commit")
+    except (ValueError, AttributeError):
+        die(f"{FORK_LOCK} at {rev[:9]} is not a JSON object")
+
+
+def fork_pin_problem(wt: Path, target: str, base: str, dev_sha: str, tip: str) -> str | None:
+    """Why merging dev into `target` must wait for the older route in
+    docs/agents/paired-worktrees.md, "When dev has a new fork pin", or None.
+
+    Only a new pinned `commit` on dev counts: a change to `pushed` or
+    `_comment` alone leaves every fork matching dev's pin (ticket 833).
+    """
+    if pinned_fork_commit(base) == pinned_fork_commit(dev_sha):
+        return None
+    see = 'see docs/agents/paired-worktrees.md, "When dev has a new fork pin"'
+    if (wt / "vendor" / "tbc-new-fork" / ".git").exists():
+        return (
+            f"dev's {FORK_LOCK} pins a new fork commit since {target} forked, so the "
+            f"fork in {wt} no longer matches dev's pin; {see}"
+        )
+    # A lock the branch set to exactly dev's merges with no conflict.
+    same_as_dev = subprocess.run(
+        _resolve_cmd(["git", "diff", "--quiet", tip, dev_sha, "--", FORK_LOCK]), cwd=ROOT
+    ).returncode == 0
+    if not same_as_dev and git_out("diff", "--name-only", base, tip, "--", FORK_LOCK).strip():
+        return (
+            f"dev's {FORK_LOCK} pins a new fork commit since {target} forked, and "
+            f"{target} changed that file too, so merging dev would conflict on it; {see}"
+        )
+    return None
+
+
 def merge_named(args: argparse.Namespace) -> int:
     """`pnpm merge-to-dev <branch>`: see "Named branch" in the module doc."""
     target = args.branch
@@ -353,12 +396,8 @@ def merge_named(args: argparse.Namespace) -> int:
 
     if not is_ancestor(dev_sha, tip):
         base = git_out("merge-base", dev_sha, tip).strip()
-        if git_out("diff", "--name-only", base, dev_sha, "--", FORK_LOCK).strip():
-            msg = (
-                f"dev's {FORK_LOCK} changed since {target} forked, so the fork in {wt} "
-                "no longer matches dev's pin; see docs/agents/paired-worktrees.md, "
-                '"When dev has a new fork pin"'
-            )
+        msg = fork_pin_problem(wt, target, base, dev_sha, tip)
+        if msg:
             if not args.check_only:
                 die(msg)
             print(f"note: a real run refuses: {msg}")

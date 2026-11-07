@@ -1,0 +1,282 @@
+{
+  "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a rogue phase-4 cap-40 run from the P3 Swords gear preset on the desktop (HTTP) transport. The file records the output of a run that passed checks (a)-(f); it does not say the ranking is right. A known defect of a spec's golden is listed in README.md beside this file. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter this spec's output (fork re-pin, pool rule change, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --spec rogue --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate.",
+  "recordedAt": "2026-11-06T19:06:35.199Z",
+  "forkCommit": "b603564eed544d5e9f62fbc3950309dd65921110",
+  "cpuCount": 20,
+  "candidatesRequested": 40,
+  "spec": "rogue",
+  "phase": 4,
+  "elapsedS": 25.7,
+  "rows": [
+    {
+      "rank": "1",
+      "item": "Signet of Primal Wrath",
+      "slot": "Ring 2",
+      "dps": 9.5,
+      "source": "Zul'Aman\nTimed Chest",
+      "belowCutoff": false
+    },
+    {
+      "rank": "1",
+      "item": "Empty Mug of Direbrew",
+      "slot": "Trinket 2",
+      "dps": -1.3,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "2",
+      "item": "Madness of the Betrayer",
+      "slot": "Trinket 2",
+      "dps": -6.3,
+      "source": "Black Temple (N)\nThe Illidari Council",
+      "belowCutoff": true
+    },
+    {
+      "rank": "3",
+      "item": "Band of Devastation",
+      "slot": "Ring 2",
+      "dps": -6.8,
+      "source": "Black Temple\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "4",
+      "item": "Berserker's Call",
+      "slot": "Trinket 2",
+      "dps": -7.3,
+      "source": "Zul'Aman (N)\nZul'jin",
+      "belowCutoff": true
+    },
+    {
+      "rank": "5",
+      "item": "Band of Eternity",
+      "slot": "Ring 2",
+      "dps": -12.6,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "6",
+      "item": "Shapeshifter's Signet",
+      "slot": "Ring 2",
+      "dps": -17.3,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "7",
+      "item": "Ring of Deceitful Intent",
+      "slot": "Ring 1",
+      "dps": -18.7,
+      "source": "Black Temple (N)\nShade of Akama",
+      "belowCutoff": true
+    },
+    {
+      "rank": "8",
+      "item": "Ring of Lethality",
+      "slot": "Ring 1",
+      "dps": -19.2,
+      "source": "Serpentshrine Cavern (N)\nHydross the Unstable",
+      "belowCutoff": true
+    },
+    {
+      "rank": "9",
+      "item": "Band of the Ranger-General",
+      "slot": "Ring 1",
+      "dps": -19.3,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
+      "belowCutoff": true
+    },
+    {
+      "rank": "10",
+      "item": "Tsunami Talisman",
+      "slot": "Trinket 2",
+      "dps": -22.1,
+      "source": "Serpentshrine Cavern (N)\nLeotheras the Blind",
+      "belowCutoff": true
+    },
+    {
+      "rank": "11",
+      "item": "Ring of Reciprocity",
+      "slot": "Ring 2",
+      "dps": -26.4,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "12",
+      "item": "Nyn'jah's Tabi Boots",
+      "slot": "Feet",
+      "dps": -26.7,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "13",
+      "item": "Bloodlust Brooch",
+      "slot": "Trinket 2",
+      "dps": -27.2,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "14",
+      "item": "Ring of a Thousand Marks",
+      "slot": "Ring 1",
+      "dps": -27.9,
+      "source": "Karazhan (N)\nPrince Malchezaar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "15",
+      "item": "Ring of the Overseer",
+      "slot": "Ring 2",
+      "dps": -28.8,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "16",
+      "item": "Garona's Signet Ring",
+      "slot": "Ring 1",
+      "dps": -29.9,
+      "source": "Karazhan (N)\nThe Curator",
+      "belowCutoff": true
+    },
+    {
+      "rank": "17",
+      "item": "Kiss of the Spider",
+      "slot": "Trinket 2",
+      "dps": -33.3,
+      "source": "Naxxramas (N)\nMaexxna",
+      "belowCutoff": true
+    },
+    {
+      "rank": "18",
+      "item": "Slayer's Crest",
+      "slot": "Trinket 2",
+      "dps": -33.4,
+      "source": "Naxxramas (N)\nSapphiron",
+      "belowCutoff": true
+    },
+    {
+      "rank": "19",
+      "item": "Violet Signet of the Master Assassin",
+      "slot": "Ring 1",
+      "dps": -33.4,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "20",
+      "item": "Abacus of Violent Odds",
+      "slot": "Trinket 2",
+      "dps": -34.5,
+      "source": "The Mechanar (N)\nPathaleon the Calculator",
+      "belowCutoff": true
+    },
+    {
+      "rank": "21",
+      "item": "Violet Signet",
+      "slot": "Ring 1",
+      "dps": -37,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "22",
+      "item": "Boots of Utter Darkness",
+      "slot": "Feet",
+      "dps": -38,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "23",
+      "item": "Swiftstrike Shoulders",
+      "slot": "Shoulders",
+      "dps": -49.5,
+      "source": "Leatherworking",
+      "belowCutoff": true
+    },
+    {
+      "rank": "24",
+      "item": "Black Featherlight Boots",
+      "slot": "Feet",
+      "dps": -50.8,
+      "source": "Hyjal Summit (N)\nKaz'rogal",
+      "belowCutoff": true
+    },
+    {
+      "rank": "25",
+      "item": "Romulo's Poison Vial",
+      "slot": "Trinket 2",
+      "dps": -55.4,
+      "source": "Karazhan (N)\nRomulo and Julianne",
+      "belowCutoff": true
+    },
+    {
+      "rank": "26",
+      "item": "Mantle of Darkness",
+      "slot": "Shoulders",
+      "dps": -57.9,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "27",
+      "item": "Battlemaster's Determination",
+      "slot": "Trinket 2",
+      "dps": -62.5,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "28",
+      "item": "Battlemaster's Cruelty",
+      "slot": "Trinket 2",
+      "dps": -65.5,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "29",
+      "item": "Talon of Azshara",
+      "slot": "Main Hand",
+      "dps": -177.5,
+      "source": "Serpentshrine Cavern (N)\nMorogrim Tidewalker",
+      "belowCutoff": true
+    },
+    {
+      "rank": "30",
+      "item": "Swiftsteel Bludgeon",
+      "slot": "Off Hand",
+      "dps": -234.3,
+      "source": "Black Temple\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "31",
+      "item": "Tracker's Blade",
+      "slot": "Off Hand",
+      "dps": -255.6,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "32",
+      "item": "Fang of Vashj",
+      "slot": "Off Hand",
+      "dps": -293.9,
+      "source": "Serpentshrine Cavern (N)\nLady Vashj",
+      "belowCutoff": true
+    }
+  ],
+  "aboveCutoffItems": [
+    "Signet of Primal Wrath"
+  ],
+  "baselineDps": 2591.9,
+  "rowCount": 33,
+  "aboveCutoff": 1
+}
