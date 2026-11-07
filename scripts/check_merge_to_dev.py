@@ -15,6 +15,7 @@ Exit 0 ok, 1 a check failed.
 
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -642,7 +643,109 @@ def check_an_ignored_review_file_does_not_count() -> list[str]:
         return problems
 
 
+_LOCK = "data/wowsims-fork.lock.json"
+_FORK_PIN_REFUSAL = "pins a new fork commit"
+
+
+def _lock_text(commit: str, pushed: bool, comment: str) -> str:
+    return json.dumps({"commit": commit, "pushed": pushed, "_comment": comment}, indent=2) + "\n"
+
+
+def _fork_pin_scratch(tmp: Path) -> _Scratch:
+    """A scratch repo whose dev has a fork lock and ignores vendor/."""
+    s = _Scratch(tmp)
+    s.write(s.main, ".gitignore", "__pycache__/\nvendor/\n")
+    s.write(s.main, _LOCK, _lock_text("a" * 40, False, "pin a"))
+    s.commit(s.main, "lock")
+    return s
+
+
+def _add_fork(s: _Scratch, wt: Path) -> None:
+    """A clean git repo at `wt`/vendor/tbc-new-fork, as a pair has."""
+    fork = wt / "vendor" / "tbc-new-fork"
+    fork.mkdir(parents=True)
+    s.git(fork, "init", "-q")
+    s.git(
+        fork, "-c", f"core.hooksPath={(s.tmp / 'no-hooks').as_posix()}", "-c", "user.name=t",
+        "-c", "user.email=t@t", "-c", "commit.gpgsign=false", "commit", "-q", "--allow-empty", "-m", "f",
+    )
+
+
+def check_fork_pin_refusal_skips_a_branch_with_no_fork_and_no_lock_edit() -> list[str]:
+    """Ticket 833: dev re-pins the fork, but the branch's worktree has no
+    fork and the branch never touched the lock, so neither reason in
+    docs/agents/paired-worktrees.md applies and a real named run merges."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _fork_pin_scratch(Path(tmp))
+        wt = s.branch("chore/nofork")
+        s.write(wt, "docs/agents/foo.md", "tooling\n")
+        s.commit(wt, "tooling")
+        s.write(s.main, _LOCK, _lock_text("b" * 40, False, "pin b"))
+        s.commit(s.main, "dev re-pins")
+        rc, out = s.merge_to_dev(s.main, "chore/nofork")
+        problems = _passed("real named run, no fork, no lock edit, dev re-pinned", rc, out)
+        if _FORK_PIN_REFUSAL in out:
+            problems.append(f"the fork-pin refusal fired with no fork and no lock edit: {out[-300:]!r}")
+        return problems
+
+
+def check_fork_pin_refusal_holds_for_a_worktree_with_a_fork() -> list[str]:
+    """Ticket 833: the branch's worktree has a fork and dev pins a new fork
+    commit, so the fork no longer matches dev's pin; a real named run
+    refuses before it merges anything."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _fork_pin_scratch(Path(tmp))
+        wt = s.branch("chore/fork")
+        _add_fork(s, wt)
+        s.write(wt, "docs/agents/foo.md", "tooling\n")
+        s.commit(wt, "tooling")
+        s.write(s.main, _LOCK, _lock_text("b" * 40, False, "pin b"))
+        s.commit(s.main, "dev re-pins")
+        branch_before = s.git(s.main, "rev-parse", "refs/heads/chore/fork")
+        rc, out = s.merge_to_dev(s.main, "chore/fork")
+        problems = _refused("real named run, fork, dev re-pinned", rc, out, _FORK_PIN_REFUSAL)
+        if s.git(s.main, "rev-parse", "refs/heads/chore/fork") != branch_before:
+            problems.append("a refused fork-pin run merged dev into the branch")
+        return problems
+
+
+def check_fork_pin_refusal_ignores_a_lock_change_that_keeps_the_commit() -> list[str]:
+    """Ticket 833: dev changes only `pushed` and `_comment` (as 211e2755
+    did), so the fork in the branch's worktree still matches dev's pin."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _fork_pin_scratch(Path(tmp))
+        wt = s.branch("chore/pushed")
+        _add_fork(s, wt)
+        s.write(wt, "docs/agents/foo.md", "tooling\n")
+        s.commit(wt, "tooling")
+        s.write(s.main, _LOCK, _lock_text("a" * 40, True, "pin a, pushed"))
+        s.commit(s.main, "dev marks the pin pushed")
+        rc, out = s.merge_to_dev(s.main, "chore/pushed", "--check-only")
+        # `--check-only` prints the refusal as a note that starts this way.
+        if _FORK_PIN_REFUSAL in out or "a real run refuses" in out:
+            return [f"the fork-pin refusal fired when only pushed and _comment changed: {out[-300:]!r}"]
+        return []
+
+
+def check_fork_pin_refusal_holds_for_a_branch_that_changed_the_lock() -> list[str]:
+    """Ticket 833: the branch re-pinned and dev re-pinned too, so the lock's
+    lines would conflict; a real named run refuses even with no fork."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        s = _fork_pin_scratch(Path(tmp))
+        wt = s.branch("chore/repin")
+        s.write(wt, _LOCK, _lock_text("c" * 40, False, "pin c"))
+        s.commit(wt, "branch re-pins")
+        s.write(s.main, _LOCK, _lock_text("b" * 40, False, "pin b"))
+        s.commit(s.main, "dev re-pins")
+        rc, out = s.merge_to_dev(s.main, "chore/repin")
+        return _refused("real named run, branch and dev re-pinned", rc, out, _FORK_PIN_REFUSAL)
+
+
 CHECKS = (
+    check_fork_pin_refusal_skips_a_branch_with_no_fork_and_no_lock_edit,
+    check_fork_pin_refusal_holds_for_a_worktree_with_a_fork,
+    check_fork_pin_refusal_ignores_a_lock_change_that_keeps_the_commit,
+    check_fork_pin_refusal_holds_for_a_branch_that_changed_the_lock,
     check_branch_cannot_exempt_itself_by_editing_the_gate,
     check_real_named_run_runs_devs_copy_after_merging_dev,
     check_ack_open_blockers_reaches_devs_copy,

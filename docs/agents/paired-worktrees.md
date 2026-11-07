@@ -159,16 +159,26 @@ merged into the real `dev`.
 leaves the pair as it was, and stops. For an ordinary conflict, resolve it in
 the pair (`git -C <pair> merge dev`) and run step 3 again.
 
-**When `dev` has a new fork pin,** take the older route below. Step 3
-refuses, before it merges anything, when `data/wowsims-fork.lock.json` on
-`dev` changed since the branch forked. Two reasons:
+**When `dev` has a new fork pin,** take the older route below. A new pin
+means the `commit` in `data/wowsims-fork.lock.json` on `dev` differs from
+the one at the branch's merge base; a change to `pushed` or `_comment`
+alone is not one. Step 3 refuses, before it merges anything, when `dev`
+has a new pin and one of these holds (`fork_pin_problem` in
+`scripts/merge_to_dev.py`):
 
-- When this pair re-pinned too, the lock's `commit` and `_comment` lines
-  conflict (temp-repo test 2026-10-10, `docs/reviews/feat-worktree-pair.md`
-  WD7; the repo has no merge driver for the lock).
-- When only `dev` re-pinned, `git merge dev` would succeed, but the pair's
-  fork worktree stays on the old commit, so the fork gates in the pair's
-  verify would fail (a reading of `scripts/_fork_gate.py`, untested).
+- The branch changed the lock too, as a pair that re-pinned does. The
+  lock's `commit` and `_comment` lines then conflict (temp-repo test
+  2026-10-10, `docs/reviews/feat-worktree-pair.md` WD7; the repo has no
+  merge driver for the lock).
+- The branch's worktree has a fork (`vendor/tbc-new-fork`). `git merge
+dev` would succeed, but the fork worktree stays on the old commit, so
+  the fork gates in the pair's verify would fail (a reading of
+  `scripts/_fork_gate.py`, untested).
+
+A branch in a worktree with no fork that did not change the lock merges
+dev's new pin with no conflict and has no fork to go stale, so step 3
+takes it (`python scripts/check_merge_to_dev.py`, the
+`check_fork_pin_refusal_*` checks).
 
 The older route's git steps ran in temp repos on 2026-10-10
 (`docs/reviews/feat-worktree-pair.md`, R1; the `pnpm` commands did not run
