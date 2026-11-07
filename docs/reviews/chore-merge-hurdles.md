@@ -2,6 +2,8 @@
 
 Reviewed range: `0bca77ec3ea5a692574273ccf582935de87a14bb..5ce0825b1466b9a17567c61b3ada5fb13aefae30`
 
+Reviewed range: `5ce0825b1466b9a17567c61b3ada5fb13aefae30..f6005cf8a31e555b64140e473ed7dd74489afaa5`
+
 Dispatch note: `python scripts/check_merge_ready.py --product-files`
 printed `package.json`, `scripts/check_merge_ready.py`,
 `scripts/check_merge_to_dev.py`, `scripts/check_worktree_cleanup.py`,
@@ -123,12 +125,62 @@ an unnamed "the clone", and no step back to `dev`. Filed as ticket 836.
 | CQ4 | `scripts/worktree_cleanup.py`  | `T3_DIR` and `REPORTS` hold a path part and a prefix, not what they say |
 | CQ5 | `scripts/merge_to_dev.py`      | `fork_pin_problem` takes five arguments that travel together            |
 
+## Focused check (round 2)
+
+One fresh `general-task` (Opus) agent over
+`5ce0825b..f6005cf8`. No fork range: the branch never moves
+`data/wowsims-fork.lock.json` (`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json`
+exits 0).
+
+1. **Conditions: pass.** Every commit names its findings (A1-A3, A4,
+   IR1-IR3, CQ2 and CQ4) or only edits the review file and tickets.
+   Every changed code line is at a place a fixed finding cites.
+2. **Fixes change only what each finding asks: pass**, with two
+   wording-only extras: a three-line comment above `git()` in
+   `scripts/worktree_cleanup.py` that explains CQ1, and two reworded
+   sentences next to IR1 in `docs/agents/paired-worktrees.md`.
+3. **Tests assert their findings: pass** for A1, A3, A4 and the A2
+   session test; each failed with its fix reverted in a copy. The re-read
+   after archiving and the own-process exclusion have no test.
+4. **Touched tests pass:** `check_worktree_cleanup.py` (4),
+   `check_merge_to_dev.py` (28), `check_merge_ready.py --self-test` (45),
+   all rc 0.
+
+Findings, all in the A2 fix (`scripts/worktree_cleanup.py`):
+
+- **R2-1 (medium).** `processes_in` sees only the caller's PID namespace.
+  Inside Claude Code's sandboxed Bash, `/proc` held 5 processes, so it
+  returns no process for every worktree and the session guard is off with
+  no message. The test passes because its `sleep` runs in the same
+  namespace.
+- **R2-2 (low to medium).** `own_process_tree` leaves out the processes
+  that started the script, so a session in a merged worktree that runs
+  `pnpm -C <main checkout> wt:cleanup --remove` can have its own worktree
+  removed. Reproduced in a copy. No test.
+- **R2-3 (low).** The re-read after archiving compares report names only;
+  a report rewritten in place after the copy loses its new text.
+  Reproduced in a copy. No test. Suggested fix: run `archive_problem`
+  again on the re-read worktree.
+- **R2-4 (hypothesis, untested).** A Claude Code subagent with
+  `isolation: "worktree"` may run inside its parent's process, so no
+  process has its folder in that worktree between Bash calls.
+
+Round 2 is the last round, and it reported findings that are not
+bookkeeping, so the review stops here with these open; step 4 (the merge
+check) was not run.
+
 ## Summary
 
 Round 1 found one data-loss bug in `pnpm wt:cleanup --remove` (A1) and
 three smaller holes (A2-A4), all fixed with tests in `578cec41` and
 `a823168e`. The doc wording found by the instruction review is fixed in
-`3b4d2002` (IR1-IR3).
+`3b4d2002` (IR1-IR3). Round 2 found that the A2 fix, which keeps a
+worktree where a session runs, is weaker than its row says (R2-1 to
+R2-4); those are open and go to the owner.
+
+Tickets: filed 4 (833-836), closed 3 (833-835): `git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`
+shows four `A` rows, and three added `Status: closed` lines. Ticket 836
+stays open.
 
 ## Disposition
 
