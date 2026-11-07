@@ -12,6 +12,7 @@ Exit 0 ok, 1 a check failed.
 from __future__ import annotations
 
 import os
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -128,10 +129,15 @@ class _Repo:
         self.git(self.main, "worktree", "add", "-q", *args)
         return path
 
-    def run(self, *argv: str) -> tuple[int, str]:
+    def run(self, *argv: str, init_cwd: Path | None = None) -> tuple[int, str]:
+        """`init_cwd` stands for the folder `pnpm` was typed in: pnpm runs a
+        script from the package root and puts that folder in INIT_CWD."""
+        env = _env()
+        if init_cwd is not None:
+            env["INIT_CWD"] = str(init_cwd)
         out = subprocess.run(
             [sys.executable, str(SCRIPT), *argv], cwd=self.main, capture_output=True,
-            text=True, env=_env(),
+            text=True, env=env,
         )
         return out.returncode, out.stdout + out.stderr
 
@@ -182,6 +188,8 @@ def _build(tmp: Path) -> tuple[_Repo, dict[str, Path]]:
     # Review finding A2: a session may still write here, so only the
     # owner's naming it lets --remove take it.
     wts["unnamed"] = r.add("unnamed", "feat/unnamed")
+    # Review finding R3-F3: a space in a name must survive the paste line.
+    wts["space"] = r.add("sp ace", "feat/space")
     return r, wts
 
 
@@ -209,9 +217,19 @@ def check_list_mode_changes_nothing() -> list[str]:
             if want not in out:
                 problems.append(f"list mode output lacks {want!r}: {out[-600:]!r}")
         paste = [line for line in out.splitlines() if line.startswith("pnpm wt:cleanup --remove ")]
-        want = ["merged", str(wts["same-a"]), str(wts["same-b"]), "unnamed"]
-        if len(paste) != 1 or sorted(paste[0].split()[3:]) != sorted(want):
+        want = ["merged", str(wts["same-a"]), str(wts["same-b"]), "unnamed", "sp ace"]
+        if len(paste) != 1 or sorted(shlex.split(paste[0])[3:]) != sorted(want):
             problems.append(f"list mode paste line: got {paste}, want the names {want}")
+        # Review finding R3-F1: a list run with --include-t3 pastes the flag.
+        rc, out = r.run("--include-t3")
+        paste = [line for line in out.splitlines() if line.startswith("pnpm wt:cleanup ")]
+        if len(paste) != 1 or "t3-1" not in shlex.split(paste[0]):
+            return problems + [f"list mode with --include-t3 paste line: got {paste}"]
+        rc, out = r.run(*shlex.split(paste[0])[2:])
+        if str(wts["t3"]) in r.listed():
+            problems.append(f"the pasted --include-t3 line kept the T3 worktree: {out[-400:]!r}")
+        if str(wts["space"]) in r.listed():
+            problems.append(f"the pasted line kept the worktree with a space: {out[-400:]!r}")
         return problems
 
 
@@ -221,7 +239,7 @@ def check_remove_mode_keeps_all_but_clean_merged() -> list[str]:
         rc, out = r.run("--remove", "main", "wt-dev", *_names(wts, "unnamed"))
         problems = [] if rc == 0 else [f"remove mode: rc={rc} {out[-600:]!r}"]
         listed = r.listed()
-        gone = {"merged", "same-a"}
+        gone = {"merged", "same-a", "space"}
         for name, path in wts.items():
             if (str(path) in listed) == (name in gone):
                 problems.append(f"remove mode: {name} {'kept' if name in gone else 'removed'}: {out[-600:]!r}")
@@ -269,12 +287,36 @@ def check_remove_mode_refuses_bad_names() -> list[str]:
         return problems
 
 
+def check_name_forms() -> list[str]:
+    """Review findings R3-F2, R3-F4 and R3-F5: a path matches only the
+    folder it names, letter case included; a name given twice counts once;
+    a relative path resolves from the folder pnpm was typed in."""
+    problems = []
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        r, wts = _build(Path(tmp))
+        rc, out = r.run("--remove", str(r.tmp / "MERGED"))
+        if rc == 0 or str(wts["merged"]) not in r.listed():
+            problems.append(f"a path in other letter case matched: rc={rc} {out[-300:]!r}")
+        rc, out = r.run("--remove", "merged", str(wts["merged"]) + "/")
+        if "removed 1 of 1 named" not in out or str(wts["merged"]) in r.listed():
+            problems.append(f"one worktree named twice: {out[-300:]!r}")
+        rc, out = r.run("--remove", "../unnamed")
+        if str(wts["unnamed"]) in r.listed():
+            problems.append(f"../unnamed from the main checkout was not removed: {out[-300:]!r}")
+        rc, out = r.run("--remove", "./same", init_cwd=r.tmp / "a")
+        listed = r.listed()
+        if str(wts["same-a"]) in listed or str(wts["same-b"]) not in listed:
+            problems.append(f"./same typed in {r.tmp / 'a'} did not pick a/same alone: {out[-300:]!r}")
+    return problems
+
+
 CHECKS = (
     check_keep_rule,
     check_report_and_ignored_split,
     check_list_mode_changes_nothing,
     check_remove_mode_keeps_all_but_clean_merged,
     check_remove_mode_refuses_bad_names,
+    check_name_forms,
 )
 
 

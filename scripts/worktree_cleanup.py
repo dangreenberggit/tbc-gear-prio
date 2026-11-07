@@ -38,6 +38,8 @@ from __future__ import annotations
 
 import argparse
 import filecmp
+import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -225,14 +227,17 @@ def archive_problem(wt: Worktree, archive: Path) -> str | None:
     return None
 
 
-def resolve_names(names: list[str], paths: list[Path]) -> tuple[list[Path], list[str]]:
+def resolve_names(names: list[str], paths: list[Path], typed_in: Path) -> tuple[list[Path], list[str]]:
     """(the worktrees `names` pick, one problem per name that picks none or
-    several). Pure. A name is a folder name, or a path."""
+    several). A name is a folder name, or a path, relative to `typed_in`.
+    Paths compare resolved and case-sensitive: `worktree_pair.same_path`
+    lower-cases for Windows, which on Linux lets `MERGED` name `merged`."""
     picked, problems = [], []
     for name in names:
-        hits = [p for p in paths if p.name == name or worktree_pair.same_path(str(p), str(Path(name).absolute()))]
+        hits = [p for p in paths if p.name == name or p.resolve() == (typed_in / name).resolve()]
         if len(hits) == 1:
-            picked.append(hits[0])
+            if hits[0] not in picked:
+                picked.append(hits[0])
         elif not hits:
             problems.append(f"no worktree is named {name!r}")
         else:
@@ -242,7 +247,7 @@ def resolve_names(names: list[str], paths: list[Path]) -> tuple[list[Path], list
 
 def paste_name(path: Path, paths: list[Path]) -> str:
     """The shortest name `resolve_names` maps back to `path` alone."""
-    return path.name if sum(p.name == path.name for p in paths) == 1 else str(path)
+    return shlex.quote(path.name if sum(p.name == path.name for p in paths) == 1 else str(path))
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -278,15 +283,19 @@ def main(argv: list[str] | None = None) -> int:
         print(f"--remove may take {len(takeable)} of {len(entries)} worktrees; it archives their reports in {archive}")
         if takeable:
             print("Name only worktrees no session still uses:")
-            print("pnpm wt:cleanup --remove " + " ".join(takeable))
+            flag = "--include-t3 " if args.include_t3 else ""
+            print(f"pnpm wt:cleanup {flag}--remove " + " ".join(takeable))
         return 0
 
-    picked, problems = resolve_names(args.remove, paths)
+    # pnpm runs a script from the package root and keeps the folder the
+    # command was typed in as INIT_CWD.
+    typed_in = Path(os.environ.get("INIT_CWD") or cwd)
+    picked, problems = resolve_names(args.remove, paths, typed_in)
     if problems:
         raise SystemExit("FAIL: " + "; ".join(problems) + ". Nothing was changed.")
     removed = failed = 0
     for entry in entries:
-        if not any(worktree_pair.same_path(entry["worktree"], str(p)) for p in picked):
+        if Path(entry["worktree"]) not in picked:
             continue
         wt = read_worktree(entry, main_path, here)
         reason = keep_reason(wt, args.include_t3) or archive_problem(wt, archive)
