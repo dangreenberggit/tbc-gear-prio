@@ -48,6 +48,8 @@ def check_keep_rule() -> list[str]:
         ("not merged", _wt(merged=False), False, "not merged"),
         ("dirty", _wt(clean=False), False, "uncommitted"),
         ("other ignored files", _wt(other_ignored=[".env"]), False, ".env"),
+        ("a session runs there", _wt(processes=["pid 7: claude"]), False, "pid 7"),
+        ("processes cannot be listed", _wt(processes=None), False, "cannot list"),
         ("main checkout, even with the flag", _wt(is_main=True, t3=True), True, "main checkout"),
     )
     problems = []
@@ -65,12 +67,15 @@ def check_report_and_ignored_split() -> list[str]:
         ".scratch/agent-reports/r.md", ".scratch/x/.cc-writes/a", ".claude/.cc-writes/b",
         "node_modules/", "vendor/", "scripts/__pycache__/", "docs/x/__pycache__/",
         "packages/core/dist/", "apps/web/tsconfig.tsbuildinfo", ".env", ".claude/settings.local.json",
+        ".scratch/inner/",
     ]
     reports, other = c.split_ignored(listed, is_empty=lambda rel: False)
     problems = []
     if reports != [".scratch/agent-reports/r.md"]:
         problems.append(f"reports: got {reports}")
-    if other != [".env"]:
+    # `ls-files` lists a git repo nested under `.scratch/` as one folder
+    # path; it is work the archive cannot copy.
+    if other != [".env", ".scratch/inner/"]:
         problems.append(f"other ignored: got {other}")
     _, other = c.split_ignored([".gitmodules"], is_empty=lambda rel: True)
     if other:
@@ -168,6 +173,16 @@ def _build(tmp: Path) -> tuple[_Repo, dict[str, Path]]:
     r.write(wts["same-a"], report, "first\n")
     wts["same-b"] = r.add("b/same", "feat/same-b")
     r.write(wts["same-b"], report, "second\n")
+    # Review finding A1: a repo nested under .scratch/ with uncommitted work.
+    wts["nested"] = r.add("nested", "feat/nested")
+    r.write(wts["nested"], ".scratch/inner/work.txt", "uncommitted\n")
+    r.git(wts["nested"] / ".scratch" / "inner", "init", "-q")
+    # Review finding A3: a folder under vendor/ that pair setup does not make.
+    wts["vendor"] = r.add("vendor-work", "feat/vendor")
+    r.write(wts["vendor"], "vendor/mywork/notes.txt", "notes\n")
+    r.write(wts["vendor"], "vendor/wowsims/x.json", "{}\n")
+    # Review finding A2: a session still runs there.
+    wts["busy"] = r.add("busy", "feat/busy")
     return r, wts
 
 
@@ -191,7 +206,12 @@ def check_list_mode_changes_nothing() -> list[str]:
 def check_remove_mode_keeps_all_but_clean_merged() -> list[str]:
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         r, wts = _build(Path(tmp))
-        rc, out = r.run("--remove")
+        session = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(120)"], cwd=wts["busy"])
+        try:
+            rc, out = r.run("--remove")
+        finally:
+            session.kill()
+            session.wait()
         problems = [] if rc == 0 else [f"remove mode: rc={rc} {out[-600:]!r}"]
         listed = r.listed()
         gone = {"merged", "same-a"}
@@ -213,6 +233,10 @@ def check_remove_mode_keeps_all_but_clean_merged() -> list[str]:
             problems.append("removing a worktree deleted the target of its node_modules link")
         if (archive / "t3-1").exists():
             problems.append("remove mode archived a T3 worktree it keeps")
+        if not (wts["nested"] / ".scratch" / "inner" / "work.txt").is_file():
+            problems.append("remove mode deleted a repo nested under .scratch/")
+        if "running process" not in out:
+            problems.append(f"remove mode did not say why it kept busy: {out[-600:]!r}")
         if "archive already has" not in out:
             problems.append(f"remove mode did not say why it kept b/same: {out[-600:]!r}")
         rc, out = r.run("--remove", "--include-t3")
