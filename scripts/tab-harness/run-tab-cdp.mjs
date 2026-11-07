@@ -1,5 +1,5 @@
 // Durable CDP harness for the upgrades tab, promoted from Chunk 1's throwaway
-// ret-p5-run.mjs. It drives a full or capped ret run against ANY origin the
+// ret-p5-run.mjs. It drives a full or capped run on one spec page against ANY origin the
 // caller already serves (the WASM page under http-server, or the packaged
 // desktop binary on :3333) and writes a readback JSON that records what the tab
 // actually did rather than what the origin implies:

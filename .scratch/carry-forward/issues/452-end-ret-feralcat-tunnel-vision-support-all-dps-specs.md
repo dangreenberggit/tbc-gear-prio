@@ -153,3 +153,43 @@ Beast Mastery and Fury EP weights) and 804 (no check pins any spec's
 phase-1 pool). 803 joins slice B, before its runs, so those runs gem with
 each spec's own weights. 804 joins slice D: both are fork changes, so one
 re-pin carries them. 802 waits on both.
+
+2026-11-06, slice F (ticket 802, branch `feat/452-reword-and-close`,
+stacked on E's branch): the epic stays open. No slice branch (A to E) is
+on `dev` yet, so no bar line is met on `dev`. Each line, and where the
+work stands:
+
+- **Spec list (bullet 1):** the 13 specs in the note above (owner ruling,
+  2026-11-06). Met once A's branch `chore/452-slice-tickets` merges.
+- **Goldens (bullet 2):** C's branch `feat/452-desktop-goldens` gates ret,
+  mage (caster), rogue (melee) and enh (hybrid) at phase 4, cap 40 (`GATED`
+  in `scripts/check_desktop_tab.py` on that branch). Ticket 800 is still
+  open there.
+- **Page checks on more than one spec page (bullet 2) and the a11y ratchet
+  on each spec's tab (bullet 3):** E's branch `feat/452-spec-page-scans`
+  scans all 11 spec pages; ticket 801 is closed on it. The owner could see
+  no separate site route for Survival or Arms (2026-11-06, quoted above),
+  so the hunter and warrior pages cover them. E's review is done
+  (`docs/reviews/feat-452-spec-page-scans.md` on that branch); the owner
+  settled its last question on 2026-11-06 (session E's handoff).
+- **EP presets per spec (bullet 2):** `pnpm ep-presets:check` is in
+  `pnpm verify`; ticket 803 (Survival and Arms weights) is closed on B's
+  branch `feat/452-survival-arms`, with 799.
+- **Universes and the sim-effects file per spec (bullet 2):** the tab reads
+  neither (ADR-0038). Met: asked whether this line counts as done because
+  only the old command-line tool uses those files, the owner answered
+  "old items; yes" (2026-11-06).
+- **Pool and meta-gem repair per spec:** tickets 746 and 804 are closed on
+  D's branch `feat/452-meta-repair-hit-cap`. D's merge waits on owner
+  question Q-452d-review: what to do with the two open round-2 findings in
+  `docs/reviews/feat-452-meta-repair-hit-cap.md` on that branch.
+- **Wording (bullet 4):** this branch rewords `data/pools/README.md`,
+  `scripts/tab-harness/README.md`, a comment in `packages/core/src/pool.ts`
+  and the header comments of `scripts/tab-harness/run-tab-cdp.mjs` and
+  `scripts/assemble_universe.py`. The `sme-rank-review` skill frames each
+  review as a ret player (lines 11, 28 and 56). The owner approved the
+  new text on 2026-11-06 ("reviewer instructions: yes"), and it is on this
+  branch; 802 is closed here.
+
+452 closes only when every bar line above is met on `dev` (802 step 3).
+Today that needs 799, 800, 746, 801, 803, 804 and 802 closed on `dev`.
