@@ -1,0 +1,336 @@
+#!/usr/bin/env python3
+"""Checks for scripts/worktree_cleanup.py: the pure keep rule, then both
+modes on a throwaway repo under the temp folder (ticket 835). Follows the
+check_worktree_pair.py convention -- a standalone script of small checks,
+not a pytest suite.
+
+    python scripts/check_worktree_cleanup.py
+
+Exit 0 ok, 1 a check failed.
+"""
+
+from __future__ import annotations
+
+import os
+import shlex
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+import worktree_cleanup as c  # noqa: E402
+
+SCRIPT = Path(__file__).resolve().with_name("worktree_cleanup.py")
+
+
+def _wt(**kw) -> c.Worktree:
+    fields = dict(
+        path=Path("/x/wt"), branch="feat/x", head="a" * 40, is_main=False, holds_dev=False,
+        here=False, locked=False, prunable=False, t3=False, pair=False, merged=True,
+        clean=True, reports=[], other_ignored=[],
+    )
+    fields.update(kw)
+    return c.Worktree(**fields)
+
+
+def check_keep_rule() -> list[str]:
+    cases = (
+        ("merged and clean", _wt(), False, None),
+        ("main checkout", _wt(is_main=True), False, "main checkout"),
+        ("holds dev", _wt(holds_dev=True, branch="dev"), False, "holds dev"),
+        ("runs from it", _wt(here=True), False, "runs from"),
+        ("folder missing", _wt(prunable=True), False, "folder is missing"),
+        ("locked", _wt(locked=True), False, "locked"),
+        ("T3 without the flag", _wt(t3=True), False, "T3"),
+        ("T3 with the flag", _wt(t3=True), True, None),
+        ("pair", _wt(pair=True), False, "wt:unpair"),
+        ("not merged", _wt(merged=False), False, "not merged"),
+        ("dirty", _wt(clean=False), False, "uncommitted"),
+        ("other ignored files", _wt(other_ignored=[".env"]), False, ".env"),
+        ("main checkout, even with the flag", _wt(is_main=True, t3=True), True, "main checkout"),
+    )
+    problems = []
+    for label, wt, include_t3, want in cases:
+        got = c.keep_reason(wt, include_t3)
+        if (want is None) != (got is None) or (want and want not in got):
+            problems.append(f"keep rule, {label}: got {got!r}, want {want!r}")
+    return problems
+
+
+def check_report_and_ignored_split() -> list[str]:
+    """`.scratch/` files are reports; build output, run caches and empty
+    sandbox stubs are not work; anything else ignored keeps the worktree."""
+    listed = [
+        ".scratch/agent-reports/r.md", ".scratch/x/.cc-writes/a", ".claude/.cc-writes/b",
+        "node_modules/", "vendor/", "scripts/__pycache__/", "docs/x/__pycache__/",
+        "packages/core/dist/", "apps/web/tsconfig.tsbuildinfo", ".env", ".claude/settings.local.json",
+        ".scratch/inner/",
+    ]
+    reports, other = c.split_ignored(listed, is_empty=lambda rel: False)
+    problems = []
+    if reports != [".scratch/agent-reports/r.md"]:
+        problems.append(f"reports: got {reports}")
+    # `ls-files` lists a git repo nested under `.scratch/` as one folder
+    # path; it is work the archive cannot copy.
+    if other != [".env", ".scratch/inner/"]:
+        problems.append(f"other ignored: got {other}")
+    _, other = c.split_ignored([".gitmodules"], is_empty=lambda rel: True)
+    if other:
+        problems.append(f"an empty sandbox stub counted as work: {other}")
+    return problems
+
+
+def _env() -> dict[str, str]:
+    # Run from `pnpm verify`, INIT_CWD names the folder verify was typed in,
+    # which would move every relative name off the scratch repo.
+    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_") and k != "INIT_CWD"}
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    return env
+
+
+class _Repo:
+    """A throwaway main checkout on branch `home`, with `dev` held by a
+    linked worktree, so the script must find dev's holder itself."""
+
+    def __init__(self, tmp: Path) -> None:
+        self.tmp = tmp
+        self.main = tmp / "main"
+        self.main.mkdir()
+        self.write(self.main, ".gitignore", ".scratch/*\nvendor/\n.env\n__pycache__/\nnode_modules\n")
+        self.write(self.main, "a.txt", "a\n")
+        hooks = tmp / "no-hooks"
+        hooks.mkdir()
+        self.git(self.main, "init", "-q", "-b", "dev")
+        for key, value in (
+            ("core.hooksPath", hooks.as_posix()), ("user.name", "t"), ("user.email", "t@t"),
+            ("commit.gpgsign", "false"),
+        ):
+            self.git(self.main, "config", key, value)
+        self.git(self.main, "add", "-A")
+        self.git(self.main, "commit", "-q", "-m", "base")
+        self.git(self.main, "switch", "-q", "-c", "home")
+        self.dev = self.add("wt-dev", "dev", new=False)
+
+    def git(self, cwd: Path, *args: str) -> str:
+        return subprocess.run(
+            ["git", *args], cwd=cwd, check=True, capture_output=True, text=True, env=_env()
+        ).stdout.strip()
+
+    @staticmethod
+    def write(cwd: Path, rel: str, text: str) -> None:
+        path = cwd / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+
+    def add(self, rel: str, branch: str, new: bool = True) -> Path:
+        path = self.tmp / rel
+        path.parent.mkdir(parents=True, exist_ok=True)
+        args = ["-b", branch, str(path), "dev"] if new else [str(path), branch]
+        self.git(self.main, "worktree", "add", "-q", *args)
+        return path
+
+    def run(self, *argv: str, init_cwd: Path | None = None) -> tuple[int, str]:
+        """`init_cwd` stands for the folder `pnpm` was typed in: pnpm runs a
+        script from the package root and puts that folder in INIT_CWD."""
+        env = _env()
+        if init_cwd is not None:
+            env["INIT_CWD"] = str(init_cwd)
+        out = subprocess.run(
+            [sys.executable, str(SCRIPT), *argv], cwd=self.main, capture_output=True,
+            text=True, env=env,
+        )
+        return out.returncode, out.stdout + out.stderr
+
+    def listed(self) -> list[str]:
+        return [
+            line.removeprefix("worktree ")
+            for line in self.git(self.main, "worktree", "list", "--porcelain").splitlines()
+            if line.startswith("worktree ")
+        ]
+
+
+def _build(tmp: Path) -> tuple[_Repo, dict[str, Path]]:
+    r = _Repo(tmp)
+    report = ".scratch/agent-reports/r.md"
+    wts = {}
+    wts["merged"] = r.add("merged", "feat/merged")
+    r.write(wts["merged"], report, "merged report\n")
+    # The 452 sessions linked the main checkout's node_modules into T3
+    # worktrees; removing the worktree must not delete through the link.
+    r.write(tmp, "shared/node_modules/keep.txt", "shared\n")
+    (wts["merged"] / "node_modules").symlink_to(tmp / "shared" / "node_modules")
+    wts["unmerged"] = r.add("unmerged", "feat/unmerged")
+    r.write(wts["unmerged"], "b.txt", "b\n")
+    r.git(wts["unmerged"], "add", "-A")
+    r.git(wts["unmerged"], "commit", "-q", "-m", "work")
+    wts["dirty"] = r.add("dirty", "feat/dirty")
+    r.write(wts["dirty"], "untracked.txt", "x\n")
+    wts["t3"] = r.add(".t3/worktrees/proj/t3-1", "t3/one")
+    r.write(wts["t3"], report, "t3 report\n")
+    wts["pair"] = r.add("tbc-wt/pair", "feat/pair")
+    r.write(wts["pair"], "vendor/tbc-new-fork/README", "fork\n")
+    wts["env"] = r.add("env", "feat/env")
+    r.write(wts["env"], ".env", "SECRET_NAME=\n")
+    # Two worktrees with one folder name: the second one's report would
+    # overwrite the first one's in the archive.
+    wts["same-a"] = r.add("a/same", "feat/same-a")
+    r.write(wts["same-a"], report, "first\n")
+    wts["same-b"] = r.add("b/same", "feat/same-b")
+    r.write(wts["same-b"], report, "second\n")
+    # Review finding A1: a repo nested under .scratch/ with uncommitted work.
+    wts["nested"] = r.add("nested", "feat/nested")
+    r.write(wts["nested"], ".scratch/inner/work.txt", "uncommitted\n")
+    r.git(wts["nested"] / ".scratch" / "inner", "init", "-q")
+    # Review finding A3: a folder under vendor/ that pair setup does not make.
+    wts["vendor"] = r.add("vendor-work", "feat/vendor")
+    r.write(wts["vendor"], "vendor/mywork/notes.txt", "notes\n")
+    r.write(wts["vendor"], "vendor/wowsims/x.json", "{}\n")
+    # Review finding A2: a session may still write here, so only the
+    # owner's naming it lets --remove take it.
+    wts["unnamed"] = r.add("unnamed", "feat/unnamed")
+    # Review finding R3-F3: a space in a name must survive the paste line.
+    wts["space"] = r.add("sp ace", "feat/space")
+    return r, wts
+
+
+def _names(wts: dict[str, Path], *leave_out: str) -> list[str]:
+    """Each worktree's folder name, or its path when two share a name."""
+    return [
+        str(path) if path.name == "same" else path.name
+        for key, path in wts.items()
+        if key not in leave_out
+    ]
+
+
+def check_list_mode_changes_nothing() -> list[str]:
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        r, wts = _build(Path(tmp))
+        before = r.listed()
+        rc, out = r.run()
+        problems = [] if rc == 0 else [f"list mode: rc={rc} {out[-400:]!r}"]
+        if r.listed() != before or (r.main / ".scratch" / "worktree-archive").exists():
+            problems.append("list mode removed a worktree or wrote the archive")
+        for want in (
+            str(wts["merged"]), "feat/merged", "not merged", "has changes", "holds dev",
+            "T3 worktree", ".scratch/agent-reports/ (1 file)", "main checkout",
+        ):
+            if want not in out:
+                problems.append(f"list mode output lacks {want!r}: {out[-600:]!r}")
+        paste = [line for line in out.splitlines() if line.startswith("pnpm wt:cleanup --remove ")]
+        want = ["merged", str(wts["same-a"]), str(wts["same-b"]), "unnamed", "sp ace"]
+        if len(paste) != 1 or sorted(shlex.split(paste[0])[3:]) != sorted(want):
+            problems.append(f"list mode paste line: got {paste}, want the names {want}")
+        # Review finding R3-F1: a list run with --include-t3 pastes the flag.
+        rc, out = r.run("--include-t3")
+        paste = [line for line in out.splitlines() if line.startswith("pnpm wt:cleanup ")]
+        if len(paste) != 1 or "t3-1" not in shlex.split(paste[0]):
+            return problems + [f"list mode with --include-t3 paste line: got {paste}"]
+        rc, out = r.run(*shlex.split(paste[0])[2:])
+        if str(wts["t3"]) in r.listed():
+            problems.append(f"the pasted --include-t3 line kept the T3 worktree: {out[-400:]!r}")
+        if str(wts["space"]) in r.listed():
+            problems.append(f"the pasted line kept the worktree with a space: {out[-400:]!r}")
+        return problems
+
+
+def check_remove_mode_keeps_all_but_clean_merged() -> list[str]:
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        r, wts = _build(Path(tmp))
+        rc, out = r.run("--remove", "main", "wt-dev", *_names(wts, "unnamed"))
+        problems = [] if rc == 0 else [f"remove mode: rc={rc} {out[-600:]!r}"]
+        listed = r.listed()
+        gone = {"merged", "same-a", "space"}
+        for name, path in wts.items():
+            if (str(path) in listed) == (name in gone):
+                problems.append(f"remove mode: {name} {'kept' if name in gone else 'removed'}: {out[-600:]!r}")
+        for path in (r.main, r.dev):
+            if str(path) not in listed:
+                problems.append(f"remove mode removed {path}")
+        archive = r.main / ".scratch" / "worktree-archive"
+        for rel, text in (
+            ("merged/.scratch/agent-reports/r.md", "merged report\n"),
+            ("same/.scratch/agent-reports/r.md", "first\n"),
+        ):
+            got = (archive / rel).read_text(encoding="utf-8") if (archive / rel).is_file() else None
+            if got != text:
+                problems.append(f"archive {rel}: got {got!r}, want {text!r}")
+        if not (r.tmp / "shared" / "node_modules" / "keep.txt").is_file():
+            problems.append("removing a worktree deleted the target of its node_modules link")
+        if (archive / "t3-1").exists():
+            problems.append("remove mode archived a T3 worktree it keeps")
+        if not (wts["nested"] / ".scratch" / "inner" / "work.txt").is_file():
+            problems.append("remove mode deleted a repo nested under .scratch/")
+        if "archive already has" not in out:
+            problems.append(f"remove mode did not say why it kept b/same: {out[-600:]!r}")
+        rc, out = r.run("--include-t3", "--remove", "t3-1")
+        if str(wts["t3"]) in r.listed():
+            problems.append(f"--include-t3 kept the T3 worktree: {out[-400:]!r}")
+        got = archive / "t3-1" / ".scratch" / "agent-reports" / "r.md"
+        if not got.is_file() or got.read_text(encoding="utf-8") != "t3 report\n":
+            problems.append("--include-t3 did not archive the T3 worktree's report")
+        return problems
+
+
+def check_remove_mode_refuses_bad_names() -> list[str]:
+    """An unknown name, or a folder name two worktrees share, stops the run
+    before anything is copied or removed."""
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        r, wts = _build(Path(tmp))
+        before = r.listed()
+        problems = []
+        for argv, want in ((("merged", "nope"), "nope"), (("merged", "same"), "same")):
+            rc, out = r.run("--remove", *argv)
+            if rc == 0 or want not in out:
+                problems.append(f"--remove {' '.join(argv)}: want a refusal naming {want!r}; rc={rc} {out[-300:]!r}")
+            if r.listed() != before or (r.main / ".scratch" / "worktree-archive").exists():
+                problems.append(f"--remove {' '.join(argv)} removed or archived something")
+        return problems
+
+
+def check_name_forms() -> list[str]:
+    """Review findings R3-F2, R3-F4 and R3-F5: a path matches only the
+    folder it names, letter case included; a name given twice counts once;
+    a relative path resolves from the folder pnpm was typed in."""
+    problems = []
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        r, wts = _build(Path(tmp))
+        rc, out = r.run("--remove", str(r.tmp / "MERGED"))
+        if rc == 0 or str(wts["merged"]) not in r.listed():
+            problems.append(f"a path in other letter case matched: rc={rc} {out[-300:]!r}")
+        rc, out = r.run("--remove", "merged", str(wts["merged"]) + "/")
+        if "removed 1 of 1 named" not in out or str(wts["merged"]) in r.listed():
+            problems.append(f"one worktree named twice: {out[-300:]!r}")
+        rc, out = r.run("--remove", "../unnamed")
+        if str(wts["unnamed"]) in r.listed():
+            problems.append(f"../unnamed from the main checkout was not removed: {out[-300:]!r}")
+        rc, out = r.run("--remove", "./same", init_cwd=r.tmp / "a")
+        listed = r.listed()
+        if str(wts["same-a"]) in listed or str(wts["same-b"]) not in listed:
+            problems.append(f"./same typed in {r.tmp / 'a'} did not pick a/same alone: {out[-300:]!r}")
+    return problems
+
+
+CHECKS = (
+    check_keep_rule,
+    check_report_and_ignored_split,
+    check_list_mode_changes_nothing,
+    check_remove_mode_keeps_all_but_clean_merged,
+    check_remove_mode_refuses_bad_names,
+    check_name_forms,
+)
+
+
+def main() -> int:
+    problems = [p for check in CHECKS for p in check()]
+    if not problems:
+        print(f"worktree_cleanup.py checks ok ({len(CHECKS)} checks)")
+        return 0
+    for p in problems:
+        print(f"  FAIL: {p}", file=sys.stderr)
+    return 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

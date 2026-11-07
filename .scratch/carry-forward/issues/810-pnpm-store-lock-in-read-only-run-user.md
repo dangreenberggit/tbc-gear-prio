@@ -48,3 +48,13 @@ commands says that in the sandbox a `pnpm` command needs
 `XDG_RUNTIME_DIR` set to a writable folder, and why. That file is a doc
 agents are pointed at, so the exact text needs the owner's approval
 first (`~/.claude/AGENTS.md` § Changing agent instructions).
+
+## Comments
+
+2026-11-07, `chore/merge-hurdles`: the folder `XDG_RUNTIME_DIR` names
+must have mode 0700. With `$TMPDIR/run` at 0775, `pnpm install
+--frozen-lockfile` (pnpm 12.16.1) ignored it and tried
+`/tmp/pnpm-store-operation-locks-1000`, which failed with "Read-only
+file system"; after `chmod 700 $TMPDIR/run` the same command passed
+(`strace -f -e trace=mkdir,statx` showed both paths). So the entry this
+ticket asks for should say `mkdir -p -m 700 $TMPDIR/run`.

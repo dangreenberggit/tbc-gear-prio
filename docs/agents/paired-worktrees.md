@@ -159,16 +159,26 @@ merged into the real `dev`.
 leaves the pair as it was, and stops. For an ordinary conflict, resolve it in
 the pair (`git -C <pair> merge dev`) and run step 3 again.
 
-**When `dev` has a new fork pin,** take the older route below. Step 3
-refuses, before it merges anything, when `data/wowsims-fork.lock.json` on
-`dev` changed since the branch forked. Two reasons:
+**When `dev` has a new fork pin** and step 3 refuses for it, take the
+older route below. A new pin means the `commit` in
+`data/wowsims-fork.lock.json` on `dev` differs from the one at the
+branch's merge base; a change to `pushed` or `_comment` alone is not
+one. Step 3 refuses, before it merges anything, when `dev` has a new pin
+and one of these holds (`fork_pin_problem` in `scripts/merge_to_dev.py`):
 
-- When this pair re-pinned too, the lock's `commit` and `_comment` lines
-  conflict (temp-repo test 2026-10-10, `docs/reviews/feat-worktree-pair.md`
-  WD7; the repo has no merge driver for the lock).
-- When only `dev` re-pinned, `git merge dev` would succeed, but the pair's
-  fork worktree stays on the old commit, so the fork gates in the pair's
-  verify would fail (a reading of `scripts/_fork_gate.py`, untested).
+- The branch changed the lock too, as a pair that re-pinned does. The
+  lock's `commit` and `_comment` lines then conflict (temp-repo test
+  2026-10-10, `docs/reviews/feat-worktree-pair.md` WD7; the repo has no
+  merge driver for the lock).
+- The branch's worktree has a fork (`vendor/tbc-new-fork`). Merging
+  `dev` would succeed, but the fork worktree stays on the old commit, so
+  the fork gates in the pair's verify would fail (a reading of
+  `scripts/_fork_gate.py`, untested).
+
+A branch in a worktree with no fork that did not change the lock gets
+`dev`'s new pin with no conflict and has no fork to go stale, so step 3
+merges it as usual (`python scripts/check_merge_to_dev.py`, the
+`check_fork_pin_refusal_*` checks).
 
 The older route's git steps ran in temp repos on 2026-10-10
 (`docs/reviews/feat-worktree-pair.md`, R1; the `pnpm` commands did not run
@@ -222,6 +232,24 @@ worktree registered inside it (such as a second fork worktree under
 before either half is removed. Before removing anything, unpair copies the
 pair's agent run logs (`.scratch/agent-runs/`, written by the run-log hook)
 into the main checkout's.
+
+**Other worktrees.** `pnpm wt:cleanup` lists every worktree of this repo:
+its branch, whether `dev` contains it, whether `git status` is clean, and
+the gitignored files under `.scratch/` it holds, such as agent reports.
+It changes nothing, and it ends with a `pnpm wt:cleanup --remove <names>`
+line naming every worktree it may remove; T3's worktrees are left out of
+that line unless the list ran with `--include-t3`. A name is a
+worktree's folder name, or its path when two share a folder name.
+`--remove` acts only on the worktrees named after it, because no check
+can tell that a session has finished with a worktree: the person who
+knows which sessions are done picks the names. For each one it copies
+those files to `.scratch/worktree-archive/<folder name>/` in the main
+checkout, then runs `git worktree remove`. Even when named, it keeps a
+worktree that is dirty or not merged into `dev`, the main checkout, the
+worktree that holds `dev`, pairs (it names the `pnpm wt:unpair` command
+for each) and T3's worktrees under `~/.t3/worktrees`, because a T3 thread
+may still use one; `--include-t3` lets a named one go too. The full list
+of what it keeps is `keep_reason` in `scripts/worktree_cleanup.py`.
 
 Remove pairs only with `pnpm wt:unpair`. On its own, `git worktree remove`
 drops the registration and then leaves a pair's main folder half-deleted

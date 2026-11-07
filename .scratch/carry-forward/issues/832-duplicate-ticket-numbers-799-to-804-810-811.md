@@ -51,3 +51,10 @@ in the main repo and the same pattern in `vendor/tbc-new-fork`.
 Each number in 799-804 and 810-811 names one ticket file on `dev`, the
 renamed tickets take numbers from `NEXT`, and the tracked references to
 the renamed tickets name the new numbers.
+
+## Comments
+
+2026-11-07, `chore/merge-hurdles`: ticket 834 adds a merge-ready check
+that fails a branch adding a ticket number the merge result already
+has. It judges only numbers the branch adds, so these duplicates stay
+until this ticket renumbers them; they block no merge.

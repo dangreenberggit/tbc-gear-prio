@@ -482,8 +482,8 @@ ADR-0030 Consequence 4 accepts that risk; ticket 355 was filed when it bit.
    `<fork-branch>` into the fork lock's `branch`, then, with the main folder on
    `dev`, runs `pnpm -C <main-folder> merge-to-dev <main-branch>`
    (`scripts/merge_to_dev.py` refuses a named branch from a folder not on
-   `dev`). A catch-up always re-pins the fork, so if `dev`'s fork lock moved
-   after `<main-branch>` was made, that command refuses: take
+   `dev`). A catch-up always re-pins the fork, so if `dev`'s fork lock
+   pins a new `commit` after `<main-branch>` was made, that command refuses: take
    paired-worktrees.md's older route ("When `dev` has a new fork pin").
 
    The merge leaves the main folder's gitignored generated files stale.
