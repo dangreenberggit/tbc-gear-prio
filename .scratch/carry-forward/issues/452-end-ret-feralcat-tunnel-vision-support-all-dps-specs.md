@@ -188,9 +188,8 @@ work stands:
   and the header comments of `scripts/tab-harness/run-tab-cdp.mjs` and
   `scripts/assemble_universe.py`. The `sme-rank-review` skill frames each
   review as a ret player (lines 11, 28 and 56). The owner approved the
-  proposed text on 2026-11-06 ("reviewer instructions: yes"); it lands when
-  the owner runs the apply script, because session F's sandbox cannot
-  write `.claude/skills/`. 802 stays open until then.
+  new text on 2026-11-06 ("reviewer instructions: yes"), and it is on this
+  branch; 802 is closed here.
 
 452 closes only when every bar line above is met on `dev` (802 step 3).
 Today that needs 799, 800, 746, 801, 803, 804 and 802 closed on `dev`.

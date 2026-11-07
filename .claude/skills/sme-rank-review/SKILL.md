@@ -8,8 +8,9 @@ description: >-
 
 # SME rank review
 
-Use **game knowledge** (TBC Anniversary ret, equip rules, loot rules, set
-bonuses, raid vs PvP, community BiS / guides / wowsims sets) to judge whether
+Use **game knowledge** (how each spec under review plays in TBC Anniversary,
+equip rules, loot rules, set bonuses, raid vs PvP, community BiS / guides /
+wowsims sets) to judge whether
 the ranking **results look right for the game**.
 
 **Audience is the engineering team**, not the character. Do not coach the
@@ -25,7 +26,6 @@ Review model lane — see [`docs/agents/model-policy.md`](../../../docs/agents/m
 ## When to run
 
 - After a real rank that needs a game-domain check
-- When asking whether Phase 1 “would a ret trust this?” gates can close
 - When reviewing a prior SME writeup (second opinion) — same rules
 
 ## Steps
@@ -53,8 +53,8 @@ Review model lane — see [`docs/agents/model-policy.md`](../../../docs/agents/m
    - **Game problems** — each finding is a game fact (equip, loot rules,
      BiS expectations, nonsense deltas). Plain language.
    - **Rows that look fine** — brief
-   - **Gate** — would you trust this output as a ret who knows the game?
-     What must be true before yes?
+   - **Gate** — would a player of each spec under review who knows the game
+     trust this output? What must be true before yes?
    - **Notes for engineering** — optional one-line pointers (“bow on a
      paladin”, “item already equipped but shown as a loss”) without pipeline
      jargon
@@ -77,9 +77,10 @@ Review model lane — see [`docs/agents/model-policy.md`](../../../docs/agents/m
 - **An empty stat line never means a weak item.** For a weapon, weapon damage
   is the dominant term and lives outside the stat map
   (`scalingOptions.0.weaponDamageMin`/`Max`, plus speed); sockets and procs are
-  budget too. Librams and trinkets carry empty stat maps for the same reason —
-  their value is the effect. Judge such an item by what it actually does, and
-  never call one "no stats, therefore not competitive".
+  budget too. Relics (librams, idols, totems) and many trinkets carry empty
+  stat maps for the same reason — their value is the effect. Judge such an
+  item by what it actually does, and never call one "no stats, therefore not
+  competitive".
 - Flag results that contradict well-known tier expectations when you are
   confident; say when you are unsure.
 - Soft ordering when gains are tiny is fine to note as “not worth arguing

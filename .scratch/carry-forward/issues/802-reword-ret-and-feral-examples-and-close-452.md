@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Verified by: docs/reviews/feat-452-reword-and-close.md (branch review); `python scripts/check_skill_mirrors.py` (skill copies match)
 Type: task
 Origin: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md (slicing, 2026-11-06, slice F)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -91,3 +92,9 @@ and the data and harness READMEs found the rest of this list.
   records, so the ticket's default holds.
 
 Step 3 (the bar check) is the 2026-11-06 slice F note on 452.
+
+2026-11-06, closed. The owner approved the `sme-rank-review` text
+("reviewer instructions: yes") and applied it with session F's apply
+script; both copies match the proposal that passed `instruction-review`
+(report `.scratch/agent-reports/2026-11-06-general-task-452-sme-skill-instruction-review.md`
+in session F's worktree). 452 has its slice F note.
