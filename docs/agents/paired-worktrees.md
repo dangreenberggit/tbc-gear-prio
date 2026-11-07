@@ -233,6 +233,18 @@ before either half is removed. Before removing anything, unpair copies the
 pair's agent run logs (`.scratch/agent-runs/`, written by the run-log hook)
 into the main checkout's.
 
+**Other worktrees.** `pnpm wt:cleanup` lists every worktree of this repo:
+its branch, whether `dev` contains it, whether `git status` is clean, and
+the gitignored files under `.scratch/` it holds, such as agent reports.
+It changes nothing. `pnpm wt:cleanup --remove` copies those files to
+`.scratch/worktree-archive/<folder name>/` in the main checkout, then runs
+`git worktree remove` on each clean, merged worktree. It keeps the main
+checkout, the worktree that holds `dev`, pairs (it names the `pnpm
+wt:unpair` command for each) and T3's worktrees under `~/.t3/worktrees`,
+because a T3 thread may still use one; `--include-t3` removes those too.
+The full list of what it keeps is `keep_reason` in
+`scripts/worktree_cleanup.py`.
+
 Remove pairs only with `pnpm wt:unpair`. On its own, `git worktree remove`
 drops the registration and then leaves a pair's main folder half-deleted
 ("Directory not empty", every live run on 2026-10-10). The script deletes
