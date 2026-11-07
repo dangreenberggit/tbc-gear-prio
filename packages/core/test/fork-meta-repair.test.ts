@@ -12,7 +12,7 @@
  * (`.scratch/carry-forward/issues/535-meta-repair-may-add-dead-hit-gems-to-set-gear.md`),
  * and against a brute force written in test code (`meta-repair-oracle.ts`).
  *
- * Each case names its ticket 535 test id. Skips when the fork clone is absent
+ * Each case names the ticket and test id it checks. Skips when the fork clone is absent
  * (`vendor/` is gitignored), like the other fork-gated suites.
  */
 

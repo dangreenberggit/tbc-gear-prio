@@ -431,3 +431,5 @@ file contention, worker prompt. This file stays the chronological log.
 - 796 The paired-worktrees route for a new fork pin fails when `dev` is checked out in another worktree or the pair is under `.scratch/` (merge of feat/620-item-level) 2026-11-05
 - 797 After a between-chunk Gate C sends a row to `rework`, the stage-gate skill gives no way to start the next chunk (draft-review finding, checked on dev 7f223cd5) 2026-11-05
 - 798 The stage-gate skill has no way to re-plan a step that turns out wrong during the build (deferred from the stage-gate ban fix; draft-3 review findings 1-4) 2026-11-05
+- 830 A budget spec ranked without a stats read (the CLI) repairs hit at full weight and says nothing (pre-merge review feat/452-meta-repair-hit-cap, round 1, A4) 2026-11-06
+- 831 The caster hit budget values hit past a talented spell's cap at full weight, with no note (pre-merge review feat/452-meta-repair-hit-cap, round 1, I2) 2026-11-06
