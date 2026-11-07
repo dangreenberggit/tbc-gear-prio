@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 3b (DPS spec list) — rule 1 of § How plans nest
 Type: epic
 Severity: major (product-scope gap: the tool is meant to support all DPS specs; ret+feralcat were only initial-dev test specs)
@@ -193,3 +193,16 @@ work stands:
 
 452 closes only when every bar line above is met on `dev` (802 step 3).
 Today that needs 799, 800, 746, 801, 803, 804 and 802 closed on `dev`.
+
+2026-11-07: closed. All six slice branches are on `dev` (A to D merged
+2026-11-06; E as `01c89d06`, F as `0cd6a7fc`), and every bar line above
+is met there: 799, 800, 746, 801, 802, 803 and 804 are each `Status:
+closed` with a `Verified by:` line; `GATED` in
+`scripts/check_desktop_tab.py` holds ret, mage, rogue and enh at phase 4;
+`ep-presets:check` is in `pnpm verify`. The layout gate measured the
+merged tab green during F's merge (`45caf828`). Follow-ups stay open as
+their own tickets: 810, 811, 820, 821, 830, 831, 840-843, 850-852, and
+832 (duplicate ticket numbers).
+
+Verified by: tbc-gear-prio@0cd6a7fcce794b91b697e28e51083d123d16cf52;
+docs/reviews/feat-452-reword-and-close.md
