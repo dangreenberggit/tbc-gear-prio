@@ -67,10 +67,51 @@ would work — treat every `Verified by` as unproven until you re-run it.
    every shared manifest has exactly one owner.
 6. **Executor traps.** Steps whose acceptance criterion is not checkable,
    paths that do not exist, verify recipes that pass vacuously.
+7. **Dry run.** The planner writes the plan's commands without running
+   them, so a bad command shows only when the executor runs it. Give the
+   dry run to one workhorse helper (`docs/agents/stage-gate-project.md`
+   § Worker lanes, Reviewer; its private-data exception applies, because
+   the helper sees every output). The helper runs every write and
+   acceptance command in § Steps and every Verify-recipe command, in plan
+   order, from the checkout root the executor starts in. Each command
+   runs as the plan wrote it, except that each write target, and each
+   later command that reads that target, uses the target's path relative
+   to the checkout root under a temp folder, copied there first when it
+   exists. The helper runs `mktemp -d` once to make the temp folder and
+   writes the absolute path it prints into every command, because shell
+   variables do not last from one Bash call to the next. The helper
+   writes only under the temp folder and its report file.
+   Before the first command, it runs `ls -l --full-time` on each write
+   target's real path (a missing file is a result too) and runs it again
+   after each command; when a listing changes, the helper stops and
+   reports the change, which is a finding.
+   Where the executor fills in a value, give the helper one the plan
+   allows that is most likely to break the command (such as text with
+   `%`, `\` or a quote). The helper holds back, as `not run` with the
+   reason: a command that writes, or may write, a file git tracks at its
+   real path, such as a script whose outputs the plan does not all name;
+   a command that reads a moved target without naming its path, such as
+   a test runner that imports it; a regen, commit, push or merge; a long
+   run or a process that keeps running (`pnpm verify`, a sim, a server);
+   and a command whose input comes from an earlier step that the dry run
+   did not run. For each command it runs, it returns the step, the
+   command as run, the absolute path each write target resolves to
+   before the move, the exit code, the first 20 output lines, and what
+   the plan says to expect. A target that resolves away from the file
+   the plan means, or an exit code or output the plan does not expect,
+   is a finding, rated by § Report's severities, with the helper's
+   command and output as `Evidence`. Judge a `not run` command from its
+   text. On a re-review, dry-run the steps your prompt names, the earlier
+   steps that make their inputs, and the later commands that read what
+   they write; each other command is `not run`, outside this re-review's
+   scope. After the `## Findings` table, write one line: `Dry run:`, the
+   steps whose results were all as expected, then each `not run` command
+   and its reason.
 
 ## Fan-out
 
-- Verify by read-only commands and reads. Run each command in the
+- Verify by read-only commands and reads; the dry run (§ What to hunt,
+  item 7) writes only under its temp folder. Run each command in the
   foreground: leave `run_in_background` unset or `false` on every Bash
   call. Start no server, sim or other process that keeps running. A
   claim that needs a measurement the plan did not supply, or that needs
@@ -84,7 +125,8 @@ would work — treat every `Verified by` as unproven until you re-run it.
   claims per helper, each told to change no files except its report file
   (report rule: that file's § Folders) and to put in its report each
   command, its exit code and the output lines that bear on the claim. You
-  compare the output with the claim.
+  compare the output with the claim. A helper that also does the dry run
+  writes under its temp folder too (§ What to hunt, item 7).
 - A refutation that needs judgment goes to a judgment agent
   (`docs/agents/stage-gate-project.md` § Worker lanes), cap 2, told to
   change no files except its report file, and prompted to refute: "Find the input, state, or file
@@ -155,6 +197,9 @@ that the latest earlier `# Round` section gave it, and write
 ## Done when
 
 Every register row has a verdict, every finding has evidence or is
-labeled `judgment`, the `# Round <n>` section of `plan-review.md` holds
-the review with the `VERDICT:` line first after the heading, and your
-final message has the parts that § Report lists.
+labeled `judgment`, the `Dry run:` line accounts for every write and
+acceptance command in the steps you reviewed and every Verify-recipe
+command (as expected, a finding, or `not run`), the `# Round <n>`
+section of `plan-review.md` holds the review with the `VERDICT:` line
+first after the heading, and your final message has the parts that
+§ Report lists.

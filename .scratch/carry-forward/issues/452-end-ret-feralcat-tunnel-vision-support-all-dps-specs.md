@@ -98,3 +98,58 @@ the pass meets no bullet in full. Q-452-golden (does the 2026-10-24 ruling
 also cover the desktop gate's single ret golden?) is open for the owner;
 either answer leaves the other parts of bullet 2 open. Whether to close or
 re-slice this epic is the owner's decision.
+
+2026-11-06, owner rulings, word for word (recorded in the main checkout's
+untracked handoff `.scratch/handoffs/2026-11-06-452-slicing.md`, lines 8-11):
+
+- On Q-452-golden: "I don't know if this is a UI component test, a layout
+  test, or a function/ sim component test. I can't answer the question of
+  what this is supposed to test if I don't know what this is supposed to
+  test, and if you figure out what it's supposed to test I assume that
+  mostly answers the question"
+- On the spec list: "yes, those other dps specs are included . Wowsims tbc
+  also has default "saved talents" that include these, but notably they
+  dont see to be different website routes"
+  (The question proposed 13 specs: the 11 of the p45 pass plus Survival
+  hunter and Arms warrior.)
+- On next steps: "definitely splitting, potentially in another session
+  unless it's very related to this content"
+
+What the desktop gate tests, as the slicing session answered it: it is a
+sim-output test, not a UI component or layout test. Check (h) of
+`scripts/check_desktop_tab.py` compares a run's `rows`, `aboveCutoffItems`
+and `baselineDps` exactly against the golden; its docstring calls it "the
+only automatic check on DPS values, row order and the above-cutoff set".
+The 2026-10-24 ruling covers page checks, which test what the page shows
+for given results; the golden tests the results themselves. So the golden
+part of bullet 2 stays open, with goldens for more specs than ret. The
+owner has not commented on this answer; slice C acts on it.
+
+The spec list (bullet 1) is these 13 specs: balance, mage, shadow,
+elemental, warlock, feral cat, ret, rogue, hunter (Beast Mastery), Survival
+hunter, enhancement, warrior (Fury) and Arms warrior. Survival and Arms are
+not separate site routes, as far as the owner could see ("dont see to be
+different website routes", above); in the fork they are the hunter and
+warrior pages with their own gear sets.
+
+Slices, worked by a chain of sessions in this order (one branch each, no
+merge without the owner's ask): A, this note and the slice tickets, plus
+an audit of the per-spec checks; B, 799 (Survival and Arms live runs,
+with 803 first);
+C, 800 (desktop-gate goldens for more specs); D, 746 (meta-gem repair at
+the hit cap for every spec, with 804); E, 801 (axe and visual-review scans on every
+spec page); F, 802 (reword ret-and-feral examples, then check this bar and
+close). B, C and E branch off A's branch, D off C's branch, and F comes
+last. The order is the chain's; each ticket's `Blocked by:` line names
+its real dependencies.
+
+2026-11-06, slice A audit of the per-spec checks (EP presets, universes,
+sim-implemented effects, pool), read at fork `b603564ee`, the current pin.
+`pnpm verify` runs every one of these checks (`package.json`, `verify:steps`).
+The tab no longer reads `data/universes` or the sim-implemented-effects
+file (ADR-0038), so checking those per spec matters only to the CLI. Two
+gaps in what the tab uses, filed: 803 (Survival and Arms pages gem with
+Beast Mastery and Fury EP weights) and 804 (no check pins any spec's
+phase-1 pool). 803 joins slice B, before its runs, so those runs gem with
+each spec's own weights. 804 joins slice D: both are fork changes, so one
+re-pin carries them. 802 waits on both.

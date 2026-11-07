@@ -524,3 +524,7 @@ Two tickets carry the follow-up:
 ## Item 7 dropped (2026-10-29)
 
 The owner dropped the reviewer's dry run (`.claude/agents/gate-reviewer.md` § What to hunt, item 7) after research and one live trial: `.scratch/agent-reports/2026-10-28-general-task-dry-run-research-and-trial.md` (gitignored, main checkout). The owner's words: "drop sounds ok i guess", and for this branch: "new branch sounds ok i guess". This branch, `chore/729-without-dry-run`, is `chore/729-test-result` without the dry-run changes to `gate-reviewer.md`. The Disposition rows above that say a dry-run finding was fixed refer to commits whose `gate-reviewer.md` part is not on this branch.
+
+## Dry run kept on `chore/729-test-result` (2026-11-05)
+
+`chore/729-test-result` keeps the three dry-run commits (`7e2ebae0`, `683bf83b`, `79160874`), so on this branch `.claude/agents/gate-reviewer.md` § What to hunt still has item 7. The owner chose this on 2026-11-05: "option 2 sounds cleaner" (option 2: merge `dev` into the branch and keep the dry-run commits). The section above and the `wontfix` rows A7, A8, A9, S7, S6, P6, P7, A10 and S8 in § Disposition came from `chore/729-without-dry-run` through that merge; their words "this branch does not carry it" describe that branch. On `chore/729-test-result` those findings are not fixed.
