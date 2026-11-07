@@ -26,3 +26,8 @@ PLAN.md
 PLAN-REVIEW.md
 docs/stage0-findings.md
 docs/verification-log.md
+
+# The owner approved this file byte for byte (md5 3a4c0385d683c8dce09dec98460729e8,
+# 2026-11-06); prettier would pad its tables, which changes the bytes and makes
+# every agent that reads it pay for the padding.
+docs/agents/home/routing.md

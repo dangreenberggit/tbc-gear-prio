@@ -96,7 +96,8 @@ Try in order:
 1. **`codex exec`**, if the binary is on `PATH` — cross-vendor review-lane review.
    Pipe the brief + diff to it directly.
 2. **Fresh subagents on a review-lane model** (explicit id) — Claude Code:
-   `general-task` agents, `model: "opus"` (Opus at effort `high`); Codex: top tier;
+   the type `~/.claude/routing.md` § Decision table names for a review
+   axis; Codex: top tier;
    Cursor: Grok high (prefer non-fast; else the current `…-high-fast` slug);
    anywhere else: the model your harness section names for review. Prefer all
    three axes in one parallel batch when the harness is healthy.
@@ -279,9 +280,8 @@ Sort each finding by what it does, whatever label the reviewer gave it:
   never starts a round of its own; round 2, which checks round 1's fixes,
   also reads the code-quality pass. Before round 2, the agent that handles this
   review's findings sends every `## Code quality` row to one fresh
-  agent, which fixes them all in one pass: a workhorse type when the rows
-  fit `~/.claude/model-policy.md` § Trial types, "Modest", else
-  `general-task`. The pass
+  agent, which fixes them all in one pass: the type
+  `~/.claude/routing.md` § Decision table names. The pass
   changes no behaviour, and the gate command (values file § Commands)
   passes after it. Each row then
   gets a Disposition row: `fixed`, or `defer` with a ticket.

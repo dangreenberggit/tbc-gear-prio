@@ -28,6 +28,7 @@ pairs=(
   "$S/AGENTS.md"                          "$HOME/.claude/AGENTS.md"
   "$S/CLAUDE.md.install"                  "$HOME/.claude/CLAUDE.md"
   "$S/model-policy.md"                    "$HOME/.claude/model-policy.md"
+  "$S/routing.md"                         "$HOME/.claude/routing.md"
   "$S/hooks/bash-footguns.sh"             "$HOME/.claude/hooks/bash-footguns.sh"
   "$S/hooks/subagent-foreground-helpers.py" "$HOME/.claude/hooks/subagent-foreground-helpers.py"
 )
@@ -52,6 +53,7 @@ done
 for ((i = 0; i < ${#pairs[@]}; i += 2)); do
   mv "${pairs[i+1]}.new" "${pairs[i+1]}"
 done
+ln -sfn "$HOME/.claude/routing.md" "$HOME/.claude_router/routing.md"
 echo "installed $(( ${#pairs[@]} / 2 )) files"
 EOF
 ```

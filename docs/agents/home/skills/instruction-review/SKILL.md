@@ -13,8 +13,9 @@ does not look for:
 3. A behaviour-changing rule counted as done before anyone ran it.
 
 This skill checks for those three. The repo's own `AGENTS.md` (or
-equivalent) supplies its values: where the report goes, which agent
-types and models to spawn, and which review covers code.
+equivalent) supplies its values: where the report goes and which review
+covers code. Which agent types and models to spawn:
+`~/.claude/routing.md`.
 
 ## Inputs
 
