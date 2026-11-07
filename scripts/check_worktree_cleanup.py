@@ -83,7 +83,9 @@ def check_report_and_ignored_split() -> list[str]:
 
 
 def _env() -> dict[str, str]:
-    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
+    # Run from `pnpm verify`, INIT_CWD names the folder verify was typed in,
+    # which would move every relative name off the scratch repo.
+    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_") and k != "INIT_CWD"}
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     return env
 
