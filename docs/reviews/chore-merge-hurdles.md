@@ -4,6 +4,8 @@ Reviewed range: `0bca77ec3ea5a692574273ccf582935de87a14bb..5ce0825b1466b9a17567c
 
 Reviewed range: `5ce0825b1466b9a17567c61b3ada5fb13aefae30..f6005cf8a31e555b64140e473ed7dd74489afaa5`
 
+Reviewed range: `f6005cf8a31e555b64140e473ed7dd74489afaa5..309b910e82c3638b26d758e5e0d439ef84cc2e90`
+
 Dispatch note: `python scripts/check_merge_ready.py --product-files`
 printed `package.json`, `scripts/check_merge_ready.py`,
 `scripts/check_merge_to_dev.py`, `scripts/check_worktree_cleanup.py`,
@@ -166,8 +168,59 @@ Findings, all in the A2 fix (`scripts/worktree_cleanup.py`):
   process has its folder in that worktree between Bash calls.
 
 Round 2 is the last round, and it reported findings that are not
-bookkeeping, so the review stops here with these open; step 4 (the merge
-check) was not run.
+bookkeeping, so the review stopped here with these open; step 4 (the merge
+check) was not run. An assessor that neither wrote nor reviewed the work
+judged that the process check is a guess no fix can make reliable, and
+recommended deleting it and having `--remove` take worktree names. The
+owner chose that on 2026-11-07: "sure 1 is fine".
+
+## Focused check (round 3)
+
+The owner chose a further round. Range `f6005cf8..309b910e`: `2e601013`
+(review file only) and `309b910e`, which deletes `processes_in`,
+`own_process_tree` and the re-read after archiving, and makes `--remove`
+act only on named worktrees (folder name, or path when two share one).
+An unknown or shared name stops the run before anything changes; list
+mode prints a ready-to-paste `pnpm wt:cleanup --remove <names>` line.
+One fresh `general-task` (Opus) agent checked it.
+
+1. **Conditions: pass.** `309b910e` names R2-1 to R2-4; every changed
+   code line is in the removed check, the remove loop, name handling or
+   the list output.
+2. **Only what was asked: pass.** The re-read went with the process
+   check; R2-3 is about it, and naming a worktree is the owner's statement
+   that no session uses it.
+3. **Tests assert their findings: pass.** Five mutants in copies (names
+   ignored, bad names accepted, first match of a shared name taken, the
+   paste line using folder names only, no paste line) each fail
+   `check_worktree_cleanup.py`.
+4. **Touched tests pass:** `check_worktree_cleanup.py` (5 checks) and
+   `pnpm verify` with `TBC_VERIFY_WITHOUT_FORK=1`, both rc 0.
+
+It found no way for `--remove` to copy or remove a worktree nobody named,
+or one `keep_reason` keeps. Findings, all in `scripts/worktree_cleanup.py`:
+
+- **R3-F1 (low).** List mode run with `--include-t3` puts T3 worktrees
+  in the paste line without the flag, so pasting it keeps them, with
+  rc 0 and "keeps it: T3 worktree" for each.
+- **R3-F2 (low).** A path that differs from a worktree's only in letter
+  case matches it on Linux, through `worktree_pair.norm_path`, which
+  lower-cases for Windows.
+- **R3-F3 (low, loud).** The paste line does not quote names; a path
+  with a space breaks it, and the pasted run refuses.
+- **R3-F4 (low).** Naming one worktree twice prints "removed 1 of 2".
+- **R3-F5 (low, loud).** A relative path with `..` is refused, because
+  `Path.absolute()` does not resolve `..`.
+
+A cold reader of the reworded "Other worktrees" paragraph in
+`docs/agents/paired-worktrees.md` listed first and then asked the owner
+which worktrees to remove, as intended. Its wording points (what a name
+is, that dirty or unmerged worktrees stay even when named, that T3
+worktrees are left out of the paste line, and who picks the names) were
+fixed in the paragraph.
+
+Round 3 is again a last round and reported findings that are not
+bookkeeping, so the review stops here; step 4 was not run.
 
 ## Summary
 

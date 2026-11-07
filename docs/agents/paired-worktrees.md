@@ -237,12 +237,15 @@ into the main checkout's.
 its branch, whether `dev` contains it, whether `git status` is clean, and
 the gitignored files under `.scratch/` it holds, such as agent reports.
 It changes nothing, and it ends with a `pnpm wt:cleanup --remove <names>`
-line naming every clean, merged worktree it may remove. `--remove` acts
-only on the worktrees named after it, because no check can tell that a
-session has finished with a worktree; name only worktrees no session
-still uses. For each one it copies those files to
-`.scratch/worktree-archive/<folder name>/` in the main checkout, then runs
-`git worktree remove`. Even when named, it keeps the main checkout, the
+line naming every worktree it may remove; T3's worktrees are left out of
+that line unless the list ran with `--include-t3`. A name is a
+worktree's folder name, or its path when two share a folder name.
+`--remove` acts only on the worktrees named after it, because no check
+can tell that a session has finished with a worktree: the person who
+knows which sessions are done picks the names. For each one it copies
+those files to `.scratch/worktree-archive/<folder name>/` in the main
+checkout, then runs `git worktree remove`. Even when named, it keeps a
+worktree that is dirty or not merged into `dev`, the main checkout, the
 worktree that holds `dev`, pairs (it names the `pnpm wt:unpair` command
 for each) and T3's worktrees under `~/.t3/worktrees`, because a T3 thread
 may still use one; `--include-t3` lets a named one go too. The full list
