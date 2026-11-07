@@ -2292,5 +2292,39 @@ describe.skipIf(!forkPresent)(
       ]);
       expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
     });
+
+    it("746-R1b: a Stop during a candidate read ends the run as a partial, uncached ranking with no failed-sim row", async () => {
+      // Oracle: Stop makes the read reject with StopRefusedSim, which
+      // runCandidate returns on, so 30907 is left to the Stop placeholder
+      // (simmed: false) and is not dropped as a failed sim.
+      const store = await newStore();
+      const controller = new AbortController();
+      const reads = await gearHitReads();
+      const stopped = await runSpec({
+        pool: S_POOL,
+        store,
+        controller,
+        computeStats: (req) => {
+          if (requestItems(req)[CHEST]?.id !== 30907) return reads(req);
+          controller.abort();
+          return new Promise<StatsObservation>(() => {});
+        },
+      });
+      expect(controller.signal.aborted).toBe(true);
+      expect(stopped.ranking.complete).toBe(false);
+      expect(
+        stopped.ranking.items.find((r) => r.itemId === 30907)
+      ).toMatchObject({ simmed: false });
+      expect(
+        stopped.ranking.substitutions.filter(
+          (s) => s.field === "item 30907" || /item 30907/.test(s.detail)
+        )
+      ).toEqual([]);
+      // No ranking was cached: a second run on the same store reads the hit
+      // again instead of returning a stored ranking.
+      const again = await runSpec({ pool: S_POOL, store, computeStats: reads });
+      expect(again.statsRequests.length).toBeGreaterThan(0);
+      expect(again.ranking.complete).toBe(true);
+    });
   }
 );

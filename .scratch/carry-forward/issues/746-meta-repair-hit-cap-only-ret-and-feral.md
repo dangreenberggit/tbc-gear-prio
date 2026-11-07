@@ -116,9 +116,17 @@ golden moved.
 A spec on a runner without `computeStats` (the CLI) repairs at full
 weight with no note; ticket 830 holds that.
 
-Verified by: tbc-new-fork@6bab26253283be19d4adf328bf3db5a901b26937;
+2026-11-06: review round 2's R1 and R2 are fixed in fork commit
+707e67f07 "Fail a candidate's sim when its hit read fails" (re-pin
+db6ed1bc). A failed per-candidate hit read now gives that item the
+tab's usual failed-sim row, with no full-weight fallback and no
+hit-rating note (main-repo case 746-R1). A Stop during that read still
+ends the run as a partial, uncached ranking, with the item left unsimmed
+and no failed-sim row (case 746-R1b).
+
+Verified by: tbc-new-fork@707e67f077542c28d98171db2a27fb77b73476ae;
 `node_modules/.bin/vitest run --root . --configLoader runner packages/core/test/fork-meta-repair.test.ts`
-(41 passed; in the agent sandbox the worktree has no `node_modules`, so
+(43 passed; in the agent sandbox the worktree has no `node_modules`, so
 it needs `ln -s /home/daniel/Code/lulz/tbc-gear-prio/node_modules node_modules`
 first, and `--configLoader runner` because that `node_modules` is
 read-only); `pnpm fork-tests:check`
