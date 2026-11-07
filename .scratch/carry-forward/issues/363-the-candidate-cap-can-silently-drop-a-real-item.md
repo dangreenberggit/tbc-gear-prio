@@ -60,3 +60,13 @@ and 3 makes some runs impossible that work today.
 Confirmed live by symbol during the reforge-catchup-leftovers investigation.
 Related: 358 (owns the mechanism statement and the misleading EP-weights docs
 note).
+
+## Comments
+
+**2026-11-07, branch `fix/821-weapon-damage-order`.** The tab's candidate
+order now counts weapon damage at the weights file's `pseudoWeights` and
+charges a two-hander the worn off hand (tickets 820, 821). It is still an
+estimate: procs, on-use effects and weapon speed are not scored, so a cap can
+still drop a real upgrade. On the enhancement `P3 Preset` page at phase 4,
+4 of the 14 real upgrades fall in the first 40 (none before). Only the tab
+changed; core's order (`packages/core/src/candidate-order.ts`) is unchanged.
