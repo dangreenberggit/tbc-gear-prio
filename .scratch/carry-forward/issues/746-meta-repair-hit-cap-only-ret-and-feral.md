@@ -52,3 +52,22 @@ merge account, then rewrite it with `pnpm desktop-gate:check --spec <spec>
 --update-golden` and give the reason in the commit body
 (`data/desktop-gate/README.md:67-79`). The branch's `pre-merge-review`
 file is part of done.
+
+2026-11-06: Arms warrior now gems with its own bundled weights (ticket
+803), and those price hit at 1.81 per point
+(`vendor/tbc-new-fork/ui/features/upgrades/model/data/warrior-arms-p1.ep-weights.json`,
+stat 20), against 1.45 in Fury's bundled set
+(`warrior-fallback.ep-weights.json`) and 1.01 in upstream's P3 Arms set
+(`ui/specs/warrior/dps/presets.ts`, `P3_ARMS_EP_PRESET`). The Arms start
+gear sits at or over the 9% cap. So a meta repair that counts hit at full
+weight would value a wasted hit gem higher on Arms than on Fury
+(hypothesis, untested). No row in the Arms runs isolates it; the run JSON
+does not record which gems the tab chose. Sources:
+`docs/live-runs/2026-11-06-survival-arms-p45.md`,
+`.scratch/agent-reports/2026-11-06-general-task-sme-arms.md` § Q3 and K3.
+
+2026-11-06: the tab's Arms set is now `P3_ARMS_EP_PRESET`, with hit
+weight 1.01 (stat 20 in `data/presets/warrior/arms-p3.ep-weights.json`;
+review finding D1 of `feat/452-survival-arms`). That replaces the premise
+of the comment above, which priced Arms hit at 1.81 from the P1 set: the
+Arms set now prices hit below Fury's 1.45, not above it.
