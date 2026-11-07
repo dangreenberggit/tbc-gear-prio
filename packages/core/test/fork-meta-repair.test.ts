@@ -2258,5 +2258,39 @@ describe.skipIf(!forkPresent)(
         );
       }
     });
+
+    it("746-R1: a failed candidate read fails that candidate's sim and leaves the others on their budgets", async () => {
+      // Oracle: the read is a sim-worker call, so its failure is that
+      // candidate's failed sim. Heartshatter still repairs on the budget (two
+      // Inscribed; full weight would put Rigid in), and no row is said to
+      // have repaired without the hit read.
+      const reads = await gearHitReads();
+      const run = await runSpec({
+        pool: S_POOL,
+        computeStats: (req) =>
+          requestItems(req)[CHEST]?.id === 30907
+            ? Promise.reject(new Error("worker died"))
+            : reads(req),
+      });
+      expect(run.ranking.items.map((r) => r.itemId)).toEqual([32365]);
+      const capped = chestRequestChanges(run.requests, run.worn, 32365);
+      expect(capped.length).toBeGreaterThan(0);
+      for (const c of capped) {
+        expect(c).toEqual([`${BOLD}->${INSCRIBED}`, `${BOLD}->${INSCRIBED}`]);
+      }
+      expect(chestRequestChanges(run.requests, run.worn, 30907)).toEqual([]);
+      expect(
+        run.ranking.substitutions.filter((s) => s.field === "item 30907")
+      ).toEqual([
+        {
+          field: "item 30907",
+          slot: "chest",
+          detail:
+            "This item was not ranked in this slot, because its sim failed." +
+            "\nitem 30907, slot chest: worker died",
+        },
+      ]);
+      expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
+    });
   }
 );
