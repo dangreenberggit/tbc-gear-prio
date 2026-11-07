@@ -971,6 +971,78 @@ def tickets_closed_without_verification(changes: BranchChanges) -> list[str]:
     return flagged
 
 
+TICKET_NUMBER_RE = re.compile(r"^(\d+)-.*\.md$")
+
+
+def ticket_number_clashes(
+    added: set[str], merged: set[str]
+) -> list[tuple[str, list[str]]]:
+    """Each ticket in `added` whose number another ticket in `merged` also
+    has, with those other tickets. Pure: both sides are file names in the
+    carry-forward folder. Numbers compare as integers, so `08-x` clashes
+    with `8-y`. Only `added` is judged, so duplicates already on dev (ticket
+    832) do not fail every branch."""
+    by_number: dict[int, list[str]] = {}
+    for name in merged | added:
+        m = TICKET_NUMBER_RE.match(name)
+        if m:
+            by_number.setdefault(int(m[1]), []).append(name)
+    clashes = []
+    for name in sorted(added):
+        m = TICKET_NUMBER_RE.match(name)
+        if not m:
+            continue
+        others = sorted(n for n in by_number[int(m[1])] if n != name)
+        if others:
+            clashes.append((name, others))
+    return clashes
+
+
+def _ticket_names_at(root: Path, ref: str) -> set[str] | None:
+    """The carry-forward tickets' file names at `ref`, or None when git
+    cannot list them. A symlink is not a ticket (`is_ticket_file`)."""
+    carry_rel = CARRY.relative_to(ROOT).as_posix()
+    out = subprocess.run(
+        ["git", "ls-tree", ref, "--", f"{carry_rel}/"],
+        cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace",
+    )
+    if out.returncode != 0:
+        return None
+    names = set()
+    for line in out.stdout.splitlines():
+        meta, _, path = line.partition("\t")
+        mode, kind, _ = meta.split(" ", 2)
+        if kind == "blob" and mode != "120000" and path.endswith(".md"):
+            names.add(Path(path).name)
+    return names
+
+
+def ticket_number_problems(changes: BranchChanges) -> tuple[list[str], str | None]:
+    """The tickets this branch adds whose number another ticket in the merge
+    result has, as error lines; or the reason the check could not run.
+
+    The merge result's tickets are dev's, less the ones the branch deleted,
+    plus the branch's. Two branches that each copy `NEXT` file the same
+    number under different names, which git merges with no conflict.
+    """
+    base = _ticket_names_at(changes.root, changes.base)
+    dev = _ticket_names_at(changes.root, f"refs/heads/{INTEGRATION_BRANCH}")
+    if changes.from_tree:
+        branch = {p.name for p in iter_issue_files()}
+    else:
+        branch = _ticket_names_at(changes.root, changes.branch)
+    if base is None or dev is None or branch is None:
+        return [], "git ls-tree could not list the tickets"
+    merged = (dev - (base - branch)) | branch
+    carry_rel = CARRY.relative_to(ROOT).as_posix()
+    return [
+        f"{carry_rel}/{name} has the number of another ticket in the merge "
+        f"result: {', '.join(others)}. Renumber it from {INTEGRATION_BRANCH}'s "
+        f"NEXT (docs/agents/issue-tracker.md)"
+        for name, others in ticket_number_clashes(branch - base, merged)
+    ], None
+
+
 def relevant_open_tickets(
     changed_files: set[str],
 ) -> list[tuple[Path, str, list[str]]]:
@@ -1172,6 +1244,18 @@ def check(
             )
     else:
         print("\nno ticket closed on this branch without Verified by: evidence")
+
+    if changes:
+        clashes, why_no_numbers = ticket_number_problems(changes)
+        if why_no_numbers:
+            print(f"\nticket number check skipped: {why_no_numbers}")
+        elif clashes:
+            print("\ntickets this branch adds whose number is taken:")
+            for line in clashes:
+                print(f"  - {line}")
+            errors.extend(clashes)
+        else:
+            print("no ticket number this branch adds is taken")
 
     phase_m = PHASE_BRANCH_RE.match(branch)
     if phase_m:
@@ -2343,7 +2427,90 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
         return problems
 
 
+def check_ticket_number_clash_rule() -> list[str]:
+    """Ticket 834: only a ticket the branch adds can clash, and only with a
+    different file of the same number in the merge result."""
+    cases = (
+        ("number dev already has", {"8-b.md"}, {"8-a.md", "8-b.md", "9-c.md"}, ["8-b.md"]),
+        ("new number", {"10-d.md"}, {"8-a.md", "10-d.md"}, []),
+        ("old duplicates the branch did not add", {"10-d.md"}, {"5-a.md", "5-b.md", "10-d.md"}, []),
+        ("two added files with one number", {"11-a.md", "11-b.md"}, {"11-a.md", "11-b.md"},
+         ["11-a.md", "11-b.md"]),
+        ("leading zero", {"08-b.md"}, {"8-a.md", "08-b.md"}, ["08-b.md"]),
+        ("not numbered", {"NEXT", "notes.md"}, {"NEXT", "notes.md", "1-a.md"}, []),
+    )
+    problems = []
+    for label, added, merged, want in cases:
+        got = sorted(name for name, _ in ticket_number_clashes(added, merged))
+        if got != want:
+            problems.append(f"ticket number clash, {label}: got {got}, want {want}")
+    return problems
+
+
+def check_ticket_number_gate_on_a_scratch_repo() -> list[str]:
+    """Ticket 834, through the CLI: dev already holds a duplicate pair (as
+    832 records on the real dev) and files 8 after the branches fork. Only a
+    branch that adds a number the merge result already has fails."""
+    import shutil
+    import tempfile
+
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        root = Path(tmp)
+        git = _scratch_git(root)
+        carry_rel = CARRY.relative_to(ROOT).as_posix()
+        try:
+            git("init", "-q", "-b", INTEGRATION_BRANCH)
+            (root / "scripts").mkdir()
+            shutil.copy(Path(__file__), root / "scripts" / Path(__file__).name)
+            shutil.copy(Path(__file__).with_name("gate_copy.py"), root / "scripts" / "gate_copy.py")
+            carry = root / CARRY.relative_to(ROOT)
+            carry.mkdir(parents=True)
+            (carry / "5-a.md").write_text("Status: open\n\n# t\n")
+            # Closed, so the branch that renumbers it needs no review file.
+            (carry / "5-b.md").write_text("Status: closed\nVerified by: `true`\n\n# t\n")
+            git("add", "-A")
+            git("commit", "-q", "-m", "base")
+            ticket = "Status: open\n\n# t\n"
+            for name, rel in (
+                ("clash", f"{carry_rel}/8-branch.md"),
+                ("clash-old", f"{carry_rel}/5-c.md"),
+                ("fresh", f"{carry_rel}/9-new.md"),
+            ):
+                _scratch_branch(root, git, name, {rel: ticket})
+            _scratch_branch(root, git, "renumber", {f"{carry_rel}/9-b.md": ticket},
+                            deletes=(f"{carry_rel}/5-b.md",))
+            git("checkout", "-q", INTEGRATION_BRANCH)
+            (carry / "8-dev.md").write_text(ticket)
+            git("add", "-A")
+            git("commit", "-q", "-m", "dev files 8")
+        except (OSError, subprocess.CalledProcessError) as exc:
+            return [f"ticket number test could not build its repo: {exc}"]
+        problems = []
+        cases = (
+            ("clash", 1, "8-branch.md"),
+            ("clash-old", 1, "5-c.md"),
+            ("fresh", 0, "no ticket number"),
+            ("renumber", 0, "no ticket number"),
+        )
+        for branch, want_rc, want_text in cases:
+            for where in ("checked out", f"from {INTEGRATION_BRANCH}"):
+                git("checkout", "-q", branch if where == "checked out" else INTEGRATION_BRANCH)
+                rc, out, err = _run_gate_copy(root, "--branch", branch)
+                text = out + err
+                # Every case lacks a review file; only the ticket check differs.
+                clash = "has the number of another ticket" in text
+                if (want_rc == 1) != clash or want_text not in text:
+                    problems.append(
+                        f"ticket number gate on {branch} ({where}): want "
+                        f"{'a' if want_rc else 'no'} clash naming {want_text!r}; "
+                        f"output {text[-400:]!r}"
+                    )
+        return problems
+
+
 CHECKS = (
+    check_ticket_number_clash_rule,
+    check_ticket_number_gate_on_a_scratch_repo,
     check_closing_without_verified_by_is_flagged,
     check_closing_rule_edges,
     check_closing_rule_reads_git,
