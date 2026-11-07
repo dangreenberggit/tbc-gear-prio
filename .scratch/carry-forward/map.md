@@ -456,3 +456,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 836 paired-worktrees "Land it on dev" reads as if only a pair can use it (pre-merge review chore/merge-hurdles, instruction-review cold readers) 2026-11-07
 - 842 The made-up tab fixtures write a melee hit cap (Precision 3/3, expertise) into every fixture, the caster ones included; nothing shows it yet (pre-merge review feat/452-spec-page-scans, round 1, D2) 2026-11-06
 - 843 The layout gate skips when one of a page's two fixtures fails to load, so that fixture's case is never checked (pre-merge review feat/452-spec-page-scans, round 1, A1) 2026-11-06
+- 853 An agent's merge-to-dev of a branch that changes `.claude/skills/` passes the gates, then fails writing the merge (read-only in the sandbox) and leaves half-written files (merge of feat/452-reword-and-close) 2026-11-07
