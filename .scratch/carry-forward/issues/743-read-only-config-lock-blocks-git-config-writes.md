@@ -35,6 +35,15 @@ placeholder for a write-denied path.
 checkout) says that session "created and deleted `.git/config.lock`" on
 Oct 25, the file's date.
 
+2026-11-05: the owner removed the lock in their own shell; `git branch
+--set-upstream-to` then worked and `core.bare` is `false`. Right after,
+inside an agent's sandboxed Bash, `ls -la .git/config.lock` printed
+`crw-rw-rw- 1 nobody nogroup 1, 3 Oct 23 17:02`: a character device
+1,3 is `/dev/null`, so the sandbox mounts `/dev/null` over that path.
+Hypothesis, untested: the empty read-only file was the mount point the
+sandbox left behind. To check, run `ls -la .git/config.lock` in a plain
+shell after the next agent session ends.
+
 ## Done when
 
 - The cause is known and recorded here.
