@@ -35,3 +35,11 @@ takes a Flash handback, or a test the caller applies to choose; the
 `glm-task` row, AGENTS.md § Spawning and the parallel-phase Claude Code
 adapter say the same. Agent-file and skill edits need the owner's
 approval first.
+
+## Comments
+
+### 2026-11-05
+
+Ticket 808 (one routing file, every other copy a pointer) carries the
+owner's answer to this question: "B sounds fine" (2026-11-02). This ticket
+closes with 808.

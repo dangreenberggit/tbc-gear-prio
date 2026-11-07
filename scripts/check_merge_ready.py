@@ -59,7 +59,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REVIEWS = ROOT / "docs" / "reviews"
-CARRY = ROOT / ".scratch" / "carry-forward" / "issues"
+CARRY_REL = ".scratch/carry-forward/issues"
+CARRY = ROOT / CARRY_REL
 
 # A cell is anything but an unescaped pipe. `\|` inside a cell is content --
 # `feat-drift-warner-proven.md:209` writes `pnpm verify 2>&1 \| wc -l` in a
@@ -520,6 +521,10 @@ def is_ticket_file(path: Path) -> bool:
     return path.is_file() and not path.is_symlink()
 
 
+# The `git ls-tree` mode of a symlink, which `is_ticket_file` rejects.
+GIT_SYMLINK_MODE = "120000"
+
+
 def open_blockers_for_phase(phase: str) -> list[tuple[Path, str]]:
     found = []
     phase_l = phase.lower()
@@ -731,10 +736,9 @@ class BranchChanges:
     def tickets(self) -> list[str]:
         """The changed carry-forward tickets: top-level `.md` files only, the
         same set `iter_issue_files()` scans."""
-        carry_rel = CARRY.relative_to(ROOT).as_posix()
         return sorted(
             rel for rel in self.names
-            if rel.endswith(".md") and Path(rel).parent.as_posix() == carry_rel
+            if rel.endswith(".md") and Path(rel).parent.as_posix() == CARRY_REL
         )
 
 
@@ -944,7 +948,7 @@ def _git_show(root: Path, ref: str, rel: str) -> str | None:
     mode = subprocess.run(
         ["git", "ls-tree", ref, "--", rel], cwd=root, capture_output=True, text=True
     ).stdout
-    if mode.startswith("120000 "):
+    if mode.startswith(GIT_SYMLINK_MODE + " "):
         return None
     out = subprocess.run(
         ["git", "show", f"{ref}:{rel}"],
@@ -969,6 +973,76 @@ def tickets_closed_without_verification(changes: BranchChanges) -> list[str]:
         if closed_without_verification(changes.old_text(rel), new_text):
             flagged.append(rel)
     return flagged
+
+
+TICKET_NUMBER_RE = re.compile(r"^(\d+)-.*\.md$")
+
+
+def ticket_number_clashes(
+    added: set[str], merged: set[str]
+) -> list[tuple[str, list[str]]]:
+    """Each ticket in `added` whose number another ticket in `merged` also
+    has, with those other tickets. Pure: both sides are file names in the
+    carry-forward folder. Numbers compare as integers, so `08-x` clashes
+    with `8-y`. Only `added` is judged, so duplicates already on dev (ticket
+    832) do not fail every branch."""
+    by_number: dict[int, list[str]] = {}
+    for name in merged | added:
+        m = TICKET_NUMBER_RE.match(name)
+        if m:
+            by_number.setdefault(int(m[1]), []).append(name)
+    clashes = []
+    for name in sorted(added):
+        m = TICKET_NUMBER_RE.match(name)
+        if not m:
+            continue
+        others = sorted(n for n in by_number[int(m[1])] if n != name)
+        if others:
+            clashes.append((name, others))
+    return clashes
+
+
+def _ticket_names_at(root: Path, ref: str) -> set[str] | None:
+    """The carry-forward tickets' file names at `ref`, or None when git
+    cannot list them. A symlink is not a ticket (`is_ticket_file`)."""
+    out = subprocess.run(
+        ["git", "ls-tree", ref, "--", f"{CARRY_REL}/"],
+        cwd=root, capture_output=True, text=True, encoding="utf-8", errors="replace",
+    )
+    if out.returncode != 0:
+        return None
+    names = set()
+    for line in out.stdout.splitlines():
+        meta, _, path = line.partition("\t")
+        mode, kind, _ = meta.split(" ", 2)
+        if kind == "blob" and mode != GIT_SYMLINK_MODE and path.endswith(".md"):
+            names.add(Path(path).name)
+    return names
+
+
+def ticket_number_problems(changes: BranchChanges) -> tuple[list[str], str | None]:
+    """The tickets this branch adds whose number another ticket in the merge
+    result has, as error lines; or the reason the check could not run.
+
+    The merge result's tickets are dev's, less the ones the branch deleted,
+    plus the branch's. Two branches that each copy `NEXT` file the same
+    number under different names, which git merges with no conflict.
+    """
+    base = _ticket_names_at(changes.root, changes.base)
+    dev = _ticket_names_at(changes.root, f"refs/heads/{INTEGRATION_BRANCH}")
+    if changes.from_tree:
+        branch = {p.name for p in iter_issue_files()}
+    else:
+        branch = _ticket_names_at(changes.root, changes.branch)
+    if base is None or dev is None or branch is None:
+        return [], "git ls-tree could not list the tickets"
+    merged = (dev - (base - branch)) | branch
+    return [
+        f"{CARRY_REL}/{name} has the number of another ticket in the merge "
+        f"result: {', '.join(others)}. Renumber it from {INTEGRATION_BRANCH}'s "
+        f"NEXT (docs/agents/issue-tracker.md)"
+        for name, others in ticket_number_clashes(branch - base, merged)
+    ], None
 
 
 def relevant_open_tickets(
@@ -1172,6 +1246,18 @@ def check(
             )
     else:
         print("\nno ticket closed on this branch without Verified by: evidence")
+
+    if changes:
+        clashes, why_no_numbers = ticket_number_problems(changes)
+        if why_no_numbers:
+            print(f"\nticket number check skipped: {why_no_numbers}")
+        elif clashes:
+            print("\ntickets this branch adds whose number is taken:")
+            for line in clashes:
+                print(f"  - {line}")
+            errors.extend(clashes)
+        else:
+            print("no ticket number this branch adds is taken")
 
     phase_m = PHASE_BRANCH_RE.match(branch)
     if phase_m:
@@ -1715,7 +1801,7 @@ def _with_linked_ticket(run):
     saved = ROOT, CARRY
     with tempfile.TemporaryDirectory() as tmp:
         ROOT = Path(tmp)
-        CARRY = ROOT / saved[1].relative_to(saved[0])
+        CARRY = ROOT / CARRY_REL
         try:
             CARRY.mkdir(parents=True)
             (CARRY / "1-open.md").write_text("Status: open\n\n# t\n")
@@ -1861,7 +1947,6 @@ def check_closing_rule_reads_git() -> list[str]:
     `--branch X` from another checkout reads X's tip, not the working tree."""
     import tempfile
 
-    carry_rel = CARRY.relative_to(ROOT).as_posix()
     bare = "Status: closed\n\n# t\n"
     good = "Status: closed\nVerified by: `pnpm verify`\n\n# t\n"
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
@@ -1878,7 +1963,7 @@ def check_closing_rule_reads_git() -> list[str]:
             )
 
         def put(name: str, text: str) -> None:
-            p = root / carry_rel / name
+            p = root / CARRY_REL / name
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(text, encoding="utf-8", newline="")
 
@@ -1899,7 +1984,7 @@ def check_closing_rule_reads_git() -> list[str]:
         except (OSError, subprocess.CalledProcessError) as exc:
             return [f"closing rule git test could not build its repo: {exc}"]
 
-        want = [f"{carry_rel}/{n}" for n in ("1-a.md", "2-b.md", "3-c.md")]
+        want = [f"{CARRY_REL}/{n}" for n in ("1-a.md", "2-b.md", "3-c.md")]
         problems = []
         changes, why = read_changes("feat", root=root)
         got = tickets_closed_without_verification(changes) if changes else why
@@ -2130,7 +2215,7 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             (root / "packages").mkdir()
             (root / "packages" / "x.ts").write_text("export const x = 1;\n")
             (root / "AGENTS.md").write_text("# rules\n")
-            carry = root / CARRY.relative_to(ROOT)
+            carry = root / CARRY_REL
             carry.mkdir(parents=True)
             (carry / "1-open.md").write_text("Status: open\nBlocks: phase-9\n\n# t\n")
             (carry / "2-closed.md").write_text(
@@ -2153,13 +2238,12 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
                 "AGENTS.md": "# rules\nnew rule\n",
                 "packages/x.ts": "export const x = 2;\n",
             })
-            carry_rel = CARRY.relative_to(ROOT).as_posix()
-            open_rel = f"{carry_rel}/1-open.md"
-            closed_rel = f"{carry_rel}/2-closed.md"
+            open_rel = f"{CARRY_REL}/1-open.md"
+            closed_rel = f"{CARRY_REL}/2-closed.md"
             for name, rel in (("drop-open", open_rel), ("phase-9/drop", open_rel),
                               ("drop-closed", closed_rel),
-                              ("drop-wontfix", f"{carry_rel}/7-wontfix.md"),
-                              ("drop-nested", f"{carry_rel}/archive/5-old.md")):
+                              ("drop-wontfix", f"{CARRY_REL}/7-wontfix.md"),
+                              ("drop-nested", f"{CARRY_REL}/archive/5-old.md")):
                 _scratch_branch(root, git, name, {"AGENTS.md": "# rules\nx\n"},
                                 deletes=(rel,))
             for name, text in (
@@ -2175,7 +2259,7 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             ):
                 _scratch_branch(root, git, name, {open_rel: text})
             _scratch_branch(root, git, "phase-11/swap", {
-                f"{carry_rel}/3-two.md":
+                f"{CARRY_REL}/3-two.md":
                     "Status: open\nBlocks: phase-12\nBlocks: phase-11\n\n# t\n",
             })
 
@@ -2190,7 +2274,7 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
             link_branch("phase-9/symlink", open_rel, "2-closed.md")
             # A link's text in git is its target, which can read as a ticket.
             link_branch("link-text", open_rel, "Status: closed\nVerified by: `true`\n")
-            link_branch("phase-9/link-copy", f"{carry_rel}/9-link.md", "1-open.md")
+            link_branch("phase-9/link-copy", f"{CARRY_REL}/9-link.md", "1-open.md")
             git("branch", "empty", INTEGRATION_BRANCH)
             git("checkout", "-q", INTEGRATION_BRANCH)
         except (OSError, subprocess.CalledProcessError) as exc:
@@ -2343,7 +2427,89 @@ def check_gate_cli_on_a_scratch_repo() -> list[str]:
         return problems
 
 
+def check_ticket_number_clash_rule() -> list[str]:
+    """Ticket 834: only a ticket the branch adds can clash, and only with a
+    different file of the same number in the merge result."""
+    cases = (
+        ("number dev already has", {"8-b.md"}, {"8-a.md", "8-b.md", "9-c.md"}, ["8-b.md"]),
+        ("new number", {"10-d.md"}, {"8-a.md", "10-d.md"}, []),
+        ("old duplicates the branch did not add", {"10-d.md"}, {"5-a.md", "5-b.md", "10-d.md"}, []),
+        ("two added files with one number", {"11-a.md", "11-b.md"}, {"11-a.md", "11-b.md"},
+         ["11-a.md", "11-b.md"]),
+        ("leading zero", {"08-b.md"}, {"8-a.md", "08-b.md"}, ["08-b.md"]),
+        ("not numbered", {"NEXT", "notes.md"}, {"NEXT", "notes.md", "1-a.md"}, []),
+    )
+    problems = []
+    for label, added, merged, want in cases:
+        got = sorted(name for name, _ in ticket_number_clashes(added, merged))
+        if got != want:
+            problems.append(f"ticket number clash, {label}: got {got}, want {want}")
+    return problems
+
+
+def check_ticket_number_gate_on_a_scratch_repo() -> list[str]:
+    """Ticket 834, through the CLI: dev already holds a duplicate pair (as
+    832 records on the real dev) and files 8 after the branches fork. Only a
+    branch that adds a number the merge result already has fails."""
+    import shutil
+    import tempfile
+
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
+        root = Path(tmp)
+        git = _scratch_git(root)
+        try:
+            git("init", "-q", "-b", INTEGRATION_BRANCH)
+            (root / "scripts").mkdir()
+            shutil.copy(Path(__file__), root / "scripts" / Path(__file__).name)
+            shutil.copy(Path(__file__).with_name("gate_copy.py"), root / "scripts" / "gate_copy.py")
+            carry = root / CARRY_REL
+            carry.mkdir(parents=True)
+            (carry / "5-a.md").write_text("Status: open\n\n# t\n")
+            # Closed, so the branch that renumbers it needs no review file.
+            (carry / "5-b.md").write_text("Status: closed\nVerified by: `true`\n\n# t\n")
+            git("add", "-A")
+            git("commit", "-q", "-m", "base")
+            ticket = "Status: open\n\n# t\n"
+            for name, rel in (
+                ("clash", f"{CARRY_REL}/8-branch.md"),
+                ("clash-old", f"{CARRY_REL}/5-c.md"),
+                ("fresh", f"{CARRY_REL}/9-new.md"),
+            ):
+                _scratch_branch(root, git, name, {rel: ticket})
+            _scratch_branch(root, git, "renumber", {f"{CARRY_REL}/9-b.md": ticket},
+                            deletes=(f"{CARRY_REL}/5-b.md",))
+            git("checkout", "-q", INTEGRATION_BRANCH)
+            (carry / "8-dev.md").write_text(ticket)
+            git("add", "-A")
+            git("commit", "-q", "-m", "dev files 8")
+        except (OSError, subprocess.CalledProcessError) as exc:
+            return [f"ticket number test could not build its repo: {exc}"]
+        problems = []
+        cases = (
+            ("clash", 1, "8-branch.md"),
+            ("clash-old", 1, "5-c.md"),
+            ("fresh", 0, "no ticket number"),
+            ("renumber", 0, "no ticket number"),
+        )
+        for branch, want_rc, want_text in cases:
+            for where in ("checked out", f"from {INTEGRATION_BRANCH}"):
+                git("checkout", "-q", branch if where == "checked out" else INTEGRATION_BRANCH)
+                rc, out, err = _run_gate_copy(root, "--branch", branch)
+                text = out + err
+                # Every case lacks a review file; only the ticket check differs.
+                clash = "has the number of another ticket" in text
+                if (want_rc == 1) != clash or want_text not in text:
+                    problems.append(
+                        f"ticket number gate on {branch} ({where}): want "
+                        f"{'a' if want_rc else 'no'} clash naming {want_text!r}; "
+                        f"output {text[-400:]!r}"
+                    )
+        return problems
+
+
 CHECKS = (
+    check_ticket_number_clash_rule,
+    check_ticket_number_gate_on_a_scratch_repo,
     check_closing_without_verified_by_is_flagged,
     check_closing_rule_edges,
     check_closing_rule_reads_git,

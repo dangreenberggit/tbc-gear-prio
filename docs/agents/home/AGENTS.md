@@ -197,8 +197,8 @@ what each step, rule and line of code does the same: make those
 changes, run one further round, and then stop whatever it finds.
 
 Before it reports the stop, the agent that runs the review spawns one
-`general-task` on Opus that neither wrote nor reviewed the work. The
-prompt gives it the review reports, the open findings and what the
+agent that neither wrote nor reviewed the work (its type:
+`~/.claude/routing.md` § Decision table). The prompt gives it the review reports, the open findings and what the
 fixes changed, and says that this is one narrow investigation, that it
 writes no files, and that each answer names its source and says
 whether it was checked. The assessor answers:
@@ -292,13 +292,8 @@ No agent reads secrets: API keys, tokens, passwords, credentials files,
 `.env` files, or environment variable output. To check that a secret
 file exists, use `test -f`.
 
-The `glm-task` and `glm-flash-task` agents exist only in a session started
-on the T3 Code card "Claude + GLM workers"; on every other card they are
-absent, which is not a fault. They run on z-ai models, and z-ai receives
-everything they see: their prompt, every file they read, and every command
-output. Do not give them a job that includes or could reach private data,
-or anything a project's `AGENTS.md` keeps private. If unsure, use a Claude
-agent.
+What a GLM worker may see, and which jobs are private:
+`~/.claude/routing.md` § Private data.
 
 # Orchestrator mode
 
@@ -316,32 +311,6 @@ also switch the mode on or off at any time.
 
 # Spawning
 
-Details: `~/.claude/model-policy.md`, cited below as model-policy.
-
-Name the model on every spawn (the GLM types excepted: they take none,
-model-policy § GLM worker types). An unnamed subagent whose type names no
-model runs on the main conversation's model, so a session on Fable then
-pays the top price tier for a `grep`. Pick the type by the job
-(model-policy § Claude Code):
-
-- An **overseer** (Opus or Fable) plans, reviews, executes a plan,
-  oversees workers, or judges an investigation; on Opus it also does
-  hard implementation. It holds the judgment itself and hands
-  **workhorse jobs** (searches, plain reads, command runs, measurements,
-  small or modest coding) to the workhorse lane in blocks. It spawns
-  another overseer only for judgment work it delegates, such as a review
-  axis, a chunk of a plan, oversight of a worker set, or the assessment
-  in § Review round limits.
-- The **workhorse lane** does one block whose result the prompt fixes
-  or names, and spawns nothing (model-policy § Workhorse jobs). When the
-  harness lists the GLM types, `glm-flash-task` takes every workhorse
-  job, small or modest coding included, and the Sonnet types
-  (`discrete-task`, `simple-task`) take only a job z-ai must not see
-  (such as a read that could reach secrets or session logs), or a retry
-  when a GLM type hits a usage wall; Sonnet is otherwise not used there.
-  A job `glm-flash-task` hands back as `NEEDS_JUDGMENT` goes to a bigger
-  agent (model-policy § Workhorse jobs). Else the workhorse types are
-  `discrete-task`, `modest-task` and `simple-task`.
-
-Nothing runs on Haiku. A helper's `not found` is one input to a
-conclusion of absence, never the conclusion.
+Before the first spawn of a session, read `~/.claude/routing.md`; it is
+the only statement of which type and model take which job in a Claude
+Code session, on every card.

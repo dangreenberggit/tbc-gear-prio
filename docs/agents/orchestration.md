@@ -1,7 +1,7 @@
 # Orchestration: the session, its subagents, and the owner
 
 Read this before spawning an agent, fanning out, stage-gating, or
-ending an investigation. Model and agent type: `model-policy.md`.
+ending an investigation. Model and agent type: `~/.claude/routing.md`.
 
 ## The session delegates
 
@@ -32,7 +32,6 @@ review file's path and its summary.
 ## Who spawns whom
 
 The general rules are in `~/.claude/model-policy.md` § Who spawns whom.
-Run `pre-merge-review` on a `general-task`.
 
 The session-only rule above binds the interactive session. A subagent
 that orchestrates (the stage-gate Executor, or a subagent spawned to run
@@ -41,12 +40,7 @@ and hands workhorse jobs down like any overseer.
 
 ## Models and walls
 
-Four lanes, every harness, sorted by kind of work, not model height:
-**workhorse** for searches, reads, command runs, measurements and small
-or modest coding, on the cheap worker models; **lead** for oversight,
-judgment and hard implementation, including hard `parallel-phase` slices;
-**review** for pre-merge review axes and adversarial judgment; **design**
-for planning and architecture. Go slower or serial on walls; never invent
+Lanes and types: `~/.claude/routing.md` § Principles. Go slower or serial on walls; never invent
 a weaker substitute for a review job: if waiting and serialising both
 fail, stop and say so rather than downgrading; and never promote a job to
 a taller lane it does not belong in. Managers must not background workers

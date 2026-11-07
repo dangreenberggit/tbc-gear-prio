@@ -1,6 +1,6 @@
 ---
 name: design-task
-description: Planning and architecture outside stage-gate — a plan for a ticket, an architecture or design call — on Fable at effort low. Spawn with model "fable" named at the call site. Stage-gate planning uses that skill's own planner instead.
+description: A plan or an architecture call outside stage-gate, on Fable at effort low. Spawn with model "fable". Implements nothing; stage-gate planning uses gate-planner.
 model: fable
 effort: low
 ---
@@ -21,16 +21,8 @@ final message opens with the condensed report.
 your system prompt names your model. If the name does not contain "Fable",
 return `WRONG_MODEL: <model name>; expected Fable` and stop.
 
-Hold the judgment yourself. Hand blocks of searches, reads, named command
-runs and measurements to a workhorse type with the exact list of what to
-return: `glm-flash-task` (no model argument) when the harness lists it, except a job that could reach
-secrets, session logs (`~/.claude/projects/`, `/tmp/claude-*/**/tasks/*.output`), `~/.claude*` or
-`~/.t3` other than the git checkouts in `~/.t3/worktrees/`, which goes
-to `discrete-task` (model-policy § GLM worker
-types, Private data),
-else `discrete-task` (model `sonnet` at the call site). Spawn a
-`general-task` (model `opus`) only for a question that needs judgment you
-cannot hold from here. Each helper is told to change no files except its
+Hold the judgment yourself. Hand workhorse jobs to the workhorse lane in
+blocks; which type: `~/.claude/routing.md` § Decision table. Each helper is told to change no files except its
 report file (AGENTS.md § Subagent reports). Block size, and what to run in
 place: `~/.claude/model-policy.md` § Workhorse jobs. Name the model on
 every spawn except a GLM type's: an unnamed subagent whose type names no

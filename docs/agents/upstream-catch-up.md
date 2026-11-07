@@ -443,18 +443,14 @@ A recorded-fixture miss (`no recording for sim key`) is a **stop-and-report**, n
 a re-record.
 
 Before a fork re-pin that `dev` will receive (ADR-0036 Consequence 1), hand-run
-`pnpm -C <pair> desktop-gate:check` and paste its
-assertion lines (a)–(f) and (h) ((g) removed) into the commit body or the stage's `desktop-gate.md`. It
-proves the upgrades tab still runs on the packaged desktop binary over the HTTP
-transport and cannot pass on a page served by vite. It is deliberately **not** in
-`pnpm verify` — it needs `go`, `make` and Chrome, none of which CI has — so
-nothing else catches a re-pin that breaks the embedded transport. A red gate
-blocks the re-pin.
-
-Check (h) compares the run against
-`<pair>/data/desktop-gate/golden-ret-p4-cap40.json`; a re-pin that changes the
-tab's output regenerates it with `--update-golden` and explains the diff in the
-commit body.
+`pnpm -C <pair> desktop-gate:check`. It is not in `pnpm verify` (it needs
+`go`, `make` and Chrome, none of which CI has), so nothing else catches a
+re-pin that breaks the embedded transport. The command checks every golden
+that `<pair>/data/desktop-gate/README.md` lists by spec id, and recording the
+run follows that README. A red gate blocks the re-pin until each red spec is
+explained. A spec the re-pin is meant to change gets its golden regenerated as
+that README's § Regenerating a golden says; any other red spec is a defect to
+fix before the re-pin.
 
 ### 6. The tag trigger
 
@@ -486,8 +482,8 @@ ADR-0030 Consequence 4 accepts that risk; ticket 355 was filed when it bit.
    `<fork-branch>` into the fork lock's `branch`, then, with the main folder on
    `dev`, runs `pnpm -C <main-folder> merge-to-dev <main-branch>`
    (`scripts/merge_to_dev.py` refuses a named branch from a folder not on
-   `dev`). A catch-up always re-pins the fork, so if `dev`'s fork lock moved
-   after `<main-branch>` was made, that command refuses: take
+   `dev`). A catch-up always re-pins the fork, so if `dev`'s fork lock
+   pins a new `commit` after `<main-branch>` was made, that command refuses: take
    paired-worktrees.md's older route ("When `dev` has a new fork pin").
 
    The merge leaves the main folder's gitignored generated files stale.
