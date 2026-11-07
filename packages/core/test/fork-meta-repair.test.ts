@@ -1134,6 +1134,10 @@ type SpecRun = {
   spec?: string;
   /** The EP weights; defaults to ret's. */
   epWeights?: Record<string, number>;
+  /** The run's `simDatabaseFor`, which `composeFor` calls for every request. */
+  simDatabaseFor?: (
+    equipment: readonly SimItemSpec[]
+  ) => Readonly<Record<string, unknown>> | undefined;
 };
 
 async function runSpec(o: SpecRun) {
@@ -1231,6 +1235,7 @@ async function runSpec(o: SpecRun) {
       ...(o.measureBrokenSetValue ? { measureBrokenSetValue: true } : {}),
       ...(o.setScreen ? { setScreen: o.setScreen } : {}),
       ...(o.controller ? { signal: o.controller.signal } : {}),
+      ...(o.simDatabaseFor ? { simDatabaseFor: o.simDatabaseFor } : {}),
     }
   );
   return { ranking, requests, statsRequests, worn };
@@ -2325,6 +2330,23 @@ describe.skipIf(!forkPresent)(
       const again = await runSpec({ pool: S_POOL, store, computeStats: reads });
       expect(again.statsRequests.length).toBeGreaterThan(0);
       expect(again.ranking.complete).toBe(true);
+    });
+
+    it("746-R3: a code error beside a candidate read fails the run; it is not that candidate's failed sim", async () => {
+      // Oracle: only the read's own failure becomes a failed-sim row. The
+      // throw stands in for a bug in the request built for 30907's read,
+      // after its swap; it must reach the caller unchanged.
+      const bug = new TypeError("code bug");
+      await expect(
+        runSpec({
+          pool: S_POOL,
+          computeStats: await gearHitReads(),
+          simDatabaseFor: (equipment) => {
+            if (equipment[CHEST]?.id === 30907) throw bug;
+            return undefined;
+          },
+        })
+      ).rejects.toBe(bug);
     });
   }
 );

@@ -124,9 +124,14 @@ hit-rating note (main-repo case 746-R1). A Stop during that read still
 ends the run as a partial, uncached ranking, with the item left unsimmed
 and no failed-sim row (case 746-R1b).
 
-Verified by: tbc-new-fork@707e67f077542c28d98171db2a27fb77b73476ae;
+2026-11-06: review round 3's R3-1 and R3-2 are fixed in fork commit
+09d86beee "Catch only the candidate read's error (R3-1, R3-2)". Only the
+read's own failure becomes that failed-sim row; a code error beside the
+read fails the run, as it did before the R1 fix (case 746-R3).
+
+Verified by: tbc-new-fork@09d86beeeeae0d9fad38d463cf325ed4c2ec93b2;
 `node_modules/.bin/vitest run --root . --configLoader runner packages/core/test/fork-meta-repair.test.ts`
-(43 passed; in the agent sandbox the worktree has no `node_modules`, so
+(44 passed; in the agent sandbox the worktree has no `node_modules`, so
 it needs `ln -s /home/daniel/Code/lulz/tbc-gear-prio/node_modules node_modules`
 first, and `--configLoader runner` because that `node_modules` is
 read-only); `pnpm fork-tests:check`
