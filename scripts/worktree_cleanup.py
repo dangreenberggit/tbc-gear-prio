@@ -46,9 +46,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import worktree_pair  # noqa: E402
 
 INTEGRATION_BRANCH = "dev"
-T3_DIR = "/.t3/worktrees/"
+T3_PATH_PART = "/.t3/worktrees/"
 FORK_REL = Path("vendor") / "tbc-new-fork"
-REPORTS = ".scratch/"
+REPORTS_PREFIX = ".scratch/"
 ARCHIVE_REL = Path(".scratch") / "worktree-archive"
 # Claude Code's write markers and Python's bytecode caches hold no work.
 NOT_WORK_PARTS = (".cc-writes", "__pycache__")
@@ -111,7 +111,7 @@ def split_ignored(listed: list[str], is_empty) -> tuple[list[str], list[str]]:
     for rel in listed:
         if any(part in NOT_WORK_PARTS for part in rel.rstrip("/").split("/")):
             continue
-        if rel.startswith(REPORTS):
+        if rel.startswith(REPORTS_PREFIX):
             # `ls-files` lists a nested git repo as its folder, which a file
             # copy cannot archive.
             (other if rel.endswith("/") else reports).append(rel)
@@ -156,6 +156,9 @@ def processes_in(path: Path, own: set[int]) -> list[str] | None:
     return found
 
 
+# worktree_pair has git() and git_ok() too, but its git() raises Refusal,
+# which this script does not catch, and decodes strictly, so a file name
+# that is not UTF-8 would crash the listing.
 def git(cwd: Path, *args: str) -> str:
     r = subprocess.run(["git", *args], cwd=cwd, capture_output=True, text=True, encoding="utf-8", errors="replace")
     if r.returncode != 0:
@@ -182,7 +185,7 @@ def read_worktree(entry: dict[str, str], main: Path, here: Path, own: set[int]) 
         here=worktree_pair.same_path(str(path), str(here)),
         locked="locked" in entry,
         prunable=prunable,
-        t3=T3_DIR in path.as_posix() + "/",
+        t3=T3_PATH_PART in path.as_posix() + "/",
         pair=(path / FORK_REL).exists(),
         merged=bool(head) and git_ok(main, "merge-base", "--is-ancestor", head, f"refs/heads/{INTEGRATION_BRANCH}"),
         clean=False,
@@ -193,10 +196,10 @@ def read_worktree(entry: dict[str, str], main: Path, here: Path, own: set[int]) 
     ignored = [
         line[3:]
         for line in git(path, "status", "--porcelain", "--ignored", "--untracked-files=normal").splitlines()
-        if line.startswith("!! ") and not line[3:].startswith(REPORTS)
+        if line.startswith("!! ") and not line[3:].startswith(REPORTS_PREFIX)
     ]
     report_files = git(
-        path, "ls-files", "-z", "--others", "--ignored", "--exclude-standard", "--", REPORTS
+        path, "ls-files", "-z", "--others", "--ignored", "--exclude-standard", "--", REPORTS_PREFIX
     ).split("\0")
     listed = [rel for rel in report_files if rel] + ignored
 
