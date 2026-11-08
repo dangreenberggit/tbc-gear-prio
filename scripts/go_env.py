@@ -25,9 +25,10 @@ def goflags_without_vcs_stamp(goflags: str) -> str:
 def go_build_env(base: Mapping[str, str] | None = None) -> dict[str, str]:
     env = dict(os.environ if base is None else base)
     # An exported GOFLAGS hides the `go env -w` value, so start from what Go
-    # itself would use.
+    # itself would use. stderr is not captured, so a failing `go env` shows
+    # Go's own error text.
     current = subprocess.run(
-        ["go", "env", "GOFLAGS"], env=env, capture_output=True, text=True, check=True
+        ["go", "env", "GOFLAGS"], env=env, stdout=subprocess.PIPE, text=True, check=True
     ).stdout.strip()
     env["GOFLAGS"] = goflags_without_vcs_stamp(current)
     return env

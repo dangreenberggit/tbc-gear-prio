@@ -90,7 +90,8 @@ with `go build`, which failed the same way in the pair.
 under the temp directory, not in the pair's fork.
 
 Not run: a full `make wowsimtbc` or `pnpm desktop-gate:check`, which cannot
-run in the agent sandbox (the devserver step's tsx fails with `listen EPERM`).
+run in the agent sandbox (tsx in the bundle step,
+`vendor/tbc-new-fork/makefile:34`, fails with `listen EPERM`).
 The evidence is the same `go build` commands the makefile runs, in the pair's
 fork with no `GOFLAGS` in the shell: plain `go build ./sim/web` and the
 `GOOS=js` `./sim/wasm/` build fail with "error obtaining VCS status: exit
@@ -103,3 +104,12 @@ Verified by: `python scripts/check_desktop_tab_verdict.py` (GOFLAGS cases and
 and in the pair's fork with `GOFLAGS` unset:
 `python3 -c "import sys,subprocess; sys.path.insert(0,'../../scripts'); import go_env; raise SystemExit(subprocess.run(['go','build','-o','/tmp/wst','./sim/web'],env=go_env.go_build_env()).returncode)"`
 (rc 0; plain `go build -o /tmp/wst ./sim/web` gives rc 1), on 2026-11-07.
+
+The "sandbox-only" line in `docs/reviews/feat-headless-run-no-orphans.md:81`
+was left as history on purpose; this ticket's "What a developer sees"
+corrects it.
+
+Remaining check: the owner runs
+`pnpm -C /home/daniel/Code/lulz/tbc-wt/weapon-order desktop-gate:check`, with
+no `GOFLAGS` prefix, outside the sandbox. If that run fails at
+`make wowsimtbc`, this ticket reopens.

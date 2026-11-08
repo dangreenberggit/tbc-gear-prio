@@ -637,7 +637,7 @@ def check_make_env_turns_vcs_stamping_off() -> list[str]:
         return types.SimpleNamespace(returncode=0, stdout="-mod=mod\n")
 
     real = go_env.subprocess
-    go_env.subprocess = types.SimpleNamespace(run=fake_run)
+    go_env.subprocess = types.SimpleNamespace(run=fake_run, PIPE=subprocess.PIPE)
     try:
         flags = wp.make_env().get("GOFLAGS")
     finally:

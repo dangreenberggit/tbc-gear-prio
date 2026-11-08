@@ -15,6 +15,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import subprocess
 import sys
 import tempfile
 import types
@@ -313,7 +314,7 @@ def build_env_problems() -> list[str]:
             return types.SimpleNamespace(returncode=0, stdout="-mod=mod\n")
         return types.SimpleNamespace(returncode=0)
 
-    stub = types.SimpleNamespace(run=fake_run)
+    stub = types.SimpleNamespace(run=fake_run, PIPE=subprocess.PIPE)
     real = go_env.subprocess
     go_env.subprocess = stub
     try:
