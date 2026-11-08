@@ -114,7 +114,9 @@ moving the wowsims engine pin.
 ## Land it on dev
 
 The merge into `dev` runs from the main folder, and only when the owner asks
-(AGENTS.md § Commits and merges). The pair stays in place.
+(AGENTS.md § Commits and merges). The pair stays in place until the merge
+prints `merged`; then the agent that ran the merge removes it (§ Remove it).
+The owner does not.
 
 1. **Pair folder: commit.** Commit everything on both branches. Done when
    `git -C <pair> status --porcelain` and
@@ -207,6 +209,16 @@ stop it (a reading of `merge_to_dev.py`, untested).
 ```
 pnpm wt:unpair <name>
 ```
+
+**In the Claude Code sandbox,** unpair removes the fork half, then stops
+with `failed to delete '.../.git/worktrees/<name>': Device or resource
+busy`: the sandbox mounts every `.git/worktrees/<name>` read-only
+(`findmnt -rn -o TARGET | grep .git/worktrees`). Finish from the main
+checkout with two more calls. First `git worktree remove <pair path>`, as
+the whole command with no `-C`, `cd` or `;`: that text is in the sandbox's
+excluded commands, so it runs outside the sandbox. Then `pnpm wt:unpair
+<name>` again, which deletes the unpair mark. Seen on 2026-11-08 with the
+pair `gate-pipe`.
 
 Run it from the main checkout or from another pair; it refuses to run from
 inside the pair it removes. Without `--force` it refuses when:
