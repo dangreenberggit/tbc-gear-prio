@@ -66,6 +66,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
+import go_env
+
 ROOT = Path(__file__).resolve().parent.parent
 FORK_ROOT = ROOT / "vendor/tbc-new-fork"
 DIST = FORK_ROOT / "dist/tbc"
@@ -312,7 +314,9 @@ def port_held(port: int) -> bool:
 def build() -> None:
     eprint(f"{CHECK_NAME}: building (make wowsimtbc)...")
     rc = subprocess.run(
-        ["make", "-C", str(FORK_ROOT), "wowsimtbc"], check=False
+        ["make", "-C", str(FORK_ROOT), "wowsimtbc"],
+        check=False,
+        env=go_env.go_build_env(),
     ).returncode
     if rc != 0:
         eprint(f"{CHECK_NAME}: make wowsimtbc failed (rc {rc}).")

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/agent-reports/2026-11-07-general-task-enh-39-rows.md (pair weapon-order, gitignored)
 Blocks: none
@@ -74,3 +74,32 @@ Also correct `docs/reviews/feat-headless-run-no-orphans.md:81`, or drop
 In a pair, `pnpm desktop-gate:check --spec enh` (no `GOFLAGS` in the shell)
 gets past `make wowsimtbc` while `/home/daniel/.git` exists, and so do
 `node scripts/dev-tab.mjs backend` and `node scripts/dev-tab.mjs desktop`.
+
+## Comments
+
+**2026-11-07, branch `fix/821-weapon-damage-order`.** Fixed in the repo's
+own scripts; no fork file changed. New `scripts/go_env.py` and its JavaScript
+twin `scripts/go-env.mjs` build the environment for a Go build: they read
+`go env GOFLAGS` (so a `go env -w` value is kept) and add `-buildvcs=false`
+unless a `-buildvcs` flag is already there. `scripts/check_desktop_tab.py`
+`build()`, `scripts/dev-tab.mjs` (backend and desktop modes) and
+`scripts/worktree_pair.py` `make_env()` use it. `worktree_pair.py` is in the
+fix because `make dist/tbc/.dirstamp` (`wt:pair --build`) builds `lib.wasm`
+with `go build`, which failed the same way in the pair.
+`scripts/fetch_wowsimcli.py` is not changed: it builds in a scratch worktree
+under the temp directory, not in the pair's fork.
+
+Not run: a full `make wowsimtbc` or `pnpm desktop-gate:check`, which cannot
+run in the agent sandbox (the devserver step's tsx fails with `listen EPERM`).
+The evidence is the same `go build` commands the makefile runs, in the pair's
+fork with no `GOFLAGS` in the shell: plain `go build ./sim/web` and the
+`GOOS=js` `./sim/wasm/` build fail with "error obtaining VCS status: exit
+status 128"; with the environment from `go_env.go_build_env()` (Python) and
+`goBuildEnv()` (JavaScript) both exit 0.
+
+Verified by: `python scripts/check_desktop_tab_verdict.py` (GOFLAGS cases and
+`build()` passing the flag to make), `python scripts/check_worktree_pair.py`
+(`make_env()`), `node --version; pnpm exec vitest run scripts/go-env.test.mjs`,
+and in the pair's fork with `GOFLAGS` unset:
+`python3 -c "import sys,subprocess; sys.path.insert(0,'../../scripts'); import go_env; raise SystemExit(subprocess.run(['go','build','-o','/tmp/wst','./sim/web'],env=go_env.go_build_env()).returncode)"`
+(rc 0; plain `go build -o /tmp/wst ./sim/web` gives rc 1), on 2026-11-07.

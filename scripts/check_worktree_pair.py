@@ -21,10 +21,12 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import types
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import go_env  # noqa: E402
 import worktree_pair as wp  # noqa: E402
 
 
@@ -627,7 +629,26 @@ def check_disposable_names_match_whole_paths() -> list[str]:
     return []
 
 
+def check_make_env_turns_vcs_stamping_off() -> list[str]:
+    """`make dist/tbc/.dirstamp` builds lib.wasm with `go build`, which fails
+    in a pair while Go stamps VCS data (ticket 856)."""
+
+    def fake_run(args: list[str], **_kw: object):
+        return types.SimpleNamespace(returncode=0, stdout="-mod=mod\n")
+
+    real = go_env.subprocess
+    go_env.subprocess = types.SimpleNamespace(run=fake_run)
+    try:
+        flags = wp.make_env().get("GOFLAGS")
+    finally:
+        go_env.subprocess = real
+    if flags != "-mod=mod -buildvcs=false":
+        return [f"make_env gave GOFLAGS {flags!r}, want '-mod=mod -buildvcs=false'"]
+    return []
+
+
 CHECKS = (
+    check_make_env_turns_vcs_stamping_off,
     check_name_accepts_a_short_slug,
     check_name_refuses_paths_and_odd_characters,
     check_target_length_budget,
