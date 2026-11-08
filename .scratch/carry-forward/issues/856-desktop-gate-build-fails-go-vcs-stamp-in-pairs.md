@@ -109,7 +109,24 @@ The "sandbox-only" line in `docs/reviews/feat-headless-run-no-orphans.md:81`
 was left as history on purpose; this ticket's "What a developer sees"
 corrects it.
 
-Remaining check: the owner runs
-`pnpm -C /home/daniel/Code/lulz/tbc-wt/weapon-order desktop-gate:check`, with
-no `GOFLAGS` prefix, outside the sandbox. If that run fails at
-`make wowsimtbc`, this ticket reopens.
+**2026-11-08, same branch.** All three "Done when" runs are done, in the
+pair `/home/daniel/Code/lulz/tbc-wt/weapon-order`. No run is left. During
+the two agent runs, `GOFLAGS` was unset (`env -u GOFLAGS`) and
+`/home/daniel/.git` existed.
+
+- `pnpm desktop-gate:check --spec enh`: covered by the owner's run of
+  `pnpm desktop-gate:check` in this pair, outside the sandbox, with no
+  `GOFLAGS` prefix, on 2026-11-07, after the fix. The owner: "all 4 specs
+  passed". With no `--spec`, the gate runs every spec in
+  `GATED` (`scripts/check_desktop_tab.py`), and enh is one of the four.
+- `node scripts/dev-tab.mjs backend`: run by an agent in the sandbox on
+  2026-11-08, with `--backend-port 3399` so the pair's `wowsimtbc` was not
+  overwritten. It built and served: `GET /tbc/` gave 200. Plain
+  `go build -o $TMPDIR/wst-plain ./sim/web` in the same fork gave rc 1 with
+  "error obtaining VCS status: exit status 128".
+- `node scripts/dev-tab.mjs desktop`: run by an agent in the sandbox on
+  2026-11-08, with `--backend-port 3398`. `make wowsimtbc` printed "Build
+  Completed Successfully" and the embedded server gave 200 for `GET /tbc/`.
+  The tsx bundle step and the `lib.wasm` build did not run, because the
+  pair's `dist/tbc` bundle was already up to date. The `GOOS=js` build
+  behind `lib.wasm` was checked on its own on 2026-11-07 (comment above).
