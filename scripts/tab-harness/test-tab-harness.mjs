@@ -63,9 +63,9 @@ export function freePort() {
 }
 
 // ---------------------------------------------------------------------------
-// Build and serve: the same steps as the makefile's bundle target
-// (`npx tsx vite.build-workers.mts`, `npx vite build`), with the fixture loader
-// compiled in. lib.wasm.gz and assets/ come from a prior `make host`.
+// Build and serve: the makefile's bundle target (`vite.build-workers.mts`, then
+// `npx vite build`), with the fixture loader compiled in. lib.wasm.gz and
+// assets/ come from a prior `make host`.
 // ---------------------------------------------------------------------------
 
 export function run(cmd, args, label, extraEnv = {}) {
