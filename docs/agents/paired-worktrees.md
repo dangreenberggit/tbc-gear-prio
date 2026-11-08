@@ -210,16 +210,19 @@ stop it (a reading of `merge_to_dev.py`, untested).
 pnpm wt:unpair <name>
 ```
 
-**In the Claude Code sandbox,** unpair removes the fork half, then stops
-with `failed to delete '.../.git/worktrees/<name>': Device or resource
-busy`: the sandbox mounts over every `.git/worktrees/<name>`, so it cannot
-delete one (`findmnt -rn -o TARGET | grep .git/worktrees`). Finish from the
-main checkout with two more calls. First `git worktree remove <pair path>`,
-with nothing before or after it in the call: that text matches
-`git worktree remove *` in `sandbox.excludedCommands` of
-`~/.claude_router/settings.json`, so it runs outside the sandbox. Then
-`pnpm wt:unpair <name>` again, which deletes the unpair mark. Seen on
-2026-11-08 with the pair `gate-pipe`.
+**When unpair stops with `Device or resource busy`.** In the Claude Code
+sandbox, unpair can remove the fork half and then stop with
+`failed to delete '.../.git/worktrees/<name>': Device or resource busy`.
+The sandbox mounts over `.git/worktrees/<name>` folders, so it cannot
+delete them (`findmnt -rn -o TARGET | grep .git/worktrees`). On 2026-11-08
+it stopped for the pair `gate-pipe`, made hours before, and not for a pair
+made and removed within minutes. Run unpair first; only after this error,
+finish from the main checkout with two more calls. First
+`git worktree remove <pair path>`, with nothing before or after it in the
+call: that text matches `git worktree remove *` in
+`sandbox.excludedCommands` of `~/.claude_router/settings.json`, so it runs
+outside the sandbox. Then `pnpm wt:unpair <name>` again, which deletes the
+unpair mark.
 
 Run it from the main checkout or from another pair; it refuses to run from
 inside the pair it removes. Without `--force` it refuses when:
