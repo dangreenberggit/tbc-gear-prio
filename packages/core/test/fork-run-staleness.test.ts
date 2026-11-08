@@ -119,10 +119,7 @@ describe.skipIf(!forkPresent)("Upgrades run staleness", () => {
         }),
         settings: SETTINGS,
       });
-    // 30s, matching `testTimeout`, not the 10s default hookTimeout: loading
-    // db.json and the fork modules took 3.4-4.7s in review round 2 and can
-    // pass 10s under CPU contention (hypothesis, untested).
-  }, 30_000);
+  });
 
   // A new run reads nothing of the state before it, so it needs none.
   const start = (runId: number, signature: string) =>

@@ -147,7 +147,7 @@ async function main() {
               "exec",
               "vitest",
               "run",
-              "--reporter=json",
+              "--reporter=./scripts/vitest_json_reporter.mjs",
               `--outputFile=${vitestJsonPath}`,
             ],
             { stream: true }

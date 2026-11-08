@@ -123,7 +123,9 @@ export function formatVitestFailures(report, root) {
         `  FAIL ${rel(file.name)} > ${a.fullName}`,
         ...excerpt((a.failureMessages ?? []).join("\n")),
       ]);
-    if (failed.length === 0 && file.status === "failed")
+    // A failed describe hook's error is the file's message even when
+    // another test in the file failed (scripts/vitest_json_reporter.mjs).
+    if (file.status === "failed" && (failed.length === 0 || file.message))
       entries.push([
         `  FAIL ${rel(file.name)}`,
         ...excerpt(file.message ?? ""),
