@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/docs-unpair-after-merge.md
 Blocks: none
@@ -26,3 +26,29 @@ to do it".
 
 An agent removes a pair after its merge by following § Remove it,
 including the fallback if the error shows, with no owner step.
+
+## Closed 2026-11-08
+
+After `docs/unpair-after-merge` merged (`tbc-gear-prio@bfec3c1f`), an agent
+removed its pair `unpair-doc` from the main checkout by following
+§ Remove it as merged. The busy error showed, and the fallback worked with
+no owner step.
+
+Verified by:
+
+```
+pnpm -C /home/daniel/Code/lulz/tbc-gear-prio wt:unpair unpair-doc
+# rc=1: removed the fork half, then
+# failed to delete '.../.git/worktrees/unpair-doc': Device or resource busy
+git worktree remove /home/daniel/Code/lulz/tbc-wt/unpair-doc
+# rc=0, no output (plain call, runs outside the sandbox)
+pnpm -C /home/daniel/Code/lulz/tbc-gear-prio wt:unpair unpair-doc
+# rc=0: nothing to remove
+```
+
+Afterwards `git worktree list` in the main repo and in
+`vendor/tbc-new-fork` list no `unpair-doc`, the folder
+`tbc-wt/unpair-doc` is gone, and `.git/tbc-wt-unpair/` is empty. Inside
+the sandbox an empty `.git/worktrees/unpair-doc` still shows as a mount
+point; `git worktree prune --dry-run -v` lists it for removal. Whether it
+exists outside the sandbox is untested.
