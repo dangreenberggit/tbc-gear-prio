@@ -37,6 +37,38 @@ import {
   repairValue,
 } from "./meta-repair-oracle.js";
 
+/**
+ * Lets test 852-R fail a set version's gem repair. The hit budget sets how a
+ * repair scores layouts (`meta-repair.ts` `valueModel`), and a version read of
+ * 1e308 percent still repaired, so the test fakes the failure instead.
+ * While `belowRemaining` is set, a repair whose hit budget is below it throws
+ * the fork's own `MetaStepBudgetExceededError`; every other repair, and every
+ * other test, gets the real one.
+ */
+const repairFault = vi.hoisted(() => ({
+  belowRemaining: undefined as number | undefined,
+}));
+vi.mock(
+  "../../../vendor/tbc-new-fork/ui/features/upgrades/model/engine/meta-repair.ts",
+  async (importOriginal) => {
+    type Repair = (opts: { hitCap?: { remaining: number } }) => unknown;
+    const real = await importOriginal<{
+      repairAndMinimize: Repair;
+      MetaStepBudgetExceededError: new (message: string) => Error;
+    }>();
+    const repairAndMinimize: Repair = (opts) => {
+      const below = repairFault.belowRemaining;
+      if (below !== undefined && (opts.hitCap?.remaining ?? 0) < below) {
+        throw new real.MetaStepBudgetExceededError(
+          "meta repair exceeded step budget"
+        );
+      }
+      return real.repairAndMinimize(opts);
+    };
+    return { ...real, repairAndMinimize };
+  }
+);
+
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 /** `Stat.StatMeleeHitRating` in the fork's proto (`proto/common.ts`). */
@@ -1791,6 +1823,34 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
         })
       ).rejects.toMatchObject(SIM_FAILED_WORKER_DIED);
       expect(versionReads).toBe(1);
+    }
+  );
+
+  it.each(["off", "on"])(
+    "852-R: a gem repair that fails on a set version skips that set bonus, as on its own build (set screen %s)",
+    async (setScreen) => {
+      // Oracle: a failed gem repair is no failed sim. On a set package's own
+      // build it skips the package with the meta-off note (`rank.ts`, the
+      // package loop); the same failure while rebuilding one of the
+      // package's versions does the same, and the run goes on. Burning
+      // Rage's 1000 hit puts each set-kept version's budget near −990
+      // rating, and only those repairs fail.
+      repairFault.belowRemaining = -500;
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      let run;
+      try {
+        run = await brRun(1000, { setScreen });
+      } finally {
+        repairFault.belowRemaining = undefined;
+        warn.mockRestore();
+      }
+      expect(run.ranking.complete).toBe(true);
+      expect(run.ranking.substitutions).toContainEqual({
+        field: "Burning Rage 2-piece set bonus",
+        detail:
+          "The Burning Rage 2-piece set bonus was not measured, because no " +
+          "gem swap could turn your meta gem on.\nmeta repair exceeded step budget",
+      });
     }
   );
 
