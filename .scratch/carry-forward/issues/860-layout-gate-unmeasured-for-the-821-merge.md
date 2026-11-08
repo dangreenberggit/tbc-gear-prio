@@ -46,8 +46,7 @@ in the pair `tbc-wt/gate-pipe` (branch `fix/860-layout-gate-tsx-pipe`, fork
 checks passed and 0 failed at widths 375, 653, 768 and 1280 over the 11
 fixtures. It advanced `data/wowsims-fork-layout.lock.json` to `5267aca2...`,
 which this branch commits. Log:
-`.scratch/agent-reports/2026-11-08-860-gate-headless-shell.log` in the main
-checkout.
+`/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-08-860-gate-headless-shell.log`.
 
 The workers build no longer needs the tsx IPC pipe:
 `scripts/tab-harness/test-tab-harness.mjs` now runs
@@ -59,10 +58,12 @@ That run then stopped at a second sandbox block, ticket 861: the gate's
 Chromium aborts with `socket() failed: Operation not permitted`. The green run
 above therefore used the shim, whose `chromium-1200/chrome-linux64/chrome` is
 a symlink to Playwright's headless-shell build of the same Chromium
-(143.0.7499.4), as tickets 754 and 800 did. The digest is the same either way,
-because it hashes the browsers.json entry, not the binary. To measure on the
-gate's own Chromium, run this outside the sandbox; it measures whatever the
-lock says:
+(143.0.7499.4), as tickets 754 and 800
+(`800-desktop-gate-goldens-for-more-specs.md`) did. The digest is the same either way,
+because it hashes the browsers.json entry, not the binary:
+`python scripts/check_layout_gate.py --print-hash` prints `5267aca2...` with
+and without the shim. To measure the tab source on disk on the gate's own
+Chromium, run this outside the sandbox (it writes no lock):
 
 ```
 cd /home/daniel/Code/lulz/tbc-wt/gate-pipe && node scripts/tab-harness/test-layout.mjs

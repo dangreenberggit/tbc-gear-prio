@@ -26,10 +26,12 @@ in the sandbox with the same flags, Playwright's `chromium-1200` build aborts:
 FATAL:chrome/browser/process_singleton_posix.cc:292] Check failed: . socket() failed: Operation not permitted (1)
 ```
 
-Log: `.scratch/agent-reports/2026-11-08-860-chromium-abort.log` in the main
-checkout. Playwright's headless-shell build of the same version
+Log:
+`/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-08-860-chromium-abort.log`.
+Playwright's headless-shell build of the same version
 (`~/.cache/ms-playwright/chromium_headless_shell-1200/...`) starts and
-answers on its DevTools port in the same sandbox. Tickets 754 and 800 used
+answers on its DevTools port in the same sandbox. Tickets 754 and 800
+(`800-desktop-gate-goldens-for-more-specs.md`) used
 it through a `PLAYWRIGHT_BROWSERS_PATH` shim, and ticket 860 got its green
 gate run the same way.
 
@@ -39,11 +41,15 @@ and ticket 401 means the skip does not block the merge.
 ## Done when
 
 An agent's `python scripts/check_layout_gate.py` inside the Claude Code
-sandbox, with no environment override, gives a `measured` verdict; or the
-owner rules that the gate is run outside the sandbox, and the docs that
-tell agents to run `pnpm merge-to-dev` say so.
+sandbox, with no environment override, gives a `measured` verdict (pass or
+fail: this ticket is about the gate being able to measure); or the owner
+rules that the owner runs the gate outside the sandbox, and `AGENTS.md`
+§ Commits and merges and `docs/workflow.md` § The loop, which tell agents to
+run `pnpm merge-to-dev`, say so.
 
-Ways in, all untested: have `chromium.mjs` return the headless-shell build
-(whether it moves the measured geometry is untested, and the digest would
-need to hash that build's entry); or a sandbox setting that allows the
-socket (the owner's decision).
+Ways in, all untested: have `scripts/tab-harness/chromium.mjs` return the
+headless-shell build (whether it moves the measured geometry is untested,
+and the layout lock's digest, `testedTabHash` in
+`data/wowsims-fork-layout.lock.json`, would need to hash that build's
+browsers.json entry); or a sandbox setting that allows the socket (the
+owner's decision).
