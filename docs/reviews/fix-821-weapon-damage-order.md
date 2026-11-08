@@ -6,6 +6,8 @@ Reviewed range: `05ede6f87783805916d71f495a569f5752ffb63b..fb88eb3d942e4e0819404
 
 Reviewed range: `fb88eb3d942e4e0819404d142e755f9dd54fa6f7..eba41bb47579a7fcbf73910ff237ac10cd937db9`
 
+Reviewed range: `eba41bb47579a7fcbf73910ff237ac10cd937db9..03c975825fdc3ffc0aa996059fe03aee7b0499a0`
+
 Fork range reviewed as part of the branch: `vendor/tbc-new-fork`
 `c9bb0acd367bd0712148c56b8d683ad6649895c0..b71e2508672defaa5296035a89dc07b5e6153247`
 (the `commit` values in `data/wowsims-fork.lock.json` at the merge base and
@@ -338,3 +340,19 @@ were told they write nothing.
 round limits) and leaves A1 to P3 open; A1 asks for a code change, so the
 review stops here and the owner chooses what happens next. No fix was made
 after round 3.
+
+**Owner's ruling (Q-856-round3).** Owner, 2026-11-07: "full review round
+sounds stupid though. checking only the changes is enough after the fixes go
+in." The fixes are in `03c97582`. One focused check of `e188818f..` the
+branch tip follows; it is the last round.
+
+## Disposition (round 3)
+
+| ID    | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ----- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R3-A1 | Adversarial | fixed       | `03c97582`: `scripts/go_env.py` reads `go env GOFLAGS` with `stdout=subprocess.PIPE` in place of `capture_output=True`, so Go's error text reaches the terminal; the two `subprocess` stubs in `scripts/check_desktop_tab_verdict.py` and `scripts/check_worktree_pair.py` gain `PIPE`. `scripts/go-env.mjs` needed no change: `execFileSync` already passes the child's stderr through. Checked both with a fake `go` on `PATH` that prints to stderr and exits 1 |
+| R3-A2 | Adversarial | wontfix     | A test seam for the two `goBuildEnv` calls in `scripts/dev-tab.mjs` would be more code than the change it guards                                                                                                                                                                                                                                                                                                                                                   |
+| R3-A3 | Adversarial | fixed       | `03c97582`: ticket 856's closing note says the "sandbox-only" line in `docs/reviews/feat-headless-run-no-orphans.md:81` was left as history on purpose                                                                                                                                                                                                                                                                                                             |
+| R3-P1 | Spec        | wontfix     | `03c97582`: 856 stays closed, because its "Done when" runs cannot run in the agent sandbox. Its note names the remaining check, the owner's run of `pnpm -C /home/daniel/Code/lulz/tbc-wt/weapon-order desktop-gate:check` with no `GOFLAGS` prefix outside the sandbox, and says the ticket reopens if that run fails at `make wowsimtbc`                                                                                                                         |
+| R3-P2 | Spec        | fixed       | Same as R3-A3                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| R3-P3 | Spec        | fixed       | `03c97582`: the note says tsx runs in the bundle step (`vendor/tbc-new-fork/makefile:34`)                                                                                                                                                                                                                                                                                                                                                                          |
