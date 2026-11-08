@@ -212,13 +212,14 @@ pnpm wt:unpair <name>
 
 **In the Claude Code sandbox,** unpair removes the fork half, then stops
 with `failed to delete '.../.git/worktrees/<name>': Device or resource
-busy`: the sandbox mounts every `.git/worktrees/<name>` read-only
-(`findmnt -rn -o TARGET | grep .git/worktrees`). Finish from the main
-checkout with two more calls. First `git worktree remove <pair path>`, as
-the whole command with no `-C`, `cd` or `;`: that text is in the sandbox's
-excluded commands, so it runs outside the sandbox. Then `pnpm wt:unpair
-<name>` again, which deletes the unpair mark. Seen on 2026-11-08 with the
-pair `gate-pipe`.
+busy`: the sandbox mounts over every `.git/worktrees/<name>`, so it cannot
+delete one (`findmnt -rn -o TARGET | grep .git/worktrees`). Finish from the
+main checkout with two more calls. First `git worktree remove <pair path>`,
+with nothing before or after it in the call: that text matches
+`git worktree remove *` in `sandbox.excludedCommands` of
+`~/.claude_router/settings.json`, so it runs outside the sandbox. Then
+`pnpm wt:unpair <name>` again, which deletes the unpair mark. Seen on
+2026-11-08 with the pair `gate-pipe`.
 
 Run it from the main checkout or from another pair; it refuses to run from
 inside the pair it removes. Without `--force` it refuses when:
