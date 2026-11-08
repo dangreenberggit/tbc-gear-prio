@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: ticket 858 investigation, 2026-11-07 (branch `fix/858-flaky-spec-pages`)
 Blocks: none
@@ -39,3 +39,28 @@ file's path. A test in `scripts/` checks this by running vitest on a
 fixture whose `describe`-level `beforeAll` fails, with the fixture kept out
 of the main suite. A test that feeds a hand-written JSON report does not
 count: the real report has no error text to feed.
+
+## Closed 2026-11-08
+
+`scripts/run_verify.mjs` now runs vitest with
+`scripts/vitest_json_reporter.mjs`, a subclass of vitest's JSON reporter.
+When a file's `message` is empty, it fills it with the error of the
+file's first failed `describe`, read from vitest's task tree. So `pnpm
+verify` prints the hook's error under `FAIL <file>`, and the kept JSON
+report holds it too. Passing runs print the same as before.
+`scripts/vitest_json_reporter.test.mjs` runs the real `run_verify.mjs`
+and vitest in a temp checkout on a fixture whose `describe`-level
+`beforeAll` times out after 50 ms, and checks that stderr shows
+`FAIL hook.test.mjs` with `Hook timed out in 50ms.` under it. With the
+stock `--reporter=json` the same test fails: the line under the path is
+empty. Commit: `fbd7d4ef`.
+
+Verified by:
+
+```sh
+pnpm exec vitest run scripts/vitest_json_reporter.test.mjs
+```
+
+(The ticket's repro with the new reporter,
+`pnpm exec vitest run packages/core/test/fork-spec-pages.test.ts --hookTimeout=50 --reporter=./scripts/vitest_json_reporter.mjs --outputFile=$TMPDIR/h.json; grep -o '"message":"[^"]*"' $TMPDIR/h.json`,
+prints `"message":"Hook timed out in 50ms.\nIf this is a long-running hook, ...`.)
