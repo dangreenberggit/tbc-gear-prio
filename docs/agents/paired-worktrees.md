@@ -213,10 +213,9 @@ pnpm wt:unpair <name>
 **When unpair stops with `Device or resource busy`.** In the Claude Code
 sandbox, unpair can remove the fork half and then stop with
 `failed to delete '.../.git/worktrees/<name>': Device or resource busy`.
-The sandbox mounts over `.git/worktrees/<name>` folders, so it cannot
-delete them (`findmnt -rn -o TARGET | grep .git/worktrees`). On 2026-11-08
-it stopped for the pair `gate-pipe`, made hours before, and not for a pair
-made and removed within minutes. Run unpair first; only after this error,
+The sandbox mounts over `.git/worktrees/<name>` folders, so git cannot
+delete them (`findmnt -rn -o TARGET | grep .git/worktrees`). Run unpair
+first; only after this error,
 finish from the main checkout with two more calls. First
 `git worktree remove <pair path>`, with nothing before or after it in the
 call: that text matches `git worktree remove *` in
