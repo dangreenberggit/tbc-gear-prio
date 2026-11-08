@@ -103,7 +103,14 @@ export async function build() {
   console.log("building bundle (tsc --noEmit)...");
   await run("node", ["node_modules/typescript/bin/tsc", "--noEmit"], "tsc");
   console.log("building bundle (workers)...");
-  await run("npx", ["tsx", "vite.build-workers.mts"], "vite.build-workers");
+  // The makefile runs `npx tsx`, but the tsx CLI listens on an IPC pipe that
+  // the Claude Code sandbox refuses (`listen EPERM`, ticket 860). tsx's loader
+  // alone runs the same script without that pipe.
+  await run(
+    "node",
+    ["--import", "tsx", "vite.build-workers.mts"],
+    "vite.build-workers"
+  );
   console.log("building bundle (vite build)...");
   // Compiles in the tab's fixture loader, so this dist/ is not a user build.
   await run("npx", ["vite", "build"], "vite build", {
