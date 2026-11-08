@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/live-runs/2026-11-06-survival-arms-p45.md (SME report .scratch/agent-reports/2026-11-06-general-task-sme-arms.md, draft N1)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -123,3 +123,18 @@ warrior page; ADR-0038 says so.
   `blocked` to `open`.
 - 2026-11-06: the owner chose "label" (step 1). Steps and Done when
   rewritten in plain words.
+- 2026-11-08: steps 2 and 3 done in the 852/810 pair. Fork `tbc-new-fork@38e0614f3`
+  (`settings_pool.ts` `rowTags` and `bisHeadingIndex`, `ItemNameCell.tsx`);
+  ADR-0038 § Preset phase and BiS tags amended. On the warrior page with the
+  Arms build at phase 4 the main table read, on screen: Ancient Amani Longbow
+  and Signet of Primal Wrath "BIS (Fury)" "BIS (Arms)", Dory's Embrace
+  "BIS (Arms)", and Dreadboots of the Legion, Choker of Endless Nightmares,
+  Cursed Vision of Sargeras, Grips of Silent Justice and Midnight Chestguard
+  "BIS (Fury)" with "(Not an upgrade)", at ranks 7 to 11 with the same losses
+  as `arms-p4-r2.json`. The pool's own "BiS (Fury)" badge on a row in no
+  selected set is covered by the test, not seen on screen.
+
+Verified by: `pnpm -C vendor/tbc-new-fork exec vitest run ui/features/upgrades/model/settings_pool.test.ts ui/features/upgrades/components/ResultsTable/ItemNameCell.test.tsx`
+(40 passed), and the live look `tbc-new-fork@38e0614f3`:
+`.scratch/agent-reports/2026-11-08-810-live/arms-p4-labels.json` and
+`arms-p4-main-table.png` (gitignored, in the t852-810 pair).
