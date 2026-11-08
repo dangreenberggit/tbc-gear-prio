@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/carry-forward/issues/800-desktop-gate-goldens-for-more-specs.md (desktop-gate runs, 2026-11-06)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -71,3 +71,41 @@ Then re-record every gated golden that moves as `data/desktop-gate/README.md`
 § Regenerating a golden says: enhancement's, and rogue's too if it moves,
 since rogue also dual-wields. Update or remove the `enh` entry in that
 README's § Known defects of a golden.
+
+## Comments
+
+**2026-11-07, branch `fix/821-weapon-damage-order` (fork commit
+`6cc79f742`, not yet on `dev`).** The order now charges a two-hander in the
+main hand the worn off hand too (`bestEpDelta` in fork
+`model/engine/candidate-order.ts`; test
+`model/engine/candidate-order.test.ts`, "prices a two-hander against the worn
+main hand and the worn off hand it would remove"). The first paragraph of
+"Done when" is met in the tab.
+
+Left before this ticket closes:
+
+- **Re-record the goldens.** Not done: `make wowsimtbc` fails in the agent
+  sandbox (`npx tsx vite.build-workers.mts`: `listen EPERM ...
+  /tmp/claude-1000/tsx-1000/929.pipe`; the sandbox refuses unix sockets), so
+  `pnpm desktop-gate:check` could not run. Until a run outside that sandbox
+  re-records them, `pnpm desktop-gate:check --spec enh` is expected to fail
+  check (h); rogue's and ret's may too, since their weights value weapon
+  damage (hypothesis, untested).
+- **The core twin.** `packages/core/src/candidate-order.ts` still compares a
+  two-hander with the main hand alone. Whether core follows or the port
+  records a divergence is the owner decision in ticket 821.
+
+**2026-11-07, closed.** Every part of "Done when" is met. The tab's order
+charges a two-hander the worn off hand (fork `6cc79f742`,
+`model/engine/candidate-order.test.ts`). The goldens that moved are
+re-recorded on the desktop binary at fork `b71e25086`: enh, rogue and mage
+(rogue and mage also moved because worn items no longer take cap places),
+and ret's compared fields did not change. The README's `enh` entry in
+§ Known defects now describes the new golden. The core twin is recorded as a
+divergence in `docs/fork-provenance/engine.md` (`candidate-order.ts` row);
+the command-line fix is ticket 855.
+
+Verified by: `tbc-gear-prio@05cddea6` (goldens and pins);
+`node --version; pnpm desktop-gate:unit:check` (ok, 4 gated specs) and
+`node --version; GOFLAGS=-buildvcs=false pnpm verify` (rc 0, 1596 gates) in
+the pair on 2026-11-07.

@@ -15,6 +15,7 @@ from __future__ import annotations
 import contextlib
 import io
 import json
+import subprocess
 import sys
 import tempfile
 import types
@@ -23,6 +24,17 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import check_desktop_tab as g  # noqa: E402
+import go_env  # noqa: E402
+
+# GOFLAGS the caller has -> GOFLAGS the build gets (ticket 856)
+GOFLAGS_CASES = [
+    ("", "-buildvcs=false"),
+    ("-mod=mod", "-mod=mod -buildvcs=false"),
+    ("-buildvcs=false", "-buildvcs=false"),
+    ("-mod=mod -buildvcs=true", "-mod=mod -buildvcs=true"),
+    ("--buildvcs=false", "--buildvcs=false"),
+    ("-buildvcs", "-buildvcs"),
+]
 
 # (bytes_rc, gate_ok, golden_rc) -> expected verdict
 CASES = [
@@ -291,8 +303,41 @@ def run_harness_problems() -> tuple[list[str], int]:
     return problems, len(cases)
 
 
+def build_env_problems() -> list[str]:
+    """build() hands make the caller's GOFLAGS, read through `go env` so a
+    `go env -w` value counts, with VCS stamping turned off."""
+    calls: list[tuple[list[str], dict | None]] = []
+
+    def fake_run(args: list[str], **kw: object):
+        calls.append((args, kw.get("env")))
+        if args[:2] == ["go", "env"]:
+            return types.SimpleNamespace(returncode=0, stdout="-mod=mod\n")
+        return types.SimpleNamespace(returncode=0)
+
+    stub = types.SimpleNamespace(run=fake_run, PIPE=subprocess.PIPE)
+    real = go_env.subprocess
+    go_env.subprocess = stub
+    try:
+        with patched(subprocess=stub):
+            got = quietly(g.build)
+    finally:
+        go_env.subprocess = real
+    makes = [env for args, env in calls if args[0] == "make"]
+    if got is not None or len(makes) != 1:
+        return [f"build() gave {got!r} with make calls {calls!r}"]
+    flags = (makes[0] or {}).get("GOFLAGS")
+    if flags != "-mod=mod -buildvcs=false":
+        return [f"build() ran make with GOFLAGS {flags!r}, "
+                "want '-mod=mod -buildvcs=false'"]
+    return []
+
+
 def main() -> int:
     problems = [
+        f"goflags_without_vcs_stamp({flags!r}) gave {got!r}, want {want!r}"
+        for flags, want in GOFLAGS_CASES
+        if (got := go_env.goflags_without_vcs_stamp(flags)) != want
+    ] + [
         f"gate_passed{args} gave {got}, want {want}"
         for args, want in CASES
         if (got := g.gate_passed(*args)) != want
@@ -304,7 +349,8 @@ def main() -> int:
         f"overall_rc({rcs}) gave {got}, want {want}"
         for rcs, want in OVERALL_CASES
         if (got := g.overall_rc(rcs)) != want
-    ] + table_problems() + harness_problems() + assertion_problems()
+    ] + table_problems() + harness_problems() + assertion_problems() \
+        + build_env_problems()
     spec_problems, spec_cases = check_spec_problems()
     problems += spec_problems
     harness_run_problems, harness_run_cases = run_harness_problems()
@@ -313,8 +359,8 @@ def main() -> int:
         print(f"  FAIL: {p}", file=sys.stderr)
     if problems:
         return 1
-    count = (len(CASES) + len(GOLDEN_CASES) + len(OVERALL_CASES)
-             + spec_cases + harness_run_cases)
+    count = (len(GOFLAGS_CASES) + len(CASES) + len(GOLDEN_CASES)
+             + len(OVERALL_CASES) + spec_cases + harness_run_cases + 1)
     print(f"check_desktop_tab_verdict.py ok ({count} verdict cases, "
           f"{len(g.gated_specs(g.DESKTOP_PHASE))} gated specs)")
     return 0

@@ -1,12 +1,12 @@
 {
   "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a ret phase-4 cap-40 run from the P3 gear preset on the desktop (HTTP) transport. The file records the output of a run that passed checks (a)-(f); it does not say the ranking is right. A known defect of a spec's golden is listed in README.md beside this file. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter this spec's output (fork re-pin, pool rule change, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --spec ret --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate.",
-  "recordedAt": "2026-10-18T04:49:33.336Z",
-  "forkCommit": "f0677292955c2420e091dcc3bb3236d17d02a3ef",
+  "recordedAt": "2026-11-08T01:50:56.225Z",
+  "forkCommit": "b71e2508672defaa5296035a89dc07b5e6153247",
   "cpuCount": 20,
   "candidatesRequested": 40,
   "spec": "ret",
   "phase": 4,
-  "elapsedS": 13,
+  "elapsedS": 11.6,
   "rows": [
     {
       "rank": "1",

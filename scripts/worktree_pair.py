@@ -488,16 +488,24 @@ def make_env() -> dict[str, str]:
     them on PATH; PowerShell and cmd (which pnpm uses) do not, and Windows'
     own find.exe answers "FIND: Parameter format not correct" (live test).
     Git for Windows ships them in usr/bin, three levels above `git
-    --exec-path`.
+    --exec-path`. Its lib.wasm build also needs VCS stamping off (go_env.py).
     """
+    # Imported here, not at the top: merge_to_dev.py and worktree_cleanup.py
+    # import this module, and their gate tests copy only the files they name.
+    import go_env
+
     env = dict(os.environ)
-    if os.name != "nt":
-        return env
-    usr_bin = Path(git(".", "--exec-path")).parents[2] / "usr" / "bin"
-    if not (usr_bin / "sh.exe").is_file():
-        raise Refusal(f"no sh.exe in {usr_bin}; make proto needs Git for Windows' usr/bin tools")
-    env["PATH"] = str(usr_bin) + os.pathsep + env.get("PATH", "")
-    return env
+    if os.name == "nt":
+        usr_bin = Path(git(".", "--exec-path")).parents[2] / "usr" / "bin"
+        if not (usr_bin / "sh.exe").is_file():
+            raise Refusal(f"no sh.exe in {usr_bin}; make proto needs Git for Windows' usr/bin tools")
+        env["PATH"] = str(usr_bin) + os.pathsep + env.get("PATH", "")
+    try:
+        return go_env.go_build_env(env)
+    except subprocess.CalledProcessError as exc:
+        # go_env lets Go's stderr through, so its error text is already on
+        # the terminal, as with a failed run() step.
+        raise Refusal(f"step failed (rc={exc.returncode}): {' '.join(exc.cmd)}") from exc
 
 
 def wowsimcli_platform() -> str:

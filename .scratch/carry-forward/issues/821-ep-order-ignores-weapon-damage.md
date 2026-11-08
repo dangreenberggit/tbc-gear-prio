@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/feat-452-desktop-goldens.md (round 1, D1 and I6)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -71,3 +71,66 @@ A change to the order can move every gated golden. Re-record each golden
 that moves as `data/desktop-gate/README.md` § Regenerating a golden says,
 and update or remove the `enh` entry in that README's § Known defects of a
 golden.
+
+## Comments
+
+**2026-11-07, branch `fix/821-weapon-damage-order` (fork commit
+`6cc79f742`, not yet on `dev`).** The tab's order now counts weapon damage.
+It no longer scores items with the port's stats-only `epScore`; it calls
+wowsims' own `EquippedItem.calcStats(slot)` and `Stats.computeEP`
+(`ui/sim/proto/equipped_item.ts:10-26`, `:263-268`; the same two calls the
+gear picker's `Player.computeItemEP` makes, `ui/sim/player/player.ts:1188-1206`)
+at the weights file's `weights` plus `pseudoWeights` (new fork file
+`model/item_ep.ts`, passed to the engine as `Deps.itemEp` from `model/run.ts`).
+So a weapon's damage per second counts at the main-hand, off-hand or ranged
+weight of the slot it would take. It does not call `computeItemEP` itself,
+because that scores with the page's EP weights and the tab orders by its
+bundled weights set. No wowsims file changed. The order is still an estimate:
+procs, on-use effects and weapon speed are not scored.
+
+Effect on the enhancement page (`P3 Preset`, phase 4), measured by running
+the fork's real `orderCandidatesByEp` with `itemEpFor` over the test
+database's pool (a throwaway test, not committed) and reading each position's
+DPS from the uncapped readback
+`.scratch/agent-reports/2026-11-07-candidate-cap-evidence/enh-p4-uncapped-readback.json`
+(gitignored, main checkout): of the 14 real upgrades, the first is now
+candidate 1 (Madness of the Betrayer), 4 are in the first 40 (Madness, Empty
+Mug of Direbrew, Berserker's Call, Tsunami Talisman), and the last is
+candidate 212 of 1024. The first 40 still hold 29 weapons, all losing DPS. The
+committed golden's first 40 are 40 losing weapons and no upgrade.
+
+Left before this ticket closes:
+
+- **Owner decision: the core twins.** `packages/core/src/candidate-order.ts`
+  and `stats.ts` still score by stats alone. Options as in "Done when": add
+  weapon damage to `data/items/index.json` through
+  `scripts/generate_item_gem_index.py`, or record a divergence in
+  `docs/fork-provenance/engine.md`. Neither is done. Until then that file's
+  rows are stale in text, not in hash: `candidate-order.ts` says "none (import
+  paths only)" and `rank.ts` says M1's EP ordering is "ported unchanged". The
+  hashes were updated, so `pnpm engine-port-drift:check` passes.
+- **Re-record the goldens and the README's `enh` entry.** Not done, for the
+  sandbox reason in ticket 820's comment of the same date.
+
+**2026-11-07, later.** The owner's `--update-golden` run for `enh` at fork
+`6cc79f742` refused at (e) with 39 rows: the new order puts the worn
+Bloodlust Brooch inside the first 40, and a worn item took a cap place
+(ticket 854's comment of this date). Fork `b71e25086` keeps worn items out of
+the cap's count. The goldens are still not re-recorded: `data/desktop-gate/README.md`
+§ Known defects says what is expected to move. The Go build needs
+`GOFLAGS=-buildvcs=false` in a pair (ticket 856).
+
+**2026-11-07, closed.** Every part of "Done when" is met. The tab's order
+counts weapon damage at the weights' `pseudoWeights` (fork `6cc79f742`,
+`model/item_ep.ts`, tests `model/item_ep.test.ts` and
+`model/engine/candidate-order.test.ts`). For the core twins, the second
+option was taken: `docs/fork-provenance/engine.md` records the divergence on
+the `candidate-order.ts` and `rank.ts` rows (`9921d796`), and the
+command-line fix is ticket 855. The goldens that moved are re-recorded at
+fork `b71e25086`, and the README's `enh` entry is updated. The owner's run
+shows the enh list now opens with Empty Mug of Direbrew, Berserker's Call and
+Madness of the Betrayer, where the old golden held 40 losing weapons.
+
+Verified by: `tbc-gear-prio@05cddea6` (goldens and pins);
+`node --version; GOFLAGS=-buildvcs=false pnpm verify` (rc 0, 1596 gates) in
+the pair on 2026-11-07.

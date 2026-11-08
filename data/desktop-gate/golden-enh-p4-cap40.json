@@ -1,71 +1,303 @@
 {
   "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a enh phase-4 cap-40 run from the P3 Preset gear preset on the desktop (HTTP) transport. The file records the output of a run that passed checks (a)-(f); it does not say the ranking is right. A known defect of a spec's golden is listed in README.md beside this file. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter this spec's output (fork re-pin, pool rule change, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --spec enh --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate.",
-  "recordedAt": "2026-11-06T19:07:01.341Z",
-  "forkCommit": "b603564eed544d5e9f62fbc3950309dd65921110",
+  "recordedAt": "2026-11-08T01:52:44.953Z",
+  "forkCommit": "b71e2508672defaa5296035a89dc07b5e6153247",
   "cpuCount": 20,
   "candidatesRequested": 40,
   "spec": "enh",
   "phase": 4,
-  "elapsedS": 18.5,
+  "elapsedS": 44.5,
   "rows": [
     {
       "rank": "1",
-      "item": "Vengeful Gladiator's Gavel",
-      "slot": "Main Hand",
-      "dps": -470.7,
-      "source": "PvP vendor · Arena",
+      "item": "Empty Mug of Direbrew",
+      "slot": "Trinket 2",
+      "dps": 23.1,
+      "source": "Source not recorded",
+      "belowCutoff": false
+    },
+    {
+      "rank": "2",
+      "item": "Berserker's Call",
+      "slot": "Trinket 2",
+      "dps": 17.7,
+      "source": "Zul'Aman (N)\nZul'jin",
+      "belowCutoff": false
+    },
+    {
+      "rank": "3",
+      "item": "Madness of the Betrayer",
+      "slot": "Trinket 2",
+      "dps": 11.8,
+      "source": "Black Temple (N)\nThe Illidari Council",
+      "belowCutoff": false
+    },
+    {
+      "rank": "1",
+      "item": "Tsunami Talisman",
+      "slot": "Trinket 2",
+      "dps": 0.7,
+      "source": "Serpentshrine Cavern (N)\nLeotheras the Blind",
       "belowCutoff": true
     },
     {
       "rank": "2",
-      "item": "Vengeful Gladiator's Spellblade",
-      "slot": "Main Hand",
-      "dps": -470.7,
-      "source": "PvP vendor · Arena",
+      "item": "Slayer's Crest",
+      "slot": "Trinket 2",
+      "dps": -5.7,
+      "source": "Naxxramas (N)\nSapphiron",
       "belowCutoff": true
     },
     {
       "rank": "3",
-      "item": "Amani Punisher",
-      "slot": "Main Hand",
-      "dps": -472.2,
-      "source": "Zul'Aman (N)\nAkil'zon",
+      "item": "Shady Dealer's Pantaloons",
+      "slot": "Legs",
+      "dps": -11.8,
+      "source": "Hyjal Summit (N)\nAzgalor",
       "belowCutoff": true
     },
     {
       "rank": "4",
-      "item": "Merciless Gladiator's Spellblade",
-      "slot": "Main Hand",
-      "dps": -473.5,
-      "source": "PvP vendor · Arena",
+      "item": "Abacus of Violent Odds",
+      "slot": "Trinket 2",
+      "dps": -12.8,
+      "source": "The Mechanar (N)\nPathaleon the Calculator",
       "belowCutoff": true
     },
     {
       "rank": "5",
-      "item": "Merciless Gladiator's Gavel",
-      "slot": "Main Hand",
-      "dps": -473.5,
-      "source": "PvP vendor · Arena",
+      "item": "Romulo's Poison Vial",
+      "slot": "Trinket 2",
+      "dps": -13.2,
+      "source": "Karazhan (N)\nRomulo and Julianne",
       "belowCutoff": true
     },
     {
       "rank": "6",
-      "item": "Hammer of Judgement",
-      "slot": "Main Hand",
-      "dps": -483,
-      "source": "Hyjal Summit\nTrash",
+      "item": "Leggings of Murderous Intent",
+      "slot": "Legs",
+      "dps": -16.9,
+      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
       "belowCutoff": true
     },
     {
       "rank": "7",
-      "item": "The Maelstrom's Fury",
-      "slot": "Main Hand",
-      "dps": -486.4,
-      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "item": "Wicked Edge of the Planes",
+      "slot": "Off Hand",
+      "dps": -26.7,
+      "source": "Blacksmithing",
       "belowCutoff": true
     },
     {
       "rank": "8",
+      "item": "Battlemaster's Determination",
+      "slot": "Trinket 2",
+      "dps": -29,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "9",
+      "item": "Battlemaster's Cruelty",
+      "slot": "Trinket 2",
+      "dps": -32.6,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "10",
+      "item": "Vengeful Gladiator's Cleaver",
+      "slot": "Off Hand",
+      "dps": -46.4,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "11",
+      "item": "Vengeful Gladiator's Chopper",
+      "slot": "Off Hand",
+      "dps": -46.4,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "12",
+      "item": "Talon of the Phoenix",
+      "slot": "Main Hand",
+      "dps": -51,
+      "source": "Tempest Keep (N)\nAl'ar",
+      "belowCutoff": true
+    },
+    {
+      "rank": "13",
+      "item": "Vengeful Gladiator's Pummeler",
+      "slot": "Off Hand",
+      "dps": -56.5,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "14",
+      "item": "Vengeful Gladiator's Left Render",
+      "slot": "Off Hand",
+      "dps": -56.5,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "15",
+      "item": "Rising Tide",
+      "slot": "Off Hand",
+      "dps": -58.5,
+      "source": "Black Temple (N)\nHigh Warlord Naj'entus",
+      "belowCutoff": true
+    },
+    {
+      "rank": "16",
+      "item": "Vengeful Gladiator's Right Ripper",
+      "slot": "Main Hand",
+      "dps": -78,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "17",
+      "item": "Vengeful Gladiator's Shiv",
+      "slot": "Off Hand",
+      "dps": -181.8,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "18",
+      "item": "Messenger of Fate",
+      "slot": "Off Hand",
+      "dps": -194.4,
+      "source": "Black Temple (N)\nGurtogg Bloodboil",
+      "belowCutoff": true
+    },
+    {
+      "rank": "19",
+      "item": "Direbrew's Shanker",
+      "slot": "Off Hand",
+      "dps": -218.5,
+      "source": "Source not recorded",
+      "belowCutoff": true
+    },
+    {
+      "rank": "20",
+      "item": "Swiftsteel Bludgeon",
+      "slot": "Off Hand",
+      "dps": -221.6,
+      "source": "Black Temple\nTrash",
+      "belowCutoff": true
+    },
+    {
+      "rank": "21",
+      "item": "Vengeful Gladiator's Hacker",
+      "slot": "Off Hand",
+      "dps": -225.5,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "22",
+      "item": "Tracker's Blade",
+      "slot": "Off Hand",
+      "dps": -226.8,
+      "source": "Hyjal Summit (N)\nRage Winterchill",
+      "belowCutoff": true
+    },
+    {
+      "rank": "23",
+      "item": "Vengeful Gladiator's Bonecracker",
+      "slot": "Off Hand",
+      "dps": -232.3,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "24",
+      "item": "Vengeful Gladiator's Left Ripper",
+      "slot": "Off Hand",
+      "dps": -232.3,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "25",
+      "item": "Merciless Gladiator's Hacker",
+      "slot": "Off Hand",
+      "dps": -239.2,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "26",
+      "item": "Fang of Vashj",
+      "slot": "Off Hand",
+      "dps": -241.1,
+      "source": "Serpentshrine Cavern (N)\nLady Vashj",
+      "belowCutoff": true
+    },
+    {
+      "rank": "27",
+      "item": "Shard of Azzinoth",
+      "slot": "Off Hand",
+      "dps": -243.7,
+      "source": "Black Temple (N)\nIllidan Stormrage",
+      "belowCutoff": true
+    },
+    {
+      "rank": "28",
+      "item": "Merciless Gladiator's Bonecracker",
+      "slot": "Off Hand",
+      "dps": -244.7,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "29",
+      "item": "Merciless Gladiator's Left Ripper",
+      "slot": "Off Hand",
+      "dps": -244.7,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "30",
+      "item": "Boundless Agony",
+      "slot": "Off Hand",
+      "dps": -245.7,
+      "source": "Hyjal Summit (N)\nAzgalor",
+      "belowCutoff": true
+    },
+    {
+      "rank": "31",
+      "item": "Dagger of Bad Mojo",
+      "slot": "Off Hand",
+      "dps": -246,
+      "source": "Zul'Aman (N)\nHex Lord Malacrass",
+      "belowCutoff": true
+    },
+    {
+      "rank": "32",
+      "item": "Vengeful Gladiator's Mutilator",
+      "slot": "Off Hand",
+      "dps": -247,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "33",
+      "item": "Vengeful Gladiator's Shanker",
+      "slot": "Off Hand",
+      "dps": -247.1,
+      "source": "PvP vendor · Arena",
+      "belowCutoff": true
+    },
+    {
+      "rank": "34",
       "item": "Soul Cleaver",
       "slot": "Main Hand",
       "dps": -546.4,
@@ -73,7 +305,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "9",
+      "rank": "35",
       "item": "Torch of the Damned",
       "slot": "Main Hand",
       "dps": -551.3,
@@ -81,7 +313,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "10",
+      "rank": "36",
       "item": "Vengeful Gladiator's Decapitator",
       "slot": "Main Hand",
       "dps": -552.4,
@@ -89,248 +321,20 @@
       "belowCutoff": true
     },
     {
-      "rank": "11",
-      "item": "Bloodmoon",
-      "slot": "Main Hand",
-      "dps": -568.4,
-      "source": "Blacksmithing",
-      "belowCutoff": true
-    },
-    {
-      "rank": "12",
+      "rank": "37",
       "item": "Vengeful Gladiator's Bonegrinder",
       "slot": "Main Hand",
       "dps": -574.4,
       "source": "PvP vendor · Arena",
       "belowCutoff": true
-    },
-    {
-      "rank": "13",
-      "item": "Trollbane",
-      "slot": "Main Hand",
-      "dps": -591.5,
-      "source": "Zul'Aman\nTimed Chest",
-      "belowCutoff": true
-    },
-    {
-      "rank": "14",
-      "item": "Merciless Gladiator's Decapitator",
-      "slot": "Main Hand",
-      "dps": -594.6,
-      "source": "PvP vendor · Arena",
-      "belowCutoff": true
-    },
-    {
-      "rank": "15",
-      "item": "Mooncleaver",
-      "slot": "Main Hand",
-      "dps": -604.3,
-      "source": "Blacksmithing",
-      "belowCutoff": true
-    },
-    {
-      "rank": "16",
-      "item": "Ethereum Nexus-Reaver",
-      "slot": "Main Hand",
-      "dps": -604.9,
-      "source": "Source not recorded",
-      "belowCutoff": true
-    },
-    {
-      "rank": "17",
-      "item": "Stormherald",
-      "slot": "Main Hand",
-      "dps": -606.1,
-      "source": "Blacksmithing",
-      "belowCutoff": true
-    },
-    {
-      "rank": "18",
-      "item": "Gorehowl",
-      "slot": "Main Hand",
-      "dps": -611.9,
-      "source": "Karazhan (N)\nPrince Malchezaar",
-      "belowCutoff": true
-    },
-    {
-      "rank": "19",
-      "item": "Merciless Gladiator's Bonegrinder",
-      "slot": "Main Hand",
-      "dps": -617.4,
-      "source": "PvP vendor · Arena",
-      "belowCutoff": true
-    },
-    {
-      "rank": "20",
-      "item": "Gladiator's Decapitator",
-      "slot": "Main Hand",
-      "dps": -635.1,
-      "source": "PvP vendor · Arena",
-      "belowCutoff": true
-    },
-    {
-      "rank": "21",
-      "item": "Deep Thunder",
-      "slot": "Main Hand",
-      "dps": -641.1,
-      "source": "Blacksmithing",
-      "belowCutoff": true
-    },
-    {
-      "rank": "22",
-      "item": "Lunar Crescent",
-      "slot": "Main Hand",
-      "dps": -642.8,
-      "source": "Blacksmithing",
-      "belowCutoff": true
-    },
-    {
-      "rank": "23",
-      "item": "Legacy",
-      "slot": "Main Hand",
-      "dps": -650.5,
-      "source": "Karazhan (N)\nThe Wizard of Oz",
-      "belowCutoff": true
-    },
-    {
-      "rank": "24",
-      "item": "Gladiator's Bonegrinder",
-      "slot": "Main Hand",
-      "dps": -656.9,
-      "source": "PvP vendor · Arena",
-      "belowCutoff": true
-    },
-    {
-      "rank": "25",
-      "item": "Thunder",
-      "slot": "Main Hand",
-      "dps": -673.1,
-      "source": "Blacksmithing",
-      "belowCutoff": true
-    },
-    {
-      "rank": "26",
-      "item": "Felsteel Reaper",
-      "slot": "Main Hand",
-      "dps": -675,
-      "source": "Blacksmithing",
-      "belowCutoff": true
-    },
-    {
-      "rank": "27",
-      "item": "Chancellor's Decapitator",
-      "slot": "Main Hand",
-      "dps": -675.4,
-      "source": "Source not recorded",
-      "belowCutoff": true
-    },
-    {
-      "rank": "28",
-      "item": "Chancellor's Bonegrinder",
-      "slot": "Main Hand",
-      "dps": -694.9,
-      "source": "Source not recorded",
-      "belowCutoff": true
-    },
-    {
-      "rank": "29",
-      "item": "Fel Hardened Maul",
-      "slot": "Main Hand",
-      "dps": -709,
-      "source": "Blacksmithing",
-      "belowCutoff": true
-    },
-    {
-      "rank": "30",
-      "item": "Chancellor's Maul",
-      "slot": "Main Hand",
-      "dps": -843.9,
-      "source": "Source not recorded",
-      "belowCutoff": true
-    },
-    {
-      "rank": "31",
-      "item": "Zhar'doom, Greatstaff of the Devourer",
-      "slot": "Main Hand",
-      "dps": -849.3,
-      "source": "Black Temple (N)\nIllidan Stormrage",
-      "belowCutoff": true
-    },
-    {
-      "rank": "32",
-      "item": "Staff of Primal Fury",
-      "slot": "Main Hand",
-      "dps": -852.5,
-      "source": "Zul'Aman (N)\nHex Lord Malacrass",
-      "belowCutoff": true
-    },
-    {
-      "rank": "33",
-      "item": "The Nexus Key",
-      "slot": "Main Hand",
-      "dps": -858.4,
-      "source": "Tempest Keep (N)\nKael'thas Sunstrider",
-      "belowCutoff": true
-    },
-    {
-      "rank": "34",
-      "item": "Terestian's Stranglestaff",
-      "slot": "Main Hand",
-      "dps": -870.7,
-      "source": "Karazhan (N)\nTerestian Illhoof",
-      "belowCutoff": true
-    },
-    {
-      "rank": "35",
-      "item": "Vengeful Gladiator's Staff",
-      "slot": "Main Hand",
-      "dps": -941,
-      "source": "PvP vendor · Arena",
-      "belowCutoff": true
-    },
-    {
-      "rank": "36",
-      "item": "Merciless Gladiator's Maul",
-      "slot": "Main Hand",
-      "dps": -951.1,
-      "source": "PvP vendor · Arena",
-      "belowCutoff": true
-    },
-    {
-      "rank": "37",
-      "item": "Vengeful Gladiator's Battle Staff",
-      "slot": "Main Hand",
-      "dps": -956.7,
-      "source": "PvP vendor · Arena",
-      "belowCutoff": true
-    },
-    {
-      "rank": "38",
-      "item": "Vengeful Gladiator's War Staff",
-      "slot": "Main Hand",
-      "dps": -962.6,
-      "source": "PvP vendor · Arena",
-      "belowCutoff": true
-    },
-    {
-      "rank": "39",
-      "item": "Merciless Gladiator's War Staff",
-      "slot": "Main Hand",
-      "dps": -965.2,
-      "source": "PvP vendor · Arena",
-      "belowCutoff": true
-    },
-    {
-      "rank": "40",
-      "item": "Gladiator's Maul",
-      "slot": "Main Hand",
-      "dps": -965.6,
-      "source": "PvP vendor · Arena",
-      "belowCutoff": true
     }
   ],
-  "aboveCutoffItems": [],
+  "aboveCutoffItems": [
+    "Empty Mug of Direbrew",
+    "Berserker's Call",
+    "Madness of the Betrayer"
+  ],
   "baselineDps": 2543.4,
   "rowCount": 40,
-  "aboveCutoff": 0
+  "aboveCutoff": 3
 }

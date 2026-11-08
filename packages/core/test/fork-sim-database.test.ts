@@ -35,6 +35,7 @@ import {
   forkRoot,
   importForkUpgrades,
   loadForkEngineEnvironment,
+  statsOnlyItemEp,
 } from "./fork-engine-harness.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -438,6 +439,7 @@ async function runRanking(skeleton: RaidSimRequest): Promise<RaidSimRequest[]> {
       clock: () => new Date("2026-10-01T12:00:00.000Z"),
       raidSimSkeleton: skeleton,
       epWeights: weights,
+      itemEp: await statsOnlyItemEp(weights),
       pool: POOL.map((p) => ({
         itemId: p.itemId,
         name: `item ${p.itemId}`,

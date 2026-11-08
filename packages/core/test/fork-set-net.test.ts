@@ -26,7 +26,11 @@ import { fileURLToPath } from "node:url";
 import { describe, expect, it, vi } from "vitest";
 
 import { SIM_ORDER, type SimOrderName } from "../src/slots.js";
-import { forkPresent, importForkUpgrades } from "./fork-engine-harness.js";
+import {
+  forkPresent,
+  importForkUpgrades,
+  statsOnlyItemEp,
+} from "./fork-engine-harness.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -582,6 +586,7 @@ async function runScenario(scenario: Scenario): Promise<{
     clock: () => new Date("2026-09-20T12:00:00.000Z"),
     raidSimSkeleton: feralSkeleton,
     epWeights: feralWeights,
+    itemEp: await statsOnlyItemEp(feralWeights),
     pool,
     ...(scenario.measureBrokenSetValue ? { measureBrokenSetValue: true } : {}),
     ...(scenario.partnerRule ? { partnerRule: scenario.partnerRule } : {}),

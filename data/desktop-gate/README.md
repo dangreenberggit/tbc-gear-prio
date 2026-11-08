@@ -111,11 +111,20 @@ developer's own machine, on demand, with the diagnostic in front of them.
 A golden records what the tab output, defects included. A spec not listed
 here has no known defect recorded.
 
-- **`enh`:** the capped run prices only main-hand weapons, and every row is a
-  loss. The EP order that picks the first 40 ignores weapon damage (ticket
-  821) and prices a two-hander against the main hand alone (ticket 820). So
-  the enh golden does not check how a dual-wielder's off-hand items are
-  priced; rogue's golden holds off-hand rows.
+- **`enh`:** the golden records fork `b71e25086`'s order (re-recorded by
+  the owner on 2026-11-07). That order counts weapon damage (ticket 821) and
+  charges a two-hander the worn off hand (ticket 820), so the golden's top
+  rows are Empty Mug of Direbrew, Berserker's Call and Madness of the
+  Betrayer. Cap 40 still leaves out most of the page's real upgrades:
+  measured from the order alone, its first 40 hold 4 of the page's 14 real
+  upgrades and 29 weapons that lose DPS (ticket 821's comment of 2026-11-07).
+  The golden before it, at fork `b603564ee`, held 40 losing main-hand
+  weapons and no upgrade.
+
+Since fork `b71e25086` a worn item takes no cap place, so every gated spec
+shows 40 rows at cap 40 (measured on the owner's run of 2026-11-07). Before
+it, the mage and rogue goldens held 38 and 33 rows, and the enh run at fork
+`6cc79f742` showed 39, because the worn Bloodlust Brooch sat at place 29.
 
 ## Recording a run
 

@@ -349,6 +349,8 @@ async function buildRecordingsAndRun<TRanking>(engine: {
   RecordedSimRunner: typeof RecordedSimRunner;
   MemoryStore: typeof MemoryStore;
   simCacheKey: typeof simCacheKey;
+  /** The fork's required candidate-order score; this repo's engine takes none. */
+  itemEp?: (itemId: number) => number;
 }): Promise<{ ranking: TRanking; composedRequests: unknown[] }> {
   const logged = slamaltmanLoggedGear();
   const equipment = mapWclGearToSim(
@@ -499,6 +501,7 @@ async function buildRecordingsAndRun<TRanking>(engine: {
       clock: () => new Date("2026-07-26T12:00:00.000Z"),
       raidSimSkeleton: skeleton,
       epWeights,
+      ...(engine.itemEp ? { itemEp: engine.itemEp } : {}),
       // Ticket 212 slice 3: both engines' `rankUpgrades` must resolve a
       // database for every request they compose internally, matching the
       // harness keys above. An engine that ignores this resolver misses
@@ -837,6 +840,12 @@ async function loadForkEngine() {
   const forkStore = await import(
     pathToFileURL(join(forkEngineDir, "seams/store.ts")).href
   );
+  const forkStats = await import(
+    pathToFileURL(join(forkEngineDir, "stats.ts")).href
+  );
+  const forkItems = await import(
+    pathToFileURL(join(forkEngineDir, "items.ts")).href
+  );
 
   return {
     forkRank,
@@ -847,6 +856,8 @@ async function loadForkEngine() {
     forkGearSource,
     forkSimRunner,
     forkStore,
+    forkStats,
+    forkItems,
   };
 }
 
@@ -873,6 +884,8 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
       forkGearSource,
       forkSimRunner,
       forkStore,
+      forkStats,
+      forkItems,
     } = await loadForkEngine();
 
     const { ranking: forkRanking, composedRequests: forkRequests } =
@@ -887,6 +900,12 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
         RecordedSimRunner: forkSimRunner.RecordedSimRunner,
         MemoryStore: forkStore.MemoryStore,
         simCacheKey: forkSimRunner.simCacheKey,
+        // Stats times weights: the order this repo's engine uses, so the two
+        // engines rank the same candidates. The tab's weapon-aware score
+        // (fork `model/item_ep.ts`) reaches `@i18n/localization`, which this
+        // suite cannot import (see `loadForkEngine`).
+        itemEp: (itemId: number) =>
+          forkStats.epScore(forkItems.getItem(itemId)?.stats ?? [], epWeights),
       });
 
     // Ticket 165: assert the composed requests themselves, BEFORE comparing

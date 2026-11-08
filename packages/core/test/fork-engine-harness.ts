@@ -131,3 +131,27 @@ export async function importForkUpgrades<T>(relativePath: string): Promise<T> {
     pathToFileURL(join(forkUpgradesDir, relativePath)).href
   )) as T;
 }
+
+/**
+ * A candidate-order score for the fork's required `Deps.itemEp`: item stats
+ * times `weights`, with no credit for weapon damage. The tab passes wowsims'
+ * weapon-aware score instead (fork `model/item_ep.ts`); suites that pass this
+ * one keep the order they were written against, which is what the fork used
+ * before it made `itemEp` required.
+ */
+export async function statsOnlyItemEp(
+  weights: Readonly<Record<string, number>>
+): Promise<(itemId: number) => number> {
+  const [{ epScore }, { getItem }] = await Promise.all([
+    importForkUpgrades<{
+      epScore: (
+        stats: readonly number[],
+        weights: Readonly<Record<string, number>>
+      ) => number;
+    }>("engine/stats.ts"),
+    importForkUpgrades<{
+      getItem: (itemId: number) => { stats: readonly number[] } | undefined;
+    }>("engine/items.ts"),
+  ]);
+  return (itemId) => epScore(getItem(itemId)?.stats ?? [], weights);
+}

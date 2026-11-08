@@ -60,3 +60,24 @@ and 3 makes some runs impossible that work today.
 Confirmed live by symbol during the reforge-catchup-leftovers investigation.
 Related: 358 (owns the mechanism statement and the misleading EP-weights docs
 note).
+
+## Comments
+
+**2026-11-07, branch `fix/821-weapon-damage-order`.** The tab's candidate
+order now counts weapon damage at the weights file's `pseudoWeights` and
+charges a two-hander the worn off hand (tickets 820, 821). It is still an
+estimate: procs, on-use effects and weapon speed are not scored, so a cap can
+still drop a real upgrade. On the enhancement `P3 Preset` page at phase 4,
+4 of the 14 real upgrades fall in the first 40 (none before). Only the tab
+changed; core's order (`packages/core/src/candidate-order.ts`) is unchanged.
+
+**2026-11-07, pre-merge review of `fix/821-weapon-damage-order` (D1).** A
+further reason the order is an estimate: for a dual-wield spec, a two-hander
+is charged the worn off hand's EP (its weapon damage at the off-hand weight),
+which does not price the loss of dual wield. So two-handers still score as
+upgrades in the order. Enhancement wearing two Syphon of the Nathrezim: Torch
+of the Damned scores +34.3 EP in the order and sims -551.3 DPS. Rows 34-37 of
+`data/desktop-gate/golden-enh-p4-cap40.json` (Soul Cleaver, Torch of the
+Damned, Vengeful Gladiator's Decapitator and Bonegrinder) are two-handers
+that lose 546-574 DPS. Source: `docs/reviews/fix-821-weapon-damage-order.md`
+§ Domain.

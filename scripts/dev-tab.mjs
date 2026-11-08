@@ -27,6 +27,7 @@ import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { goBuildEnv } from "./go-env.mjs";
 import { USE_PROCESS_GROUPS, killGroup, killTree } from "./process-group.mjs";
 
 const SELF = fileURLToPath(import.meta.url);
@@ -117,7 +118,7 @@ function backend(port) {
   );
   fs.writeFileSync(path.join(FORK, "binary_dist", "tbc", "embedded"), "");
   const name = port === 3333 ? `wowsimtbc${EXE}` : `wowsimtbc-${port}${EXE}`;
-  runSync("go", ["build", "-o", name, "./sim/web"]);
+  runSync("go", ["build", "-o", name, "./sim/web"], goBuildEnv());
   log(`starting the backend on :${port}...`);
   serve(path.join(FORK, name), [
     "--usefs=true",
@@ -144,7 +145,7 @@ function desktop(port) {
         env.PATH = `${usrBin}${path.delimiter}${env.PATH}`;
     }
   }
-  runSync("make", ["wowsimtbc"], env);
+  runSync("make", ["wowsimtbc"], goBuildEnv(env));
   // No --usefs here: serving dist/ from disk would bypass the embedded
   // net_worker.js this mode exists to exercise.
   log(`starting the embedded desktop server on :${port}...`);
