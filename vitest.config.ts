@@ -43,10 +43,10 @@ export default defineConfig({
     // here to stop machine load being reported as a test failure, not to
     // accommodate a slow test, and a genuine hang still fails the run.
     testTimeout: 30_000,
-    // The same budget for setup hooks, whose default is 10 s. A hook that
-    // loads the fork engine (db.json and the module graph) takes ~3 s alone
-    // and ~6 s in a full run, and passed 10 s in every run made while a
-    // second full run was going (ticket 858).
+    // The same budget for every hook, setup and teardown, whose default is
+    // 10 s. A hook that loads the fork engine (db.json and the module graph)
+    // takes ~3 s alone and ~6 s in a full run, and took longer than 10 s in
+    // every run made while a second full run was going (ticket 858).
     hookTimeout: 30_000,
     exclude: [
       "**/node_modules/**",
