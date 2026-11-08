@@ -249,22 +249,18 @@ with its sources:
 
 ## Open
 
-IR1 blocks until the owner rules. IR6 and IR7 are wording for the author.
-Their rows below say `pending`, a word `scripts/check_merge_ready.py`
-rejects, so `pnpm merge-to-dev` fails on this file until each row gets
-`fixed`, `wontfix` or `defer` with a ticket path. IR1's row takes
-`wontfix` with the owner's words if the owner approves without more
-trial, or `defer` with a ticket path if the owner wants the trial on the
-next real merge.
+None. On 2026-11-08 the owner chose the `defer` route for IR1: "a sounds
+fine, send out a new session to do it". The trial runs on this branch's own
+pair after its merge (ticket 862). IR6 and IR7 are fixed in `df230886`.
 
 ## Disposition
 
-| ID  | Axis                        | Disposition | Ticket / note                                                                                                                                                   |
-| --- | --------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| IR1 | Instruction review, round 1 | pending     | No full trial: the new text ran once (`bdf558d7`, `unpair-trial`, fallback not reached), with no old-text run beside it. Waits for the owner's ruling (§ Open). |
-| IR2 | Instruction review, round 1 | fixed       | `bdf558d7`: `parallel-phase-project.md:34` points to "Remove it".                                                                                               |
-| IR3 | Instruction review, round 1 | fixed       | `bdf558d7`: the text names `sandbox.excludedCommands` of `~/.claude_router/settings.json`.                                                                      |
-| IR4 | Instruction review, round 1 | fixed       | `bdf558d7`: "with nothing before or after it in the call".                                                                                                      |
-| IR5 | Instruction review, round 1 | fixed       | `bdf558d7`: "mounts over ... so it cannot delete them".                                                                                                         |
-| IR6 | Instruction review, round 2 | pending     | "so it cannot delete them": name unpair, or drop the sentence (§ Assessor's view).                                                                              |
-| IR7 | Instruction review, round 2 | pending     | Drop the `gate-pipe` history sentence; keep "only after this error".                                                                                            |
+| ID  | Axis                        | Disposition | Ticket / note                                                                                                                                                                                         |
+| --- | --------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| IR1 | Instruction review, round 1 | defer       | `.scratch/carry-forward/issues/862-unpair-sandbox-fallback-untried-by-an-agent.md`: trial on this branch's pair after its merge. Owner, 2026-11-08: "a sounds fine, send out a new session to do it". |
+| IR2 | Instruction review, round 1 | fixed       | `bdf558d7`: `parallel-phase-project.md:34` points to "Remove it".                                                                                                                                     |
+| IR3 | Instruction review, round 1 | fixed       | `bdf558d7`: the text names `sandbox.excludedCommands` of `~/.claude_router/settings.json`.                                                                                                            |
+| IR4 | Instruction review, round 1 | fixed       | `bdf558d7`: "with nothing before or after it in the call".                                                                                                                                            |
+| IR5 | Instruction review, round 1 | fixed       | `bdf558d7`: "mounts over ... so it cannot delete them".                                                                                                                                               |
+| IR6 | Instruction review, round 2 | fixed       | `df230886`: "so git cannot delete them".                                                                                                                                                              |
+| IR7 | Instruction review, round 2 | fixed       | `df230886`: the `gate-pipe` history sentence is cut; "only after this error" stays.                                                                                                                   |
