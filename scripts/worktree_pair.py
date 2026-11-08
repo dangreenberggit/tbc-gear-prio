@@ -500,7 +500,12 @@ def make_env() -> dict[str, str]:
         if not (usr_bin / "sh.exe").is_file():
             raise Refusal(f"no sh.exe in {usr_bin}; make proto needs Git for Windows' usr/bin tools")
         env["PATH"] = str(usr_bin) + os.pathsep + env.get("PATH", "")
-    return go_env.go_build_env(env)
+    try:
+        return go_env.go_build_env(env)
+    except subprocess.CalledProcessError as exc:
+        # go_env lets Go's stderr through, so its error text is already on
+        # the terminal, as with a failed run() step.
+        raise Refusal(f"step failed (rc={exc.returncode}): {' '.join(exc.cmd)}") from exc
 
 
 def wowsimcli_platform() -> str:

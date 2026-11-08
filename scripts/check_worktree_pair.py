@@ -16,6 +16,8 @@ Exit 0 ok, 1 a check failed.
 
 from __future__ import annotations
 
+import contextlib
+import io
 import os
 import shutil
 import subprocess
@@ -647,8 +649,33 @@ def check_make_env_turns_vcs_stamping_off() -> list[str]:
     return []
 
 
+def check_failing_go_env_refuses_without_a_traceback() -> list[str]:
+    """`pair` calls make_env() before its own `try`, so only main()'s Refusal
+    handler stands between a failing `go env` and a traceback."""
+
+    def fake_run(args: list[str], **_kw: object):
+        raise subprocess.CalledProcessError(1, args)
+
+    real_run, real_pair = go_env.subprocess, wp.pair
+    go_env.subprocess = types.SimpleNamespace(run=fake_run, PIPE=subprocess.PIPE)
+    wp.pair = lambda _args: wp.make_env() and 0
+    err = io.StringIO()
+    try:
+        with contextlib.redirect_stderr(err):
+            rc = wp.main(["pair", "x", "x", "--fork-detached"])
+    except subprocess.CalledProcessError as exc:
+        return [f"a failing go env escaped main() as {exc!r}"]
+    finally:
+        go_env.subprocess, wp.pair = real_run, real_pair
+    want = "[wt] refused: step failed (rc=1): go env GOFLAGS"
+    if rc != 1 or err.getvalue().strip() != want:
+        return [f"a failing go env gave rc={rc}, stderr {err.getvalue()!r}; want rc=1, {want!r}"]
+    return []
+
+
 CHECKS = (
     check_make_env_turns_vcs_stamping_off,
+    check_failing_go_env_refuses_without_a_traceback,
     check_name_accepts_a_short_slug,
     check_name_refuses_paths_and_odd_characters,
     check_target_length_budget,
