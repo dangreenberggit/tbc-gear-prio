@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/feat-452-desktop-goldens.md (round 1, D1 and I6)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -119,3 +119,18 @@ Bloodlust Brooch inside the first 40, and a worn item took a cap place
 the cap's count. The goldens are still not re-recorded: `data/desktop-gate/README.md`
 § Known defects says what is expected to move. The Go build needs
 `GOFLAGS=-buildvcs=false` in a pair (ticket 856).
+
+**2026-11-07, closed.** Every part of "Done when" is met. The tab's order
+counts weapon damage at the weights' `pseudoWeights` (fork `6cc79f742`,
+`model/item_ep.ts`, tests `model/item_ep.test.ts` and
+`model/engine/candidate-order.test.ts`). For the core twins, the second
+option was taken: `docs/fork-provenance/engine.md` records the divergence on
+the `candidate-order.ts` and `rank.ts` rows (`9921d796`), and the
+command-line fix is ticket 855. The goldens that moved are re-recorded at
+fork `b71e25086`, and the README's `enh` entry is updated. The owner's run
+shows the enh list now opens with Empty Mug of Direbrew, Berserker's Call and
+Madness of the Betrayer, where the old golden held 40 losing weapons.
+
+Verified by: `tbc-gear-prio@05cddea6` (goldens and pins);
+`node --version; GOFLAGS=-buildvcs=false pnpm verify` (rc 0, 1596 gates) in
+the pair on 2026-11-07.

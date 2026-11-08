@@ -77,10 +77,8 @@ Rows are ranked most-tab-critical first within each bucket.
 
 ## Tab-blocking
 
-| Ticket                                                                        | Repo                                                       | Transport | Why                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 821 — the candidate order ignores weapon damage                               | both (twin: `model/engine/candidate-order.ts`, `stats.ts`) | both      | The order decides which candidates a capped run sims, which rows fill first and what a Stop leaves. On `dev` it gives weapons no credit for their damage: an enhancement run capped at 40 sims 40 losing weapons and none of the page's 14 upgrades. Branch `fix/821-weapon-damage-order` (fork `6cc79f742`) scores items with wowsims' own weapon-aware code; left: re-record the goldens, and the owner's choice for the core twins. |
-| 820 — a capped dual-wield run prices a two-hander against the main hand alone | both (twin: `model/engine/candidate-order.ts`)             | both      | The sim clears the worn off hand for a two-hander, but the order did not charge it, so two-handers sorted too high. Fixed in the tab on branch `fix/821-weapon-damage-order`; left: re-record the goldens, and core's twin (ticket 821's owner choice).                                                                                                                                                                                |
+No ticket is in this bucket. The last two, 820 and 821, closed on 2026-11-07
+(branch `fix/821-weapon-damage-order`).
 
 ---
 
