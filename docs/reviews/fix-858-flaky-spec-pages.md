@@ -181,3 +181,14 @@ fixing 858.
 | ---- | ------------- | ----------- | ------------------------------------------------------------------------------------ |
 | R2-1 | Focused check | fixed       | ticket 859 "Done when" no longer names a way to keep the fixture out (`8803b237`)    |
 | R2-2 | Focused check | fixed       | title, "Done when" and map line say "a `beforeAll` inside a `describe`" (`8803b237`) |
+
+## Fix for ticket 859
+
+Ticket 859 is fixed on this branch after the review above, and is not
+covered by it; a separate reviewer checks it.
+
+- `fbd7d4ef` Print describe-level hook errors in pnpm verify: adds
+  `scripts/vitest_json_reporter.mjs` (vitest's JSON reporter, plus the
+  error of a failed `describe` in the file's `message`), uses it in
+  `scripts/run_verify.mjs`, and adds `scripts/vitest_json_reporter.test.mjs`.
+- `c949adc2` Close ticket 859.
