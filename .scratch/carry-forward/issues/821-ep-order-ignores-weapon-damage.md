@@ -111,3 +111,11 @@ Left before this ticket closes:
   hashes were updated, so `pnpm engine-port-drift:check` passes.
 - **Re-record the goldens and the README's `enh` entry.** Not done, for the
   sandbox reason in ticket 820's comment of the same date.
+
+**2026-11-07, later.** The owner's `--update-golden` run for `enh` at fork
+`6cc79f742` refused at (e) with 39 rows: the new order puts the worn
+Bloodlust Brooch inside the first 40, and a worn item took a cap place
+(ticket 854's comment of this date). Fork `b71e25086` keeps worn items out of
+the cap's count. The goldens are still not re-recorded: `data/desktop-gate/README.md`
+§ Known defects says what is expected to move. The Go build needs
+`GOFLAGS=-buildvcs=false` in a pair (ticket 856).

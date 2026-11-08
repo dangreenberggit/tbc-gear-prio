@@ -43,3 +43,22 @@ so does `--spec rogue --full`. Either pin `full_rows` per spec from a
 measured run, as the comment above `GATED` says, or derive the expected
 count from the eligible count and the worn items in the pool. Say in the
 comment above `GATED` which was chosen.
+
+## Comments
+
+**2026-11-07, branch `fix/821-weapon-damage-order`.** The same cause, a worn
+item simmed and not listed, also hit a capped run. The owner's
+`desktop-gate:check --spec enh --update-golden` at fork `6cc79f742` refused
+at (e) with 39 rows against 40: the new weapon-damage order puts the worn
+Bloodlust Brooch (29383) at place 29 of 1039 (it scores above the worn
+Dragonspine Trophy in the other trinket slot), so it took one of the 40 cap
+places and showed no row (the order measured offline with
+`orderCandidatesByEp` and `itemEpFor` over `dbPoolFor('enh', 4, 'exclude')`
+and `p3.gear.json`; agent report
+`.scratch/agent-reports/2026-11-07-general-task-enh-39-rows.md` in the pair,
+gitignored). That one was a tab defect, since the player asks for 40 and
+sees 39, and fork `b71e25086` fixes it: the cap keeps the first N items the
+player does not wear plus every worn one. This ticket's uncapped case is
+unchanged: an uncapped run still sims every worn item in the pool and lists
+none, so (e) still needs `full_rows` or the eligible count minus the worn
+items in the pool.
