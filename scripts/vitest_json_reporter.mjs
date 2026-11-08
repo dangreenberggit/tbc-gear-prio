@@ -16,10 +16,10 @@ export default class JsonReporterWithSuiteErrors extends JsonReporter {
       this.ctx.state.getFiles().map((file) => [file.filepath, file])
     );
     for (const result of report.testResults) {
-      const error = result.message
-        ? null
-        : firstSuiteError(files.get(result.name));
-      if (error) result.message = error.message;
+      if (result.message) continue;
+      // A thrown non-Error has no message; keep the stock "" then.
+      const message = firstSuiteError(files.get(result.name))?.message;
+      if (typeof message === "string" && message) result.message = message;
     }
     await super.writeReport(JSON.stringify(report));
   }
