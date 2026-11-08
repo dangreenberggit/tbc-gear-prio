@@ -44,16 +44,33 @@ count: the real report has no error text to feed.
 
 `scripts/run_verify.mjs` now runs vitest with
 `scripts/vitest_json_reporter.mjs`, a subclass of vitest's JSON reporter.
-When a file's `message` is empty, it fills it with the error of the
-file's first failed `describe`, read from vitest's task tree. So `pnpm
-verify` prints the hook's error under `FAIL <file>`, and the kept JSON
-report holds it too. Passing runs print the same as before.
+When a file's `message` is empty, it fills it with the message of the
+file's first failed `describe`, read from vitest's task tree; a thrown
+non-Error has no message, so the file keeps the stock `""`.
+`formatVitestFailures` in `scripts/verify_summary.mjs` prints a failed
+file's non-empty `message` under `FAIL <file>`, also when other tests in
+the file failed. So `pnpm verify` prints the hook's error under
+`FAIL <file>`, and the kept JSON report holds it too. Passing runs print
+the same as before.
+
 `scripts/vitest_json_reporter.test.mjs` runs the real `run_verify.mjs`
-and vitest in a temp checkout on a fixture whose `describe`-level
-`beforeAll` times out after 50 ms, and checks that stderr shows
-`FAIL hook.test.mjs` with `Hook timed out in 50ms.` under it. With the
-stock `--reporter=json` the same test fails: the line under the path is
-empty. Commit: `fbd7d4ef`.
+and vitest in a temp checkout, on three fixtures:
+
+- a `describe`-level `beforeAll` that times out after 50 ms: stderr shows
+  `FAIL hook.test.mjs` with `Hook timed out in 50ms.` under it. With the
+  stock `--reporter=json` this case fails: the line under the path is
+  empty.
+- one `describe` whose `beforeAll` throws and another whose test fails:
+  stderr shows both the failed test and the hook's error.
+- a `beforeAll` that throws `{ code: 42 }`: the report's `message` is
+  `""`.
+
+The focused check of the first commit
+(`.scratch/agent-reports/2026-11-08-general-task-859-focused-check.md`)
+found the last two cases broken (F1: the hook error was hidden when
+another test in the file failed; F2: the `message` key was dropped).
+Both were fixed in `d38911c9`; each of their test cases failed before it.
+Commits: `fbd7d4ef`, `d38911c9`.
 
 Verified by:
 

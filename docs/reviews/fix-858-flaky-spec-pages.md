@@ -192,3 +192,14 @@ covered by it; a separate reviewer checks it.
   error of a failed `describe` in the file's `message`), uses it in
   `scripts/run_verify.mjs`, and adds `scripts/vitest_json_reporter.test.mjs`.
 - `c949adc2` Close ticket 859.
+- `d38911c9` Print a hook error beside failed tests in verify: fixes the
+  two minor findings of the focused check of `fbd7d4ef`
+  (`.scratch/agent-reports/2026-11-08-general-task-859-focused-check.md`
+  in the pair). F1: `formatVitestFailures` hid a failed `describe` hook's
+  error when another test in the same file failed; it now prints a failed
+  file's non-empty `message` in that case too. F2: a `beforeAll` that
+  throws a non-Error left the report entry with no `message` key; the
+  reporter now sets `message` only to a non-empty string. Two test cases
+  added, one per finding; each failed before the fix.
+- The commit after `d38911c9` corrects ticket 859's closing note and this
+  list.
