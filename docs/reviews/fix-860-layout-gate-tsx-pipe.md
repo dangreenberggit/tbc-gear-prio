@@ -283,11 +283,29 @@ the `Status:` grep in the pre-merge-review skill). Ticket 861 is open.
 The merge check (`pnpm merge-to-dev --check-only`) was not run: the caller
 asked that `pnpm merge-to-dev` not be run, and A1/P1 is still open.
 
+## A1/P1 settled: owner's run on the gate's own Chromium (2026-11-08)
+
+The owner chose to measure on the gate's own Chromium ("1 sounds fine") and
+ran `node scripts/tab-harness/test-layout.mjs` in the pair at `843c2be2`,
+outside the sandbox, and pasted its output into the session. Its verdict
+line: `"outcome":"measured","pass":true`, `"failed":0`, `"a11yFailed":0`,
+widths 375, 653, 768 and 1280, all 11 fixtures, no unmeasured fixtures.
+
+The geometry matches the headless-shell run
+(`/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-08-860-gate-headless-shell-r2.log`)
+at every value compared: check 3 `cardBottom`/`resultsTop` at 375, 653 and
+768 (1667/1702, 1652/1687, 1631/1666); check 18 `deltaRect.top` at 375 for
+all 11 fixtures; check 20 `toggleTops` at 653 for all 11 fixtures. Both runs
+report the same 11 non-failing `heading-order` axe notes. The comparison is a
+sample, not a full diff: the owner's output exists only in the session
+transcript.
+
 ## Disposition (round 2)
 
-| ID    | Axis          | Disposition | Ticket / note                                                                                                                                                                                                            |
-| ----- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| S1    | Standards     | wontfix     | Commit-subject length of `7ac5100d`; fixing it means rewording that commit, which rewrites every later commit, and this file cites `0a8a3cf7`, `789aa911` and `d1c66ab4` by sha. Same disposition as the 821 review's S1 |
-| S2    | Standards     | wontfix     | Unsourced cause in the `7ac5100d` body; same reason as S1. Ticket 860 holds the error and the reproducing command                                                                                                        |
-| S3    | Standards     | fixed       | `999ec37e` rewrites the header comment at `scripts/tab-harness/test-tab-harness.mjs:65-67`; `843c2be2` advances the layout lock to `f6263668...` from a green gate run on the new digest                                 |
-| R2-B1 | Focused check | wontfix     | `999ec37e` and `843c2be2` name no finding ID; naming them in the messages means rewriting history, as for S1. Ticket 860's closing note now names `999ec37e` as the S3 fix, and the S3 row above records both commits    |
+| ID    | Axis              | Disposition | Ticket / note                                                                                                                                                                                                            |
+| ----- | ----------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| S1    | Standards         | wontfix     | Commit-subject length of `7ac5100d`; fixing it means rewording that commit, which rewrites every later commit, and this file cites `0a8a3cf7`, `789aa911` and `d1c66ab4` by sha. Same disposition as the 821 review's S1 |
+| S2    | Standards         | wontfix     | Unsourced cause in the `7ac5100d` body; same reason as S1. Ticket 860 holds the error and the reproducing command                                                                                                        |
+| S3    | Standards         | fixed       | `999ec37e` rewrites the header comment at `scripts/tab-harness/test-tab-harness.mjs:65-67`; `843c2be2` advances the layout lock to `f6263668...` from a green gate run on the new digest                                 |
+| R2-B1 | Focused check     | wontfix     | `999ec37e` and `843c2be2` name no finding ID; naming them in the messages means rewriting history, as for S1. Ticket 860's closing note now names `999ec37e` as the S3 fix, and the S3 row above records both commits    |
+| A1/P1 | Adversarial, Spec | wontfix     | Not a defect: the owner's run of `node scripts/tab-harness/test-layout.mjs` on the gate's own Chromium at `843c2be2` passed with 0 failed, and its geometry matches the headless-shell run (§ A1/P1 settled)             |
