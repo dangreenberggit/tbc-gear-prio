@@ -7,6 +7,11 @@ Fork range (vendor/tbc-new-fork, branch `fix/852-810`):
 (two commits: `e1f0a16d8` hit-read failures fail the run, ticket 852;
 `38e0614f3` BiS badges name the gear-set heading, ticket 810).
 
+Reviewed range: `b3a502bf9cfe351ea6e7f4c0aa30e5f7f3848bba..b465e023b447e6235613c34a32ec8711d2667dd6`
+
+Round 2 fork range: `38e0614f3717867f3c4b9088e436c9485d64b0ba..3e554d9d22ec0be4e7f9500eb3362a39e2ccfde0`
+(four commits; the lock names `3e554d9d2` with `"pushed": false`).
+
 ## Dispatch note
 
 - Tooling check: `python scripts/check_merge_ready.py --product-files`
@@ -177,6 +182,16 @@ All are fixed or disposed below. One pre-existing defect the fixer found
 is ticket 865. The fixer's console-text note (X2) is `wontfix` under the
 scope filter.
 
+Round 2 (focused check) passed all four checks and left one finding open:
+F2, a missing test for three of the new catches. The review stops there
+and F2 blocks the merge until it is fixed or the owner allows a deferral.
+The merge check (`pnpm merge-to-dev --check-only`) was not run.
+
+Tickets: filed 3 (863, 864, 865), closed 2 (810, 852), from
+`git diff --name-status e1584033...HEAD -- '.scratch/carry-forward/issues/*.md'`
+and the `Status:` grep in `pre-merge-review` step 3. Filed is higher than
+closed by one: the branch found more follow-up work than it closed.
+
 ## Disposition
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                           |
@@ -195,3 +210,57 @@ scope filter.
 | Q5  | Fix report  | fixed       | fork `3e554d9d2`: `hitPercentOf` comment says it fails the run as an internal error                                                     |
 | X1  | Fix report  | defer       | `.scratch/carry-forward/issues/865-stale-result-set-badges-follow-new-phase.md` — pre-existing (ticket 430's `tagsOf`), not this branch |
 | X2  | Fix report  | wontfix     | a failed version repair on the set screen logs "the rung's request could not be built": console text only, outside the scope filter     |
+
+## Focused check (round 2)
+
+Main range `b3a502bf..b465e023`; fork range `38e0614f3..3e554d9d2`. One
+fresh `general-task` agent on Opus, told it writes nothing.
+
+1. **Conditions 1 to 3: pass.** Every commit names the finding IDs it
+   fixes (`2fca406f` as a fix commit, since it also carries a test;
+   `b465e023` names D1 and A1/P2, its other files are this file and
+   tickets). A1's catches sit at each caller of `versionGears`, where A1
+   says the default build handles the same error; `selectSettledPhase` is
+   the smallest support A3's fix at `useUpgradesSettings.ts:76` needs. None
+   of the 21 changed fork files exists at `cec2a7b6` (`cat-file -e` loop);
+   `rev-list --merges` counts 0.
+2. **Fixes change only what each finding asks: pass.** The `engine.md`
+   diff is 3 real lines under `git diff -w` (the rest is table padding);
+   its `rank.ts` and `set-less-copies.ts` hashes match the files at
+   `3e554d9d2`.
+3. **New tests assert their findings: pass.** `852-R`'s `vi.mock` passes
+   every call to the real `repairAndMinimize` and throws the fork's own
+   error class only below a budget the test sets; the ranking runs for real
+   and the test asserts the note the player sees and `complete: true`. The
+   reverted-fix run is the fixer's (not repeated). The A3 test asserts
+   `['Arms']` before and `['Fury']` after the phase change.
+4. **Touched tests pass: pass.** Core `fork-meta-repair` and
+   `wowsims-fork-parity`: 48 passed, both `852-R` cases ran. Fork: the 12
+   touched test files, 144 passed. Fork `tsc --noEmit` rc 0. Each run
+   printed node v22.23.2.
+
+Findings:
+
+- **F1 (bookkeeping).** This file had 5 uncommitted lines (the round 2
+  range header) when the check ran. Committed with this section.
+- **F2 (low, test gap, open).** Only `852-R` makes a version rebuild throw,
+  on the set-package path. No test makes it throw at the new catches in
+  `stepGear` (fork `rank.ts:2856-2862`), the step break split
+  (`3089-3097`) or `measurePairTwoPiece` (`3277-3291`); which other catches
+  `852-R` reaches is untested.
+
+F2 is a finding other than bookkeeping in the lines the fixes wrote, so the
+review stops here (`pre-merge-review` § Round limit): no
+`## Disposition (round 2)` table, and the merge check was not run. F2 is a
+missing test that this branch introduced, so it blocks the merge until it
+is fixed or the owner allows a `defer` row.
+
+Assessor (one fresh `general-task` agent that neither wrote nor reviewed
+the work; its view, read from the code, not built or run): the A1 fix put
+the handling in seven caller catches where `versionGears` had one, and F2
+is a gap in those. Another round that adds three fault tests would likely
+close F2 but could find the same gap at the remaining catches. Its
+simpler option is one catch inside `versionGears` that returns the shared
+layout on a `MetaRepairError`, which `852-R` would then cover; that
+changes behaviour (the bonus is measured on the run's layout with no note,
+where today it is skipped as `repair-failed`).
