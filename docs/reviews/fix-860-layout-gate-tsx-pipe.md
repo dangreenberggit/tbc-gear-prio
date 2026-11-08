@@ -2,6 +2,8 @@
 
 Reviewed range: `ba3e295e1ddbf9f67a98aa7495813c51d0f18345..0a8a3cf7273249203bf6b4a47e0c837207a2b3c1`
 
+Reviewed range: `0a8a3cf7273249203bf6b4a47e0c837207a2b3c1..843c2be20b1f0e2b31687392285b3fe302e015d7`
+
 The branch never moves the fork pin
 (`git diff dev...HEAD -- data/wowsims-fork.lock.json` is empty); the fork
 stays at `68b2afacf`.
@@ -34,7 +36,9 @@ No confirmed defect.
   headless-shell build through a `PLAYWRIGHT_BROWSERS_PATH` shim, not the
   gate's own `chromium-1200` build. The digest hashes the browsers.json entry,
   not the binary, so `python scripts/check_layout_gate.py --print-hash`
-  prints `5267aca2...` with and without the shim (re-run for this review).
+  printed `5267aca2...` with and without the shim at round 1's HEAD (re-run
+  for this review). The lock is now `f6263668...` after the S3 fix and a
+  second headless-shell run (round 2 below); the same holds for it.
   The shim's `chromium-1200/chrome-linux64/chrome` is a symlink to
   `chromium_headless_shell-1200/chrome-headless-shell-linux64/chrome-headless-shell`
   (`ls -la` on the shim path). If the headless shell lays the tab out
@@ -52,7 +56,8 @@ No confirmed defect.
   prints `tsx v4.23.1` then fails with `listen EPERM`. A missing tsx still
   makes `run()` reject. The comment's claim is true: the fork's `makefile:34`
   runs `npx tsx vite.build-workers.mts` (`git grep tsx 68b2afacf -- makefile`).
-- **Provenance confirmed.** `--print-hash` at HEAD equals the committed lock.
+- **Provenance confirmed (round 1).** `--print-hash` at round 1's HEAD
+  equalled the committed lock then.
   `2026-11-08-860-gate-headless-shell.log` line 543 is
   `LAYOUT_GATE_VERDICT {"outcome":"measured","pass":true,...,"failed":0,"a11yFailed":0,...}`
   and line 545 is `layout gate: PASSED. Advanced the baseline to 5267aca21022...`,
@@ -105,7 +110,8 @@ Spec: ticket 860 § Done when. Every clause is met, one partly.
   merge base `ba3e295e`.
 - Met: "the layout lock on dev records that digest". `merge_to_dev.py:578-585`
   calls the layout gate, which skips when the live digest equals the lock, so
-  the merge carries `5267aca2...` onto dev unchanged.
+  the merge carries the committed digest (now `f6263668...`) onto dev
+  unchanged.
 - Met: "the gate's workers build no longer needs the tsx IPC pipe".
   `2026-11-08-860-gate-normal-chromium.log` line 18 prints `bundle built.`
   inside the sandbox without the shim; line 19 is the Chromium failure that
@@ -144,7 +150,7 @@ tab). That sentence is from dev, not this branch; the first clause of the
 | `scripts/tab-harness/test-tab-harness.mjs`                      | agrees (`launchChrome()` uses `stdio: "ignore"`; line 106-113 runs `node --import tsx`)    |
 | `scripts/tab-harness/test-layout.mjs`                           | P2 (writes no lock)                                                                        |
 | `scripts/tab-harness/chromium.mjs`                              | exists; IR1 (path not given)                                                               |
-| `data/wowsims-fork-layout.lock.json`                            | agrees (`5267aca2...`)                                                                     |
+| `data/wowsims-fork-layout.lock.json`                            | agrees (`5267aca2...` at round 1; `f6263668...` since `843c2be2`)                          |
 | the four `2026-11-08-860-*.log` files                           | agree (`socket() failed` at chromium-abort line 3; `bundle built.` at gate-normal line 18) |
 | tickets 401 (open), 754 (closed), 800                           | IR5                                                                                        |
 | `AGENTS.md` § Commits and merges, `docs/workflow.md` § The loop | exist; now named in 861 (IR1)                                                              |
@@ -179,10 +185,10 @@ real green run.
 headless-shell browser, not the gate's own Chromium; whether the two lay out
 the tab the same is untested, and a difference would be a silent wrong result
 (a lock that certifies a layout the full build fails). It is settled by either
-a green gate run on the full Chromium outside the sandbox (which the S3 fix
-needs anyway, since S3 changes the digest), or the owner's ruling that a
-headless-shell green is enough, quoted with the date in a `defer` row linked
-to ticket 861.
+a green gate run on the full Chromium outside the sandbox, or the owner's
+ruling that a headless-shell green is enough, quoted with the date in a
+`defer` row linked to ticket 861. Still open after round 2: see
+`## Summary (round 2)`.
 
 **Open, for the agent handling findings:** code-quality rows S1, S2, S3
 (the code-quality pass, then round 2).
@@ -206,3 +212,82 @@ is written.
 | IR4 | Instruction review | wontfix     | Not a defect: a ticket closes on its branch so the close merges with the fix, and `merge_to_dev.py:578-585` carries the lock onto dev unchanged when the digest matches |
 | IR5 | Instruction review | fixed       | `789aa911`: both tickets name `800-desktop-gate-goldens-for-more-specs.md`                                                                                              |
 | IR6 | Instruction review | fixed       | `789aa911`: map lines for 860 (closed) and 861 (open)                                                                                                                   |
+
+## Focused check (round 2)
+
+Range `0a8a3cf7..843c2be2`: `789aa911` (ticket wording and map), `d1c66ab4`
+(round 1 review file), `999ec37e` (S3 comment fix), `843c2be2` (layout lock
+advance after the S3 fix, ticket 860's closing note). No fork range: the
+branch never moves `data/wowsims-fork.lock.json`
+(`git diff --quiet dev...HEAD -- data/wowsims-fork.lock.json` exits 0).
+One fresh `general-task` agent on Opus ran the check and wrote nothing.
+
+**Condition 1 does not hold as written.** `789aa911` only edits tickets and
+the map, and `d1c66ab4` only edits this file, so both are allowed kinds. But
+neither `999ec37e` ("Describe the harness build steps as they now run") nor
+`843c2be2` ("Record the layout gate re-run after the comment fix") names S3
+in its message or in a ticket it names
+(`git log --format='%h %s%n%b' 0a8a3cf7..843c2be2`). This is R2-B1 below.
+The review followed the repo's earlier ruling on the same gap
+(`docs/reviews/fix-821-weapon-damage-order.md`, Disposition (round 2), row
+R2-B1: a fix commit that names no finding ID, where naming it would mean
+rewriting history, is `wontfix`) and ran the check rather than stopping.
+Ticket 860's closing note now names `999ec37e` as the S3 fix.
+
+**Condition 2 holds in substance.** The only changed line outside comments,
+docs and tickets is `data/wowsims-fork-layout.lock.json:2`. S3 cites
+`test-tab-harness.mjs:65-67`, not the lock, but round 1's `## Code quality`
+note says the S3 fix "changes the digest and needs a new green gate run and
+lock advance"; `843c2be2` is that advance.
+
+**Condition 3 holds:** no fork range.
+
+| Check                               | Result                                                                                                                                                                                                                                                                                                                                                            |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Conditions hold                  | Fails on condition 1 as written (R2-B1); 2 and 3 hold, 2 in substance                                                                                                                                                                                                                                                                                             |
+| 2. Fixes change only what was asked | Pass. `999ec37e` changes the 3 comment lines only; the new text matches `git show 68b2afacf:makefile` lines 33-35 (`tsc --noEmit`, `npx tsx vite.build-workers.mts`, `npx vite build`) and no longer names `npx tsx`. `843c2be2` changes the lock line and ticket 860's closing note only                                                                         |
+| 3. New tests assert their finding   | No tests added; S3 is a comment                                                                                                                                                                                                                                                                                                                                   |
+| 4. Touched tests pass               | Pass. `2026-11-08-860-gate-headless-shell-r2.log` line 543: `"outcome":"measured","pass":true,"failed":0`; line 545: `PASSED. Advanced the baseline to f6263668fd2b...`; 496 `PASS` lines, 0 `FAIL`. `python scripts/check_layout_gate.py --print-hash` (node v22.23.2) prints `f6263668fd2b...c34c59` with and without the shim, equal to the lock at `843c2be2` |
+
+Ticket 860's updated closing note matches the r2 log and the lock: digest,
+log path, counts (496 passed, 0 failed, 4 widths, 11 fixtures) and "gave the
+same counts" for the first run (its log also has 496 `PASS` lines).
+
+**A1/P1 unchanged.** The r2 log does not say which Chromium build ran
+(`grep -i 'headless\|pwshim\|executable'` finds only a generic line). That the
+r2 run used the headless-shell shim comes from the agent that ran it,
+unverified here. Either way, this run does not settle A1/P1.
+
+## Summary (round 2)
+
+Round 2 found the S3 fix correct and the re-run gate green on the new digest
+`f6263668...`. Its one finding, R2-B1 (the fix commits name no finding ID),
+is bookkeeping.
+
+**Blocks the merge, pending the owner — A1/P1.** No Disposition row. Every
+green run so far used the headless-shell build, not the gate's own Chromium.
+It is settled by either a green run on the gate's own Chromium outside the
+sandbox:
+
+```
+cd /home/daniel/Code/lulz/tbc-wt/gate-pipe && node scripts/tab-harness/test-layout.mjs
+```
+
+or the owner's ruling that a headless-shell green is enough, then recorded as
+a `defer` row quoting the owner with the date and linking ticket 861.
+
+Tickets: this branch filed 1 (861) and closed 1 (860)
+(`git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`;
+the `Status:` grep in the pre-merge-review skill). Ticket 861 is open.
+
+The merge check (`pnpm merge-to-dev --check-only`) was not run: the caller
+asked that `pnpm merge-to-dev` not be run, and A1/P1 is still open.
+
+## Disposition (round 2)
+
+| ID    | Axis          | Disposition | Ticket / note                                                                                                                                                                                                            |
+| ----- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| S1    | Standards     | wontfix     | Commit-subject length of `7ac5100d`; fixing it means rewording that commit, which rewrites every later commit, and this file cites `0a8a3cf7`, `789aa911` and `d1c66ab4` by sha. Same disposition as the 821 review's S1 |
+| S2    | Standards     | wontfix     | Unsourced cause in the `7ac5100d` body; same reason as S1. Ticket 860 holds the error and the reproducing command                                                                                                        |
+| S3    | Standards     | fixed       | `999ec37e` rewrites the header comment at `scripts/tab-harness/test-tab-harness.mjs:65-67`; `843c2be2` advances the layout lock to `f6263668...` from a green gate run on the new digest                                 |
+| R2-B1 | Focused check | wontfix     | `999ec37e` and `843c2be2` name no finding ID; naming them in the messages means rewriting history, as for S1. Ticket 860's closing note now names `999ec37e` as the S3 fix, and the S3 row above records both commits    |

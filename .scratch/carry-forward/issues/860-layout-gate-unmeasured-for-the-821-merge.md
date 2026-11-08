@@ -49,7 +49,9 @@ which this branch commits. Log:
 `/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-08-860-gate-headless-shell-r2.log`.
 This is the second such run; the first (`5267aca2...`, log
 `2026-11-08-860-gate-headless-shell.log`) came before a comment fix in
-`test-tab-harness.mjs`, a file the digest hashes, and gave the same counts.
+`test-tab-harness.mjs` (commit `999ec37e`, finding S3 of
+`docs/reviews/fix-860-layout-gate-tsx-pipe.md`), a file the digest hashes,
+and gave the same counts.
 
 The workers build no longer needs the tsx IPC pipe:
 `scripts/tab-harness/test-tab-harness.mjs` now runs
