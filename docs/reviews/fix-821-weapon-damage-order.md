@@ -2,6 +2,8 @@
 
 Reviewed range: `e905cb5f3b6fc1dea6fc359f13f49f3af22dfe12..05ede6f87783805916d71f495a569f5752ffb63b`
 
+Reviewed range: `05ede6f87783805916d71f495a569f5752ffb63b..fb88eb3d942e4e0819404d142e755f9dd54fa6f7`
+
 Fork range reviewed as part of the branch: `vendor/tbc-new-fork`
 `c9bb0acd367bd0712148c56b8d683ad6649895c0..b71e2508672defaa5296035a89dc07b5e6153247`
 (the `commit` values in `data/wowsims-fork.lock.json` at the merge base and
@@ -179,3 +181,127 @@ new problems outside its scope.
 | S3  | Standards   | fixed       | Fork `3e7ea5cd5` (re-pin `5fbc8f53`): `itemEpFor` takes the set's weights and pseudo-weights as one object (`epWeightsFileFor` in `data.ts`), and `run.ts` looks the set up once                                                                                                                                                                                               |
 | S4  | Standards   | fixed       | Fork `68b2afacf` (re-pin `5fbc8f53`): `bestEpDelta` looks up each slot's index once                                                                                                                                                                                                                                                                                            |
 | P1  | Spec        | fixed       | `6ba10691` rewrites the comment: a capped run lists the cap itself, because worn items take no cap place                                                                                                                                                                                                                                                                       |
+
+## Focused check (round 2)
+
+Main range `05ede6f8..fb88eb3d` (round 2's `Reviewed range:` line). Fork range
+`vendor/tbc-new-fork` `b71e2508672defaa5296035a89dc07b5e6153247..68b2afacf5716572e800cfbc4efc4496549fbee9`,
+the lock's `commit` at `05ede6f8` and at `fb88eb3d`.
+
+**Dispatch.** The session that handles this review's findings sent the
+focused check to one fresh `general-task` subagent on Opus, which did not
+write or review the branch's code. It ran the checks itself and edited no
+code; every mutation below was reverted, and both working trees were clean
+after it (`git status --porcelain` empty in the pair and in its fork).
+
+**Conditions.**
+
+1. Every commit is of a listed kind. Fork `e7dfd728d`, `8e6107af7`,
+   `3e7ea5cd5` and `68b2afacf` name A1, A2, S3 and S4 in their message
+   bodies. Main `240562a3` names A1. `5fbc8f53` is a fork re-pin (lock,
+   `data/sim-implemented-effects.json`, `docs/fork-provenance/engine.md`).
+   `f795824c` and `fb88eb3d` edit only this file and ticket 363. One
+   commit does not meet the literal rule: `6ba10691` ("Fix the desktop
+   gate's comment on worn items") names no finding ID. This review file's
+   round 1 Disposition row P1 names it as P1's fix, and it changes only
+   a comment, so the condition was taken as settled from this file; see
+   R2-B1.
+2. Every changed line outside tests, comments, docs and re-pin data is
+   at a place a fixed finding cites: fork `rank.ts` `Deps.itemEp` and the
+   deleted fallback (A1), fork `run.ts` weights lookup and `itemEp` line
+   (A1, S3), `data.ts` `EpWeightsFile` and `item_ep.ts` `itemEpFor` (S3),
+   `candidate-order.ts` `bestEpDelta` and the `OFFHAND_INDEX` constant it
+   uses (S4). The lock and `sim-implemented-effects.json` lines in
+   `240562a3` are the re-pin that carries A1's fork commit.
+3. No fork commit in the range edits an upstream wowsims file: each of
+   the 8 changed fork files is absent from upstream base `cec2a7b68`
+   (`git cat-file -e`), and `git rev-list --merges --count
+b71e25086..68b2afacf` is 0.
+
+**Check 1 (conditions hold):** pass, with R2-B1.
+
+**Check 2 (each fix changes only what its finding asks):** pass.
+
+- A1: `Deps.itemEp` is required and the stats-only fallback and its
+  `epScore` import are gone (fork `rank.ts:210`, `:975`). Every caller of
+  the fork's `rankUpgrades` passes one: fork `run.ts`, `rank_cap.test.ts`,
+  `rank_placeholders.test.ts`, and in this repo `fork-set-net`,
+  `fork-sim-database`, `fork-run-progress`, `fork-meta-repair`,
+  `feral-rank-fixture.ts` and `wowsims-fork-parity` (fork `git grep
+"rankUpgrades("`; `git grep "engine/rank.ts"` here).
+- S3: `itemEpFor` takes the `EpWeightsFile`; `run.ts` looks the set up
+  once. Same behaviour for a set with no `pseudoWeights` (mage):
+  `Stats.fromMap` skips an absent pseudo map (fork
+  `ui/sim/proto/stats.ts:622-638`), as the deleted
+  `epPseudoWeightsFor`'s `?? {}` did.
+- S4: one `SIM_ORDER.indexOf` per slot; same results (the 3 order tests
+  pass).
+- P1: the comment at `scripts/check_desktop_tab.py:763-764` now says worn
+  items take no cap place.
+
+**Check 3 (each new test asserts its finding):** pass.
+
+- A1, repeated round 1's mutation: deleted `itemEp: itemEpFor(weights),`
+  from fork `run.ts` and ran `GOFLAGS=-buildvcs=false pnpm verify`: rc=1.
+  `fork-lint:check` failed 2 of 2 checks, `run.ts(110,3): error TS2741:
+Property 'itemEp' is missing ... but required in type 'Deps'`, and
+  oxlint (the `itemEpFor` import left unused). Reverted.
+- A2, two main-hand-only mutations of `bestEpDelta`, run with `npx
+vitest run ui/features/upgrades/model/engine/candidate-order.test.ts`
+  in the fork. M1 (candidate and worn item both scored in the main hand)
+  and M2 (every slot priced at the main-hand value) each fail the new
+  test: `expected [ 30082, 28524 ] to deeply equal [ 28524, 30082 ]`. M2
+  against round 1's test file (`git show b71e25086:...`) passes 3 of 3,
+  so the new data is what catches it. Talon of Azshara 30082 is a
+  one-hander (`handType` 2, `HandTypeOneHand` in fork
+  `proto/common.proto:352-358`; `assets/database/db.json`).
+
+**Check 4 (tests the fixes touch pass):** pass.
+`GOFLAGS=-buildvcs=false pnpm verify` at `fb88eb3d` with fork `68b2afacf`:
+rc=0, `gates: 1596 ran, 0 skipped`. It runs the fork's tests and `tsc`
+(`fork-tests:check`, `fork-lint:check`) and the five fork suites here. The
+desktop gate (`desktop-gate:check`) cannot run in this sandbox (tsx `listen
+EPERM`); the fix commits change no output the tab shows by reading, not by
+a run.
+
+**The stats-only `itemEp` in this repo's fork suites.** No test here
+claims to check the tab's real candidate order while using
+`statsOnlyItemEp`. What each suite says about the tab is about something
+else: `fork-run-progress` about the tab's default seeds, `fork-set-net`
+644-C about the set screen setting, `fork-meta-repair` 535-O1 about the
+swap path. `fork-set-net`, `fork-sim-database` and `fork-meta-repair` run
+with `candidateCap: 100` over hand-listed pools, so the order picks
+nothing out. The one capped run (`fork-run-progress`, 4 of 12) holds only
+armour, which has no weapon damage for the two scores to price
+differently, and asserts progress events. `wowsims-fork-parity` (E-W3)
+says in its comment that it uses stats times weights so both engines rank
+the same candidates. `statsOnlyItemEp` does find the items: a probe in
+`fork-run-progress` and `fork-sim-database` gave every pool item
+`found=true` and a non-zero score except the two neutral items (10140,
+8289), whose stats the feral weights do not price (probe reverted). The
+tab's real order is covered by the fork's `candidate-order.test.ts`,
+`item_ep.test.ts` and the manual desktop gate.
+
+**Noted, not a finding.** The type check proves `run.ts` passes an
+`itemEp`, not that it passes `itemEpFor`. Swapping in another scorer would
+pass every automated gate; only the desktop gate would see it. Round 1's
+A1 offered the required field as its direct fix, and that is what landed.
+
+**Result:** all four checks pass. The only finding is R2-B1, bookkeeping.
+No fix added a wrong result, a loud failure or a code-quality problem.
+
+## Summary (round 2)
+
+Round 2 passed. A1, A2, S3, S4 and P1 are fixed: removing the tab's
+`itemEp` wiring now fails `pnpm verify`, and the per-slot order test fails
+on main-hand-only scoring. No finding is open. Tickets: filed 4 (854, 855,
+856, 857), closed 2 (820, 821), by the same two `git diff dev...HEAD --
+'.scratch/carry-forward/issues/*.md'` counts as round 1; round 2 filed none.
+Filed is higher than closed, because the branch's runs found four new
+problems outside its scope.
+
+## Disposition (round 2)
+
+| ID    | Axis          | Disposition | Ticket / note                                                                                                                                                                                       |
+| ----- | ------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R2-B1 | Focused check | wontfix     | Commit `6ba10691` names no finding ID; round 1's Disposition row P1 names it as P1's fix, it changes only a comment, and naming the ID would mean rewriting the branch's history (as for S1 and S2) |
