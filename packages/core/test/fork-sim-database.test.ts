@@ -200,10 +200,7 @@ describe.skipIf(!forkPresent)(
       ({ simDatabaseResolverFor } = await importForkUpgrades<{
         simDatabaseResolverFor: ResolverFactory;
       }>("adapters/sim_database.ts"));
-      // 30s, matching `testTimeout`, not the 10s default hookTimeout: parsing
-      // the 3.1 MB db.json plus the proto transforms takes about 3.3s idle and
-      // can pass 10s under CPU contention.
-    }, 30_000);
+    });
 
     it("522-A: an agility melee mix (feral P2 consumables on ret P2 gear) is sent with its rows", () => {
       // Scenario kind: battle and guardian elixirs, agility food, an imbue,
