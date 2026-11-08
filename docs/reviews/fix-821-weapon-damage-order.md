@@ -4,6 +4,8 @@ Reviewed range: `e905cb5f3b6fc1dea6fc359f13f49f3af22dfe12..05ede6f87783805916d71
 
 Reviewed range: `05ede6f87783805916d71f495a569f5752ffb63b..fb88eb3d942e4e0819404d142e755f9dd54fa6f7`
 
+Reviewed range: `fb88eb3d942e4e0819404d142e755f9dd54fa6f7..eba41bb47579a7fcbf73910ff237ac10cd937db9`
+
 Fork range reviewed as part of the branch: `vendor/tbc-new-fork`
 `c9bb0acd367bd0712148c56b8d683ad6649895c0..b71e2508672defaa5296035a89dc07b5e6153247`
 (the `commit` values in `data/wowsims-fork.lock.json` at the merge base and
@@ -305,3 +307,34 @@ problems outside its scope.
 | ID    | Axis          | Disposition | Ticket / note                                                                                                                                                                                       |
 | ----- | ------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | R2-B1 | Focused check | wontfix     | Commit `6ba10691` names no finding ID; round 1's Disposition row P1 names it as P1's fix, it changes only a comment, and naming the ID would mean rewriting the branch's history (as for S1 and S2) |
+
+## Round 3 (ticket 856 fix, after round 2)
+
+Range `fb88eb3d..eba41bb4` (round 3's `Reviewed range:` line). The code
+commit is `eba41bb4`; `33df833d` and `8993ac4f` only add this file's round 2
+and a ticket. The fork pin does not move in this range (`git diff --quiet
+fb88eb3d..eba41bb4 -- data/wowsims-fork.lock.json` exits 0).
+
+**Dispatch.** `eba41bb4` fixes ticket 856, which this review did not raise as
+a finding, so it fails condition 1 of the focused check, and the skill's
+"Round limit" says a further round is then a review in round 1's form. Not the
+small-change lane: `git diff --shortstat fb88eb3d..eba41bb4` gives 13 files,
+361 insertions, 17 deletions. `codex` is not on `PATH`, so the adversarial and
+Standards + Spec axes ran as two fresh `general-task` subagents on Opus, in
+parallel; Standards + Spec ran the `code-review` skill. The domain axis was
+skipped: the diff is Go build tooling with no game-domain content. Both axes
+were told they write nothing.
+
+| ID  | Axis        | Finding                                                                                                                                                                                                      |
+| --- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A1  | Adversarial | `scripts/go_env.py` runs `go env GOFLAGS` with `capture_output=True, check=True`, so a failing `go env` hides Go's own error text; in `worktree_pair.py` the call is outside the `try`, so it is a traceback |
+| A2  | Adversarial | No test fails if `goBuildEnv` is removed from either call in `scripts/dev-tab.mjs`; that file has no test seam                                                                                               |
+| A3  | Adversarial | Ticket 856's Fix asks to correct `docs/reviews/feat-headless-run-no-orphans.md:81` ("sandbox-only"); it was left as history, and the closing note does not say so (same as P2)                               |
+| P1  | Spec        | Ticket 856 is closed, but its "Done when" runs (`pnpm desktop-gate:check --spec enh`, `node scripts/dev-tab.mjs backend\|desktop` in a pair) did not run; the closing note gives the `go build` evidence     |
+| P2  | Spec        | Same as A3                                                                                                                                                                                                   |
+| P3  | Spec        | The closing note says the "devserver step's tsx" fails in the sandbox; tsx runs in the bundle step (`vendor/tbc-new-fork/makefile:34`), not `devserver` (`:142-144`)                                         |
+
+**Status.** Round 3 is past the last round (`~/.claude/AGENTS.md` § Review
+round limits) and leaves A1 to P3 open; A1 asks for a code change, so the
+review stops here and the owner chooses what happens next. No fix was made
+after round 3.
