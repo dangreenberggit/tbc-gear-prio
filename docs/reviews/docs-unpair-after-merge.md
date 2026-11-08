@@ -146,9 +146,125 @@ throwaway pair the owner makes with `pnpm wt:pair`), on the
   `ls /home/daniel/Code/lulz/tbc-wt/<name>` fails,
   `ls .git/tbc-wt-unpair/<name>` fails, and the owner ran nothing.
 
+## Round 2: fix path, last round
+
+Reviewed `0902943f..94c4a3c5`: `bdf558d7` (fixes for IR2 to IR5) and
+`94c4a3c5` (§ Remove it rewritten after the trial). Line numbers below
+are in `docs/agents/paired-worktrees.md` at `94c4a3c5`.
+
+Each fixed finding's check was run again on the changed sentences:
+
+- IR2 (check 2): `docs/agents/parallel-phase-project.md:34` now says
+  "Remove the pair as `docs/agents/paired-worktrees.md` "Remove it"
+  says". The two files now agree. Closed.
+- IR3 (check 2): lines 222-224 name `sandbox.excludedCommands` of
+  `~/.claude_router/settings.json`, which holds `git worktree remove *`
+  (read in round 1). The claim is now exact. Closed.
+- IR4 (check 1): line 221 "with nothing before or after it in the
+  call". The cold reader ran the command alone and left out `cd`,
+  `git -C`, `2>&1` and the `rc=` echo. Closed.
+- IR5 (check 2): line 216 "The sandbox mounts over
+  `.git/worktrees/<name>` folders" matches the `findmnt` output. Closed,
+  with new finding IR6 in the same sentence.
+- IR1 (check 3): see § Trial, round 2. Still open.
+
+A second cold reader (`general-task`, Opus, no tools) got § Land it on
+dev and § Remove it at `94c4a3c5` and two cases. Case A (first unpair
+exits 0): it ran `pnpm wt:unpair tooltip-wrap` once and stopped, quoting
+"only after this error". Case B (busy error): it ran
+`git worktree remove /home/daniel/Code/lulz/tbc-wt/tooltip-wrap` alone in
+its call, then `pnpm wt:unpair tooltip-wrap` again, from the main
+checkout. Both are the intended actions. It read line 217-219 ("On
+2026-11-08 it stopped for the pair `gate-pipe` ...") as "background, not
+a rule". It noted that the text does not mention the `refused: a
+worktree is still registered after removal` line; that line was already
+in round 1's Notes.
+
+### Findings, round 2
+
+| ID  | Check  | file:line | Quoted text                                                                                                                 | What an agent does wrong                                                                                            | How it happens, and what it costs                                                                                         | Severity | Evidence                                              |
+| --- | ------ | --------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------- | ----------------------------------------------------- |
+| IR6 | 1      | 216-217   | "The sandbox mounts over `.git/worktrees/<name>` folders, so it cannot delete them"                                         | None seen. "it" reads as the sandbox; the author means unpair (git).                                                | A reader has to work out what "it" is. Cost: a moment's confusion; no wrong action.                                       | minor    | Reading; the cold reader did not act on the sentence. |
+| IR7 | rubric | 217-219   | "On 2026-11-08 it stopped for the pair `gate-pipe`, made hours before, and not for a pair made and removed within minutes." | None seen. The sentence tells the history of one run; the action rule is "Run unpair first; only after this error". | An agent might try to predict the error from the pair's age. The cold reader did not. Cost: words an agent does not need. | minor    | Cold reader: "This is background, not a rule."        |
+
+Both are wording only. Removing the reason and history sentences, as the
+assessor below suggests, removes both findings in place of fixing them.
+
+### Trial, round 2
+
+The coordinator's trial (reported to this reviewer, not observed by it):
+a throwaway pair `unpair-trial` from `dev` `0dfb1c8f`; a fresh Opus
+`general-task`, told it had just merged that branch and to read the two
+sections at `bdf558d7`, ran `pnpm wt:unpair unpair-trial` from the main
+checkout, rc=0, removed both halves, left no unpair mark, and kept the
+branches. The busy error did not happen, so no agent ran the fallback.
+The fallback calls ran by hand on `gate-pipe` on 2026-11-08 and worked.
+
+Under the skill's check 3, this trial is partial, so IR1 stays open:
+
+- No old-text run on the same input. The old-text behaviour on record is
+  the `gate-pipe` merge, where the agent left the pair and gave the owner
+  `pnpm wt:unpair gate-pipe`.
+- It ran `bdf558d7`, not the current `94c4a3c5`. § Land it on dev, which
+  holds the new rule, is the same in both; only § Remove it changed.
+- No agent has run the fallback (`git worktree remove`, then a second
+  unpair).
+
+### Assessor's view (round limit)
+
+One `general-task` agent (Opus) that neither wrote nor reviewed the
+change answered the three questions in the round-limit rule. Its view,
+with its sources:
+
+- **Has something gone wrong?** No loop. The change is still +18 lines
+  in `paired-worktrees.md` and one sentence in
+  `parallel-phase-project.md` (`git diff --stat`). Round 1 found 5
+  findings, round 2 found 2 minor ones. `94c4a3c5` added a history
+  sentence (IR7) in place of the cause.
+- **Would doing less fix it?** Yes, for § Remove it. Keep the trigger,
+  the two calls and the "nothing before or after it" rule; drop the
+  `findmnt` reason, the history sentence and "Run unpair first". Its
+  suggested text, not trialled:
+
+  > **When unpair stops with `Device or resource busy`** (the sandbox
+  > cannot delete `.git/worktrees/<name>`), finish from the main
+  > checkout. Run `git worktree remove <pair path>` with nothing before
+  > or after it in the call; `sandbox.excludedCommands` in
+  > `~/.claude_router/settings.json` lets that exact text run outside
+  > the sandbox. Then run `pnpm wt:unpair <name>` again to delete the
+  > unpair mark.
+
+  Reviewer's note: this text drops "only after this error". The heading
+  "When unpair stops ..." carries the condition, but the trial agent
+  asked exactly that question, so keep a few words such as "Only then,
+  finish from the main checkout".
+
+- **Would another round settle it?** The wording findings, yes. IR1
+  closes only with a same-input old-text and new-text run of the current
+  text, which needs throwaway pairs made before a new session starts and
+  two Opus agents. In its view that costs more than the risk: if the
+  fallback fails, the owner removes the pair by hand, as today. It
+  recommends recording IR1 as `defer` with an open ticket for a trial on
+  the next real paired merge, if the owner accepts that.
+
 ## Open
 
-All five findings are open; the author fixes them. This file has no
-`## Disposition` section yet, so `pnpm merge-to-dev` fails on it until
-the rows are added ("review has no ## Disposition section",
-`scripts/check_merge_ready.py:1121-1125`).
+IR1 blocks until the owner rules. IR6 and IR7 are wording for the author.
+Their rows below say `pending`, a word `scripts/check_merge_ready.py`
+rejects, so `pnpm merge-to-dev` fails on this file until each row gets
+`fixed`, `wontfix` or `defer` with a ticket path. IR1's row takes
+`wontfix` with the owner's words if the owner approves without more
+trial, or `defer` with a ticket path if the owner wants the trial on the
+next real merge.
+
+## Disposition
+
+| ID  | Axis                        | Disposition | Ticket / note                                                                                                                                                   |
+| --- | --------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| IR1 | Instruction review, round 1 | pending     | No full trial: the new text ran once (`bdf558d7`, `unpair-trial`, fallback not reached), with no old-text run beside it. Waits for the owner's ruling (§ Open). |
+| IR2 | Instruction review, round 1 | fixed       | `bdf558d7`: `parallel-phase-project.md:34` points to "Remove it".                                                                                               |
+| IR3 | Instruction review, round 1 | fixed       | `bdf558d7`: the text names `sandbox.excludedCommands` of `~/.claude_router/settings.json`.                                                                      |
+| IR4 | Instruction review, round 1 | fixed       | `bdf558d7`: "with nothing before or after it in the call".                                                                                                      |
+| IR5 | Instruction review, round 1 | fixed       | `bdf558d7`: "mounts over ... so it cannot delete them".                                                                                                         |
+| IR6 | Instruction review, round 2 | pending     | "so it cannot delete them": name unpair, or drop the sentence (§ Assessor's view).                                                                              |
+| IR7 | Instruction review, round 2 | pending     | Drop the `gate-pipe` history sentence; keep "only after this error".                                                                                            |
