@@ -356,3 +356,33 @@ branch tip follows; it is the last round.
 | R3-P1 | Spec        | wontfix     | `03c97582`: 856 stays closed, because its "Done when" runs cannot run in the agent sandbox. Its note names the remaining check, the owner's run of `pnpm -C /home/daniel/Code/lulz/tbc-wt/weapon-order desktop-gate:check` with no `GOFLAGS` prefix outside the sandbox, and says the ticket reopens if that run fails at `make wowsimtbc`                                                                                                                         |
 | R3-P2 | Spec        | fixed       | Same as R3-A3                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | R3-P3 | Spec        | fixed       | `03c97582`: the note says tsx runs in the bundle step (`vendor/tbc-new-fork/makefile:34`)                                                                                                                                                                                                                                                                                                                                                                          |
+
+## Focused check (round 4)
+
+Range `e188818f..5262b770`: `03c97582` (the fixes) and `5262b770` (the round 3
+Disposition). One fresh `general-task` subagent on Opus, which did not write
+or review this code, checked only these changes, as the owner's ruling says.
+It wrote nothing; both working trees were clean after it.
+
+It found no bug and no broken test (`python3 scripts/check_desktop_tab_verdict.py`
+rc 0, `python3 scripts/check_worktree_pair.py` rc 0, `pnpm exec vitest run
+scripts/go-env.test.mjs` 7 passed). R3-A2, R3-A3, R3-P2 and R3-P3 hold as
+written. Two rows do not:
+
+- **R3-A1** fixes only the first half of A1. Go's error text now shows, but
+  `scripts/worktree_pair.py:547` still calls `make_env()` before the `try`
+  at `:553`, so a failing `go env` still ends `wt:pair` in a
+  `CalledProcessError` traceback. The row says `fixed` and does not mention
+  that half.
+- **R3-P1**'s reason, that 856's "Done when" runs cannot run in the agent
+  sandbox, is not true for all of them. The `dev-tab.mjs backend` build is a
+  plain `go build` with `goBuildEnv()` (`scripts/dev-tab.mjs:121`); in the
+  sandbox, in the pair's fork with `GOFLAGS` unset, it gives rc 1 without the
+  fix and rc 0 with it. `docs/reviews/feat-headless-run-no-orphans.md:81-85`
+  records a way past the tsx `listen EPERM`. And the ticket's "Remaining
+  check" names `desktop-gate:check` without `--spec enh` and leaves out the
+  two `dev-tab.mjs` runs that "Done when" lists.
+
+**Status.** This was the last round under the owner's ruling. It reports
+findings, so the review stops here with R3-A1 and R3-P1 open, and the owner
+chooses what happens next. No fix was made after this check.
