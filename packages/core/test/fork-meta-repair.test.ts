@@ -28,6 +28,7 @@ import {
   forkRoot,
   forkUpgradesDir,
   importForkUpgrades,
+  statsOnlyItemEp,
 } from "./fork-engine-harness.js";
 import {
   bruteForceBestValue,
@@ -1231,6 +1232,7 @@ async function runSpec(o: SpecRun) {
       clock: () => new Date("2026-10-03T12:00:00.000Z"),
       raidSimSkeleton: o.skeleton ?? retSkeleton,
       epWeights: o.epWeights ?? retWeights,
+      itemEp: await statsOnlyItemEp(o.epWeights ?? retWeights),
       pool,
       ...(o.measureBrokenSetValue ? { measureBrokenSetValue: true } : {}),
       ...(o.setScreen ? { setScreen: o.setScreen } : {}),

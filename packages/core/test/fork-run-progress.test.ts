@@ -29,6 +29,7 @@ import {
   forkPresent,
   forkUpgradesDir,
   importForkUpgrades,
+  statsOnlyItemEp,
 } from "./fork-engine-harness.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -806,6 +807,7 @@ async function recordRun(
       clock: () => new Date("2026-10-03T12:00:00.000Z"),
       raidSimSkeleton: feralSkeleton,
       epWeights: feralWeights,
+      itemEp: await statsOnlyItemEp(feralWeights),
       pool,
       measureBrokenSetValue: true,
     },

@@ -12,7 +12,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { importForkUpgrades } from "./fork-engine-harness.js";
+import { importForkUpgrades, statsOnlyItemEp } from "./fork-engine-harness.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -191,5 +191,6 @@ export async function baseDeps(): Promise<Record<string, unknown>> {
     clock: () => new Date("2026-07-26T12:00:00.000Z"),
     raidSimSkeleton: feralSkeleton,
     epWeights: feralWeights,
+    itemEp: await statsOnlyItemEp(feralWeights),
   };
 }
