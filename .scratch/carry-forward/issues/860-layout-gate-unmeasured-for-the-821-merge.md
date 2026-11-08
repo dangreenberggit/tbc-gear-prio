@@ -1,9 +1,9 @@
-Status: open
+Status: closed
 Type: gap
 Origin: `pnpm merge-to-dev fix/821-weapon-damage-order`, 2026-11-08 (dev `460e6b72`)
 Blocks: none
 Blocked by: none
-Related: 401, 820, 856
+Related: 401, 820, 856, 861
 
 # The 821 merge put a changed tab on dev without a layout measurement
 
@@ -36,3 +36,34 @@ The layout gate gives a green verdict on dev's tab source (fork `68b2afacf`
 or later) and the layout lock on dev records that digest; and either the
 gate's workers build no longer needs the tsx IPC pipe, or this ticket names
 the command an owner runs outside the sandbox to measure it.
+
+## Closing note (2026-11-08)
+
+Verified by:
+`PLAYWRIGHT_BROWSERS_PATH=/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-03-p45-runs/pwshim python scripts/check_layout_gate.py`
+in the pair `tbc-wt/gate-pipe` (branch `fix/860-layout-gate-tsx-pipe`, fork
+`68b2afacf`), inside the Claude Code sandbox: verdict `measured`, pass, 496
+checks passed and 0 failed at widths 375, 653, 768 and 1280 over the 11
+fixtures. It advanced `data/wowsims-fork-layout.lock.json` to `5267aca2...`,
+which this branch commits. Log:
+`.scratch/agent-reports/2026-11-08-860-gate-headless-shell.log` in the main
+checkout.
+
+The workers build no longer needs the tsx IPC pipe:
+`scripts/tab-harness/test-tab-harness.mjs` now runs
+`node --import tsx vite.build-workers.mts`, and the same gate run without the
+shim built the whole bundle in the sandbox
+(`.scratch/agent-reports/2026-11-08-860-gate-normal-chromium.log`).
+
+That run then stopped at a second sandbox block, ticket 861: the gate's
+Chromium aborts with `socket() failed: Operation not permitted`. The green run
+above therefore used the shim, whose `chromium-1200/chrome-linux64/chrome` is
+a symlink to Playwright's headless-shell build of the same Chromium
+(143.0.7499.4), as tickets 754 and 800 did. The digest is the same either way,
+because it hashes the browsers.json entry, not the binary. To measure on the
+gate's own Chromium, run this outside the sandbox; it measures whatever the
+lock says:
+
+```
+cd /home/daniel/Code/lulz/tbc-wt/gate-pipe && node scripts/tab-harness/test-layout.mjs
+```
