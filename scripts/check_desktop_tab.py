@@ -760,8 +760,8 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
     requested = rb.get("candidatesRequested") or 0
     # C14 is FALSE (D4): an uncapped run lands full_rows (< eligibleCount), not
     # eligibleCount, because screened-out candidates do not all land as rows. A
-    # capped run lands its pinned capped_rows (worn items inside the cap are
-    # simmed but not listed).
+    # capped run lands its pinned capped_rows, the cap itself: worn items take
+    # no cap place (fork b71e25086), and they are simmed but not listed.
     if requested > 0:
         expected_rows = run.capped_rows.get(requested) if run else None
     else:
