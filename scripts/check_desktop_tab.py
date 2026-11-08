@@ -164,12 +164,15 @@ class GatedRun:
 # out (engine/kael-temp.ts).
 #
 # capped_rows: the measured row count of a capped run, per cap: the rows the
-# Upgrades list pane shows. The cap sims the first N candidates in EP order
-# plus every worn item (model/engine/rank.ts, "the cap keeps the first N of
-# the EP order plus every owned row"), and owned rows stay out of the list
-# pane (model/results_view.ts paneRows), so a capped run shows N minus the
-# worn items inside the first N. Which worn items fall inside was not listed
-# for any spec; only the counts were measured.
+# Upgrades list pane shows. Since fork b71e25086 the cap sims the first N
+# candidates in EP order that the player does not wear, plus every worn item
+# (model/engine/rank.ts), and owned rows stay out of the list pane
+# (model/results_view.ts paneRows), so a capped run should show N rows
+# whenever the eligible pool holds at least N items the player does not wear.
+# Before that fork commit a worn item inside the first N took a cap place, so
+# a run showed N minus those worn items. A count stays as measured until a run
+# at the new fork commit measures it again, because the golden's rowCount
+# must equal it (desktop-gate:unit:check).
 #
 # full_rows: the measured full-pool row count for the --full branch of
 # assertion (e). An uncapped run lands fewer rows than eligible candidates,
@@ -204,7 +207,8 @@ GATED: dict[tuple[str, int], GatedRun] = {
     # off-hand-only - 63 one-handers = 516.
     # Rows at cap 40, measured on the desktop binary at fork b603564ee on
     # 2026-11-06 (ticket 800): of 16 worn items, the pane shows 38, so 2 worn
-    # items are inside the first 40.
+    # items are inside the first 40. Expected to move to 40 at fork b71e25086
+    # (the cap rule above); not yet measured there.
     ("mage", 4): GatedRun(
         page="/tbc/mage/dps/",
         preset_tab="Phase 3",
@@ -217,7 +221,8 @@ GATED: dict[tuple[str, int], GatedRun] = {
     # 32837 and 32838 Warglaive of Azzinoth in the two hands, so the hand rule
     # removes nothing: 826.
     # Rows at cap 40, measured as mage's: of 17 worn items, the pane shows 33,
-    # so 7 are inside.
+    # so 7 are inside. Expected to move to 40 at fork b71e25086 (the cap rule
+    # above); not yet measured there.
     ("rogue", 4): GatedRun(
         page="/tbc/rogue/dps/",
         preset_tab=None,
@@ -230,10 +235,14 @@ GATED: dict[tuple[str, int], GatedRun] = {
     # two 32262 Syphon of the Nathrezim, one-handers: 1039.
     # Rows at cap 40, measured as mage's: of 16 distinct worn ids (32262 is
     # worn in both hands, and the cap keeps worn items by id, rank.ts
-    # equippedIds), the pane shows 40, so none is inside. Every row is a
-    # main-hand weapon and a loss (tickets 820, 821), 33 of the 40 two-handers
-    # (handType 4 in the fork's assets/database/db.json at b603564ee), so the
-    # golden holds no off-hand row and no armour row.
+    # equippedIds), the pane shows 40 at fork b603564ee, so none is inside;
+    # every row was a main-hand weapon and a loss (tickets 820, 821). At fork
+    # 6cc79f742, which counts weapon damage, the owner's run of 2026-11-07
+    # showed 39: the order put the worn trinket 29383 Bloodlust Brooch at
+    # place 29 (it scores above the worn Dragonspine Trophy in the other
+    # trinket slot) and it took a cap place. Fork b71e25086 keeps worn items
+    # out of the cap's count, so 40 again (the cap rule above); not yet
+    # measured there.
     ("enh", 4): GatedRun(
         page="/tbc/shaman/enhancement/",
         preset_tab=None,

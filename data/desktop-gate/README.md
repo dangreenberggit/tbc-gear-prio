@@ -115,10 +115,15 @@ here has no known defect recorded.
   all main-hand weapons, and every row is a loss, because that order ignored
   weapon damage (ticket 821) and priced a two-hander against the main hand
   alone (ticket 820). Fork `6cc79f742` counts both, so the golden no longer
-  matches the tab and check (h) is expected to fail until it is re-recorded
-  (not yet run). Measured from the order alone, the first 40 then hold 4 of
-  the page's 14 real upgrades and 29 weapons that lose DPS (ticket 821's
-  comment of 2026-11-07).
+  matches the tab and check (h) is expected to fail until it is re-recorded.
+  Measured from the order alone, the first 40 then hold 4 of the page's 14
+  real upgrades and 29 weapons that lose DPS (ticket 821's comment of
+  2026-11-07). The owner's `--update-golden` run at `6cc79f742` on 2026-11-07
+  refused at (e) with 39 rows: the new order put the worn Bloodlust Brooch
+  (29383) at place 29, and a worn item took a cap place but showed no row.
+  Fork `b71e25086` keeps worn items out of the cap's count, so every gated
+  spec should again show 40 rows at cap 40; the mage (38) and rogue (33)
+  goldens and pins move with it (not yet run).
 
 ## Recording a run
 
