@@ -44,9 +44,12 @@ Verified by:
 in the pair `tbc-wt/gate-pipe` (branch `fix/860-layout-gate-tsx-pipe`, fork
 `68b2afacf`), inside the Claude Code sandbox: verdict `measured`, pass, 496
 checks passed and 0 failed at widths 375, 653, 768 and 1280 over the 11
-fixtures. It advanced `data/wowsims-fork-layout.lock.json` to `5267aca2...`,
+fixtures. It advanced `data/wowsims-fork-layout.lock.json` to `f6263668...`,
 which this branch commits. Log:
-`/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-08-860-gate-headless-shell.log`.
+`/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-08-860-gate-headless-shell-r2.log`.
+This is the second such run; the first (`5267aca2...`, log
+`2026-11-08-860-gate-headless-shell.log`) came before a comment fix in
+`test-tab-harness.mjs`, a file the digest hashes, and gave the same counts.
 
 The workers build no longer needs the tsx IPC pipe:
 `scripts/tab-harness/test-tab-harness.mjs` now runs
@@ -61,7 +64,7 @@ a symlink to Playwright's headless-shell build of the same Chromium
 (143.0.7499.4), as tickets 754 and 800
 (`800-desktop-gate-goldens-for-more-specs.md`) did. The digest is the same either way,
 because it hashes the browsers.json entry, not the binary:
-`python scripts/check_layout_gate.py --print-hash` prints `5267aca2...` with
+`python scripts/check_layout_gate.py --print-hash` prints the committed digest with
 and without the shim. To measure the tab source on disk on the gate's own
 Chromium, run this outside the sandbox (it writes no lock):
 
