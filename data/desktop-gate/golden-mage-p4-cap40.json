@@ -1,12 +1,12 @@
 {
   "_note": "Golden readback for scripts/check_desktop_tab.py check (h): rows, aboveCutoffItems and baselineDps of a mage phase-4 cap-40 run from the Arcane - Staff gear preset on the desktop (HTTP) transport. The file records the output of a run that passed checks (a)-(f); it does not say the ranking is right. A known defect of a spec's golden is listed in README.md beside this file. The gate fails when a run differs from these three fields; every other field here is provenance. Regenerate ONLY when a change is meant to alter this spec's output (fork re-pin, pool rule change, intended ranking change) and after the printed diff is explained: pnpm desktop-gate:check --spec mage --update-golden, then commit with the reason in the body. A red gate is a finding, not a prompt to regenerate.",
-  "recordedAt": "2026-11-06T19:06:02.325Z",
-  "forkCommit": "b603564eed544d5e9f62fbc3950309dd65921110",
+  "recordedAt": "2026-11-08T02:53:13.926Z",
+  "forkCommit": "b71e2508672defaa5296035a89dc07b5e6153247",
   "cpuCount": 20,
   "candidatesRequested": 40,
   "spec": "mage",
   "phase": 4,
-  "elapsedS": 8.6,
+  "elapsedS": 10.6,
   "rows": [
     {
       "rank": "1",
@@ -66,6 +66,14 @@
     },
     {
       "rank": "6",
+      "item": "Velvet Boots of the Guardian",
+      "slot": "Feet",
+      "dps": -11.3,
+      "source": "Serpentshrine Cavern (N)\nThe Lurker Below",
+      "belowCutoff": true
+    },
+    {
+      "rank": "7",
       "item": "Tirisfal Wand of Ascendancy",
       "slot": "Ranged",
       "dps": -13.4,
@@ -73,7 +81,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "7",
+      "rank": "8",
       "item": "Focused Mana Bindings",
       "slot": "Wrist",
       "dps": -13.4,
@@ -81,7 +89,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "8",
+      "rank": "9",
       "item": "Belt of Blasting",
       "slot": "Waist",
       "dps": -15.9,
@@ -89,7 +97,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "9",
+      "rank": "10",
       "item": "Blue Suede Shoes",
       "slot": "Feet",
       "dps": -17.8,
@@ -97,7 +105,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "10",
+      "rank": "11",
       "item": "Boots of Blasting",
       "slot": "Feet",
       "dps": -20.8,
@@ -105,7 +113,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "11",
+      "rank": "12",
       "item": "Band of Eternity",
       "slot": "Ring 1",
       "dps": -21.4,
@@ -113,7 +121,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "12",
+      "rank": "13",
       "item": "Voodoo-woven Belt",
       "slot": "Waist",
       "dps": -23.1,
@@ -121,7 +129,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "13",
+      "rank": "14",
       "item": "Ring of Captured Storms",
       "slot": "Ring 1",
       "dps": -25,
@@ -129,7 +137,15 @@
       "belowCutoff": true
     },
     {
-      "rank": "14",
+      "rank": "15",
+      "item": "Eye of Magtheridon",
+      "slot": "Trinket 1",
+      "dps": -27.2,
+      "source": "Magtheridon's Lair (N)\nMagtheridon",
+      "belowCutoff": true
+    },
+    {
+      "rank": "16",
       "item": "Ruby Drape of the Mysticant",
       "slot": "Back",
       "dps": -28.4,
@@ -137,7 +153,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "15",
+      "rank": "17",
       "item": "Cord of Screaming Terrors",
       "slot": "Waist",
       "dps": -28.6,
@@ -145,7 +161,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "16",
+      "rank": "18",
       "item": "Brooch of Unquenchable Fury",
       "slot": "Neck",
       "dps": -31,
@@ -153,7 +169,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "17",
+      "rank": "19",
       "item": "Ruby Slippers",
       "slot": "Feet",
       "dps": -42.6,
@@ -161,7 +177,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "18",
+      "rank": "20",
       "item": "Band of Crimson Fury",
       "slot": "Ring 1",
       "dps": -46.9,
@@ -169,7 +185,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "19",
+      "rank": "21",
       "item": "Cowl of the Illidari High Lord",
       "slot": "Head",
       "dps": -48.7,
@@ -177,7 +193,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "20",
+      "rank": "22",
       "item": "Robe of the Shadow Council",
       "slot": "Chest",
       "dps": -61.7,
@@ -185,7 +201,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "21",
+      "rank": "23",
       "item": "Robes of Rhonin",
       "slot": "Chest",
       "dps": -62.2,
@@ -193,7 +209,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "22",
+      "rank": "24",
       "item": "Robe of Departed Spirits",
       "slot": "Chest",
       "dps": -62.2,
@@ -201,7 +217,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "23",
+      "rank": "25",
       "item": "Vestments of the Sea-Witch",
       "slot": "Chest",
       "dps": -64,
@@ -209,7 +225,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "24",
+      "rank": "26",
       "item": "Gauntlets of the Sun King",
       "slot": "Hands",
       "dps": -64.8,
@@ -217,7 +233,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "25",
+      "rank": "27",
       "item": "Blood-cursed Shoulderpads",
       "slot": "Shoulders",
       "dps": -69.7,
@@ -225,7 +241,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "26",
+      "rank": "28",
       "item": "Vengeful Gladiator's Battle Staff",
       "slot": "Main Hand",
       "dps": -72.7,
@@ -233,7 +249,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "27",
+      "rank": "29",
       "item": "Pendant of the Violet Eye",
       "slot": "Trinket 1",
       "dps": -73.3,
@@ -241,7 +257,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "28",
+      "rank": "30",
       "item": "Robes of the Tempest",
       "slot": "Chest",
       "dps": -76.5,
@@ -249,7 +265,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "29",
+      "rank": "31",
       "item": "Cowl of the Tempest",
       "slot": "Head",
       "dps": -79.9,
@@ -257,7 +273,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "30",
+      "rank": "32",
       "item": "Gloves of the Aldor",
       "slot": "Hands",
       "dps": -81.5,
@@ -265,7 +281,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "31",
+      "rank": "33",
       "item": "Mantle of the Elven Kings",
       "slot": "Shoulders",
       "dps": -81.7,
@@ -273,7 +289,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "32",
+      "rank": "34",
       "item": "Mantle of the Tempest",
       "slot": "Shoulders",
       "dps": -86.9,
@@ -281,7 +297,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "33",
+      "rank": "35",
       "item": "Gloves of the Tempest",
       "slot": "Hands",
       "dps": -87.4,
@@ -289,7 +305,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "34",
+      "rank": "36",
       "item": "Cowl of the Grand Engineer",
       "slot": "Head",
       "dps": -127.2,
@@ -297,7 +313,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "35",
+      "rank": "37",
       "item": "Hood of Hexing",
       "slot": "Head",
       "dps": -128.8,
@@ -305,7 +321,7 @@
       "belowCutoff": true
     },
     {
-      "rank": "36",
+      "rank": "38",
       "item": "Uni-Mind Headdress",
       "slot": "Head",
       "dps": -151.1,
@@ -318,6 +334,6 @@
     "Dark Iron Smoking Pipe"
   ],
   "baselineDps": 2794,
-  "rowCount": 38,
+  "rowCount": 40,
   "aboveCutoff": 2
 }

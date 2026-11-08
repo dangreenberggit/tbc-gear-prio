@@ -111,19 +111,20 @@ developer's own machine, on demand, with the diagnostic in front of them.
 A golden records what the tab output, defects included. A spec not listed
 here has no known defect recorded.
 
-- **`enh`:** the golden records fork `b603564ee`'s order. Its 40 rows are
-  all main-hand weapons, and every row is a loss, because that order ignored
-  weapon damage (ticket 821) and priced a two-hander against the main hand
-  alone (ticket 820). Fork `6cc79f742` counts both, so the golden no longer
-  matches the tab and check (h) is expected to fail until it is re-recorded.
-  Measured from the order alone, the first 40 then hold 4 of the page's 14
-  real upgrades and 29 weapons that lose DPS (ticket 821's comment of
-  2026-11-07). The owner's `--update-golden` run at `6cc79f742` on 2026-11-07
-  refused at (e) with 39 rows: the new order put the worn Bloodlust Brooch
-  (29383) at place 29, and a worn item took a cap place but showed no row.
-  Fork `b71e25086` keeps worn items out of the cap's count, so every gated
-  spec should again show 40 rows at cap 40; the mage (38) and rogue (33)
-  goldens and pins move with it (not yet run).
+- **`enh`:** the golden records fork `b71e25086`'s order (re-recorded by
+  the owner on 2026-11-07). That order counts weapon damage (ticket 821) and
+  charges a two-hander the worn off hand (ticket 820), so the golden's top
+  rows are Empty Mug of Direbrew, Berserker's Call and Madness of the
+  Betrayer. Cap 40 still leaves out most of the page's real upgrades:
+  measured from the order alone, its first 40 hold 4 of the page's 14 real
+  upgrades and 29 weapons that lose DPS (ticket 821's comment of 2026-11-07).
+  The golden before it, at fork `b603564ee`, held 40 losing main-hand
+  weapons and no upgrade.
+
+Since fork `b71e25086` a worn item takes no cap place, so every gated spec
+shows 40 rows at cap 40 (measured on the owner's run of 2026-11-07). Before
+it, the mage and rogue goldens held 38 and 33 rows, and the enh run at fork
+`6cc79f742` showed 39, because the worn Bloodlust Brooch sat at place 29.
 
 ## Recording a run
 
