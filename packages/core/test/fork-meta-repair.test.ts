@@ -75,6 +75,15 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const MELEE_HIT = 20;
 /** `Stat.StatSpellHitRating` in the fork's proto (`proto/common.ts`). */
 const SPELL_HIT = 12;
+/** The sim's `SpellSchool` bits (`sim/core/flags.go:226-232`). */
+const SCHOOL = {
+  holy: 2,
+  fire: 4,
+  nature: 8,
+  frost: 16,
+  shadow: 32,
+  arcane: 64,
+} as const;
 
 /**
  * The ret-p3-p2 baseline's `meleeHitPercent_final` against level 73 with no
@@ -82,13 +91,18 @@ const SPELL_HIT = 12;
  */
 const BASELINE_HIT_PERCENT = 6.297560509125587;
 
-type HitCapBudget = { stat: number; remaining: number };
+type HitCapBudget = {
+  stat: number;
+  remaining: number;
+  groups?: Array<{ offset: number; share: number }>;
+};
 type CapProfileMod = {
   capProfileFor: (spec: string) => unknown;
   hitCapBudgetFrom: (
     profile: unknown,
     request: unknown,
-    pseudoStats: readonly number[]
+    pseudoStats: readonly number[],
+    spellDamageBySchool?: Readonly<Record<number, number>>
   ) => HitCapBudget | undefined;
 };
 
@@ -193,7 +207,8 @@ describe.skipIf(!forkPresent)("repair hit budget (535)", () => {
     const budget = m.hitCapBudgetFrom(
       m.capProfileFor("mage"),
       budgetRequest("TristateEffectImproved"),
-      pseudoStatsWithHit(10, 13)
+      pseudoStatsWithHit(10, 13),
+      { [SCHOOL.arcane]: 1 }
     );
     expect(budget?.stat).toBe(SPELL_HIT);
     expect(budget?.remaining).toBeCloseTo(75.69, 2);
@@ -1165,6 +1180,11 @@ type SpecRun = {
   onRun?: (req: RaidSimRequest) => void;
   /** The spec the run ranks for; defaults to `"ret"`. */
   spec?: string;
+  /**
+   * Every sim's `spellDamageBySchool`, keyed by the sim's school bit (ticket
+   * 831); defaults to all damage in Shadow. `null` leaves the field out.
+   */
+  castDamage?: Readonly<Record<number, number>> | null;
   /** The EP weights; defaults to ret's. */
   epWeights?: Record<string, number>;
   /** The run's `simDatabaseFor`, which `composeFor` calls for every request. */
@@ -1228,11 +1248,14 @@ async function runSpec(o: SpecRun) {
       requests.push(structuredClone(req));
       o.onRun?.(req);
       const dps = o.dps ? o.dps(req) : 2000;
+      const castDamage =
+        o.castDamage === undefined ? { [SCHOOL.shadow]: 1 } : o.castDamage;
       return Promise.resolve({
         dps,
         stdev: 30,
         iterationsDone: opts.iterations,
         simVersion: "v0.0.535",
+        ...(castDamage === null ? {} : { spellDamageBySchool: castDamage }),
         ...(opts.saveAllValues === true
           ? { allValues: new Array<number>(opts.iterations).fill(dps) }
           : {}),
@@ -1451,11 +1474,13 @@ describe.skipIf(!forkPresent)(
   }
 );
 
-/** The note a caster gets when some spells reach the hit cap below 16% (ticket 831). */
-const TALENT_CAP_DETAIL =
-  "If gems were swapped to turn your meta gem on, hit rating was counted " +
-  "at full value up to 16% spell hit, although some of your spells get " +
-  "extra hit and reach the hit cap sooner.";
+/**
+ * The note a caster gets when a talent adds hit to some spells only, which
+ * no stats read shows (ticket 831).
+ */
+const perSpellTalentDetail = (talent: string) =>
+  "If gems were swapped to turn your meta gem on, hit rating was valued " +
+  `as if your ${talent} talent added no hit, so it may be valued too high.`;
 
 /**
  * A caster's stats read: `shared` spell hit in slot 13 and in each school
@@ -1483,39 +1508,171 @@ function skeletonWithTalents(talentsString: string): RaidSimRequest {
 }
 
 describe.skipIf(!forkPresent)(
-  "a talent that caps some spells early gets a note (831)",
+  "a caster's hit is priced by the spells its sim cast (831)",
   () => {
-    it("831-N1: a mage whose read shows Arcane hit above the shared spell hit gets the note", async () => {
-      // Oracle: Arcane Focus adds school hit (`sim/mage/talents.go:113`), so
-      // slot 6 reads above slot 13 and Arcane spells cap first.
-      const run = await runSpec({
-        pool: S_POOL,
-        spec: "mage",
-        skeleton: skeletonWithTalents("--"),
-        computeStats: casterRead(5, { 6: 10 }),
-      });
-      expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([
-        { field: "Meta gem swaps and the hit cap", detail: TALENT_CAP_DETAIL },
+    const load = () =>
+      importForkUpgrades<CapProfileMod>("engine/cap-profile.ts");
+    /** A slot-13 read of 5% whose Shadow slot, 11, reads 15%. */
+    const shadowFocusRead = () => {
+      const pseudo = pseudoStatsWithHit(5, 13);
+      for (let slot = 6; slot <= 11; slot++) pseudo[slot] = 5;
+      pseudo[11] = 15;
+      return pseudo;
+    };
+
+    it("831-G1: the budget splits the spell damage by school, each school capped at its own hit", async () => {
+      // Oracle: Shadow spells read slot 11, 10% (126.15 rating) above slot
+      // 13; Arcane spells read slot 6, equal to slot 13.
+      const m = await load();
+      const budget = m.hitCapBudgetFrom(
+        m.capProfileFor("shadow"),
+        budgetRequest(undefined),
+        shadowFocusRead(),
+        { [SCHOOL.shadow]: 900, [SCHOOL.arcane]: 100 }
+      );
+      expect(budget?.remaining).toBeCloseTo(
+        11 * SPELL_HIT_RATING_PER_PERCENT,
+        6
+      );
+      expect(budget?.groups).toEqual([
+        { offset: 0, share: 0.1 },
+        {
+          offset: expect.closeTo(10 * SPELL_HIT_RATING_PER_PERCENT, 6),
+          share: 0.9,
+        },
       ]);
     });
 
-    it("831-N2: a shadow priest whose read shows Shadow hit above the shared spell hit gets the note", async () => {
-      // Oracle: Shadow Focus adds school hit (`sim/priest/talents.go:338`).
-      const run = await runSpec({
-        pool: S_POOL,
+    it("831-G2: physical damage takes no share, and a two-school spell reads slot 13", async () => {
+      // Oracle: `SchoolIndex` sends a multi-school spell to the physical
+      // index, which holds no school hit (`sim/core/flags.go:288-308`), so
+      // its hit is slot 13's; physical damage uses melee hit, not spell hit.
+      const m = await load();
+      const budget = m.hitCapBudgetFrom(
+        m.capProfileFor("shadow"),
+        budgetRequest(undefined),
+        shadowFocusRead(),
+        { 1: 500, [SCHOOL.shadow + SCHOOL.fire]: 250, [SCHOOL.shadow]: 750 }
+      );
+      expect(budget?.groups).toEqual([
+        { offset: 0, share: 0.25 },
+        {
+          offset: expect.closeTo(10 * SPELL_HIT_RATING_PER_PERCENT, 6),
+          share: 0.75,
+        },
+      ]);
+    });
+
+    it("831-G3: a melee budget takes no groups; a spell budget with no spell damage throws", async () => {
+      const m = await load();
+      const melee = m.hitCapBudgetFrom(
+        m.capProfileFor("ret"),
+        budgetRequest(undefined),
+        pseudoStatsWithHit(5),
+        { [SCHOOL.shadow]: 1 }
+      );
+      expect(melee?.groups).toBeUndefined();
+      expect(() =>
+        m.hitCapBudgetFrom(
+          m.capProfileFor("mage"),
+          budgetRequest(undefined),
+          shadowFocusRead()
+        )
+      ).toThrow(/spell damage/);
+    });
+
+    it("831-P1: a shadow priest whose cast spells are all Shadow values no hit past the Shadow cap", async () => {
+      // Oracle: the page's default shadow priest is a Troll, with no
+      // Starshards (`sim/priest/priest.go:58-62`), so all its damage is
+      // Shadow, which Shadow Focus's 10% (126 rating) caps before slot 13.
+      // 30 rating under slot 13's cap is 96 past the Shadow cap: no Great
+      // Dawnstone. The same budget with the damage in Arcane, which reads
+      // slot 13, takes one. Warlock weights, under which a Great Dawnstone
+      // wins while hit has its full value (746-A2).
+      const shadow = await warlockRun({
         spec: "shadow",
-        skeleton: skeletonWithTalents("--"),
-        computeStats: casterRead(5, { 11: 10 }),
+        weightsOf: "warlock",
+        bonusHit: 0,
+        localBudget: 30,
+        schoolBonus: { 11: 10 },
+        castDamage: { [SCHOOL.shadow]: 1 },
       });
-      expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([
-        { field: "Meta gem swaps and the hit cap", detail: TALENT_CAP_DETAIL },
-      ]);
+      for (const items of shadow.rows) {
+        expect(holdsGem(items, GREAT_DAWNSTONE)).toBe(false);
+      }
+      const arcane = await warlockRun({
+        spec: "shadow",
+        weightsOf: "warlock",
+        bonusHit: 0,
+        localBudget: 30,
+        schoolBonus: { 11: 10 },
+        castDamage: { [SCHOOL.arcane]: 1 },
+      });
+      for (const items of arcane.rows) {
+        expect(holdsGem(items, GREAT_DAWNSTONE)).toBe(true);
+      }
     });
 
-    it("831-N3: a warlock with Suppression in its talents gets the note, though the read shows no school hit", async () => {
+    it("831-W1: a caster whose worn meta is off sims that gear first and prices the worn repair by its spells", async () => {
+      // Oracle: slot 13 reads 7%, Shadow 17%. With the damage in Shadow no
+      // hit is worth anything, so the worn repair places no Great
+      // Dawnstone; with it in Arcane, 9% (113.5 rating) is left and it does.
+      const e = await engine();
+      const weights = e.data.epWeightsFor("warlock") as Record<string, number>;
+      const baselineGear = async (school: number) => {
+        const worn = await wornWithMetaOff();
+        const run = await runSpec({
+          worn,
+          pool: S_POOL,
+          spec: "shadow",
+          epWeights: weights,
+          computeStats: casterRead(7, { 11: 10 }),
+          castDamage: { [school]: 1 },
+        });
+        expect(requestItems(run.requests[0]!)[CHEST]!.gems).toEqual(
+          worn[CHEST]!.gems
+        );
+        expect(run.ranking.baseline?.metaAdjusted).toBe(true);
+        return requestItems(run.requests[1]!);
+      };
+      expect(holdsGem(await baselineGear(SCHOOL.shadow), GREAT_DAWNSTONE)).toBe(
+        false
+      );
+      expect(holdsGem(await baselineGear(SCHOOL.arcane), GREAT_DAWNSTONE)).toBe(
+        true
+      );
+    });
+
+    it("831-F1: a caster run whose baseline sim gives no spell damage fails", async () => {
+      await expect(
+        runSpec({
+          pool: S_POOL,
+          spec: "mage",
+          castDamage: null,
+          computeStats: casterRead(5),
+        })
+      ).rejects.toThrow(/spell damage/);
+    });
+
+    it("831-N1: school hit from talents gets no note, because the price already counts it", async () => {
+      for (const [spec, slot, school] of [
+        ["mage", 6, SCHOOL.arcane],
+        ["shadow", 11, SCHOOL.shadow],
+      ] as const) {
+        const run = await runSpec({
+          pool: S_POOL,
+          spec,
+          skeleton: skeletonWithTalents("0--"),
+          computeStats: casterRead(5, { [slot]: 10 }),
+          castDamage: { [school]: 1 },
+        });
+        expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
+      }
+    });
+
+    it("831-N3: a warlock with Suppression gets the note that names it", async () => {
       // Oracle: Suppression is a per-spell bonus on Affliction spells
-      // (`sim/warlock/talents.go:75-84`), which no pseudo-stat holds; the
-      // talent string the sim reads is the signal.
+      // (`sim/warlock/talents.go:75-84`), in no stats slot.
       const run = await runSpec({
         pool: S_POOL,
         spec: "warlock",
@@ -1523,11 +1680,14 @@ describe.skipIf(!forkPresent)(
         computeStats: casterRead(5),
       });
       expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([
-        { field: "Meta gem swaps and the hit cap", detail: TALENT_CAP_DETAIL },
+        {
+          field: "Meta gem swaps and the hit cap",
+          detail: perSpellTalentDetail("Suppression"),
+        },
       ]);
     });
 
-    it("831-N5: a shadow priest with Focused Power gets the note, though the read shows no school hit", async () => {
+    it("831-N5: a shadow priest with Focused Power gets the note that names it", async () => {
       // Oracle: Focused Power is a per-spell bonus on Smite and Mind Blast
       // (`sim/priest/talents.go:64-73`), Discipline (segment 0) index 15 in
       // `ui/sim/talents/trees/priest.json`.
@@ -1538,29 +1698,32 @@ describe.skipIf(!forkPresent)(
         computeStats: casterRead(5),
       });
       expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([
-        { field: "Meta gem swaps and the hit cap", detail: TALENT_CAP_DETAIL },
+        {
+          field: "Meta gem swaps and the hit cap",
+          detail: perSpellTalentDetail("Focused Power"),
+        },
       ]);
     });
 
     it("831-N6: against a target that is not level 73 a caster gets only the no-cap note", async () => {
-      // Oracle: with no budget, hit was treated as always useful, so the
-      // 16% sentence would be false; the level-73 note says what happened.
+      // Oracle: with no budget, hit was treated as always useful; the
+      // level-73 note says so, and no other hit-cap note joins it.
       const skeleton = skeletonWithTalents("5--") as unknown as {
         encounter: { targets: Array<{ level: number }> };
       };
       for (const t of skeleton.encounter.targets) t.level = 72;
       const run = await runSpec({
         pool: S_POOL,
-        spec: "mage",
+        spec: "warlock",
         skeleton: skeleton as unknown as RaidSimRequest,
-        computeStats: casterRead(5, { 6: 10 }),
+        computeStats: casterRead(5),
       });
       const notes = run.ranking.substitutions.filter(isHitCapNote);
       expect(notes).toHaveLength(1);
       expect(notes[0]!.detail).toMatch(/level 73/);
     });
 
-    it("831-N4: with no talent that adds hit to some spells, a budget spec gets no hit-cap note", async () => {
+    it("831-N4: with no per-spell hit talent, a budget spec gets no hit-cap note", async () => {
       for (const spec of ["mage", "shadow", "warlock"]) {
         const run = await runSpec({
           pool: S_POOL,
@@ -1570,7 +1733,6 @@ describe.skipIf(!forkPresent)(
         });
         expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
       }
-      // Ret's Precision is flat hit inside slot 12, so no ret attack caps first.
       const ret = await runSpec({
         pool: S_POOL,
         computeStats: await gearHitReads(),
@@ -1705,6 +1867,11 @@ async function scriptedStats(o: {
   baselineHitPercent: number;
   bonusHit: Readonly<Record<number, number>>;
   hit?: { stat: number; slot: number; ratingPerPercent: number };
+  /**
+   * For a slot-13 read, each school slot's extra hit over slot 13; the
+   * school slots 6-11 read slot 13 plus it, as `FillPlayerStats` writes them.
+   */
+  schoolBonus?: Readonly<Record<number, number>>;
 }) {
   const hit = o.hit ?? {
     stat: MELEE_HIT,
@@ -1729,14 +1896,16 @@ async function scriptedStats(o: {
       if (n >= 2) bonus += o.bonusHit[setId] ?? 0;
     }
     const rating = e.caps.gearHitRating(mapped, hit.stat) + bonus;
-    return {
-      stats: [],
-      pseudoStats: pseudoStatsWithHit(
-        (rating - o.baselineGearHit) / hit.ratingPerPercent +
-          o.baselineHitPercent,
-        hit.slot
-      ),
-    };
+    const percent =
+      (rating - o.baselineGearHit) / hit.ratingPerPercent +
+      o.baselineHitPercent;
+    const pseudoStats = pseudoStatsWithHit(percent, hit.slot);
+    if (hit.slot === 13) {
+      for (let slot = 6; slot <= 11; slot++) {
+        pseudoStats[slot] = percent + (o.schoolBonus?.[slot] ?? 0);
+      }
+    }
+    return { stats: [], pseudoStats };
   };
 }
 
@@ -2283,14 +2452,26 @@ async function warlockRun(o: {
   bonusHit: number;
   /** The candidate's budget on the run's baseline budget moved by gear hit. */
   localBudget: number;
+  /** The caster ranked; defaults to `"warlock"`. */
+  spec?: string;
+  /** See `scriptedStats`. */
+  schoolBonus?: Readonly<Record<number, number>>;
+  /** See `SpecRun.castDamage`. */
+  castDamage?: Readonly<Record<number, number>>;
+  /** Whose EP weights repair uses; defaults to the spec's. */
+  weightsOf?: string;
 }) {
+  const spec = o.spec ?? "warlock";
   const e = await engine();
   const worn = equipmentOf(loadFixture("ret-p3-p2"));
   worn[HEAD] = { id: MANA_ETCHED.crown, gems: [RUNED, 32409] };
   worn[HANDS] = { id: MANA_ETCHED.gloves, gems: [RUNED, NIGHTSEYE] };
   expect(metaOf(e, socketedOf(worn)).status.kind).toBe("active");
-  const weights = e.data.epWeightsFor("warlock") as Record<string, number>;
-  const gems = e.cg.gemContext(e.gems.gemsForPhase(3), weights, "warlock");
+  const weights = e.data.epWeightsFor(o.weightsOf ?? spec) as Record<
+    string,
+    number
+  >;
+  const gems = e.cg.gemContext(e.gems.gemsForPhase(3), weights, spec);
   const pre = e.rank.candidateSwapPreRepair(worn, HANDS, RET_HANDS, gems);
   expect(metaOf(e, pre.socketed).status.kind).toBe("inactive");
   const wornGearHit = e.caps.gearHitRating(worn, SPELL_HIT);
@@ -2308,13 +2489,15 @@ async function warlockRun(o: {
       slot: 13,
       ratingPerPercent: SPELL_HIT_RATING_PER_PERCENT,
     },
+    ...(o.schoolBonus ? { schoolBonus: o.schoolBonus } : {}),
   });
   const run = await runSpec({
     worn,
     pool: [{ itemId: RET_HANDS, slot: "hands" }],
-    spec: "warlock",
+    spec,
     epWeights: weights,
     computeStats: (req) => Promise.resolve(stats(req)),
+    ...(o.castDamage ? { castDamage: o.castDamage } : {}),
   });
   const rows = run.requests
     .map(requestItems)

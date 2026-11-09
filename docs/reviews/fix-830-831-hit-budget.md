@@ -475,10 +475,10 @@ Tickets this branch filed: 0. Closed: 2 (830, 831), counted with
 
 ## Disposition (round 2)
 
-| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                     |
-| ---- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| R2-1 | Focused check | fixed       | fixed — pending author fix. Reopens A1/D1: price the default Troll shadow priest's hit by what its cast spells still gain, from the sim's own result, not by race |
-| R2-2 | Focused check | fixed       | fixed — pending author fix. The note must be true when every cast spell already reaches the cap (default Troll priest, D4's custom rotation)                      |
-| R2-3 | Focused check | wontfix     | Bookkeeping: the `## Disposition` rows map each finding ID to its change and commit                                                                               |
-| R2-4 | Focused check | wontfix     | Bookkeeping: wording in ticket 830 only; correct the sha when the ticket is next edited (this review writes only this file)                                       |
-| R2-5 | Code quality  | fixed       | fixed — pending author fix. See `## Code quality (round 2)`                                                                                                       |
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                                                          |
+| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R2-1 | Focused check | fixed       | Fork 4903b8cee: the spell-hit budget splits hit by the baseline sim's spell damage by school, each school capped at its own hit; tests 831-P1 and 831-W1. Owner chose this, 2026-11-09: "a sounds ok." |
+| R2-2 | Focused check | fixed       | Fork 4903b8cee removes that note; the only note left names a per-spell hit talent (Suppression, Focused Power) the price leaves out; tests 831-N1, N3, N5                                              |
+| R2-3 | Focused check | wontfix     | Bookkeeping: the `## Disposition` rows map each finding ID to its change and commit                                                                                                                    |
+| R2-4 | Focused check | fixed       | Ticket 830's `Verified by:` now names fork 4903b8cee, where its runs were made, and says it holds ed3255a80                                                                                            |
+| R2-5 | Code quality  | fixed       | Fork 4903b8cee: `TalentHitDescriptor` extends `TalentPosition`; the note is `hitCapPerSpellTalentNote` and the test's `perSpellTalentDetail`, both about a talent                                      |
