@@ -486,3 +486,53 @@ re-pin to `3055fa71a`, `engine.md` `rank.ts` row (new hash and one
 history entry), `sim-implemented-effects.json` regenerated. E-W3 green
 before the hash moved; `pnpm verify` rc 0 (`gates: 1608 ran, 0 skipped`),
 node v22.23.2.
+
+## Focused check (round 5)
+
+Main range `b52c3d8b..bada813a`; fork range `788b8e86e..3055fa71a`. One
+fresh `general-task` agent on Opus that wrote none of this, told it writes
+nothing. The owner chose this round ("fine a", 2026-11-08), so it is again
+a last round. The check was limited to the R4-1 deletion: it did not review
+other comments or code.
+
+Conditions 1 to 3, checked by the dispatcher: `2c7a8b82` is a fork re-pin
+naming R4-1 (it changes the lock, `data/`, `docs/` and this file);
+`e259cb29`, `3e16ea9e` and `bada813a` edit only this file; fork
+`3055fa71a` names R4-1 and changes only comment lines. `rank.ts` does not
+exist at upstream `cec2a7b6` (`git cat-file -e` rc 128); no merges in
+either range (`git rev-list --merges` prints nothing).
+
+1. **The diff removes only that sentence: pass.** `git diff 788b8e86e
+3055fa71a --stat` names only `rank.ts`, 1 insertion and 4 deletions;
+   every `+` and `-` line starts with ` *`. The one `+` line is the old
+   line "for a caller whose note names it. It" with " It" cut.
+2. **Every sentence left in the `VersionGears` doc is true: pass.** The
+   four sentences (versions of one build, a pair's in one call; `base`
+   and `rebuild`; when an entry is undefined; the `MetaRepairError` goes
+   to `onRepairFailed`) each hold against `rank.ts` at `3055fa71a`: the
+   helper at `1130-1213` inside `rankUpgrades` (`782`), the repair catch
+   at `1198-1202` (dispatcher re-read), the Stop catch at `1209-1212`, and
+   the callers that pass `onRepairFailed` at `2372-2377` and `2441-2446`.
+3. **The pin names the new fork commit: pass.** `rank.ts` at `3055fa71a`
+   hashes to `4cf41a87...`, the hash in the `engine.md` row (dispatcher
+   re-ran `sha256sum`); the lock's `commit` is `3055fa71a`, `branch`
+   unchanged, `"pushed": false`, and `git ls-remote origin
+refs/heads/fix/852-810` prints nothing; `sim-implemented-effects.json`
+   names `3055fa71a`. Under `git diff -w`, `engine.md` changes only the
+   table separator and the `rank.ts` row.
+4. **The tests pass: pass.** `wowsims-fork-parity` and
+   `fork-meta-repair`: 48 passed, rc 0, node v22.23.2.
+
+Findings: none. The checker noted that it did not read the helper's own
+doc comment (`rank.ts:1116-1126`), which was outside this check.
+
+## Disposition (round 5)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                   |
+| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| F1   | Focused check | fixed       | bookkeeping: the round 2 range header was committed with its section in `a9326235`                                              |
+| F2   | Focused check | fixed       | fork `ef85f07fa`: one `MetaRepairError` catch in `versionGears`; main `02ad5867` re-pins it and makes `852-R` go through it     |
+| R3-1 | Focused check | fixed       | fork `788b8e86e`: the "never the shared layout" sentence deleted from the `versionGears` doc; main `b52c3d8b` fixes `engine.md` |
+| R3-2 | Focused check | fixed       | bookkeeping: the finding IDs of fork `ef85f07fa` and `788b8e86e` are recorded in `## Fix after round 3` (`e259cb29`)            |
+| R3-3 | Focused check | fixed       | fork `788b8e86e`: the `VersionGears` doc says "default request" for the compose case; re-pinned in main `b52c3d8b`              |
+| R4-1 | Focused check | fixed       | fork `3055fa71a`: the sentence listing why `VersionGears` rejects is deleted; re-pinned in main `2c7a8b82`                      |
