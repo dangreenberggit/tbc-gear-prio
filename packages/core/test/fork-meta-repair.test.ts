@@ -1371,17 +1371,6 @@ describe.skipIf(!forkPresent)(
       }
     });
 
-    it("535-S2: a runner with no computeStats repairs at full weight: two Rigid on both rows", async () => {
-      const run = await runSpec({ pool: S_POOL });
-      for (const chestId of [32365, 30907]) {
-        const changes = chestRequestChanges(run.requests, run.worn, chestId);
-        expect(changes.length).toBeGreaterThan(0);
-        for (const c of changes) {
-          expect(c).toEqual([`${BOLD}->${RIGID}`, `${BOLD}->${RIGID}`]);
-        }
-      }
-    });
-
     it("852-B: a failed baseline read fails the run with the sim's error", async () => {
       // Oracle: the read is a sim call, so its failure ends the run as a
       // failed baseline sim does, with the sim's own message. No repair runs
@@ -1440,11 +1429,120 @@ describe.skipIf(!forkPresent)(
       ]);
     });
 
-    it("535-S7: ret without a stats read gets no full-weight note", async () => {
-      const run = await runSpec({ pool: S_POOL, spec: "ret" });
-      expect(
-        run.ranking.substitutions.filter((s) => s.detail === FULL_WEIGHT_DETAIL)
-      ).toEqual([]);
+    it("535-S7: a budget spec on a runner with no computeStats fails at the baseline's read (830)", async () => {
+      // Oracle: `SimRunner.computeStats` is required (ticket 830), so no
+      // budget spec repairs at full weight without saying so. A runner that
+      // breaks the type fails the run at its first read, after the baseline
+      // sim and before any candidate sim.
+      for (const spec of ["ret", "feral", "mage", "shadow", "warlock"]) {
+        let sims = 0;
+        await expect(
+          runSpec({
+            pool: S_POOL,
+            spec,
+            onRun: () => {
+              sims += 1;
+            },
+          })
+        ).rejects.toThrow(/computeStats is not a function/);
+        expect(sims).toBe(1);
+      }
+    });
+  }
+);
+
+/** The note a caster gets when a talent caps some spells below 16% (ticket 831). */
+const TALENT_CAP_DETAIL =
+  "If gems were swapped to turn your meta gem on, hit rating was counted " +
+  "at full value up to 16% spell hit, although your talents give some of " +
+  "your spells extra hit, so they reach the hit cap sooner.";
+
+/**
+ * A caster's stats read: `shared` spell hit in slot 13 and in each school
+ * slot 6-11, plus each school's talent bonus, as `FillPlayerStats` writes
+ * them (`sim/core/character_sheet.go:110-116`).
+ */
+function casterRead(
+  shared: number,
+  schoolBonus: Readonly<Record<number, number>> = {}
+): () => Promise<StatsObservation> {
+  const pseudoStats = pseudoStatsWithHit(shared, 13);
+  for (let slot = 6; slot <= 11; slot++) {
+    pseudoStats[slot] = shared + (schoolBonus[slot] ?? 0);
+  }
+  return () => Promise.resolve({ stats: [], pseudoStats: [...pseudoStats] });
+}
+
+/** The ret P2 skeleton with the player's talents replaced. */
+function skeletonWithTalents(talentsString: string): RaidSimRequest {
+  const skeleton = structuredClone(retSkeleton) as {
+    raid: { parties: Array<{ players: Array<{ talentsString: string }> }> };
+  };
+  skeleton.raid.parties[0]!.players[0]!.talentsString = talentsString;
+  return skeleton as unknown as RaidSimRequest;
+}
+
+describe.skipIf(!forkPresent)(
+  "a talent that caps some spells early gets a note (831)",
+  () => {
+    it("831-N1: a mage whose read shows Arcane hit above the shared spell hit gets the note", async () => {
+      // Oracle: Arcane Focus adds school hit (`sim/mage/talents.go:113`), so
+      // slot 6 reads above slot 13 and Arcane spells cap first.
+      const run = await runSpec({
+        pool: S_POOL,
+        spec: "mage",
+        skeleton: skeletonWithTalents("--"),
+        computeStats: casterRead(5, { 6: 10 }),
+      });
+      expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([
+        { field: "Meta gem swaps and the hit cap", detail: TALENT_CAP_DETAIL },
+      ]);
+    });
+
+    it("831-N2: a shadow priest whose read shows Shadow hit above the shared spell hit gets the note", async () => {
+      // Oracle: Shadow Focus adds school hit (`sim/priest/talents.go:338`).
+      const run = await runSpec({
+        pool: S_POOL,
+        spec: "shadow",
+        skeleton: skeletonWithTalents("--"),
+        computeStats: casterRead(5, { 11: 10 }),
+      });
+      expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([
+        { field: "Meta gem swaps and the hit cap", detail: TALENT_CAP_DETAIL },
+      ]);
+    });
+
+    it("831-N3: a warlock with Suppression in its talents gets the note, though the read shows no school hit", async () => {
+      // Oracle: Suppression is a per-spell bonus on Affliction spells
+      // (`sim/warlock/talents.go:75-84`), which no pseudo-stat holds; the
+      // talent string the sim reads is the signal.
+      const run = await runSpec({
+        pool: S_POOL,
+        spec: "warlock",
+        skeleton: skeletonWithTalents("5--"),
+        computeStats: casterRead(5),
+      });
+      expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([
+        { field: "Meta gem swaps and the hit cap", detail: TALENT_CAP_DETAIL },
+      ]);
+    });
+
+    it("831-N4: with no talent that adds hit to some spells, a budget spec gets no hit-cap note", async () => {
+      for (const spec of ["mage", "shadow", "warlock"]) {
+        const run = await runSpec({
+          pool: S_POOL,
+          spec,
+          skeleton: skeletonWithTalents("0--"),
+          computeStats: casterRead(5),
+        });
+        expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
+      }
+      // Ret's Precision is flat hit inside slot 12, so no ret attack caps first.
+      const ret = await runSpec({
+        pool: S_POOL,
+        computeStats: await gearHitReads(),
+      });
+      expect(ret.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
     });
   }
 );
@@ -1509,14 +1607,6 @@ describe.skipIf(!forkPresent)(
       expect(run.ranking.baseline?.metaAdjusted).toBe(true);
       expect(run.statsRequests.length).toBeGreaterThan(0);
       expect(run.ranking.substitutions.filter(isHitCapNote)).toHaveLength(0);
-    });
-
-    it("705-W2: with no computeStats, the worn repair keeps full weight and puts Rigid in the chest", async () => {
-      const worn = await wornWithMetaOff();
-      const run = await runSpec({ worn, pool: S_POOL });
-      const baselineChest = requestItems(run.requests[0]!)[CHEST]!;
-      expect(baselineChest.gems).toEqual([BOLD, RIGID, 28363]);
-      expect(run.ranking.baseline?.metaAdjusted).toBe(true);
     });
 
     it("852-W: a failed worn-gear read fails the run with the sim's error before any sim", async () => {

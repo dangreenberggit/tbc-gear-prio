@@ -30,6 +30,7 @@ import {
   forkPresent,
   importForkUpgrades,
   statsOnlyItemEp,
+  zeroHitStats,
 } from "./fork-engine-harness.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -443,6 +444,12 @@ async function runScenario(scenario: Scenario): Promise<{
   /** For each `activeSetBonuses` call, how many sims had run before it. */
   setBonusReadRuns: number[];
 }> {
+  // The fake sim answers in microtasks, so without this the file never gives
+  // the event loop back. Since every feral run reads hit (ticket 830), the
+  // file runs for minutes, and vitest's worker reported
+  // `Timeout calling "onTaskUpdate"`. `setImmediate`, not `setTimeout`: only
+  // the former lets the loop read the worker's pending messages first.
+  await new Promise((resolve) => setImmediate(resolve));
   const rankMod = await importForkUpgrades<{
     rankUpgrades: (
       input: Record<string, unknown>,
@@ -516,6 +523,7 @@ async function runScenario(scenario: Scenario): Promise<{
       : new AbortController();
   const sim = {
     version: () => Promise.resolve(SIM_VERSION),
+    computeStats: zeroHitStats,
     run: (req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation> => {
       runCount += 1;
       const ids = equippedIds(req);
@@ -5682,7 +5690,9 @@ describe.skipIf(!forkPresent)(
       }
       // The sweep reaches a 4pc step that breaks Thunderheart (k >= 2).
       expect(fourPcStepsWithBreaks).toBeGreaterThan(0);
-    });
+      // Every feral run reads hit (ticket 830), so each repair searches with
+      // the hit term; alone, this sweep took 57 s on 2026-11-09.
+    }, 180_000);
 
     it("497-B: a stat interaction on the 4pc gear moves the pieces line, not the Breaks line", async () => {
       // Scenario kind: worn Thunderheart hands and legs (k = 2), the Malorne
