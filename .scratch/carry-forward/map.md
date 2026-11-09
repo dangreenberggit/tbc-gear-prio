@@ -463,3 +463,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 861 The layout gate's Chromium aborts inside the Claude Code sandbox (`socket() failed`), so an agent's merge skips the gate (ticket 860) 2026-11-08
 - 862 No agent has yet removed a pair through the unpair sandbox fallback in `paired-worktrees.md` § Remove it (`docs/reviews/docs-unpair-after-merge.md` IR1) 2026-11-08; CLOSED 2026-11-08, an agent removed the pair `unpair-doc` after its merge through the fallback, with no owner step
 - 865 A stale result's gear-set badges name the new phase's sets after a phase change (`docs/reviews/fix-852-810-sim-errors-bis-labels.md` X1) 2026-11-08
+- 866 The fork's locale-key test fails on two plural keys that exist in `upgrades.json` (wowsims catch-up to v0.0.155, `docs/reviews/feat-wowsims-catchup-2026-11-09.md` B1) 2026-11-09

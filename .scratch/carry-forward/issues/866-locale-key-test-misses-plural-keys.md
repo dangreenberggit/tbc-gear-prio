@@ -22,7 +22,8 @@ Both calls pass `count`
 (`ui/features/upgrades/components/BelowCutoffGroup/BelowCutoffGroup.tsx:34-35`),
 and `assets/locales/en/upgrades.json:154-157` defines each key in its
 i18next plural forms, `_one` and `_other`. i18next picks the plural form
-from `count`, so the player sees the right text. The test looks only for
+from `count`, so the player should see the right text (untested: no
+render of the group title was checked). The test looks only for
 the bare key and does not know plural suffixes.
 
 `fork-tests:check` in `pnpm verify` runs only the tab's own test paths
