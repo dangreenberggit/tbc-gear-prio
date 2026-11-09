@@ -6,7 +6,7 @@ The rules are in the script's docstring; this file names every wearable
 epic the list does not hold, and the policy that excludes it.
 
 List: `data/universes/mage-p2.json`, 353 entries.
-Wowsims DB: `wowsims/tbc-new` commit `cec2a7b687f985c7dcbb94b3620e9cf7885f0323`, sha256 `3c97432c94f6bf66fa285738057e963647dfbd51dbb7ba0d157733b9016dca5e`.
+Wowsims DB: `wowsims/tbc-new` commit `24606be6bae2601e5ca3985431c8c1da2ab422c0`, sha256 `3c97432c94f6bf66fa285738057e963647dfbd51dbb7ba0d157733b9016dca5e`.
 
 ## Counts
 
