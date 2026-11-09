@@ -849,11 +849,12 @@ when the character has Engineering and an `explosiveId`
 default warlock: it has no school hit talent, so the grenade's Fire
 damage and all its spells are one group at offset 0 and stop at the
 same cap (`spellHitGroups` merges damage by offset). This is a reading
-of the code; no warlock sim was run. Suggested text: "The page's
-default shadow priest does not take Engineering. The default warlock
-does, and throws the Adamantite Grenade, but with no school hit talent
-its spells and the grenade reach the cap together, so its price does
-not change." The `CapProfile.repair` comment makes no such claim.
+of the code; no warlock sim was run. Suggested fix: delete the
+sentence. The note's next sentence, "How often either moves a ranking
+is unmeasured", already covers it, and a replacement about the warlock
+would add a claim no sim has checked (the round-limit assessor's advice,
+taken after the first round 4 commit). The `CapProfile.repair` comment
+makes no such claim.
 
 **R4-2 (code quality, low).** R3-S2 is not applied in the main tests,
 which the round 3 Code quality row names ("main 831 tests"). They still
@@ -908,9 +909,9 @@ line.
 
 ## Disposition (round 4)
 
-| ID   | Axis          | Disposition | Ticket / note                                                                                                                       |
-| ---- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| R4-1 | Focused check | fixed       | fixed — pending author fix: replace the Engineering sentence in ticket 831's closing note with the suggested text in round 4's R4-1 |
-| R4-2 | Focused check | fixed       | fixed — pending author fix: a local `SpellDamageBySchool` alias in the two main test files                                          |
-| R4-3 | Focused check | fixed       | fixed — pending author fix: rewrap the explosive sentence in fork `cap-profile.ts`                                                  |
-| R4-4 | Focused check | wontfix     | Not a defect: the move serves 831-T1 and changes no behaviour                                                                       |
+| ID   | Axis          | Disposition | Ticket / note                                                                              |
+| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------ |
+| R4-1 | Focused check | fixed       | fixed — pending author fix: delete the Engineering sentence from ticket 831's closing note |
+| R4-2 | Focused check | fixed       | fixed — pending author fix: a local `SpellDamageBySchool` alias in the two main test files |
+| R4-3 | Focused check | fixed       | fixed — pending author fix: rewrap the explosive sentence in fork `cap-profile.ts`         |
+| R4-4 | Focused check | wontfix     | Not a defect: the move serves 831-T1 and changes no behaviour                              |
