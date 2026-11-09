@@ -2,6 +2,10 @@
 
 Reviewed range: `5fa40c5761d38ebf4d1fe10e520e6f79acff33fe..a7c422c1718339c69baf4837b2939e39638a26e1`
 
+Reviewed range: `a7c422c1718339c69baf4837b2939e39638a26e1..05c8be4992598a7db2509d51b58d6aa62d382cd7`
+
+Reviewed range: `05c8be4992598a7db2509d51b58d6aa62d382cd7..c56cee771c3a92d40c903fb7e50522bec7dd8d65`
+
 Fork range (round 1): `3055fa71a..60a4735ea` in `vendor/tbc-new-fork`
 (`60a4735ea` merges upstream `24606be6b`, tag v0.0.155).
 
@@ -171,6 +175,76 @@ author's report; the procedure names no committed place for them.
 | --- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | CQ1 | `data/desktop-gate/README.md:75-79` | A1 / P1: the sentence calls the mage golden a first recording whose adding commit names what it covers. Say that the mage golden was re-recorded for upstream's Arcane APL change in v0.0.155 and that commit `3b44d2b7` explains it. |
 
+The code-quality pass was made by the agent that wrote this review, not by
+a fresh agent, because the coordinator that sent it allowed it to edit
+`data/desktop-gate/README.md` for CQ1 only: commit `05c8be49`. Then
+`node --version; pnpm verify` printed v22.23.2, `gates: 1608 ran, 0
+skipped`, rc 0.
+
+## Focused check (round 2)
+
+Main range `a7c422c1..05c8be49`: `b88d03cd` (round 1's review file, ticket
+866 wording for S3, the map line for B1) and `05c8be49` (the code-quality
+pass, CQ1). Fork range: empty; the fork lock's `commit` is `60a4735ea…` at
+both ends (`git show <c>:data/wowsims-fork.lock.json`). One fresh
+`general-task` agent on Opus ran the check.
+
+1. **Conditions 1 to 3: hold.** `b88d03cd` edits only the review file and
+   ticket files; `05c8be49` names CQ1 and changes only a doc; the fork range
+   is empty.
+2. **Fixes change only what each finding asks: yes,** but the CQ1 text is
+   wrong (F1).
+3. **New tests: none,** which is right for doc and ticket fixes.
+4. **Tests the fixes touch: pass.** No check reads the README's text
+   (`scripts/check_desktop_tab.py` names it only in message strings and
+   reads the golden JSON); `npx prettier --check data/desktop-gate/README.md`
+   rc 0.
+
+- **F1.** The new README text said "The rogue and enhancement goldens are
+  first recordings". Commit `05cddea6` ("Re-record desktop goldens for
+  weapon-damage order", 2026-11-07, on `dev` before this branch) re-recorded
+  the enh, rogue and mage goldens (`git show --stat 05cddea6`; the README's
+  own line 117 says enh was "re-recorded by the owner on 2026-11-07"). The
+  sentence round 1 flagged was already wrong for all three before this
+  branch; round 1 saw only the mage part. Checked by the dispatching agent:
+  `git log -- data/desktop-gate/golden-<spec>-p4-cap40.json` shows
+  `05cddea6` on all four goldens.
+- **F2.** The new text stated as fact that upstream's Arcane rotation change
+  caused the mage move; the only evidence is the author's isolation run,
+  which no reviewer repeated.
+
+Both findings ask only for a wording change in a README that changes no
+step, rule or line of code, so under `~/.claude/AGENTS.md` § Review round
+limits the review went on without asking: commit `c56cee77` replaces the
+sentence with the reviewer's suggested text ("the latest commit that
+changes each one (`git log -1 -- data/desktop-gate/golden-<spec>-p4-cap40.json`)
+says why its values moved"), and round 3 is the one further round, after
+which the review stops whatever it finds.
+
+## Focused check (round 3)
+
+Main range `05c8be49..c56cee77`: one commit, `c56cee77`, which names F1 and
+F2 and changes only `data/desktop-gate/README.md`. Fork range: empty (fork
+lock `commit` `60a4735ea…` at both ends). One fresh `general-task` agent on
+Opus ran the check.
+
+1. **Conditions 1 to 3: hold.**
+2. **The fix changes only what F1 and F2 ask: yes.** "First recordings" and
+   the stated Arcane cause are gone; the phase-4 sentence before them is
+   unchanged.
+3. **New tests: none,** which is right for a doc change.
+4. **Tests the fix touches: pass.** No check reads the README text
+   (`git grep README c56cee77 -- scripts` finds only comments and printed
+   messages); `node --version; npx prettier --check
+data/desktop-gate/README.md` printed v22.23.2 and rc 0.
+
+The new sentence is true for each golden (`git log -1 c56cee77 --
+data/desktop-gate/golden-<spec>-p4-cap40.json`): enh and rogue end at
+`05cddea6`, whose message says why their rows moved (weapon damage in the
+order; worn items take no cap place) and whose diff leaves their
+`baselineDps` unchanged; mage ends at `3b44d2b7`, whose message gives
+upstream's Arcane APL change as the reason. No finding.
+
 ## Summary
 
 Round 1 found no correctness defect, no test theatre, no domain
@@ -181,11 +255,13 @@ suite passes at `60a4735ea` (adversarial axis), and the mage golden's move
 is consistent with upstream's Arcane APL change (adversarial and domain
 axes).
 
-Open: CQ1, one stale README sentence. This review's writer may not edit
-`data/desktop-gate/README.md`, so the code-quality pass (one fresh agent,
-then `pnpm verify`) is left to the agent that handles this review's
-findings. Round 2 (the focused check) then reads that commit; step 4 (the
-merge check) waits for round 2. CQ1, A1 and P1 get Disposition rows then.
+Round 1's one open finding, CQ1 (a stale README sentence, also A1 and P1),
+was fixed in `05c8be49`. Round 2 found the new sentence false (F1, F2: the
+rogue and enhancement goldens were re-recorded on 2026-11-07 in
+`05cddea6`, on `dev` before this branch). Both were wording-only, so
+`c56cee77` applied the round 2 reviewer's text and round 3, the one further
+round, passed all four checks with no finding. No finding is open, and none
+blocks the merge.
 
 Not counted against the branch: the layout gate and desktop gate were not
 re-run by any axis; their PASS results come from the executing agent's
@@ -204,3 +280,13 @@ owner's approval of an edit to that upstream file.
 | S3  | Standards   | fixed       | ticket 866 now says "should see the right text (untested: no render of the group title was checked)"                            |
 | D1  | Domain      | wontfix     | the tab takes item facts from wowsims (ADR-0029, ADR-0038); presets and saved settings keep their drums                         |
 | B1  | Bookkeeping | fixed       | 866's line added to `.scratch/carry-forward/map.md`                                                                             |
+
+## Disposition (round 3)
+
+| ID  | Axis          | Disposition | Ticket / note                                                                              |
+| --- | ------------- | ----------- | ------------------------------------------------------------------------------------------ |
+| CQ1 | Code quality  | fixed       | `05c8be49`, then `c56cee77` (F1, F2); passed round 3                                       |
+| A1  | Adversarial   | fixed       | same as CQ1                                                                                |
+| P1  | Spec          | fixed       | same as CQ1                                                                                |
+| F1  | Focused check | fixed       | `c56cee77`: the README points at each golden's latest commit; true for all three (round 3) |
+| F2  | Focused check | fixed       | `c56cee77` removes the unrepeated causal claim                                             |
