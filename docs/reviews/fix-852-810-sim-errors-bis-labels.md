@@ -463,3 +463,21 @@ it), and found the other sentences in the `versionGears` and
 likely pass; a full re-read could find more in older comments, most
 likely `hitPercentOf`'s doc (outside this branch's fix range; its caller
 at `rank.ts:840` unchecked).
+
+## Fix after round 4
+
+The owner was offered three options for R4-1 on 2026-11-08: A, delete the
+sentence and have a fresh agent check only the changed lines; B, delete it
+with no check; C, delete it and read the whole helper. The owner answered:
+"fine a".
+
+Comment only; no code line changed. Fork `3055fa71a` (R4-1) deletes the
+sentence "It rejects only to fail the run: when a version's stats read
+fails (ticket 852), or on any other error while rebuilding. So a caller
+does not catch its rejection." from the `VersionGears` doc, with nothing
+in its place. An error the helper throws ends the run by default, so it
+needs no comment, and a list of causes can always be incomplete. Main:
+re-pin to `3055fa71a`, `engine.md` `rank.ts` row (new hash and one
+history entry), `sim-implemented-effects.json` regenerated. E-W3 green
+before the hash moved; `pnpm verify` rc 0 (`gates: 1608 ran, 0 skipped`),
+node v22.23.2.
