@@ -96,13 +96,16 @@ type HitCapBudget = {
   remaining: number;
   groups?: Array<{ offset: number; share: number }>;
 };
+/** Damage by the sim's `SpellSchool` bit, the fork's `SpellDamageBySchool`. */
+type SpellDamageBySchool = Readonly<Record<number, number>>;
+
 type CapProfileMod = {
   capProfileFor: (spec: string) => unknown;
   hitCapBudgetFrom: (
     profile: unknown,
     request: unknown,
     pseudoStats: readonly number[],
-    spellDamageBySchool?: Readonly<Record<number, number>>
+    spellDamageBySchool?: SpellDamageBySchool
   ) => HitCapBudget | undefined;
 };
 
@@ -1184,7 +1187,7 @@ type SpecRun = {
    * Every sim's `spellDamageBySchool`, keyed by the sim's school bit (ticket
    * 831); defaults to all damage in Shadow. `null` leaves the field out.
    */
-  castDamage?: Readonly<Record<number, number>> | null;
+  castDamage?: SpellDamageBySchool | null;
   /** The EP weights; defaults to ret's. */
   epWeights?: Record<string, number>;
   /** The run's `simDatabaseFor`, which `composeFor` calls for every request. */
@@ -2490,7 +2493,7 @@ async function warlockRun(o: {
   /** See `scriptedStats`. */
   schoolBonus?: Readonly<Record<number, number>>;
   /** See `SpecRun.castDamage`. */
-  castDamage?: Readonly<Record<number, number>>;
+  castDamage?: SpellDamageBySchool;
   /** Whose EP weights repair uses; defaults to the spec's. */
   weightsOf?: string;
 }) {

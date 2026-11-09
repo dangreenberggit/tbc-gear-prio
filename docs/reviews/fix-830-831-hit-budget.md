@@ -909,9 +909,9 @@ line.
 
 ## Disposition (round 4)
 
-| ID   | Axis          | Disposition | Ticket / note                                                                              |
-| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------ |
-| R4-1 | Focused check | fixed       | fixed — pending author fix: delete the Engineering sentence from ticket 831's closing note |
-| R4-2 | Focused check | fixed       | fixed — pending author fix: a local `SpellDamageBySchool` alias in the two main test files |
-| R4-3 | Focused check | fixed       | fixed — pending author fix: rewrap the explosive sentence in fork `cap-profile.ts`         |
-| R4-4 | Focused check | wontfix     | Not a defect: the move serves 831-T1 and changes no behaviour                              |
+| ID   | Axis          | Disposition | Ticket / note                                                                                    |
+| ---- | ------------- | ----------- | ------------------------------------------------------------------------------------------------ |
+| R4-1 | Focused check | fixed       | The sentence is deleted from ticket 831's closing note                                           |
+| R4-2 | Focused check | fixed       | Both main test files declare a local `SpellDamageBySchool` alias and use it for damage by school |
+| R4-3 | Focused check | fixed       | Fork b77e48ae3 rewraps the comment (comment only)                                                |
+| R4-4 | Focused check | wontfix     | Not a defect: the move serves 831-T1 and changes no behaviour                                    |

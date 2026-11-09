@@ -34,6 +34,9 @@ const binaryPath = join(
   platform === "win32-x64" ? "wowsimcli-windows.exe" : "wowsimcli"
 );
 
+/** Damage by the sim's `SpellSchool` bit, the fork's `SpellDamageBySchool`. */
+type SpellDamageBySchool = Readonly<Record<number, number>>;
+
 type Action = {
   isMelee?: boolean;
   spellSchool?: number;
@@ -46,7 +49,7 @@ type SimMod = {
       spellSchool: number;
       targets: ReadonlyArray<{ damage: number }>;
     }>
-  ) => Record<number, number>;
+  ) => SpellDamageBySchool;
 };
 type CapMod = {
   capProfileFor: (spec: string) => unknown;
@@ -54,7 +57,7 @@ type CapMod = {
     profile: unknown,
     request: unknown,
     pseudoStats: readonly number[],
-    spellDamageBySchool?: Readonly<Record<number, number>>
+    spellDamageBySchool?: SpellDamageBySchool
   ) => { groups?: Array<{ offset: number; share: number }> } | undefined;
 };
 
@@ -100,7 +103,7 @@ function defaultShadowPriest(race: string): Record<string, unknown> {
 /** The first player's damage by school from one real sim of `request`. */
 async function simmedDamage(
   request: Record<string, unknown>
-): Promise<Record<number, number>> {
+): Promise<SpellDamageBySchool> {
   const dir = mkdtempSync(join(tmpdir(), "caster-hit-"));
   const infile = join(dir, "in.json");
   const outfile = join(dir, "out.json");

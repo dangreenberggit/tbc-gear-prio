@@ -78,9 +78,9 @@ lacked the read got one: `zeroHitStats` in
 `packages/core/test/fork-engine-harness.ts`, and a `RecordedSimRunner`
 subclass in E-W3 (`wowsims-fork-parity.test.ts`), which stays green.
 
-Verified by: tbc-new-fork@3803a1398adf1036fa99fbd546d223fc3a4d20b6, the
+Verified by: tbc-new-fork@b77e48ae34685fb2d4632e2dfdc897e356fa6f79, the
 branch's fork tip, which holds the 830 commit `ed3255a80`;
 `node --version; pnpm exec vitest run packages/core/test/fork-meta-repair.test.ts packages/core/test/wowsims-fork-parity.test.ts`
-(58 passed at that tip); `node --version; pnpm verify` (rc 0, 4 min 36 s; `gates:
+(58 passed at that tip); `node --version; pnpm verify` (rc 0, 4 min 35 s; `gates:
 1620 ran, 0 skipped`; its fork tests check ran 826 tests at
-`tbc-new-fork@3803a1398`).
+`tbc-new-fork@b77e48ae3`).

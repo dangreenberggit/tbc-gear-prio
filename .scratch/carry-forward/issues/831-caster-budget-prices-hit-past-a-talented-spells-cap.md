@@ -100,9 +100,8 @@ class mask, as an item proc is, gets no school bonus in the sim but is
 priced at its school's hit, so hit is valued too low for its share; and
 an explosive gets 100% bonus hit (`sim/core/consumes.go:625-626`), so
 the player's hit never changes it, but its damage is priced as if it
-did, so hit is valued too high for its share. Explosives need
-Engineering, which the page's default casters do not take. How often
-either moves a ranking is unmeasured.
+did, so hit is valued too high for its share. How often either moves a
+ranking is unmeasured.
 
 Tests, in `packages/core/test/fork-meta-repair.test.ts`: 831-G1 to G3
 (the groups, physical and two-school damage, and the error),
@@ -123,8 +122,8 @@ checks that a Night Elf adds Starshards' Arcane damage. Fork:
 by school"), `SubstitutionsList.test.tsx` (the note renders as one
 sentence).
 
-Verified by: tbc-new-fork@3803a1398adf1036fa99fbd546d223fc3a4d20b6;
+Verified by: tbc-new-fork@b77e48ae34685fb2d4632e2dfdc897e356fa6f79;
 `node --version; pnpm exec vitest run packages/core/test/fork-meta-repair.test.ts packages/core/test/fork-caster-hit-sim.test.ts packages/core/test/wowsims-fork-parity.test.ts`
-(60 passed); `node --version; pnpm verify` (rc 0, 4 min 36 s; `gates:
+(60 passed); `node --version; pnpm verify` (rc 0, 4 min 35 s; `gates:
 1620 ran, 0 skipped`; its fork tests check ran 826 tests at
-`tbc-new-fork@3803a1398`).
+`tbc-new-fork@b77e48ae3`).
