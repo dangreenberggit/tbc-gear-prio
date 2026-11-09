@@ -4,6 +4,8 @@ Reviewed range: `fab063a5db43793fb7966154a18893ddaa841c79..7a8e88c597a891b6a4010
 
 Reviewed range: `7a8e88c597a891b6a4010b42b0744b9aa81f4667..00e34b701ce49bb98e6908f1708038bf8d76bfe8`
 
+Reviewed range: `00e34b701ce49bb98e6908f1708038bf8d76bfe8..68518d8df4b8192376c0bf7a8b90ebeabdc78e43`
+
 Fork range reviewed with it: `tbc-new-fork` `60a4735ea1112760fb1d9a175d8e79373647b1a0..52bb752ce4cb5b5ff5e906457891f746b73305d2`
 (ed3255a80 "Require the stats read on every sim runner", 52bb752ce "Note
 when a talent caps some spells before 16%"). The lock moves from the
@@ -482,3 +484,250 @@ Tickets this branch filed: 0. Closed: 2 (830, 831), counted with
 | R2-3 | Focused check | wontfix     | Bookkeeping: the `## Disposition` rows map each finding ID to its change and commit                                                                                                                    |
 | R2-4 | Focused check | fixed       | Ticket 830's `Verified by:` now names fork 4903b8cee, where its runs were made, and says it holds ed3255a80                                                                                            |
 | R2-5 | Code quality  | fixed       | Fork 4903b8cee: `TalentHitDescriptor` extends `TalentPosition`; the note is `hitCapPerSpellTalentNote` and the test's `perSpellTalentDetail`, both about a talent                                      |
+
+## Round 3 (full axes over the 831 rework)
+
+Main range: `00e34b70..68518d8d` (the third `Reviewed range:` line).
+9fd2230b only adds this review file; the commit under review is 68518d8d
+"Re-pin the fork for the 831 spell pricing". Fork range reviewed with it:
+`tbc-new-fork`
+`ae2c8afc148d6331660557716d4085c14c4e8d1c..4903b8cee8a2df6011a8e457168048406096e127`
+(one commit, 4903b8cee "Price caster hit by the spells the sim cast").
+The lock moves from the first to the second (`commit` in
+`data/wowsims-fork.lock.json` at 68518d8d). `git -C <fork> log --merges
+ae2c8afc1..4903b8cee` lists no merge, and none of the 11 changed fork
+files exists at upstream 24606be6b (`git cat-file -e`), so no upstream
+wowsims file changed.
+
+**Dispatch note.** Round 2 was the last round; the owner chose a
+further round after choosing option (a) for ticket 831 ("a sounds
+ok."). This round is a full review in round 1's form, not a focused
+check: condition 2 of "Focused check (round 2)" fails, because fork
+`meta-repair.ts`, `candidate-gems.ts` and `seams/sim-runner.ts` changed
+at places no fixed finding cites, and the rework is a new design. `codex`
+is not on `PATH` (`command -v codex`, rc 1), so four fresh `general-task`
+agents on Opus ran in parallel: adversarial, domain, and the
+`code-review` skill's Standards and Spec sub-axes, each over both
+ranges. Each was told it writes nothing, that it must not run `pnpm` in
+the fork, and was given the caller's no-new-tickets rule. Both trees
+were clean at dispatch except this file's `Reviewed range:` line.
+
+Tests run by the adversarial axis: fork, `node --version; node
+<fork>/node_modules/vitest/vitest.mjs run` on the 5 touched test files
+(v22.23.2, rc 0, 19 passed); main, `node --version; pnpm -C <pair> exec
+vitest run packages/core/test/fork-meta-repair.test.ts` (v22.23.2, rc 0,
+56 passed). The fork tree was clean after both runs.
+
+### Round 3: adversarial
+
+The new budget prices the default Troll shadow priest's hit only up to
+its Shadow cap: with all damage in Shadow, the one group has offset 126
+rating and share 1. School bits match `sim/core/flags.go:226-232`; slot
+6-11 values are shared hit plus the school bonus
+(`sim/core/character_sheet.go:111-116`), so the offset is the bonus; a
+two-school spell gets offset 0 (`flags.go:288-308`); physical damage is
+skipped; swaps and set versions keep `groups`. The tab's results cache is
+an in-memory `MemoryStore` per page session, so no result from before
+this change reaches the budget.
+
+**R3-A1 (test gap, medium).** No test checks that a group with an
+offset still has value below its own cap. 831-P1 uses a budget of 30
+rating, 96 past the Shadow cap; 831-W1 uses 7% plus 10%, past the 16%
+cap; both assert no Great Dawnstone. 831-G1 checks the budget's
+`groups`, not their price. In `valueModel` (fork `meta-repair.ts`), a
+change that gives 0 to every group with an offset above 0 passes P1 and
+W1, and would price a Troll priest at 2% hit as needing no hit. Read
+from the tests at `fork-meta-repair.test.ts:1523-1645` and `valueModel`;
+the mutation was not run. The owner asked that the Troll value hit "only
+up to" the cap; the tests pin only the "not past" half.
+
+**R3-A2 (silent wrong price, low).** Explosives always hit
+(`BonusHitPercent: 100`, `sim/core/consumes.go:625-626`), but their Fire
+damage takes a share at offset 0 (fork `cap-profile.ts` `spellHitGroups`),
+so a shadow priest with Engineering and an explosive values hit past the
+Shadow cap by that share, with no note. The `CapProfile` comment ("Two
+estimates remain", fork `cap-profile.ts:127-131`) leaves this case out.
+The default state is not affected: explosives need Engineering
+(`consumes.go:558`) and the default professions are Enchanting and
+Tailoring (fork `ui/specs/priest/dps/presets.ts:136-137`), though the
+default consumables name explosive 30217 (`presets.ts:96`).
+
+**R3-A3 (estimate with no note, low).** Two cases make hit look less
+useful than it is. An item proc with no class mask in a talented school
+gets only shared hit (`spell_result.go:241-249`) but is priced at its
+school's slot. The Water Elemental copies the mage's `SpellHitRating`
+(`sim/mage/water_elemental.go:53`), but pet damage is left out
+(`worker_pool_sim_runner.ts:210`), so a Frost mage that summons it values
+hit past the Frost cap at 0 for the pet's share. No shipped mage APL
+summons it (`ui/specs/mage/dps/apls/`: arcane, arcaneBraid, blank,
+test). The comment and ticket 831's closing note record the item-proc
+case.
+
+**R3-A4 (wasted sim, low).** The worn-gear sim for a spell budget (fork
+`rank.ts`, the `if (pricesHitBySpells(capProfile))` block before
+`readHitCap`) runs before `hitCapBudgetFrom` checks the target level
+(`cap-profile.ts:603-606`). Against a target that is not level 73 its
+result is thrown away, it runs at full iterations, and if it fails the
+whole run fails with `sim-failed`. Read by the reviewing agent at fork
+`rank.ts:901-913`.
+
+Not examined: whether the 831 tests fail on the old code (no finding
+rests on it; the author's stash run is recorded in the caller's brief),
+Stop during the new worn-gear sim (it uses the same `deps.sim.run` as the
+baseline sim), and live sims of real rotations.
+
+### Round 3: domain
+
+No game fact in the diff is wrong. Checked against the sim code: the cap
+is 16% (17% base miss at level 73, `sim/core/target.go:393`; 1% floor,
+`spell_result.go:261`); 12.615385 rating per 1%
+(`base_stats_auto_gen.go:18`); spell hit is `SpellHitPercent` plus the
+spell's `BonusHitPercent` plus the school bonus, and the school bonus
+needs a class mask (`spell_result.go:241-249`); Arcane Focus
+(`sim/mage/talents.go:113`), Elemental Precision Frost 2x and Fire 1x
+(`:536-537`) and Shadow Focus (`sim/priest/talents.go:338`) are school
+bonuses, and the warlock has none; the only per-spell hit talents in
+these classes are Focused Power on Smite and Mind Blast
+(`sim/priest/talents.go:64-74`) and Suppression on the Affliction mask
+(`sim/warlock/talents.go:74-84`); talent positions match
+`ui/sim/talents/trees/`; Starshards is Night Elf only
+(`sim/priest/priest.go:58-62`) and Arcane with a class mask, priced at
+offset 0; the default shadow priest is a Troll (`presets.ts:134`); Totem
+of Wrath and the Draenei aura add flat `SpellHitPercent`
+(`sim/core/buffs.go:1068-1078,1307-1311`); `ActionMetrics.spell_school`
+is the sim's school bitmask (`proto/api.proto:153`,
+`metrics_aggregator.go:147,366`) and pets are a separate list, so
+`players[0].actions` holds none. Relayed, not checked: the comment at
+`cap-profile.ts:119` that the default target has no resistances.
+
+**R3-D1 (low).** Water Elemental, the same as R3-A3's pet case.
+
+**R3-D2 (low).** The note keys on talent points, not on cast spells: a
+Destruction warlock with points in Suppression, which covers only
+`WarlockAfflictionSpells` (`sim/warlock/warlock.go:273-275`), sees the
+note although its price is exact. The note says hit "may be valued too
+high", so it stays true.
+
+### Round 3: Standards + Spec
+
+#### Standards
+
+Documented standards pass. `python scripts/check_engine_port_drift.py`
+printed "engine port drift check ok: 36 ported files match engine.md"
+(rc 0), and each of the five changed engine files has a "Ticket 831"
+sentence in its row. The lock names 4903b8cee and its `_comment` gains
+the entry `paired-worktrees.md` § Re-pin after a fork change asks for.
+`python scripts/check_sim_implemented_effects.py` printed "matches
+committed file" (rc 0). R2-5 is fixed: `TalentHitDescriptor =
+TalentPosition & {...}`, and a grep for
+`someSpellsCapSooner|hitCapTalentNote` in fork `ui/` and main `packages/`
+finds nothing.
+
+**R3-S1 (code quality).** The comment `// Each group's hit is worth its
+share until its own cap (ticket 831).` in fork `meta-repair.ts`
+`valueModel` restates the `hitTerm` reduce below it and the `HitCapBudget`
+doc comment; the comment policy says to delete such a comment.
+
+**R3-S2 (code quality).** `Readonly<Record<number, number>>` stands for
+"spell damage by school bit" at about seven places (fork
+`seams/sim-runner.ts:47`, `cap-profile.ts:594,656`, `rank.ts:848`, three
+in the main test). In the main test, `schoolBonus` (keyed by stat slots
+6-11) and `castDamage` (keyed by school bits) have the same type, so the
+two kinds of key are easy to mix up. A named type would say what the
+keys are.
+
+**R3-S3.** In the main test, `SpecRun.castDamage` is the runner's
+`spellDamageBySchool` under another name.
+
+**R3-S4.** Fork `worker_pool_sim_runner.ts` exports `spellDamageBySchool()`,
+which only its own file uses.
+
+**R3-S5.** Fork `rank.ts` repeats `...(x.groups ? { groups: x.groups } :
+{})` twice.
+
+#### Spec
+
+The change prices caster hit by school from the tab's own sim result,
+with no race rule (`git diff ae2c8afc1..4903b8cee | grep -ci race`
+gives 0). The old note is gone. The one note left, fork `rank.ts:4509-4515` (`hitCapPerSpellTalentNote`),
+reads "If gems were swapped to turn your meta gem on, hit rating was
+valued as if your Suppression talent added no hit, so it may be valued
+too high." It is one sentence, names only a talent the player picked,
+says nothing about spells being cast, and shows only when a budget
+exists (every target level 73). Ticket 831's closing note matches the
+code. No scope creep.
+
+**R3-P1 (missing test, medium).** The owner asked that the default Troll
+shadow priest value hit only up to where its cast spells reach the cap,
+"and a test must pin that". 831-P1 feeds a stub sim
+`castDamage: { [SCHOOL.shadow]: 1 }` with warlock weights and no race,
+and the fork runner test feeds made-up action metrics. No test shows
+that the page's real default shadow priest preset gives Shadow-only
+spell damage, the step that P1's oracle comment takes from a source
+reading. Other tests already run the real sim (`fork-set-net.test.ts`,
+492-J).
+
+**R3-P2 (low).** The item-proc estimate shows no note: the same case as
+R3-A3.
+
+**R3-P3 (low).** The Suppression and Focused Power note keys on talent
+points: the same case as R3-D2.
+
+### Round 3: earlier findings marked fixed in this window
+
+R2-1 and R2-2 are fixed (adversarial check 4 and the spec axis, above).
+R2-4 is fixed: ticket 830's `Verified by:` line names
+`tbc-new-fork@4903b8cee8a2df6011a8e457168048406096e127`
+(`830-*.md:81`, read by the reviewing agent). R2-5 is fixed (standards,
+above).
+
+## Code quality (round 3)
+
+| ID    | Where                                                                                  | What                                                                |
+| ----- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| R3-S1 | fork `ui/features/upgrades/model/engine/meta-repair.ts` `valueModel`                   | Delete the comment that restates `hitTerm`                          |
+| R3-S2 | fork `seams/sim-runner.ts:47`, `cap-profile.ts:594,656`, `rank.ts:848`; main 831 tests | Name the "spell damage by school bit" type and use it at every site |
+
+## Summary (round 3)
+
+The 831 rework does what the owner chose: caster hit is priced by the
+school damage of the tab's own sim result, the default Troll shadow
+priest values no hit past its Shadow cap, and the old note is gone. The
+domain axis found no wrong game fact. R2-1, R2-2, R2-4 and R2-5 are
+fixed. Open, pending an author fix on this branch: two test gaps, one on
+each half of the owner's "only up to the cap" (R3-A1: no test that hit
+below an offset group's cap still counts; R3-P1: no test on the real
+default Troll preset); a small overvalue for a shadow priest with
+Engineering, whose explosives always hit (R3-A2, not the default state);
+a worn-gear sim wasted against a target that is not level 73 (R3-A4);
+and two code-quality rows (R3-S1, R3-S2). The other rows are `wontfix`.
+
+This is the last round (the caller's brief), and it reports findings
+other than bookkeeping, so the review ends here (`pre-merge-review`
+skill, "Round limit"): the owner chooses the next step. By the skill's
+rules R3-A2 is fixed before merge (a silent wrong result), and R3-A1,
+R3-P1, R3-A4, R3-S1 and R3-S2 block the merge until fixed.
+
+Tickets this branch filed: 0. Closed: 2 (830, 831), counted with
+`git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`
+(three `M` rows: 795, 830, 831; no `A`) and the skill's `Status:` grep
+(2).
+
+## Disposition (round 3)
+
+| ID    | Axis        | Disposition | Ticket / note                                                                                                                                                                                                |
+| ----- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R3-A1 | Adversarial | fixed       | fixed — pending author fix: add a case where the budget is above an offset group's offset (for example the Troll at 2% hit, Shadow-only damage) and assert hit still places a gem                            |
+| R3-A2 | Adversarial | fixed       | fixed — pending author fix: price always-hit damage (explosives, `BonusHitPercent: 100`) out of the groups, or at least name the case in the `CapProfile` comment and the 831 closing note                   |
+| R3-A3 | Adversarial | wontfix     | The sim result holds no class mask and no pet-hit signal; both cases make hit look less useful, never more; no shipped mage APL summons the Water Elemental; the item-proc case is in the comment and ticket |
+| R3-A4 | Adversarial | fixed       | fixed — pending author fix: skip the worn-gear sim when any target is not level 73, the same check `hitCapBudgetFrom` makes                                                                                  |
+| R3-D1 | Domain      | wontfix     | Same as R3-A3                                                                                                                                                                                                |
+| R3-D2 | Domain      | wontfix     | The note says hit "may be valued too high", so it is true for a talented player who casts none of the covered spells; telling them apart needs a hand-kept spell list per talent, which is another rule      |
+| R3-S1 | Standards   | fixed       | fixed — pending author fix (code-quality pass)                                                                                                                                                               |
+| R3-S2 | Standards   | fixed       | fixed — pending author fix (code-quality pass)                                                                                                                                                               |
+| R3-S3 | Standards   | wontfix     | Test-only field; its doc comment links the two names                                                                                                                                                         |
+| R3-S4 | Standards   | wontfix     | Harmless; keeps the helper open to a direct unit test                                                                                                                                                        |
+| R3-S5 | Standards   | wontfix     | The file uses this pattern for optional fields elsewhere (`saveAllValues`); a helper for two sites is not clearer                                                                                            |
+| R3-P1 | Spec        | fixed       | fixed — pending author fix: a real-sim check that the page's default shadow priest preset gives spell damage in Shadow only, as `fork-set-net.test.ts` 492-J runs the real sim                               |
+| R3-P2 | Spec        | wontfix     | Same as R3-A3                                                                                                                                                                                                |
+| R3-P3 | Spec        | wontfix     | Same as R3-D2                                                                                                                                                                                                |
