@@ -80,6 +80,6 @@ subclass in E-W3 (`wowsims-fork-parity.test.ts`), which stays green.
 
 Verified by: tbc-new-fork@ed3255a8036f63e75e25f732b5c3147a40a908f9;
 `node --version; pnpm exec vitest run packages/core/test/fork-meta-repair.test.ts packages/core/test/wowsims-fork-parity.test.ts`
-(50 passed); `node --version; pnpm verify` (rc 0, 4 min 31 s; `gates:
-1610 ran, 0 skipped`; its fork tests check ran 825 tests at
-`tbc-new-fork@52bb752ce`).
+(52 passed); `node --version; pnpm verify` (rc 0, 4 min 52 s; `gates:
+1612 ran, 0 skipped`; its fork tests check ran 825 tests at
+`tbc-new-fork@ae2c8afc1`).

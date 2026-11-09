@@ -1451,11 +1451,11 @@ describe.skipIf(!forkPresent)(
   }
 );
 
-/** The note a caster gets when a talent caps some spells below 16% (ticket 831). */
+/** The note a caster gets when some spells reach the hit cap below 16% (ticket 831). */
 const TALENT_CAP_DETAIL =
   "If gems were swapped to turn your meta gem on, hit rating was counted " +
-  "at full value up to 16% spell hit, although your talents give some of " +
-  "your spells extra hit, so they reach the hit cap sooner.";
+  "at full value up to 16% spell hit, although some of your spells get " +
+  "extra hit and reach the hit cap sooner.";
 
 /**
  * A caster's stats read: `shared` spell hit in slot 13 and in each school
@@ -1525,6 +1525,39 @@ describe.skipIf(!forkPresent)(
       expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([
         { field: "Meta gem swaps and the hit cap", detail: TALENT_CAP_DETAIL },
       ]);
+    });
+
+    it("831-N5: a shadow priest with Focused Power gets the note, though the read shows no school hit", async () => {
+      // Oracle: Focused Power is a per-spell bonus on Smite and Mind Blast
+      // (`sim/priest/talents.go:64-73`), Discipline (segment 0) index 15 in
+      // `ui/sim/talents/trees/priest.json`.
+      const run = await runSpec({
+        pool: S_POOL,
+        spec: "shadow",
+        skeleton: skeletonWithTalents("0000000000000002--"),
+        computeStats: casterRead(5),
+      });
+      expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([
+        { field: "Meta gem swaps and the hit cap", detail: TALENT_CAP_DETAIL },
+      ]);
+    });
+
+    it("831-N6: against a target that is not level 73 a caster gets only the no-cap note", async () => {
+      // Oracle: with no budget, hit was treated as always useful, so the
+      // 16% sentence would be false; the level-73 note says what happened.
+      const skeleton = skeletonWithTalents("5--") as unknown as {
+        encounter: { targets: Array<{ level: number }> };
+      };
+      for (const t of skeleton.encounter.targets) t.level = 72;
+      const run = await runSpec({
+        pool: S_POOL,
+        spec: "mage",
+        skeleton: skeleton as unknown as RaidSimRequest,
+        computeStats: casterRead(5, { 6: 10 }),
+      });
+      const notes = run.ranking.substitutions.filter(isHitCapNote);
+      expect(notes).toHaveLength(1);
+      expect(notes[0]!.detail).toMatch(/level 73/);
     });
 
     it("831-N4: with no talent that adds hit to some spells, a budget spec gets no hit-cap note", async () => {

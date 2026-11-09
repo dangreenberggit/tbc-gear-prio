@@ -35,6 +35,10 @@ import {
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
+// Every feral run reads hit (ticket 830), so each meta repair searches with the
+// hit term, and several cases run 15-27 s alone, near the 30 s default.
+vi.setConfig({ testTimeout: 120_000 });
+
 /* ------------------------------------------------------------------ *
  * The controlled fixture
  * ------------------------------------------------------------------ */
