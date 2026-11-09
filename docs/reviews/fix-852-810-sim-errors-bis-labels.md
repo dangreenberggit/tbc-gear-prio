@@ -398,3 +398,68 @@ Main `b52c3d8b` re-pins the fork to `788b8e86e`.
   it fails its gem repair." It now says an entry is undefined "when that
   version's default request cannot be composed or, unless Stop ends a
   later read in the same call, when rebuilding it fails its gem repair."
+
+## Focused check (round 4)
+
+Main range `02ad5867..b52c3d8b`; fork range `ef85f07fa..788b8e86e`. One
+fresh `general-task` agent on Opus that wrote none of this, told it writes
+nothing. This was the one further round after wording-only fixes
+(`~/.claude/AGENTS.md` § Review round limits), so the review stops after it
+whatever it finds.
+
+1. **Conditions 1 to 3: pass.** `b17f5a0f` edits only this file;
+   `b52c3d8b` is a fork re-pin naming R3-1 and R3-3; fork `788b8e86e`
+   changes only `rank.ts`, every changed line inside a comment (the
+   `git diff ef85f07fa 788b8e86e -- rank.ts` lines starting `+` or `-`
+   and not ` *` are empty). `rank.ts` does not exist at upstream `cec2a7b6`
+   (`cat-file -e` rc 128); no merges in either range.
+2. **Fixes change only what each finding asks: pass.** `engine.md` differs
+   only in the table separator (padding) and the `rank.ts` row; the row's
+   hash `4e975efb...` matches `rank.ts` at `788b8e86e`; the lock names
+   `788b8e86e` with `branch` unchanged and `"pushed": false`;
+   `sim-implemented-effects.json` names `788b8e86e`. R3-2's IDs are in
+   `## Fix after round 3`.
+3. **Sentences true against the code: pass for every rewritten sentence.**
+   The `VersionGears` doc's undefined-entry sentence holds for a default
+   request that cannot be composed, for a failed repair followed by Stop
+   ending a later read in the same call, after an earlier call's Stop
+   (`versionBudgetsOff`), and for a compose error on a rebuilt version.
+   No new test, so "each new test asserts its finding" does not apply.
+4. **Touched tests pass: pass.** `wowsims-fork-parity` and
+   `fork-meta-repair`: 48 passed, rc 0, node v22.23.2.
+
+Findings:
+
+- **R4-1 (low, comment, open).** Fork `rank.ts:4227-4229`, the
+  `VersionGears` doc: "It rejects only to fail the run: when a version's
+  stats read fails (ticket 852), or on any other error while rebuilding."
+  A read that answers with no finite hit number also rejects:
+  `hitPercentOf` throws (`rank.ts:3879`), `hitPercentOrSimFailed` calls it
+  outside its catch (`rank.ts:3902`), and `versionGears` rethrows it. That
+  is neither a failed read (`hitPercentOrSimFailed`'s own doc says it is
+  not a sim failure) nor an error while rebuilding, so the list of causes
+  is incomplete. The run still fails loudly; only the comment is short. Fork
+  `ef85f07fa` wrote the sentence (round 3's range); this range did not
+  touch it. The checker's smallest fix drops the list: "It rejects only to
+  fail the run, so a caller does not catch its rejection." Read from the
+  code; the dispatcher re-read `rank.ts:3868-3905` and `4220-4232`.
+
+R4-1 is a finding other than bookkeeping, so the review stops here
+(`pre-merge-review` § Round limit): no `## Disposition (round 4)` table,
+and the merge check was not run. No fix was written. F2, R3-1, R3-2 and
+R3-3 get their Disposition rows in the round that passes.
+
+Assessor (one fresh `general-task` agent that neither wrote nor reviewed
+the work; its view, read from the code, not run): the code has settled
+(rounds 3 and 4 passed it); the last three findings are comment sentences
+that list causes or claim more than the code shows. R4-1's sentence came
+with fork `ef85f07fa`, not with the round 3 wording fix (`git blame -L
+4228,4230 788b8e86e` names `ef85f07fa`; dispatcher re-ran it). Its
+smallest fix deletes the list: "It rejects only to fail the run, so a
+caller does not catch its rejection." It read that sentence as true (no
+direct caller of `versionGears` catches its rejection; Stop never leaves
+it), and found the other sentences in the `versionGears` and
+`VersionGears` comments true. A check limited to that deletion would
+likely pass; a full re-read could find more in older comments, most
+likely `hitPercentOf`'s doc (outside this branch's fix range; its caller
+at `rank.ts:840` unchecked).
