@@ -75,8 +75,11 @@ copy of Chrome,
 - **Where the run's values are explained.** The phase-4 golden's rows and
   `baselineDps`, against the old phase-5 golden, are explained in the commit
   that writes the golden and in the ticket-560 stage's `desktop-gate.md`. The
-  mage, rogue and enhancement goldens are first recordings: the commit that
-  adds them names what each covers.
+  rogue and enhancement goldens are first recordings: the commit that adds
+  them names what each covers. The mage golden was re-recorded at the
+  wowsims catch-up to v0.0.155, because upstream's Arcane rotation
+  (`ui/specs/mage/dps/apls/arcane.apl.json`) changed; commit `3b44d2b7`
+  gives the reason and the gate lines.
 
 ## What check (h) compares
 
