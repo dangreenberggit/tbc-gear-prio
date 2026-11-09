@@ -37,6 +37,38 @@ import {
   repairValue,
 } from "./meta-repair-oracle.js";
 
+/**
+ * Lets test 852-R fail a set version's gem repair. The hit budget sets how a
+ * repair scores layouts (`meta-repair.ts` `valueModel`), and a version read of
+ * 1e308 percent still repaired, so the test fakes the failure instead.
+ * While `belowRemaining` is set, a repair whose hit budget is below it throws
+ * the fork's own `MetaStepBudgetExceededError`; every other repair, and every
+ * other test, gets the real one.
+ */
+const repairFault = vi.hoisted(() => ({
+  belowRemaining: undefined as number | undefined,
+}));
+vi.mock(
+  "../../../vendor/tbc-new-fork/ui/features/upgrades/model/engine/meta-repair.ts",
+  async (importOriginal) => {
+    type Repair = (opts: { hitCap?: { remaining: number } }) => unknown;
+    const real = await importOriginal<{
+      repairAndMinimize: Repair;
+      MetaStepBudgetExceededError: new (message: string) => Error;
+    }>();
+    const repairAndMinimize: Repair = (opts) => {
+      const below = repairFault.belowRemaining;
+      if (below !== undefined && (opts.hitCap?.remaining ?? 0) < below) {
+        throw new real.MetaStepBudgetExceededError(
+          "meta repair exceeded step budget"
+        );
+      }
+      return real.repairAndMinimize(opts);
+    };
+    return { ...real, repairAndMinimize };
+  }
+);
+
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 /** `Stat.StatMeleeHitRating` in the fork's proto (`proto/common.ts`). */
@@ -1301,13 +1333,14 @@ const S_POOL = [
 ];
 
 /** The `substitutions` notes that say repair could not use the hit cap. */
-const HIT_CAP_FIELDS = [
-  "Meta gem swaps and the hit cap",
-  "Meta gem swaps and your hit rating",
-];
 type Note = { field: string; detail: string };
-const isHitCapNote = (s: Note) => HIT_CAP_FIELDS.includes(s.field);
-const isSetVersionNote = (s: Note) => s.field === "Set bonuses and the hit cap";
+const isHitCapNote = (s: Note) => s.field === "Meta gem swaps and the hit cap";
+/** How a run fails when a stats read fails: as a failed sim, with the sim's own message (ticket 852). */
+const SIM_FAILED_WORKER_DIED = {
+  name: "RankError",
+  kind: "sim-failed",
+  message: "worker died",
+};
 /** The note a full-weight spec gets (ticket 746). */
 const FULL_WEIGHT_DETAIL =
   "If gems were swapped to turn your meta gem on, hit rating was counted " +
@@ -1349,67 +1382,28 @@ describe.skipIf(!forkPresent)(
       }
     });
 
-    it("535-S3: a failed read completes the run at full weight, warns once, and caches no ranking", async () => {
-      const store = await newStore();
-      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      let failed;
-      try {
-        failed = await runSpec({
+    it("852-B: a failed baseline read fails the run with the sim's error", async () => {
+      // Oracle: the read is a sim call, so its failure ends the run as a
+      // failed baseline sim does, with the sim's own message. No repair runs
+      // at full weight under a note of the tab's own wording.
+      let reads = 0;
+      let sims = 0;
+      await expect(
+        runSpec({
           pool: S_POOL,
-          store,
-          computeStats: () => Promise.reject(new Error("worker died")),
-        });
-        const repairWarnings = warn.mock.calls.filter((args) =>
-          String(args[0]).startsWith("[upgrades] meta repair:")
-        );
-        expect(repairWarnings).toHaveLength(1);
-      } finally {
-        warn.mockRestore();
-      }
-      expect(failed.ranking.complete).toBe(true);
-      for (const chestId of [32365, 30907]) {
-        for (const c of chestRequestChanges(
-          failed.requests,
-          failed.worn,
-          chestId
-        )) {
-          expect(c).toEqual([`${BOLD}->${RIGID}`, `${BOLD}->${RIGID}`]);
-        }
-      }
-      const again = await runSpec({
-        pool: S_POOL,
-        store,
-        computeStats: await gearHitReads(),
-      });
-      const capped = chestRequestChanges(again.requests, again.worn, 32365);
-      expect(capped.length).toBeGreaterThan(0);
-      for (const c of capped) {
-        expect(c).toEqual([`${BOLD}->${INSCRIBED}`, `${BOLD}->${INSCRIBED}`]);
-      }
-    });
-
-    it("535-S4: a failed read tells the ranking that repair used full weight; a good read does not", async () => {
-      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      let failed;
-      try {
-        failed = await runSpec({
-          pool: S_POOL,
-          computeStats: () => Promise.reject(new Error("worker died")),
-        });
-      } finally {
-        warn.mockRestore();
-      }
-      const notes = failed.ranking.substitutions.filter(isHitCapNote);
-      expect(notes).toHaveLength(1);
-      expect(notes[0]!.field).toBe("Meta gem swaps and your hit rating");
-      expect(notes[0]!.detail).toMatch(/always useful/);
-      expect(notes[0]!.detail).toMatch(/worker died/);
-
-      const good = await runSpec({
-        pool: S_POOL,
-        computeStats: await gearHitReads(),
-      });
-      expect(good.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
+          onRun: () => {
+            sims += 1;
+          },
+          computeStats: () => {
+            reads += 1;
+            return Promise.reject(new Error("worker died"));
+          },
+        })
+      ).rejects.toMatchObject(SIM_FAILED_WORKER_DIED);
+      // The worn meta is on, so the baseline's is the only read; it follows
+      // the baseline sim and no candidate is simmed.
+      expect(reads).toBe(1);
+      expect(sims).toBe(1);
     });
 
     it("535-S5: a target that is not level 73 gives no budget, and the ranking says repair used full weight", async () => {
@@ -1525,24 +1519,29 @@ describe.skipIf(!forkPresent)(
       expect(run.ranking.baseline?.metaAdjusted).toBe(true);
     });
 
-    it("705-W4: when both stats reads fail, the worn repair keeps full weight and the ranking carries one hit-rating note", async () => {
+    it("852-W: a failed worn-gear read fails the run with the sim's error before any sim", async () => {
+      // Oracle: the worn-gear read is the run's first sim call (ticket 705),
+      // so its failure ends the run there, with the sim's own message. The
+      // worn repair does not go on at full weight under a note of the tab's
+      // own wording.
       const worn = await wornWithMetaOff();
-      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      let run;
-      try {
-        run = await runSpec({
+      let reads = 0;
+      let sims = 0;
+      await expect(
+        runSpec({
           worn,
           pool: S_POOL,
-          computeStats: () => Promise.reject(new Error("worker died")),
-        });
-      } finally {
-        warn.mockRestore();
-      }
-      const baselineChest = requestItems(run.requests[0]!)[CHEST]!;
-      expect(baselineChest.gems).toEqual([BOLD, RIGID, 28363]);
-      const notes = run.ranking.substitutions.filter(isHitCapNote);
-      expect(notes).toHaveLength(1);
-      expect(notes[0]!.field).toBe("Meta gem swaps and your hit rating");
+          onRun: () => {
+            sims += 1;
+          },
+          computeStats: () => {
+            reads += 1;
+            return Promise.reject(new Error("worker died"));
+          },
+        })
+      ).rejects.toMatchObject(SIM_FAILED_WORKER_DIED);
+      expect(reads).toBe(1);
+      expect(sims).toBe(0);
     });
 
     it("705-W3: a run that reads stats is keyed apart from rankings whose worn repair used full weight", async () => {
@@ -1793,65 +1792,72 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     expect(new Set(keys).size).toBe(keys.length);
   });
 
-  it("535-V4: the first failed version read ends version budgets and caches no ranking", async () => {
-    // Oracle: the first failed version read turns version budgets off for
-    // the rest of the run, so every later version uses the shared layout,
-    // and the ranking is not cached.
-    const store = await newStore();
-    const stats = await scriptedStats({
-      baselineGearHit: 52,
-      baselineHitPercent: BASELINE_HIT_PERCENT,
-      bonusHit: { [BURNING_RAGE]: 20 },
-    });
-    // A version read is of the package: both Ragesteel pieces worn. The
-    // baseline and the candidates' own reads wear at most one.
-    const isPackage = (req: RaidSimRequest) => {
-      const ids = requestItems(req).map((spec) => realId(spec.id ?? 0));
-      return (
-        ids.includes(RAGESTEEL_SHOULDERS) && ids.includes(RAGESTEEL_BREASTPLATE)
-      );
-    };
-    let versionReads = 0;
-    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-    let failed;
-    try {
-      failed = await brRun(20, { store }, (req) => {
-        if (!isPackage(req)) return Promise.resolve(stats(req));
-        versionReads += 1;
-        return versionReads === 1
-          ? Promise.reject(new Error("worker died"))
-          : Promise.resolve(stats(req));
+  it.each(["on", "off"])(
+    "852-V: a failed set-version read fails the run with the sim's error (set screen %s)",
+    async (setScreen) => {
+      // Oracle: a set version's read is a sim call, so its failure ends the
+      // run with the sim's own message, as a failed baseline sim does. No
+      // version goes on with the shared layout under a note of the tab's own
+      // wording. The screen reads the first version when it is on; with it
+      // off, the package's same-gear gate does.
+      const stats = await scriptedStats({
+        baselineGearHit: 52,
+        baselineHitPercent: BASELINE_HIT_PERCENT,
+        bonusHit: { [BURNING_RAGE]: 20 },
       });
-      const versionWarnings = warn.mock.calls.filter((args) =>
-        String(args[0]).startsWith("[upgrades] meta repair: set version")
-      );
-      expect(versionWarnings).toHaveLength(1);
-    } finally {
-      warn.mockRestore();
+      // A version read is of the package: both Ragesteel pieces worn. The
+      // baseline and the candidates' own reads wear at most one.
+      const isPackage = (req: RaidSimRequest) => {
+        const ids = requestItems(req).map((spec) => realId(spec.id ?? 0));
+        return (
+          ids.includes(RAGESTEEL_SHOULDERS) &&
+          ids.includes(RAGESTEEL_BREASTPLATE)
+        );
+      };
+      let versionReads = 0;
+      await expect(
+        brRun(20, { setScreen }, (req) => {
+          if (!isPackage(req)) return Promise.resolve(stats(req));
+          versionReads += 1;
+          return Promise.reject(new Error("worker died"));
+        })
+      ).rejects.toMatchObject(SIM_FAILED_WORKER_DIED);
+      expect(versionReads).toBe(1);
     }
-    expect(failed.ranking.complete).toBe(true);
-    expect(versionReads).toBe(1);
-    const notes = failed.ranking.substitutions.filter(isSetVersionNote);
-    expect(notes).toHaveLength(1);
-    expect(notes[0]!.detail).toMatch(
-      /did not count hit rating from set bonuses against the hit cap/
-    );
-    expect(notes[0]!.detail).toMatch(/worker died/);
-    expect(failed.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
-    const { kept, setLess } = brVersions(failed.requests);
-    expect(kept.length).toBeGreaterThan(0);
-    for (const k of kept) {
-      expect(k.map((spec) => spec.gems)).toEqual(
-        setLess[0]!.map((spec) => spec.gems)
-      );
+  );
+
+  it.each(["off", "on"])(
+    "852-R: a gem repair that fails on a set version skips that set bonus, as on its own build (set screen %s)",
+    async (setScreen) => {
+      // Oracle: a failed gem repair is no failed sim. On a set package's own
+      // build it skips the package with the meta-off note (`rank.ts`, the
+      // package loop); the same failure while rebuilding one of the
+      // package's versions does the same, and the run goes on. Every
+      // version's rebuild goes through the one catch in `versionGears`.
+      // Burning Rage's 1000 hit puts each set-kept version's budget near
+      // −990 rating, and only those repairs fail. No sim ran for the bonus,
+      // so no note says one failed.
+      repairFault.belowRemaining = -500;
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      let run;
+      try {
+        run = await brRun(1000, { setScreen });
+      } finally {
+        repairFault.belowRemaining = undefined;
+        warn.mockRestore();
+      }
+      expect(run.ranking.complete).toBe(true);
+      expect(run.ranking.substitutions).toContainEqual({
+        field: "Burning Rage 2-piece set bonus",
+        detail:
+          "The Burning Rage 2-piece set bonus was not measured, because no " +
+          "gem swap could turn your meta gem on.\nmeta repair exceeded step budget",
+      });
+      expect(
+        run.ranking.substitutions.map((s) => s.detail).join("\n")
+      ).not.toContain("the sims that measure it failed");
     }
-    // The set-less version is the same request in both runs, so the store
-    // answers it; the kept version is new, and wears V1's gems.
-    const again = await brRun(20, { store });
-    const keptAgain = brVersions(again.requests).kept;
-    expect(keptAgain.length).toBeGreaterThan(0);
-    for (const k of keptAgain) expect(holdsGem(k, RIGID)).toBe(false);
-  });
+  );
 
   it("535-V5: a Stop during a set-phase sim stops the version reads, with no warning", async () => {
     // Oracle: after Stop the guard refuses each version read, and a refused

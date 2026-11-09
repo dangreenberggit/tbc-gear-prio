@@ -159,6 +159,31 @@ Two more visible effects:
   and P3 Presets. Session ruling: follow wowsims' item phase, edit no preset
   file, read no phase from a name.
 
+The warrior and hunter DPS pages each hold two builds' gear sets, which
+wowsims' gear tab shows under two headings (the preset's `group`): Fury and
+Arms, Beast Mastery and Survival. Both builds' sets are BiS sets, so with the
+Arms build loaded, Fury's picks that miss the cutoff still show in the main
+table (ticket 810). The owner ruled on 2026-11-06: "it should use the tags
+wowsims has for that site (for example i think all dps warriors are probably
+one site with two talent preset options, not different tabs)"; then, asked to
+choose between a label that names the build and hiding the other build's rows
+by a guess from the talents: "label". For hunter, wowsims saves no build
+choice, only talents and gear. For warrior, the simple rotation settings save
+a Fury or Arms choice (fork `proto/warrior.proto`, `DpsWarrior.Rotation.spec`),
+but the default rotation is picked from the talents and does not read it
+(fork `ui/specs/warrior/dps/spec.ts`, `autoRotation`). So on neither page does
+one saved value say which build is loaded, and hiding would rest on a guess.
+
+So on a page whose gear sets sit under more than one heading, every badge for
+a gear set names that set's heading after its name, such as "BIS (Fury)" or
+"DW - 6% hit (Survival)", and the pool's own "BiS" badge on a row in no
+selected set names the headings of the BiS sets that hold the item, such as
+"BiS (Fury)". The rows stay where they are. A badge gets its phase in front
+only when another selected set of the same heading and name holds the item
+("P3 BIS (Fury)"), so an item in both builds' phase-4 sets reads "BIS (Fury)"
+and "BIS (Arms)". Pages with one heading or none keep their badges (fork
+`settings_pool.ts`, `rowTags` and `bisHeadingIndex`; fork commit `38e0614f3`).
+
 ### Sources
 
 `ui/features/upgrades/utils/item_sources.ts` (`sourcesOf`) builds each row's
