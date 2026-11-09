@@ -6,6 +6,8 @@ Reviewed range: `7a8e88c597a891b6a4010b42b0744b9aa81f4667..00e34b701ce49bb98e690
 
 Reviewed range: `00e34b701ce49bb98e6908f1708038bf8d76bfe8..68518d8df4b8192376c0bf7a8b90ebeabdc78e43`
 
+Reviewed range: `68518d8df4b8192376c0bf7a8b90ebeabdc78e43..a7ae8bf71ed4cb1c3f35dc8b34fa5a98e39606a3`
+
 Fork range reviewed with it: `tbc-new-fork` `60a4735ea1112760fb1d9a175d8e79373647b1a0..52bb752ce4cb5b5ff5e906457891f746b73305d2`
 (ed3255a80 "Require the stats read on every sim runner", 52bb752ce "Note
 when a talent caps some spells before 16%"). The lock moves from the
@@ -731,3 +733,184 @@ Tickets this branch filed: 0. Closed: 2 (830, 831), counted with
 | R3-P1 | Spec        | fixed       | `packages/core/test/fork-caster-hit-sim.test.ts` 831-T1 sims the page's default Troll shadow priest with the pinned wowsimcli: only Shadow damage, one group at the Shadow cap; 831-T2 the Night Elf case    |
 | R3-P2 | Spec        | wontfix     | Same as R3-A3                                                                                                                                                                                                |
 | R3-P3 | Spec        | wontfix     | Same as R3-D2                                                                                                                                                                                                |
+
+## Focused check (round 4)
+
+Main range: `68518d8d..a7ae8bf7` (the fourth `Reviewed range:` line).
+8623a77b only adds the round 3 review; the commit under review is
+a7ae8bf7 "Fix review round 3 of the 830 and 831 branch". Fork range:
+`tbc-new-fork`
+`4903b8cee8a2df6011a8e457168048406096e127..3803a1398adf1036fa99fbd546d223fc3a4d20b6`
+(one commit, 3803a1398 "Fix review round 3 of the 831 pricing"), the
+`commit` values in `data/wowsims-fork.lock.json` at 68518d8d and
+a7ae8bf7.
+
+**Dispatch note.** Round 3 was the last round; the owner chose this
+round, 2026-11-09: "yes check the fixes." Scope, from the caller's
+brief: only whether R3-A1, R3-A2, R3-A4, R3-S1, R3-S2 and R3-P1 are
+fixed in this window, and whether the fixes add a new problem. The
+reviewing agent (Opus, a fresh session that wrote none of this code and
+ran none of rounds 1 to 3) ran the check alone, as the brief allowed;
+no axis agents were spawned. It wrote only this file. The caller's
+no-new-tickets rule applies, so no row is `defer`.
+
+### The three conditions
+
+1. Commit kinds. 3803a1398 names R3-A2, R3-A4, R3-S1 and R3-S2 in its
+   message. a7ae8bf7 names no finding ID in its message; it re-pins the
+   fork, adds the R3-A1 and R3-P1 tests, edits tickets 830 and 831, and
+   writes the round 3 Disposition rows that name each fix by ID. Held,
+   read through those rows.
+2. Every changed non-test, non-comment line is at a place a fixed
+   finding cites, with one addition: 3803a1398 moves
+   `spellDamageBySchool()` from `adapters/worker_pool_sim_runner.ts` to
+   `engine/seams/sim-runner.ts`. R3-S2 asked only for a named type. See
+   R4-4.
+3. Fork condition. `git -C <fork> log --merges 4903b8cee..3803a1398`
+   lists nothing, and none of the five changed fork files exists at
+   upstream 24606be6b (`git cat-file -e`, each fails). Held.
+
+### The four checks
+
+1. Conditions: held, as above.
+2. Each fix against its finding:
+   - **R3-A1: fixed.** `fork-meta-repair.test.ts` 831-P1 adds a Shadow
+     run with a 1% school bonus (`schoolBonus: { 11: 1 }`), so the
+     group's offset is 12.6 rating and 17.4 of the 30-rating budget is
+     left, and asserts a Great Dawnstone on every row. P1's first run
+     (Shadow past its cap) asserts none, so the only difference is
+     whether the group has room. A `valueModel` that gave 0 to every
+     group with an offset would fail the new assertion. Read from the
+     test; the mutation was not run.
+   - **R3-A2: fixed, with a wrong sentence in the ticket (R4-1).** The
+     `CapProfile.repair` comment (fork `cap-profile.ts:128-134`) and
+     ticket 831's closing note now name explosives. Their facts check:
+     `BonusHitPercent: 100` at `sim/core/consumes.go:626` (the comment
+     line is 625); six explosive spells pass `SpellSchoolFire` to
+     `newBasicExplosiveSpellConfig`; `ActionMetrics` at
+     `proto/api.proto:142-158` has no field that marks them.
+   - **R3-A4: fixed.** Fork `rank.ts:903-906` runs the worn-gear sim
+     only when `pricesHitBySpells(capProfile) &&
+targetsAtCapLevel(preRequest)`. `targetsAtCapLevel` is the target
+     test `hitCapBudgetFrom` used before, moved out unchanged
+     (`some(level !== 73)` became `every(level === 73)`, the same with
+     the empty-list test). 831-W2 sets every target to level 72 and
+     asserts that the first simmed request has repaired chest gems.
+     On 4903b8cee the first `deps.sim.run` was the un-repaired
+     `preRequest`, so W2 would fail there. Read from `rank.ts` and the
+     test harness (`requests` records every `sim.run`,
+     `fork-meta-repair.test.ts:1243-1248`); not run with the fix
+     reverted.
+   - **R3-S1: fixed.** The comment is gone from `valueModel`.
+   - **R3-S2: fixed in the fork only (R4-2).** `SpellDamageBySchool` is
+     declared in `engine/seams/sim-runner.ts:53` and used at every fork
+     site the finding named. The main tests still spell out
+     `Readonly<Record<number, number>>`.
+   - **R3-P1: fixed.** `packages/core/test/fork-caster-hit-sim.test.ts`
+     builds the page's default shadow priest (Troll, `StandardTalents`'
+     string `500230013--503250510240103051451`, Enchanting and
+     Tailoring, `preShadowform`, the P1 gear set, the default APL; all
+     match fork `ui/specs/priest/dps/presets.ts`) on the ret P2
+     skeleton, sims it with the pinned wowsimcli, reads the damage
+     through the fork's own `spellDamageBySchool`, and asserts Shadow
+     only and one group at offset 10% of rating with share 1 (831-T1),
+     and Shadow plus Arcane for a Night Elf (831-T2). It sets
+     `consumables: {}`; the page's default explosive needs Engineering,
+     which the default priest lacks, so this changes no school. The
+     ticket's numbers were re-run by this check with the same request
+     and seed 7: at 200 iterations the Troll dealt only Shadow damage
+     and the Night Elf's Arcane share was 4.24% (4.22% at the test's 50
+     iterations). Script: `$TMPDIR/r4sim/run.mjs` (not kept).
+3. Each new test asserts its finding: yes, for A1, A4 (W2) and P1 (T1,
+   T2), by reading. No revert run is recorded for these tests, and none
+   was run here.
+4. The tests the fixes touch pass. Main: `node --version; pnpm -C <pair>
+exec vitest run packages/core/test/fork-meta-repair.test.ts
+packages/core/test/fork-caster-hit-sim.test.ts` (v22.23.2, rc 0, 59
+   passed, none skipped; W2, T1 and T2 ran). Fork: `node <fork>/node_modules/vitest/vitest.mjs run` on the 24 fork test
+   files that import a changed module (rc 0, 326 passed); the fork tree
+   was clean after. `python scripts/check_engine_port_drift.py` (rc 0,
+   "36 ported files match engine.md") and `python
+scripts/check_sim_implemented_effects.py` (rc 0, "matches committed
+   file") pass at a7ae8bf7.
+
+Player-facing text: the window changes none.
+
+### Findings
+
+**R4-1 (wrong statement in a ticket, low).** Ticket 831's closing note
+says "Explosives need Engineering, which the page's default casters do
+not take." The default warlock takes Engineering and the Adamantite
+Grenade (fork `ui/specs/warlock/dps/presets.ts:121,128`), and the
+default mage takes Engineering (`ui/specs/mage/dps/presets.ts:161`; its
+default consumables name no explosive). The sim registers the grenade
+when the character has Engineering and an `explosiveId`
+(`sim/core/consumes.go:557-596`). The price is still right for the
+default warlock: it has no school hit talent, so the grenade's Fire
+damage and all its spells are one group at offset 0 and stop at the
+same cap (`spellHitGroups` merges damage by offset). This is a reading
+of the code; no warlock sim was run. Suggested text: "The page's
+default shadow priest does not take Engineering. The default warlock
+does, and throws the Adamantite Grenade, but with no school hit talent
+its spells and the grenade reach the cap together, so its price does
+not change." The `CapProfile.repair` comment makes no such claim.
+
+**R4-2 (code quality, low).** R3-S2 is not applied in the main tests,
+which the round 3 Code quality row names ("main 831 tests"). They still
+write `Readonly<Record<number, number>>`: `fork-meta-repair.test.ts:105`
+(`spellDamageBySchool`), `:1187` (`castDamage`), `:2493` (`castDamage`)
+beside `:2491` (`schoolBonus`, keyed by stat slot), the pair R3-S2 named
+as easy to mix up; and `fork-caster-hit-sim.test.ts:49,57,103`. The main
+tests cannot import the fork's type when `vendor/` is absent, so a local
+alias in each file would do. The round 3 row "used at every site" holds
+for the fork only.
+
+**R4-3 (code quality, low).** The new explosive sentence in fork
+`cap-profile.ts` is not rewrapped: line 130 is 93 characters where its
+neighbours are 73 to 77, and line 134 holds only `* per-spell`.
+
+**R4-4 (checked, not a defect).** 3803a1398 moves
+`spellDamageBySchool()` into the seam, beyond what R3-S2 asked. The move
+lets 831-T1 read the damage through the tab's own function without
+loading the worker-pool adapter, and the adapter imports it back
+(`worker_pool_sim_runner.ts:33-40`); behaviour is the same (the fork
+runner test passes). R3-S4's reason ("keeps the helper open to a direct
+unit test") still holds.
+
+## Code quality (round 4)
+
+| ID   | Where                                                                                                | What                                                        |
+| ---- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| R4-2 | main `packages/core/test/fork-meta-repair.test.ts`, `packages/core/test/fork-caster-hit-sim.test.ts` | A local `SpellDamageBySchool` alias at the R3-S2 sites      |
+| R4-3 | fork `ui/features/upgrades/model/engine/cap-profile.ts:128-137`                                      | Rewrap the `CapProfile.repair` comment's explosive sentence |
+
+## Summary (round 4)
+
+The six round 3 fixes are in: the test for hit below a group's own cap
+(R3-A1), explosives named as an estimate (R3-A2), no worn-gear sim
+against a target that is not level 73 (R3-A4), the restating comment
+removed (R3-S1), the `SpellDamageBySchool` type in the fork (R3-S2), and
+a real-sim test of the default Troll shadow priest (R3-P1). The touched
+tests pass. Open, pending an author fix on this branch: R3-S2's type is
+not used in the main tests (R4-2), the new comment sentence is not
+rewrapped (R4-3), and ticket 831 says the default casters take no
+Engineering when the default warlock and mage do (R4-1; the warlock's
+price is still right). No finding changes what the tab shows.
+
+This round was the owner's chosen last round and it reports code-quality
+findings, so the review ends here (`pre-merge-review` skill, "Round
+limit"): the owner chooses the next step. Every open finding asks for a
+wording or naming change that leaves behaviour the same.
+
+Tickets this branch filed: 0. Closed: 2 (830, 831), the same count as
+round 3; this window edits both tickets' notes and changes no `Status:`
+line.
+
+## Disposition (round 4)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                       |
+| ---- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| R4-1 | Focused check | fixed       | fixed — pending author fix: replace the Engineering sentence in ticket 831's closing note with the suggested text in round 4's R4-1 |
+| R4-2 | Focused check | fixed       | fixed — pending author fix: a local `SpellDamageBySchool` alias in the two main test files                                          |
+| R4-3 | Focused check | fixed       | fixed — pending author fix: rewrap the explosive sentence in fork `cap-profile.ts`                                                  |
+| R4-4 | Focused check | wontfix     | Not a defect: the move serves 831-T1 and changes no behaviour                                                                       |
