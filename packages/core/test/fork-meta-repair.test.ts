@@ -1832,9 +1832,11 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       // Oracle: a failed gem repair is no failed sim. On a set package's own
       // build it skips the package with the meta-off note (`rank.ts`, the
       // package loop); the same failure while rebuilding one of the
-      // package's versions does the same, and the run goes on. Burning
-      // Rage's 1000 hit puts each set-kept version's budget near −990
-      // rating, and only those repairs fail.
+      // package's versions does the same, and the run goes on. Every
+      // version's rebuild goes through the one catch in `versionGears`.
+      // Burning Rage's 1000 hit puts each set-kept version's budget near
+      // −990 rating, and only those repairs fail. No sim ran for the bonus,
+      // so no note says one failed.
       repairFault.belowRemaining = -500;
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       let run;
@@ -1851,6 +1853,9 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
           "The Burning Rage 2-piece set bonus was not measured, because no " +
           "gem swap could turn your meta gem on.\nmeta repair exceeded step budget",
       });
+      expect(
+        run.ranking.substitutions.map((s) => s.detail).join("\n")
+      ).not.toContain("the sims that measure it failed");
     }
   );
 

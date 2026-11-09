@@ -264,3 +264,24 @@ simpler option is one catch inside `versionGears` that returns the shared
 layout on a `MetaRepairError`, which `852-R` would then cover; that
 changes behaviour (the bonus is measured on the run's layout with no note,
 where today it is skipped as `repair-failed`).
+
+## Fix after round 2
+
+The owner, 2026-11-08: "idk wtf this means about "7 places" why would 7
+places for this exist? im assuming we should do option 1 but im initially
+suspicious that this is even set up correctly or and wonder whether weve
+set up 7 wounds and slapped on 7 bandaids instead of having one test for
+one thing"
+
+Fork `ef85f07fa` (F2): the seven caller catches of `74896bc70` are gone.
+`versionGears` catches a `MetaRepairError` around `rebuild(...)` only and
+makes that version's entry undefined, which its doc already allowed and
+every caller already handled; it never falls back to the shared layout.
+The set package loop passes `onRepairFailed`, so the package is still
+skipped as `repair-failed` with the repair's error: with an undefined entry
+alone, `852-R` showed "the sims that measure it failed." where no sim ran.
+The other callers show what they showed before (console text only).
+A failed read still fails the run. `852-R` now goes through the one catch
+and also asserts that no note says a sim failed; it fails with the catch
+removed (the run rejects) and with the error not passed on (the false
+note). Main: re-pin, `engine.md` row, `852-R`.
