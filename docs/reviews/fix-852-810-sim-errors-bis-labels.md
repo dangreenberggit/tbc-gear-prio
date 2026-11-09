@@ -17,6 +17,11 @@ Reviewed range: `b465e023b447e6235613c34a32ec8711d2667dd6..02ad5867c3171b8922ebb
 Round 3 fork range: `3e554d9d22ec0be4e7f9500eb3362a39e2ccfde0..ef85f07fa493e872d01d4aa8d7b66c912b43d7f6`
 (one commit; the lock names `ef85f07fa` with `"pushed": false`).
 
+Reviewed range: `02ad5867c3171b8922ebbf5bb4fbef111c38cee4..b52c3d8b34f6dbbdf59c9fbf5837fd485f5c3f68`
+
+Round 4 fork range: `ef85f07fa493e872d01d4aa8d7b66c912b43d7f6..788b8e86e71d5ddb871be7fdbcac979b5a829a32`
+(one commit; the lock names `788b8e86e` with `"pushed": false`).
+
 ## Dispatch note
 
 - Tooling check: `python scripts/check_merge_ready.py --product-files`
@@ -372,3 +377,24 @@ wrong. Its smallest fix is to delete ", never the shared layout" at
 those wording changes alone would likely settle both; a fix that adds new
 explanation would give the next round new sentences to test. R3-2: put the
 finding ID in the review file rather than amend a pinned fork commit.
+
+## Fix after round 3
+
+Wording only; no code line changed. The finding IDs for the fork commits
+are recorded here (R3-2), not by amending a pinned fork commit: fork
+`ef85f07fa` is the F2 fix, and fork `788b8e86e` fixes R3-1 and R3-3.
+Main `b52c3d8b` re-pins the fork to `788b8e86e`.
+
+- R3-1: the `versionGears` doc comment (fork `rank.ts`) no longer ends
+  "A version whose rebuild fails its gem repair is not measured: its entry
+  is undefined, never the shared layout."; the sentence is deleted. In the
+  `engine.md` `rank.ts` row, "and makes that version's entry undefined,
+  never the shared layout, and passes the error to" now reads "and passes
+  it to". `## Fix after round 2` above says the same false thing ("it never
+  falls back to the shared layout"); it stays as written, and this
+  correction replaces it.
+- R3-3: the `VersionGears` type doc said an entry is undefined when "that
+  version's request cannot be built: it cannot be composed, or rebuilding
+  it fails its gem repair." It now says an entry is undefined "when that
+  version's default request cannot be composed or, unless Stop ends a
+  later read in the same call, when rebuilding it fails its gem repair."
