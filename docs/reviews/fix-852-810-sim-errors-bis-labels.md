@@ -22,6 +22,11 @@ Reviewed range: `02ad5867c3171b8922ebbf5bb4fbef111c38cee4..b52c3d8b34f6dbbdf59c9
 Round 4 fork range: `ef85f07fa493e872d01d4aa8d7b66c912b43d7f6..788b8e86e71d5ddb871be7fdbcac979b5a829a32`
 (one commit; the lock names `788b8e86e` with `"pushed": false`).
 
+Reviewed range: `b52c3d8b34f6dbbdf59c9fbf5837fd485f5c3f68..2c7a8b82f80fa2b1956cab11004e2a47857b0cff`
+
+Round 5 fork range: `788b8e86e71d5ddb871be7fdbcac979b5a829a32..3055fa71a52471c6d658523d65083dfd570f8ba7`
+(one commit; the lock names `3055fa71a` with `"pushed": false`).
+
 ## Dispatch note
 
 - Tooling check: `python scripts/check_merge_ready.py --product-files`
