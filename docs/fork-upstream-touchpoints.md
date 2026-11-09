@@ -31,26 +31,26 @@ next upstream merge and before opening any PR.
 
 All commands run from the main repo root against the fork clone at
 `vendor/tbc-new-fork` (gitignored; its own `.git`, branch
-`feat/upgrades-tab-react`). The fork commit is `119b9f676`, the commit
-`data/wowsims-fork.lock.json` pins. Its upstream base is `cec2a7b68`, the
-upstream commit `data/wowsims.lock.json` pins.
+`feat/upgrades-tab-react`). The fork commit is `60a4735ea`, the commit
+`data/wowsims-fork.lock.json` pins. Its upstream base is `24606be6b`
+(v0.0.155), the upstream commit `data/wowsims.lock.json` pins.
 
 ```
-# cec2a7b68 is the merge base of the fork commit and upstream master, and
-# 8ccce9d7f merged it with cec2a7b68 itself as the second parent, so this diff
-# holds only our changes (211 commits plus six merges, measured 2026-10-25 at
-# 119b9f676: 8ccce9d7f, bc96d0a03, fedf78807 and three merges of our own
-# branches)
-git -C vendor/tbc-new-fork merge-base upstream/master 119b9f676   # -> cec2a7b687f9...
-git -C vendor/tbc-new-fork rev-list --no-merges --count cec2a7b68..119b9f676   # -> 211
-git -C vendor/tbc-new-fork log --merges --oneline cec2a7b68..119b9f676
+# 24606be6b is the merge base of the fork commit and upstream master, and
+# 60a4735ea merged it with 24606be6b itself as the second parent, so this diff
+# holds only our changes (265 commits plus eight merges, measured 2026-11-09 at
+# 60a4735ea: 60a4735ea, 8ccce9d7f, bc96d0a03, fedf78807 and four merges of our
+# own branches)
+git -C vendor/tbc-new-fork merge-base upstream/master 60a4735ea   # -> 24606be6bae2...
+git -C vendor/tbc-new-fork rev-list --no-merges --count 24606be6b..60a4735ea   # -> 265
+git -C vendor/tbc-new-fork log --merges --oneline 24606be6b..60a4735ea
 
 # the modified upstream files (1) and their line counts
-git -C vendor/tbc-new-fork diff --name-only --diff-filter=M cec2a7b68 119b9f676 | wc -l
-git -C vendor/tbc-new-fork diff --numstat --diff-filter=M cec2a7b68 119b9f676
+git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 24606be6b 60a4735ea | wc -l
+git -C vendor/tbc-new-fork diff --numstat --diff-filter=M 24606be6b 60a4735ea
 
-# the whole changed-file set by status: 237 A, 1 M, nothing else
-git -C vendor/tbc-new-fork diff --name-status cec2a7b68 119b9f676 | cut -f1 | sort | uniq -c
+# the whole changed-file set by status: 248 A, 1 M, nothing else
+git -C vendor/tbc-new-fork diff --name-status 24606be6b 60a4735ea | cut -f1 | sort | uniq -c
 ```
 
 ### How the count moved
@@ -95,13 +95,15 @@ git -C vendor/tbc-new-fork diff --name-status cec2a7b68 119b9f676 | cut -f1 | so
 | `160ae36c2` (base `e804c29e8`)     | 1                       | 2026-10-17: 2 tab commits, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                                           |
 | `7024ba6d2` (base `e804c29e8`)     | 1                       | 2026-10-24: 34 tab commits since `160ae36c2`, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                                                        |
 | `8ccce9d7f` (base `cec2a7b68`)     | 1                       | 2026-10-25: merge of upstream master `cec2a7b68` (v0.0.153); no tab commit; `ui/app/SimTabsSection.tsx` still 6/0.                                                        |
-| **`119b9f676` (base `cec2a7b68`)** | **1**                   | 2026-10-25: 1 tab commit, the tab's pool-size test fixtures re-pinned to `cec2a7b68`, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                |
+| `119b9f676` (base `cec2a7b68`)     | 1                       | 2026-10-25: 1 tab commit, the tab's pool-size test fixtures re-pinned to `cec2a7b68`, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                |
+| `3055fa71a` (base `cec2a7b68`)     | 1                       | 2026-11-08: 54 tab commits and one merge of our own branch since `119b9f676`, in tab files; `ui/app/SimTabsSection.tsx` still 6/0.                                        |
+| **`60a4735ea` (base `24606be6b`)** | **1**                   | 2026-11-09: merge of upstream master `24606be6b` (v0.0.155); no tab commit; `ui/app/SimTabsSection.tsx` still 6/0.                                                        |
 
 Each row is the `--name-only --diff-filter=M` command above over that range.
 
 ## Category B — the one modified upstream file
 
-Counts are added/removed from `--numstat` over `cec2a7b68..119b9f676`. Ticket
+Counts are added/removed from `--numstat` over `24606be6b..60a4735ea`. Ticket
 numbers are this repo's (tbc-gear-prio) tickets.
 
 | #   | File                        | +/− | What the lines are                                                                                                                                                                                                                                                                                                                          | Why the tab needs it                                                             | Ticket |
@@ -146,12 +148,12 @@ catch-up that changes that branch must change the copy too.
 ## Back to upstream's text
 
 The branch changed 19 upstream files at one time or another
-(`git -C vendor/tbc-new-fork log --format= --name-only cec2a7b68..119b9f676`,
-keeping the paths that exist at `cec2a7b68`). At the pin before the cleanup,
+(`git -C vendor/tbc-new-fork log --format= --name-only 24606be6b..60a4735ea`,
+keeping the paths that exist at `24606be6b`). At the pin before the cleanup,
 `b2851da58`, 18 of them were modified, #1 among them
 (`git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 42c75dc9 b2851da58`);
 the 19th, `sim/core/gem_test.go`, was already back to upstream's text there.
-Apart from #1 above, each of them is now byte-identical to `cec2a7b68`:
+Apart from #1 above, each of them is now byte-identical to `24606be6b`:
 
 | File                                                                                                                                                                                                                                                                                                                   | What the branch had in it                                                                                                  | Where that went                                                                                                                                                                                          |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -185,10 +187,10 @@ run until the page reloads, as on every other wowsims page.
 
 ## Category A — new files outside the tab's folder
 
-237 files are new; 231 of them are under `ui/features/upgrades/`. The other 6:
+248 files are new; 242 of them are under `ui/features/upgrades/`. The other 6:
 
 ```
-git -C vendor/tbc-new-fork diff --name-only --diff-filter=A cec2a7b68 119b9f676 -- . ':!ui/features/upgrades'
+git -C vendor/tbc-new-fork diff --name-only --diff-filter=A 24606be6b 60a4735ea -- . ':!ui/features/upgrades'
 ```
 
 - **`ui/app/tabs/UpgradesTabBody.tsx`** and its three tests
@@ -257,7 +259,7 @@ untested here.
 ticket numbers, so keep it that way. Re-run (prints nothing):
 
 ```
-git -C vendor/tbc-new-fork grep -n -iE "ticket [0-9]+" 119b9f676 -- $(git -C vendor/tbc-new-fork diff --name-only --diff-filter=M cec2a7b68 119b9f676)
+git -C vendor/tbc-new-fork grep -n -iE "ticket [0-9]+" 60a4735ea -- $(git -C vendor/tbc-new-fork diff --name-only --diff-filter=M 24606be6b 60a4735ea)
 ```
 
 ## Formatting
