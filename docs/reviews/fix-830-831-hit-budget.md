@@ -2,6 +2,8 @@
 
 Reviewed range: `fab063a5db43793fb7966154a18893ddaa841c79..7a8e88c597a891b6a4010b42b0744b9aa81f4667`
 
+Reviewed range: `7a8e88c597a891b6a4010b42b0744b9aa81f4667..00e34b701ce49bb98e6908f1708038bf8d76bfe8`
+
 Fork range reviewed with it: `tbc-new-fork` `60a4735ea1112760fb1d9a175d8e79373647b1a0..52bb752ce4cb5b5ff5e906457891f746b73305d2`
 (ed3255a80 "Require the stats read on every sim runner", 52bb752ce "Note
 when a talent caps some spells before 16%"). The lock moves from the
@@ -284,3 +286,199 @@ asked to stop once this file is committed. The fork tip is not pushed
 | S5  | Standards   | wontfix     | Matches its sibling notes and the one-sentence rule; if the D3 rewording yields a shorter sentence that still states the cost, use it                                                                                                                                                                                                                                                                                                                                                                                                              |
 | P1  | Spec        | fixed       | Same fix as D2                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | P2  | Spec        | fixed       | Same fix as D3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+
+## Focused check (round 2)
+
+Main range: `7a8e88c5..00e34b70` (the second `Reviewed range:` line).
+df41e9e7 only added this review file; the commit under check is
+00e34b70 "Fix review round 1 of the 830 and 831 branch". Fork range
+reviewed with it: `tbc-new-fork`
+`52bb752ce4cb5b5ff5e906457891f746b73305d2..ae2c8afc148d6331660557716d4085c14c4e8d1c`
+(one commit, ae2c8afc1 "Fix the 831 note's wording and per-spell
+talents"). The lock moves from the first to the second
+(`git show 7a8e88c5:data/wowsims-fork.lock.json` and the same at
+00e34b70, `commit` field).
+
+**Dispatch note.** `codex` is not on `PATH` (`command -v codex`, rc 1),
+so one fresh `general-task` agent on Opus ran the four checks below and
+judged the `wontfix` rows A1 and D1. It was told it writes nothing and
+was given the caller's no-new-tickets rule. Before dispatch the
+reviewing agent tested the skill's three conditions and judged that they
+hold in substance; check 1 records where the literal text is not met.
+
+**Side effect of this round.** The agent's first fork test command,
+`pnpm -C <pair>/vendor/tbc-new-fork exec vitest run …`, made pnpm
+install into the fork, which is an npm repo. It left an untracked
+`vendor/tbc-new-fork/pnpm-lock.yaml` and rebuilt the fork's
+`node_modules` in pnpm layout (vitest 4.1.12, where `package-lock.json`
+pins 4.1.11). No tracked file changed: `git -C <pair>/vendor/tbc-new-fork
+status --short` prints only `?? pnpm-lock.yaml`. Restore command:
+`rm <pair>/vendor/tbc-new-fork/pnpm-lock.yaml && npm --prefix <pair>/vendor/tbc-new-fork ci`.
+
+**Check 1, the three conditions: hold in substance; the literal text of
+condition 1 is not met (bookkeeping, R2-3).** Neither fix commit message
+names a finding ID or the ticket by path, and 00e34b70 mixes test
+fixes, the fork re-pin (`data/wowsims-fork.lock.json`,
+`data/sim-implemented-effects.json`, `docs/fork-provenance/engine.md`),
+edits to tickets 795, 830 and 831, and this review file. The fork commit
+also holds the code-quality pass (S1, S2) without the row IDs. The
+`## Disposition` rows the author edited in 00e34b70 name each fix and
+the commit it is in, so every change traces to a finding. Condition 2
+holds: the only product-code changes are fork `cap-profile.ts` and
+`rank.ts`, at the places D2, S1, S2 and D3 cite. The re-pin data checks
+out: `sha256sum` of `rank.ts` and `cap-profile.ts` matches their
+PROVENANCE rows, the lock `_comment` only gains one sentence, and the
+other provenance rows changed only in padding. Condition 3 holds:
+`git -C <fork> diff --name-status 24606be6b ae2c8afc1 --` the three
+changed fork files gives `A` for all three (fork-only files, checked by
+the reviewing agent with `git cat-file -e 24606be6b:<path>`), and
+`git -C <fork> log --merges 52bb752ce..ae2c8afc1` lists no merge.
+
+**Check 2, each fix changes only what its finding asks: pass.** Changes
+no finding asked for: the rename `talentCapsSomeSpellsSooner` to
+`someSpellsCapSooner`, the new `TalentPosition` type, the switch from
+`profile.talentHit` to `repair.perSpellHitTalents`, and a `CapProfile`
+doc paragraph that names the Troll overpricing (fork
+`cap-profile.ts:129-136`). The switch changes behaviour only for D2's
+case. Mage's Arcane Focus and shadow's Shadow Focus already show in a
+school slot (`sim/mage/talents.go:113`, `sim/priest/talents.go:338`);
+warlock keeps Suppression at segment 0, index 0; elemental and the melee
+specs return false before the talent read, as before.
+`grep -rn SpellMod_BonusHit_Percent sim/mage sim/priest sim/warlock`
+finds only `priest/talents.go:70` and `warlock/talents.go:81`, so the
+list is complete. Focused Power's position (Discipline, index 15) matches
+`ui/sim/talents/trees/priest.json`.
+
+**Check 3, each new test asserts its finding: pass.** 831-N5 would fail
+at fork 52bb752ce, read from that commit's code: the old line is
+`return schoolAbove || talentPoints(talentsString, profile.talentHit) > 0;`,
+shadow's `talentHit` is segment 2, index 4, N5's string
+`"0000000000000002--"` has an empty segment 2, and `casterRead(5)` puts
+no school slot above slot 13, so no note shows. 831-N6 asserts exactly
+one note matching `/level 73/` (`fork-meta-repair.test.ts:1545-1561`), so
+a talent note pushed outside `if (budget)` makes it fail; it passes at
+both commits, which is what A3 asked (a pin, not a red-first test). The
+D3/P2 strings are exact matches in `TALENT_CAP_DETAIL` and
+`SubstitutionsList.test.tsx`. A2's `vi.setConfig({ testTimeout: 120_000 })`
+(`fork-set-net.test.ts:38-40`) is the fix itself; 492-J took 25.4 s in
+this run.
+
+**Check 4, the tests the fixes touch pass: pass.**
+
+| Command                                                                                                                                                                 | Node     | rc  | Result                                                               |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- | --- | -------------------------------------------------------------------- |
+| `node --version; pnpm -C <pair> exec vitest run packages/core/test/fork-meta-repair.test.ts packages/core/test/fork-set-net.test.ts`                                    | v22.23.2 | 0   | 154 passed (meta-repair 51, set-net 103, 172.7 s); 831-N1 to N6 ran  |
+| `node --version` and, in the fork, `node node_modules/vitest/vitest.mjs run` on `SubstitutionsList.test.tsx`, `engine/cap-profile.test.ts` and `model/rank_cap.test.ts` | v22.23.2 | 0   | 3 files, 11 passed, on the vitest 4.1.12 the stray pnpm install left |
+
+The agent's first fork run, through pnpm, passed 9 tests in 2 files with
+a wrong `rank_cap` path; the row above is its second run.
+
+### Findings
+
+**R2-1. The default shadow priest's hit from 6% to 16% is still priced
+at full value, though no damage spell its rotation casts gains from it.**
+This is A1/D1, which the author marked `wontfix`. The page's default
+shadow priest is a Troll (fork `ui/specs/priest/dps/presets.ts:134`),
+Starshards is registered only for Night Elves (`sim/priest/priest.go:58-62`,
+read by the reviewing agent), and Shadowfiend takes only attack power
+from the priest (`sim/priest/shadowfiend_pet.go:71-77`, relayed). The 831 closing
+note says "the pricing stays", and fork `cap-profile.ts:129-136` says
+"none of those spells gains from it". So the branch keeps a known wrong
+price in the page's default state, which in practice closes 831 as an
+accepted estimate for that state; the caller's brief says that option is
+not available for 831. The `wontfix` reason rests on "`SimObservation`
+does not keep" the spell schools. That is a fact about the code under
+review, not a limit: `WorkerPoolSimRunner.run` receives the whole
+`RaidSimResult` and returns only `dps`, `stdev`, `iterationsDone` and
+`allValues` (fork `ui/features/upgrades/model/adapters/worker_pool_sim_runner.ts:196-210`,
+read by the reviewing agent), and every run fills each unit's action
+metrics with `spell_school` (`proto/api.proto:146-153`, read by the
+reviewing agent; `sim/core/metrics_aggregator.go:147,366,613-616`,
+relayed). The baseline sim runs just before the hit read in the same
+function (fork `rank.ts:1082-1100`, relayed). The author is right that a
+slot chosen by race would be a guess, which the owner's ruling rules
+out. Limit of the direct signal: action metrics carry the school but not
+the class mask that decides which spells get the school bonus
+(`sim/core/spell_result.go:244-246`), so an item proc with no mask stays
+unknown (hypothesis, untested on whether it matters). The same kept data
+would also reach D4's custom-rotation case.
+
+**R2-2. In the Troll state the note tells the player something that is
+not what happened.** The note reads "If gems were swapped to turn your
+meta gem on, hit rating was counted at full value up to 16% spell hit,
+although some of your spells get extra hit and reach the hit cap
+sooner." (fork `rank.ts:4486-4493`, read by the reviewing agent). For
+the default Troll priest every damaging spell gets that hit, so "some"
+tells the player the other spells still gain, and nothing says that hit
+past 6% bought nothing. The same holds for D4's custom rotation that
+casts no affected spell. In the other states it shows in (Arcane Focus
+mage, Suppression warlock, Focused Power priest, school hit in the bonus
+stats) the sentence is true. Owner ruling: player-facing text must be
+true in every state it can show in. A1 already raised "some" (round 1,
+A1); the D3 rewording removed "talents" and kept "some".
+
+**R2-3 (bookkeeping).** The fix commit messages name no finding IDs, and
+00e34b70 bundles test fixes, a re-pin, ticket edits and this review file
+(check 1).
+
+**R2-4 (bookkeeping).** Ticket 830's "Verified by" line still names
+`tbc-new-fork@ed3255a8036f63e75e25f732b5c3147a40a908f9`
+(`830-*.md:81`), while the numbers after it (52 passed; `gates: 1612
+ran`) now come from runs at ae2c8afc1 (`git show 00e34b70 -- .scratch/carry-forward/issues/830-*.md`).
+
+**R2-5 (code quality).** Two names the fixes left behind. `TalentPosition`
+(fork `cap-profile.ts:175-179`) repeats three fields of
+`TalentHitDescriptor` (`cap-profile.ts:40-46`). `someSpellsCapSooner`
+was renamed because the note no longer names talents, but
+`hitCapTalentNote` (fork `rank.ts`) and the main-repo test constant
+`TALENT_CAP_DETAIL` (`fork-meta-repair.test.ts`) still say "Talent".
+
+### Round 2 verdict on A1 and D1
+
+The `wontfix` does not hold. Its two claims are that the note is now true
+in the Troll state and that the direct fix needs data the tab does not
+keep. R2-2 shows the first is not met under the owner's "true in every
+state" ruling, and R2-1 shows the data reaches the tab's runner on every
+sim and is dropped there. With no new tickets allowed, a `wontfix` here
+leaves a known wrong price in the page's default shadow priest with no
+ticket. So R2-1 and R2-2 take `fixed — pending author fix`.
+
+## Code quality (round 2)
+
+| ID   | Where                                                                                                                                                    | What                                                                                                                             |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| R2-5 | fork `ui/features/upgrades/model/engine/cap-profile.ts:40-46,175-179`; `rank.ts` `hitCapTalentNote`; main `fork-meta-repair.test.ts` `TALENT_CAP_DETAIL` | Build `TalentHitDescriptor` from `TalentPosition`; rename `hitCapTalentNote` and `TALENT_CAP_DETAIL` so they do not say "Talent" |
+
+## Summary (round 2)
+
+The round-1 fixes do what their findings asked, and every test they
+touch passes: 154 main-repo tests and 11 fork tests (check 4). One
+round-1 finding is still open: A1/D1, kept as `wontfix` by the author.
+The page's default shadow priest is a Troll, so every damage spell its
+rotation casts reaches the hit cap at 6% shared hit, yet the meta-gem
+repair still prices hit from 6% to 16% at full value (R2-1), and the
+note's "some of your spells" tells the player the other spells still
+gain (R2-2). The sim already returns each spell's school on every run;
+the tab's runner drops it. Round 2 also found two bookkeeping items
+(R2-3, R2-4) and one code-quality row (R2-5).
+
+Round 2 is the last round (`pre-merge-review` skill, "Round limit"), and
+it reports findings other than bookkeeping, so the review ends here:
+the merge check (step 4) was not run, and the owner chooses the next
+step. R2-1, R2-2 and R2-5 are open, pending an author fix on this
+branch, and block the merge.
+
+Tickets this branch filed: 0. Closed: 2 (830, 831), counted with
+`git diff --name-status dev...HEAD -- '.scratch/carry-forward/issues/*.md'`
+(three `M` rows: 795, 830, 831; no `A`) and the skill's `Status:` grep
+(2). Ticket 831's closing note will need editing once R2-1 is fixed.
+
+## Disposition (round 2)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                                                                                     |
+| ---- | ------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R2-1 | Focused check | fixed       | fixed — pending author fix. Reopens A1/D1: price the default Troll shadow priest's hit by what its cast spells still gain, from the sim's own result, not by race |
+| R2-2 | Focused check | fixed       | fixed — pending author fix. The note must be true when every cast spell already reaches the cap (default Troll priest, D4's custom rotation)                      |
+| R2-3 | Focused check | wontfix     | Bookkeeping: the `## Disposition` rows map each finding ID to its change and commit                                                                               |
+| R2-4 | Focused check | wontfix     | Bookkeeping: wording in ticket 830 only; correct the sha when the ticket is next edited (this review writes only this file)                                       |
+| R2-5 | Code quality  | fixed       | fixed — pending author fix. See `## Code quality (round 2)`                                                                                                       |
