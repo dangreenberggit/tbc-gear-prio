@@ -12,6 +12,11 @@ Reviewed range: `b3a502bf9cfe351ea6e7f4c0aa30e5f7f3848bba..b465e023b447e6235613c
 Round 2 fork range: `38e0614f3717867f3c4b9088e436c9485d64b0ba..3e554d9d22ec0be4e7f9500eb3362a39e2ccfde0`
 (four commits; the lock names `3e554d9d2` with `"pushed": false`).
 
+Reviewed range: `b465e023b447e6235613c34a32ec8711d2667dd6..02ad5867c3171b8922ebbf5bb4fbef111c38cee4`
+
+Round 3 fork range: `3e554d9d22ec0be4e7f9500eb3362a39e2ccfde0..ef85f07fa493e872d01d4aa8d7b66c912b43d7f6`
+(one commit; the lock names `ef85f07fa` with `"pushed": false`).
+
 ## Dispatch note
 
 - Tooling check: `python scripts/check_merge_ready.py --product-files`
@@ -285,3 +290,85 @@ A failed read still fails the run. `852-R` now goes through the one catch
 and also asserts that no note says a sim failed; it fails with the catch
 removed (the run rejects) and with the error not passed on (the false
 note). Main: re-pin, `engine.md` row, `852-R`.
+
+## Focused check (round 3)
+
+Main range `b465e023..02ad5867`; fork range `3e554d9d2..ef85f07fa`. One
+fresh `general-task` agent on Opus that did not write the code, told it
+writes nothing. This is again a last round (owner's choice to fix F2,
+2026-11-08).
+
+1. **Conditions 1 to 3: pass.** `a9326235` edits only this file.
+   `02ad5867` names F2 and also changes the test, so it counts as a fix
+   commit. Fork `ef85f07fa` names no finding ID (R3-2); the commit that
+   pins it names F2, and `## Fix after round 2` names it as the F2 fix.
+   Every changed code line is one of the seven caller catches F2 is about
+   or the one catch in `versionGears`. `rank.ts` does not exist at
+   upstream base `cec2a7b6` (`git cat-file -e` rc 128); no merges in either
+   range. The `engine.md` hash `6eb84d72...` matches `rank.ts` at
+   `ef85f07fa`.
+2. **Fixes change only what F2 asks: pass.** Against `38e0614f3` the
+   crossing gate, `stepGear`, `queueBonusOff`, `measurePairTwoPiece` and
+   the set screen have no code change; what remains is the catch, the
+   callback, the package loop's use of it, and doc comments.
+3. **The test asserts its finding: pass.** Red re-run by the dispatcher:
+   with the catch at fork `rank.ts:1201` changed to rethrow every error,
+   both `852-R` cases fail, "meta repair exceeded step budget", rc 1, node
+   v22.23.2 (`.scratch/agent-reports/2026-11-08-round3-red-catch-removed.log`).
+   The checker read that removing the callback would fail the test's new
+   `not.toContain("the sims that measure it failed")`
+   (`fork-meta-repair.test.ts:1851-1858`); that run is the fixer's, not
+   repeated.
+4. **Touched tests pass: pass.** `fork-meta-repair` and
+   `wowsims-fork-parity`: 48 passed, rc 0; fork `tsc --noEmit` rc 0; node
+   v22.23.2 in each run.
+
+Also checked: the stats read (`rank.ts:1182`) is outside the new catch
+(`1191-1205`), so a failed read still fails the run; `versionRepairError`
+is declared inside the per-package loop (`rank.ts:2369`, loop at `2284`),
+so one package's failure cannot skip another; the fixer's per-caller table
+is right for all seven callers, and no pair caller sims a difference with
+one version missing; `onRepairFailed` is the smallest way found to keep
+the package's note; no player-facing string changed.
+
+Findings:
+
+- **R3-1 (low, open).** Fork `rank.ts:1201-1215`. When version i's
+  rebuild fails its repair and Stop then refuses version i+1's read in the
+  same call, the outer `StopRefusedSim` catch returns `shared()` for every
+  version, version i included. So a version whose repair failed comes back
+  on the shared layout. The package loop still skips (its callback already
+  fired); the crossing gate, the steps and the 2pc pair get the shared
+  request, whose sim Stop refuses unless a cached result exists. Both
+  halves of a pair are then shared, so no pair is mixed. The doc comment
+  at `rank.ts:1126-1128`, the `engine.md` row and `## Fix after round 2`
+  above say "never the shared layout", which is false in this state. Read
+  from the code (dispatcher re-read `rank.ts:1130-1216`); not run.
+- **R3-2 (bookkeeping).** Fork commit `ef85f07fa`'s message names no
+  finding ID, where the earlier fork fix commits did. Changing it means
+  amending a pinned commit and re-pinning.
+- **R3-3 (low, comment, open).** Fork `rank.ts:4223-4231`, the rewritten
+  `VersionGears` doc, says an entry is undefined when its request "cannot
+  be composed". A compose error on a rebuilt version
+  (`applyCopies(composeFor(rebuilt.equipment), ...)`, `rank.ts:1206`,
+  outside both catches) rejects and fails the run instead. Same behaviour
+  as at `38e0614f3` (the fixer listed it as left as is), but the rewritten
+  comment states it wrongly.
+
+R3-1 and R3-3 are findings other than bookkeeping in the lines the fix
+wrote, so the review stops here (`pre-merge-review` § Round limit): no
+`## Disposition (round 3)` table, and the merge check was not run. F2's
+Disposition row waits for a round that passes.
+
+Assessor (one fresh `general-task` agent that neither wrote nor reviewed
+the work; its view, read from the code, not run): the code is converging
+(seven catches became one, and round 3's four checks passed); the open
+findings are comment claims stronger than the code. R3-1 does not reach
+the screen: a stopped run discards the whole set phase's output before it
+returns (`rank.ts:1765-1776`, dispatcher re-read), so only the comment is
+wrong. Its smallest fix is to delete ", never the shared layout" at
+`rank.ts:1128` and in the `engine.md` `rank.ts` row; for R3-3, say
+"default request" or drop the clause at `rank.ts:4226-4227`. A round on
+those wording changes alone would likely settle both; a fix that adds new
+explanation would give the next round new sentences to test. R3-2: put the
+finding ID in the review file rather than amend a pinned fork commit.
