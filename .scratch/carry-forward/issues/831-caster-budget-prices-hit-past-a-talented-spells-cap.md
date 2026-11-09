@@ -49,9 +49,9 @@ ticket records the ruling with its date.
 ## Closing note (2026-11-09)
 
 Closed by pricing hit by what the spells the rotation casts still gain.
-Owner, 2026-11-09, choosing this over a note: "a sounds ok." Fork commit
-`4903b8cee` on `fix/830-831-hit-budget` (after `52bb752ce` and
-`ae2c8afc1`, whose note it removes):
+Owner, 2026-11-09, choosing this over a note: "a sounds ok." Fork commits
+`4903b8cee` and `3803a1398` (review round 3) on `fix/830-831-hit-budget`,
+after `52bb752ce` and `ae2c8afc1`, whose note `4903b8cee` removes:
 
 - The tab's sim runner now keeps, from every sim result, the first
   player's spell damage by school (`SimObservation.spellDamageBySchool`,
@@ -66,11 +66,15 @@ Owner, 2026-11-09, choosing this over a note: "a sounds ok." Fork commit
   of the spell damage until that group reaches 16% (`meta-repair.ts`,
   `valueModel`). The baseline sim gives the groups; a caster whose worn
   meta gem is off sims its un-repaired gear first, so the worn repair is
-  priced the same way.
+  priced the same way. That extra sim runs only when every target is
+  level 73, since otherwise there is no budget.
 - So the page's default shadow priest, a Troll with no Starshards
   (`sim/priest/priest.go:58-62`), whose spells are all Shadow, values no
-  hit past the point where Shadow Focus caps them. A Night Elf priest
-  values hit past that point only by Starshards' share of the damage.
+  hit past the point where Shadow Focus caps them. A real wowsimcli sim
+  of that default (P1 gear, 200 iterations, seed 7) dealt only Shadow
+  damage. A Night Elf priest values hit past that point only by
+  Starshards' share of the damage, 4.2% in the same sim with the race set
+  to Night Elf.
   An Arcane mage values hit for Fire Blast and Frostbolt by their shares
   after Arcane spells cap.
 - A caster whose sim result has no spell damage by school fails the run
@@ -90,28 +94,37 @@ every target is level 73: "If gems were swapped to turn your meta gem
 on, hit rating was valued as if your Suppression talent added no hit, so
 it may be valued too high." (or "Focused Power").
 
-One estimate remains with no note: a damage spell with no class mask, as
-an item proc is, gets no school bonus in the sim but is priced at its
-school's hit, so hit is valued too low for its share of the damage. The
-sim result does not say which spells have a class mask. How often this
-moves a ranking is unmeasured.
+Two estimates remain with no note, because the sim result does not mark
+the spells concerned (`proto/api.proto:142-158`): a damage spell with no
+class mask, as an item proc is, gets no school bonus in the sim but is
+priced at its school's hit, so hit is valued too low for its share; and
+an explosive gets 100% bonus hit (`sim/core/consumes.go:625-626`), so
+the player's hit never changes it, but its damage is priced as if it
+did, so hit is valued too high for its share. Explosives need
+Engineering, which the page's default casters do not take. How often
+either moves a ranking is unmeasured.
 
 Tests, in `packages/core/test/fork-meta-repair.test.ts`: 831-G1 to G3
 (the groups, physical and two-school damage, and the error),
 831-P1 (a shadow priest whose damage is all Shadow places no Great
-Dawnstone past the Shadow cap; with the damage in Arcane it does),
-831-W1 (the same for the worn repair, after a sim of the un-repaired
-gear), 831-F1 (no spell damage fails the run), 831-N1 (school hit gets
+Dawnstone past the Shadow cap; with the damage in Arcane it does, and
+below the Shadow cap it does), 831-W1 (the same for the worn repair,
+after a sim of the un-repaired gear), 831-W2 (no extra sim against a
+level-72 target), 831-F1 (no spell damage fails the run), 831-N1 (school hit gets
 no note), 831-N3 and N5 (the talent note for Suppression and Focused
 Power), 831-N4 (no note without such a talent) and 831-N6 (only the
 level-73 note against a level-72 target). G1-G3, P1, W1, F1, N1, N3 and
-N5 failed on the fork code before `4903b8cee`. Fork:
+N5 failed on the fork code before `4903b8cee`. In
+`packages/core/test/fork-caster-hit-sim.test.ts`, 831-T1 sims the page's
+default Troll shadow priest with the pinned wowsimcli and checks that its
+damage is all Shadow and its budget one group at the Shadow cap; 831-T2
+checks that a Night Elf adds Starshards' Arcane damage. Fork:
 `worker_pool_sim_runner.test.ts` ("gives the first player's spell damage
 by school"), `SubstitutionsList.test.tsx` (the note renders as one
 sentence).
 
-Verified by: tbc-new-fork@4903b8cee8a2df6011a8e457168048406096e127;
-`node --version; pnpm exec vitest run packages/core/test/fork-meta-repair.test.ts packages/core/test/wowsims-fork-parity.test.ts`
-(57 passed); `node --version; pnpm verify` (rc 0, 4 min 39 s; `gates:
-1617 ran, 0 skipped`; its fork tests check ran 826 tests at
-`tbc-new-fork@4903b8cee`).
+Verified by: tbc-new-fork@3803a1398adf1036fa99fbd546d223fc3a4d20b6;
+`node --version; pnpm exec vitest run packages/core/test/fork-meta-repair.test.ts packages/core/test/fork-caster-hit-sim.test.ts packages/core/test/wowsims-fork-parity.test.ts`
+(60 passed); `node --version; pnpm verify` (rc 0, 4 min 36 s; `gates:
+1620 ran, 0 skipped`; its fork tests check ran 826 tests at
+`tbc-new-fork@3803a1398`).

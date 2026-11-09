@@ -1611,6 +1611,39 @@ describe.skipIf(!forkPresent)(
       for (const items of arcane.rows) {
         expect(holdsGem(items, GREAT_DAWNSTONE)).toBe(true);
       }
+      // Below its own cap a Shadow group still values hit: a 1% school
+      // bonus leaves 30 − 12.6 = 17.4 rating, room for the 8 of a Dawnstone.
+      const underShadowCap = await warlockRun({
+        spec: "shadow",
+        weightsOf: "warlock",
+        bonusHit: 0,
+        localBudget: 30,
+        schoolBonus: { 11: 1 },
+        castDamage: { [SCHOOL.shadow]: 1 },
+      });
+      for (const items of underShadowCap.rows) {
+        expect(holdsGem(items, GREAT_DAWNSTONE)).toBe(true);
+      }
+    });
+
+    it("831-W2: against a target that is not level 73 a caster's worn repair runs no extra sim", async () => {
+      // Oracle: with no budget the sim's spells price nothing, so the first
+      // sim is the baseline, already repaired.
+      const worn = await wornWithMetaOff();
+      const skeleton = structuredClone(retSkeleton) as {
+        encounter: { targets: Array<{ level: number }> };
+      };
+      for (const t of skeleton.encounter.targets) t.level = 72;
+      const run = await runSpec({
+        worn,
+        pool: S_POOL,
+        spec: "shadow",
+        skeleton: skeleton as unknown as RaidSimRequest,
+        computeStats: casterRead(7, { 11: 10 }),
+      });
+      expect(requestItems(run.requests[0]!)[CHEST]!.gems).not.toEqual(
+        worn[CHEST]!.gems
+      );
     });
 
     it("831-W1: a caster whose worn meta is off sims that gear first and prices the worn repair by its spells", async () => {
