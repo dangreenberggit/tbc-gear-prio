@@ -1,8 +1,9 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
+import http from "node:http";
 import os from "node:os";
 import path from "node:path";
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import {
   BackendTraffic,
@@ -142,12 +143,24 @@ describe("BackendTraffic.stallReason", () => {
   });
 });
 
+// Stands in for the backend's pprof endpoint, so no test reaches a real
+// backend on :3333.
+const GOROUTINES = "stub goroutine dump";
+let stub;
+let backendOrigin;
+beforeAll(async () => {
+  stub = http.createServer((_, res) => res.end(GOROUTINES));
+  await new Promise((resolve) => stub.listen(0, "127.0.0.1", resolve));
+  backendOrigin = `http://127.0.0.1:${stub.address().port}`;
+});
+afterAll(() => new Promise((resolve) => stub.close(resolve)));
+
 /** A temp checkout with a backend log that already holds an older run's line. */
 function tempRun() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "run-evidence-"));
   const backendLog = path.join(root, "backend-3333.log");
   fs.writeFileSync(backendLog, "an older run\n");
-  return { root, backendLog };
+  return { root, backendLog, backendOrigin };
 }
 const read = (dir, file) => fs.readFileSync(path.join(dir, file), "utf8");
 const readSummary = (dir) => JSON.parse(read(dir, "summary.json"));
@@ -240,8 +253,8 @@ describe("openRunEvidence", () => {
     const summary = readSummary(ev.dir);
     expect(summary.outcome).toBe("failed");
     expect(summary.error).toBe("first");
-    expect(fs.existsSync(path.join(ev.dir, "backend-goroutines.txt"))).toBe(
-      true
+    expect(read(ev.dir, "backend-goroutines.txt")).toBe(
+      `HTTP 200\n${GOROUTINES}`
     );
   }, 20000);
 
@@ -301,8 +314,8 @@ const CHILD = `
 import fs from "node:fs";
 import { openRunEvidence } from ${JSON.stringify(new URL("./run-evidence.mjs", import.meta.url).href)};
 import { armRunDeadline } from ${JSON.stringify(new URL("./run-guard.mjs", import.meta.url).href)};
-const [root, backendLog, mode] = process.argv.slice(1);
-const ev = openRunEvidence({ root, label: "t", stallMs: 120000, backendLog });
+const [root, backendLog, backendOrigin, mode] = process.argv.slice(1);
+const ev = openRunEvidence({ root, label: "t", stallMs: 120000, backendLog, backendOrigin });
 let emit;
 await ev.watch({ onEvent: (fn) => { emit = fn; }, send: async () => ({}) }, async () => ({}));
 emit({ method: "Network.requestWillBeSent", sessionId: "P", params: { requestId: "7", request: { method: "POST", url: "${B}/raidSimAsync?requestId=a" } } });
@@ -321,7 +334,15 @@ function runChild(mode, signal) {
   const run = tempRun();
   const child = spawn(
     process.execPath,
-    ["--input-type=module", "-e", CHILD, run.root, run.backendLog, mode],
+    [
+      "--input-type=module",
+      "-e",
+      CHILD,
+      run.root,
+      run.backendLog,
+      run.backendOrigin,
+      mode,
+    ],
     { stdio: ["ignore", "pipe", "pipe"] }
   );
   let dir = null;
@@ -372,7 +393,7 @@ describe("a run that ends without close()", () => {
     expect(summary.outcome).toBe("failed");
     expect(summary.error).toMatch(/limit \(the run deadline\)$/);
     expect(read(dir, "backend.log")).toBe("this run\n");
-    expect(fs.existsSync(path.join(dir, "backend-goroutines.txt"))).toBe(true);
+    expect(read(dir, "backend-goroutines.txt")).toBe(`HTTP 200\n${GOROUTINES}`);
     lastLines(dir);
   }, 30000);
 

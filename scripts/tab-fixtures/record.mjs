@@ -23,9 +23,9 @@
 // committed, as the ticket 502 owner render gate needs; the file then names
 // the diff by hash instead (`forkDirty: true`).
 //
-// Every run keeps its console, backend-request trace and backend log under
-// .scratch/tab-recordings/logs/, and a run that stops making progress fails
-// with a message naming what stopped (run-evidence.mjs, ticket 703).
+// Every run keeps its evidence under .scratch/tab-recordings/logs/ (the file
+// list is at the top of run-evidence.mjs), and a run that stops making
+// progress fails with a message naming what stopped (ticket 703).
 
 import { execFileSync } from "node:child_process";
 import crypto from "node:crypto";

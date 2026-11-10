@@ -263,7 +263,13 @@ export function tracedSend(send, record, now = Date.now) {
  *
  * A line noted after close() is appended at once.
  */
-export function openRunEvidence({ root, label, stallMs, backendLog }) {
+export function openRunEvidence({
+  root,
+  label,
+  stallMs,
+  backendLog,
+  backendOrigin = BACKEND_ORIGIN,
+}) {
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");
   const dir = path.join(
     root,
@@ -448,7 +454,7 @@ export function openRunEvidence({ root, label, stallMs, backendLog }) {
     try {
       // The backend imports net/http/pprof (sim/web/main.go in the fork).
       return await withTimeout(
-        fetch(`${BACKEND_ORIGIN}/debug/pprof/goroutine?debug=2`).then(
+        fetch(`${backendOrigin}/debug/pprof/goroutine?debug=2`).then(
           async (res) => `HTTP ${res.status}\n${await res.text()}`
         ),
         10000,
