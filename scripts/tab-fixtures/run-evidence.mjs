@@ -28,6 +28,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+import { exitOnSignals } from "../process-group.mjs";
 import { withTimeout } from "./run-guard.mjs";
 
 /** Where `local_worker.ts` in the fork sends every sim call. */
@@ -252,8 +253,9 @@ export function tracedSend(send, record, now = Date.now) {
  *
  * - close(), from record.mjs or from the run deadline (armRunDeadline waits
  *   a bounded time for it); on a failure it also keeps the goroutine dump.
- * - SIGINT or SIGTERM, synchronously, then exit with 128 + the signal number.
- * - any other process.exit, synchronously from the exit hook.
+ * - any process.exit, synchronously from the exit hook. That includes SIGINT,
+ *   SIGTERM and SIGHUP, which exitOnSignals turns into exit code 128 + the
+ *   signal number.
  *
  * A line noted after close() is appended at once.
  */
@@ -347,7 +349,6 @@ export function openRunEvidence({
     if (closed) return;
     clearInterval(flushTimer);
     process.off("exit", onExit);
-    for (const [signal, handler] of onSignal) process.off(signal, handler);
     const backendLogNote = copyBackendLog();
     note(`backend log: ${backendLogNote}`);
     flush();
@@ -360,21 +361,19 @@ export function openRunEvidence({
 
   const flushTimer = setInterval(flush, 1000);
   flushTimer.unref();
-  const onExit = () => {
-    fail(new Error("the process exited before the recorder closed the run"));
+  const onExit = (code) => {
+    const signal = ["SIGINT", "SIGTERM", "SIGHUP"].find(
+      (s) => code === 128 + os.constants.signals[s]
+    );
+    fail(
+      new Error(
+        `the process exited with code ${code}${signal ? ` (${signal}, through exitOnSignals)` : ""} before the recorder closed the run`
+      )
+    );
     finish("exited before the run was closed");
   };
   process.on("exit", onExit);
-  // A handler replaces Node's default exit on these signals, so it must exit.
-  const onSignal = ["SIGINT", "SIGTERM"].map((signal) => [
-    signal,
-    () => {
-      fail(new Error(`the recorder got ${signal} and stopped the run`));
-      finish(`ended by ${signal}`);
-      process.exit(128 + os.constants.signals[signal]);
-    },
-  ]);
-  for (const [signal, handler] of onSignal) process.on(signal, handler);
+  exitOnSignals();
 
   const sessions = new Map();
   const onEvent = (client) => (msg) => {

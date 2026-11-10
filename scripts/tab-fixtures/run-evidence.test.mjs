@@ -155,9 +155,16 @@ beforeAll(async () => {
 });
 afterAll(() => new Promise((resolve) => stub.close(resolve)));
 
+const tempRoots = [];
+afterAll(() => {
+  for (const root of tempRoots)
+    fs.rmSync(root, { recursive: true, force: true });
+});
+
 /** A temp checkout with a backend log that already holds an older run's line. */
 function tempRun() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "run-evidence-"));
+  tempRoots.push(root);
   const backendLog = path.join(root, "backend-3333.log");
   fs.writeFileSync(backendLog, "an older run\n");
   return { root, backendLog, backendOrigin };
@@ -376,9 +383,9 @@ describe("a run that ends without close()", () => {
       const { code, killedBy, dir } = await runChild("wait", signal);
       expect({ code, killedBy }).toEqual({ code: status, killedBy: null });
       const summary = readSummary(dir);
-      expect(summary.outcome).toBe(`ended by ${signal}`);
+      expect(summary.outcome).toBe("exited before the run was closed");
       expect(summary.error).toBe(
-        `the recorder got ${signal} and stopped the run`
+        `the process exited with code ${status} (${signal}, through exitOnSignals) before the recorder closed the run`
       );
       expect(read(dir, "backend.log")).toBe("this run\n");
       lastLines(dir);
