@@ -19,7 +19,8 @@ A hang therefore costs only the person recording by hand.
 `pnpm tab-fixtures:record` starts the run, logs `run started`, and then logs
 nothing more until its 25-minute limit ends it with
 `record: Error: run did not settle in 25 min`
-(`scripts/tab-fixtures/record.mjs:331`). The same command, run again with
+(`scripts/tab-fixtures/record.mjs:331` at the time; `grep -n "did not settle"
+scripts/tab-fixtures/record.mjs` finds it now). The same command, run again with
 no code change, settles in the usual time. It has happened twice on
 2026-10-20, each time to a feral fixture, with the backend on `:3333` and
 one recorder at a time:
@@ -65,9 +66,12 @@ cause is not found. The second half of "Done means" is met; the first is not.
 - **What changed.** `record.mjs` keeps each run's evidence in
   `.scratch/tab-recordings/logs/<time>-<spec>-p<phase>-<name>/`: the page's
   and workers' console, every backend request with sent, answered and
-  finished times, the recorder's lines with the tab's progress text, the
-  backend's log lines for the run, a summary, and on failure the backend's
-  goroutine dump (`/debug/pprof/goroutine?debug=2`). `dev-tab.mjs backend`
+  finished times, every CDP command the recorder sent with its answer time
+  or error, the recorder's lines with the tab's progress text, the
+  backend's log lines for the run (or a line saying the backend wrote
+  none), a summary, and on failure the backend's goroutine dump
+  (`/debug/pprof/goroutine?debug=2`). The files are kept however the run
+  ends: settled, failed, the 25-minute deadline, or Ctrl+C / SIGTERM. `dev-tab.mjs backend`
   now appends its log, with a time on each line, to
   `.scratch/dev-tab/backend-<port>.log`, so a restart no longer loses it.
   A run fails after `TBC_RECORD_STALL_S` (default 120) seconds when a
@@ -89,7 +93,13 @@ cause is not found. The second half of "Done means" is met; the first is not.
 - **Fault test.** With `TBC_RECORD_STALL_S=45`, the backend was paused with
   `SIGSTOP` 60 s into a run. 59 s later the recorder failed with
   `run stopped: backend request POST /asyncProgress?requestId=raidSimAsync-79d5b1f42557ba36 ... has had no answer for 50 s`
-  (folder `2026-11-10T03-09-14-663Z-feral-p2-fault-sigstop`).
+  (folder `2026-11-10T03-09-14-663Z-feral-p2-fault-sigstop`). A first
+  attempt, folder `2026-11-10T02-59-08-783Z-feral-p2-fault-sigstop`, kept
+  only two recorder lines (`evidence in`, `opening`) and no
+  `summary.json`, so what ended it is not recorded. The pre-merge review
+  (`docs/reviews/fix-703-run-hang.md`, finding A1) found that a signal or
+  the deadline left such partial folders; the branch now keeps the files
+  on both.
 - **Two places a run could stall, from reading upstream code** (hypothesis,
   untested). (1) If a backend sim sends no progress for 10 minutes, the
   backend drops it (`asyncProgressSilenceTimeout`, `sim/web/main.go:154`)
@@ -97,9 +107,13 @@ cause is not found. The second half of "Done means" is met; the first is not.
   payload, and `doAsyncRequest` waits on a promise nothing resolves
   (`ui/sim/workers/worker_pool.ts:281-282`). (2) `runSimConcurrent` waits
   for all of a candidate's split sims (`sim/core/sim_concurrent.go:540`),
-  so one split sim that never ends stalls that candidate. The watchdog
-  names both: (2) as "sim ... polled with no final answer", and (1) as
-  "the page sent no backend request", which quotes the 204.
+  so one split sim that never ends stalls that candidate. With the default
+  120 s limit the watchdog reports both as "sim ... polled ... with no final
+  answer": in (1) the worker keeps polling every 50 ms and each poll gets a
+  200 until the backend drops the sim after 10 minutes, so this rule fires
+  long before the 204. The "page sent no backend request" message, which
+  quotes the last answer other than 200, could show the 204 only with
+  `TBC_RECORD_STALL_S` over 600.
 - **Who else runs this path** (from code, hypothesis). The recorder's page
   sends its sims over HTTP to the Go backend
   (`ui/worker/local_worker.ts`). A player on the website runs them in WASM

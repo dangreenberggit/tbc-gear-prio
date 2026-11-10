@@ -118,3 +118,17 @@ That the runs used Playwright's headless shell is unverified.
 | S1  | `run-evidence.mjs:134,153,306` | The `?requestId=` suffix is built three times; one helper.                                                  |
 | S2  | `record.mjs:375-379`           | `armRunDeadline` builds `record ${args.spec}-p${args.phase}-${args.name}` by hand; `label` (:217) holds it. |
 | S3  | `run-evidence.mjs:159,353,372` | JSDoc lines that say what the function does, not why (global comment policy).                               |
+
+## Round 1 fixes
+
+- `8b3a7e39` "Keep run evidence on every exit (A1-A5, P3)": A1/P2, A2, A3,
+  A4, A5 and P3, each with a test that the fixer reports failed with its fix
+  reverted (26 tests in `scripts/tab-fixtures/`, 13 before).
+- `a87d0efd` "Stub the goroutine fetch in evidence tests (A1)": the A1
+  deadline tests read a local stub server, not the backend on :3333.
+- `5fcfbfcb` "Apply the 703 code-quality pass (S1-S3)": the code-quality
+  pass, by one fresh `general-task` agent; `pnpm verify` rc=0 after it.
+- The ticket commit after these: P1 (stall (1) is reported by the sim
+  rule), P4 (the stale `record.mjs:331` citation) and the first fault
+  attempt folder from P2, in
+  `.scratch/carry-forward/issues/703-tab-fixture-runs-sometimes-never-settle.md`.
