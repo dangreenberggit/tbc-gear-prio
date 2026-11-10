@@ -29,6 +29,7 @@ import { fileURLToPath } from "node:url";
 
 import { goBuildEnv } from "./go-env.mjs";
 import { USE_PROCESS_GROUPS, killGroup, killTree } from "./process-group.mjs";
+import { backendLogPath } from "./tab-fixtures/run-evidence.mjs";
 
 const SELF = fileURLToPath(import.meta.url);
 const ROOT = path.resolve(path.dirname(SELF), "..");
@@ -76,17 +77,19 @@ function runSync(cmd, args, env = process.env) {
 // `both` mode) must be able to see.
 // The server runs in its own process group so that stopping it also stops
 // what it started (scripts/process-group.mjs).
-function serve(cmd, args, env = process.env) {
+function serve(cmd, args, env = process.env, logFile = null) {
   // stdin is ignored because a process outside the terminal's foreground
   // group is stopped (SIGTTIN) when it reads the terminal, and both servers
   // read it for interactive commands this script does not need.
   const detached = USE_PROCESS_GROUPS;
+  const output = logFile ? "pipe" : "inherit";
   const child = spawn(cmd, args, {
     cwd: FORK,
-    stdio: ["ignore", "inherit", "inherit"],
+    stdio: ["ignore", output, output],
     detached,
     env,
   });
+  if (logFile) keepLog(child, logFile);
   let stopRequested = false;
   const stop = () => {
     stopRequested = true;
@@ -107,6 +110,35 @@ function serve(cmd, args, env = process.env) {
   });
 }
 
+// The server's output goes to this terminal unchanged, and to `file` with the
+// time each line arrived. The file is appended to, never replaced: a hung
+// recording could not be explained once a restart had overwritten the
+// backend's log (ticket 703), and record.mjs copies each run's part of it.
+function keepLog(child, file) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const append = (lines) =>
+    fs.appendFileSync(
+      file,
+      lines.map((l) => `${new Date().toISOString()} ${l}\n`).join("")
+    );
+  append([`[dev-tab] started pid ${child.pid} in ${FORK}`]);
+  log(`keeping the server's log in ${file}`);
+  for (const [stream, terminal] of [
+    [child.stdout, process.stdout],
+    [child.stderr, process.stderr],
+  ]) {
+    let rest = "";
+    stream.setEncoding("utf8");
+    stream.on("data", (chunk) => {
+      terminal.write(chunk);
+      const lines = (rest + chunk).split(/\r?\n/);
+      rest = lines.pop();
+      append(lines);
+    });
+    stream.on("end", () => rest && append([rest]));
+  }
+}
+
 function backend(port) {
   log(`building the sim backend (port ${port})...`);
   // go:embed needs binary_dist/dist.go and binary_dist/tbc/embedded to exist;
@@ -120,11 +152,12 @@ function backend(port) {
   const name = port === 3333 ? `wowsimtbc${EXE}` : `wowsimtbc-${port}${EXE}`;
   runSync("go", ["build", "-o", name, "./sim/web"], goBuildEnv());
   log(`starting the backend on :${port}...`);
-  serve(path.join(FORK, name), [
-    "--usefs=true",
-    "--launch=false",
-    `--host=:${port}`,
-  ]);
+  serve(
+    path.join(FORK, name),
+    ["--usefs=true", "--launch=false", `--host=:${port}`],
+    process.env,
+    backendLogPath(ROOT, port)
+  );
 }
 
 function desktop(port) {

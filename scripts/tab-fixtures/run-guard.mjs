@@ -79,15 +79,32 @@ export function guardPage(client, { callTimeoutMs }) {
 
 /**
  * Kills Chrome and exits 1 once `ms` pass, whatever the recorder is awaiting.
- * The backstop for a hang no per-call timeout covers. Returns a disarm
- * function.
+ * The backstop for a hang no per-call timeout covers. First it starts
+ * `beforeExit(error)`, which saves the run's evidence, and waits up to
+ * `beforeExitMs` for it. Returns a disarm function.
  */
-export function armRunDeadline(ms, killChrome, label) {
-  const timer = setTimeout(() => {
+export function armRunDeadline(
+  ms,
+  killChrome,
+  label,
+  { beforeExit = () => {}, beforeExitMs = 20000 } = {}
+) {
+  const timer = setTimeout(async () => {
+    const limit = `the run passed its ${ms / 60000} min limit`;
     console.error(
-      `${label}: watchdog: the run passed its ${ms / 60000} min limit; killing Chrome and exiting`
+      `${label}: watchdog: ${limit}; saving the evidence, killing Chrome and exiting`
     );
+    // Started before Chrome dies, so the evidence names the deadline and not
+    // the closed CDP socket that follows.
+    const saving = withTimeout(
+      new Promise((resolve) =>
+        resolve(beforeExit(new Error(`${limit} (the run deadline)`)))
+      ),
+      beforeExitMs,
+      "saving the evidence before the deadline exit"
+    ).catch((err) => console.error(`${label}: watchdog: ${err.message}`));
     killChrome();
+    await saving;
     process.exit(1);
   }, ms);
   return () => clearTimeout(timer);
