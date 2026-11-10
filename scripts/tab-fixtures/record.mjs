@@ -22,6 +22,10 @@
 // `--allow-dirty` records an uncommitted fork for review before it is
 // committed, as the ticket 502 owner render gate needs; the file then names
 // the diff by hash instead (`forkDirty: true`).
+//
+// Every run keeps its console, backend-request trace and backend log under
+// .scratch/tab-recordings/logs/, and a run that stops making progress fails
+// with a message naming what stopped (run-evidence.mjs, ticket 703).
 
 import { execFileSync } from "node:child_process";
 import crypto from "node:crypto";
@@ -32,6 +36,11 @@ import { URL, fileURLToPath, pathToFileURL } from "node:url";
 
 import { holdKeepAwake } from "./keep-awake.mjs";
 import { armRunDeadline, guardPage, withTimeout } from "./run-guard.mjs";
+import {
+  DEFAULT_STALL_MS,
+  backendLogPath,
+  openRunEvidence,
+} from "./run-evidence.mjs";
 
 const ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -68,7 +77,7 @@ const USAGE = `usage: node scripts/tab-fixtures/record.mjs --spec feral|ret|warl
          ([--preset-tab "Phase 2"] --preset "BiS 6%" --expect-gear-file <fork-relative .gear.json>
           | --gear-url <page link> --expect-item-ids 1,2,3)
          [--iterations 3000] [--base http://localhost:$TBC_FORK_PORT, default 5173]
-         [--out <dir> [--allow-dirty]]
+         [--out <dir> [--allow-dirty]] [--backend-log <file>]
 
 Writes .scratch/tab-recordings/<spec>-p<phase>-<name>.json, or the same name
 under --out (never inside the made-up fixtures' folder). A by-hand tool: no
@@ -81,7 +90,15 @@ during the run. It cannot write to the frozen recordings' folder
 page's "Gear Sets" presets, under the named phase tab when --preset-tab is
 given; leave --preset-tab out on a page whose picker has no phase tabs
 (warlock, enh). --gear-url opens a gear link. Either way the worn gear is
-checked item by item before the run, and the run is refused on a mismatch.`;
+checked item by item before the run, and the run is refused on a mismatch.
+
+Every run keeps its evidence in .scratch/tab-recordings/logs/<time>-<spec>-p<phase>-<name>/:
+the page's console, each backend request, and the backend's log lines from
+--backend-log (default .scratch/dev-tab/backend-3333.log, which
+\`node scripts/dev-tab.mjs backend\` writes). A run with no backend progress
+for TBC_RECORD_STALL_S seconds (default ${DEFAULT_STALL_MS / 1000}) fails with a
+message naming what stopped, and a run the tab reports as failed ends at once
+with the tab's message.`;
 
 function parseArgs(argv) {
   const port = process.env.TBC_FORK_PORT ?? "5173";
@@ -99,6 +116,7 @@ function parseArgs(argv) {
     "--iterations": "iterations",
     "--base": "base",
     "--out": "out",
+    "--backend-log": "backendLog",
   };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--help" || argv[i] === "-h") out.help = true;
@@ -196,8 +214,29 @@ async function main() {
   const { launchChrome, cdp, attachPage, evaluate, activateTabExpression } =
     harness;
 
-  const log = (...a) =>
-    console.log(`[record ${args.spec}-p${args.phase}-${args.name}]`, ...a);
+  const label = `${args.spec}-p${args.phase}-${args.name}`;
+  const stallS = Number(
+    process.env.TBC_RECORD_STALL_S ?? DEFAULT_STALL_MS / 1000
+  );
+  if (!(stallS > 0)) {
+    console.error(
+      "record: TBC_RECORD_STALL_S must be a positive number of seconds"
+    );
+    return 2;
+  }
+  const evidence = openRunEvidence({
+    root: ROOT,
+    label,
+    stallMs: stallS * 1000,
+    backendLog: args.backendLog
+      ? path.resolve(args.backendLog)
+      : backendLogPath(ROOT),
+  });
+  const log = (...a) => {
+    console.log(`[record ${label}]`, ...a);
+    evidence.note(a.join(" "));
+  };
+  log("evidence in", path.relative(ROOT, evidence.dir));
   // A committed gear link names the server it was made on (:5173); with
   // TBC_FORK_PORT set, open the same link on the server this run drives.
   let url = args.gearUrl ?? `${args.base}${PAGE_BY_SPEC[args.spec]}`;
@@ -215,6 +254,7 @@ async function main() {
   const chrome = await launchChrome();
   const client = cdp(chrome.wsUrl);
   let disarmDeadline = () => {};
+  let failure = null;
   try {
     await withTimeout(client.ready, CALL_TIMEOUT_MS, "the CDP connection");
     const guard = guardPage(client, { callTimeoutMs: CALL_TIMEOUT_MS });
@@ -227,6 +267,7 @@ async function main() {
     const send = guard.wrap(page.send);
     const browserSend = guard.wrap(client.send);
     await send("Inspector.enable", {});
+    await evidence.watch(client, send);
     await send("Emulation.setDeviceMetricsOverride", {
       width: 1280,
       height: 900,
@@ -341,15 +382,35 @@ async function main() {
       `(() => { const b = document.querySelector('[data-testid="upgrades-run-button"]'); if (!b) return false; b.click(); return true; })()`
     );
     if (!clicked) throw new Error("run button not found");
+    evidence.runStarted();
     log("run started");
     let summary = "";
+    let progress = "";
     while (Date.now() - started < RUN_LIMIT_MS) {
       await sleep(10000);
-      summary = await evaluate(
+      const now = await evaluate(
         send,
-        `document.querySelector('[data-testid="upgrades-baseline-summary"]')?.textContent ?? ''`
+        `({ summary: document.querySelector('[data-testid="upgrades-baseline-summary"]')?.textContent ?? '',
+            progress: document.querySelector('[data-testid="upgrades-run-progress"]')?.textContent ?? '',
+            failed: document.querySelector('[data-testid="upgrades-status-alert"]')?.textContent ?? '' })`
       );
+      summary = now.summary;
       if (/Took/.test(summary)) break;
+      // A failed run never shows "Took"; without this the recorder waited out
+      // its whole limit on a run the tab had already ended.
+      if (now.failed)
+        throw new Error(
+          `the tab reported the run failed: ${now.failed}; evidence in ${path.relative(ROOT, evidence.dir)}`
+        );
+      if (now.progress !== progress) {
+        progress = now.progress;
+        evidence.note(`progress: ${progress}`);
+      }
+      const stall = evidence.stallReason();
+      if (stall)
+        throw new Error(
+          `run stopped: ${stall}; evidence in ${path.relative(ROOT, evidence.dir)}`
+        );
     }
     if (!/Took/.test(summary))
       throw new Error(`run did not settle in ${RUN_LIMIT_MS / 60000} min`);
@@ -432,7 +493,14 @@ async function main() {
       `wrote ${path.relative(ROOT, out)} (${fs.statSync(out).size} bytes, ${ranking.items.length} items)`
     );
     return 0;
+  } catch (err) {
+    failure = err;
+    throw err;
   } finally {
+    // Bounded, so saving the evidence cannot become the next hang (ticket 684).
+    await withTimeout(evidence.close(failure), 30000, "saving the run evidence")
+      .then(() => log("evidence kept in", path.relative(ROOT, evidence.dir)))
+      .catch((err) => console.error(`record: ${err.message}`));
     disarmDeadline();
     client.close();
     chrome.kill();
