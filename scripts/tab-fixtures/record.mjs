@@ -379,7 +379,7 @@ async function main() {
     disarmDeadline = armRunDeadline(
       RUN_LIMIT_MS,
       chrome.kill,
-      `record ${args.spec}-p${args.phase}-${args.name}`,
+      `record ${label}`,
       { beforeExit: (err) => evidence.close(err) }
     );
     const clicked = await evaluate(

@@ -58,11 +58,10 @@ export function isBackendUrl(url) {
 
 const iso = (ms) => new Date(ms).toISOString();
 const secs = (ms) => Math.round(ms / 1000);
+const requestPath = (req) =>
+  `${req.path}${req.requestId ? `?requestId=${req.requestId}` : ""}`;
 
-/**
- * The backend requests one run made, and the rule that says when the run has
- * stopped. Pure: the caller passes each CDP event's time.
- */
+/** Pure: the caller passes each CDP event's time. */
 export class BackendTraffic {
   constructor({ stallMs = DEFAULT_STALL_MS } = {}) {
     this.stallMs = stallMs;
@@ -95,7 +94,6 @@ export class BackendTraffic {
     }
   }
 
-  /** Records an answer other than 200; returns it when it is one. */
   answered(key, status, now) {
     const req = this.inFlight.get(key);
     if (!req) return null;
@@ -124,7 +122,7 @@ export class BackendTraffic {
   /**
    * Drops the requests of a CDP session that went away: an ended worker sends
    * no more events for them, so they would read as unanswered. Keys start
-   * with the session id (`${sessionId}:${requestId}`). Returns how many.
+   * with the session id (`${sessionId}:${requestId}`).
    */
   sessionDetached(sessionId) {
     let dropped = 0;
@@ -142,7 +140,6 @@ export class BackendTraffic {
   }
 
   /**
-   * Why the run has stopped, naming what stopped, or null while it moves.
    * Counts only from the Run click; and the "no request" rule applies only
    * once the page has sent the backend anything, because a WASM_WORKER page
    * never does.
@@ -153,7 +150,7 @@ export class BackendTraffic {
     for (const req of this.inFlight.values()) {
       const waited = now - since(req.sentAt);
       if (waited < this.stallMs) continue;
-      const what = `backend request ${req.method} ${req.path}${req.requestId ? `?requestId=${req.requestId}` : ""} sent at ${iso(req.sentAt)}`;
+      const what = `backend request ${req.method} ${requestPath(req)} sent at ${iso(req.sentAt)}`;
       return req.status === undefined
         ? `${what} has had no answer for ${secs(waited)} s`
         : `${what} was answered ${req.status} at ${iso(req.answeredAt)}, but its body has not finished after ${secs(waited)} s`;
@@ -175,13 +172,12 @@ export class BackendTraffic {
       `the page sent no backend request for ${secs(quiet)} s (the last was ${this.lastSent.method} ${this.lastSent.path} at ${iso(this.lastSent.sentAt)}); ` +
       `last console line: ${lastConsoleLine ?? "(none)"}` +
       (odd
-        ? `; the last answer other than 200 was ${odd.status ?? odd.error} for ${odd.method} ${odd.path}${odd.requestId ? `?requestId=${odd.requestId}` : ""} at ${iso(odd.at)}`
+        ? `; the last answer other than 200 was ${odd.status ?? odd.error} for ${odd.method} ${requestPath(odd)} at ${iso(odd.at)}`
         : "")
     );
   }
 }
 
-/** One console line from a Runtime or Log event, or null for other events. */
 export function consoleLine(msg) {
   const p = msg.params;
   let text;
@@ -207,11 +203,10 @@ export function consoleLine(msg) {
 }
 
 /**
- * Wraps a CDP send so each command is logged when sent and when it is
- * answered or fails. Params and results are left out because they can be
- * large; a Runtime.evaluate keeps the start of its expression, enough to tell
- * which call it was. A command that never returns shows as a "sent" line with
- * no outcome.
+ * Params and results are left out because they can be large; a
+ * Runtime.evaluate keeps the start of its expression, enough to tell which
+ * call it was. A command that never returns shows as a "sent" line with no
+ * outcome.
  */
 export function tracedSend(send, record, now = Date.now) {
   let n = 0;
@@ -251,8 +246,7 @@ export function tracedSend(send, record, now = Date.now) {
 }
 
 /**
- * Opens the run's evidence folder. Lines are buffered and appended once a
- * second. Each way a run ends writes summary.json and backend.log, and on a
+ * Each way a run ends writes summary.json and backend.log, and on a
  * failure first notes the error and the last backend requests and console
  * lines in recorder.log:
  *
@@ -436,7 +430,7 @@ export function openRunEvidence({
       });
       if (odd)
         note(
-          `backend answered ${odd.status} to ${odd.method} ${odd.path}${odd.requestId ? `?requestId=${odd.requestId}` : ""}`
+          `backend answered ${odd.status} to ${odd.method} ${requestPath(odd)}`
         );
     } else if (msg.method === "Network.loadingFinished") {
       if (!traffic.inFlight.has(key)) return;
@@ -465,7 +459,6 @@ export function openRunEvidence({
     }
   }
 
-  /** Copies the run's part of the backend log; returns what summary.json says of it. */
   function copyBackendLog() {
     if (backendLogStart === null) return `not found: ${backendLog}`;
     if (!fs.existsSync(backendLog))
@@ -492,7 +485,6 @@ export function openRunEvidence({
   return {
     dir,
     note,
-    /** Starts the console and backend-request trace on the page and its workers. */
     async watch(client, send) {
       client.onEvent(onEvent(client));
       await send("Network.enable", {});
@@ -511,7 +503,6 @@ export function openRunEvidence({
     stallReason() {
       return traffic.stallReason(Date.now(), lastConsoleLine);
     },
-    /** Logs each command `send` sends to cdp-commands.jsonl. */
     traceCommands(send) {
       return tracedSend(send, (t, fields) =>
         write(
