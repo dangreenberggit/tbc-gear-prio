@@ -134,3 +134,48 @@ problems in the check scripts (I1–I8). `fc6e2c63` fixes A1–A4 and I1–I8.
 | I6  | Instruction review | fixed       | `fc6e2c63`: both scripts exit 1 with a message when the servers never listen                                             |
 | I7  | Instruction review | fixed       | `fc6e2c63`: covered by I1's fix; no manual stop is needed                                                                |
 | I8  | Instruction review | fixed       | `fc6e2c63`: the header points at the ticket's `## Answer`, which names each source                                       |
+
+## Focused check (round 2)
+
+One fresh `general-task` (Opus) agent checked `b6620154..fc6e2c63`. No fork
+range: the pin does not move.
+
+1. **Conditions: pass, one exception.** The one commit names A1–A4 and
+   I1–I8, and each script change maps to one of them, except
+   `695-t3-stop-check.py:40-41` (`pump` now sleeps after the terminal hangs
+   up), which no finding cites (R2-5).
+2. **Only what each finding asks: pass.**
+3. **Each fix does what its finding asks: pass.** The ticket's T3 quotes
+   match T3 Code 0.1.2 (`projectScriptEditor-Bw2ut9Xe.js` `ge`,
+   `agentScope.wrap({..., survivesRestart: true})`,
+   `AGENT_SLICE = "app-t3code-agents.slice"`, `t3code.service:12`
+   `KillMode=mixed`), and a cold reader of the new headers would do what
+   I1–I8 asked.
+4. **Scripts run as their headers say: pass.** single-pid: TERM, HUP, INT
+   "all gone 2 s after; port=down", KILL "still running after 30 s: 1 node
+   1 tsc; port=up". `t3`: "all gone 1 s after the stop", both ports False.
+   `pnpm`: "still running after 60 s", both ports True.
+
+Findings:
+
+- **R2-1** (low): `695-single-pid-check.sh:19-21` records vite's group 2 s
+  after the port opens; a tsc that starts later would not be tracked, and
+  "all gone" would not cover it.
+- **R2-2** (low, code quality): `695-t3-stop-check.py:83` calls `table()`
+  twice per pid, and `:101` indexes `rows[p]`; a pid that exits between
+  calls raises `KeyError`.
+- **R2-3** (low): the cleanup at `695-t3-stop-check.py:112-117` sends
+  SIGTERM and exits without waiting; right after a `pnpm` run, vite, tsc,
+  the `dev-tab.mjs` processes and `:5192` were still there, gone about 1 s
+  later. The header says the script stops the groups it started.
+- **R2-4** (low, hypothesis, untested): the early exit at
+  `695-t3-stop-check.py:79-80` skips the cleanup.
+- **R2-5** (bookkeeping): no row records the `pump` change. Before it,
+  `pump` returned at once after the shell died, so a loop that called it
+  ran with no delay.
+- Bookkeeping: one line in the ticket's single-pid paragraph is not
+  rewrapped, and the ticket's "five runs" timing has no recorded output.
+
+The round reported findings other than bookkeeping, so the review stops
+here (`~/.claude/AGENTS.md` § Review round limits) and the owner chooses
+the next step. No round-2 Disposition table is written yet.
