@@ -151,6 +151,43 @@ function equippedIds(req: RaidSimRequest): number[] {
  */
 const COPY_OFFSET = 1_000_000;
 
+/** The error every failed sim of `failWhen` gives (`runScenario`). */
+const MODEL_SIM_ERROR = "the model sim failed on purpose";
+
+/** The ranking's set-phase lines: a set bonus, or a set the screen kept. */
+const setSkipLines = (ranking: ForkRanking) =>
+  ranking.substitutions.filter((s) => /( set bonus| set)$/.test(s.field));
+
+/** The line for a set the screen kept because its sim failed (ticket 863). */
+const screenFailedLine = {
+  field: expect.stringMatching(/ set$/),
+  detail: expect.stringMatching(
+    new RegExp(
+      `^The .+ set was kept without the quick check that can skip it, because the check's sim failed\\.\n${MODEL_SIM_ERROR}$`
+    )
+  ),
+};
+
+/** The line for a worn-set ladder sim that failed at `pieces` (ticket 863). */
+const wornSetFailedLine = (pieces: number) => ({
+  field: expect.stringMatching(/ set$/),
+  detail: expect.stringMatching(
+    new RegExp(
+      `^The value of the .+ set at ${pieces} pieces on your gear was not measured, because its sim failed\\.\n${MODEL_SIM_ERROR}$`
+    )
+  ),
+});
+
+/** The line for a set bonus the run did not measure because a sim failed (ticket 863). */
+const simFailedLine = (threshold: number, onSomeRows = false) => ({
+  field: expect.stringMatching(new RegExp(` ${threshold}-piece set bonus$`)),
+  detail: expect.stringMatching(
+    new RegExp(
+      `^The .+ ${threshold}-piece set bonus was not measured${onSomeRows ? " on some rows, because their sim failed" : ", because its sim failed"}\\.\n${MODEL_SIM_ERROR}$`
+    )
+  ),
+});
+
 /**
  * The fork's set-kept copy id offset (`SET_KEPT_ID_OFFSET`, ticket 512): a copy
  * that keeps its set. A literal for the same reason as `COPY_OFFSET`; 511-C
@@ -321,6 +358,7 @@ type Scenario = {
 type ForkRanking = {
   contentHash: string;
   complete?: boolean;
+  substitutions: Array<{ field: string; detail: string; slot?: string }>;
   assumptions: { seeds: number[]; iterations: number };
   items: Array<{
     itemId: number;
@@ -536,7 +574,7 @@ async function runScenario(scenario: Scenario): Promise<{
       requests.push(structuredClone(req));
       if (runCount - 1 === scenario.stopDuringCall) controller?.abort();
       if (scenario.failWhen?.(ids, opts)) {
-        return Promise.reject(new Error("the model sim failed on purpose"));
+        return Promise.reject(new Error(MODEL_SIM_ERROR));
       }
       const dps = modelDps(
         ids,
@@ -1593,6 +1631,21 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
     );
   });
 
+  it("863-F: a failed worn-1 pair sim leaves the 4pc net unset and shows the sim's error", async () => {
+    // Scenario kind: 492-F's gear. The pair sim is the one request with
+    // exactly three real Thunderheart pieces: the worn hands and the pair.
+    const thIds: readonly number[] = Object.values(THUNDERHEART);
+    const { ranking: r } = await runScenario({
+      worn: wornGear({ hands: THUNDERHEART.hands }),
+      pool: TH_POOL.filter((p) => p.slot !== "hands"),
+      failWhen: (ids) => ids.filter((id) => thIds.includes(id)).length === 3,
+    });
+    const th4 = bonusOf(r, 676, 4);
+    expect(th4!.selfConfound).toEqual({ threshold: 2 });
+    expect(th4!.bonusDpsNet).toBeUndefined();
+    expect(setSkipLines(r)).toEqual([simFailedLine(2)]);
+  });
+
   it("492-F: at worn 1 the 4pc value is recovered with one pair sim", async () => {
     // Run count before the 492 fix, recorded from the red run
     // (docs/set-bonus-fixture-derivations.md, 492-F: 6).
@@ -1786,6 +1839,9 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
       [3, false, null],
       [4, true, "sim-failed"],
     ]);
+    // Ticket 863: the failed rung's error reaches the player, named by the
+    // pieces it counted, since the ladder does not know Malorne has no 3pc.
+    expect(setSkipLines(r)).toEqual([wornSetFailedLine(4)]);
     // Four ladder rungs (one fails) and two gate sims for each of the
     // Thunderheart counts 2, 3 and 4 (tickets 511 and 512). No step gear:
     // every partner choice needs the unmeasured (640, 4) (K5, W-Z1).
@@ -1816,6 +1872,31 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
       expect(view.rankableSetPotential(row, FLOOR, "full")).toBe(0);
       expect(view.setBonusSubLine(row.setContext, true)).toBe("not_counted");
     }
+  });
+
+  it("863-L: a failed middle ladder rung names the pieces it counted, not a bonus", async () => {
+    // 476-D's gear with the model sim failing on R(3) only: the one rung that
+    // sends the Malorne chest set-kept and the hands set-less. Counts 3 and
+    // 4 both use it, and Malorne has no 3pc, so a line per count would name
+    // a bonus that does not exist.
+    const { ranking: r } = await runScenario({
+      worn: wornGear(MALORNE_4),
+      pool: TH_OVER_MALORNE_POOL,
+      measureBrokenSetValue: true,
+      failWhen: (ids) =>
+        ids.includes(SET_KEPT_OFFSET + MALORNE.chest) &&
+        ids.includes(COPY_OFFSET + MALORNE.hands),
+    });
+    expect(
+      (r.wornSetLadder ?? [])
+        .filter((e) => e.setId === 640)
+        .map((e) => [e.count, e.unmeasured ?? null])
+    ).toEqual([
+      [2, null],
+      [3, "sim-failed"],
+      [4, "sim-failed"],
+    ]);
+    expect(setSkipLines(r)).toEqual([wornSetFailedLine(3)]);
   });
 });
 
@@ -3086,6 +3167,8 @@ describe.skipIf(!forkPresent)(
       });
       expect(bonusOf(gate.ranking, 676, 4)?.unmeasured).toBe("sim-failed");
       expect(bonusOf(gate.ranking, 676, 4)?.sameGearDps).toBeUndefined();
+      // Ticket 863: the line carries the gate sim's own error.
+      expect(setSkipLines(gate.ranking)).toEqual([simFailedLine(4)]);
       for (const id of TH_FOUR) {
         const row = thRow(gate.ranking, id);
         expect(view.setCreditUnmeasured(row.setContext)).toBe(true);
@@ -3105,6 +3188,12 @@ describe.skipIf(!forkPresent)(
       });
       const pauldrons = thRow(step.ranking, THUNDERHEART.shoulder);
       expect(futureOf(pauldrons, 2)?.stepGearDps).toBeUndefined();
+      // Ticket 863: the failed step sims' error reaches the player once.
+      const stepLines = setSkipLines(step.ranking);
+      expect(stepLines).toContainEqual(simFailedLine(2, true));
+      expect(new Set(stepLines.map((l) => `${l.field}|${l.detail}`)).size).toBe(
+        stepLines.length
+      );
       expect(view.rankableSetPotential(pauldrons, FLOOR)).toBe(0);
       expect(view.setCreditUnmeasured(pauldrons.setContext)).toBe(true);
       // The others stop at the 4pc: 400 + 130 − 100.
@@ -3196,6 +3285,33 @@ describe.skipIf(!forkPresent)(
       expect(futureOf(chest, 3)?.stepGearDps).toBeCloseTo(325, 9);
       expect(stopTerms(view, chest).find((t) => t.isStop)?.threshold).toBe(3);
       expect(view.rankableSetPotential(chest, FLOOR)).toBeCloseTo(225, 9);
+    });
+
+    it("863-X: a failed crossing gate sim leaves the gate not cleared and shows the sim's error", async () => {
+      // Scenario kind: 511-X's Crystalforge 629 worn at 1, model 2pc 30. The
+      // crossing gate copies the chest, the lower slot, so its "off" sim is
+      // the one request with a set-less chest, the hands and no legs. At worn
+      // 1 the 2pc package adds one piece, so it runs no gate of its own.
+      const { ranking } = await runScenario({
+        worn: wornGear({ chest: CRYSTALFORGE.chest }),
+        pool: [
+          { itemId: CRYSTALFORGE.hands, slot: "hands" },
+          { itemId: CRYSTALFORGE.legs, slot: "legs" },
+        ],
+        itemValue: withValues(
+          Object.values(CRYSTALFORGE).map((id) => [id, 100] as const)
+        ),
+        setBonuses: { ...SET_BONUSES, 629: { b2: 30, b4: 0 } },
+        measureBrokenSetValue: true,
+        failWhen: (ids) =>
+          ids.includes(COPY_OFFSET + CRYSTALFORGE.chest) &&
+          ids.includes(CRYSTALFORGE.hands) &&
+          !ids.includes(CRYSTALFORGE.legs),
+      });
+      expect(ranking.crossingGates).toEqual([
+        { setId: 629, count: 2, itemId: CRYSTALFORGE.hands, cleared: false },
+      ]);
+      expect(setSkipLines(ranking)).toEqual([simFailedLine(2)]);
     });
 
     it("511-X: one added piece crosses a bonus only when that count's crossing gate clears", async () => {
@@ -3779,6 +3895,8 @@ describe.skipIf(!forkPresent)(
         [300, 3],
       ]);
       expect(set.pairs.map((p) => p.dps)).toEqual([130, 130, 130, 130]);
+      // Ticket 863: the screen sim's own error reaches the player.
+      expect(setSkipLines(on.ranking)).toEqual([screenFailedLine]);
       // The failed sim was sent, so it counts as simmed.
       expect(on.ranking.setScreen!.simmed).toBe(14);
       expect(on.ranking.setScreen!.fromStore).toBe(6);
@@ -3935,6 +4053,8 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
     ]);
     expect(futureOf(bothHands, 2)?.stepGearDps).toBeUndefined();
     expect(view.setCreditUnmeasured(bothHands.setContext)).toBe(true);
+    // Ticket 863: the step sims' error reaches the player.
+    expect(setSkipLines(both.ranking)).toContainEqual(simFailedLine(2, true));
   });
 });
 
@@ -4383,6 +4503,8 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
     expect(set.pair).toEqual({});
     expect(set.measure).toBeUndefined();
     expect([set.kept, set.reason]).toEqual([true, "readings-absent"]);
+    // Ticket 863: the screen sim's own error reaches the player.
+    expect(setSkipLines(on.ranking)).toEqual([screenFailedLine]);
     // W-ON4: the gain side runs as with the screen off.
     expect(await screenFreeParts(on.ranking)).toEqual(
       await screenFreeParts(off.ranking)
@@ -4866,6 +4988,8 @@ describe.skipIf(!forkPresent)(
         skippedSteps: 0,
         beforeInStore: 1,
       });
+      // Ticket 863: the bonus-off sim's error names the lost Malorne 2pc.
+      expect(setSkipLines(r)).toEqual([simFailedLine(2, true)]);
       // The credits are 511-PS's: 54 − 6 and 54 + 12.
       expect(view.rankableSetPotential(hands, FLOOR)).toBeCloseTo(48, 9);
       expect(view.rankableSetPotential(legs, FLOOR)).toBeCloseTo(66, 9);
