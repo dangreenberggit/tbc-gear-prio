@@ -1,6 +1,7 @@
 # Pre-merge review — fix/703-run-hang
 
 Reviewed range: `86b5f5e10d88b177c71b8532933369b9fe76c2ba..5b98dc8ca5233a6fe52031eea1a6bc0a589efd1b`
+Reviewed range: `5b98dc8ca5233a6fe52031eea1a6bc0a589efd1b..b3e0081a57f2c38f062bd66744ba4ffbf389548a`
 
 ## Dispatch note
 
@@ -132,3 +133,47 @@ That the runs used Playwright's headless shell is unverified.
   rule), P4 (the stale `record.mjs:331` citation) and the first fault
   attempt folder from P2, in
   `.scratch/carry-forward/issues/703-tab-fixture-runs-sometimes-never-settle.md`.
+
+## Focused check (round 2)
+
+Range `5b98dc8c..b3e0081a`; no fork range (the fork pin does not move). One
+fresh `general-task` (Opus) agent ran the four checks.
+
+1. Conditions hold. Each commit names its finding IDs or only edits this
+   file and the ticket; every non-test code hunk belongs to a cited finding
+   (A1, A3, A4, A5, P3, S1, S2), and none belongs to no finding.
+2. The fix commits change only what each finding asks for (with R1 below).
+3. Spot checks with the fix reverted, in scratch copies under `$TMPDIR`:
+   A2, A3, A5(a) and the A1 signal tests each fail without their fix; the
+   unchanged copy passes 26/26.
+4. `node --version` v22.23.2; `vitest run scripts/tab-fixtures/` 26/26,
+   rc=0.
+
+Findings other than bookkeeping, so the review stops here (skill "Round
+limit"):
+
+- **R1 (low, code quality):** the SIGINT/SIGTERM handler that A1's fix
+  added (`run-evidence.mjs:368-377`) repeats `exitOnSignals()`
+  (`scripts/process-group.mjs:43-49`), which `launchChrome`
+  (`scripts/tab-harness/test-tab-harness.mjs:236`) installs and
+  `record.mjs:255` reaches. That turns the signals into
+  `process.exit(128+n)`, which runs the exit hook, and the exit hook now
+  keeps the full evidence. So A1's "nothing handles the signal" was wrong
+  for `record.mjs` (the round-1 check ran a bare Node process); the
+  deadline half of A1 stands. The new handler's only extra effect is the
+  "ended by SIGx" outcome text, and its test runs a child without
+  `exitOnSignals`, a setup `record.mjs` never has.
+- **R2 (low, test hygiene):** `tempRun` in `run-evidence.test.mjs:160`
+  makes `run-evidence-*` folders with `fs.mkdtempSync` and never removes
+  them; about 11 are left per test run (`ls $TMPDIR | grep -c
+'^run-evidence-'` counted 250).
+
+## Summary
+
+Round 1 (full axes, domain skipped) found five adversarial findings, four
+spec findings and three code-quality rows; all were fixed in `8b3a7e39`,
+`a87d0efd`, `5fcfbfcb` and `b3e0081a`. Round 2, the last round, passed its
+four checks but found R1 and R2 in the lines the fixes wrote, so no
+Disposition table is written and the merge check (step 4) was not run; the
+owner chooses the next step. Tickets: this branch filed 0 and closed 0
+(ticket 703 existed at the merge base and stays open).
