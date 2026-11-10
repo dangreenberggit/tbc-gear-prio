@@ -1,6 +1,16 @@
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { BackendTraffic, consoleLine, isBackendUrl } from "./run-evidence.mjs";
+import {
+  BackendTraffic,
+  consoleLine,
+  isBackendUrl,
+  openRunEvidence,
+  tracedSend,
+} from "./run-evidence.mjs";
 
 const B = "http://localhost:3333";
 const S = 1000;
@@ -56,6 +66,8 @@ describe("BackendTraffic.stallReason", () => {
   });
 
   it("forgets a sim once its polls stop", () => {
+    // Sim a is polled until 30 s, then sim b until 125 s. At 125 s sim a
+    // would have run past the 120 s limit if it were still counted.
     const t = trafficWithSim(30 * S);
     t.sent(
       "s:99",
@@ -64,7 +76,7 @@ describe("BackendTraffic.stallReason", () => {
       60 * S
     );
     t.finished("s:99");
-    for (let at = 65 * S; at <= 100 * S; at += 5 * S) {
+    for (let at = 65 * S; at <= 125 * S; at += 5 * S) {
       t.sent(
         `p:${at}`,
         "POST",
@@ -73,7 +85,28 @@ describe("BackendTraffic.stallReason", () => {
       );
       t.finished(`p:${at}`);
     }
-    expect(t.stallReason(100 * S + 1, null)).toBeNull();
+    expect(t.stallReason(125 * S, null)).toBeNull();
+  });
+
+  it("names a request whose answer came but whose body never finished", () => {
+    const t = new BackendTraffic({ stallMs: STALL });
+    t.runStarted(0);
+    t.sent("s:1", "POST", `${B}/raidSimAsync?requestId=raidSimAsync-a`, 0);
+    t.answered("s:1", 200, 2 * S);
+    expect(t.stallReason(STALL, null)).toMatch(
+      /^backend request POST \/raidSimAsync\?requestId=raidSimAsync-a sent at .* was answered 200 at 1970-01-01T00:00:02\.000Z, but its body has not finished after 120 s$/
+    );
+  });
+
+  it("drops the requests of a detached session only", () => {
+    const t = new BackendTraffic({ stallMs: STALL });
+    t.runStarted(0);
+    t.sent("w1:1", "POST", `${B}/raidSimAsync?requestId=a`, 0);
+    t.sent("w1:2", "POST", `${B}/asyncProgress?requestId=a`, 0);
+    t.sent("w10:1", "POST", `${B}/raidSimAsync?requestId=b`, 0);
+    expect(t.sessionDetached("w1")).toBe(2);
+    expect([...t.inFlight.keys()]).toEqual(["w10:1"]);
+    expect(t.counts.detached).toBe(2);
   });
 
   it("names a page that stopped asking, with the last console line and odd answer", () => {
@@ -107,6 +140,248 @@ describe("BackendTraffic.stallReason", () => {
       /the last answer other than 200 was net::ERR_CONNECTION_REFUSED for POST \/raidSimAsync\?requestId=r/
     );
   });
+});
+
+/** A temp checkout with a backend log that already holds an older run's line. */
+function tempRun() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "run-evidence-"));
+  const backendLog = path.join(root, "backend-3333.log");
+  fs.writeFileSync(backendLog, "an older run\n");
+  return { root, backendLog };
+}
+const read = (dir, file) => fs.readFileSync(path.join(dir, file), "utf8");
+const readSummary = (dir) => JSON.parse(read(dir, "summary.json"));
+
+/** Opens evidence watching a fake CDP client; returns it and the event feed. */
+async function watchedRun(run) {
+  const ev = openRunEvidence({ ...run, label: "t", stallMs: STALL });
+  let emit;
+  await ev.watch(
+    {
+      onEvent: (fn) => {
+        emit = fn;
+      },
+      send: async () => ({}),
+    },
+    async () => ({})
+  );
+  return { ev, emit };
+}
+
+describe("openRunEvidence", () => {
+  it("says plainly when the backend wrote nothing to its log", async () => {
+    const { ev } = await watchedRun(tempRun());
+    await ev.close();
+    expect(readSummary(ev.dir).backendLog).toMatch(
+      /^the backend wrote nothing to .*backend-3333\.log during the run, so there is no backend\.log; the backend on :3333 may have been started from another checkout/
+    );
+    expect(read(ev.dir, "recorder.log")).toMatch(
+      /backend log: the backend wrote nothing to /
+    );
+    expect(fs.existsSync(path.join(ev.dir, "backend.log"))).toBe(false);
+  });
+
+  it("copies only the backend's lines from this run", async () => {
+    const run = tempRun();
+    const { ev } = await watchedRun(run);
+    fs.appendFileSync(run.backendLog, "this run\n");
+    await ev.close();
+    expect(read(ev.dir, "backend.log")).toBe("this run\n");
+    expect(readSummary(ev.dir).backendLog).toMatch(
+      /^backend\.log holds the 9 bytes the backend wrote to /
+    );
+  });
+
+  it("appends a line noted after close", async () => {
+    const { ev } = await watchedRun(tempRun());
+    await ev.close();
+    ev.note("evidence kept in somewhere");
+    expect(read(ev.dir, "recorder.log").trim().split("\n").at(-1)).toMatch(
+      /evidence kept in somewhere$/
+    );
+  });
+
+  it("drops a detached worker's requests and names the worker", async () => {
+    const { ev, emit } = await watchedRun(tempRun());
+    emit({
+      method: "Target.attachedToTarget",
+      sessionId: "P",
+      params: {
+        sessionId: "W",
+        targetInfo: { type: "worker", url: "blob:sim-worker" },
+      },
+    });
+    emit({
+      method: "Network.requestWillBeSent",
+      sessionId: "W",
+      params: {
+        requestId: "7",
+        request: { method: "POST", url: `${B}/raidSimAsync?requestId=a` },
+      },
+    });
+    emit({
+      method: "Target.detachedFromTarget",
+      sessionId: "P",
+      params: { sessionId: "W" },
+    });
+    await ev.close();
+    expect(read(ev.dir, "recorder.log")).toMatch(
+      /detached worker 1; it had 1 backend request in flight/
+    );
+    expect(readSummary(ev.dir).backendRequestsInFlight).toEqual([]);
+  });
+
+  it("keeps the error and the first failure when closed twice", async () => {
+    const { ev } = await watchedRun(tempRun());
+    await Promise.all([
+      ev.close(new Error("first")),
+      ev.close(new Error("second")),
+    ]);
+    const summary = readSummary(ev.dir);
+    expect(summary.outcome).toBe("failed");
+    expect(summary.error).toBe("first");
+    expect(fs.existsSync(path.join(ev.dir, "backend-goroutines.txt"))).toBe(
+      true
+    );
+  }, 20000);
+
+  it("logs each CDP command to cdp-commands.jsonl", async () => {
+    const { ev } = await watchedRun(tempRun());
+    const send = ev.traceCommands(async (method) => {
+      if (method === "Page.navigate") throw new Error("no page");
+      return { result: { value: 1 } };
+    });
+    await send("Runtime.evaluate", { expression: "x".repeat(500) }, "S");
+    await expect(send("Page.navigate", { url: "u" })).rejects.toThrow(
+      "no page"
+    );
+    await ev.close();
+    const lines = read(ev.dir, "cdp-commands.jsonl")
+      .trim()
+      .split("\n")
+      .map((l) => JSON.parse(l));
+    expect(lines.map((l) => [l.ev, l.id, l.method])).toEqual([
+      ["sent", 1, "Runtime.evaluate"],
+      ["answered", 1, "Runtime.evaluate"],
+      ["sent", 2, "Page.navigate"],
+      ["failed", 2, "Page.navigate"],
+    ]);
+    expect(lines[0].session).toBe("S");
+    expect(lines[0].expression).toBe("x".repeat(200));
+    expect(lines[2]).not.toHaveProperty("url");
+    expect(lines[3].error).toBe("no page");
+  });
+});
+
+describe("tracedSend", () => {
+  it("times each command and leaves out its params and result", async () => {
+    let clock = 1000;
+    const records = [];
+    const send = tracedSend(
+      async () => {
+        clock += 250;
+        return { big: "result" };
+      },
+      (t, fields) => records.push({ t, ...fields }),
+      () => clock
+    );
+    expect(await send("DOM.getDocument", { depth: -1 })).toEqual({
+      big: "result",
+    });
+    expect(records).toEqual([
+      { t: 1000, ev: "sent", id: 1, method: "DOM.getDocument" },
+      { t: 1250, ev: "answered", id: 1, method: "DOM.getDocument", ms: 250 },
+    ]);
+  });
+});
+
+// A recorder stand-in in its own process, so a signal or process.exit ends
+// it the way it ends record.mjs.
+const CHILD = `
+import fs from "node:fs";
+import { openRunEvidence } from ${JSON.stringify(new URL("./run-evidence.mjs", import.meta.url).href)};
+import { armRunDeadline } from ${JSON.stringify(new URL("./run-guard.mjs", import.meta.url).href)};
+const [root, backendLog, mode] = process.argv.slice(1);
+const ev = openRunEvidence({ root, label: "t", stallMs: 120000, backendLog });
+let emit;
+await ev.watch({ onEvent: (fn) => { emit = fn; }, send: async () => ({}) }, async () => ({}));
+emit({ method: "Network.requestWillBeSent", sessionId: "P", params: { requestId: "7", request: { method: "POST", url: "${B}/raidSimAsync?requestId=a" } } });
+emit({ method: "Runtime.consoleAPICalled", params: { type: "log", args: [{ type: "string", value: "hello from the page" }] } });
+fs.appendFileSync(backendLog, "this run\\n");
+console.log(ev.dir);
+if (mode === "deadline")
+  armRunDeadline(50, () => {}, "t", { beforeExit: (err) => ev.close(err) });
+if (mode === "hung-save")
+  armRunDeadline(50, () => {}, "t", { beforeExit: () => new Promise(() => {}), beforeExitMs: 100 });
+setInterval(() => {}, 1000);
+`;
+
+/** Runs CHILD; sends `signal` once it has opened its evidence. */
+function runChild(mode, signal) {
+  const run = tempRun();
+  const child = spawn(
+    process.execPath,
+    ["--input-type=module", "-e", CHILD, run.root, run.backendLog, mode],
+    { stdio: ["ignore", "pipe", "pipe"] }
+  );
+  let dir = null;
+  child.stdout.on("data", (chunk) => {
+    if (dir !== null) return;
+    dir = chunk.toString().split("\n")[0];
+    if (signal) child.kill(signal);
+  });
+  return new Promise((resolve) =>
+    child.on("exit", (code, killedBy) => resolve({ code, killedBy, dir }))
+  );
+}
+
+const lastLines = (dir) => {
+  const log = read(dir, "recorder.log");
+  expect(log).toMatch(
+    /last backend requests:\n.*"url":"\/raidSimAsync\?requestId=a"/
+  );
+  expect(log).toMatch(
+    /last console lines:\n.*\[page\] log: hello from the page/
+  );
+};
+
+describe("a run that ends without close()", () => {
+  it.each([
+    ["SIGINT", 130],
+    ["SIGTERM", 143],
+  ])(
+    "keeps its evidence on %s and exits %i",
+    async (signal, status) => {
+      const { code, killedBy, dir } = await runChild("wait", signal);
+      expect({ code, killedBy }).toEqual({ code: status, killedBy: null });
+      const summary = readSummary(dir);
+      expect(summary.outcome).toBe(`ended by ${signal}`);
+      expect(summary.error).toBe(
+        `the recorder got ${signal} and stopped the run`
+      );
+      expect(read(dir, "backend.log")).toBe("this run\n");
+      lastLines(dir);
+    },
+    20000
+  );
+
+  it("keeps its evidence and goroutines on the run deadline", async () => {
+    const { code, dir } = await runChild("deadline");
+    expect(code).toBe(1);
+    const summary = readSummary(dir);
+    expect(summary.outcome).toBe("failed");
+    expect(summary.error).toMatch(/limit \(the run deadline\)$/);
+    expect(read(dir, "backend.log")).toBe("this run\n");
+    expect(fs.existsSync(path.join(dir, "backend-goroutines.txt"))).toBe(true);
+    lastLines(dir);
+  }, 30000);
+
+  it("still exits on the deadline when saving the evidence hangs", async () => {
+    const { code, dir } = await runChild("hung-save");
+    expect(code).toBe(1);
+    expect(readSummary(dir).outcome).toBe("exited before the run was closed");
+    lastLines(dir);
+  }, 20000);
 });
 
 describe("isBackendUrl", () => {

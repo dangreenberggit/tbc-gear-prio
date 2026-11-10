@@ -93,7 +93,8 @@ given; leave --preset-tab out on a page whose picker has no phase tabs
 checked item by item before the run, and the run is refused on a mismatch.
 
 Every run keeps its evidence in .scratch/tab-recordings/logs/<time>-<spec>-p<phase>-<name>/:
-the page's console, each backend request, and the backend's log lines from
+the page's console, each backend request, each CDP command the recorder sends,
+and the backend's log lines from
 --backend-log (default .scratch/dev-tab/backend-3333.log, which
 \`node scripts/dev-tab.mjs backend\` writes). A run with no backend progress
 for TBC_RECORD_STALL_S seconds (default ${DEFAULT_STALL_MS / 1000}) fails with a
@@ -253,6 +254,9 @@ async function main() {
   );
   const chrome = await launchChrome();
   const client = cdp(chrome.wsUrl);
+  // attachPage and evidence.watch read client.send at each call, so the page
+  // and worker sessions' commands are traced too.
+  client.send = evidence.traceCommands(client.send);
   let disarmDeadline = () => {};
   let failure = null;
   try {
@@ -375,7 +379,8 @@ async function main() {
     disarmDeadline = armRunDeadline(
       RUN_LIMIT_MS,
       chrome.kill,
-      `record ${args.spec}-p${args.phase}-${args.name}`
+      `record ${args.spec}-p${args.phase}-${args.name}`,
+      { beforeExit: (err) => evidence.close(err) }
     );
     const clicked = await evaluate(
       send,
