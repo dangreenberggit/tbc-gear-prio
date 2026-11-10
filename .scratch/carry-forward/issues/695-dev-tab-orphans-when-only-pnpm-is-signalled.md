@@ -75,9 +75,9 @@ Code sandbox, from Python rather than from the T3 app, and without T3's
 `systemd-run` scope.
 
 - Mode `t3`: both ports listened before the stop and neither did afterwards.
-  In five runs every tab process was gone between under 1 s and 12 s after
-  the stop. The slowest was vite's `tsc --noEmit --watch`, which runs in
-  vite's process group, the group the frontend wrapper sends SIGTERM to.
+  In the run that review round 2 recorded, every tab process was gone 1 s
+  after the stop (`docs/reviews/fix-695-dev-tab-orphans.md`, round 2,
+  check 4).
 - Mode `pnpm`, the ticket's case, as a control: after SIGTERM to the pnpm pid
   alone, the corepack shim exited, and `pnpm-native`, the `dev-tab.mjs`
   parent, both wrappers, both servers and tsc kept running, with both ports
@@ -98,10 +98,10 @@ from WSL, and the Claude Code CLI 2.1.309 has no `preview_stop`.
 
 One signal to the wrapper's pid alone, with `695-single-pid-check.sh`
 below: SIGTERM, SIGHUP and SIGINT each stopped the wrapper, vite and tsc
-within 2 s; one earlier run saw tsc still alive 4 s after SIGTERM, so the
-check waits up to 30 s. SIGKILL left vite and tsc running with the port open
-for the full 30 s, because the wrapper cannot catch it. If the preview sends SIGKILL (hypothesis, untested), none of
-this ticket's fixes would help, because the wrapper is the process that dies.
+within 2 s. SIGKILL left vite and tsc running with the port open for the
+full 30 s, because the wrapper cannot catch it. If the preview sends SIGKILL
+(hypothesis, untested), none of this ticket's fixes would help, because the
+wrapper is the process that dies.
 
 ### Why no change
 

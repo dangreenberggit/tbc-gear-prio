@@ -176,6 +176,22 @@ Findings:
 - Bookkeeping: one line in the ticket's single-pid paragraph is not
   rewrapped, and the ticket's "five runs" timing has no recorded output.
 
-The round reported findings other than bookkeeping, so the review stops
-here (`~/.claude/AGENTS.md` § Review round limits) and the owner chooses
-the next step. No round-2 Disposition table is written yet.
+The round reported findings other than bookkeeping, so the review stopped
+here (`~/.claude/AGENTS.md` § Review round limits). An assessor that neither
+wrote nor reviewed the work found that every round-2 finding sits in code
+the round-1 fix added, that a `wontfix` ticket needs no `Verified by:` line
+(`docs/agents/issue-tracker.md`), and that another round would likely only
+find more. So the round-2 findings are recorded as known limits of the
+evidence scripts, and the two ticket sentences with no recorded output are
+cut. The ticket's conclusion does not rest on the scripts.
+
+## Disposition (round 2)
+
+| ID   | Axis          | Disposition | Ticket / note                                                                                      |
+| ---- | ------------- | ----------- | -------------------------------------------------------------------------------------------------- |
+| R2-1 | Focused check | wontfix     | Known limit of a throwaway evidence script; in every recorded run tsc was running when tracked     |
+| R2-2 | Focused check | wontfix     | Known limit of a throwaway evidence script; the race needs a pid to exit between two `ps` calls    |
+| R2-3 | Focused check | wontfix     | Known limit: the servers were gone about 1 s after the script exited (round 2's re-run)            |
+| R2-4 | Focused check | wontfix     | Known limit: the early exit happens only when the servers never start                              |
+| R2-5 | Focused check | wontfix     | Bookkeeping: the `pump` change is described in R2-5 above; it makes the wait loops keep their pace |
+| R2-6 | Focused check | fixed       | Bookkeeping: the ticket's unrecorded "five runs" timing and the earlier-run sentence are cut       |
