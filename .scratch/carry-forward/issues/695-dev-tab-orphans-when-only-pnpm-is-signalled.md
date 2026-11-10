@@ -44,14 +44,18 @@ Neither tool sends a signal to pnpm alone, so the code stays as it is.
 ### T3 Code (`t3.json` scripts)
 
 From T3 Code 0.1.2's bundled source (`strings -n 6
-~/.t3/runtime/versions/0.1.2/t3`, and `client/assets/_chat-*.js` beside it):
+~/.t3/runtime/versions/0.1.2/t3`, and `client/assets/*.js` beside it):
 
-- The client runs a script by writing `<command>\r` into a terminal
-  (``writeToTerminal(..., `${e.command}\r`)``).
+- The client runs a script by writing ` <command>\r` into a terminal, with a
+  leading space that keeps it out of the shell's history
+  (``function ge(e){return` ${e}\r`}`` in `projectScriptEditor-*.js`).
 - The terminal is `$SHELL` started with no arguments in a node-pty pty
   (`resolveShellCandidates`). That is an interactive bash with job control,
   so `pnpm tab:dev` runs as its foreground job, in a process group of its
-  own.
+  own. With a systemd user manager, the shell starts through
+  `agentScope.wrap({..., survivesRestart: true})`, which runs it under
+  `systemd-run --user --scope --slice=app-t3code-agents.slice`; each step
+  `exec`s, so the pid T3 signals is still the shell's.
 - Closing the terminal runs `terminal.closeSession`, then `stopProcess`, then
   `runKillEscalation`: `process.kill("SIGTERM")`, and `process.kill("SIGKILL")`
   after `DEFAULT_PROCESS_KILL_GRACE_MS = 1e3` if the process is still alive.
@@ -67,18 +71,21 @@ From T3 Code 0.1.2's bundled source (`strings -n 6
 The live test copies that sequence: a pty, an interactive `$SHELL`, the
 command typed in, SIGTERM to the shell, SIGKILL 1 s later. It ran on
 2026-11-10 in the pair `fix/695-dev-tab-orphans`, in WSL, inside the Claude
-Code sandbox, from Python rather than from the T3 app.
+Code sandbox, from Python rather than from the T3 app, and without T3's
+`systemd-run` scope.
 
-- Mode `t3`: both ports listened before the stop and neither did 5 s after.
-  Vite's `tsc --noEmit --watch` ended by itself 7 s after the stop. No tab
-  process was left.
+- Mode `t3`: both ports listened before the stop and neither did afterwards.
+  In five runs every tab process was gone between under 1 s and 12 s after
+  the stop. The slowest was vite's `tsc --noEmit --watch`, which runs in
+  vite's process group, the group the frontend wrapper sends SIGTERM to.
 - Mode `pnpm`, the ticket's case, as a control: after SIGTERM to the pnpm pid
   alone, the corepack shim exited, and `pnpm-native`, the `dev-tab.mjs`
   parent, both wrappers, both servers and tsc kept running, with both ports
   listening. So the test does see orphans when there are some.
 
-Not tested: stopping or restarting T3 itself (`t3code.service` has
-`KillMode=mixed`).
+Not tested: stopping or restarting T3 itself. The terminal scopes are in
+`app-t3code-agents.slice`, outside `t3code.service`, so that unit's
+`KillMode=mixed` does not reach them.
 
 ### Claude Code's preview (`.claude/launch.json`)
 
@@ -90,9 +97,10 @@ desktop app, whose files under `C:\Program Files\WindowsApps` are not readable
 from WSL, and the Claude Code CLI 2.1.309 has no `preview_stop`.
 
 One signal to the wrapper's pid alone, with `695-single-pid-check.sh`
-below: SIGTERM, SIGHUP and SIGINT each stopped vite and tsc within 4 s.
-SIGKILL left vite and tsc running with the port open, because the wrapper
-cannot catch it. If the preview sends SIGKILL (hypothesis, untested), none of
+below: SIGTERM, SIGHUP and SIGINT each stopped the wrapper, vite and tsc
+within 2 s; one earlier run saw tsc still alive 4 s after SIGTERM, so the
+check waits up to 30 s. SIGKILL left vite and tsc running with the port open
+for the full 30 s, because the wrapper cannot catch it. If the preview sends SIGKILL (hypothesis, untested), none of
 this ticket's fixes would help, because the wrapper is the process that dies.
 
 ### Why no change
