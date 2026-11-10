@@ -781,8 +781,10 @@ async function loadForkEngine() {
     // applicability from `effectId` alone via `ENCHANT_APPLIES`, one
     // synthetic record per known effectId — returned for every slot — is
     // enough to reach it; the fake never needs slot-shaped data of its own.
+    // The empty `stats` is for the hit budget's gear sum (ticket 830): every
+    // ranking of ret now reads it.
     getEnchants: () =>
-      [...ENCHANT_APPLIES.keys()].map((effectId) => ({ effectId })),
+      [...ENCHANT_APPLIES.keys()].map((effectId) => ({ effectId, stats: [] })),
   };
 
   vi.doMock(
@@ -897,7 +899,17 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
         SIM_ORDER: forkSlots.SIM_ORDER,
         rankUpgrades: forkRank.rankUpgrades,
         RecordedGearSource: forkGearSource.RecordedGearSource,
-        RecordedSimRunner: forkSimRunner.RecordedSimRunner,
+        // The fork's runner must read stats (ticket 830). A 0% hit read
+        // gives ret its whole hit cap as budget, so the fork's repairs value
+        // hit at full weight, as this repo's engine does.
+        RecordedSimRunner: class extends forkSimRunner.RecordedSimRunner {
+          computeStats() {
+            return Promise.resolve({
+              stats: [],
+              pseudoStats: new Array<number>(25).fill(0),
+            });
+          }
+        } as unknown as typeof RecordedSimRunner,
         MemoryStore: forkStore.MemoryStore,
         simCacheKey: forkSimRunner.simCacheKey,
         // Stats times weights: the order this repo's engine uses, so the two

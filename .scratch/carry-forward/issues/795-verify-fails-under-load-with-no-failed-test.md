@@ -89,3 +89,19 @@ main process being too busy to answer) is also a hypothesis, untested.
   hide the starved reply.
 - Five `pnpm verify` runs in a row pass while the load average is above
   30, with `uptime` recorded before and after each run.
+
+## Comments
+
+2026-11-09, branch `fix/830-831-hit-budget`: one stretch that trips the
+timeout at normal load is a whole test file whose fake sim answers in
+microtasks, so the worker never reaches the event loop between tests.
+`packages/core/test/fork-set-net.test.ts` grew from 24 s to about 170 s
+when every feral run started reading hit (ticket 830), and then
+`pnpm exec vitest run packages/core/test/fork-set-net` alone printed
+`Error: [vitest-worker]: Timeout calling "onTaskUpdate"` with all 103
+tests passed; `pnpm verify` failed with this ticket's message. A
+`setTimeout(0)` yield did not help; `await new Promise((resolve) =>
+setImmediate(resolve))` at the start of the file's `runScenario` did
+(rc 0, same run). Other fork-gated files whose fakes answer the same
+way may hold the worker under load in the same way (hypothesis,
+untested).

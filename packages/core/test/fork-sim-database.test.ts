@@ -36,6 +36,7 @@ import {
   importForkUpgrades,
   loadForkEngineEnvironment,
   statsOnlyItemEp,
+  zeroHitStats,
 } from "./fork-engine-harness.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -402,6 +403,7 @@ async function runRanking(skeleton: RaidSimRequest): Promise<RaidSimRequest[]> {
   const requests: RaidSimRequest[] = [];
   const sim = {
     version: () => Promise.resolve(SIM_VERSION),
+    computeStats: zeroHitStats,
     run: (req: RaidSimRequest, opts: { iterations: number }) => {
       requests.push(req);
       const equipped = (

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/feat-452-meta-repair-hit-cap.md (round 1, I2)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -45,3 +45,85 @@ weight, or the owner rules the window an accepted estimate and this
 ticket records the ruling with its date.
 
 ## Comments
+
+## Closing note (2026-11-09)
+
+Closed by pricing hit by what the spells the rotation casts still gain.
+Owner, 2026-11-09, choosing this over a note: "a sounds ok." Fork commits
+`4903b8cee` and `3803a1398` (review round 3) on `fix/830-831-hit-budget`,
+after `52bb752ce` and `ae2c8afc1`, whose note `4903b8cee` removes:
+
+- The tab's sim runner now keeps, from every sim result, the first
+  player's spell damage by school (`SimObservation.spellDamageBySchool`,
+  from the sim's `ActionMetrics.spell_school` and damage; melee actions
+  and pets left out; `adapters/worker_pool_sim_runner.ts`).
+- For mage, shadow priest and warlock, the repair hit budget
+  (`hitCapBudgetFrom`, `engine/cap-profile.ts`) splits that damage into
+  one group per school hit: a spell's hit is slot 13 plus its school's
+  bonus, which the stats read gives as the school's slot 6-11
+  (`sim/core/spell_result.go:241-249`,
+  `sim/core/character_sheet.go:110-116`). Hit is worth each group's share
+  of the spell damage until that group reaches 16% (`meta-repair.ts`,
+  `valueModel`). The baseline sim gives the groups; a caster whose worn
+  meta gem is off sims its un-repaired gear first, so the worn repair is
+  priced the same way. That extra sim runs only when every target is
+  level 73, since otherwise there is no budget.
+- So the page's default shadow priest, a Troll with no Starshards
+  (`sim/priest/priest.go:58-62`), whose spells are all Shadow, values no
+  hit past the point where Shadow Focus caps them. A real wowsimcli sim
+  of that default (P1 gear, 200 iterations, seed 7) dealt only Shadow
+  damage. A Night Elf priest values hit past that point only by
+  Starshards' share of the damage, 4.2% in the same sim with the race set
+  to Night Elf.
+  An Arcane mage values hit for Fire Blast and Frostbolt by their shares
+  after Arcane spells cap.
+- A caster whose sim result has no spell damage by school fails the run
+  (`the sim result has no spell damage by school, so spell hit cannot be
+  priced`), so no caster is priced without it.
+
+The note "If gems were swapped to turn your meta gem on, hit rating was
+counted at full value up to 16% spell hit, although some of your spells
+get extra hit and reach the hit cap sooner." is gone: the price now
+counts school hit. One player-facing note remains, for the one state the
+sim result does not show: a talent that adds hit to some spells only
+(Suppression for the warlock, `sim/warlock/talents.go:75-84`; Focused
+Power for the priest, `sim/priest/talents.go:64-73`; the only
+`SpellMod_BonusHit_Percent` users under `sim/mage`, `sim/priest` and
+`sim/warlock`). It shows when the player has points in one of them and
+every target is level 73: "If gems were swapped to turn your meta gem
+on, hit rating was valued as if your Suppression talent added no hit, so
+it may be valued too high." (or "Focused Power").
+
+Two estimates remain with no note, because the sim result does not mark
+the spells concerned (`proto/api.proto:142-158`): a damage spell with no
+class mask, as an item proc is, gets no school bonus in the sim but is
+priced at its school's hit, so hit is valued too low for its share; and
+an explosive gets 100% bonus hit (`sim/core/consumes.go:625-626`), so
+the player's hit never changes it, but its damage is priced as if it
+did, so hit is valued too high for its share. How often either moves a
+ranking is unmeasured.
+
+Tests, in `packages/core/test/fork-meta-repair.test.ts`: 831-G1 to G3
+(the groups, physical and two-school damage, and the error),
+831-P1 (a shadow priest whose damage is all Shadow places no Great
+Dawnstone past the Shadow cap; with the damage in Arcane it does, and
+below the Shadow cap it does), 831-W1 (the same for the worn repair,
+after a sim of the un-repaired gear), 831-W2 (no extra sim against a
+level-72 target), 831-F1 (no spell damage fails the run), 831-N1 (school hit gets
+no note), 831-N3 and N5 (the talent note for Suppression and Focused
+Power), 831-N4 (no note without such a talent) and 831-N6 (only the
+level-73 note against a level-72 target). G1-G3, P1, W1, F1, N1, N3 and
+N5 failed on the fork code before `4903b8cee`. In
+`packages/core/test/fork-caster-hit-sim.test.ts`, 831-T1 sims the page's
+default Troll shadow priest with the pinned wowsimcli and checks that its
+damage is all Shadow and its budget one group at the Shadow cap; 831-T2
+checks that a Night Elf adds Starshards' Arcane damage. Fork:
+`worker_pool_sim_runner.test.ts` ("gives the first player's spell damage
+by school"), `SubstitutionsList.test.tsx` (the note renders as one
+sentence).
+
+Verified by: tbc-new-fork@b77e48ae34685fb2d4632e2dfdc897e356fa6f79;
+`node --version; pnpm exec vitest run packages/core/test/fork-meta-repair.test.ts packages/core/test/fork-caster-hit-sim.test.ts packages/core/test/wowsims-fork-parity.test.ts`
+(60 passed); `node --version; pnpm verify` (rc 0, 4 min 35 s; `gates:
+1620 ran, 0 skipped`; its fork tests check ran 826 tests at
+`tbc-new-fork@b77e48ae3`).

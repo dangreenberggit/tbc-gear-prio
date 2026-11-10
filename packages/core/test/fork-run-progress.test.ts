@@ -30,6 +30,7 @@ import {
   forkUpgradesDir,
   importForkUpgrades,
   statsOnlyItemEp,
+  zeroHitStats,
 } from "./fork-engine-harness.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -695,8 +696,8 @@ type RecordedEvent = { progress: Progress; simCallsSoFar: number };
 /**
  * One cold run: Malorne 2pc worn in hands and legs, Thunderheart and neutral
  * candidates, the broken-bonus measurement on, and no `seeds`, as the tab
- * calls it. The fake sim has no `computeStats`, so the engine skips its stats
- * reads (rank.ts `hitCapReadable`). `candidateCap` defaults to 100, more than
+ * calls it. The worn gear holds no meta, so the baseline's is the only stats
+ * read and it moves no gem. `candidateCap` defaults to 100, more than
  * any pool here, so only a run that passes a smaller one is capped.
  */
 async function recordRun(
@@ -764,6 +765,7 @@ async function recordRun(
   let simCalls = 0;
   const fakeSim = {
     version: () => Promise.resolve(SIM_VERSION),
+    computeStats: zeroHitStats,
     run: (req: RaidSimRequest, opts: SimRunOpts) => {
       simCalls += 1;
       let dps = BASE_DPS;

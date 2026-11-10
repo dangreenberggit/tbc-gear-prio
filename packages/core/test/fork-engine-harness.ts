@@ -155,3 +155,18 @@ export async function statsOnlyItemEp(
   ]);
   return (itemId) => epScore(getItem(itemId)?.stats ?? [], weights);
 }
+
+/**
+ * A stats read for fakes whose runs need no hit cap: every hit slot reads 0%,
+ * so a hit-budget spec gets the whole cap as its budget. The fork's
+ * `SimRunner.computeStats` is required (ticket 830).
+ */
+export function zeroHitStats(): Promise<{
+  stats: number[];
+  pseudoStats: number[];
+}> {
+  return Promise.resolve({
+    stats: [],
+    pseudoStats: new Array<number>(25).fill(0),
+  });
+}
