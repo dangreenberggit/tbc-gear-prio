@@ -238,6 +238,12 @@ async function main() {
     evidence.note(a.join(" "));
   };
   log("evidence in", path.relative(ROOT, evidence.dir));
+  // A recording once returned 38 min after "wrote" (ticket 684). With this
+  // line's time, a late return shows whether this process was still running
+  // or its caller (pnpm, the shell, a sleeping machine) was waiting.
+  process.on("exit", (code) =>
+    log(`exiting with code ${code} at ${new Date().toISOString()}`)
+  );
   // A committed gear link names the server it was made on (:5173); with
   // TBC_FORK_PORT set, open the same link on the server this run drives.
   let url = args.gearUrl ?? `${args.base}${PAGE_BY_SPEC[args.spec]}`;
