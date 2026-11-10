@@ -64,9 +64,11 @@ Not reproduced; the cause is still unknown, so the ticket stays open.
   `th-hands-legs` and ret `p2`. Its `feral-p5-th4pc` run (453 s) wrote
   its file, but the transcript does not show how that run ended
   (`~/.claude/projects/-home-daniel-Code-lulz-tbc-gear-prio/9985d2ac-7a9f-40cc-8622-96d09dc8a33a/subagents/agent-aa701f7a61ecf4c87.jsonl`).
-  The ten ticket-703 runs on 2026-11-09 each exited within 0.5 s of
-  `wrote`: the next run's evidence folder name is its start time, about
-  0.47 s after the previous run's `wrote` line in its `recorder.log`
+  Of the ten ticket-703 runs on 2026-11-10 (UTC), the first nine each
+  exited within 0.5 s of `wrote`: the next run's evidence folder name is
+  its start time, 0.42 s to 0.48 s after the previous run's `wrote` line
+  in its `recorder.log`. The tenth run's next folder starts 29.9 s after
+  its `wrote`, so the folders bound its exit only to that
   (`/home/daniel/Code/lulz/tbc-gear-prio/.scratch/703-evidence/tab-recordings-logs/`).
   On 2026-11-10, at `tbc-gear-prio@72bc2060`, `pnpm tab-fixtures:record`
   for `feral-p3-th-hands-legs` ("Took 295.8s") logged `wrote` at
@@ -81,9 +83,14 @@ Not reproduced; the cause is still unknown, so the ticket stays open.
 - **What names the cause next time.** `record.mjs` now logs
   `exiting with code N at <ISO time>` from its exit hook, to the console
   and to `recorder.log`, whose lines carry times. If a command returns
-  long after that time, the recorder was not the one waiting (pnpm, the
-  shell, or a sleeping machine was). If the line itself comes late, the
-  timed `recorder.log` lines before it show the step that took the time.
+  long after that time, the recorder was not the one waiting (pnpm or
+  the shell was, or the machine slept after the recorder exited). If the
+  line itself comes late, the last timed line before it shows where the
+  wait started. After `evidence kept in` no line is logged until the
+  exit line, so a wait there is in `client.close()`, `chrome.kill()` or
+  `releaseKeepAwake()` (`scripts/tab-fixtures/record.mjs`, the `finally`
+  block of `main()`). The times are wall-clock times, so a machine that
+  slept during any step leaves the same lines as a step that blocked.
 - On Windows the one step after `wrote` with no time limit is
   `spawnSync("taskkill", ...)` in `launchChrome`'s `kill`
   (`scripts/tab-harness/test-tab-harness.mjs`). It is unchanged, because
