@@ -2,6 +2,7 @@
 
 Reviewed range: `86b5f5e10d88b177c71b8532933369b9fe76c2ba..5b98dc8ca5233a6fe52031eea1a6bc0a589efd1b`
 Reviewed range: `5b98dc8ca5233a6fe52031eea1a6bc0a589efd1b..b3e0081a57f2c38f062bd66744ba4ffbf389548a`
+Reviewed range: `b3e0081a57f2c38f062bd66744ba4ffbf389548a..485b8ba1e8a01fd1999439682d7d6e1262af86d2`
 
 ## Dispatch note
 
@@ -165,15 +166,67 @@ limit"):
   `exitOnSignals`, a setup `record.mjs` never has.
 - **R2 (low, test hygiene):** `tempRun` in `run-evidence.test.mjs:160`
   makes `run-evidence-*` folders with `fs.mkdtempSync` and never removes
-  them; about 11 are left per test run (`ls $TMPDIR | grep -c
-'^run-evidence-'` counted 250).
+  them; about 11 are left per test run
+  (`ls $TMPDIR | grep -c '^run-evidence-'` counted 250).
+
+An assessor that neither wrote nor reviewed the work judged that nothing
+had gone wrong beyond A1's wrong signal premise, that both findings shrink
+to deletion-sized fixes, and that one more focused round would likely
+settle them. The owner answered "fix" (2026-11-10, relayed by the
+coordinator), which makes round 3 a further last round.
+
+## Focused check (round 3)
+
+Range `b3e0081a..485b8ba1` (`69c545f5` only edits this file); no fork
+range. Fix commit `485b8ba1` "Use exitOnSignals and clean test dirs (R1,
+R2)": `openRunEvidence` calls `exitOnSignals()` in place of its own
+handler, so a signal ends the run through the exit hook, which keeps the
+full evidence; `tempRun` records its folders and an `afterAll` removes them.
+Beyond the ask, the exit hook maps an exit code of 128 + SIGINT, SIGTERM or
+SIGHUP back to the signal's name, so the summary still names the signal
+(A1). One fresh `general-task` (Opus) agent ran the four checks:
+
+1. Conditions hold: both commits name R1, R2 or only edit this file; every
+   changed non-test line is inside `openRunEvidence`, where R1 points.
+2. Only what was asked. The extra mapping cannot misname a cause today:
+   `record.mjs` exits only with 0, 1 or 2 from `main` and 1 from the run
+   deadline (`run-guard.mjs:108`), and on the deadline path `fail()` keeps
+   the deadline's own error (`run-evidence.mjs:334`).
+3. With `exitOnSignals();` removed in a scratch copy, the SIGINT/130 and
+   SIGTERM/143 tests fail; the unchanged copy passes 26/26. A test run adds
+   no `run-evidence-*` folder (250 before and after; the 250 are from
+   earlier runs).
+4. `node --version` v22.23.2; `vitest run scripts/tab-fixtures/` 26/26,
+   rc=0.
+
+No findings.
 
 ## Summary
 
 Round 1 (full axes, domain skipped) found five adversarial findings, four
 spec findings and three code-quality rows; all were fixed in `8b3a7e39`,
-`a87d0efd`, `5fcfbfcb` and `b3e0081a`. Round 2, the last round, passed its
-four checks but found R1 and R2 in the lines the fixes wrote, so no
-Disposition table is written and the merge check (step 4) was not run; the
-owner chooses the next step. Tickets: this branch filed 0 and closed 0
-(ticket 703 existed at the merge base and stays open).
+`a87d0efd`, `5fcfbfcb` and `b3e0081a`. Round 2 passed its four checks but
+found R1 and R2 in the lines the fixes wrote. The owner chose "fix"; R1 and
+R2 were fixed in `485b8ba1`, and round 3 passed its four checks with no
+findings. Every finding is `fixed`. Tickets: this branch filed 0 and closed
+0 (ticket 703 existed at the merge base and stays open, because the hang
+has not reproduced and its cause is not found).
+
+## Disposition
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                         |
+| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | `8b3a7e39`, `a87d0efd`: full evidence on the deadline; signals through `exitOnSignals()` (`485b8ba1`) |
+| A2  | Adversarial | fixed       | `8b3a7e39`: the test fails with the forget code removed (round 2 check 3)                             |
+| A3  | Adversarial | fixed       | `8b3a7e39`: summary and `recorder.log` say when the backend wrote nothing                             |
+| A4  | Adversarial | fixed       | `8b3a7e39`: lines noted after close reach `recorder.log`                                              |
+| A5  | Adversarial | fixed       | `8b3a7e39`: answered-but-unfinished message; a detached worker's requests leave the in-flight set     |
+| P1  | Spec        | fixed       | `b3e0081a`: the ticket says stall (1) is reported by the sim rule                                     |
+| P2  | Spec        | fixed       | same fix as A1; the first fault folder is noted in the ticket (`b3e0081a`)                            |
+| P3  | Spec        | fixed       | `8b3a7e39`: `cdp-commands.jsonl` logs the recorder's own CDP commands                                 |
+| P4  | Spec        | fixed       | `b3e0081a`: the stale `record.mjs:331` citation                                                       |
+| S1  | Standards   | fixed       | `5fcfbfcb`: one `requestPath` helper                                                                  |
+| S2  | Standards   | fixed       | `5fcfbfcb`: `armRunDeadline` gets `label`                                                             |
+| S3  | Standards   | fixed       | `5fcfbfcb`: what-not-why comments deleted                                                             |
+| R1  | Focused (2) | fixed       | `485b8ba1`: own signal handler removed; `exitOnSignals()` called                                      |
+| R2  | Focused (2) | fixed       | `485b8ba1`: `afterAll` removes the test folders                                                       |
