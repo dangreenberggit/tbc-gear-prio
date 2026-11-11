@@ -6053,7 +6053,7 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
     }
   });
 
-  it("644-D: a set whose bonus read fails gets no entry and no count tried, and a warning names it", async () => {
+  it("644-D: a set whose bonus read fails gets no entry and no count tried, and a line gives the read's error", async () => {
     // Scenario kind: 644-A's gear (the pool reaches 6), with the read of the
     // largest package's gear failing, or the read of the worn gear.
     const scenario: Scenario = {
@@ -6090,13 +6090,19 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
         expect(
           warn.mock.calls.some(([line]) => String(line).includes("set 676"))
         ).toBe(true);
+        // Ticket 867: the read's own error reaches the ranking's lines.
+        expect(setSkipLines(ranking)).toContainEqual({
+          field: "Thunderheart Harness set",
+          detail:
+            "The Thunderheart Harness set bonuses were not all measured, because the sim could not list the set's bonuses.\nthe set-bonus read failed on purpose",
+        });
       }
     } finally {
       warn.mockRestore();
     }
   });
 
-  it("644-R: a set whose largest package fails gem repair gets no entry and no count tried, and a warning names it", async () => {
+  it("644-R: a set whose largest package fails gem repair gets no entry and no count tried, and a line gives the repair's error", async () => {
     // Scenario kind: each piece's single can switch the meta gem on, the
     // package's gear cannot. Example: Malorne Harness 640 over gemless gear.
     // The worn Gloves of Dexterous Manipulation have two sockets, so the
@@ -6127,6 +6133,13 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
           )
         )
       ).toBe(true);
+      // Ticket 867: the repair's own error reaches the ranking's lines.
+      expect(setSkipLines(ranking)).toContainEqual({
+        field: "Malorne Harness set",
+        detail: expect.stringMatching(
+          /^The Malorne Harness set bonuses were not all measured, because no gem swap could turn your meta gem on\.\n\S/
+        ),
+      });
     } finally {
       warn.mockRestore();
     }
