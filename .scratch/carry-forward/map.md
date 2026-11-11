@@ -467,3 +467,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 867 A set whose bonus read (`activeSetBonuses`) fails is dropped with no line for the player (ticket 863 fix) 2026-11-10
 - 868 A run whose sim panics shows the whole Go stack trace in the status line (ticket 621 check) 2026-11-10
 - 869 A set-phase sim request that cannot be built (set screen, same-gear gate) shows no error (`docs/reviews/fix-621-863-865-tab.md` P2) 2026-11-10
+- 870 A failed worn-set ladder sim can list a break of a set bonus the set does not have, such as "Malorne Harness 3pc" (`docs/reviews/fix-621-863-865-tab.md` round 2, F1) 2026-11-10

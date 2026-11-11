@@ -1,5 +1,5 @@
 Status: open
-Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Out-of-scope)
+Serves: none (separate engine fix; owner 2026-11-10)
 Type: defect
 Origin: ticket 311 close, 2026-10-11 (check of the seven unguarded `agent.(HunterAgent)` assertions named in 311's 2026-08-29 note)
 Blocks: none
@@ -143,3 +143,14 @@ Checked on branch `fix/621-863-865-tab` (fork `550c01576`):
   (`substitutionConsoleLines`). The player
   would then see the panic text without the goroutine dump. Filed as
   ticket 868; not done here.
+
+## Owner ruling, 2026-11-10
+
+The owner, 2026-11-10, word for word: "621: I see no reason to approve
+this. We can note in the ticket that this will be a separate fix and is
+not connected to the upgrades tab."
+
+So the upstream guard diff
+(`.scratch/agent-reports/2026-11-10-621-proposed-guards.diff` in the main
+checkout) was not approved. The fix is a separate engine fix, outside the
+Upgrades tab's work.
