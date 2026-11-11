@@ -189,6 +189,19 @@ const simFailedLine = (threshold: number, onSomeRows = false) => ({
 });
 
 /**
+ * The line for a step whose bonus-off sim failed (ticket 863): the step is
+ * still measured, but its break is not split from its pieces.
+ */
+const breakSplitFailedLine = (threshold: number) => ({
+  field: expect.stringMatching(new RegExp(` ${threshold}-piece set bonus$`)),
+  detail: expect.stringMatching(
+    new RegExp(
+      `^On some rows, the cost of breaking the .+ ${threshold}-piece set bonus was not measured apart from the pieces that break it, because their sim failed\\.\n${MODEL_SIM_ERROR}$`
+    )
+  ),
+});
+
+/**
  * The fork's set-kept copy id offset (`SET_KEPT_ID_OFFSET`, ticket 512): a copy
  * that keeps its set. A literal for the same reason as `COPY_OFFSET`; 511-C
  * checks that the two agree.
@@ -5006,8 +5019,9 @@ describe.skipIf(!forkPresent)(
         skippedSteps: 0,
         beforeInStore: 1,
       });
-      // Ticket 863: the bonus-off sim's error names the lost Malorne 2pc.
-      expect(setSkipLines(r)).toEqual([simFailedLine(2, true)]);
+      // Ticket 863: the bonus-off sim's error names the lost Malorne 2pc,
+      // whose cost the step does not show apart from its pieces.
+      expect(setSkipLines(r)).toEqual([breakSplitFailedLine(2)]);
       // The credits are 511-PS's: 54 − 6 and 54 + 12.
       expect(view.rankableSetPotential(hands, FLOOR)).toBeCloseTo(48, 9);
       expect(view.rankableSetPotential(legs, FLOOR)).toBeCloseTo(66, 9);
