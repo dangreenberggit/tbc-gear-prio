@@ -1926,6 +1926,81 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     ]);
     expect(setSkipLines(r)).toEqual([wornSetFailedLine]);
   });
+
+  /** 476-D's gear and pool with R(3) failing: counts 3 and 4 go unmeasured. */
+  const rungThreeFails: Scenario = {
+    worn: wornGear(MALORNE_4),
+    pool: [
+      { itemId: THUNDERHEART.head, slot: "head" },
+      { itemId: THUNDERHEART.shoulder, slot: "shoulder" },
+      { itemId: THUNDERHEART.chest, slot: "chest" },
+      { itemId: THUNDERHEART.hands, slot: "hands" },
+      { itemId: NEUTRAL.chest[0], slot: "chest" },
+      { itemId: NEUTRAL.hands[0], slot: "hands" },
+    ],
+    measureBrokenSetValue: true,
+    reportsSetBonuses: true,
+    failWhen: (ids) =>
+      ids.includes(SET_KEPT_OFFSET + MALORNE.chest) &&
+      ids.includes(COPY_OFFSET + MALORNE.hands),
+  };
+  /** Every Malorne count a row or the run lists as broken. */
+  const malorneBreakCounts = (r: ForkRanking): number[] => {
+    const counts = new Set<number>();
+    for (const b of r.brokenSetValues ?? []) {
+      if (b.setId === 640) counts.add(b.threshold);
+    }
+    for (const row of r.items) {
+      const ctx = row.setContext;
+      for (const b of [
+        ...(ctx?.singleBreaks ?? []),
+        ...(ctx?.commitBreaks ?? []),
+        ...(ctx?.futureBonuses ?? []).flatMap((f) => f.breaks ?? []),
+      ]) {
+        if (b.setId === 640) counts.add(b.threshold);
+      }
+    }
+    return [...counts].sort((a, b) => a - b);
+  };
+
+  it("870-A: a failed ladder rung lists breaks only at counts where the set has a bonus", async () => {
+    // Malorne has bonuses at 2 and 4 only. A Thunderheart pair takes it from
+    // 4 to 2 pieces, so before ticket 870 the unmeasured count 3 was listed
+    // as a break ("Breaks Malorne Harness 3pc").
+    const { ranking: r } = await runScenario(rungThreeFails);
+    expect(malorneBreakCounts(r)).toEqual([2, 4]);
+    expect(
+      (r.wornSetLadder ?? [])
+        .filter((e) => e.setId === 640)
+        .map((e) => [e.count, e.counted, e.unmeasured ?? null])
+    ).toEqual([
+      [2, true, null],
+      [3, false, "sim-failed"],
+      [4, true, "sim-failed"],
+    ]);
+    expect(setSkipLines(r)).toEqual([wornSetFailedLine]);
+  });
+
+  it("870-B: when the bonus list cannot be read either, a line gives the read's error", async () => {
+    const { ranking: r } = await runScenario({
+      ...rungThreeFails,
+      failSetBonusReadWhen: () => true,
+    });
+    expect(
+      (r.wornSetLadder ?? [])
+        .filter((e) => e.setId === 640)
+        .map((e) => [e.count, e.counted])
+    ).toEqual([
+      [2, true],
+      [3, true],
+      [4, true],
+    ]);
+    expect(setSkipLines(r)).toContainEqual({
+      field: "Malorne Harness set",
+      detail:
+        "The Malorne Harness set bonuses were not all measured, because the sim could not list the set's bonuses.\nthe set-bonus read failed on purpose",
+    });
+  });
 });
 
 /* ------------------------------------------------------------------ *
