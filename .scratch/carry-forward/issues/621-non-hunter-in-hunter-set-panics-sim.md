@@ -1,5 +1,5 @@
 Status: open
-Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Out-of-scope)
+Serves: none (separate engine fix; owner 2026-11-10)
 Type: defect
 Origin: ticket 311 close, 2026-10-11 (check of the seven unguarded `agent.(HunterAgent)` assertions named in 311's 2026-08-29 note)
 Blocks: none
@@ -108,3 +108,49 @@ reason is the owner's rule for upstream engine fixes, session `ef13ce60`,
 Ticket 573 closes. If its decision puts the guards in the fork or
 upstream, close this ticket as fixed with it; if the branch is deleted,
 close this ticket with that decision recorded.
+
+## 2026-11-10: still upstream-only, and what the tab shows
+
+Checked on branch `fix/621-863-865-tab` (fork `550c01576`):
+
+- Upstream has not fixed it. At upstream `master` `24606be6b` (the fork's
+  `branchedFrom`), `sim/hunter/item_sets.go` still has 7 unguarded
+  `agent.(HunterAgent).GetHunter()` calls (Cryptstalker 4pc `:25` and 6pc
+  `:63`, Beast Lord 4pc `:96` among them) and `sim/warrior/items.go` has 8
+  unguarded `agent.(WarriorAgent).GetWarrior()` calls (Bold Armor 4pc
+  `:24`). Re-run:
+  `git -C vendor/tbc-new-fork grep -n "agent.(HunterAgent).GetHunter()\|agent.(WarriorAgent).GetWarrior()" upstream/master -- sim/hunter/item_sets.go sim/warrior/items.go`.
+- The parked guards still apply to the fork's tree with no conflict:
+  `git -C vendor/tbc-new-fork diff 42c75dc9 fa57ef5b7 -- sim/hunter/item_sets.go sim/warrior/items.go > /tmp/621.diff; git -C vendor/tbc-new-fork apply --check /tmp/621.diff`
+  exits 0. Both files are upstream files, so the fork does not take this
+  edit without the owner's approval of that exact diff.
+- What the tab shows (from code, not run; tab paths under the fork's
+  `ui/features/upgrades/`): the baseline sim panics, Go's
+  `runSim` recover (`sim/core/sim.go:121`) returns the panic text plus
+  "Stack Trace:" and the goroutine dump as the sim's error, the tab's
+  runner throws it (`model/adapters/worker_pool_sim_runner.ts:205`), and
+  the run fails. The status line's alert shows "Ranking failed: sim error
+  (<type>): <panic text>" followed by the whole stack trace, uncut
+  (`utils/format.ts` `describeRunError`, `components/StatusLine`).
+  No result rows. The site's own sim fails on that gear as well.
+- A tab-only change cannot make that gear sim: leaving the set out of the
+  request would be a tab-made fallback, which the owner's 2026-11-06 rule
+  rules out (ticket 852: "i dont know why we need to invent to new error,
+  rather than just normally bubbling up whatever error we got from
+  existing sim code"). What the tab could change is the message: cut the run
+  failure to its first line, as the notes list already does
+  (`substitutionText`), and send the full text to the console
+  (`substitutionConsoleLines`). The player
+  would then see the panic text without the goroutine dump. Filed as
+  ticket 868; not done here.
+
+## Owner ruling, 2026-11-10
+
+The owner, 2026-11-10, word for word: "621: I see no reason to approve
+this. We can note in the ticket that this will be a separate fix and is
+not connected to the upgrades tab."
+
+So the upstream guard diff
+(`.scratch/agent-reports/2026-11-10-621-proposed-guards.diff` in the main
+checkout) was not approved. The fix is a separate engine fix, outside the
+Upgrades tab's work.
