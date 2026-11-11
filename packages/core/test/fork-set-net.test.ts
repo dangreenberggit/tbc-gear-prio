@@ -168,15 +168,18 @@ const screenFailedLine = {
   ),
 };
 
-/** The line for a worn-set ladder sim that failed at `pieces` (ticket 863). */
-const wornSetFailedLine = (pieces: number) => ({
+/**
+ * The line for a worn-set ladder sim that failed (ticket 863), with any stack
+ * trace after the error (`Scenario.failStack`).
+ */
+const wornSetFailedLine = {
   field: expect.stringMatching(/ set$/),
   detail: expect.stringMatching(
     new RegExp(
-      `^The value of the .+ set at ${pieces} pieces on your gear was not measured, because its sim failed\\.\n${MODEL_SIM_ERROR}$`
+      `^The value of the .+ set on your gear was not fully measured, because its sim failed\\.\n${MODEL_SIM_ERROR}(\n[\\s\\S]*)?$`
     )
   ),
-});
+};
 
 /** The line for a set bonus the run did not measure because a sim failed (ticket 863). */
 const simFailedLine = (threshold: number, onSomeRows = false) => ({
@@ -341,6 +344,11 @@ type Scenario = {
   idEffects?: ReadonlyMap<number, number>;
   /** The fake sim throws for a request whose equipped ids (and options) match. */
   failWhen?: (ids: readonly number[], opts: SimRunOpts) => boolean;
+  /**
+   * Text after the thrown error, by sim call, as a Go panic's stack trace
+   * differs from sim to sim (ticket 863).
+   */
+  failStack?: (call: number) => string;
   /** `Deps.partnerRule` (ticket 511); absent means the engine's default. */
   partnerRule?: string;
   /** `Deps.setScreen` (ticket 511, K5R); absent means off. */
@@ -587,7 +595,9 @@ async function runScenario(scenario: Scenario): Promise<{
       requests.push(structuredClone(req));
       if (runCount - 1 === scenario.stopDuringCall) controller?.abort();
       if (scenario.failWhen?.(ids, opts)) {
-        return Promise.reject(new Error(MODEL_SIM_ERROR));
+        return Promise.reject(
+          new Error(MODEL_SIM_ERROR + (scenario.failStack?.(runCount) ?? ""))
+        );
       }
       const dps = modelDps(
         ids,
@@ -1852,9 +1862,8 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
       [3, false, null],
       [4, true, "sim-failed"],
     ]);
-    // Ticket 863: the failed rung's error reaches the player, named by the
-    // pieces it counted, since the ladder does not know Malorne has no 3pc.
-    expect(setSkipLines(r)).toEqual([wornSetFailedLine(4)]);
+    // Ticket 863: the failed rung's error reaches the player.
+    expect(setSkipLines(r)).toEqual([wornSetFailedLine]);
     // Four ladder rungs (one fails) and two gate sims for each of the
     // Thunderheart counts 2, 3 and 4 (tickets 511 and 512). No step gear:
     // every partner choice needs the unmeasured (640, 4) (K5, W-Z1).
@@ -1887,29 +1896,35 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     }
   });
 
-  it("863-L: a failed middle ladder rung names the pieces it counted, not a bonus", async () => {
-    // 476-D's gear with the model sim failing on R(3) only: the one rung that
-    // sends the Malorne chest set-kept and the hands set-less. Counts 3 and
-    // 4 both use it, and Malorne has no 3pc, so a line per count would name
-    // a bonus that does not exist.
+  it("863-L: failed ladder rungs give one line that names the set and no piece count", async () => {
+    // 476-D's gear with the model sim failing on R(1), the rung that sends
+    // the Malorne shoulder, chest and hands set-less, and on R(3), the one
+    // that sends the chest set-kept and the hands set-less. Counts 2, 3 and
+    // 4 use them. Malorne has no 3pc, and R(1) counts one piece, so a line
+    // per rung or per count would name a count or a bonus that means nothing
+    // to the player. Each failure's stack differs, as a Go panic's does.
     const { ranking: r } = await runScenario({
       worn: wornGear(MALORNE_4),
       pool: TH_OVER_MALORNE_POOL,
       measureBrokenSetValue: true,
       failWhen: (ids) =>
-        ids.includes(SET_KEPT_OFFSET + MALORNE.chest) &&
-        ids.includes(COPY_OFFSET + MALORNE.hands),
+        (ids.includes(COPY_OFFSET + MALORNE.shoulder) &&
+          ids.includes(COPY_OFFSET + MALORNE.chest) &&
+          ids.includes(COPY_OFFSET + MALORNE.hands)) ||
+        (ids.includes(SET_KEPT_OFFSET + MALORNE.chest) &&
+          ids.includes(COPY_OFFSET + MALORNE.hands)),
+      failStack: (call) => `\nStack Trace:\ngoroutine ${call} [running]:`,
     });
     expect(
       (r.wornSetLadder ?? [])
         .filter((e) => e.setId === 640)
         .map((e) => [e.count, e.unmeasured ?? null])
     ).toEqual([
-      [2, null],
+      [2, "sim-failed"],
       [3, "sim-failed"],
       [4, "sim-failed"],
     ]);
-    expect(setSkipLines(r)).toEqual([wornSetFailedLine(3)]);
+    expect(setSkipLines(r)).toEqual([wornSetFailedLine]);
   });
 });
 
