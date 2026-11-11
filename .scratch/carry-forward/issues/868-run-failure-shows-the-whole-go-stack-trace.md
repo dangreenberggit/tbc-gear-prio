@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: ticket 621 check, 2026-11-10, reading the run-failure path in the fork
 Serves: .scratch/plans/upgrades-tab-finish-line.md
@@ -71,3 +71,32 @@ Owner, 2026-11-11, on the error text under each notes line: "idk wtf the "notes 
 The console half stays (the whole error goes to the console). The status-line half is reopened: "Ranking failed: <first line> (full text in the browser console)" is the tab's own display, not a wowsims one.
 
 Done when: the tab shows this error the way wowsims shows a sim error, each on-screen piece citing a wowsims file:line, per the design the owner approves.
+
+## Closing note (2026-11-11)
+
+Fixed on branch `fix/867-870-tab-errors`, fork commit `2c13aea9d` 'Show a
+failed run's own message in a toast', per the design the owner approved
+(owner, 2026-11-11: "tab eerror display: keep going"; design
+`.scratch/agent-reports/2026-11-11-session-tab-error-display-design.md` in
+the main checkout). Paths under the fork's `ui/features/upgrades/`:
+
+- When the run fails, `model/run_session.ts` shows one error toast whose
+  body is the error's own message, as wowsims' bulk sim does
+  (`ui/features/bulk/model/run.ts:301-310` at `24606be6`: `console.error`,
+  then `toastManager.add({ variant: 'error', body: errorMessage })`). No
+  toast for a superseded run or after Stop, as wowsims shows none when the
+  user cancelled.
+- The whole error still goes to the console
+  (`console.error('[upgrades] the run failed', error)`).
+- The status line says only "Ranking failed." (`upgrades_tab.status.error`
+  in `assets/locales/en/upgrades.json`); before, it said "Ranking failed:
+  <first line> (full text in the browser console)". "This spec has no
+  ranking data yet." is unchanged.
+
+Verified by: in the pair's fork (`vendor/tbc-new-fork`),
+`npx vitest run ui/features/upgrades/utils/format.test.ts ui/features/upgrades/model/run_session.test.ts`.
+Before the fix 2 failed, 49 passed ("says only that the ranking failed, for
+any other failure"; "sends a failed run's whole error to the console and its
+own message to one error toast"); after it all pass, and
+`npx vitest run ui/features/upgrades` passes 815 of 815. Not checked on
+screen.
