@@ -87,6 +87,15 @@ eight changed set-net cases failed (8 failed, 43 passed with a `-t` filter),
 `863-L` failed, and the SubstitutionsList case "shows every engine line as
 one plain sentence" failed. Not checked on screen: no live tab run.
 
+Left as it was: the set screen's `applyCopies` catch, which ticket 863
+listed as `set-screen.ts:269` at `e1f0a16d8`, still writes only a console
+warning. It fails while building the sim's request, before any sim runs.
+The same-gear gate's build failure now says "could not be built" but drops
+the caught error. Both are ticket 869. The fork commit `550c01576` message
+says the new lines replace "a console warning"; the console warnings are
+still written next to the new lines (for example `set-screen.ts:287`,
+`rank.ts:2914`).
+
 Not fixed here: a failed set-bonus read (`activeSetBonuses`, a
 `computeStats` call, not a sim) still drops the set with only a console
 warning. Filed as ticket 867.

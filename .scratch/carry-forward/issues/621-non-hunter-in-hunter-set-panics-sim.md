@@ -124,7 +124,8 @@ Checked on branch `fix/621-863-865-tab` (fork `550c01576`):
   `git -C vendor/tbc-new-fork diff 42c75dc9 fa57ef5b7 -- sim/hunter/item_sets.go sim/warrior/items.go > /tmp/621.diff; git -C vendor/tbc-new-fork apply --check /tmp/621.diff`
   exits 0. Both files are upstream files, so the fork does not take this
   edit without the owner's approval of that exact diff.
-- What the tab shows (from code, not run): the baseline sim panics, Go's
+- What the tab shows (from code, not run; tab paths under the fork's
+  `ui/features/upgrades/`): the baseline sim panics, Go's
   `runSim` recover (`sim/core/sim.go:121`) returns the panic text plus
   "Stack Trace:" and the goroutine dump as the sim's error, the tab's
   runner throws it (`model/adapters/worker_pool_sim_runner.ts:205`), and
@@ -134,8 +135,11 @@ Checked on branch `fix/621-863-865-tab` (fork `550c01576`):
   No result rows. The site's own sim fails on that gear as well.
 - A tab-only change cannot make that gear sim: leaving the set out of the
   request would be a tab-made fallback, which the owner's 2026-11-06 rule
-  rules out. What the tab could change is the message: cut the run
+  rules out (ticket 852: "i dont know why we need to invent to new error,
+  rather than just normally bubbling up whatever error we got from
+  existing sim code"). What the tab could change is the message: cut the run
   failure to its first line, as the notes list already does
-  (`substitutionText`), and send the full text to the console. The player
+  (`substitutionText`), and send the full text to the console
+  (`substitutionConsoleLines`). The player
   would then see the panic text without the goroutine dump. Filed as
   ticket 868; not done here.

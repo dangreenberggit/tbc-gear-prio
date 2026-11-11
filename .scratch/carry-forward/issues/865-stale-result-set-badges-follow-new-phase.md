@@ -63,5 +63,9 @@ The new test "keeps the sets picked at the click and at a fixture load
 through a later phase change (ticket 865)" and the changed test "badges a
 row with the name of each set the run was ranked with that holds it" both
 failed with `model/run_session.ts` and `hooks/useResultsView.ts` reverted
-and pass with the fix. Not checked on screen: no live tab or layout gate
-run for this ticket.
+and pass with the fix. Not checked on screen: no live tab run for this
+ticket. The layout gate did run on the pair after both fork commits and
+passed: its log ends `LAYOUT_GATE_VERDICT {"outcome":"measured","pass":true,...`
+(`.scratch/agent-reports/2026-11-10-621-863-865-layout-gate.log` in the
+main checkout, gitignored; re-run with `python scripts/check_layout_gate.py`
+in the pair), and commit `642b1323` moved the layout baseline from it.

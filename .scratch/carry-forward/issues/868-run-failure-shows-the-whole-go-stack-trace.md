@@ -23,10 +23,11 @@ on screen). Paths under the fork's `ui/features/upgrades/` unless named:
   "Ranking failed: {{message}}", and `components/StatusLine/StatusLine.tsx`
   renders it in the alert line, stack trace included.
 
-The notes list already cuts each line to its first line and sends the
-full text to the browser console (`substitutionText`, built on
-`substitutionFirstLine` in `model/assumptions.ts`). The status line does
-not. Ticket 311 removed the stack trace from the old tab's notes; this is
+The notes list already cuts each line to its first line
+(`substitutionText` in `utils/format.ts`, using `substitutionFirstLine`
+from `model/assumptions.ts`) and sends the full text to the browser
+console (`substitutionConsoleLines` in `model/assumptions.ts`, logged by
+`model/run_session.ts`). The status line does neither. Ticket 311 removed the stack trace from the old tab's notes; this is
 the same text in the React tab's run-failure line.
 
 One way a player reaches it: ticket 621 (4 pieces of another class's

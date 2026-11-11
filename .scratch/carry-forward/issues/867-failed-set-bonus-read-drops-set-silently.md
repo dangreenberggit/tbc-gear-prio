@@ -21,8 +21,8 @@ Read from the fork on branch `fix/621-863-865-tab` (paths under
   the set. The set then gets no set-bonus entry, no count is tried, and
   no crossing gate runs.
 - The ranking adds no substitution line for it, so the player sees a set
-  with no set figures and no reason. `fork-set-net.test.ts` case 644-D
-  pins this: it checks the warning, and no line.
+  with no set figures and no reason. the main repo's
+  `packages/core/test/fork-set-net.test.ts` case 644-D pins this: it checks the warning, and no line.
 
 Ticket 863 made every failed set-phase sim show the sim's error. This read
 is a `computeStats` call, not a sim, so 863 left it as it was.
