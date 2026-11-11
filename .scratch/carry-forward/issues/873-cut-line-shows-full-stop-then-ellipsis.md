@@ -1,4 +1,4 @@
-Status: closed
+Status: open
 Type: bug
 Origin: live check of ticket 863 on dev 5413e971 (fork 74b9c3bc1), 2026-11-10, `.scratch/agent-reports/2026-11-10-live-863-865/` in the main checkout (gitignored)
 Serves: .scratch/plans/upgrades-tab-finish-line.md
@@ -58,3 +58,11 @@ Verified by: in the pair's fork (`vendor/tbc-new-fork`),
 Before the fix 8 tests failed (the new ones and the changed text); after
 it `npx vitest run ui/features/upgrades` passed 814 of 814. Not checked
 on screen.
+
+## Reopened 2026-11-11
+
+Owner, 2026-11-11, on the error text under each notes line: "idk wtf the "notes list" is. if one sim fail ends the entire wowsims bulk sim, then we don't necessarily need to copy that and we can do something more graceful than multiple dialogs opening. but generaly we should match what wowsims has and not try to reinvent new things, especially when our reinventions are most likely dumb AI slop."
+
+The " (full text in the browser console)" suffix is the tab's own display, not a wowsims one.
+
+Done when: the tab shows this error the way wowsims shows a sim error, each on-screen piece citing a wowsims file:line, per the design the owner approves.

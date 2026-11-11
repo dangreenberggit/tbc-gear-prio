@@ -1,4 +1,4 @@
-Status: closed
+Status: open
 Type: bug
 Origin: live check of ticket 863 on dev 5413e971 (fork 74b9c3bc1), 2026-11-10, `.scratch/agent-reports/2026-11-10-live-863-865/` in the main checkout (gitignored)
 Serves: .scratch/plans/upgrades-tab-finish-line.md
@@ -136,3 +136,11 @@ error"; with the fix, `npx vitest run ui/features/upgrades` passes 815
 of 815. In the main repo, `pnpm exec vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-meta-repair.test.ts`
 and the other fork suites pass (234 tests). Not checked on screen in a
 live run; the layout gate result is in the branch's agent report.
+
+## Reopened 2026-11-11
+
+Owner, 2026-11-11, on the error text under each notes line: "idk wtf the "notes list" is. if one sim fail ends the entire wowsims bulk sim, then we don't necessarily need to copy that and we can do something more graceful than multiple dialogs opening. but generaly we should match what wowsims has and not try to reinvent new things, especially when our reinventions are most likely dumb AI slop."
+
+The second line under each notes line (the error's first line) is the tab's own display; no wowsims screen puts a sim error in a table or list (session handoff `.scratch/agent-reports/2026-11-11-session-tab-errors-handoff.md` in the main checkout, § How wowsims shows a sim error).
+
+Done when: the tab shows this error the way wowsims shows a sim error, each on-screen piece citing a wowsims file:line, per the design the owner approves.

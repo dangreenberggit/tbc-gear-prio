@@ -1,4 +1,4 @@
-Status: closed
+Status: open
 Type: bug
 Origin: ticket 621 check, 2026-11-10, reading the run-failure path in the fork
 Serves: .scratch/plans/upgrades-tab-finish-line.md
@@ -63,3 +63,11 @@ rest is in the console (ticket 868)" and "sends a failed run's whole
 error to the console, as the status line shows only its first line
 (ticket 868)" failed before the fix (2 failed, 48 passed) and pass with
 it. Not checked on screen: no live tab run for this ticket.
+
+## Reopened 2026-11-11
+
+Owner, 2026-11-11, on the error text under each notes line: "idk wtf the "notes list" is. if one sim fail ends the entire wowsims bulk sim, then we don't necessarily need to copy that and we can do something more graceful than multiple dialogs opening. but generaly we should match what wowsims has and not try to reinvent new things, especially when our reinventions are most likely dumb AI slop."
+
+The console half stays (the whole error goes to the console). The status-line half is reopened: "Ranking failed: <first line> (full text in the browser console)" is the tab's own display, not a wowsims one.
+
+Done when: the tab shows this error the way wowsims shows a sim error, each on-screen piece citing a wowsims file:line, per the design the owner approves.
