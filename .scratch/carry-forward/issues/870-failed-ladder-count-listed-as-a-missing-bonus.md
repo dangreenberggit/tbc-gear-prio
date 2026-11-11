@@ -82,7 +82,8 @@ When that list cannot be read, the count is counted as before, and a
 line gives the read's error: "The <set> set bonuses were not all
 measured, because the sim could not list the set's bonuses." (case
 870-B). In that state a break at a count with no bonus can still be
-listed: ticket 871.
+listed: ticket 871. (Ticket 871, fork `4794a28d7`, later changed this
+state: no failed count is counted, and 870-B now pins that.)
 
 Verified by: in the pair,
 `pnpm exec vitest run packages/core/test/fork-set-net.test.ts -t "870-"`.

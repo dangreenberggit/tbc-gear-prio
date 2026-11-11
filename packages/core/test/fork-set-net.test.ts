@@ -1998,7 +1998,10 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     expect(setSkipLines(r)).toEqual([wornSetFailedLine]);
   });
 
-  it("870-B: when the bonus list cannot be read either, a line gives the read's error", async () => {
+  it("870-B: when the bonus list cannot be read either, no failed count is a break, and lines give both errors", async () => {
+    // Ticket 871: with no list, a failed count may hold no bonus, so the row
+    // claims no break it did not measure; the ladder's line and the read's
+    // line say what was not measured.
     const { ranking: r } = await runScenario({
       ...rungThreeFails,
       failSetBonusReadWhen: () => true,
@@ -2009,9 +2012,11 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
         .map((e) => [e.count, e.counted])
     ).toEqual([
       [2, true],
-      [3, true],
-      [4, true],
+      [3, false],
+      [4, false],
     ]);
+    expect(malorneBreakCounts(r)).toEqual([2]);
+    expect(setSkipLines(r)).toContainEqual(wornSetFailedLine);
     expect(setSkipLines(r)).toContainEqual({
       field: "Malorne Harness set",
       detail:

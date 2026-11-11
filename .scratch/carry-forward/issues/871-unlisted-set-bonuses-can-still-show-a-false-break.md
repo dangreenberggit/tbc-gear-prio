@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: ticket 870's fix, 2026-11-10, branch `fix/867-870-tab-errors`
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -47,3 +47,32 @@ option is false in some state:
 
 The owner picks what the row shows when both a ladder sim and the bonus
 list fail, and a fork-set-net case (870-B or a new one) pins it.
+
+## Closing note
+
+Ruling, 2026-11-10, from the orchestrating session (not an owner
+quote): apply option 2 if each failure already gets its own line with
+the sim's error, because the row then claims no break it did not measure
+and the notes list says what was not measured.
+
+Checked first, fork at `64ad50972`, paths under
+`ui/features/upgrades/model/engine/`: in this state each failure already
+has its own line. A failed ladder rung calls `onSimFailed`
+(`set-less-copies.ts:236`), and `measureWornSetLadders` pushes "The value
+of the <set> set on your gear was not fully measured, because its sim
+failed." with the error (`rank.ts:3625`). The failed bonus-list read
+pushes "The <set> set bonuses were not all measured, because the sim
+could not list the set's bonuses." with the error (`rank.ts:3674`).
+
+Fixed on branch `fix/867-870-tab-errors`, fork commit `4794a28d7` 'Claim
+no unmeasured break when bonus list fails': when the list read fails,
+`wornSetBonusCounts` (`rank.ts`) gives no counts, so no failed ladder
+count is counted as a break. A runner with no bonus list at all (no
+`activeSetBonuses`, not the tab's worker runner) still counts a failed
+count, because there no line says the list is missing (case 476-D).
+
+Verified by: in the pair,
+`pnpm exec vitest run packages/core/test/fork-set-net.test.ts -t "870-B"`.
+870-B now expects counts 3 and 4 not counted, Malorne breaks `[2]`, and
+both lines; it failed before the fix (`[ 3, true ]`) and passes with it.
+The whole file passes (111 tests).

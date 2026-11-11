@@ -468,7 +468,7 @@ file contention, worker prompt. This file stays the chronological log.
 - 868 A run whose sim panics shows the whole Go stack trace in the status line (ticket 621 check) 2026-11-10; CLOSED 2026-11-10, fix/867-870-tab-errors, the status line shows the first line and the console the rest
 - 869 A set-phase sim request that cannot be built (set screen, same-gear gate) shows no error (`docs/reviews/fix-621-863-865-tab.md` P2) 2026-11-10; CLOSED 2026-11-10, fix/867-870-tab-errors, versionGears carries the error to the screen and gate lines
 - 870 A failed worn-set ladder sim can list a break of a set bonus the set does not have, such as "Malorne Harness 3pc" (`docs/reviews/fix-621-863-865-tab.md` round 2, F1) 2026-11-10; CLOSED 2026-11-10, fix/867-870-tab-errors, the sim's bonus list decides
-- 871 When both a worn-set ladder sim and the sim's bonus list fail, a row can still list a break of a bonus the set does not have; owner's choice (ticket 870 fix) 2026-11-10
+- 871 When both a worn-set ladder sim and the sim's bonus list fail, a row can still list a break of a bonus the set does not have; owner's choice (ticket 870 fix) 2026-11-10; CLOSED 2026-11-10, fix/867-870-tab-errors, no failed count is counted when the list fails
 - 872 Six more set-phase requests that cannot be built drop or misname their error: package sim, step gear, step break split, worn-1 pair, worn-set ladder, worn-set bonus list (ticket 869 fix) 2026-11-10
 - 873 A cut notes line reads "failed.… (full text in the browser console)" (live check of 863) 2026-11-10; CLOSED 2026-11-10, fix/867-870-tab-errors, the note goes before the full stop
 - 874 A failed sim's own error never shows in the notes list, only in the console; owner's choice of three displays (live check of 863) 2026-11-10
