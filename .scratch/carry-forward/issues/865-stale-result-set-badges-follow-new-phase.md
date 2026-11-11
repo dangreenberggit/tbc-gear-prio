@@ -57,7 +57,7 @@ So a phase change after a run, which empties the selection
 run was ranked with. Any other set pick after a run also leaves the badges
 alone. The pool's "BiS" badge already took the ranked phase (`selectSettledPhase`).
 
-Verified by, in the pair's fork (`vendor/tbc-new-fork`):
+Verified by: in the pair's fork (`vendor/tbc-new-fork`),
 `npx vitest run ui/features/upgrades/model/run_session.test.ts ui/features/upgrades/components/UpgradesResults/UpgradesResults.view.test.tsx`.
 The new test "keeps the sets picked at the click and at a fixture load
 through a later phase change (ticket 865)" and the changed test "badges a
