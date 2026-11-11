@@ -1132,7 +1132,7 @@ type RunRanking = {
   items: RankedRow[];
   setBonusOffSims?: { skippedSteps: number; gears: number };
   setScreen?: { sets: Array<{ setId: number; pair: { dps?: number } }> };
-  substitutions: Array<{ field: string; detail: string }>;
+  substitutions: Array<{ field: string; detail: string; error?: string }>;
 };
 
 const retSkeleton = JSON.parse(
@@ -2179,7 +2179,8 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
         field: "Burning Rage 2-piece set bonus",
         detail:
           "The Burning Rage 2-piece set bonus was not measured, because no " +
-          "gem swap could turn your meta gem on.\nmeta repair exceeded step budget",
+          "gem swap could turn your meta gem on.",
+        error: "meta repair exceeded step budget",
       });
       expect(
         run.ranking.substitutions.map((s) => s.detail).join("\n")
@@ -2641,8 +2642,8 @@ describe.skipIf(!forkPresent)(
           field: "item 30907",
           slot: "chest",
           detail:
-            "This item was not ranked in this slot, because its sim failed." +
-            "\nitem 30907, slot chest: worker died",
+            "This item was not ranked in this slot, because its sim failed.",
+          error: "worker died\nitem 30907, slot chest",
         },
       ]);
       expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
@@ -2672,7 +2673,9 @@ describe.skipIf(!forkPresent)(
       ).toMatchObject({ simmed: false });
       expect(
         stopped.ranking.substitutions.filter(
-          (s) => s.field === "item 30907" || /item 30907/.test(s.detail)
+          (s) =>
+            s.field === "item 30907" ||
+            /item 30907/.test(`${s.detail}\n${s.error ?? ""}`)
         )
       ).toEqual([]);
       // No ranking was cached: a second run on the same store reads the hit
@@ -2722,8 +2725,8 @@ describe.skipIf(!forkPresent)(
           field: "item 30907",
           slot: "chest",
           detail:
-            "This item was not ranked in this slot, because its sim failed." +
-            "\nitem 30907, slot chest: hit percent read as NaN",
+            "This item was not ranked in this slot, because its sim failed.",
+          error: "hit percent read as NaN\nitem 30907, slot chest",
         },
       ]);
     });

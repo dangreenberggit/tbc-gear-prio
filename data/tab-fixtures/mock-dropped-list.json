@@ -136,52 +136,62 @@
       {
         "field": "Ring of a Thousand Marks",
         "slot": "finger1",
-        "detail": "This item was not ranked in this slot, because its sim failed.\nitem 28757, slot finger1: made-up sim error"
+        "detail": "This item was not ranked in this slot, because its sim failed.",
+        "error": "made-up sim error\nitem 28757, slot finger1"
       },
       {
         "field": "Girdle of the Endless Pit",
         "slot": "waist",
-        "detail": "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.\nitem 28779, slot waist: made-up meta gem rule"
+        "detail": "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.",
+        "error": "made-up meta gem rule\nitem 28779, slot waist"
       },
       {
         "field": "Bladespire Warbands",
         "slot": "wrist",
-        "detail": "This item was not ranked in this slot, because its sim failed.\nitem 28795, slot wrist: made-up sim error"
+        "detail": "This item was not ranked in this slot, because its sim failed.",
+        "error": "made-up sim error\nitem 28795, slot wrist"
       },
       {
         "field": "Dragonspine Trophy",
         "slot": "trinket2",
-        "detail": "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.\nitem 28830, slot trinket2: made-up meta gem rule"
+        "detail": "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.",
+        "error": "made-up meta gem rule\nitem 28830, slot trinket2"
       },
       {
         "field": "Justicar Breastplate",
         "slot": "chest",
-        "detail": "This item was not ranked in this slot, because its sim failed.\nitem 29071, slot chest: made-up sim error"
+        "detail": "This item was not ranked in this slot, because its sim failed.",
+        "error": "made-up sim error\nitem 29071, slot chest"
       },
       {
         "field": "Justicar Crown",
         "slot": "head",
-        "detail": "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.\nitem 29073, slot head: made-up meta gem rule"
+        "detail": "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.",
+        "error": "made-up meta gem rule\nitem 29073, slot head"
       },
       {
         "field": "Justicar Shoulderplates",
         "slot": "shoulder",
-        "detail": "This item was not ranked in this slot, because its sim failed.\nitem 29075, slot shoulder: made-up sim error"
+        "detail": "This item was not ranked in this slot, because its sim failed.",
+        "error": "made-up sim error\nitem 29075, slot shoulder"
       },
       {
         "field": "Haramad's Bargain",
         "slot": "neck",
-        "detail": "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.\nitem 29119, slot neck: made-up meta gem rule"
+        "detail": "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.",
+        "error": "made-up meta gem rule\nitem 29119, slot neck"
       },
       {
         "field": "A'dal's Command",
         "slot": "finger1",
-        "detail": "This item was not ranked in this slot, because its sim failed.\nitem 29177, slot finger1: made-up sim error"
+        "detail": "This item was not ranked in this slot, because its sim failed.",
+        "error": "made-up sim error\nitem 29177, slot finger1"
       },
       {
         "field": "Bloodlust Brooch",
         "slot": "trinket1",
-        "detail": "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.\nitem 29383, slot trinket1: made-up meta gem rule"
+        "detail": "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.",
+        "error": "made-up meta gem rule\nitem 29383, slot trinket1"
       }
     ],
     "caps": {

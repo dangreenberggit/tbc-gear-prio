@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: live check of ticket 863 on dev 5413e971 (fork 74b9c3bc1), 2026-11-10, `.scratch/agent-reports/2026-11-10-live-863-865/` in the main checkout (gitignored)
 Serves: .scratch/plans/upgrades-tab-finish-line.md
@@ -79,3 +79,60 @@ error).
 The owner picks an option; the notes list shows it for every failure
 line, a fork test checks each kind of line, and, for options 2 and 3, a
 live or fixture render shows the error on screen.
+
+## Closing note
+
+Ruling, 2026-11-10, from the orchestrating session (not an owner quote):
+apply option 3, because only it meets both owner rules at once (the
+sim's own error shows; the tab's string is one plain sentence), and it
+is the rule the 868 status line already uses.
+
+Fixed on branch `fix/867-870-tab-errors`, fork commit `038876c98` 'Show a
+failed call's error under its line'. Paths under the fork's
+`ui/features/upgrades/`:
+
+- `Substitution` (`model/engine/disclosure.ts`) has an `error` field.
+  Every failure line in `model/engine/rank.ts` puts the tab's one
+  sentence in `detail` and the call's error in `error`
+  (`SkipReason`, `withError`; candidate, set bonus, set bonuses, break
+  split, set screen and worn-set lines). A candidate line's error ends
+  with "item <id>, slot <slot>" on its own line, for the console only.
+- `SubstitutionsList` shows the sentence, then, when the error is not
+  blank, the error's first line on a second line in the same cell
+  (`substitutionErrorText`, `utils/format.ts`). A cut error ends with
+  " (full text in the browser console)"; the run logs the whole line and
+  error to the console (`substitutionConsoleLines`).
+- The main repo's mock fixture `data/tab-fixtures/mock-dropped-list.json`
+  (from `packages/core/test/tab-fixtures/make-mock-fixtures.ts`) writes
+  its item lines the same way, so the layout gate renders the second
+  line.
+
+What a cell shows, by the state of the error (the live check's line as
+the example):
+
+- one-line error: "The Justicar Battlegear 2-piece set bonus was not
+  measured, because its sim failed." and under it "HTTP 500 from
+  /raidSimAsync: injected failure for the 863 live check". No console
+  note: the whole error is on screen.
+- long one-line error: the same, the error whole.
+- multi-line error (a Go panic): the sentence, and under it "sim error
+  (ErrorOutcome): runtime error: index out of range (full text in the
+  browser console)".
+- empty, blank or missing error: the sentence only, with no second line
+  and no note.
+- a failed candidate: "This item was not ranked in this slot, because its
+  sim failed." and under it "<error's first line> (full text in the
+  browser console)"; the console copy adds the item id and slot.
+
+Ticket 873's note is still true in each state: it shows only when text is
+cut, and the console then holds that text. It is needed only for a
+multi-line error and for candidate lines (the item id).
+
+Verified by: in the pair's fork (`vendor/tbc-new-fork`),
+`npx vitest run ui/features/upgrades/components/SubstitutionsList ui/features/upgrades/model/assumptions.test.ts`.
+With the fix's files put aside, 6 tests failed, among them the new
+"shows a failed call's error on a second line, in every state of the
+error"; with the fix, `npx vitest run ui/features/upgrades` passes 815
+of 815. In the main repo, `pnpm exec vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-meta-repair.test.ts`
+and the other fork suites pass (234 tests). Not checked on screen in a
+live run; the layout gate result is in the branch's agent report.

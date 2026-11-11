@@ -163,9 +163,10 @@ const screenFailedLine = {
   field: expect.stringMatching(/ set$/),
   detail: expect.stringMatching(
     new RegExp(
-      `^The .+ set was kept without the quick check that can skip it, because the check's sim failed\\.\n${MODEL_SIM_ERROR}$`
+      `^The .+ set was kept without the quick check that can skip it, because the check's sim failed\\.$`
     )
   ),
+  error: MODEL_SIM_ERROR,
 };
 
 /**
@@ -176,8 +177,11 @@ const wornSetFailedLine = {
   field: expect.stringMatching(/ set$/),
   detail: expect.stringMatching(
     new RegExp(
-      `^The value of the .+ set on your gear was not fully measured, because its sim failed\\.\n${MODEL_SIM_ERROR}(\n[\\s\\S]*)?$`
+      `^The value of the .+ set on your gear was not fully measured, because its sim failed\\.$`
     )
+  ),
+  error: expect.stringMatching(
+    new RegExp(`^${MODEL_SIM_ERROR}(\n[\\s\\S]*)?$`)
   ),
 };
 
@@ -186,9 +190,10 @@ const simFailedLine = (threshold: number, onSomeRows = false) => ({
   field: expect.stringMatching(new RegExp(` ${threshold}-piece set bonus$`)),
   detail: expect.stringMatching(
     new RegExp(
-      `^The .+ ${threshold}-piece set bonus was not measured${onSomeRows ? " on some rows, because their sim failed" : ", because its sim failed"}\\.\n${MODEL_SIM_ERROR}$`
+      `^The .+ ${threshold}-piece set bonus was not measured${onSomeRows ? " on some rows, because their sim failed" : ", because its sim failed"}\\.$`
     )
   ),
+  error: MODEL_SIM_ERROR,
 });
 
 /**
@@ -199,9 +204,10 @@ const breakSplitFailedLine = (threshold: number) => ({
   field: expect.stringMatching(new RegExp(` ${threshold}-piece set bonus$`)),
   detail: expect.stringMatching(
     new RegExp(
-      `^On some rows, the cost of breaking the .+ ${threshold}-piece set bonus was not measured apart from the pieces that break it, because their sim failed\\.\n${MODEL_SIM_ERROR}$`
+      `^On some rows, the cost of breaking the .+ ${threshold}-piece set bonus was not measured apart from the pieces that break it, because their sim failed\\.$`
     )
   ),
+  error: MODEL_SIM_ERROR,
 });
 
 /**
@@ -384,7 +390,12 @@ type Scenario = {
 type ForkRanking = {
   contentHash: string;
   complete?: boolean;
-  substitutions: Array<{ field: string; detail: string; slot?: string }>;
+  substitutions: Array<{
+    field: string;
+    detail: string;
+    slot?: string;
+    error?: string;
+  }>;
   assumptions: { seeds: number[]; iterations: number };
   items: Array<{
     itemId: number;
@@ -2020,7 +2031,8 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     expect(setSkipLines(r)).toContainEqual({
       field: "Malorne Harness set",
       detail:
-        "The Malorne Harness set bonuses were not all measured, because the sim could not list the set's bonuses.\nthe set-bonus read failed on purpose",
+        "The Malorne Harness set bonuses were not all measured, because the sim could not list the set's bonuses.",
+      error: "the set-bonus read failed on purpose",
     });
   });
 });
@@ -6191,7 +6203,8 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
         expect(setSkipLines(ranking)).toContainEqual({
           field: "Thunderheart Harness set",
           detail:
-            "The Thunderheart Harness set bonuses were not all measured, because the sim could not list the set's bonuses.\nthe set-bonus read failed on purpose",
+            "The Thunderheart Harness set bonuses were not all measured, because the sim could not list the set's bonuses.",
+          error: "the set-bonus read failed on purpose",
         });
       }
     } finally {
@@ -6233,9 +6246,9 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
       // Ticket 867: the repair's own error reaches the ranking's lines.
       expect(setSkipLines(ranking)).toContainEqual({
         field: "Malorne Harness set",
-        detail: expect.stringMatching(
-          /^The Malorne Harness set bonuses were not all measured, because no gem swap could turn your meta gem on\.\n\S/
-        ),
+        detail:
+          "The Malorne Harness set bonuses were not all measured, because no gem swap could turn your meta gem on.",
+        error: expect.stringMatching(/\S/),
       });
     } finally {
       warn.mockRestore();
@@ -6274,11 +6287,9 @@ describe.skipIf(!forkPresent)("set requests that cannot be built (869)", () => {
       expect(onSets.find((set) => set.setId === 676)?.kept).toBe(true);
       expect(setSkipLines(ranking)).toContainEqual({
         field: "Thunderheart Harness set",
-        detail: expect.stringMatching(
-          new RegExp(
-            `^The Thunderheart Harness set was kept without the quick check that can skip it, because the check's sim could not be built\\.\n${NO_ROW_ERROR}$`
-          )
-        ),
+        detail:
+          "The Thunderheart Harness set was kept without the quick check that can skip it, because the check's sim could not be built.",
+        error: expect.stringMatching(new RegExp(`^${NO_ROW_ERROR}$`)),
       });
     } finally {
       warn.mockRestore();
@@ -6291,11 +6302,9 @@ describe.skipIf(!forkPresent)("set requests that cannot be built (869)", () => {
       const { ranking } = await runScenario(noThunderheartRows);
       expect(setSkipLines(ranking)).toContainEqual({
         field: "Thunderheart Harness 2-piece set bonus",
-        detail: expect.stringMatching(
-          new RegExp(
-            `^The Thunderheart Harness 2-piece set bonus was not measured, because the sims that measure it could not be built\\.\n${NO_ROW_ERROR}$`
-          )
-        ),
+        detail:
+          "The Thunderheart Harness 2-piece set bonus was not measured, because the sims that measure it could not be built.",
+        error: expect.stringMatching(new RegExp(`^${NO_ROW_ERROR}$`)),
       });
     } finally {
       warn.mockRestore();
