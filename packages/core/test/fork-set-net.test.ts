@@ -374,6 +374,11 @@ type Scenario = {
   stopDuringSetBonusRead?: number;
   /** The fake's `activeSetBonuses` rejects for gear whose equipped ids match. */
   failSetBonusReadWhen?: (ids: readonly number[]) => boolean;
+  /**
+   * Gives each request a database with a row for every worn item except
+   * these, so a copy of one of them cannot be built (ticket 869).
+   */
+  databaseWithout?: readonly number[];
 };
 
 type ForkRanking = {
@@ -665,6 +670,18 @@ async function runScenario(scenario: Scenario): Promise<{
     ...(scenario.partnerRule ? { partnerRule: scenario.partnerRule } : {}),
     ...(scenario.setScreen ? { setScreen: scenario.setScreen } : {}),
     ...(controller ? { signal: controller.signal } : {}),
+    ...(scenario.databaseWithout
+      ? {
+          simDatabaseFor: (equipment: ReadonlyArray<{ id?: number }>) => ({
+            items: equipment
+              .filter(
+                (spec) =>
+                  spec.id && !scenario.databaseWithout!.includes(spec.id)
+              )
+              .map((spec) => ({ id: spec.id })),
+          }),
+        }
+      : {}),
   });
 
   return { ranking, runCount, calls, callOpts, requests, setBonusReadRuns };
@@ -6218,5 +6235,108 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
     } finally {
       warn.mockRestore();
     }
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * Ticket 869: a set-phase request that cannot be built gives a line that
+ * ends in the error that was caught.
+ * ------------------------------------------------------------------ */
+
+const NO_ROW_ERROR = String.raw`the request database has no row for item \d+`;
+const TH_IDS = Object.values(THUNDERHEART);
+
+describe.skipIf(!forkPresent)("set requests that cannot be built (869)", () => {
+  const noThunderheartRows: Scenario = {
+    worn: wornGear({}),
+    pool: TH_POOL,
+    measureBrokenSetValue: true,
+    databaseWithout: TH_IDS,
+  };
+
+  it("869-S: a set screen whose rung requests cannot be built keeps the set, and a line gives the error", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const { ranking } = await runScenario({
+        ...noThunderheartRows,
+        setScreen: "on",
+      });
+      const onSets = (
+        ranking.setScreen as unknown as {
+          sets: Array<{ setId: number; kept: boolean }>;
+        }
+      ).sets;
+      expect(onSets.find((set) => set.setId === 676)?.kept).toBe(true);
+      expect(setSkipLines(ranking)).toContainEqual({
+        field: "Thunderheart Harness set",
+        detail: expect.stringMatching(
+          new RegExp(
+            `^The Thunderheart Harness set was kept without the quick check that can skip it, because the check's sim could not be built\\.\n${NO_ROW_ERROR}$`
+          )
+        ),
+      });
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it("869-G: a same-gear gate whose requests cannot be built gives a line with the error", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const { ranking } = await runScenario(noThunderheartRows);
+      expect(setSkipLines(ranking)).toContainEqual({
+        field: "Thunderheart Harness 2-piece set bonus",
+        detail: expect.stringMatching(
+          new RegExp(
+            `^The Thunderheart Harness 2-piece set bonus was not measured, because the sims that measure it could not be built\\.\n${NO_ROW_ERROR}$`
+          )
+        ),
+      });
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it("869-U: the same-gear measure returns the error of a request it cannot build", async () => {
+    const copies = await importForkUpgrades<{
+      measureSameGearBonus: (
+        runSim: (
+          request: RaidSimRequest
+        ) => Promise<{ dps: number; se: number }>,
+        composedRequest: RaidSimRequest,
+        setPieceSlots: readonly number[],
+        lowerCount: number,
+        requestsFor?: (
+          copiesList: Array<{ setKept: number[]; setLess: number[] }>
+        ) => Promise<Array<RaidSimRequest | { buildError: string }>>
+      ) => Promise<unknown>;
+    }>("engine/set-less-copies.ts");
+    const runSim = () => Promise.resolve({ dps: 1, se: 0 });
+    // A database with no rows, so neither copy of the hands can be built.
+    const request = await composedRequest(
+      { hands: THUNDERHEART.hands, legs: THUNDERHEART.legs },
+      { items: [] }
+    );
+    expect(
+      await copies.measureSameGearBonus(
+        runSim,
+        request,
+        [HANDS_SLOT, LEGS_SLOT],
+        1
+      )
+    ).toEqual({
+      buildError: `the request database has no row for item ${THUNDERHEART.hands}`,
+    });
+    // With `requestsFor`, its failure for either request is returned as is.
+    expect(
+      await copies.measureSameGearBonus(
+        runSim,
+        request,
+        [HANDS_SLOT, LEGS_SLOT],
+        1,
+        () =>
+          Promise.resolve([request, { buildError: "the off request failed" }])
+      )
+    ).toEqual({ buildError: "the off request failed" });
   });
 });
