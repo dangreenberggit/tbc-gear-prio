@@ -469,4 +469,4 @@ file contention, worker prompt. This file stays the chronological log.
 - 869 A set-phase sim request that cannot be built (set screen, same-gear gate) shows no error (`docs/reviews/fix-621-863-865-tab.md` P2) 2026-11-10; CLOSED 2026-11-10, fix/867-870-tab-errors, versionGears carries the error to the screen and gate lines
 - 870 A failed worn-set ladder sim can list a break of a set bonus the set does not have, such as "Malorne Harness 3pc" (`docs/reviews/fix-621-863-865-tab.md` round 2, F1) 2026-11-10; CLOSED 2026-11-10, fix/867-870-tab-errors, the sim's bonus list decides
 - 871 When both a worn-set ladder sim and the sim's bonus list fail, a row can still list a break of a bonus the set does not have; owner's choice (ticket 870 fix) 2026-11-10
-- 872 Five more set-phase requests that cannot be built drop or misname their error: package sim, step gear, step break split, worn-1 pair, worn-set ladder (ticket 869 fix) 2026-11-10
+- 872 Six more set-phase requests that cannot be built drop or misname their error: package sim, step gear, step break split, worn-1 pair, worn-set ladder, worn-set bonus list (ticket 869 fix) 2026-11-10

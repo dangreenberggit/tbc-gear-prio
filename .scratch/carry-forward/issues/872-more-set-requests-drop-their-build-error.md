@@ -6,7 +6,7 @@ Blocks: none
 Blocked by: none
 Related: 869, 863
 
-# Five more set-phase requests that cannot be built drop or misname their error
+# Six more set-phase requests that cannot be built drop or misname their error
 
 ## What happens today
 
@@ -16,7 +16,7 @@ these is seen on screen or covered by a test.
 
 Ticket 869 made `versionGears` (`rank.ts`) return a `BuildFailure` with
 the caught error for each request it cannot build, and made the set
-screen and the same-gear and crossing gates show it. Five other places
+screen and the same-gear and crossing gates show it. Six other places
 still lose the error, or say a sim failed when none ran:
 
 1. The package's own sim (`rank.ts:2570`): with no request it throws
@@ -35,6 +35,11 @@ still lose the error, or say a sim failed when none ran:
    inside the sim's `try`, so a request that cannot be built gives "The
    value of the <set> set on your gear was not fully measured, because
    its sim failed." The error does show; "its sim failed" is false.
+6. The worn set's bonus list (`wornSetBonusCounts`, `rank.ts`, added by
+   ticket 870): `applySetLessCopies` runs inside the read's `try`, so a
+   set-less request that cannot be built gives "The <set> set bonuses
+   were not all measured, because the sim could not list the set's
+   bonuses." The error does show; no sim call failed.
 
 The owner, 2026-11-06, in ticket 852: "i dont know why we need to invent
 to new error, rather than just normally bubbling up whatever error we got
@@ -42,7 +47,7 @@ from existing sim code".
 
 ## Done when
 
-Each of the five adds a line that ends in the caught error and does not
+Each of the six adds a line that ends in the caught error and does not
 say a sim failed when none ran, and a fork-set-net case covers each one
 that a scenario can reach (`Scenario.databaseWithout` makes `applyCopies`
 throw).
