@@ -4039,6 +4039,11 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
       THUNDERHEART.chest,
     ]);
     expect(futureOf(oneHands, 2)?.stepGearDps).toBeCloseTo(260, 9);
+    // Every row's 2pc is measured on a partner set whose sim worked, so no
+    // line says the 2pc went unmeasured. The 3pc's same-gear gate sims wear
+    // the failing Gauntlets and Leggings with a copied Chestguard, so the 3pc
+    // line is true.
+    expect(setSkipLines(one.ranking)).toEqual([simFailedLine(3)]);
     // Both of the Gauntlets row's gears fail: the row keeps Z's choice, the
     // Chestguard, whose step sim fails again, so the row is unmeasured.
     const both = await runScenario({
@@ -4055,6 +4060,19 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
     expect(view.setCreditUnmeasured(bothHands.setContext)).toBe(true);
     // Ticket 863: the step sims' error reaches the player.
     expect(setSkipLines(both.ranking)).toContainEqual(simFailedLine(2, true));
+    // The every-combination rule finds no partner set when every sim fails,
+    // so the row is unmeasured and the line still names the bonus.
+    const every = await runScenario({
+      ...PC_SCENARIO,
+      partnerRule: "every-combination",
+      failWhen: (ids) =>
+        isGear(ids, [THUNDERHEART.hands, THUNDERHEART.legs]) ||
+        isGear(ids, [THUNDERHEART.chest, THUNDERHEART.hands]),
+    });
+    const everyHands = thRow(every.ranking, THUNDERHEART.hands);
+    expect(futureOf(everyHands, 2)?.pieces).toBeUndefined();
+    expect(futureOf(everyHands, 2)?.stepGearDps).toBeUndefined();
+    expect(setSkipLines(every.ranking)).toContainEqual(simFailedLine(2, true));
   });
 });
 
