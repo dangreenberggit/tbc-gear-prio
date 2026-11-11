@@ -49,7 +49,9 @@ fork's `ui/features/upgrades/`:
   `substitutionText`, the cut the notes list already uses. The status
   line reads "Ranking failed: <the error up to its first line break>…
   (full text in the browser console)". A one-line error shows as before,
-  with no suffix.
+  with no suffix. Ticket 873 (fork `e67eb2fd3`) later dropped the "…":
+  the line now reads "Ranking failed: <first line> (full text in the
+  browser console)", with a final full stop moved after the note.
 - `model/run_session.ts` logs the whole error with
   `console.error('[upgrades] the run failed', error)` when the current
   run fails, so the suffix is true.
