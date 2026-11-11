@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: ticket 621 check, 2026-11-10, reading the run-failure path in the fork
 Serves: .scratch/plans/upgrades-tab-finish-line.md
@@ -38,3 +38,26 @@ Cryptstalker, Beast Lord or Bold Armor set).
 A failed run's status line shows the sim's own error up to its first line
 break, the full text goes to the browser console, and a fork test covers
 a message with a stack trace.
+
+## Closing note
+
+Fixed 2026-11-10 on branch `fix/867-870-tab-errors`, fork commit
+`277fb1855` 'Show only a failed run's first error line'. Paths under the
+fork's `ui/features/upgrades/`:
+
+- `describeRunError` (`utils/format.ts`) now passes the error through
+  `substitutionText`, the cut the notes list already uses. The status
+  line reads "Ranking failed: <the error up to its first line break>…
+  (full text in the browser console)". A one-line error shows as before,
+  with no suffix.
+- `model/run_session.ts` logs the whole error with
+  `console.error('[upgrades] the run failed', error)` when the current
+  run fails, so the suffix is true.
+
+Verified by: in the pair's fork (`vendor/tbc-new-fork`),
+`npx vitest run ui/features/upgrades/utils/format.test.ts ui/features/upgrades/model/run_session.test.ts`.
+The new tests "shows a failure up to its first line break and says the
+rest is in the console (ticket 868)" and "sends a failed run's whole
+error to the console, as the status line shows only its first line
+(ticket 868)" failed before the fix (2 failed, 48 passed) and pass with
+it. Not checked on screen: no live tab run for this ticket.
