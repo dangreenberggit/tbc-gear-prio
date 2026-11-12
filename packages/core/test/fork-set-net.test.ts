@@ -6262,12 +6262,13 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
           )
         )
       ).toBe(true);
-      // Ticket 867: the repair's own error reaches the ranking's lines.
+      // Ticket 867: the repair's own error reaches the ranking's lines, after
+      // the sentence and not in `error`, which holds only a failed call's error.
       expect(setSkipLines(ranking)).toContainEqual({
         field: "Malorne Harness set",
-        detail:
-          "The Malorne Harness set bonuses were not all measured, because no gem swap could turn your meta gem on.",
-        error: expect.stringMatching(/\S/),
+        detail: expect.stringMatching(
+          /^The Malorne Harness set bonuses were not all measured, because no gem swap could turn your meta gem on\.\n\S/
+        ),
       });
     } finally {
       warn.mockRestore();

@@ -36,7 +36,7 @@ import {
 } from "../../src/slots-sim-order.generated.js";
 import type { Race } from "../../src/types.js";
 
-/** The fork's line, which keeps a failed call's error apart (ticket 874). */
+/** The fork's line, which keeps a failed call's own error apart (ticket 874). */
 type ForkSubstitution = Substitution & { error?: string };
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
@@ -943,9 +943,10 @@ class Builder {
 
   /**
    * Two 704 headings and ten item lines, every line's field and detail
-   * distinct (review R4). An item line carries its error apart from its
-   * sentence, as the fork writes it (ticket 874), so the page shows it on a
-   * second line.
+   * distinct (review R4). An item line is written as the fork's
+   * `candidateSkipSubstitution` writes it: the item id after the sentence,
+   * and a failed sim's error apart in `error`. The page shows the sentence
+   * only.
    */
   private droppedList(pairs: Pair[], chosen: Pair[]): ForkSubstitution[] {
     const rowIds = new Set(chosen.map((p) => p.itemId));
@@ -967,14 +968,23 @@ class Builder {
       if (rowIds.has(p.itemId) || seenIds.has(p.itemId)) continue;
       seenIds.add(p.itemId);
       const sim = lines.length % 2 === 0;
-      lines.push({
+      const where = `item ${p.itemId}, slot ${p.simSlot}`;
+      const line = {
         field: shortName(this.item(p.itemId).name),
         slot: p.simSlot,
-        detail: sim
-          ? "This item was not ranked in this slot, because its sim failed."
-          : "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.",
-        error: `${sim ? "made-up sim error" : "made-up meta gem rule"}\nitem ${p.itemId}, slot ${p.simSlot}`,
-      });
+      };
+      lines.push(
+        sim
+          ? {
+              ...line,
+              detail: `This item was not ranked in this slot, because its sim failed.\n${where}`,
+              error: "made-up sim error",
+            }
+          : {
+              ...line,
+              detail: `This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.\n${where}: made-up meta gem rule`,
+            }
+      );
     }
     return lines;
   }

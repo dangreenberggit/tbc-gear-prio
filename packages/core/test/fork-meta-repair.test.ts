@@ -2175,12 +2175,14 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
         warn.mockRestore();
       }
       expect(run.ranking.complete).toBe(true);
+      // A gem repair that fails is no failed call, so its rule follows the
+      // sentence for the console and `error` stays unset: the run's error
+      // toast shows only a failed call's error.
       expect(run.ranking.substitutions).toContainEqual({
         field: "Burning Rage 2-piece set bonus",
         detail:
           "The Burning Rage 2-piece set bonus was not measured, because no " +
-          "gem swap could turn your meta gem on.",
-        error: "meta repair exceeded step budget",
+          "gem swap could turn your meta gem on.\nmeta repair exceeded step budget",
       });
       expect(
         run.ranking.substitutions.map((s) => s.detail).join("\n")
@@ -2641,9 +2643,11 @@ describe.skipIf(!forkPresent)(
         {
           field: "item 30907",
           slot: "chest",
+          // `error` is the call's own error, word for word, so the run's
+          // error toast can show it; the item id is for the console only.
           detail:
-            "This item was not ranked in this slot, because its sim failed.",
-          error: "worker died\nitem 30907, slot chest",
+            "This item was not ranked in this slot, because its sim failed.\nitem 30907, slot chest",
+          error: "worker died",
         },
       ]);
       expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
@@ -2725,8 +2729,8 @@ describe.skipIf(!forkPresent)(
           field: "item 30907",
           slot: "chest",
           detail:
-            "This item was not ranked in this slot, because its sim failed.",
-          error: "hit percent read as NaN\nitem 30907, slot chest",
+            "This item was not ranked in this slot, because its sim failed.\nitem 30907, slot chest",
+          error: "hit percent read as NaN",
         },
       ]);
     });
