@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-452-spec-page-scans.md (round 1, finding D2)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -49,3 +49,23 @@ the block is dead data: the fixture loader
 (`ui/features/upgrades/utils/fixture.ts` in the fork) reads only
 `ranking.items` and ignores it. Found by the branch's pre-merge review,
 `docs/reviews/fix-521-delete-hit-readout.md` (finding A1 / P1).
+
+### 2026-11-11: closed, the `caps` block is gone
+
+Branch `fix/842-regen` drops the `caps` type and value from
+`packages/core/test/tab-fixtures/make-mock-fixtures.ts` and regenerates
+the 11 `data/tab-fixtures/mock-*.json` files with `pnpm tab-fixtures:mock`.
+Each fixture is the same as before apart from the removed `ranking.caps`
+(each file compared with `dev`'s copy minus that key), and two generator
+runs wrote the same bytes. The generator's types comment now names the
+fork types it copies (`RankedItem`, `SetContext`, `Ranking` in `rank.ts`,
+and `durationMs` from `run.ts`), so it no longer covers a field the tab
+does not read. Nothing in this repo or the fork at `tbc-new-fork@a98a7a6fc`
+reads `caps` from these fixtures. The six real recordings in
+`packages/core/test/fixtures/tab-recordings/` still have a `caps` block; the
+fork loader ignores it, and this ticket covers only the made-up fixtures.
+
+Verified by: `pnpm tab-fixtures:check` prints
+`mock fixtures: 11 files match the generator` at `tbc-gear-prio@9160a582`,
+and `git grep -c '"caps"' -- data/tab-fixtures` finds nothing. The review
+is `docs/reviews/fix-842-regen.md`.
