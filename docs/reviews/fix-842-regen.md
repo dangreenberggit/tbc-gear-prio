@@ -88,6 +88,8 @@ run before and after.
 | Check can fail | same, with `dev`'s `mock-balance.json` put back | `mock-balance.json differs from the generator`, rc=1                                                     |
 | No `caps` left | `git grep -c '"caps"' -- data/tab-fixtures`     | no output, rc=1                                                                                          |
 | Verify         | `pnpm -C <pair> verify` at `295dee93`           | v22.23.2, rc=0; `gates: 1649 ran, 0 skipped`; layout gate skipped (the pair's fork has no built `dist/`) |
+| Verify at head | `pnpm -C <pair> verify` at `43f515b7`           | v22.23.2, rc=0; `gates: 1649 ran, 0 skipped`; layout gate skipped (same reason)                          |
+| Merge check    | `pnpm -C <pair> merge-ready` at `43f515b7`      | v22.23.2, rc=0; 2 of 2 Disposition rows parsed; `merge-ready: ok (this checkout's copy and dev's copy)`  |
 
 ## Notes
 
@@ -97,6 +99,9 @@ run before and after.
   comment. Outside ticket 842, which covers the made-up fixtures.
 - At `1474faf7` alone, `tab-fixtures:check` fails: the generator changed
   and the fixtures had not been regenerated yet. Only matters for bisect.
+- `merge-ready` warns that open ticket 841 names `make-mock-fixtures.ts`.
+  841 is about a `known-traps.md` sentence on the fixtures' made-up
+  `durationMs` ("Took 60.0s"), which this branch does not touch.
 
 ## Disposition
 
