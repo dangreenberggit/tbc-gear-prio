@@ -184,25 +184,6 @@
         "detail": "This item was not ranked in this slot, because no gem swap could turn your meta gem on with it equipped.\nitem 29383, slot trinket1: made-up meta gem rule"
       }
     ],
-    "caps": {
-      "hit": {
-        "rating": 83.31,
-        "capRating": 141.92,
-        "gap": 58.61,
-        "capUncertainty": 15.77,
-        "assumedRace": "RaceBloodElf",
-        "talentHitAssumed": {
-          "talent": "Precision",
-          "points": 3,
-          "maxPoints": 3
-        }
-      },
-      "expertise": {
-        "rating": 95,
-        "capRating": null,
-        "gap": null
-      }
-    },
     "items": [
       {
         "rank": 1,
