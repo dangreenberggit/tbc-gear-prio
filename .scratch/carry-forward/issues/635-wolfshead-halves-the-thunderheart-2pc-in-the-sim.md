@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 follow-on (Out-of-scope)
 Type: research
 Origin: gate-sme finding F2, stage-gate tab-set-bonus K2 (.scratch/handoffs/sme-rank-judgment-467-worn-thunderheart-sweep.md, committed 93ad75b5)
@@ -56,3 +56,66 @@ and `:268-272` run a Mangle step gated on `mangleCost == 35` that the code
 comment calls relevant for no-Wolfshead rotations (fork `f4b78f65d`). That
 these lines explain the halved 2pc value is a hypothesis, untested; they
 are where close condition 1's check starts.
+
+## Closed 2026-11-12: research done, the sim is right
+
+The sim still prices the Thunderheart 2pc at about half while Wolfshead
+Helm is worn. That is upstream wowsims' deliberate rotation choice, not a
+tab bug, and no wowsims ticket follows: both item effects work as their
+tooltips say, and the cat rotation picks the stronger line for each helm.
+Full triage: `.scratch/agent-reports/2026-11-12-general-task-635-triage.md`
+(gitignored; this note stands without it).
+
+**The measurement** (fork `bf9c26a00`, 100,000 iterations, seed 635). Base:
+the feral `p2_6p` preset (phase 3's previous phase) with hands and legs
+swapped to Thunderheart Gauntlets 31034 and Leggings 31044; buffs, target,
+talents and the 180 s fight are the feral page defaults. Each variant has the
+same stats: "2pc off" empties the hands slot and adds the Gauntlets' stats as
+bonus stats; "Wolfshead off" empties the head slot and adds the stats of Wolfshead and
+its head enchant, Glyph of Ferocity. So only the set bonus and the helm's effect (with the
+rotation's checks for it) differ. Each run's SE is 0.23 to 0.26.
+
+| Rotation | Wolfshead effect | 2pc on | 2pc off | 2pc worth |
+|---|---|---|---|---|
+| Default APL (the page's "Auto") | on | 2416.4 | 2336.0 | 80.5 ± 0.4 |
+| Default APL | off | 2169.4 | 2019.3 | 150.0 ± 0.4 |
+| Simple rotation | on | 2332.7 | 2283.0 | 49.8 ± 0.3 |
+| Simple rotation | off | 2135.4 | 1980.8 | 154.6 ± 0.3 |
+
+Flipping only the default APL's "Wait To Mangle" branch, 2pc on: without
+Wolfshead, 2169.4 as shipped against 2124.4 on the Wolfshead line; with
+Wolfshead, 2416.4 as shipped against 2387.5 on the no-Wolfshead line. So the
+shipped line is the higher-DPS one for each helm. Part of the gap remains on
+a fixed line (105.1 against 80.5), from the helm's extra energy alone.
+
+**Why.** Wolfshead gives +20 energy per shift into Cat
+(`sim/druid/items.go:214-229`); the 2pc cuts Mangle (Cat) by 5 energy
+(`sim/druid/item_sets.go:226-234`). Neither reads the other. They meet in
+the rotation: the APL's "Wait To Mangle"
+(`ui/specs/druid/feralcat/apls/default.apl.json:54`: Mangle Next, or Mangle
+cost ≤ 38 and no Wolfshead aura 17768) and the simple rotation's
+`waitToMangle` (`sim/druid/feralcat/rotation.go:189`) and two-Mangles trick
+(`:266-272`, "relevant for no-Wolfshead rotations"). The rotation is ported
+from NerdEgghead's TBC_cat_sim (`rotation.go:11`), whose author explains the
+choice at `tbc_cat_sim.py:1297-1310` (commit 59cc8576): without Wolfshead,
+Mangle beats Shred as the second special when a bonus like 2pT6 brings
+Mangle to 38 energy or below. These files are upstream's: `git diff --stat
+upstream/master HEAD -- sim/druid ui/specs/druid/feralcat/apls` in the fork
+prints nothing (2026-11-12). The tab simulates the page's own raid proto,
+rotation included, and no tab code reads Wolfshead to price anything. Game
+truth is unverified: the effect texts are tooltip copies, and the rotation
+preference is the reference sim author's theorycraft.
+
+**Re-run.** Build the CLI in the fork with
+`GOFLAGS=-buildvcs=false go build -tags=with_db -o <dir>/wowsimcli ./cmd/wowsimcli`
+(without `with_db` it fails on item 8345), build the four stat-matched
+requests above from the feral page's `p2_6p` request for each rotation, and
+run `wowsimcli sim --infile <req> --outfile <out>` on each at 100,000
+iterations. The scripts that did this (`make_requests.py`, `summarize.py`,
+`make_attribution.py`) are in the gitignored
+`.scratch/agent-reports/2026-11-12-635-triage/` of the main checkout.
+
+Verified by: `tbc-new-fork@bf9c26a00` (`sim/druid/feralcat/rotation.go:52,189,266-272`,
+`ui/specs/druid/feralcat/apls/default.apl.json:54`, `sim/druid/items.go:214-229`,
+`sim/druid/item_sets.go:226-234`, read 2026-11-12), and the runs in the table
+above.
