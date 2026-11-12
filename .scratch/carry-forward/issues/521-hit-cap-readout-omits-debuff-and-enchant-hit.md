@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: stage-gate 511-512-set-credit diagnosis, 2026-09-28 (`.scratch/stage-gate/511-512-set-credit/decision-log.md` 2026-09-28 entries, and `diag/report.md` in the same directory; both gitignored)
 Blocks: none
@@ -75,3 +75,31 @@ from the request's `raid.debuffs` and withholds the budget unless every
 target is level 73. The readout (`capStateFrom`) can reuse them. Ticket
 535's test 535-L0 checks `gearHitRating` against the sim's gear hit (52 on
 ret-p3-p2). This ticket stays open.
+
+## Comment 2026-11-11: closed by deleting the readout
+
+The tab's readout is deleted, not fixed. No Upgrades tab screen showed
+`Ranking.caps`, `hitDriven`, `hitRegression` or `hitCapBanner`, so a
+correct figure had nowhere to appear. The orchestrator put "Delete it (my
+recommendation): drop the side calculation and close 521" to the owner,
+who answered "Sure delete".
+
+Fork commit `d16a74959` on `fix/521-delete-hit-readout` deletes
+`capStateFrom`, `Ranking.caps`, the `hitDriven` and `hitRegression` row
+flags, `hitCapBanner` and the cap profiles' `talentHit`. It keeps
+`gearHitRating`, `hitCapBudgetFrom`, `targetsAtCapLevel` and the hit-cap
+notes, which the gem repair uses. The ranking is unchanged apart from the
+removed fields: the E-W3 parity harness's fork ranking and composed sim
+requests were dumped before and after the change and compared equal once
+`caps`, `hitDriven` and `hitRegression` were taken out of the "before"
+dump.
+
+Core's copy (`packages/core/src/caps.ts`) keeps its readout and the same
+omission. It is outside this ticket: the owner limited this work to the
+fork's Upgrades tab.
+
+Verified by: `tbc-new-fork@d16a74959`, and in the pair's fork
+(`vendor/tbc-new-fork`)
+`git grep -nE 'capStateFrom|hitDriven|hitRegression|hitCapBanner|talentHit\b' -- ui/`
+prints only the `caps.ts` and `disclosure.ts` header comments that record
+the deletion.

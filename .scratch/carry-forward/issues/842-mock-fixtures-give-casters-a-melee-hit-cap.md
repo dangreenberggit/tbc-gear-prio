@@ -31,3 +31,21 @@ Each fixture's `caps` block fits its spec (a spell hit cap with no
 expertise for the caster fixtures), made by the generator and checked
 by `pnpm tab-fixtures:check`; or the block is dropped from the fixtures
 if the tab still reads no `caps` field.
+
+## Comments
+
+### 2026-11-11: the fork no longer has a `caps` field
+
+Ticket 521's branch (`fix/521-delete-hit-readout`) deleted the fork tab's
+hit-cap readout: `Ranking.caps`, `capStateFrom` and `hitCapBanner` are
+gone from the fork (`tbc-new-fork@d16a74959`). So "What happens today"
+above is out of date: there is no `hitCapBanner` at `disclosure.ts:68`,
+and the tab has no `caps` field to show. Only the second way to close
+this ticket is left: drop the `caps` block from
+`packages/core/test/tab-fixtures/make-mock-fixtures.ts` (and its
+`MockRanking` comment, which still calls `caps` a field the tab reads),
+then regenerate the 11 `data/tab-fixtures/mock-*.json` files. Until then
+the block is dead data: the fixture loader
+(`ui/features/upgrades/utils/fixture.ts` in the fork) reads only
+`ranking.items` and ignores it. Found by the branch's pre-merge review,
+`docs/reviews/fix-521-delete-hit-readout.md` (finding A1 / P1).
