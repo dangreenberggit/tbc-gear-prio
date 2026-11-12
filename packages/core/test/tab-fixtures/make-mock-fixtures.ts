@@ -47,8 +47,8 @@ const GENERATOR = "packages/core/test/tab-fixtures/make-mock-fixtures.ts";
 // Local types for the fork-only fields the tab reads. packages/core's
 // `Ranking` cannot express them, and the fork's own type cannot be imported
 // here (CI has no fork). Source: the fork's
-// `ui/features/upgrades/model/engine/rank.ts:303-343,604-675`; precedent:
-// `packages/core/test/feral-rank-fixture.ts:60-85`.
+// `ui/features/upgrades/model/engine/rank.ts:316-352,615-685` at a98a7a6fc;
+// precedent: `packages/core/test/feral-rank-fixture.ts:60-85`.
 type MockSource =
   | { kind: "raid"; zone: string; boss?: string }
   | { kind: "crafted"; profession: string }
@@ -121,17 +121,6 @@ type MockRanking = {
   baseline: { dps: number; stdev: number; metaAdjusted: boolean };
   assumptions: Assumptions;
   substitutions: Substitution[];
-  caps: {
-    hit: {
-      rating: number;
-      capRating: number;
-      gap: number;
-      capUncertainty: number;
-      assumedRace: Race;
-      talentHitAssumed: { talent: string; points: number; maxPoints: number };
-    };
-    expertise: { rating: number; capRating: null; gap: null };
-  };
   items: MockRow[];
   complete: true;
   durationMs: number;
@@ -668,17 +657,6 @@ class Builder {
           standing: [],
         },
         substitutions: spec.droppedList ? this.droppedList(pairs, chosen) : [],
-        caps: {
-          hit: {
-            rating: 83.31,
-            capRating: 141.92,
-            gap: 58.61,
-            capUncertainty: 15.77,
-            assumedRace: spec.race,
-            talentHitAssumed: { talent: "Precision", points: 3, maxPoints: 3 },
-          },
-          expertise: { rating: 95, capRating: null, gap: null },
-        },
         items: rows,
         complete: true,
         durationMs: 60000,
