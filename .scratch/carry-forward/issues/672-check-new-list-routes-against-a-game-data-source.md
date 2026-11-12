@@ -62,24 +62,40 @@ Game data is Wowhead's TBC Classic pages, fetched 2026-11-12.
 2. **The 5 rejected helms: fixed.** Yrma also sells 34400 for 34345, 34401
    for 34243, 34402 for 34332, 34403 for 34245 and 34404 for 34244, each
    plus one Sunmote. The bases are ilvl 164 Kil'jaeden drops and the helms
-   ilvl 159, so the trade swaps a helm for another class's helm; it does
-   not raise the item level. Ticket 612's item-level rule was wrong and is
-   gone from `scripts/assemble_universe.py` (`sunmote_upgrade_pairs`) and
-   `scripts/check_pool_completeness.py` (`_sunmote_upgrades`).
-   `tier-exchange.json` has 28 Sunmote rows (was 23), 25 p5 entries in 8
-   specs go from `unknown` to `Sunmote + <helm>`, and the tab shows that
-   source at Kil'jaeden where it showed "Source not recorded" (fork
-   `b7231a0c4`, test `item_sources.test.ts` for 34401).
-3. **Ogri'la rewards in p2 lists: no change.** The CLI's p2 is right:
-   Warcraft Wiki's Anniversary timeline puts Ogri'la in phase 2
+   ilvl 159, so the trade swaps a helm for a different helm of the same
+   armour type; it does not raise the item level. Ticket 612's item-level
+   rule was wrong and is gone from `scripts/assemble_universe.py`
+   (`sunmote_upgrade_pairs`) and `scripts/check_pool_completeness.py`
+   (`_sunmote_upgrades`). `tier-exchange.json` has 28 Sunmote rows (was
+   23), and 25 p5 entries in 8 specs go from `unknown` to the token source
+   `Sunmote + <Kil'jaeden helm>` (fork `b7231a0c4`, test
+   `item_sources.test.ts` for 34401). The tab's Source cell for the five
+   helms reads "Sunwell Plateau (N) · Kil'jaeden" where it read "Source not
+   recorded": the cell names a token's zone and boss, not the token (fork
+   `format.test.ts`, "names a tier token's zone, difficulty and boss, as a
+   drop row does, and not the token"), as it already did for 34405 and
+   34406.
+3. **Ogri'la rewards in p2 lists: no change.** The CLI's p2 is right: the
+   Wowhead pages of the four epic rewards the p2 lists hold (`tbc/item=`
+   32645, 32647, 32648, 32651, each sold at Exalted) say "Added in content
+   phase 2". Warcraft Wiki's Anniversary timeline also lists "Phase 2
+   (Overlords of Outland) - The Eye, Serpentshrine Cavern, Ogri'la,
+   Sha'tari Skyguard"
    (`https://warcraft.wiki.gg/wiki/World_of_Warcraft:_Burning_Crusade_Classic_Anniversary_Edition`,
-   seen through a search result, page not opened). The tab offers them
-   from db.json's phase 1; that is wowsims' own fact, kept as ticket 641
-   was (ADR-0038, "match wowsims").
-4. **Band of Eternity in p2 lists: right.** `tbc/item=29298` is the reward
-   of quest 10462 Champion's Pledge (Scale of the Sands); the Hyjal
-   attunement `tbc/quest=10445` needs Vashj's and Kael's Vial Remnants,
-   phase-2 bosses. No change.
+   seen through a search result; the site answers a fetch with 403). The
+   tab offers them from db.json's phase 1; that is wowsims' own fact, kept
+   as ticket 641 was (ADR-0038, "match wowsims").
+4. **Band of Eternity in p2 lists: no change; the sources disagree.**
+   `tbc/item=29298` is the reward of quest 10462 Champion's Pledge and
+   `tbc/item=29302` of quest 10463 Sage's Pledge (Scale of the Sands, 250
+   reputation each); both quest pages say "Added in patch 2.5.2 "Overlords
+   of Outland"", the phase-2 patch. `tbc/quest=10445` The Vials of
+   Eternity needs Vashj's and Kael's Vial Remnants, phase-2 bosses, and
+   gives 3,000 Scale of the Sands reputation. Against p2: both ring pages
+   say "Added in content phase 3". That 10445 opens the rings is said only
+   in user comments on quest 10462 (2008-04-30 and later), not by either
+   quest page. db.json says phase 2, and the tab follows it (as 641); the
+   CLI lists keep p2, which only the CLI shows.
 
 Token class groups: the "Classes:" line on `tbc/item=` 29759 Hero (Hunter,
 Mage, Warlock), 29760 Champion (Paladin, Rogue, Shaman), 29761 Defender

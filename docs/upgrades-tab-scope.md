@@ -438,7 +438,8 @@ The placements a reviewer should scrutinize first:
     wowsims fix, not part of the tab.
 15. **672 closed on 2026-11-12 on `fix/672-sunmote-helms`, so it has no
     row.** Of its four questions, only the five rejected Sunmote helms needed
-    a change: Yrma sells them, so they now show "Sunmote + <helm>" at
-    Kil'jaeden (fork `b7231a0c4`). The two Kil'jaeden Sunmote pairs and
-    Band of Eternity's phase match Wowhead. Ogri'la's phase follows
-    wowsims, as 641 does.
+    a change: Yrma sells them, so their Source cell now reads "Sunwell
+    Plateau (N) · Kil'jaeden" where it read "Source not recorded" (fork
+    `b7231a0c4`). The two Kil'jaeden Sunmote pairs match Wowhead. The tab
+    takes Ogri'la's and Band of Eternity's phases from wowsims, as 641
+    does.
