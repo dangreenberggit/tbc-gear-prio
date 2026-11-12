@@ -6507,8 +6507,11 @@
       "phase": 5,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "curated"
+          "kind": "token",
+          "zone": "Sunwell Plateau",
+          "token": "Sunmote + Cover of Ursol the Wise",
+          "boss": "Kil'jaeden",
+          "origin": "sunmote"
         }
       ],
       "curationHint": 128.18,
@@ -7287,8 +7290,11 @@
       "phase": 5,
       "sources": [
         {
-          "kind": "unknown",
-          "origin": "db"
+          "kind": "token",
+          "zone": "Sunwell Plateau",
+          "token": "Sunmote + Duplicitous Guise",
+          "boss": "Kil'jaeden",
+          "origin": "sunmote"
         }
       ],
       "curationHint": 11.8

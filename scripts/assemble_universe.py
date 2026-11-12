@@ -1423,11 +1423,12 @@ def sunmote_upgrade_pairs(
 ) -> list[dict]:
     """The `sunmote-pairs.json` pairs that are Sunmote upgrades.
 
-    AtlasLoot comments the Sunmote result under its base row; the head rows
-    that invert the item level are not upgrades (ticket 612). A pair is kept
-    when both items are in db.json, share a slot, are both phase 5, and the
-    upgrade's item level is not below the base's. Most kept pairs have equal
-    item levels (159 -> 159), so the rule rejects only an inversion.
+    AtlasLoot comments the Sunmote result under its base row. A pair is kept
+    when both items are in db.json, share a slot and are both phase 5. Item
+    level is not a test: Yrma on the Isle of Quel'Danas sells all 28 AtlasLoot
+    pairs for base item + 1 Sunmote, including the five Kil'jaeden helms that
+    trade an item level 164 helm for a 159 one (Wowhead tbc/npc=25977; ticket
+    672 removed the item-level rule ticket 612 added).
     """
     kept: list[dict] = []
     pairs = sunmote_pairs.get("pairs") if isinstance(sunmote_pairs, dict) else None
@@ -1441,8 +1442,6 @@ def sunmote_upgrade_pairs(
             reason = "different slot"
         elif base.get("phase") != 5 or upgrade.get("phase") != 5:
             reason = "not phase 5"
-        elif (item_ilvl(upgrade) or 0) < (item_ilvl(base) or 0):
-            reason = f"ilvl {item_ilvl(base)} -> {item_ilvl(upgrade)}"
         if reason is None:
             kept.append({"baseId": int(pair["baseId"]), "upgradeId": int(pair["upgradeId"])})
         elif report:
