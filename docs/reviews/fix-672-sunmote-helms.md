@@ -232,6 +232,11 @@ through a search result. No second round ran.
   and 623 branches, and judgment call 15 in `docs/upgrades-tab-scope.md` may
   take the same number as 623's; the second branch to land renumbers (plan
   decision log).
+- **N6:** `pnpm merge-ready` (rc 0, both copies) lists six open tickets that
+  name a file this branch changed: 173, 300, 524, 621, 673 and 725. Each
+  names `scripts/assemble_universe.py`, `scripts/check_pool_completeness.py`
+  or a `data/` file for another reason; none is about Sunmote pairs or the
+  helms' source, so none is touched here.
 - **Modes:** the change touches no state machine. The states the helms show
   in are listed above.
 - Nothing on the branch goes beyond what ticket 672 asked for.
