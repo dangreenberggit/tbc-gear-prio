@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/fix-621-863-865-tab.md (round 1, row P2)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -41,3 +41,45 @@ from the sim, so whether that rule covers them is a reading, not a ruling.
 A set-phase request that cannot be built adds a line that ends in the
 error that was caught, or the ticket records the owner's ruling that it
 need not, and a fork test covers each of the two places.
+
+## Closing note
+
+Fixed 2026-11-10 on branch `fix/867-870-tab-errors`, fork commit
+`0f286ebc3` 'Show the error when a set sim cannot be built'. Paths under
+the fork's `ui/features/upgrades/model/engine/`.
+
+In the tab every set-phase request comes from `versionGears`
+(`rank.ts`), and that is where the errors were dropped: its catches of
+`composeFor` and `applyCopies`, and a failed gem repair, each gave an
+undefined entry. Each now gives a `BuildFailure` (`set-less-copies.ts`)
+that carries the caught error. The two places this ticket names:
+
+- The set screen (`set-screen.ts`, `rungSimmer`): a rung whose request
+  cannot be built, from `requestsFor` or from `applyCopies`, calls
+  `onRequestNotBuilt`, and the ranking adds "The <set> set was kept
+  without the quick check that can skip it, because the check's sim
+  could not be built." with the error on the next line.
+- The same-gear gate (`measureSameGearBonus`): it returns the
+  `BuildFailure`, and the line now reads "The <set> <n>-piece set bonus
+  was not measured, because the sims that measure it could not be
+  built." with the error on the next line. The crossing gate uses the
+  same function and adds the same line; before, it added none.
+
+The page shows the first line; the error is in the browser console, as
+for the other set-phase lines. The decision the ticket left open (whether
+the owner's 2026-11-06 rule covers errors from the tab's own request
+building) was not needed: the fix shows the caught error, which is what
+that rule asks for sims.
+
+Other places that get a build failure still give no line or a wrong
+one: ticket 872.
+
+Verified by: in the pair,
+`pnpm exec vitest run packages/core/test/fork-set-net.test.ts -t "869-"`.
+869-S (set screen, `setScreen: "on"`), 869-G (same-gear gate) and 869-U
+(`measureSameGearBonus` directly, with and without `requestsFor`) failed
+before the fix (3 failed: the gate's line had no error, the screen added
+no line, the function returned undefined) and pass with it. The whole
+file passes (111 tests). The integration cases make `applyCopies` throw
+with a scenario database that has no Thunderheart rows
+(`Scenario.databaseWithout`).

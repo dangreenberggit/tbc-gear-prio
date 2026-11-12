@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/fix-621-863-865-tab.md (round 2, row F1)
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -57,3 +57,35 @@ whether the 3pc break shows.
 
 A fork-set-net case with a failed ladder rung shows breaks only at counts
 where the set has a bonus, and it failed before the fix.
+
+## Closing note
+
+Fixed 2026-11-10 on branch `fix/867-870-tab-errors`, fork commit
+`64ad50972` 'List a failed ladder count only if it has a bonus'.
+
+The bug was real in the model run: case 870-A (worn Malorne 4, rung 3
+fails, a Thunderheart pair takes Malorne to 2) listed Malorne breaks at
+2, 3 and 4 before the fix (`expected [ 2, 3, 4 ] to deeply equal [ 2, 4 ]`).
+The case reads the breaks from `brokenSetValues` and each row's
+`singleBreaks`, `commitBreaks` and `futureBonuses[].breaks`; not
+checked on screen.
+
+The direct signal is the sim's own list of active set bonuses
+(`SimRunner.activeSetBonuses`, ticket 644). In the fork's
+`model/engine/rank.ts`, when a worn set has an unmeasured ladder count,
+`wornSetBonusCounts` reads that list on the worn gear and on the worn
+gear with the set's pieces sent set-less; the bonuses that go are the
+set's, with their counts. An unmeasured count is counted as a break only
+when that list has a bonus at it. No set name is matched.
+
+When that list cannot be read, the count is counted as before, and a
+line gives the read's error: "The <set> set bonuses were not all
+measured, because the sim could not list the set's bonuses." (case
+870-B). In that state a break at a count with no bonus can still be
+listed: ticket 871. (Ticket 871, fork `4794a28d7`, later changed this
+state: no failed count is counted, and 870-B now pins that.)
+
+Verified by: in the pair,
+`pnpm exec vitest run packages/core/test/fork-set-net.test.ts -t "870-"`.
+870-A and 870-B failed before the fix and pass with it; the whole file
+passes (108 tests).

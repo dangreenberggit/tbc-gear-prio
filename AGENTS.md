@@ -30,6 +30,12 @@ paths: an `@` import loads at start and would undo the saving.
   `docs/agents/model-policy.md` § GLM worker types.
 - **Judging a ranking, shortlist or pool output:** the `sme-rank-review`
   skill; its audience is the engineering team, not players.
+- **Deciding how the Upgrades tab looks or behaves:** start from what
+  wowsims already does (`upstream/master` in `vendor/tbc-new-fork` has no
+  Upgrades tab, so everything there is wowsims' own). Reuse its pieces
+  and patterns where they fit, and cite the file:line you followed. Build
+  something new only where nothing in wowsims fits, and say in the brief,
+  plan or commit that it is new and why.
 - **A plan, a ticket, a skill, an agent definition, `AGENTS.md`,
   `CLAUDE.md`, or a doc an agent is pointed at:** a second pass against
   the `writing-for-agents` skill. A change to `AGENTS.md`, `CLAUDE.md`, a

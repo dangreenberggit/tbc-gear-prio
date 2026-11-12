@@ -151,6 +151,9 @@ function equippedIds(req: RaidSimRequest): number[] {
  */
 const COPY_OFFSET = 1_000_000;
 
+/** The error a compose that `composeFailsWhen` matches throws (ticket 872). */
+const MODEL_COMPOSE_ERROR = "the model compose failed on purpose";
+
 /** The error every failed sim of `failWhen` gives (`runScenario`). */
 const MODEL_SIM_ERROR = "the model sim failed on purpose";
 
@@ -163,9 +166,10 @@ const screenFailedLine = {
   field: expect.stringMatching(/ set$/),
   detail: expect.stringMatching(
     new RegExp(
-      `^The .+ set was kept without the quick check that can skip it, because the check's sim failed\\.\n${MODEL_SIM_ERROR}$`
+      `^The .+ set was kept without the quick check that can skip it, because the check's sim failed\\.$`
     )
   ),
+  error: MODEL_SIM_ERROR,
 };
 
 /**
@@ -176,8 +180,11 @@ const wornSetFailedLine = {
   field: expect.stringMatching(/ set$/),
   detail: expect.stringMatching(
     new RegExp(
-      `^The value of the .+ set on your gear was not fully measured, because its sim failed\\.\n${MODEL_SIM_ERROR}(\n[\\s\\S]*)?$`
+      `^The value of the .+ set on your gear was not fully measured, because its sim failed\\.$`
     )
+  ),
+  error: expect.stringMatching(
+    new RegExp(`^${MODEL_SIM_ERROR}(\n[\\s\\S]*)?$`)
   ),
 };
 
@@ -186,9 +193,10 @@ const simFailedLine = (threshold: number, onSomeRows = false) => ({
   field: expect.stringMatching(new RegExp(` ${threshold}-piece set bonus$`)),
   detail: expect.stringMatching(
     new RegExp(
-      `^The .+ ${threshold}-piece set bonus was not measured${onSomeRows ? " on some rows, because their sim failed" : ", because its sim failed"}\\.\n${MODEL_SIM_ERROR}$`
+      `^The .+ ${threshold}-piece set bonus was not measured${onSomeRows ? " on some rows, because their sim failed" : ", because its sim failed"}\\.$`
     )
   ),
+  error: MODEL_SIM_ERROR,
 });
 
 /**
@@ -199,9 +207,10 @@ const breakSplitFailedLine = (threshold: number) => ({
   field: expect.stringMatching(new RegExp(` ${threshold}-piece set bonus$`)),
   detail: expect.stringMatching(
     new RegExp(
-      `^On some rows, the cost of breaking the .+ ${threshold}-piece set bonus was not measured apart from the pieces that break it, because their sim failed\\.\n${MODEL_SIM_ERROR}$`
+      `^On some rows, the cost of breaking the .+ ${threshold}-piece set bonus was not measured apart from the pieces that break it, because their sim failed\\.$`
     )
   ),
+  error: MODEL_SIM_ERROR,
 });
 
 /**
@@ -374,12 +383,29 @@ type Scenario = {
   stopDuringSetBonusRead?: number;
   /** The fake's `activeSetBonuses` rejects for gear whose equipped ids match. */
   failSetBonusReadWhen?: (ids: readonly number[]) => boolean;
+  /**
+   * Gives each request a database with a row for every worn item except
+   * these, so a copy of one of them cannot be built (ticket 869).
+   */
+  databaseWithout?: readonly number[];
+  /**
+   * For gear whose equipped ids are given, the items whose database rows are
+   * left out, so a copy of one of them cannot be built (ticket 872).
+   */
+  databaseOmits?: (ids: readonly number[]) => readonly number[];
+  /** Composing a request for gear whose equipped ids match throws (ticket 872). */
+  composeFailsWhen?: (ids: readonly number[]) => boolean;
 };
 
 type ForkRanking = {
   contentHash: string;
   complete?: boolean;
-  substitutions: Array<{ field: string; detail: string; slot?: string }>;
+  substitutions: Array<{
+    field: string;
+    detail: string;
+    slot?: string;
+    error?: string;
+  }>;
   assumptions: { seeds: number[]; iterations: number };
   items: Array<{
     itemId: number;
@@ -665,6 +691,27 @@ async function runScenario(scenario: Scenario): Promise<{
     ...(scenario.partnerRule ? { partnerRule: scenario.partnerRule } : {}),
     ...(scenario.setScreen ? { setScreen: scenario.setScreen } : {}),
     ...(controller ? { signal: controller.signal } : {}),
+    ...(scenario.databaseWithout ||
+    scenario.databaseOmits ||
+    scenario.composeFailsWhen
+      ? {
+          simDatabaseFor: (equipment: ReadonlyArray<{ id?: number }>) => {
+            const ids = equipment.map((spec) => spec.id ?? 0);
+            if (scenario.composeFailsWhen?.(ids)) {
+              throw new Error(MODEL_COMPOSE_ERROR);
+            }
+            const left = [
+              ...(scenario.databaseWithout ?? []),
+              ...(scenario.databaseOmits?.(ids) ?? []),
+            ];
+            return {
+              items: equipment
+                .filter((spec) => spec.id && !left.includes(spec.id))
+                .map((spec) => ({ id: spec.id })),
+            };
+          },
+        }
+      : {}),
   });
 
   return { ranking, runCount, calls, callOpts, requests, setBonusReadRuns };
@@ -1925,6 +1972,87 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
       [4, "sim-failed"],
     ]);
     expect(setSkipLines(r)).toEqual([wornSetFailedLine]);
+  });
+
+  /** 476-D's gear and pool with R(3) failing: counts 3 and 4 go unmeasured. */
+  const rungThreeFails: Scenario = {
+    worn: wornGear(MALORNE_4),
+    pool: [
+      { itemId: THUNDERHEART.head, slot: "head" },
+      { itemId: THUNDERHEART.shoulder, slot: "shoulder" },
+      { itemId: THUNDERHEART.chest, slot: "chest" },
+      { itemId: THUNDERHEART.hands, slot: "hands" },
+      { itemId: NEUTRAL.chest[0], slot: "chest" },
+      { itemId: NEUTRAL.hands[0], slot: "hands" },
+    ],
+    measureBrokenSetValue: true,
+    reportsSetBonuses: true,
+    failWhen: (ids) =>
+      ids.includes(SET_KEPT_OFFSET + MALORNE.chest) &&
+      ids.includes(COPY_OFFSET + MALORNE.hands),
+  };
+  /** Every Malorne count a row or the run lists as broken. */
+  const malorneBreakCounts = (r: ForkRanking): number[] => {
+    const counts = new Set<number>();
+    for (const b of r.brokenSetValues ?? []) {
+      if (b.setId === 640) counts.add(b.threshold);
+    }
+    for (const row of r.items) {
+      const ctx = row.setContext;
+      for (const b of [
+        ...(ctx?.singleBreaks ?? []),
+        ...(ctx?.commitBreaks ?? []),
+        ...(ctx?.futureBonuses ?? []).flatMap((f) => f.breaks ?? []),
+      ]) {
+        if (b.setId === 640) counts.add(b.threshold);
+      }
+    }
+    return [...counts].sort((a, b) => a - b);
+  };
+
+  it("870-A: a failed ladder rung lists breaks only at counts where the set has a bonus", async () => {
+    // Malorne has bonuses at 2 and 4 only. A Thunderheart pair takes it from
+    // 4 to 2 pieces, so before ticket 870 the unmeasured count 3 was listed
+    // as a break ("Breaks Malorne Harness 3pc").
+    const { ranking: r } = await runScenario(rungThreeFails);
+    expect(malorneBreakCounts(r)).toEqual([2, 4]);
+    expect(
+      (r.wornSetLadder ?? [])
+        .filter((e) => e.setId === 640)
+        .map((e) => [e.count, e.counted, e.unmeasured ?? null])
+    ).toEqual([
+      [2, true, null],
+      [3, false, "sim-failed"],
+      [4, true, "sim-failed"],
+    ]);
+    expect(setSkipLines(r)).toEqual([wornSetFailedLine]);
+  });
+
+  it("870-B: when the bonus list cannot be read either, no failed count is a break, and lines give both errors", async () => {
+    // Ticket 871: with no list, a failed count may hold no bonus, so the row
+    // claims no break it did not measure; the ladder's line and the read's
+    // line say what was not measured.
+    const { ranking: r } = await runScenario({
+      ...rungThreeFails,
+      failSetBonusReadWhen: () => true,
+    });
+    expect(
+      (r.wornSetLadder ?? [])
+        .filter((e) => e.setId === 640)
+        .map((e) => [e.count, e.counted])
+    ).toEqual([
+      [2, true],
+      [3, false],
+      [4, false],
+    ]);
+    expect(malorneBreakCounts(r)).toEqual([2]);
+    expect(setSkipLines(r)).toContainEqual(wornSetFailedLine);
+    expect(setSkipLines(r)).toContainEqual({
+      field: "Malorne Harness set",
+      detail:
+        "The Malorne Harness set bonuses were not all measured, because the sim could not list the set's bonuses.",
+      error: "the set-bonus read failed on purpose",
+    });
   });
 });
 
@@ -6053,7 +6181,7 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
     }
   });
 
-  it("644-D: a set whose bonus read fails gets no entry and no count tried, and a warning names it", async () => {
+  it("644-D: a set whose bonus read fails gets no entry and no count tried, and a line gives the read's error", async () => {
     // Scenario kind: 644-A's gear (the pool reaches 6), with the read of the
     // largest package's gear failing, or the read of the worn gear.
     const scenario: Scenario = {
@@ -6090,13 +6218,20 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
         expect(
           warn.mock.calls.some(([line]) => String(line).includes("set 676"))
         ).toBe(true);
+        // Ticket 867: the read's own error reaches the ranking's lines.
+        expect(setSkipLines(ranking)).toContainEqual({
+          field: "Thunderheart Harness set",
+          detail:
+            "The Thunderheart Harness set bonuses were not all measured, because the sim could not list the set's bonuses.",
+          error: "the set-bonus read failed on purpose",
+        });
       }
     } finally {
       warn.mockRestore();
     }
   });
 
-  it("644-R: a set whose largest package fails gem repair gets no entry and no count tried, and a warning names it", async () => {
+  it("644-R: a set whose largest package fails gem repair gets no entry and no count tried, and a line gives the repair's error", async () => {
     // Scenario kind: each piece's single can switch the meta gem on, the
     // package's gear cannot. Example: Malorne Harness 640 over gemless gear.
     // The worn Gloves of Dexterous Manipulation have two sockets, so the
@@ -6127,8 +6262,284 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
           )
         )
       ).toBe(true);
+      // Ticket 867: the repair's own error reaches the ranking's lines, after
+      // the sentence and not in `error`, which holds only a failed call's error.
+      expect(setSkipLines(ranking)).toContainEqual({
+        field: "Malorne Harness set",
+        detail: expect.stringMatching(
+          /^The Malorne Harness set bonuses were not all measured, because no gem swap could turn your meta gem on\.\n\S/
+        ),
+      });
     } finally {
       warn.mockRestore();
     }
   });
 });
+
+/* ------------------------------------------------------------------ *
+ * Ticket 869: a set-phase request that cannot be built gives a line that
+ * ends in the error that was caught.
+ * ------------------------------------------------------------------ */
+
+const NO_ROW_ERROR = String.raw`the request database has no row for item \d+`;
+const TH_IDS = Object.values(THUNDERHEART);
+
+describe.skipIf(!forkPresent)("set requests that cannot be built (869)", () => {
+  const noThunderheartRows: Scenario = {
+    worn: wornGear({}),
+    pool: TH_POOL,
+    measureBrokenSetValue: true,
+    databaseWithout: TH_IDS,
+  };
+
+  it("869-S: a set screen whose rung requests cannot be built keeps the set, and a line gives the error", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const { ranking } = await runScenario({
+        ...noThunderheartRows,
+        setScreen: "on",
+      });
+      const onSets = (
+        ranking.setScreen as unknown as {
+          sets: Array<{ setId: number; kept: boolean }>;
+        }
+      ).sets;
+      expect(onSets.find((set) => set.setId === 676)?.kept).toBe(true);
+      expect(setSkipLines(ranking)).toContainEqual({
+        field: "Thunderheart Harness set",
+        detail:
+          "The Thunderheart Harness set was kept without the quick check that can skip it, because the check's sim could not be built.",
+        error: expect.stringMatching(new RegExp(`^${NO_ROW_ERROR}$`)),
+      });
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it("869-G: a same-gear gate whose requests cannot be built gives a line with the error", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const { ranking } = await runScenario(noThunderheartRows);
+      expect(setSkipLines(ranking)).toContainEqual({
+        field: "Thunderheart Harness 2-piece set bonus",
+        detail:
+          "The Thunderheart Harness 2-piece set bonus was not measured, because the sims that measure it could not be built.",
+        error: expect.stringMatching(new RegExp(`^${NO_ROW_ERROR}$`)),
+      });
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it("869-U: the same-gear measure returns the error of a request it cannot build", async () => {
+    const copies = await importForkUpgrades<{
+      measureSameGearBonus: (
+        runSim: (
+          request: RaidSimRequest
+        ) => Promise<{ dps: number; se: number }>,
+        composedRequest: RaidSimRequest,
+        setPieceSlots: readonly number[],
+        lowerCount: number,
+        requestsFor?: (
+          copiesList: Array<{ setKept: number[]; setLess: number[] }>
+        ) => Promise<Array<RaidSimRequest | { buildError: string }>>
+      ) => Promise<unknown>;
+    }>("engine/set-less-copies.ts");
+    const runSim = () => Promise.resolve({ dps: 1, se: 0 });
+    // A database with no rows, so neither copy of the hands can be built.
+    const request = await composedRequest(
+      { hands: THUNDERHEART.hands, legs: THUNDERHEART.legs },
+      { items: [] }
+    );
+    expect(
+      await copies.measureSameGearBonus(
+        runSim,
+        request,
+        [HANDS_SLOT, LEGS_SLOT],
+        1
+      )
+    ).toEqual({
+      buildError: `the request database has no row for item ${THUNDERHEART.hands}`,
+    });
+    // With `requestsFor`, its failure for either request is returned as is.
+    expect(
+      await copies.measureSameGearBonus(
+        runSim,
+        request,
+        [HANDS_SLOT, LEGS_SLOT],
+        1,
+        () =>
+          Promise.resolve([request, { buildError: "the off request failed" }])
+      )
+    ).toEqual({ buildError: "the off request failed" });
+  });
+});
+
+/* ------------------------------------------------------------------ *
+ * Ticket 872: six more set-phase requests that cannot be built give a line
+ * that ends in the caught error and does not say a sim failed.
+ * ------------------------------------------------------------------ */
+
+const noRowError = (itemId: number) =>
+  `the request database has no row for item ${itemId}`;
+
+describe.skipIf(!forkPresent)(
+  "more set requests that cannot be built (872)",
+  () => {
+    const quiet = () => vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    it("872-P: a package whose own request cannot be built names the error, not a failed sim", async () => {
+      // Without the broken-set flag the package's plain request is composed
+      // only inside the set phase's versions, so a compose of any gear with
+      // two or more Thunderheart pieces fails there.
+      const thIds: readonly number[] = Object.values(THUNDERHEART);
+      const warn = quiet();
+      try {
+        const { ranking } = await runScenario({
+          worn: wornGear({}),
+          pool: TH_POOL,
+          composeFailsWhen: (ids) =>
+            ids.filter((id) => thIds.includes(id)).length >= 2,
+        });
+        expect(bonusOf(ranking, 676, 2)?.unmeasured).toBe("sim-failed");
+        expect(setSkipLines(ranking)).toContainEqual({
+          field: "Thunderheart Harness 2-piece set bonus",
+          detail:
+            "The Thunderheart Harness 2-piece set bonus was not measured, because the sims that measure it could not be built.",
+          error: MODEL_COMPOSE_ERROR,
+        });
+      } finally {
+        warn.mockRestore();
+      }
+    });
+
+    it("872-S: a step gear whose request cannot be built gives a line on some rows", async () => {
+      // 511-U's step case, with the compose of each Pauldrons 2pc step gear
+      // failing in place of its sim.
+      const thSlots = [SHOULDER_SLOT, CHEST_SLOT, HANDS_SLOT, LEGS_SLOT];
+      const warn = quiet();
+      try {
+        const { ranking } = await runScenario({
+          worn: wornGear({}),
+          pool: TH_FOUR_POOL,
+          measureBrokenSetValue: true,
+          composeFailsWhen: (ids) =>
+            ids[SHOULDER_SLOT] === THUNDERHEART.shoulder &&
+            thSlots.filter((slot) => ids[slot] !== 0).length === 2,
+        });
+        expect(setSkipLines(ranking)).toContainEqual({
+          field: "Thunderheart Harness 2-piece set bonus",
+          detail:
+            "The Thunderheart Harness 2-piece set bonus was not measured on some rows, because their sims could not be built.",
+          error: MODEL_COMPOSE_ERROR,
+        });
+      } finally {
+        warn.mockRestore();
+      }
+    });
+
+    it("872-B: a bonus-off request that cannot be built gives the break-split line with the error", async () => {
+      // 511-LF's bonus-off request, the Malorne shoulder's set-less copy with
+      // the Gauntlets and the Leggings, with no row to copy the shoulder from.
+      const warn = quiet();
+      try {
+        const { ranking } = await runScenario({
+          ...PS_SCENARIO,
+          databaseOmits: (ids) =>
+            ids.includes(MALORNE.shoulder) &&
+            ids.includes(THUNDERHEART.hands) &&
+            ids.includes(THUNDERHEART.legs)
+              ? [MALORNE.shoulder]
+              : [],
+        });
+        expect(setSkipLines(ranking)).toContainEqual({
+          field: "Malorne Harness 2-piece set bonus",
+          detail:
+            "On some rows, the cost of breaking the Malorne Harness 2-piece set bonus was not measured apart from the pieces that break it, because their sim could not be built.",
+          error: noRowError(MALORNE.shoulder),
+        });
+      } finally {
+        warn.mockRestore();
+      }
+    });
+
+    it("872-W: a worn-1 pair whose request cannot be built names the error, not a failed sim", async () => {
+      // 863-F's pair, the one gear with exactly three real Thunderheart pieces.
+      const thIds: readonly number[] = Object.values(THUNDERHEART);
+      const warn = quiet();
+      try {
+        const { ranking } = await runScenario({
+          worn: wornGear({ hands: THUNDERHEART.hands }),
+          pool: TH_POOL.filter((p) => p.slot !== "hands"),
+          composeFailsWhen: (ids) =>
+            ids.filter((id) => thIds.includes(id)).length === 3,
+        });
+        expect(bonusOf(ranking, 676, 4)!.bonusDpsNet).toBeUndefined();
+        expect(setSkipLines(ranking)).toContainEqual({
+          field: "Thunderheart Harness 2-piece set bonus",
+          detail:
+            "The Thunderheart Harness 2-piece set bonus was not measured, because the sims that measure it could not be built.",
+          error: MODEL_COMPOSE_ERROR,
+        });
+      } finally {
+        warn.mockRestore();
+      }
+    });
+
+    /** Worn Malorne 4 whose Gauntlets have no row, so no ladder rung can be built. */
+    const noGauntletRow: Scenario = {
+      worn: wornGear(MALORNE_4),
+      pool: [
+        { itemId: THUNDERHEART.head, slot: "head" },
+        { itemId: THUNDERHEART.shoulder, slot: "shoulder" },
+        { itemId: THUNDERHEART.chest, slot: "chest" },
+        { itemId: THUNDERHEART.hands, slot: "hands" },
+      ],
+      measureBrokenSetValue: true,
+      databaseWithout: [MALORNE.hands],
+    };
+
+    it("872-L: a worn-set ladder rung that cannot be built names the error, not a failed sim", async () => {
+      const warn = quiet();
+      try {
+        const { ranking } = await runScenario(noGauntletRow);
+        const malorne = setSkipLines(ranking).filter(
+          (l) => l.field === "Malorne Harness set"
+        );
+        expect(malorne).toEqual([
+          {
+            field: "Malorne Harness set",
+            detail:
+              "The value of the Malorne Harness set on your gear was not fully measured, because its sim could not be built.",
+            error: noRowError(MALORNE.hands),
+          },
+        ]);
+      } finally {
+        warn.mockRestore();
+      }
+    });
+
+    it("872-R: a bonus-list request that cannot be built names the error, and no failed count is a break", async () => {
+      const warn = quiet();
+      try {
+        const { ranking } = await runScenario({
+          ...noGauntletRow,
+          reportsSetBonuses: true,
+        });
+        expect(setSkipLines(ranking)).toContainEqual({
+          field: "Malorne Harness set",
+          detail:
+            "The Malorne Harness set bonuses were not all measured, because the check that lists the set's bonuses could not be built.",
+          error: noRowError(MALORNE.hands),
+        });
+        expect(
+          (ranking.wornSetLadder ?? [])
+            .filter((e) => e.setId === 640)
+            .map((e) => e.counted)
+        ).toEqual([false, false, false]);
+      } finally {
+        warn.mockRestore();
+      }
+    });
+  }
+);

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: ticket 863's fix, 2026-11-10, reading `setBonusCountsInReach` in the fork's `rank.ts`
 Serves: .scratch/carry-forward/issues/452-end-ret-feralcat-tunnel-vision-support-all-dps-specs.md
@@ -35,3 +35,27 @@ existing sim code".
 
 A failed set-bonus read shows the call's own error in the ranking's lines,
 and case 644-D checks that line.
+
+## Closing note
+
+Fixed 2026-11-10 on branch `fix/867-870-tab-errors`, fork commit
+`66ed075c3` 'Show the error when a set's bonus counts fail'. In the
+fork's `ui/features/upgrades/model/engine/rank.ts`,
+`setBonusCountsInReach` now reports each set it gives no counts, with
+the reason, and the set phase adds this line (field "<set> set"):
+
+- read failed: "The <set> set bonuses were not all measured, because
+  the sim could not list the set's bonuses." and, on the next line, the
+  read's own error;
+- the largest package's gem repair failed (the same silent drop, case
+  644-R): "The <set> set bonuses were not all measured, because no gem
+  swap could turn your meta gem on." and the repair's error.
+
+The page shows the first line; the error is in the browser console, as
+for the other set-phase lines. A read that Stop refused adds no line, as
+before. The console warnings are still written.
+
+Verified by: in the pair,
+`pnpm exec vitest run packages/core/test/fork-set-net.test.ts -t "644-D|644-R"`.
+Both cases failed before the fix (2 failed) and pass with it; the whole
+file passes (106 tests).

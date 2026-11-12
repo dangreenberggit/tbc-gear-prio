@@ -47,6 +47,8 @@ import {
  */
 const repairFault = vi.hoisted(() => ({
   belowRemaining: undefined as number | undefined,
+  /** How many repairs the fault failed, so a test can show it fired. */
+  fired: 0,
 }));
 vi.mock(
   "../../../vendor/tbc-new-fork/ui/features/upgrades/model/engine/meta-repair.ts",
@@ -59,6 +61,7 @@ vi.mock(
     const repairAndMinimize: Repair = (opts) => {
       const below = repairFault.belowRemaining;
       if (below !== undefined && (opts.hitCap?.remaining ?? 0) < below) {
+        repairFault.fired += 1;
         throw new real.MetaStepBudgetExceededError(
           "meta repair exceeded step budget"
         );
@@ -1132,7 +1135,7 @@ type RunRanking = {
   items: RankedRow[];
   setBonusOffSims?: { skippedSteps: number; gears: number };
   setScreen?: { sets: Array<{ setId: number; pair: { dps?: number } }> };
-  substitutions: Array<{ field: string; detail: string }>;
+  substitutions: Array<{ field: string; detail: string; error?: string }>;
 };
 
 const retSkeleton = JSON.parse(
@@ -2175,6 +2178,9 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
         warn.mockRestore();
       }
       expect(run.ranking.complete).toBe(true);
+      // A gem repair that fails is no failed call, so its rule follows the
+      // sentence for the console and `error` stays unset: the run's error
+      // toast shows only a failed call's error.
       expect(run.ranking.substitutions).toContainEqual({
         field: "Burning Rage 2-piece set bonus",
         detail:
@@ -2184,6 +2190,36 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       expect(
         run.ranking.substitutions.map((s) => s.detail).join("\n")
       ).not.toContain("the sims that measure it failed");
+    }
+  );
+
+  it.each(["off", "on"])(
+    "852-R every line: a gem repair that fails on a set version gives no line with an error and none that says a request was not built (set screen %s)",
+    async (setScreen) => {
+      // Oracle: the run's error toast shows the first line with an `error`
+      // (`run_session.ts`), so a failed gem repair, which is no failed call,
+      // must give no such line, and each caller says what it says for a
+      // failed repair on its own build. Review A1 of `fix/867-870-tab-errors`
+      // found the set screen's line "the check's sim could not be built" with
+      // the repair's message. This run's failed rebuilds are in the package
+      // loop and, with the screen on, the set screen.
+      repairFault.belowRemaining = -500;
+      repairFault.fired = 0;
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      let run;
+      try {
+        run = await brRun(1000, { setScreen });
+      } finally {
+        repairFault.belowRemaining = undefined;
+        warn.mockRestore();
+      }
+      expect(repairFault.fired).toBeGreaterThan(0);
+      expect(run.ranking.complete).toBe(true);
+      const lines = run.ranking.substitutions;
+      expect(lines.filter((s) => s.error !== undefined)).toEqual([]);
+      expect(lines.filter((s) => /could not be built/.test(s.detail))).toEqual(
+        []
+      );
     }
   );
 
@@ -2640,9 +2676,11 @@ describe.skipIf(!forkPresent)(
         {
           field: "item 30907",
           slot: "chest",
+          // `error` is the call's own error, word for word, so the run's
+          // error toast can show it; the item id is for the console only.
           detail:
-            "This item was not ranked in this slot, because its sim failed." +
-            "\nitem 30907, slot chest: worker died",
+            "This item was not ranked in this slot, because its sim failed.\nitem 30907, slot chest",
+          error: "worker died",
         },
       ]);
       expect(run.ranking.substitutions.filter(isHitCapNote)).toEqual([]);
@@ -2672,7 +2710,9 @@ describe.skipIf(!forkPresent)(
       ).toMatchObject({ simmed: false });
       expect(
         stopped.ranking.substitutions.filter(
-          (s) => s.field === "item 30907" || /item 30907/.test(s.detail)
+          (s) =>
+            s.field === "item 30907" ||
+            /item 30907/.test(`${s.detail}\n${s.error ?? ""}`)
         )
       ).toEqual([]);
       // No ranking was cached: a second run on the same store reads the hit
@@ -2722,8 +2762,8 @@ describe.skipIf(!forkPresent)(
           field: "item 30907",
           slot: "chest",
           detail:
-            "This item was not ranked in this slot, because its sim failed." +
-            "\nitem 30907, slot chest: hit percent read as NaN",
+            "This item was not ranked in this slot, because its sim failed.\nitem 30907, slot chest",
+          error: "hit percent read as NaN",
         },
       ]);
     });
