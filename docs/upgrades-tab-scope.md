@@ -426,9 +426,11 @@ The placements a reviewer should scrutinize first:
 14. **Four tickets closed on 2026-11-12 on `fix/tab-polish`, so none has a
     row.** 747 closed fixed (fork `dc9dbda76`: the locale schema lists the
     two missing keys). 753 closed fixed (fork `690fcdeb5`: items whose
-    db.json records match apart from the id are offered once; the two
-    Mark of the Champion items stay two rows, as wowsims' gear picker shows
-    them). 641 is `wontfix`, settled by wowsims: upstream sets The 2 Ring to
+    db.json records match apart from the id are offered once, where
+    wowsims' gear picker lists both; fork `bee90b468`: a gear set that
+    names the id left out still holds the item; the two Mark of the
+    Champion items stay two rows, as the picker shows them). 641 is
+    `wontfix`, settled by wowsims: upstream sets The 2 Ring to
     phase 1 on purpose, and the tab's phase test is the picker's. 703 is
     `wontfix`: not reproduced in 8 more recordings, cause unknown; the
     player-visible case is 574. 866 stays Tab-adjacent.

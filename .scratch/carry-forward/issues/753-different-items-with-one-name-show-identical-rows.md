@@ -41,8 +41,12 @@ reputation ring; these are different items that share a name.
 - Repo data (db.json, read by the SME): Sergeant's Heavy Cape is 28378 and 28379 (identical
   stats); Sergeant's Heavy Cloak is 28377 and 28380. None has a
   `factionRestriction` in db.json.
-- Game: the capes and cloaks are an Alliance and a Horde version.
-  **Recalled, unverified.**
+- Game: in original TBC the capes and cloaks were an Alliance and a Horde
+  version (warcraft.wiki.gg). In TBC Classic, Wowhead's vendor data lists
+  28377 and 28378 as sold to both factions, and 28379 and 28380 as sold by
+  no one (checked 2026-11-12; `.scratch/agent-reports/2026-11-12-general-task-753-same-name-rows.md`
+  § 3 in the main checkout, gitignored). wowsims' data gives no faction for
+  any of the four.
 - In the runs judged, both rows of a pair have the same DPS and sit far
   below the cutoff, so no upgrade above the cutoff changes. For Mark of the
   Champion the two items have different effects, so on another page the
@@ -72,11 +76,26 @@ once").
   pool (`ui/features/upgrades/model/pool_source.ts`) now keeps one item per
   group of items whose db.json records match apart from the id: the id the
   player wears, else one a preset holds, else the lowest id, with the
-  group's tags. Each cape and cloak is offered once. Across all 110 pool
-  cells (11 specs, phases 1-5, BiS rows in and out) the change drops 28379
-  and 28380 and nothing else
+  group's tags. Each cape and cloak is offered once. Across the 55 pool
+  cells (11 specs, phases 1-5), under both heroic five-man policies, the
+  change drops 28379 and 28380 and nothing else
   (`.scratch/agent-reports/2026-11-12-general-task-753-build.md` in the
   main checkout, gitignored).
+- **This differs from wowsims' gear picker, on purpose.** The picker lists
+  both ids of each pair as two identical rows: its list keeps an item by
+  phase and search text only
+  (`ui/features/gear/components/SelectorModal/ItemList.tsx:76`), and its
+  faction filter keeps an item with no faction (`ui/sim/player/player.ts:1299-1304`).
+  The tab offers one because it ranks: simming both gives two rows with one
+  DPS figure that nothing on the page tells apart. This was the session's
+  call (`.scratch/plans/tab-polish-2026-11-12.md` Decision log, 753), not a
+  wowsims behaviour, and the merge ask says so.
+- **Gear sets that name the other id: fixed in review.** A preset or saved
+  set holding the id the pool left out showed "0 in pool", got no badge on
+  the row, and prune dropped the item from the run. Fork `bee90b468`
+  ("Match a set's items to the twin the pool offers") makes the settings
+  hold a set's item under every id of its group (`twinIdsOf`,
+  `settings_pool.ts`); finding A1 of `docs/reviews/fix-tab-polish.md`.
 - **Mark of the Champion: stays two rows, on purpose.** 23206 and 23207 are
   different items: +150 attack power against Undead and Demons, and +85
   spell damage against them
@@ -84,32 +103,40 @@ once").
   gear picker shows them as two rows with the same name and item level,
   told apart only by icon and Wowhead tooltip, and wowsims' data has no
   words for the difference. The tab rows have the same icon and tooltip.
-  The owner accepted the same case for ticket 620's ring steps, on
-  2026-11-03: "each step as its own item, which is true, being displayed
-  that way, is fine. showing i level seems like a fine idea" (the owner's
-  message in session `0ce9166b-0892-4004-8c8c-bd4a041a9848`, transcript
-  line 412, 2026-11-03T16:20Z; recorded verbatim in ticket 620 § Owner
-  rulings and in `.scratch/handoffs/2026-11-03-upgrades-tab-session-2-handoff.md:19`).
+  The owner's ruling on ticket 620's ring steps, on 2026-11-03, is close
+  but not the same case: "each step as its own item, which is true, being
+  displayed that way, is fine. showing i level seems like a fine idea"
+  (the owner's message in session `0ce9166b-0892-4004-8c8c-bd4a041a9848`,
+  transcript line 412, 2026-11-03T16:20Z; recorded verbatim in ticket 620
+  § Owner rulings and in
+  `.scratch/handoffs/2026-11-03-upgrades-tab-session-2-handoff.md:19`). The
+  ring steps differ in item level, which the tab now shows; both Marks are
+  item level 90, so their rows read the same in every word. What decides
+  the Marks is the picker: it shows them the same way, and wowsims has no
+  words for the difference.
   So "Done when" is met as "no two rows offer items the site's own database
   describes the same", not as its literal "no two rows have identical
   text". The faction route ("not offered") cannot be built: wowsims has no
   faction data for these ids. Investigation:
   `.scratch/agent-reports/2026-11-12-general-task-753-same-name-rows.md`
   (main checkout, gitignored).
-- **Known limit, for review:** set badges and prune mode match exact ids,
-  so a set that holds the dropped twin gets no badge for the kept one.
 
 Verified by: run from inside the fork (`vendor/tbc-new-fork`), with node v22:
 
 ```
 npx vitest run ui/features/upgrades/model/pool_source.test.ts -t "Sergeant|describes the same but the id|keeps the id the player wears"
+npx vitest run ui/features/upgrades/model/settings_pool.test.ts -t "names the other id of an item the pool offers once"
 ```
 
-On 2026-11-12 at fork `690fcdeb5` it printed `Tests  59 passed | 124
-skipped (183)` and exited 0. The 59 are "offers each Sergeant’s cape and
-cloak once and keeps both Mark of the Champion items", the 55 cells of
-"%s offers no two items db.json describes the same but the id", and the
-three cases of "keeps the id the player wears, else one a preset holds,
-with the group’s tags". The whole file (`npx vitest run
-ui/features/upgrades/model/pool_source.test.ts`) printed `Tests  183
-passed (183)`.
+On 2026-11-12 at fork `bee90b468` the first printed `Tests  59 passed |
+125 skipped (184)` and the second `Tests  3 passed | 36 skipped (39)`;
+both exited 0. The 59 are "offers each Sergeant’s cape and cloak once and
+keeps both Mark of the Champion items", the 55 cells of "%s offers no two
+items db.json describes the same but the id", and the three cases of
+"keeps the id the player wears, else one a preset holds, with the group’s
+tags". The 3 are the review fix's: a saved set naming either id is counted
+in the pool, kept by prune and badged, and a BiS preset naming the other id
+is selected by default and names its heading. The whole of
+`pool_source.test.ts` printed `Tests  184 passed (184)`. (At `690fcdeb5`,
+before the review fix, the first command printed `59 passed | 124
+skipped (183)`.)

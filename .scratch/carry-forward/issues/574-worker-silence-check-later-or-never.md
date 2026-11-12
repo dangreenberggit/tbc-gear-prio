@@ -63,3 +63,20 @@ hook exists at a later upstream commit).
 
 The owner asks for it again (and a plan names how it stays out of wowsims'
 files), or closes this as never.
+
+## Comments
+
+2026-11-12 (pre-merge review of `fix/tab-polish`, while closing 703): "Stop
+still ends a run" above was checked on a run with no stuck sim. With a sim
+that never answers, a reading of the code says Stop does not end the run
+either: Stop only sets `stopping: true` (fork
+`ui/features/upgrades/model/run_state.ts:115`), and the candidate loop waits
+for every in-flight sim (`ui/features/upgrades/model/engine/promise-pool.ts:65`),
+so the tab stays on "stopping" until the page reloads. Not tested live. The
+703 investigation names a tab-side option that edits no wowsims file: race
+each in-flight candidate sim against Stop, as `readStats` already does for
+stats reads (ticket 538), so Stop ends the run with a partial ranking; the
+stuck worker stays in the pool. Details:
+`.scratch/agent-reports/2026-11-12-general-task-703-run-hang.md` § "Is there
+a tab-side fix with no upstream edit?" in the pair `tbc-wt/polish`
+(gitignored). Recorded only; this ticket still waits on the owner.

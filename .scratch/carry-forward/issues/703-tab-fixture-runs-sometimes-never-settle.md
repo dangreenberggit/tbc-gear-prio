@@ -152,9 +152,14 @@ since the recorder started keeping those logs. Part 2 was met on
   `backend-goroutines.txt`, and `console.log` for a worker that logged
   "Created." but never "Ready") and file a new ticket from it.
 - Two follow-ups, neither filed as a new ticket:
-  - A sim that never answers, so the run never ends and Stop does not end
-    it, is what a player could notice. That is ticket 574, which the owner
-    has already decided.
+  - A sim that never answers is what a player could notice: the run never
+    ends. By a reading of the code Stop does not end it either: Stop only
+    sets `stopping: true` (fork `ui/features/upgrades/model/run_state.ts:115`)
+    and the candidate loop waits for every sim
+    (`ui/features/upgrades/model/engine/promise-pool.ts:65`); not tested
+    live. That case is ticket 574, which the owner has already decided.
+    574's "Stop still ends a run" was checked on a run with no stuck sim;
+    its 2026-11-12 comment records this case.
   - The upstream `worker_http.ts` change for stall (1) above was not made.
     Stall (1) needs the HTTP path (desktop build or the recorder) and a
     backend sim that has already sent nothing for 10 minutes.
@@ -163,6 +168,9 @@ Investigation: `.scratch/agent-reports/2026-11-12-general-task-703-run-hang.md`
 in the pair `tbc-wt/polish` (gitignored). Re-run: the recorder commands in
 `packages/core/test/fixtures/tab-recordings/README.md:59,61`, one at a time,
 with the backend and vite from `node scripts/dev-tab.mjs backend` and
-`node scripts/dev-tab.mjs frontend`. Each of the 8 runs on 2026-11-12
+`node scripts/dev-tab.mjs frontend`, and with `--out` set to a scratch
+folder: the README's `OUT` (line 56) is the tracked fixture folder, which
+tests read, and the batch wrote to `.scratch/agent-reports/2026-11-12-703-repro/run-<n>`
+instead (`batch.sh:56` there). Each of the 8 runs on 2026-11-12
 printed `settled: Your current gear: ... DPS. Took ...s.` and exited 0
 (`.scratch/agent-reports/2026-11-12-703-repro/status.log` in the pair).
