@@ -69,7 +69,11 @@ fork's `ui/features/upgrades/model/`, all fork-added
 - `run.ts` reads the talents once, ranks with the set they pick and
   returns it on the outcome (`RunOutcome.epWeightsSet`, `run_state.ts`),
   as it returns `runner`. Settling drops it, so a recorded fixture never
-  carries it.
+  carries it. One other read stays in the run, and it picks no set: the
+  gear source (`adapters/player_gear_source.ts:95`) fills the seam field
+  `LoggedGear.talentPointsByTree`, which no tab engine code reads
+  (`git grep -n talentPointsByTree -- ui/features/upgrades/model/engine`
+  finds only the seam type and an offline fixture builder).
 - `run_session.ts` no longer reads the talents: the assumptions line
   names the set the run returned (`EP weights set: hunter-sv`).
 - Route: the run returns the set, not the session passing it in through
