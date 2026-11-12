@@ -101,13 +101,13 @@ type ViewMod = {
   ) => { rows: Row[]; shortlist: Row[] };
   rankableSetPotential: (
     item: { setContext?: SetContext },
-    noiseFloorDps: number,
+    cutoff: Cutoff,
     setCredit?: "full" | "split"
   ) => number;
   setCreditUnmeasured: (ctx: SetContext | undefined) => boolean;
   setPotentialTerms: (
     ctx: SetContext | undefined,
-    noiseFloorDps: number
+    cutoff: Cutoff
   ) => { credit: number; stopThreshold: number; terms: Term[] };
 };
 type CutoffMod = { setBonusNoiseFloorDps: (cutoff: Cutoff) => number };
@@ -297,7 +297,11 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
       const { setBonusNoiseFloorDps } =
         await importForkUpgrades<CutoffMod>("engine/cutoff.ts");
       const ranking = load(name);
-      const floor = setBonusNoiseFloorDps(ranking.cutoff);
+      // A step ranking's same-gear value is one sim minus another, so its
+      // gate floor is the item bar; a flag-off bonus folds four sims and gets
+      // the √2 floor (ticket 623).
+      const stepFloor = ranking.cutoff.absDps;
+      const fourSimFloor = setBonusNoiseFloorDps(ranking.cutoff);
       const setBonuses = ranking.setBonuses ?? [];
       const byId = new Map(ranking.items.map((r) => [r.itemId, r]));
 
@@ -308,8 +312,8 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
 
         if (ctx?.stepRanking) {
           // 3s. the shipped credit equals the step rule's reference walk
-          const ref = referenceStep(ctx, floor);
-          const credit = view.rankableSetPotential(row, floor, "full");
+          const ref = referenceStep(ctx, stepFloor);
+          const credit = view.rankableSetPotential(row, ranking.cutoff, "full");
           expect(Math.abs(credit - ref.credit), `${where} credit`).toBeLessThan(
             1e-9
           );
@@ -345,8 +349,8 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
 
         // 3. the shipped credit equals the reference walk, and the popover
         // terms add up to it
-        const ref = referenceR1(ctx, floor);
-        const credit = view.rankableSetPotential(row, floor, "full");
+        const ref = referenceR1(ctx, fourSimFloor);
+        const credit = view.rankableSetPotential(row, ranking.cutoff, "full");
         expect(Math.abs(credit - ref.credit), `${where} credit`).toBeLessThan(
           1e-9
         );
@@ -354,7 +358,7 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
           (ctx?.futureBonuses ?? []).length > 0 &&
           !view.setCreditUnmeasured(ctx)
         ) {
-          const { terms } = view.setPotentialTerms(ctx, floor);
+          const { terms } = view.setPotentialTerms(ctx, ranking.cutoff);
           const sum = terms.reduce((s, t) => s + ("dps" in t ? t.dps : 0), 0);
           expect(Math.abs(sum - credit), `${where} terms`).toBeLessThan(1e-9);
         }
@@ -392,7 +396,8 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
             (r) =>
               [
                 r.name,
-                r.deltaDps + view.rankableSetPotential(r, floor, "full"),
+                r.deltaDps +
+                  view.rankableSetPotential(r, ranking.cutoff, "full"),
               ] as const
           );
         expect(got.map((g) => g[0])).toEqual(pinned.map((p) => p[0]));

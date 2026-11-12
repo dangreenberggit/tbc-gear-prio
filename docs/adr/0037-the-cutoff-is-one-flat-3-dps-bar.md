@@ -1,6 +1,6 @@
 # ADR-0037 — The cutoff is one flat 3 DPS bar for every spec
 
-**Status:** accepted
+**Status:** accepted; amended 2026-11-12 by ticket 623 (the √2 set-bonus floor applies only to the four-sim flag-off bonus; see Consequences)
 **Date:** 2026-10-11
 **Amends:** PLAN.md §10 (the dual threshold "3.4 DPS or 0.15%"); [ADR-0021](0021-a-mixed-semethod-tie-is-judged-on-the-coarser-se.md) (its derivation of 3.4 from `max(3.0, 2 × mean reported SE 1.678)`); [ADR-0032](0032-one-spec-registry-keyed-by-spec-id.md) (the registry no longer has a `cutoff` field)
 **Related:** [ADR-0020](0020-the-cutoff-is-absolute-a-filter-never-moves-the-bar.md) (the cutoff is absolute; its `engineVersion` note applies); tickets `.scratch/carry-forward/issues/615-cutoff-absolute-bar-never-applies-below-2267-dps.md` (closed by this ADR), `617-report-hides-which-cutoff-rule-admitted-a-row.md`, `618-tab-pct-rule-note-hover-only-and-can-contradict-figure.md`, `105-consider-reducing-sim-noise-std-128-plus.md` (stays open)
@@ -55,6 +55,14 @@ So:
   derivation, `√2 × absDps`, so the floor is now √2 × 3 ≈ 4.24 DPS for every
   spec, down from ≈4.81 (ret) and ≈5.09 (feral). Ticket 335's band scan was
   taken at the old ret floor and has not been re-run for 4.24 (untested).
+  **Amended 2026-11-12 (ticket 623):** the √2 floor now applies only to the
+  bonus that folds four sims, on a ranking made without
+  `measureBrokenSetValue` (core, and the fork's E-W3 parity harness). The tab
+  always sets that flag, and every set value on its path is one sim minus
+  another: a same-gear value, a worn-set ladder rung, a crossing gate, a gap
+  between two step gears. Those have the noise of one item delta and are held
+  to the 3 DPS bar itself (`clearsSameGearGate`, `walkSteps`). So the tab
+  never applies 4.24, and ticket 335's scan bears on flag-off rankings only.
 - **Outputs state one number.** The CLI header prints `cutoff=3 DPS`, the
   HTML report lede "Cutoff 3 DPS.", and the tab's below-cutoff group "N
   item(s) below the 3 DPS cutoff" (the bar comes from the shown ranking, so a
