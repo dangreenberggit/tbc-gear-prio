@@ -68,9 +68,15 @@ the fork's E-W3 parity harness). Full triage, with the code lines:
   `docs/set-bonus-fixture-derivations.md` names the new gate.
 
 What a player can see change, at the tab's 3000 iterations: a value between
-`max(3, 2·se)` and 4.24 now counts. 2·se there is about 3.8 to 4.5 DPS for
-feral and 6.3 for ret (triage § 1), so the bar drops by at most about 0.4
-DPS for feral and not at all for ret. None of the six committed tab
+`max(3, 2·se)` and 4.24 now counts. In the six committed tab recordings a
+two-sim value's se is 1.81 to 2.23 for feral and 3.16 to 3.28 for ret, so
+2·se is about 3.6 to 4.5 DPS for feral and 6.3 to 6.6 for ret. The bar
+therefore drops by at most about 0.6 DPS for feral and not at all for ret
+(corrected by the pre-merge review, `docs/reviews/fix-623-set-floor.md`).
+The popover's gap between two step gears adds two such se in quadrature, so
+its 2·se is above 4.24 at 3000 iterations and its gate does not change
+there. A player who raises the iteration count shrinks every se, and then
+the bar decides more often. None of the six committed tab
 recordings has a gated value in (3, 4.24]; `fork-set-fixtures.test.ts`
 passes on all six at the new gate. Ticket 335's band scan at 4.24 is moot
 for the tab, which never applies that floor now (ADR-0037's amendment).

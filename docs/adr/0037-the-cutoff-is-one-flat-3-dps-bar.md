@@ -58,11 +58,15 @@ So:
   **Amended 2026-11-12 (ticket 623):** the √2 floor now applies only to the
   bonus that folds four sims, on a ranking made without
   `measureBrokenSetValue` (core, and the fork's E-W3 parity harness). The tab
-  always sets that flag, and every set value on its path is one sim minus
-  another: a same-gear value, a worn-set ladder rung, a crossing gate, a gap
-  between two step gears. Those have the noise of one item delta and are held
-  to the 3 DPS bar itself (`clearsSameGearGate`, `walkSteps`). So the tab
-  never applies 4.24, and ticket 335's scan bears on flag-off rankings only.
+  always sets that flag, and every value a set gate reads on its path is one
+  sim minus another: a same-gear value, a worn-set ladder rung, a crossing
+  gate, a gap between two step gears. Those have the noise of one item delta
+  and are held to the 3 DPS bar itself (`clearsSameGearGate`, `walkSteps`).
+  The step credit itself still has no gate of its own (ADR-0035, Known
+  limits (a)); with Set potential on, the row's total (its item figure plus
+  that credit) is held to the same 3 DPS bar as any row (`view.ts`
+  `belowCutoffUnderView`). So the tab never applies 4.24, and ticket 335's
+  scan bears on flag-off rankings only.
 - **Outputs state one number.** The CLI header prints `cutoff=3 DPS`, the
   HTML report lede "Cutoff 3 DPS.", and the tab's below-cutoff group "N
   item(s) below the 3 DPS cutoff" (the bar comes from the shown ranking, so a
