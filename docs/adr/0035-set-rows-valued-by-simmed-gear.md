@@ -1,6 +1,6 @@
 # ADR-0035 — Set rows are valued by a sim of gear the player could wear
 
-**Status:** accepted; amended 2026-10-03 by ticket 535; amended 2026-10-11 by [ADR-0037](0037-the-cutoff-is-one-flat-3-dps-bar.md) (the floor in "The rule for one row" is now √2 × 3 ≈ 4.24 for every spec, not 5.09 feral and 4.81 other specs)
+**Status:** accepted; amended 2026-10-03 by ticket 535; amended 2026-10-11 by [ADR-0037](0037-the-cutoff-is-one-flat-3-dps-bar.md) (the floor in "The rule for one row" is now √2 × 3 ≈ 4.24 for every spec, not 5.09 feral and 4.81 other specs); amended 2026-11-12 by ticket 623 (that floor, and the ladder's, is the 3 DPS bar itself, not √2 × 3, because each value it gates is one sim minus another)
 **Date:** 2026-10-02
 **Related:** [`ADR-0034`](0034-set-bonus-row-values-are-not-additive.md) (superseded in part here: the walk (R1) and the rule for when a row equals the measured swap, for a step ranking); tickets `.scratch/carry-forward/issues/511-ret-set-credit-counts-bonuses-with-no-ret-dps.md`, `512-set-breaks-model-only-six-tier-sets.md`, `514-set-bonus-value-carries-gear-dependent-residue.md`, `490-commit-break-assumes-top-package-over-charges-other-sets.md` (owner-quote correction), `523-moving-a-worn-set-to-other-slots-cannot-be-shown.md`, `530-tab-replicate-seeds-overlap.md`, `532-off-class-cryptstalker-sims-fail.md`; fork engine files `partner-choice.ts`, `set-screen.ts`, `set-less-copies.ts`, `rank.ts`, `view.ts` under `vendor/tbc-new-fork/ui/core/components/individual_sim_ui/upgrades/engine/`; fixtures in `packages/core/test/fork-set-net.test.ts`, derived in `docs/set-bonus-fixture-derivations.md`; stage-gate `511-512-set-credit`
 
@@ -90,6 +90,14 @@ For a row r of set S that the player does not wear (plan, "The rule for one row"
 - A future (S, t) is **eligible** when its same-gear value clears the gate:
   B'(S, t) > max(floor, 2·se). The floor is 5.09 for feral and 4.81 for every
   other spec (C22).
+  **Amended 2026-11-12 (ticket 623):** the floor is the cutoff's bar itself,
+  3 DPS for every spec (ADR-0037), through `clearsSameGearGate`. B' is one sim
+  with the bonus minus one without, so its noise is one item delta's, the
+  noise the bar is set against. C22 reused √2 × the bar from
+  `setBonusNoiseFloorDps`, whose √2 is for a bonus that folds four sims. The
+  same holds for every other value this gate reads: a worn-set ladder rung
+  (§ Worn-set breaks: the ladder), a crossing gate, and a gap between two step
+  gears in the popover.
 - For each eligible future, g(r, t) = sim(G + r + P(r, t)) − sim(G), where P is
   the chosen partner set and G is the current gear.
 - **Best total (`DEFAULT_SET_CREDIT_RULE` = "best-stop").** Walk the eligible futures in count
@@ -656,7 +664,8 @@ For a **step ranking** (the tab, with `measureBrokenSetValue` on):
   the three conditions (W-S1).
 - **Breaks charged with no floor.** On the flag path, a worn break is charged
   only when it clears the same gate (C150). Fixture 502-G's ON figure stays 366,
-  the measured 4-piece swap (decision-log line 104).
+  the measured 4-piece swap (decision-log line 104). (Since ticket 623 the
+  fixture's worn 2pc is worth 2, below the 3 DPS gate, so the figure is 368.)
 - **"Remaining gap, until ticket 512."** The ladder measures every count a swap
   takes a worn set below, with no list.
 

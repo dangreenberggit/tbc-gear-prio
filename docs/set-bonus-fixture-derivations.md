@@ -14,13 +14,17 @@ a fresh clone can check them.
 
 These derivations were written under the gate before
 [ADR-0037](adr/0037-the-cutoff-is-one-flat-3-dps-bar.md), so where they
-give the feral gate as `max(√2 · 3.6, 2 · se) = 5.09`, the engine gate is
-now `max(√2 · 3, 2 · se)` ≈ 4.24 for every spec. The text below is not
-rewritten for the new gate. The fixture tests in
-`packages/core/test/fork-set-net.test.ts` pass at the new gate: on
-2026-10-11, with the fork at `c4696b09`,
-`corepack pnpm exec vitest run packages/core/test/fork-set-net.test.ts`
-reported 95 tests passed.
+give the feral gate as `max(√2 · 3.6, 2 · se) = 5.09`, the engine gate was
+then `max(√2 · 3, 2 · se)` ≈ 4.24 for every spec. Since ticket 623
+(2026-11-12) the gate on the flag path (same-gear values, ladder rungs,
+crossing gates) is `max(3, 2 · se)`, because each of those values is one sim
+minus another; √2 · 3 stays only for the flag-off bonus. The text below is
+not rewritten for either gate, except 502-G, whose 2pc was moved below 3.
+The fixture tests in `packages/core/test/fork-set-net.test.ts` passed at the
+4.24 gate on 2026-10-11, with the fork at `c4696b09`
+(`corepack pnpm exec vitest run packages/core/test/fork-set-net.test.ts`
+reported 95 tests passed), and pass at the ticket 623 gate (2026-11-12, fork `adf591743`: the same
+command reported 120 tests passed).
 
 The suite is fork-gated and CI skips it (`docs/agents/known-traps.md`). To
 run it locally with the fork clone present:
@@ -393,20 +397,22 @@ credited as before 502: `50 − 20 = 30`, and it is not unmeasured.
 (`120 − 100 − 50 = −30`), then Malorne hands and legs (−50).
 
 **502-G (a worn bonus below the gate; rewritten for ticket 512):** the
-490 geometry with the Thunderheart 2pc worth 4 and Malorne 2pc 40, 4pc 30.
+490 geometry with the Thunderheart 2pc worth 2 and Malorne 2pc 40, 4pc 30.
+(Ticket 623 moved the 2pc from 4 to 2: the ladder's gate is now the 3 DPS
+bar, not √2 × the bar, and 4 would clear it.)
 
 - Singles: chest, head, shoulder 100; Malorne hands or legs
-  `100 − 100 − 4 = −4`; neutral hands or legs `120 − 100 − 4 = 16`.
-- Ladder: R(1) `3200`, R(2) `3204`, so (676,2) reads 4. That is below the
-  gate of 5.09, so it is not counted: no `brokenSetValues` entry, no
+  `100 − 100 − 2 = −2`; neutral hands or legs `120 − 100 − 2 = 18`.
+- Ladder: R(1) `3200`, R(2) `3202`, so (676,2) reads 2. That is below the
+  gate of 3, so it is not counted: no `brokenSetValues` entry, no
   package or row break, and no add-back in any piece's own stats.
 - `P_2` is chest and head, net2 40. `P_4` is chest, head, shoulder and
-  hands: `pkgΔ4 = 300 + 40 + 30 − 4 = 366` (the sim still loses the 4),
-  `raw4 = 366 − 296 − 40 = 30`, no counted breaks, net4 30.
-- Chest row: head owns 100, shoulder 100, hands `−4` (its single, with
+  hands: `pkgΔ4 = 300 + 40 + 30 − 2 = 368` (the sim still loses the 2),
+  `raw4 = 368 − 298 − 40 = 30`, no counted breaks, net4 30.
+- Chest row: head owns 100, shoulder 100, hands `−2` (its single, with
   nothing added back). `R_2 = 40 + 100 = 140`,
-  `R_4 = 140 + 30 + 100 − 4 = 266`, no break term, credit 266, and
-  `100 + 266 = 366 = pkgΔ4`.
+  `R_4 = 140 + 30 + 100 − 2 = 268`, no break term, credit 268, and
+  `100 + 268 = 368 = pkgΔ4`.
 - Before 512 the case was "a path break below the floor is charged at its
   measured value": the break term was −4 and hands owned `−4 + 4 = 0`, which
   gives the same 266. The Gate B ruling for plan revision 7 (R1) expected
@@ -697,8 +703,8 @@ The flag-on literals that K5 moves, with the arithmetic that moves them.
   4pc partners head, shoulder and chest in slot order, with no own-stat
   figure; count 3 is below the gate.
 - **502-G.** The chest row's 4pc partners are head, shoulder and hands; the
-  stop gear is `400 + 70 + 100 = 3570`, over `3204`: 366, so the credit is
-  still 266.
+  stop gear is `400 + 70 + 100 = 3570`, over `3202`: 368, so the credit is
+  still 268.
 - **512-W.** The Mantle row's 2pc partner is the chest (ests tie at 180),
   whose gear takes Wastewalker 4→2: `3270 − 3050 = 220`, naming (659,4).
   The 4pc gear takes it to 0: `460`, naming (659,4) and (659,2). The stop is

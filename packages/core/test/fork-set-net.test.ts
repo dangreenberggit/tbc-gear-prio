@@ -869,7 +869,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     const viewMod = await importForkUpgrades<{
       rankableSetPotential: (
         item: { setContext?: unknown },
-        noiseFloorDps: number,
+        cutoff: { absDps: number },
         setCredit?: "full" | "split"
       ) => number;
     }>("engine/view.ts");
@@ -995,12 +995,12 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit views (467)", () => {
     const viewMod = await importForkUpgrades<{
       rankableSetPotential: (
         item: { setContext?: unknown },
-        noiseFloorDps: number,
+        cutoff: { absDps: number },
         setCredit?: "full" | "split"
       ) => number;
     }>("engine/view.ts");
     const { rankableSetPotential } = viewMod;
-    const floor = 5;
+    const floor = { absDps: 5 };
 
     const ctx = {
       setContext: {
@@ -1066,12 +1066,16 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit views (467)", () => {
  * docs/set-bonus-fixture-derivations.md.
  * ------------------------------------------------------------------ */
 
-const FLOOR = 5;
+/**
+ * The cutoff these cases pass the view. A step ranking's figures are gated at
+ * its bar, 5; a flag-off bonus at √2 × 5 ≈ 7.07 (ticket 623).
+ */
+const FLOOR = { absDps: 5 };
 
 type ViewMod = {
   rankableSetPotential: (
     item: { setContext?: unknown },
-    noiseFloorDps: number,
+    cutoff: { absDps: number },
     setCredit?: "full" | "split"
   ) => number;
 };
@@ -1451,14 +1455,14 @@ type SetCreditRule = "best-stop" | "full-path";
 type SubLineMod = ViewMod & {
   setPotentialCredit: (
     ctx: unknown,
-    noiseFloorDps: number,
+    cutoff: { absDps: number },
     setCredit?: "full" | "split",
     rule?: SetCreditRule
   ) => number;
   setCreditUnmeasured: (ctx: unknown) => boolean;
   setPotentialTerms: (
     ctx: unknown,
-    noiseFloorDps: number,
+    cutoff: { absDps: number },
     rule?: SetCreditRule
   ) => {
     credit: number;
@@ -2333,38 +2337,40 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
     // measured value": on the flag path a worn bonus that measures at or
     // below the noise gate is not a break at all, so no line charges it and
     // no piece adds it back. The chest row still ends at pkgΔ4, because the
-    // hands piece's own stats (its single, −4) hold the loss.
+    // hands piece's own stats (its single, −2) hold the loss. The bonus is
+    // worth 2, below the 3 DPS bar; it was 4 while the gate's floor was
+    // √2 × 3 (ticket 623).
     const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
     const { on } = await run490({
-      676: { b2: 4, b4: B4_TH },
+      676: { b2: 2, b4: B4_TH },
       640: { b2: 40, b4: 30 },
     });
     const r = on.ranking;
     const th2 = (r.wornSetLadder ?? []).find(
       (e) => e.setId === 676 && e.count === 2
     );
-    expect(th2?.dps).toBeCloseTo(4, 9);
+    expect(th2?.dps).toBeCloseTo(2, 9);
     expect(th2?.counted).toBe(false);
     expect(bsvDps(r, 676, 2)).toBeUndefined();
     const p4 = bonusOf(r, 640, 4);
-    expect(p4!.packageDeltaDps!).toBeCloseTo(366, 9);
+    expect(p4!.packageDeltaDps!).toBeCloseTo(368, 9);
     expect(p4!.breaks ?? []).toEqual([]);
     const chest = thRow(r, MALORNE.chest);
     const f4 = (chest.setContext?.futureBonuses ?? []).find(
       (f) => f.threshold === 4
     );
     // K5: the pieces are the 4pc's partner choice, and the stop gear's sim,
-    // not the pieces' own stats, holds the hands' −4 (3570 − 3204 = 366).
+    // not the pieces' own stats, holds the hands' −2 (3570 − 3202 = 368).
     expect((f4?.pieces ?? []).map((p) => p.itemId)).toEqual([
       MALORNE.head,
       MALORNE.shoulder,
       MALORNE.hands,
     ]);
-    expect(f4?.stepGearDps).toBeCloseTo(366, 9);
+    expect(f4?.stepGearDps).toBeCloseTo(368, 9);
     const res = view.setPotentialTerms(chest.setContext, FLOOR);
     expect(res.stopThreshold).toBe(4);
     expect(res.terms.filter((t) => t.kind === "break")).toEqual([]);
-    expect(view.rankableSetPotential(chest, FLOOR, "full")).toBeCloseTo(266, 9);
+    expect(view.rankableSetPotential(chest, FLOOR, "full")).toBeCloseTo(268, 9);
     expect(
       chest.deltaDps + view.rankableSetPotential(chest, FLOOR, "full")
     ).toBeCloseTo(p4!.packageDeltaDps!, 9);
@@ -3009,20 +3015,23 @@ type StepTerm = {
 type StepViewMod = ViewMod & {
   setPotentialTerms: (
     ctx: unknown,
-    noiseFloorDps: number
+    cutoff: { absDps: number }
   ) => {
     credit: number;
     stopThreshold: number;
     terms: Array<StopTerm | { kind: "bonus" | "piece" | "break" }>;
   };
-  setPotentialSteps: (ctx: unknown, noiseFloorDps: number) => StepTerm[] | null;
+  setPotentialSteps: (
+    ctx: unknown,
+    cutoff: { absDps: number }
+  ) => StepTerm[] | null;
   setCreditUnmeasured: (ctx: unknown) => boolean;
   setBonusSubLine: (
     ctx: unknown,
     on: boolean
   ) => "not_counted" | "hover_hint" | null;
   crossingLabelCount: (ctx: unknown) => number | null;
-  stepEligible: (future: unknown, noiseFloorDps: number) => boolean;
+  stepEligible: (future: unknown, cutoff: { absDps: number }) => boolean;
 };
 
 async function stepView(): Promise<StepViewMod> {
@@ -6540,6 +6549,126 @@ describe.skipIf(!forkPresent)(
       } finally {
         warn.mockRestore();
       }
+    });
+  }
+);
+
+/* ------------------------------------------------------------------ *
+ * Ticket 623: a set value that is one difference of two sims has the
+ * noise of one item delta, so it is held to the item bar itself, not
+ * to √2 × the bar, which is for the four-sim flag-off bonus.
+ * ------------------------------------------------------------------ */
+
+describe.skipIf(!forkPresent)(
+  "two-sim set values use the item bar (623)",
+  () => {
+    type CutoffMod = { CUTOFF: { absDps: number } };
+    type BarViewMod = {
+      applyView: (
+        r: unknown,
+        v: { withSetPotential?: boolean }
+      ) => { rows: Array<{ itemId: number; belowCutoffInView: boolean }> };
+    };
+
+    /** A set row worth 0 alone, and a plain row worth 3.2, under the tab's bar. */
+    async function rankingWith(setContext: unknown) {
+      const { CUTOFF } =
+        await importForkUpgrades<CutoffMod>("engine/cutoff.ts");
+      return {
+        baseline: { dps: 3000 },
+        cutoff: CUTOFF,
+        items: [
+          {
+            itemId: 1,
+            deltaDps: 0,
+            se: 0.1,
+            seMethod: "independent",
+            bisTags: [],
+            belowCutoff: true,
+            setContext,
+          },
+          {
+            itemId: 2,
+            deltaDps: 3.2,
+            se: 0.1,
+            seMethod: "independent",
+            bisTags: [],
+            belowCutoff: false,
+          },
+        ],
+      };
+    }
+
+    it("623-A: a step future worth 3.5 on the same gear, se 1, is credited under the 3 DPS bar", async () => {
+      // Scenario kind: Set potential on, a future whose same-gear value (one
+      // sim with the bonus minus one without) sits between the 3 DPS item bar
+      // and √2 × 3 ≈ 4.24. Its se of 1 puts the 2·se part at 2, so the bar
+      // decides. The stop gear is 3.5 over current gear, so the row's figure
+      // is 0 + 3.5 and it sorts above the 3.2 row.
+      const view = await importForkUpgrades<BarViewMod>("engine/view.ts");
+      const ranking = await rankingWith({
+        stepRanking: true,
+        setId: 676,
+        setName: "Thunderheart Harness",
+        piecesWornBefore: 1,
+        singleDeltaDps: 0,
+        futureBonuses: [
+          {
+            threshold: 2,
+            piecesNeeded: 1,
+            sameGearDps: 3.5,
+            sameGearSe: 1,
+            stepGearDps: 3.5,
+            pieces: [{ itemId: THUNDERHEART.legs, name: "Leggings" }],
+          },
+        ],
+      });
+      const { rows } = view.applyView(ranking, { withSetPotential: true });
+      expect(rows.map((r) => [r.itemId, r.belowCutoffInView])).toEqual([
+        [1, false],
+        [2, false],
+      ]);
+    });
+
+    it("623-B: the flag-off four-sim bonus keeps the √2 floor", async () => {
+      // Scenario kind: a ranking made without the broken-set flag (the parity
+      // harness and core). Its prospective bonus folds four sims, so 3.5 is
+      // still within √2 × 3 and earns nothing.
+      const view = await importForkUpgrades<BarViewMod>("engine/view.ts");
+      const ranking = await rankingWith({
+        setId: 676,
+        setName: "Thunderheart Harness",
+        piecesWornBefore: 1,
+        piecesAfterSwap: 2,
+        crossesThreshold: false,
+        futureBonuses: [{ threshold: 2, piecesNeeded: 1, dps: 3.5 }],
+      });
+      const { rows } = view.applyView(ranking, { withSetPotential: true });
+      expect(rows.map((r) => [r.itemId, r.belowCutoffInView])).toEqual([
+        [2, false],
+        [1, true],
+      ]);
+    });
+
+    it("623-C: a worn-set ladder rung worth 3.5, se 0.5, is counted and charged", async () => {
+      // Scenario kind: the player wears a 2pc worth 3.5 DPS. The rung is one
+      // sim minus another; at 7200 iterations each sim's se is 30 / √7200, so
+      // the rung's se is exactly 0.5 and 2·se is 1.
+      const { ranking: r } = await runScenario({
+        worn: TH_HANDS_LEGS,
+        pool: [...setPool(MALORNE), ...NEUTRAL_HANDS_LEGS],
+        itemValue: withSetValues(Object.values(MALORNE)),
+        setBonuses: { 676: { b2: 3.5, b4: B4_TH }, 640: { b2: 40, b4: 30 } },
+        iterations: 7200,
+        measureBrokenSetValue: true,
+      });
+      const th2 = (r.wornSetLadder ?? []).find(
+        (e) => e.setId === 676 && e.count === 2
+      );
+      expect(th2?.dps).toBeCloseTo(3.5, 9);
+      expect(th2?.se).toBeCloseTo(0.5, 9);
+      expect(th2?.counted).toBe(true);
+      expect(bsvDps(r, 676, 2)).toBeCloseTo(3.5, 9);
     });
   }
 );
