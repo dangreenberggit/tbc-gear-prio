@@ -20,7 +20,7 @@
     1012
   ],
   "d7EligibleTotal": 3675,
-  "excludedNoSource": 1103,
+  "excludedNoSource": 1100,
   "universeTotal": 826,
   "listOnlyMembership": 0,
   "perSlot": {
@@ -43,7 +43,7 @@
     "atlasloot": 308,
     "curated": 5,
     "db": 2440,
-    "sunmote": 23,
+    "sunmote": 28,
     "two-hop": 18,
     "wowhead": 7
   },

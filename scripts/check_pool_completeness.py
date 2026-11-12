@@ -48,8 +48,9 @@ Every epic (quality >= 4) a spec can wear is classified, first match wins:
                    E-sourceless, which arena items would otherwise match.
     E-token       `setId` is one of the spec's tier sets, item phase <= P;
                    present with a `token` source
-    E-sunmote      upgrade of a Sunmote pair whose upgrade is not below its base
-                   in item level, P = 5; present with a `Sunmote + ...` token
+    E-sunmote      upgrade of a Sunmote pair (base and upgrade share a slot,
+                   both phase 5, base drops in a raid), P = 5; present with a
+                   `Sunmote + ...` token
     E-raid         drops in a raid of phase <= P (db.json drop or AtlasLoot row)
     E-heroic       heroic drop in Magisters' Terrace, P = 5, item phase <= P
     E-rep          reputation reward: a faction `phase_raids.json` lists at
@@ -279,8 +280,6 @@ class Inputs:
             if base.get("type") != up.get("type"):
                 continue
             if phase_of(base) != 5 or phase_of(up) != 5:
-                continue
-            if ilvl(up) < ilvl(base):
                 continue
             if not any(
                 self.raid_phase_by_id.get(int((s.get("drop") or {}).get("zoneId") or 0))
