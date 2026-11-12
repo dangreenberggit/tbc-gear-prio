@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: live check of ticket 863 on dev 5413e971 (fork 74b9c3bc1), 2026-11-10, `.scratch/agent-reports/2026-11-10-live-863-865/` in the main checkout (gitignored)
 Serves: .scratch/plans/upgrades-tab-finish-line.md
@@ -144,3 +144,49 @@ Owner, 2026-11-11, on the error text under each notes line: "idk wtf the "notes 
 The second line under each notes line (the error's first line) is the tab's own display; no wowsims screen puts a sim error in a table or list (session handoff `.scratch/agent-reports/2026-11-11-session-tab-errors-handoff.md` in the main checkout, § How wowsims shows a sim error).
 
 Done when: the tab shows this error the way wowsims shows a sim error, each on-screen piece citing a wowsims file:line, per the design the owner approves.
+
+## Closing note (2026-11-11)
+
+Fixed on branch `fix/867-870-tab-errors` per the design the owner approved
+(owner, 2026-11-11: "tab eerror display: keep going"; design
+`.scratch/agent-reports/2026-11-11-session-tab-error-display-design.md` in
+the main checkout). Every piece on screen copies wowsims' bulk sim
+(`ui/features/bulk/model/run.ts:301-310` at `24606be6`): `console.error`,
+then one `toastManager.add({ variant: 'error', body: errorMessage })` with
+the error's own message, skipped when the user cancelled. The run still goes
+on past a failed sim, which the owner allowed ("we don't necessarily need to
+copy that"). Fork commits, paths under `ui/features/upgrades/`:
+
+- `7698520f4` 'Show only the tab's sentence in the notes list': each line in
+  the section headed "Items left out and other notes (N)" shows the tab's
+  one sentence only; the error line under it (fork `038876c98`) is gone.
+  Every failed call's whole error goes to the console
+  (`substitutionConsoleLines`, `model/assumptions.ts`).
+- `a95e5e10a` 'Keep only a failed call's own error in a line':
+  `Substitution.error` holds only a failed sim's, read's or request build's
+  own error, word for word. A candidate line's item id and slot, and a gem
+  repair that finds no swap (no failed call), follow the sentence in
+  `detail`, for the console (`candidateSkipSubstitution`, `metaOff` in
+  `model/engine/rank.ts`).
+- `ef091a1fc` 'Show the first failed sim's error in one toast': when a run
+  ends with failed calls, `model/run_session.ts` shows one error toast whose
+  body is the `error` of the first such line in the notes list's order
+  (`result.substitutions`, which the list renders as is). Never one toast per
+  failure; none for a superseded run, after Stop, or for a loaded fixture.
+
+What the player sees for the live check's line: the notes list reads "The
+Justicar Battlegear 2-piece set bonus was not measured, because its sim
+failed."; one error toast at the bottom right reads "HTTP 500 from
+/raidSimAsync: injected failure for the 863 live check" (the first failure's
+message); the console has every failure's whole error.
+
+Verified by: in the pair's fork (`vendor/tbc-new-fork`),
+`npx vitest run ui/features/upgrades/model/run_session.test.ts` (before
+`ef091a1fc`: 1 failed, 15 passed, "shows one error toast with the first
+failed call's own message, in the notes list's order"; after: all pass);
+`npx vitest run ui/features/upgrades/components/SubstitutionsList ui/features/upgrades/utils/format.test.ts ui/features/upgrades/model/assumptions.test.ts`
+(before `7698520f4`: 8 failed, 45 passed; after: all pass); in the main
+repo, `pnpm exec vitest run packages/core/test/fork-meta-repair.test.ts packages/core/test/fork-set-net.test.ts packages/core/test/wowsims-fork-parity.test.ts`
+(before `a95e5e10a`: 5 failed, 169 passed of the first two; after: 175 of
+175 with the parity test). `npx vitest run ui/features/upgrades` passes 817
+of 817 at `ef091a1fc`. Not checked on screen in a live run.
