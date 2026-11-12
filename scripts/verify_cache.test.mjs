@@ -105,6 +105,8 @@ function makeCheckout() {
       "*.tsbuildinfo",
       ".env",
       ".scratch/*",
+      ".claude/.cc-writes/",
+      ".claude/scheduled_tasks.json",
       "",
     ].join("\n")
   );
@@ -131,6 +133,8 @@ function makeCheckout() {
   put(root, "packages/core/tsconfig.tsbuildinfo", "{}");
   put(root, "scripts/__pycache__/x.pyc", "pyc");
   put(root, ".scratch/agent-runs/log.jsonl", "{}");
+  put(root, ".claude/.cc-writes/a.json", "{}");
+  put(root, ".claude/scheduled_tasks.json", "[]");
 
   const fork = join(root, "vendor", "tbc-new-fork");
   put(
@@ -314,6 +318,13 @@ const STAYS = [
     what: "a dirty edit committed as it stood",
     before: (c) => put(c.root, "src/a.ts", "export const a = 2;\n"),
     change: (c) => git(c.root, c.env, "commit", "-q", "-am", "x"),
+  },
+  {
+    what: "Claude Code's ignored session files under .claude/",
+    change: (c) => {
+      put(c.root, ".claude/.cc-writes/a.json", "{1}");
+      put(c.root, ".claude/scheduled_tasks.json", "[1]");
+    },
   },
   {
     what: "an ignored file under .scratch/",

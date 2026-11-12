@@ -24,9 +24,10 @@
  *   GIT_CONFIG* reaches the key through `git config --list`.
  * - The values of command-scope proxy and credential git settings: the
  *   sandbox injects them, and no gate fetches over git. Their names stay in.
- * - Ignored files under .scratch/ and .claude/worktrees/: no verify step reads
- *   them, vitest and eslint exclude them, and agent hooks write there while a
- *   run is going.
+ * - Ignored files under .scratch/ and .claude/: no verify step reads them,
+ *   eslint excludes both, vitest excludes .scratch/ and .claude/worktrees/,
+ *   and agents write there while a run is going (the run-log hook under
+ *   .scratch/agent-runs/, Claude Code under .claude/.cc-writes/).
  * - __pycache__/: Python checks each .pyc against its source's mtime and size.
  * - *.tsbuildinfo: tsc's build history (it differs between checkouts built in
  *   a different order); `tsc --build` checks it against the sources, and the
@@ -254,11 +255,10 @@ const derivedCache = (p) =>
 
 /** @returns {"skip" | "build-outputs" | "main-ignored"} */
 function mainIgnoredClass(p) {
-  const [first, second] = segments(p);
-  if (derivedCache(p) || first === "vendor" || first === ".scratch") {
+  const first = segments(p)[0];
+  if (derivedCache(p) || [".claude", ".scratch", "vendor"].includes(first)) {
     return "skip";
   }
-  if (first === ".claude" && second === "worktrees") return "skip";
   if (segments(p).some((s) => s === "dist" || s === "dist-server")) {
     return "build-outputs";
   }
