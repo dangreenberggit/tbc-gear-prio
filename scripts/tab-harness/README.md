@@ -110,11 +110,12 @@ Two timing fields are recorded on every run: **`firstRowS`** — Run click to th
 first `[data-testid="upgrades-result-row"]` (via a
 `MutationObserver` installed before the click; `null` if no row lands) — and
 **`clickToDoneS`** — click to the `Took` status. **`iterationsRequested`** echoes
-the `--iterations` flag. **`character`** is the talents string, points per tree
-and rotation the page holds just before Run, read from the settings it saves to
-localStorage; the tab picks the Survival or Arms EP weights from the points per
-tree. **`assumptionsLine`** is the tab's `[upgrades] assumptions` console line
-for the run, `null` if none was printed.
+the `--iterations` flag. **`character`** is the talents string and rotation the
+page holds just before Run, read from the settings it saves to localStorage.
+**`assumptionsLine`** is the tab's `[upgrades] assumptions` console line for the
+run, `null` if none was printed; its `EP weights set:` item names the set the
+run took, which the tab picks from the talents (Survival and Arms have their
+own).
 
 Opt-in flags. The desktop gate (`scripts/check_desktop_tab.py`) passes
 `--preset-tab` and `--preset` to start from a gear preset; the other flags
