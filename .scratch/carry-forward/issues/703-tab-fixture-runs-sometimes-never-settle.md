@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: bug
 Origin: feat/dps-spec-coverage fixture re-recording, 2026-10-20
 Serves: .scratch/plans/upgrades-tab-finish-line.md
@@ -127,3 +127,42 @@ cause is not found. The second half of "Done means" is met; the first is not.
 - **Next.** The next hang names what stopped and leaves its evidence in
   that run's folder. Read `summary.json` and `backend-goroutines.txt`
   first.
+
+## Closing note
+
+2026-11-12, closed without a change on branch `fix/tab-polish`: not
+reproduced, and the cause is unknown. Part 1 of "Done means" (find the
+cause from a failing run's logs) is not met, because no run has failed
+since the recorder started keeping those logs. Part 2 was met on
+2026-11-09 (the note above).
+
+- 8 more recordings at the pin `817c23d37`, one at a time, alternating
+  `feral-p2-malorne4` and `feral-p3-th-hands-legs`, with one backend and
+  one vite kept up for the whole batch as in October. All 8 settled, in
+  200-319 s wall ("Took" 182.4-310.5 s), with 0 failed backend requests and
+  no answer other than 200. With the 10 of 2026-11-09 and 1 of 2026-11-10,
+  that is 19 settled recordings since the evidence change (`ea2254ed`).
+  19 clean runs do not prove the hang is gone: at a 1-in-10 hang rate they
+  would still happen about 14% of the time.
+- The sim path has not changed since the forks that hung:
+  `git -C vendor/tbc-new-fork diff --stat c89b0b912 817c23d37 -- ui/sim ui/worker sim/web sim/core`
+  lists one generated file, `ui/sim/constants/missing_effects_auto_gen.ts`.
+- If a recording fails again, read its folder under
+  `.scratch/tab-recordings/logs/` (`summary.json`,
+  `backend-goroutines.txt`, and `console.log` for a worker that logged
+  "Created." but never "Ready") and file a new ticket from it.
+- Two follow-ups, neither filed as a new ticket:
+  - A sim that never answers, so the run never ends and Stop does not end
+    it, is what a player could notice. That is ticket 574, which the owner
+    has already decided.
+  - The upstream `worker_http.ts` change for stall (1) above was not made.
+    Stall (1) needs the HTTP path (desktop build or the recorder) and a
+    backend sim that has already sent nothing for 10 minutes.
+
+Investigation: `.scratch/agent-reports/2026-11-12-general-task-703-run-hang.md`
+in the pair `tbc-wt/polish` (gitignored). Re-run: the recorder commands in
+`packages/core/test/fixtures/tab-recordings/README.md:59,61`, one at a time,
+with the backend and vite from `node scripts/dev-tab.mjs backend` and
+`node scripts/dev-tab.mjs frontend`. Each of the 8 runs on 2026-11-12
+printed `settled: Your current gear: ... DPS. Took ...s.` and exited 0
+(`.scratch/agent-reports/2026-11-12-703-repro/status.log` in the pair).

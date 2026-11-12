@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: found while fixing docs/reviews/fix-wrong-advice-text.md round 1 (not a review finding)
 Serves: .scratch/plans/upgrades-tab-finish-line.md, Chunk 4 (Tab-adjacent)
@@ -47,3 +47,23 @@ The schema lists `tip_too_small` under `upgrades_tab.set_bonus` and
 `substitution_in_slot` under `upgrades_tab.assumptions` (each also in its
 object's `required` list if the other keys there are required), and
 `node ./test-locales.mjs` from inside the fork prints no `❌` line.
+
+## Closing note
+
+2026-11-12, fixed on branch `fix/tab-polish` by fork commit
+`tbc-new-fork@dc9dbda76` ("List tip_too_small and substitution_in_slot in
+the upgrades schema"). `schemas/upgrades.schema.json` now lists
+`tip_too_small` under `upgrades_tab.set_bonus` and `substitution_in_slot`
+under `upgrades_tab.assumptions`. The schema is the fork's own file, not
+upstream's. The pin moved to `690fcdeb5`, which holds this commit.
+
+Verified by: run from inside the fork (`vendor/tbc-new-fork`), with node v22:
+
+```
+node ./test-locales.mjs; echo "rc=$?"
+```
+
+On 2026-11-12 at fork `690fcdeb5` it printed four `✅` lines
+(`en/character.json`, `en/talents.json`, `en/translation.json`,
+`en/upgrades.json` "is valid"), no `❌` line, and `rc=0`. Before the fix
+it exited 1 with the error quoted above.
