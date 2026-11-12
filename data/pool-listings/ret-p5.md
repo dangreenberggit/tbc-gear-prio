@@ -16,12 +16,12 @@ Wowsims DB: `wowsims/tbc-new` commit `24606be6bae2601e5ca3985431c8c1da2ab422c0`,
 | P-season-closed | 0 |
 | E-arena | 74 |
 | E-token | 18 |
-| E-sunmote | 23 |
+| E-sunmote | 28 |
 | E-raid | 500 |
 | E-heroic | 12 |
 | E-rep | 41 |
 | E-recipe | 88 |
-| E-sourceless | 377 |
+| E-sourceless | 372 |
 | P-later-phase | 0 |
 | P-vanilla | 187 |
 | P-rep-below-floor | 0 |

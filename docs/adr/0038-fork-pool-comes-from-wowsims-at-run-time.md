@@ -204,7 +204,7 @@ wowsims states no tier-token or Sunmote exchange. The fork carries one
 copied file, `model/data/tier-exchange.json`, written by
 `scripts/generate_fork_exchange.py` from `data/two-hop/<spec>-tokens.json`,
 `data/two-hop/tank-healer-tokens.json` and `data/two-hop/sunmote-pairs.json`:
-306 tier piece to token rows (54 tokens) and 23 Sunmote pairs. It gives tier
+306 tier piece to token rows (54 tokens) and 28 Sunmote pairs. It gives tier
 pieces their token source and the export's token id, and Sunmote upgrades
 their source. It holds no spec and no date.
 
@@ -217,6 +217,12 @@ pieces to `tank-healer-tokens.json` with the same AtlasLoot matcher, where it
 used to skip them; every one of the 108 matches exactly one token, and no
 new token id appears. `pnpm atlasloot:regen:check` compares that file, and
 `pnpm fork-exchange:check` compares the union.
+
+The first build also had 23 Sunmote pairs, not 28: it dropped the five
+Kil'jaeden helm trades that lower the item level (164 to 159), so those
+helms showed "Source not recorded". Yrma, the Sunmote vendor, sells all
+28 AtlasLoot pairs (Wowhead `tbc/npc=25977`), and ticket 672 put the five
+back.
 
 ### Effect data: wowsims' own lists, not a copy
 

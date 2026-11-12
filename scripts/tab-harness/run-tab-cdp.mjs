@@ -71,10 +71,11 @@
 //   it, so the run still starts from the gear set:
 //   --preset-tab "Phase 3" --preset-spec Survival --build "DW - 6% hit" --preset "DW - 6% hit".
 //   --build "?" lists the chips and exits 1 before any sim.
-//   Readback: build. Every run also records character (the talents string,
-//   points per tree and rotation the page holds just before Run) and
-//   assumptionsLine (the tab's "[upgrades] assumptions" console line, which
-//   names the EP weights' phase).
+//   Readback: build. Every run also records character (the talents string
+//   and rotation the page holds just before Run) and assumptionsLine (the
+//   tab's "[upgrades] assumptions" console line, which names the EP-weights
+//   set the run took, picked from the talents, and the phase it was written
+//   for).
 // --wasm-concurrency N sets the page's wasm worker count before navigation; at 1
 //   the page does not split its sim, and a split run gives different floats.
 // --capture-requests <dir> records every WorkerPool.raidSimAsync request and its
@@ -416,9 +417,8 @@ const preRun = `(() => {
 // localStorage at load and 300 ms after each change (fork
 // ui/sim/state/persistence.ts); the page puts no handle to its player on
 // window. The browser profile is new each run, so the one key is this page's.
-// Points per tree are counted as the page's getTalentTreePoints counts them
-// (fork ui/sim/proto/utils.ts); the tab picks the Survival or Arms EP weights
-// from them.
+// The EP-weights set the talents pick is not worked out here: the tab names
+// it in assumptionsLine (ticket 811).
 const readCharacter = `(async () => {
 	await new Promise(r=>setTimeout(r,1000));
 	const keys = Object.keys(localStorage).filter(k=>k.endsWith('__currentSettings__'));
@@ -427,15 +427,12 @@ const readCharacter = `(async () => {
 	try { saved = JSON.parse(localStorage.getItem(keys[0])); } catch (e) { return {error:'saved settings are not JSON: '+e}; }
 	const player = saved?.player ?? {};
 	const talentsString = player.talentsString ?? '';
-	const trees = talentsString.split('-');
-	if (trees.length === 2) trees.push('0');
 	const rotation = player.rotation ?? {};
 	let simple = rotation.simple?.specRotationJson ?? null;
 	try { if (simple !== null) simple = JSON.parse(simple); } catch { /* kept as the stored text */ }
 	return {
 		settingsKey: keys[0],
 		talentsString,
-		talentPointsByTree: trees.map(t=>[...t].reduce((n,c)=>n+(parseInt(c,10)||0),0)),
 		rotationType: rotation.type ?? null,
 		simpleRotation: simple,
 		aplActions: (rotation.priorityList ?? []).length,

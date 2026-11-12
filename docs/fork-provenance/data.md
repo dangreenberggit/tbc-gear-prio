@@ -909,3 +909,24 @@ Verify:
 pnpm ep-presets:check                          # 22 files match the fork symbols they name
 pnpm fork-universes:check                      # 22 bundled copies byte-match
 ```
+
+## Refresh, 2026-11-12 (the five Kil'jaeden Sunmote helms, ticket 672)
+
+The 2026-10-15 refresh above dropped five of the 28 AtlasLoot Sunmote pairs,
+the head pairs that trade an item level 164 Kil'jaeden helm for a 159 one,
+on the untested idea that a Sunmote trade raises the item level. Yrma, the
+Sunmote vendor on the Isle of Quel'Danas, sells all 28 pairs for base item
+plus one Sunmote (Wowhead `tbc/npc=25977`), those five among them.
+`scripts/assemble_universe.py` and `scripts/check_pool_completeness.py` no
+longer test the item level, so `tier-exchange.json` holds 28 Sunmote rows
+(was 23). Fork `b7231a0c4` takes the new copy. The tab's Source cell for
+34400-34404 now reads "Sunwell Plateau (N) · Kil'jaeden", the base helm's
+raid and boss, as it does for every Sunmote upgrade; it read "Source not
+recorded".
+
+Verify:
+
+```bash
+python scripts/generate_fork_exchange.py --check
+pnpm fork-universes:check                      # 22 bundled copies byte-match
+```

@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Serves: .scratch/plans/upgrades-tab-finish-line.md, follow-on of 612 and 613 (scope bucket for the orchestrator to set)
 Type: task
 Origin: pre-merge review of feat/tab-item-lists (docs/reviews/feat-tab-item-lists.md, findings U1-U4), 2026-10-16
@@ -51,3 +51,64 @@ tab now (ADR-0038). Question 1 still reaches the tab: the fork's
 Questions 3 and 4: the tab takes item phases from db.json, so for the tab a
 wrong phase is wowsims' data. The questions are unchanged for this repo's
 builder.
+
+2026-11-12 (closed on `fix/672-sunmote-helms`): all four answered, one fixed.
+Game data is Wowhead's TBC Classic pages, fetched 2026-11-12.
+
+1. **Two Kil'jaeden Sunmote pairs: right.** Yrma ("Transmuter of Sin'dorei
+   Relics", Isle of Quel'Danas, `https://www.wowhead.com/tbc/npc=25977`)
+   sells 34405 for 34339 + Sunmote (34664) and 34406 for 34342 + Sunmote.
+   No change.
+2. **The 5 rejected helms: fixed.** Yrma also sells 34400 for 34345, 34401
+   for 34243, 34402 for 34332, 34403 for 34245 and 34404 for 34244, each
+   plus one Sunmote. The bases are ilvl 164 Kil'jaeden drops and the helms
+   ilvl 159, so the trade swaps a helm for a different helm of the same
+   armour type; it does not raise the item level. Ticket 612's item-level
+   rule was wrong and is gone from `scripts/assemble_universe.py`
+   (`sunmote_upgrade_pairs`) and `scripts/check_pool_completeness.py`
+   (`_sunmote_upgrades`). `tier-exchange.json` has 28 Sunmote rows (was
+   23), and 25 p5 entries in 8 specs go from `unknown` to the token source
+   `Sunmote + <Kil'jaeden helm>` (fork `b7231a0c4`, test
+   `item_sources.test.ts` for 34401). The tab's Source cell for the five
+   helms reads "Sunwell Plateau (N) · Kil'jaeden" where it read "Source not
+   recorded": the cell names a token's zone and boss, not the token (fork
+   `format.test.ts`, "names a tier token’s zone, difficulty and boss, as a
+   drop row does, and not the token"), as it already did for 34405 and
+   34406.
+3. **Ogri'la rewards in p2 lists: no change.** The CLI's p2 is right: the
+   Wowhead pages of the four epic rewards the p2 lists hold (`tbc/item=`
+   32645, 32647, 32648, 32651, each sold at Exalted) say "Added in content
+   phase 2". Warcraft Wiki's Anniversary timeline also lists "Phase 2
+   (Overlords of Outland) - The Eye, Serpentshrine Cavern, Ogri'la,
+   Sha'tari Skyguard"
+   (`https://warcraft.wiki.gg/wiki/World_of_Warcraft:_Burning_Crusade_Classic_Anniversary_Edition`,
+   seen through a search result; the site answers a fetch with 403). The
+   tab offers them from db.json's phase 1; that is wowsims' own fact, kept
+   as ticket 641 was (ADR-0038, "match wowsims").
+4. **Band of Eternity in p2 lists: no change; the sources disagree.**
+   `tbc/item=29298` is the reward of quest 10462 Champion's Pledge and
+   `tbc/item=29302` of quest 10463 Sage's Pledge (Scale of the Sands, 250
+   reputation each); both quest pages say "Added in patch 2.5.2 "Overlords
+   of Outland"", the phase-2 patch. `tbc/quest=10445` The Vials of
+   Eternity needs Vashj's and Kael's Vial Remnants, phase-2 bosses, and
+   gives 3,000 Scale of the Sands reputation. Against p2: both ring pages
+   say "Added in content phase 3". That 10445 opens the rings is said only
+   in user comments (on 10445, 10462 and 10463, from 2007), not in any
+   quest page's data. db.json says phase 2, and the tab follows it (as 641); the
+   CLI lists keep p2, which only the CLI shows.
+
+Token class groups: the "Classes:" line on `tbc/item=` 29759 Hero (Hunter,
+Mage, Warlock), 29760 Champion (Paladin, Rogue, Shaman), 29761 Defender
+(Warrior, Priest, Druid), 31095 Protector (Warrior, Hunter, Shaman), 31096
+Vanquisher (Rogue, Mage, Druid) and 31097 Conqueror (Paladin, Priest,
+Warlock) matches every group in `data/two-hop/token-groups.json` (class ids
+from `data/proto/common.proto`). No change.
+
+Verified by: `python scripts/check_pool_completeness.py --check` (25
+findings with the item-level clause dropped from the gate alone, 0 after
+the fix) and `tbc-new-fork@b7231a0c4`
+(`npx vitest run ui/features/upgrades/utils/item_sources.test.ts`). The
+Wowhead check, re-runnable: fetch `https://www.wowhead.com/tbc/npc=25977`,
+take each sold item's `"cost":[[0,[],[[<base>,1],[34664,1]]]]` pair, and
+compare with `data/two-hop/sunmote-pairs.json`: 28 pairs on each side,
+equal.
