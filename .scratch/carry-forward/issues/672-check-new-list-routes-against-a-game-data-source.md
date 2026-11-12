@@ -72,7 +72,7 @@ Game data is Wowhead's TBC Classic pages, fetched 2026-11-12.
    `item_sources.test.ts` for 34401). The tab's Source cell for the five
    helms reads "Sunwell Plateau (N) · Kil'jaeden" where it read "Source not
    recorded": the cell names a token's zone and boss, not the token (fork
-   `format.test.ts`, "names a tier token's zone, difficulty and boss, as a
+   `format.test.ts`, "names a tier token’s zone, difficulty and boss, as a
    drop row does, and not the token"), as it already did for 34405 and
    34406.
 3. **Ogri'la rewards in p2 lists: no change.** The CLI's p2 is right: the
@@ -93,8 +93,8 @@ Game data is Wowhead's TBC Classic pages, fetched 2026-11-12.
    Eternity needs Vashj's and Kael's Vial Remnants, phase-2 bosses, and
    gives 3,000 Scale of the Sands reputation. Against p2: both ring pages
    say "Added in content phase 3". That 10445 opens the rings is said only
-   in user comments on quest 10462 (2008-04-30 and later), not by either
-   quest page. db.json says phase 2, and the tab follows it (as 641); the
+   in user comments (on 10445, 10462 and 10463, from 2007), not in any
+   quest page's data. db.json says phase 2, and the tab follows it (as 641); the
    CLI lists keep p2, which only the CLI shows.
 
 Token class groups: the "Classes:" line on `tbc/item=` 29759 Hero (Hunter,
