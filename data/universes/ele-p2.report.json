@@ -15,7 +15,7 @@
   ],
   "phaseRepFactions": [],
   "d7EligibleTotal": 3632,
-  "excludedNoSource": 1177,
+  "excludedNoSource": 1174,
   "universeTotal": 544,
   "listOnlyMembership": 0,
   "perSlot": {
@@ -37,7 +37,7 @@
     "atlasloot": 305,
     "curated": 6,
     "db": 2322,
-    "sunmote": 23,
+    "sunmote": 28,
     "two-hop": 18,
     "wowhead": 7
   },
