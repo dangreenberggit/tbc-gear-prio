@@ -53,6 +53,7 @@ function runVerifyOn(fixture) {
     mkdirSync(join(root, "scripts"));
     for (const f of [
       "run_verify.mjs",
+      "verify_cache.mjs",
       "verify_fork_guard.mjs",
       "verify_summary.mjs",
       "vitest_json_reporter.mjs",

@@ -20,6 +20,10 @@
  *
  * `preflight:node` is excluded from the step list: it is a version guard, not
  * a gate, and this script already requires Node to run at all.
+ *
+ * Before the first step, verify_cache.mjs looks for a stamp left by a green
+ * full run of these exact inputs, and after a green run leaves one (ticket
+ * 876). TBC_VERIFY_FRESH=1 runs every step regardless.
  */
 
 import { spawn } from "node:child_process";
@@ -34,6 +38,7 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { verifyWithCache } from "./verify_cache.mjs";
 import { forkGuard, skipGuard } from "./verify_fork_guard.mjs";
 import {
   extractPythonSkips,
@@ -126,6 +131,20 @@ async function main() {
     return;
   }
 
+  process.exitCode = await verifyWithCache({
+    root: ROOT,
+    env: process.env,
+    runFull: runSteps,
+  });
+}
+
+/**
+ * Runs every step and prints the summary.
+ *
+ * @returns {Promise<{code: number, ran: number, skipped: number}>} the exit
+ *   code, and the gate counts the summary line printed (0 when a step failed)
+ */
+async function runSteps() {
   const steps = verifySteps();
   const pythonSkips = [];
   let stepsRan = 0;
@@ -161,8 +180,7 @@ async function main() {
         // from the report, and the report is kept for the full messages.
         if (isTest) reportVitestFailure(vitestJsonPath);
         keepReport = isTest && existsSync(vitestJsonPath);
-        process.exitCode = code;
-        return;
+        return { code, ran: 0, skipped: 0 };
       }
 
       if (isTest) {
@@ -176,8 +194,7 @@ async function main() {
           console.error(
             `run_verify.mjs: could not read vitest's JSON report at ${vitestJsonPath}: ${err}\nverify: failed -- the test and skip counts are unknown without it.`
           );
-          process.exitCode = 1;
-          return;
+          return { code: 1, ran: 0, skipped: 0 };
         }
         stepsRan += 1;
       } else {
@@ -206,12 +223,14 @@ async function main() {
       );
     }
 
+    const ran = stepsRan + vitestSkips.ran;
+    const skipped = pythonSkips.length + vitestSkips.skipped;
     console.log(
       "\n" +
         formatSummary({
           pythonSkips,
           vitest: {
-            ran: stepsRan + vitestSkips.ran,
+            ran,
             skipped: vitestSkips.skipped,
             reasons: vitestSkips.reasons,
           },
@@ -226,8 +245,9 @@ async function main() {
     });
     if (skipFailure) {
       console.error(`\n${skipFailure}`);
-      process.exitCode = 1;
+      return { code: 1, ran, skipped };
     }
+    return { code: 0, ran, skipped };
   } finally {
     if (!keepReport) rmSync(tmpDir, { recursive: true, force: true });
   }
