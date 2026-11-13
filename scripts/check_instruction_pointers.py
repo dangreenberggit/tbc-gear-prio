@@ -418,11 +418,16 @@ def collect(world: World) -> tuple[list[Pointer], list[str]]:
             errors.append(f"{claude} is missing or unreadable; pointers into it cannot be checked (set CI only on CI).")
     repo_keys, home_keys = site_keys(world)
     pointers: list[Pointer] = []
+    read: set[str] = set()
     for key in repo_keys + home_keys:
         site = world.doc(key)
         if site is None:
             errors.append(f"{key}: cannot read")
             continue
+        # One overlay file stands in for a card in both agent homes.
+        if site.shown in read:
+            continue
+        read.add(site.shown)
         pointers += pointers_in(site, world) + quoted_pointers(site, world)
     return pointers, errors
 
@@ -974,6 +979,17 @@ def t_numbered_heading_is_not_its_subsection():
         }
     )
     assert rc == 0 and "3 checked" in out, (out, err)
+
+
+def t_overlay_file_feeding_both_agent_homes_is_read_once():
+    tmp = Path(tempfile.mkdtemp(prefix="ptr-overlay-", dir=_BASE))
+    _tree(tmp, {"agents/design-task.md": "`~/.claude/routing.md` § Gone\n", "routing.md": "## A\n"})
+    home = {
+        ".claude/agents/design-task.md": "old\n",
+        ".claude_router/agents/design-task.md": "old\n",
+    }
+    rc, out, err = _run({"AGENTS.md": "x\n"}, ["check", "--home-overlay", str(tmp)], home_files=home)
+    assert rc == 1 and "1 checked, 1 dead" in out and len(err.splitlines()) == 1, (out, err)
 
 
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("t_")]
