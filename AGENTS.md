@@ -40,9 +40,9 @@ paths: an `@` import loads at start and would undo the saving.
   the `writing-for-agents` skill. A change to `AGENTS.md`, `CLAUDE.md`, a
   skill or an agent definition then follows `~/.claude/AGENTS.md`
   § Agent instructions.
-- **Renaming, moving or removing a heading or a file in an instruction
-  file:** run `pnpm pointers refs <path>` first
-  (`scripts/check_instruction_pointers.py`).
+- **Renaming, moving or removing a heading or a file that agents read**
+  (`AGENTS.md`, `docs/`, skills, agent files): run
+  `pnpm pointers refs <path>` first, then update every pointer it lists.
 - **Reporting a nontrivial task done,** especially a review, research, or
   "use X to check Y": the `dont-be-stupid` checklist.
 - **Tickets:** local markdown under `.scratch/`,
