@@ -46,8 +46,8 @@ mismatched `vendor/` input and the command that restores it.
 
 If the fork branch's HEAD is not the commit the pair's
 `data/wowsims-fork.lock.json` pins, the fork gates exit 2 until the lock names
-it. The command prints a note when that is the case. See `known-traps.md`,
-"Before moving the wowsims engine pin".
+it. The command prints a note when that is the case. See
+`docs/agents/known-traps.md` § Before moving the wowsims engine pin.
 
 ## Re-pin after a fork change
 

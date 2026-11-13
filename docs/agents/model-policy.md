@@ -32,7 +32,7 @@ Check again when verify gains a step.
   Push from the "Claude" card. The card's sandbox allows writes only under `~/.npm` and
   `~/.cache`, so `pnpm wt:pair` probably fails there too (hypothesis,
   untested;
-  `docs/reviews/feat-glm-worker-policy.md`, "Not a defect").
+  `docs/reviews/feat-glm-worker-policy.md`: "Not a defect").
 
 ## Stage-gate seats
 
