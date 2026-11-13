@@ -653,6 +653,72 @@ def t_style_space_after_section_sign():
     assert rc == 1 and "1 style" in out and "§ 2" in err, (out, err)
 
 
+HOME = {
+    ".claude/AGENTS.md": "# G\n## Subagent reports\n",
+    ".claude/routing.md": "## Decision table\nSee `~/.claude/AGENTS.md` § Subagent reports.\n",
+    ".claude/agents/general-task.md": "Report: `~/.claude/AGENTS.md` § Gone.\n",
+    ".claude/skills/x/SKILL.md": "`~/.claude/routing.md` § Decision table\n",
+    ".claude/skills/.trash/old/SKILL.md": "`~/.claude/routing.md` § Gone\n",
+    ".claude_router/agents/glm-task.md": "Then `~/.claude/routing.md` § Decision table.\n",
+}
+
+
+def t_home_pointers_and_home_sites():
+    rc, out, err = _check(
+        {"AGENTS.md": "See `~/.claude/routing.md` § Decision table.\n"}, home_files=HOME
+    )
+    # repo 1 + routing 1 + general-task 1 (dead) + skill 1 + glm 1; .trash skipped
+    assert rc == 1 and "5 checked, 1 dead" in out, (out, err)
+    assert "~/.claude/agents/general-task.md:1:" in err and "Gone" in err, err
+
+
+def t_ci_skips_and_counts_home_pointers():
+    rc, out, err = _check(
+        {
+            "AGENTS.md": "See `~/.claude/routing.md` § Gone and `docs/agents/a.md` § A.\n",
+            "docs/agents/a.md": "## A\n",
+        },
+        ci=True,
+        home_files={},
+    )
+    assert rc == 0, (out, err)
+    assert "1 checked, 0 dead, 0 style; 1 into ~/.claude skipped (CI)" in out, out
+
+
+def t_missing_home_claude_fails_off_ci():
+    rc, out, err = _check({"AGENTS.md": "x\n"}, home_files={})
+    assert rc == 1 and ".claude is missing or unreadable" in err, (out, err)
+
+
+def t_scratch_targets_skipped_and_counted():
+    rc, out, err = _check({"AGENTS.md": "See `.scratch/x.md` § Whatever.\n"})
+    assert rc == 0 and "0 checked" in out and "1 into .scratch skipped" in out, (out, err)
+
+
+def t_home_overlay_replaces_home_files():
+    tmp = Path(tempfile.mkdtemp(prefix="ptr-overlay-"))
+    _tree(
+        tmp,
+        {
+            "agents/general-task.md": "Report: `~/.claude/AGENTS.md` § Subagent reports.\n",
+            "agents/glm-task.md": "Then `~/.claude/routing.md` § Size bound.\n",
+            "routing.md": "## Decision table\n## Size bound\n",
+            "skills/new/SKILL.md": "`~/.claude/routing.md` § Nope\n",
+            "install.sh": "not a site\n",
+        },
+    )
+    home = dict(HOME)
+    home[".claude_router/agents/glm-task.md"] = "Then `~/.claude/routing.md` § Gone.\n"
+    rc, out, err = _run(
+        {"AGENTS.md": "x\n"}, ["check", "--home-overlay", str(tmp)], home_files=home
+    )
+    # The overlay fixes general-task and feeds both agent homes; its new
+    # skill is a site, and its pointer is dead.
+    assert rc == 1 and "1 dead" in out, (out, err)
+    assert str(tmp / "skills/new/SKILL.md") + ":1:" in err, err
+    assert "general-task" not in err and "glm-task" not in err, err
+
+
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("t_")]
 
 
