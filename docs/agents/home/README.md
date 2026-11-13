@@ -15,10 +15,12 @@ files with this older text.
 Not yet moved to the setup repo: the hooks in `hooks/` and their tests.
 `flash-over-sonnet.py` and `subagent-foreground-helpers.py` are live in
 `~/.claude/hooks/`, and this folder holds their only versioned copy.
-`hooks/install-flash-over-sonnet.sh` copies the first one and wires it;
-it changes nothing while the two copies match.
+Before changing either hook, ask the user where its source should live.
+Do not run `hooks/install-flash-over-sonnet.sh`: it copies the first
+hook and wires it, which today changes nothing because the two copies
+match.
 
-## What the folder described
+## What the folder described (as of 2026-11-06, not checked since)
 
 On the WSL host, `~/.claude/hooks/agent-guard.py` and `permissions.deny`
 rules in `~/.claude/settings.json` replace `block-outside-repo.sh`; both
@@ -35,6 +37,6 @@ the XDG directory variables before it checks a path. It does not see a
 write made inside a script or an interpreter one-liner. The
 `settings.json` in the Windows home wires no hook.
 
-The staged file is named `CLAUDE.md.install` because a real `CLAUDE.md`
+The copy of `CLAUDE.md` is named `CLAUDE.md.install` because a real `CLAUDE.md`
 here would be auto-discovered as project context when an agent reads this
 directory.

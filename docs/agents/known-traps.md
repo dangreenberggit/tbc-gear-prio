@@ -96,19 +96,21 @@ must match. `i/lf w/crlf` means the write used CRLF. `.gitattributes`
 (`* text=auto eol=lf`) turns it back to LF when the file is staged, so
 `git diff --stat` shows no line count for it. The bytes on disk are
 still CRLF, and byte-compare gates such as `pnpm fork-universes:check`
-fail on them. The few files stored as CRLF
-(`git ls-files --eol | grep i/crlf`) go the other way: an LF write shows
-every line changed in `git diff --stat`, and
-`git diff --ignore-cr-at-eol` shows the real change. Either way, write
-the file back with the endings its `i/` column shows, then commit. The
-Edit tool keeps a file's endings; a script, or a Windows editor saving
-over the `\\wsl.localhost\...` path, may not.
+fail on them, so fix the bytes on disk too: `sed -i 's/\r$//' <file>`.
+A few files are stored as CRLF, and the rule leaves them so
+(`git ls-files --eol | grep i/crlf`). They go the other way: an LF write
+shows every line changed in `git diff --stat`, and
+`git diff --ignore-cr-at-eol` shows the real change; write such a file
+back with CRLF. Then check `git ls-files --eol <file>` again and commit.
+The Edit tool keeps a file's endings; a script, or a Windows editor
+saving over the `\\wsl.localhost\...` path, may not.
 
 **Generated artifacts:** regenerate them from the committed sources with
-the pinned toolchain. Before you commit, the working tree must match
-`HEAD`, or the commit says which side is wrong. A claim that a
-byte-compare gate passes on another OS needs a CI run you have read; do
-not predict it from a local run.
+the pinned toolchain. When the sources did not change, the regenerated
+file must equal the committed one; when it does not, find out whether
+the generator or the committed file is wrong, and say which in the
+commit. A claim that a byte-compare gate passes on another OS needs a CI
+run you have read; do not predict it from a local run.
 
 The Python generators no longer flip endings (ticket 283, fixed by 399 on
 2026-09-15 across fourteen write sites). **Keep it that way when you add

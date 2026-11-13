@@ -9,7 +9,8 @@ In orchestrator mode (`~/.claude/AGENTS.md` § Orchestrator mode), the
 session in this repo also makes these tool calls itself:
 
 - writing the `stage-gate` skill's `brief.md` (its step 1) in the stage
-  folder, `.scratch/stage-gate/<slug>/`
+  folder, `.scratch/stage-gate/<slug>/`, and reading the tickets and
+  reports the brief cites
 - reading the files in that folder and
   `docs/agents/stage-gate-project.md`
 - `git rev-parse HEAD` and `git diff --stat`, as short state checks
@@ -25,7 +26,7 @@ review file's path and its summary.
 
 The general rules are in `~/.claude/model-policy.md` § Who spawns whom.
 
-The session-only rule above binds the interactive session. A subagent
+The rule in § The session delegates binds the interactive session. A subagent
 that orchestrates (a stage-gate builder, or a subagent spawned to run
 `parallel-phase` as Delegator) holds its own judgment, merge and fan-in,
 and hands workhorse jobs down like any overseer.
