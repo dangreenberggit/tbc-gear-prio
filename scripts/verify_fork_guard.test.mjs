@@ -114,6 +114,7 @@ function runDriver({ withFork, step, steps, env: extraEnv = {} }) {
     mkdirSync(join(root, "scripts"));
     for (const f of [
       "run_verify.mjs",
+      "verify_cache.mjs",
       "verify_fork_guard.mjs",
       "verify_summary.mjs",
     ]) {
@@ -187,6 +188,17 @@ describe("run_verify.mjs", () => {
       step: SKIPPING_STEP,
       env: { [OPT_OUT]: "1" },
     });
+    expect(result.status).toBe(0);
+  });
+
+  // The temp checkout is not a git repository, so no cache key can be
+  // computed there; the driver must say so and still run every step.
+  it("consults the pass cache, and runs in full when it has no key", () => {
+    const result = runDriver({ withFork: true, step: MARK_STEP });
+    expect(result.stdout).toContain(
+      "verify: cache off -- could not compute the inputs key"
+    );
+    expect(result.stepRan).toBe(true);
     expect(result.status).toBe(0);
   });
 });
