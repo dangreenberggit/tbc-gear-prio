@@ -149,4 +149,4 @@ gitignored; main checkout only).
 
 **SKILL.md step 2, never revert:** ticket 261
 
-**Subagent helpers run in the foreground (`~/.claude/hooks/subagent-foreground-helpers.py`, staged in `docs/agents/home/hooks/`):** ticket 712
+**Subagent helpers run in the foreground (`~/.claude/hooks/subagent-foreground-helpers.py`; source in `/home/daniel/setup`, `research/rebuild/hooks/`):** ticket 712
