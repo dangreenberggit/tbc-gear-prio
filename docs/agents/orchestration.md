@@ -37,8 +37,8 @@ Lanes and types: `~/.claude/routing.md` § Principles. Go slower or serial on wa
 a weaker substitute for a review job: if waiting and serialising both
 fail, stop and say so rather than downgrading; and never promote a job to
 a taller lane it does not belong in. Managers must not background workers
-and end the turn without a disk handoff for fan-in (model-policy
-§ Manager / multi-step fan-out). Fills per harness, and Composer and Grok
+and end the turn without a disk handoff for fan-in (`~/.claude/model-policy.md`
+§ Manager / multi-step fan-out (any harness)). Fills per harness, and Composer and Grok
 on Cursor: `~/.claude/model-policy.md` § Harness notes. The `effort`
 argument: `~/.claude/routing.md` § Models and effort.
 
@@ -46,7 +46,7 @@ argument: `~/.claude/routing.md` § Models and effort.
 
 When to fan out writers, and who runs the fan-out, is global
 (`~/.claude/model-policy.md` § Parallelism vs serial). Here, a slice that reads or edits
-the fork gets a pair (AGENTS.md § The forked tab repo). The
+the fork gets a pair (`AGENTS.md` § The forked tab repo). The
 `parallel-phase` skill holds the rest: disjointness is a claim to verify
 before spawning, isolation per slice, merge onto the feature branch,
 teardown, `pnpm verify` on the integrated tip, `pre-merge-review`, then

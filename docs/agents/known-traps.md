@@ -266,7 +266,7 @@ held — 3333 by a stray `wowsimtbc`, or 5173 by another session's vite
 leftover `tsc --noEmit --watch`, `vite` or `chrome` processes.
 
 Each port's server builds and serves the fork of the folder that started it,
-so first find that folder (`docs/agents/paired-worktrees.md`, "Live tab").
+so first find that folder (`docs/agents/paired-worktrees.md` § Work in it, the "Live tab" item).
 **3333** must be exactly 3333 (the frontend hardcodes the proxy; the entry
 sets `autoPort: false`): if the `wowsimtbc` on it was built in your
 folder and none of your sessions manages it, stop it and start the managed

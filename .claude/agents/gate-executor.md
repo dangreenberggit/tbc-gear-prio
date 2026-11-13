@@ -123,7 +123,7 @@ with a silent deviation is the failure.
   the spawn** (`docs/agents/stage-gate-project.md` § Worker lanes,
   Executor). Keep to the `parallel-phase` cap of 3–5 workers at once.
   Name each worker's report-file path in your own checkout (report rule:
-  that file's § Folders), because teardown removes the worker's worktree.
+  `docs/agents/stage-gate-project.md` § Folders), because teardown removes the worker's worktree.
 - Stay inside the Paths manifest. A file you need that is not in it is a
   `flag` ledger row, not an edit.
 - Per unit of a kind that `docs/agents/stage-gate-project.md`

@@ -54,11 +54,13 @@ const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
  * @returns {string[]} `pnpm run <script>` names, in order, from package.json's
  *   `verify:steps` chain.
  *
- * `verify` itself is just `preflight:node && node scripts/run_verify.mjs` (the
- * preflight check runs outside this script, before Node's own version could
- * be the reason a step fails oddly) -- the real step list lives in
- * `verify:steps` so both `pnpm run verify:steps` (the old plain chain, kept as
- * an escape hatch) and this driver read one definition.
+ * `verify` itself is `preflight:node && pointers:check && node
+ * scripts/run_verify.mjs`. The preflight check runs outside this script,
+ * before Node's own version could be the reason a step fails oddly; the
+ * pointer check runs outside it so the verify cache never skips it, since
+ * it reads files under ~/.claude that no cache key covers. The real step
+ * list lives in `verify:steps` so both `pnpm run verify:steps` (the old
+ * plain chain, kept as an escape hatch) and this driver read one definition.
  */
 function verifySteps() {
   return pkg.scripts["verify:steps"]

@@ -1,16 +1,18 @@
 # Stage-gate project values
 
-The values that the `stage-gate` skill and its seats read for this repo,
-one section per kind. Lanes and spawning rules in full:
-`~/.claude/routing.md`.
+The values that the `stage-gate` skill
+(`~/.claude/skills/stage-gate/SKILL.md`) and its agents read for this
+repo, one section per kind. The skill's planner is `design-task` (model
+`fable`); its plan checker, builder and build checker are `general-task`
+(model `opus`). Lanes and spawning rules in full: `~/.claude/routing.md`.
 
 ## Planner
 
-The `gate-planner` reads only this section.
+The planner reads this section.
 
 **Workhorse types:** `~/.claude/routing.md` § Decision table. **Block
 size:** `~/.claude/model-policy.md` § Workhorse jobs. **Naming the model
-on every spawn:** § Claude Code of the same file.
+on every spawn:** `~/.claude/model-policy.md` § Claude Code.
 
 **Judgment agent:** `~/.claude/routing.md` § Decision table.
 
@@ -19,7 +21,7 @@ on every spawn:** § Claude Code of the same file.
 **Plan lines:** A step that changes what the Upgrades tab
 renders says how it is looked at. The default is a `Visual check:` line:
 the fixture names to look at (from `data/tab-fixtures/`) and the one
-sentence to judge against. The executor opens the fixture's link in a
+sentence to judge against. The builder opens the fixture's link in a
 browser pane where the harness has one (the Claude desktop app's Browser
 pane; untested under T3 Code or WSL mode), and otherwise looks at the
 PNGs from `pnpm tab-fixtures:smoke`. Only the browser pane covers hover
@@ -39,13 +41,13 @@ in the header comment of `scripts/tab-harness/test-review.mjs`.
 
 **Run-log folder:** `.scratch/agent-runs`
 
-**Report folder:** Report files: AGENTS.md § Subagent reports.
+**Report folder:** Report files: `AGENTS.md` § Subagent reports.
 
 ## Hand off
 
 **Review step:** `pre-merge-review`
 
-**Merge rule:** the AGENTS.md merge gate (AGENTS.md § Commits and merges)
+**Merge rule:** the AGENTS.md merge gate (`AGENTS.md` § Commits and merges)
 
 **Merge command:** `pnpm merge-to-dev`, after the ask
 
@@ -53,7 +55,7 @@ in the header comment of `scripts/tab-harness/test-review.mjs`.
 
 **Gate command:** `pnpm verify`
 
-**Executors never merge into:** `dev` or `main`
+**Builders never merge into:** `dev` or `main`
 
 ## Tickets
 
@@ -68,16 +70,16 @@ The only commands you run are the ones that
 
 **Judgment agent:** `~/.claude/routing.md` § Decision table.
 
-**Workhorse types** (the session, the Reviewer and the Executor):
+**Workhorse types** (the session, the plan checker and the builder):
 `~/.claude/routing.md` § Decision table.
 
-### Executor
+### Builder
 
-**Parallel-phase workers:** A slice's type: routing.md § Decision table.
+**Parallel-phase workers:** A slice's type: `~/.claude/routing.md` § Decision table.
 
 ## Checkouts
 
-**Pair:** When AGENTS.md § The forked tab repo says the work needs a
+**Pair:** When `AGENTS.md` § The forked tab repo says the work needs a
 pair, have a subagent make the pair with `pnpm wt:pair`;
 `isolation: worktree` has no fork.
 
@@ -86,7 +88,7 @@ pair, have a subagent make the pair with `pnpm wt:pair`;
 
 ## Search scopes
 
-**Reviewer, Less code:** in the fork (`vendor/tbc-new-fork`), or in
+**Plan checker, when it looks for code that already exists:** in the fork (`vendor/tbc-new-fork`), or in
 wowsims upstream (`upstream/master` in the fork).
 `git -C vendor/tbc-new-fork grep -n <words>` (the fork) and
 `git -C vendor/tbc-new-fork grep -n <words> upstream/master` (upstream).
@@ -105,38 +107,38 @@ fork. If your checkout has no `vendor/tbc-new-fork`, write that in
 
 **Plan lines (planner):** in § Planner.
 
-**Session, step 5:** When the plan has an SME step, the executor spawns
-`gate-sme` once and commits its handoff.
+**Builder (skill step 4):** When the plan has an SME step, the builder
+spawns `gate-sme` once and commits its handoff.
 
-When a plan step carries a `Visual check:` line, the executor looks at
+When a plan step carries a `Visual check:` line, the builder looks at
 each named fixture before that unit's re-pin (`pnpm tab-fixtures:smoke`
 and its PNGs, or the fixture's link in a browser pane where the harness
 has one), judges it against the sentence, and records the smoke line and
-what it saw in its ledger. That is the whole check: no `tab-review` run
+what it saw in its report. That is the whole check: no `tab-review` run
 and no `gate-visual` seat.
 
-When a plan step carries a `Visual acceptance:` block, the executor
+When a plan step carries a `Visual acceptance:` block, the builder
 writes the unit's manifest, runs `pnpm tab-review <manifest>`, and spawns
 `gate-visual` once per unit before that unit's re-pin. A ticket with a
 Visual acceptance is not closed on `fail` or `cannot-judge`.
 
-**Gate C done-when:** every ticket with a Visual acceptance has a `pass`
+**Build check (skill step 5) done when:** every ticket with a Visual acceptance has a `pass`
 row or an accepted / escalated disposition.
 
-**Executor:**
+**Builder:**
 
 - Per unit with a `Visual check:` line: run `pnpm tab-fixtures:smoke` (it
   starts `:5173` if the port is free) and Read the named fixtures' PNGs in
   `.scratch/tab-fixtures-smoke/`, or, where the harness has a browser pane,
   open their links from `http://localhost:5173/tbc/tab-fixtures/` in it →
-  judge against the sentence → record the smoke line and what you saw in the
-  ledger → re-pin.
+  judge against the sentence → record the smoke line and what you saw in
+  your report → re-pin.
 - Per unit with a `Visual acceptance:` block: fork edits → write
   `.scratch/stage-gate/<slug>/visual/<unit>/manifest.json` →
   `pnpm tab-review <manifest>` → spawn `gate-visual` (`model: "opus"`) →
   `fail`: fix, re-capture, `SendMessage` the same seat for the failed
   tickets; `cannot-judge`: fix the manifest and re-capture; `pass`: commit
-  the handoff, then re-pin. Ledger row per ticket:
+  the handoff, then re-pin. Report row per ticket:
   `visual: pass | fail-fixed | contested`. A ticket with a Visual
   acceptance is not closed on `fail` or `cannot-judge`.
 
@@ -149,4 +151,4 @@ gitignored; main checkout only).
 
 **SKILL.md step 2, never revert:** ticket 261
 
-**Subagent helpers run in the foreground (`~/.claude/hooks/subagent-foreground-helpers.py`, staged in `docs/agents/home/hooks/`):** ticket 712
+**Subagent helpers run in the foreground (`~/.claude/hooks/subagent-foreground-helpers.py`; source in `/home/daniel/setup`, `research/rebuild/hooks/`):** ticket 712

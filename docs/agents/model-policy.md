@@ -11,7 +11,7 @@ Estimate: implementation workers on this repo have run roughly 100k–240k
 tokens each (five measured workers, 2026-08-11, fix-round worker table in
 `.scratch/set-bonus-value/orchestration-observations-2026-08-12.html`).
 Multiply by slice count, add fan-in. Those five workers ran Fable
-(§ Lane is per job, not per parent). No Opus-at-`high` worker has been
+(`~/.claude/model-policy.md` § Lane is per job, not per parent). No Opus-at-`high` worker has been
 measured, so on Claude Code the estimate is a hypothesis, untested.
 
 ## Trial types
@@ -32,7 +32,7 @@ Check again when verify gains a step.
   Push from the "Claude" card. The card's sandbox allows writes only under `~/.npm` and
   `~/.cache`, so `pnpm wt:pair` probably fails there too (hypothesis,
   untested;
-  `docs/reviews/feat-glm-worker-policy.md`, "Not a defect").
+  `docs/reviews/feat-glm-worker-policy.md`: "Not a defect").
 
 ## Stage-gate seats
 
@@ -45,9 +45,9 @@ The Executor runs on Opus at effort `high` because of the kind of work
 it does. It decides adapt-vs-flag-vs-stop wherever the plan
 and reality disagree, and a plan is underspecified by construction. The
 failure mode there is a silent paper-over, which is a judgment failure and
-not a throughput one. A slice's type: routing.md § Decision table.
+not a throughput one. A slice's type: `~/.claude/routing.md` § Decision table.
 Every seat hands its workhorse jobs to the workhorse types in
-blocks (§ Workhorse jobs).
+blocks (`~/.claude/model-policy.md` § Workhorse jobs).
 
 The orchestrator is the interactive session. The owner picks its model and
 effort per session. The skill names every seat's model at

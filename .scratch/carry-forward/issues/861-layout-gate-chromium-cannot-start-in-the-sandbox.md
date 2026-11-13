@@ -53,3 +53,16 @@ and the layout lock's digest, `testedTabHash` in
 `data/wowsims-fork-layout.lock.json`, would need to hash that build's
 browsers.json entry); or a sandbox setting that allows the socket (the
 owner's decision).
+
+## Comments
+
+- 2026-11-13, `feat/instruction-pointer-check` stage-gate trial: the same
+  Chromium start failure stops `pnpm tab-fixtures:smoke`, so a builder
+  cannot do a plan's `Visual check:` step from a sandboxed agent.
+  Both trial builders (pairs `tbc-wt/trial-sg-new`, `trial-sg-old`) got
+  `Error: Chromium CDP endpoint did not come up` (rc 1); a hand start
+  crashed at `process_singleton_posix.cc:292 ... socket() failed:
+  Operation not permitted`. The T3 browser-pane route also failed: a vite
+  server started in one sandboxed command was unreachable from
+  `preview_open` (`net::ERR_CONNECTION_REFUSED`) and from another
+  command's `curl`. Reports: `.scratch/agent-reports/2026-11-13-general-task-pointer-check-finish.md`.

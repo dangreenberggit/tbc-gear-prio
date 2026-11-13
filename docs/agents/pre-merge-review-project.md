@@ -55,14 +55,14 @@ shows how to list those files.
 
 **Path:** `docs/reviews/<branch-name>.md` (slashes → dashes)
 
-**Disposition rules:** `docs/agents/known-traps.md`, "Before writing a
-review Disposition table"
+**Disposition rules:** `docs/agents/known-traps.md` § Before writing a
+review Disposition table
 
 ## Tickets
 
 **New ticket:** `.scratch/carry-forward/issues/<NN>-<slug>.md`, with the
 header lines that `docs/agents/issue-tracker.md` § Carry-forward tickets
-lists.
+(deferred from a review) lists.
 
 **Ticket path pattern:** `.scratch/carry-forward/issues/*.md`
 

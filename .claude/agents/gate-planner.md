@@ -17,7 +17,7 @@ once with the final message `WRONG_MODEL: <model name>; expected Fable`.
 Your prompt names the brief, the plan template and the stage folder,
 and sometimes more files (see below). Read every file your prompt
 names, and the `## Planner` section of
-`docs/agents/stage-gate-project.md` (called § Planner below), which
+`docs/agents/stage-gate-project.md`, which
 holds this project's values for the planner.
 
 ## The plan
@@ -65,12 +65,13 @@ plan, not a diff.
 - **Read-only.** You change no files.
 - **Research through helpers.** You hold the judgment. Give blocks of
   searches, other reads, command runs and measurements to the workhorse
-  types that § Planner names, several jobs to each helper. Tell each
+  types that `docs/agents/stage-gate-project.md` § Planner names, several jobs to each helper. Tell each
   helper which files to read, which commands to run, the exact form of
   its answer, and that it may change no file except its report file.
   Run at most 4 helpers at once; give a helper more jobs rather than
-  start more helpers. Name the model on every spawn, as § Planner says.
-  Spawn the judgment agent that § Planner names only for a question
+  start more helpers. Name the model on every spawn, as `docs/agents/stage-gate-project.md`
+  § Planner says.
+  Spawn the judgment agent that that section names only for a question
   that needs judgment you cannot hold yourself.
 - **Batch your tool calls.** Each message of yours that holds tool
   calls sends your whole context to the model again. First privately

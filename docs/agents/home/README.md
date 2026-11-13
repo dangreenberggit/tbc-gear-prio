@@ -12,13 +12,10 @@ refence too").
 removed on 2026-11-13: running either would have overwritten the live
 files with this older text.
 
-Not yet moved to the setup repo: the hooks in `hooks/` and their tests.
-`flash-over-sonnet.py` and `subagent-foreground-helpers.py` are live in
-`~/.claude/hooks/`, and this folder holds their only versioned copy.
-Before changing either hook, ask the user where its source should live.
-Do not run `hooks/install-flash-over-sonnet.sh`: it copies the first
-hook and wires it, which today changes nothing because the two copies
-match.
+The sources of `flash-over-sonnet.py` and `subagent-foreground-helpers.py`,
+and their tests, moved on 2026-11-13 to `/home/daniel/setup`, folder
+`research/rebuild/hooks/`. Do not run `hooks/install-flash-over-sonnet.sh`:
+the hook file it copies is no longer here.
 
 ## What the folder described (as of 2026-11-06, not checked since)
 
