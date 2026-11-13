@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: Owner, 2026-11-12, orchestrating session for tickets 672/811/623/635
 Blocks: none
@@ -49,3 +49,12 @@ branch gets `pre-merge-review`.
 
 **Separate, needs the owner's OK of the text:** drop the hand runs that a
 hook or merge-to-dev repeats (report § 4: P1-P4).
+
+## Closing note
+
+Closed 2026-11-12 on `feat/876-verify-cache`. The cache, its tests and the
+Gates table row are on the branch; the review fixed three faults (A1-A3).
+The last line above, dropping hand runs that a hook or merge-to-dev
+repeats, moved to ticket 877.
+
+Verified by: docs/reviews/feat-876-verify-cache.md
