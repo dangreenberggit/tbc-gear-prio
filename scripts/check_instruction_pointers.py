@@ -274,18 +274,32 @@ def _style_problem(before: str, span: str | None, rest: str, said: str, world: W
     if not rest.startswith(" "):
         return f"write a space after §: `§ {said}`."
     if rest[1:2] in ('"', "\u201c"):
-        return f"drop the quotes: § {said.strip(chr(34) + chr(0x201c) + chr(0x201d))}."
+        where = f"`{span}` " if span else ""
+        return f"drop the quotes: {where}§ {said}."
     return None
 
 
 def _said(rest: str) -> str:
-    flat = re.sub(r"\s+", " ", rest[:120]).strip()
-    m = re.match(r"[^.;:()|\[\]]*", flat)
-    return (m.group(0) if m else flat)[:60].strip(" ,")
+    """A guess at the heading text after a §, for messages only."""
+    flat = re.sub(r"\s+", " ", rest[:160]).strip()
+    q = re.match(r'["\u201c]([^"\u201d]*)', flat)
+    if q:
+        return q.group(1).strip()
+    flat = flat.split("§")[0]
+    flat = re.match(r"[^.;:()|\[\]]*", flat).group(0)
+    flat = re.sub(r"(,|\s)*(\band|\bor)?\s*$", "", flat)
+    if len(flat) > 60:
+        flat = flat[:60].rsplit(" ", 1)[0] + " ..."
+    return flat.strip(" ,")
 
 
 def pointers_in(site: Doc, world: World) -> list[Pointer]:
-    text = blank_fences(site.text)
+    # Blockquote markers become spaces, so a wrapped heading reads whole.
+    text = re.sub(
+        r"(?m)^([ \t]*)((?:>[ \t]?)+)",
+        lambda m: m.group(1) + " " * len(m.group(2)),
+        blank_fences(site.text),
+    )
     spans = _spans(text)
     in_span = [False] * (len(text) + 1)
     for a, b, _ in spans:
@@ -293,7 +307,9 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
             in_span[i] = True
     span_ending_at = {b: s for a, b, s in spans}
     found: list[Pointer] = []
-    prev: tuple[str, int | None, int, int] | None = None  # target, end, § pos, para
+    # The previous pointer: target, where its heading ended, § pos, paragraph,
+    # and whether it was a style failure.
+    prev: tuple[str, int | None, int, int, bool] | None = None
     for m in re.finditer("§", text):
         pos = m.start()
         if in_span[pos]:
@@ -305,24 +321,31 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
         stripped = before.rstrip()
         target: str | None = None
         span = span_ending_at.get(para + len(stripped))
+        continued = False
         if span is not None and _looks_like_path(span):
             target = span
         elif prev is not None and prev[3] == para:
-            ptarget, pend, ppos, _ = prev
+            ptarget, pend, ppos, _, _ = prev
             gap = text[pend:pos] if pend is not None else ""
             if pend is not None and CONNECTOR.match(gap):
-                target = ptarget
+                target, continued = ptarget, True
             elif pend is None and re.search(r"(,|\band|\bor)\s*$", stripped) and "`" not in text[ppos:pos] and "." not in text[ppos + 1 : pos]:
-                target = ptarget
+                target, continued = ptarget, True
         if target is None:
             target = site.key
         said = _said(rest[1:] if rest[:1] == " " else rest)
         p = Pointer(site, line, target, said)
+        if continued and prev[4]:
+            # Fixing the style failure before it fixes this one too.
+            p.skipped = "style"
+            found.append(p)
+            prev = (target, None, pos, para, True)
+            continue
         p.problem = _style_problem(stripped, span, rest, said, world)
         p.style = p.problem is not None
         end = _resolve(p, rest, world, pos + 1)
         found.append(p)
-        prev = (target, end, pos, para)
+        prev = (target, end, pos, para, p.style)
     return found
 
 
@@ -908,6 +931,33 @@ def t_mermaid_focus_and_no_file_written():
     assert rc == 0 and sorted(p for p in tmp.rglob("*")) == before, e.getvalue()
     edges = [l.strip() for l in o.getvalue().splitlines() if "-->" in l]
     assert len(edges) == 2 and all("|1|" in l for l in edges), edges  # workflow->a, b->workflow
+
+
+def t_heading_wrapped_in_a_blockquote():
+    rc, out, err = _check(
+        {
+            "AGENTS.md": "> Read `docs/agents/a.md` § Models and\n> effort first.\n",
+            "docs/agents/a.md": "## Models and effort\n",
+        }
+    )
+    assert rc == 0 and "1 checked" in out, (out, err)
+
+
+def t_continuation_of_a_style_failure_is_one_failure():
+    rc, out, err = _style("See docs/agents/a.md § Heading one and § 2.\n")
+    assert rc == 1 and "0 dead, 1 style" in out and len(err.splitlines()) == 1, (out, err)
+
+
+def t_message_names_only_the_heading():
+    rc, out, err = _check(
+        {
+            "AGENTS.md": "Read `docs/agents/a.md` § Gone, § Also gone and § X; then go.\n",
+            "docs/agents/a.md": "## X\n",
+        }
+    )
+    assert 'no heading "Gone"' in err and 'no heading "Also gone"' in err, err
+    rc, out, err = _style('See `docs/agents/a.md` § "Heading one" first.\n')
+    assert "drop the quotes: `docs/agents/a.md` § Heading one." in err, err
 
 
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("t_")]
