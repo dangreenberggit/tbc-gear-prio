@@ -1,8 +1,7 @@
 # Agent model policy: this repo's values
 
-The policy is global: `~/.claude/model-policy.md`, staged in
-`docs/agents/home/model-policy.md`. This file holds only this repo's
-values, under the global file's section names. For anything a pointer
+The policy is global: `~/.claude/model-policy.md`. This file holds only
+this repo's values, under the global file's section names. For anything a pointer
 names that this file does not hold, read the same section of the global
 file.
 
