@@ -28,7 +28,7 @@ because that would need updating every time a tool changes.
 
 1. Branch off `dev`: `feat/<slug>`, or `phase-N/<slug>` for a PLAN.md phase.
 2. Red → green, one slice at a time (see the `tdd` skill). Commits: global
-   `AGENTS.md` § Commits and merges.
+   `AGENTS.md` § Git.
 3. `pnpm verify` before every push. This runs typecheck, lint, format check,
    and tests in one command — it's the thing every gate below actually
    calls, so there's one definition of "passing," not a different one per
@@ -64,7 +64,7 @@ because that would need updating every time a tool changes.
    executor, then an independent reviewer.
 
 5. **Ask the user, then `pnpm merge-to-dev`.** The merge ask follows
-   global `AGENTS.md` § Commits and merges; here the branch's review is
+   global `AGENTS.md` § Git; here the branch's review is
    the review file, or for a tooling-only branch the `instruction-review`
    result. `pnpm merge-to-dev` is the only supported door. It merges
    into `dev` only after three checks pass: `pnpm verify`; the review and
@@ -110,7 +110,7 @@ Cursor adapters. See the global `parallel-phase` skill
 | Review file before merge to `dev`                                              | `pnpm merge-to-dev` / `merge-ready` fail with no `docs/reviews/<branch>.md`, except when every changed file is on `TOOLING_PATHS` (`scripts/check_merge_ready.py`) | none                                                          |
 | Deferred findings filed as tickets                                             | `pnpm merge-to-dev` / `merge-ready` — every `defer` links an open carry-forward ticket                                                                             | `wontfix` with a reason, or fix on branch                     |
 | Phase open-blockers seen                                                       | `pnpm merge-to-dev` on `phase-N/*` fails if `Blocks: phase-N` tickets are open                                                                                     | `--ack-open-blockers`                                         |
-| Comment policy (why, not what; global `AGENTS.md` § Comment policy)            | Not mechanically enforced — a `pre-merge-review` finding                                                                                                           | —                                                             |
+| Comment policy (why, not what; global `AGENTS.md` § Writing)                   | Not mechanically enforced — a `pre-merge-review` finding                                                                                                           | —                                                             |
 
 **The escape hatch is real and intentional** — spikes and throwaway
 exploration shouldn't be blocked by the full gate. It's safe specifically

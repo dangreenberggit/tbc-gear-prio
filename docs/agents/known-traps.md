@@ -3,9 +3,8 @@
 Read the entry for what you are **about to do** — each heading is the
 action that arms the trap. The _Symptom_ line doubles as the after-the-fact
 index when something already broke. Environment basics live in
-`~/.claude/AGENTS.md` § This machine (staged in
-`docs/agents/home/AGENTS.md`) — this file covers only what that section
-does not. The commands below are for the WSL (Ubuntu) dev host.
+`~/.claude/AGENTS.md` § This machine and `~/.claude/machine.md` — this
+file covers only what those do not. The commands below are for the WSL (Ubuntu) dev host.
 
 ## Before running node / pnpm / test commands
 
@@ -86,12 +85,32 @@ Do not run interactive `pnpm approve-builds`; declare builds via
 
 **Symptom when armed:** `git diff --stat` shows hundreds of changed lines
 for an edit you know was small (a 4-line schema edit staging as ~18k
-lines; a 2-hash `sed` rewriting all 182 lines of a file); or a reviewer
-reports CRLF where HEAD is LF.
+lines; a 2-hash `sed` rewriting all 182 lines of a file); `git status`
+lists a file as modified while `git diff --stat` shows no line count,
+only "CRLF will be replaced by LF"; or a reviewer reports CRLF where HEAD
+is LF.
 
-The cause, the check after a scripted write, and the rules for generated
-artifacts and CI byte-compare gates are in `~/.claude/AGENTS.md` § Shell
-and tool habits.
+**After a scripted or generated write, check the endings:**
+`git ls-files --eol <file>`. Its `i/` (index) and `w/` (disk) columns
+must match. `i/lf w/crlf` means the write used CRLF. `.gitattributes`
+(`* text=auto eol=lf`) turns it back to LF when the file is staged, so
+`git diff --stat` shows no line count for it. The bytes on disk are
+still CRLF, and byte-compare gates such as `pnpm fork-universes:check`
+fail on them, so fix the bytes on disk too: `sed -i 's/\r$//' <file>`.
+A few files are stored as CRLF, and the rule leaves them so
+(`git ls-files --eol | grep i/crlf`). They go the other way: an LF write
+shows every line changed in `git diff --stat`, and
+`git diff --ignore-cr-at-eol` shows the real change; write such a file
+back with CRLF. Then check `git ls-files --eol <file>` again and commit.
+The Edit tool keeps a file's endings; a script, or a Windows editor
+saving over the `\\wsl.localhost\...` path, may not.
+
+**Generated artifacts:** regenerate them from the committed sources with
+the pinned toolchain. When the sources did not change, the regenerated
+file must equal the committed one; when it does not, find out whether
+the generator or the committed file is wrong, and say which in the
+commit. A claim that a byte-compare gate passes on another OS needs a CI
+run you have read; do not predict it from a local run.
 
 The Python generators no longer flip endings (ticket 283, fixed by 399 on
 2026-09-15 across fourteen write sites). **Keep it that way when you add

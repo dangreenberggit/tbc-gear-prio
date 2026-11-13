@@ -8,10 +8,9 @@ paths: an `@` import loads at start and would undo the saving.
 ## Before you start, by kind of work
 
 - **You are the interactive session (the user talks to you directly):**
-  the global rule "Orchestrator mode" (staged in
-  `docs/agents/home/AGENTS.md`) says when you hand work to subagents. In
-  that mode, this repo's extra calls are in `docs/agents/orchestration.md`
-  § The session delegates.
+  `~/.claude/AGENTS.md` § Orchestrator mode says when you hand work to
+  subagents. In that mode, this repo's extra calls are in
+  `docs/agents/orchestration.md` § The session delegates.
 - **Writing code or tests, committing, pushing:** `docs/workflow.md`
   (the loop, gates, testing seams, types from JSON).
 - **A ported engine file, a scripted or generated file, the wowsims
@@ -39,8 +38,8 @@ paths: an `@` import loads at start and would undo the saving.
 - **A plan, a ticket, a skill, an agent definition, `AGENTS.md`,
   `CLAUDE.md`, or a doc an agent is pointed at:** a second pass against
   the `writing-for-agents` skill. A change to `AGENTS.md`, `CLAUDE.md`, a
-  skill or an agent definition then follows the global rule "Changing
-  agent instructions" (staged in `docs/agents/home/AGENTS.md`).
+  skill or an agent definition then follows `~/.claude/AGENTS.md`
+  § Agent instructions.
 - **Reporting a nontrivial task done,** especially a review, research, or
   "use X to check Y": the `dont-be-stupid` checklist.
 - **Tickets:** local markdown under `.scratch/`,
@@ -49,19 +48,18 @@ paths: an `@` import loads at start and would undo the saving.
 
 ## Durable claims
 
-The rules on durable claims, one-option comparisons and exit codes are
-global (`~/.claude/AGENTS.md` § Durable claims, staged in
-`docs/agents/home/AGENTS.md`). When the claim is that an upstream
+The rules on claims and exit codes are global (`~/.claude/AGENTS.md`
+§ Claims and § Development). When the claim is that an upstream
 feature is absent, the refs that could contain it are in
 `docs/agents/known-traps.md` § Before moving the wowsims engine pin.
 
 ## CLI environment
 
-The machine facts and the general shell and tool habits are global
-(`~/.claude/AGENTS.md` § This machine and § Shell and tool habits,
-staged in `docs/agents/home/AGENTS.md`). This repo's Node, pnpm, Go and
-protoc setup and its check: `docs/agents/known-traps.md` § Before
-running node / pnpm / test commands.
+The machine facts are global (`~/.claude/AGENTS.md` § This machine).
+This repo's Node, pnpm, Go and protoc setup and its check:
+`docs/agents/known-traps.md` § Before running node / pnpm / test
+commands. Line endings and generated files: the same file, § Before any
+scripted or generated file edit.
 
 ## The forked tab repo
 
@@ -77,9 +75,8 @@ bump and `pnpm sim-implemented-effects:generate`):
 
 ## Commits and merges
 
-The rules on commits, the merge ask and parked work are global
-(`~/.claude/AGENTS.md` § Commits and merges, staged in
-`docs/agents/home/AGENTS.md`). Here, `git add <paths>` does not scope
+The rules on commits and the merge ask are global
+(`~/.claude/AGENTS.md` § Git). Here, `git add <paths>` does not scope
 the commit: pre-commit runs `lint-staged` against `*` with `--no-stash
 --no-hide-partially-staged`, so every dirty file rides along, and
 staging part of a file commits the rest of it too. `pnpm verify` before
@@ -94,9 +91,8 @@ loop, step 4).
 
 ## Spawning
 
-The rule is `~/.claude/routing.md` (staged in
-`docs/agents/home/routing.md`). In this repo a workhorse type also stops
-and returns `NEEDS_JUDGMENT` for an edit under `data/` or
+The rule is `~/.claude/routing.md`. In this repo a workhorse type also
+stops and returns `NEEDS_JUDGMENT` for an edit under `data/` or
 `vendor/tbc-new-fork`, `.githooks/` or `scripts/`. A workhorse type also
 returns `NEEDS_JUDGMENT: <trap>` for any action
 `docs/agents/known-traps.md` names a trap for. A workhorse type may run a
@@ -110,9 +106,8 @@ commands").
 
 ## Subagent reports
 
-The global "Subagent reports" rule applies (staged in
-`docs/agents/home/AGENTS.md` § Chat responses). With no path in the
-prompt, the report file goes at
+The global rule applies (`~/.claude/AGENTS.md` § Subagent reports).
+With no path in the prompt, the report file goes at
 `.scratch/agent-reports/<UTC date>-<agent type>-<a few words of the task>.md`
 (gitignored). In the condensed report, mark an important claim that has
 no source `hypothesis, untested` in place of "unverified". Callers with
