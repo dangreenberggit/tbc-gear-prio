@@ -122,6 +122,7 @@ class Pointer:
     said: str  # the heading text as written, for messages
     heading: str | None = None  # matched heading text, when resolved
     problem: str | None = None
+    style: bool = False  # the problem is a ruled-out way of writing it
     skipped: str | None = None  # "home" or "scratch"
 
 
@@ -243,6 +244,40 @@ def _match_heading(heads: list[tuple[int, str]], rest: str) -> tuple[list[str], 
     return [], 0
 
 
+UNBACKTICKED = re.compile(r"(?:^|[\s(])(~/[\w./-]+|[\w./-]*[\w-]\.md)$")
+QUOTED = re.compile(r'(`[^`\n]+`),?\s*["\u201c]([^"\u201d\n]{1,120})["\u201d]')
+GLOBAL_RULE = re.compile(r'\bthe global rule\s+["\u201c]([^"\u201d\n]{1,120})["\u201d]', re.I)
+
+
+def _style_problem(before: str, span: str | None, rest: str, said: str, world: World) -> str | None:
+    """Why the text around a § is a ruled-out style, or None."""
+    m = re.search(r"\bglobal\s+`([^`]+)`$", before)
+    if m:
+        name = m.group(1).rsplit("/", 1)[-1]
+        return f"drop `global` and write the full path: `~/.claude/{name}` § {said}."
+    m = re.search(r"`([\w:.-]+)`\s+skill(?:'s)?,?$", before)
+    if m:
+        x = m.group(1)
+        return f"name the skill's file, not the skill: `~/.claude/skills/{x}/SKILL.md` § {said} (or `.claude/skills/{x}/SKILL.md` for a repo skill)."
+    if before.endswith("("):
+        inner = before[:-1].rstrip()
+        m = re.search(r"`([^`]+)`$", inner)
+        if m and _looks_like_path(m.group(1)):
+            return f"drop the parentheses: `{m.group(1)}` § {said}."
+    if span is not None and _looks_like_path(span):
+        if "/" not in span and not (world.repo / span).is_file():
+            return f"`{span}` has no folder and is not a root file of the repo; write its path, such as `docs/agents/{span}` § {said} or `~/.claude/{span}` § {said}."
+    elif span is None:
+        m = UNBACKTICKED.search(before)
+        if m:
+            return f"put the path in backticks: `{m.group(1)}` § {said}."
+    if not rest.startswith(" "):
+        return f"write a space after §: `§ {said}`."
+    if rest[1:2] in ('"', "\u201c"):
+        return f"drop the quotes: § {said.strip(chr(34) + chr(0x201c) + chr(0x201d))}."
+    return None
+
+
 def _said(rest: str) -> str:
     flat = re.sub(r"\s+", " ", rest[:120]).strip()
     m = re.match(r"[^.;:()|\[\]]*", flat)
@@ -269,7 +304,6 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
         before = text[para:pos]
         stripped = before.rstrip()
         target: str | None = None
-        problem: str | None = None
         span = span_ending_at.get(para + len(stripped))
         if span is not None and _looks_like_path(span):
             target = span
@@ -282,11 +316,34 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
                 target = ptarget
         if target is None:
             target = site.key
-        p = Pointer(site, line, target, _said(rest[1:] if rest[:1] == " " else rest))
-        p.problem = problem
+        said = _said(rest[1:] if rest[:1] == " " else rest)
+        p = Pointer(site, line, target, said)
+        p.problem = _style_problem(stripped, span, rest, said, world)
+        p.style = p.problem is not None
         end = _resolve(p, rest, world, pos + 1)
         found.append(p)
         prev = (target, end, pos, para)
+    return found
+
+
+def quoted_pointers(site: Doc, world: World) -> list[Pointer]:
+    """Pointers written as a path and a quoted heading, with no §."""
+    text = blank_fences(site.text)
+    found = []
+    for m in QUOTED.finditer(text):
+        path = m.group(1).strip("`").strip()
+        if not _looks_like_path(path):
+            continue
+        doc = world.doc(path)
+        quote = m.group(2)
+        if doc is not None and any(norm(h) == norm(quote) for _, h in doc.heads):
+            p = Pointer(site, text.count("\n", 0, m.start()) + 1, path, quote)
+            p.problem, p.style = f"write `{path}` § {quote}.", True
+            found.append(p)
+    for m in GLOBAL_RULE.finditer(text):
+        p = Pointer(site, text.count("\n", 0, m.start()) + 1, "~/.claude/AGENTS.md", m.group(1))
+        p.problem, p.style = f"write `~/.claude/AGENTS.md` § {m.group(1)}.", True
+        found.append(p)
     return found
 
 
@@ -304,9 +361,6 @@ def _resolve(p: Pointer, rest: str, world: World, offset: int) -> int | None:
     doc = world.doc(p.target)
     if doc is None:
         p.problem = f"{p.target} is missing. Fix the path, or write the reference as prose with no §."
-        return None
-    if not rest.startswith(" "):
-        p.problem = f"write a space after §: `§ {p.said}`."
         return None
     hits, used = _match_heading(doc.heads, rest[1:])
     if len(hits) == 1:
@@ -342,7 +396,7 @@ def collect(world: World) -> tuple[list[Pointer], list[str]]:
         if site is None:
             errors.append(f"{key}: cannot read")
             continue
-        pointers += pointers_in(site, world)
+        pointers += pointers_in(site, world) + quoted_pointers(site, world)
     return pointers, errors
 
 
@@ -350,19 +404,21 @@ def run_check(world: World, out, err) -> int:
     pointers, errors = collect(world)
     for e in errors:
         print(e, file=err)
-    dead = [p for p in pointers if p.problem]
-    for p in dead:
+    bad = sorted((p for p in pointers if p.problem), key=lambda p: (p.site.shown, p.line))
+    for p in bad:
         print(f"{p.site.shown}:{p.line}: {p.problem}", file=err)
+    dead = [p for p in bad if not p.style]
+    style = [p for p in bad if p.style]
     checked = [p for p in pointers if not p.skipped]
     home_skipped = sum(1 for p in pointers if p.skipped == "home")
     scratch_skipped = sum(1 for p in pointers if p.skipped == "scratch")
-    summary = f"pointers: {len(checked)} checked, {len(dead)} dead, 0 style"
+    summary = f"pointers: {len(checked)} checked, {len(dead)} dead, {len(style)} style"
     if home_skipped:
         summary += f"; {home_skipped} into ~/.claude skipped (CI)"
     if scratch_skipped:
         summary += f"; {scratch_skipped} into .scratch skipped"
     print(summary, file=out)
-    return 1 if dead or errors else 0
+    return 1 if bad or errors else 0
 
 
 def main(argv: list[str], *, home: Path, ci: bool, out=sys.stdout, err=sys.stderr) -> int:
@@ -530,6 +586,71 @@ def t_site_set():
         }
     )
     assert rc == 0 and "4 checked" in out, (rc, out, err)
+
+
+def _style(text: str, extra: dict | None = None):
+    files = {"AGENTS.md": text, "docs/agents/a.md": "## Heading one\n## 2. Two\n"}
+    files.update(extra or {})
+    return _check(files)
+
+
+def t_style_unbackticked_path():
+    for text in (
+        "See docs/agents/a.md § Heading one.\n",
+        "description: Spawn (~/.claude/routing.md § Decision table).\n",
+        "As AGENTS.md § Heading one says.\n",
+    ):
+        rc, out, err = _style(text)
+        assert rc == 1 and "1 style" in out and "backticks" in err, (text, out, err)
+
+
+def t_style_global_before_path():
+    rc, out, err = _style("Per global `AGENTS.md` § Heading one.\n")
+    assert rc == 1 and "1 style" in out and "global" in err and "~/.claude/AGENTS.md" in err, (out, err)
+
+
+def t_style_name_without_folder():
+    rc, out, err = _style("See `a.md` § Heading one.\n")
+    assert rc == 1 and "1 style" in out and "folder" in err, (out, err)
+    rc, out, err = _style("See `PLAN.md` § 14.\n", {"PLAN.md": "## 14. Gates\n"})
+    assert rc == 0, (out, err)
+
+
+def t_style_skill_name():
+    for text in (
+        "Read the `stage-gate` skill's § Heading one.\n",
+        "The `pre-merge-review` skill, § Heading one, says.\n",
+    ):
+        rc, out, err = _style(text)
+        assert rc == 1 and "1 style" in out and "SKILL.md" in err, (text, out, err)
+
+
+def t_style_parenthesised():
+    rc, out, err = _style("See `docs/agents/a.md` (§ Heading one).\n")
+    assert rc == 1 and "1 style" in out and "parentheses" in err, (out, err)
+
+
+def t_style_quoted_heading():
+    for text in (
+        'See `docs/agents/a.md`, "Heading one".\n',
+        'See `docs/agents/a.md` "Heading one".\n',
+        'See `docs/agents/a.md` § "Heading one".\n',
+    ):
+        rc, out, err = _style(text)
+        assert rc == 1 and "1 style" in out and "§ Heading one" in err, (text, out, err)
+    # A quote that is no heading of that file is prose, not a pointer.
+    rc, out, err = _style('`docs/agents/a.md` "says this".\n')
+    assert rc == 0, (out, err)
+
+
+def t_style_global_rule():
+    rc, out, err = _style('Follow the global rule "Orchestrator mode".\n')
+    assert rc == 1 and "1 style" in out and "~/.claude/AGENTS.md" in err, (out, err)
+
+
+def t_style_space_after_section_sign():
+    rc, out, err = _style("See `docs/agents/a.md` §2.\n")
+    assert rc == 1 and "1 style" in out and "§ 2" in err, (out, err)
 
 
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("t_")]
