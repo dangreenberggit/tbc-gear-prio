@@ -1,4 +1,24 @@
-# Staged copies of the global agent files
+# Archive: the old staged copy of the global agent files
+
+**This folder is an archive, kept for reference. Nothing here is live.
+Do not edit it to change a global rule, and do not copy it into
+`~/.claude/`.** The source of the global agent files is the git repo
+`/home/daniel/setup`, folder `research/rebuild/`. The copies here are the
+text as it stood before the 2026-11-11 rebuild; the owner asked on
+2026-11-13 to keep them as reference ("keep the old orchestration file as
+refence too").
+
+`install-routing.sh` and the copy block this README used to hold were
+removed on 2026-11-13: running either would have overwritten the live
+files with this older text.
+
+Not yet moved to the setup repo: the hooks in `hooks/` and their tests.
+`flash-over-sonnet.py` and `subagent-foreground-helpers.py` are live in
+`~/.claude/hooks/`, and this folder holds their only versioned copy.
+`hooks/install-flash-over-sonnet.sh` copies the first one and wires it;
+it changes nothing while the two copies match.
+
+## What the folder described
 
 On the WSL host, `~/.claude/hooks/agent-guard.py` and `permissions.deny`
 rules in `~/.claude/settings.json` replace `block-outside-repo.sh`; both
@@ -15,69 +35,6 @@ the XDG directory variables before it checks a path. It does not see a
 write made inside a script or an interpreter one-liner. The
 `settings.json` in the Windows home wires no hook.
 
-The files are versioned here, and **the user runs the install in their own
-terminal**, from inside a checkout of the branch that holds the change. It checks
-every source first, writes each copy next to its target as `.new`, and
-moves the copies into place only when all are written.
-
-For the routing change, one command installs everything, the hook's
-wiring included: `bash docs/agents/home/install-routing.sh`.
-
-- `install-routing.sh` copies `routing.md`, the global files and the agent
-  files for both cards, then runs the next script.
-- `hooks/install-flash-over-sonnet.sh` copies `hooks/flash-over-sonnet.py`
-  and wires it in `~/.claude_router/settings.json`; `--check` prints what is installed.
-
-The block below copies files only and wires no hook:
-
-```bash
-bash <<'EOF'
-set -euo pipefail
-S="$(git rev-parse --show-toplevel)/docs/agents/home"
-pairs=(
-  "$S/AGENTS.md"                          "$HOME/.claude/AGENTS.md"
-  "$S/CLAUDE.md.install"                  "$HOME/.claude/CLAUDE.md"
-  "$S/model-policy.md"                    "$HOME/.claude/model-policy.md"
-  "$S/routing.md"                         "$HOME/.claude/routing.md"
-  "$S/hooks/bash-footguns.sh"             "$HOME/.claude/hooks/bash-footguns.sh"
-  "$S/hooks/subagent-foreground-helpers.py" "$HOME/.claude/hooks/subagent-foreground-helpers.py"
-  "$S/hooks/flash-over-sonnet.py"         "$HOME/.claude/hooks/flash-over-sonnet.py"
-)
-while IFS= read -r -d '' f; do
-  pairs+=("$S/skills/$f" "$HOME/.claude/skills/$f")
-done < <(cd "$S/skills" && git ls-files -z)
-for t in general discrete simple modest design; do
-  pairs+=("$S/agents/$t-task.md" "$HOME/.claude/agents/$t-task.md"
-          "$S/agents/$t-task.md" "$HOME/.claude_router/agents/$t-task.md")
-done
-for t in glm-task glm-flash-task; do
-  pairs+=("$S/agents/$t.md" "$HOME/.claude_router/agents/$t.md")
-done
-for ((i = 0; i < ${#pairs[@]}; i += 2)); do
-  test -s "${pairs[i]}" || { echo "missing or empty: ${pairs[i]}" >&2; exit 1; }
-done
-for ((i = 0; i < ${#pairs[@]}; i += 2)); do
-  mkdir -p "$(dirname "${pairs[i+1]}")"
-  cp "${pairs[i]}" "${pairs[i+1]}.new"
-  cmp -s "${pairs[i]}" "${pairs[i+1]}.new"
-done
-for ((i = 0; i < ${#pairs[@]}; i += 2)); do
-  mv "${pairs[i+1]}.new" "${pairs[i+1]}"
-done
-ln -sfn "$HOME/.claude/routing.md" "$HOME/.claude_router/routing.md"
-echo "installed $(( ${#pairs[@]} / 2 )) files"
-EOF
-```
-
-`AGENTS.md` is reached only through the `@AGENTS.md` import in
-`CLAUDE.md`, so both are needed. `~/.claude_router/` links `AGENTS.md`,
-`CLAUDE.md` and `skills` to `~/.claude/`, but each card reads its own
-`agents` folder: the "Claude" card reads `~/.claude/agents/`, and "Claude +
-GLM workers" reads `~/.claude_router/agents/`. So the five worker types go
-to both, and the two GLM types only to the second. The script prints
-how many files it installed.
-
 The staged file is named `CLAUDE.md.install` because a real `CLAUDE.md`
 here would be auto-discovered as project context when an agent reads this
-directory. Edit here first, then re-copy; the copies in `~/.claude/` are
-not versioned. Until the copy is run, nothing in this directory is live.
+directory.
