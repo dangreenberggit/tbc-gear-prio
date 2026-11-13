@@ -319,7 +319,8 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
             continue
         line = text.count("\n", 0, pos) + 1
         para = _paragraph_start(text, pos)
-        rest = text[pos + 1 :]
+        end_m = re.search(r"\n[ \t]*\n", text[pos:])
+        rest = text[pos + 1 : pos + end_m.start() if end_m else len(text)]
         before = text[para:pos]
         stripped = before.rstrip()
         target: str | None = None
@@ -990,6 +991,16 @@ def t_overlay_file_feeding_both_agent_homes_is_read_once():
     }
     rc, out, err = _run({"AGENTS.md": "x\n"}, ["check", "--home-overlay", str(tmp)], home_files=home)
     assert rc == 1 and "1 checked, 1 dead" in out and len(err.splitlines()) == 1, (out, err)
+
+
+def t_heading_does_not_run_past_its_paragraph():
+    rc, out, err = _check(
+        {
+            "AGENTS.md": "See `docs/agents/a.md` § Report\n\nlists more.\n",
+            "docs/agents/a.md": "## Report lists\n",
+        }
+    )
+    assert rc == 1 and 'no heading "Report"' in err, (out, err)
 
 
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("t_")]
