@@ -273,7 +273,9 @@ FILE_WORD = re.compile(r"(?:^|[\s(])(\w[\w./-]*[-./][\w./-]*\w)$")
 UNBACKTICKED = re.compile(r"(?:^|[\s(])(~/[\w./-]+|[\w./-]*[\w-]\.md)$")
 # A quote may wrap a line but not cross a blank line.
 _QUOTE = r'["\u201c]((?:(?!\n[ \t]*\n)[^"\u201d]){1,160})["\u201d]'
-QUOTED = re.compile(r"(`[^`\n]+`),?\s*" + _QUOTE)
+# A comma or a space comes between the path and the quote: a quote mark right
+# after the path closes a quote the path sits in ("see `x.md`" and ...).
+QUOTED = re.compile(r"(`[^`\n]+`)(?:,\s*|\s+)" + _QUOTE)
 GLOBAL_RULE = re.compile(r"\bthe global rule\s+" + _QUOTE, re.I)
 
 
@@ -344,8 +346,8 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
     span_ending_at = {b: s for a, b, s in spans}
     found: list[Pointer] = []
     # The previous pointer: target, where its heading ended, § pos, paragraph,
-    # and whether it was a style failure.
-    prev: tuple[str, int | None, int, int, bool] | None = None
+    # whether it was a style failure, and whether CI skipped it as a ~/ pointer.
+    prev: tuple[str, int | None, int, int, bool, bool] | None = None
     for m in re.finditer("§", text):
         pos = m.start()
         if in_span[pos]:
@@ -362,7 +364,7 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
         if span is not None and _looks_like_path(span):
             target = span
         elif prev is not None and prev[3] == para:
-            ptarget, pend, ppos, _, _ = prev
+            ptarget, pend, ppos, _, _, phome = prev
             gap = text[pend:pos] if pend is not None else ""
             if pend is not None and CONNECTOR.match(gap):
                 target, continued = ptarget, True
@@ -371,8 +373,11 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
                 # numbered heading's "1." and code in the heading are not a
                 # sentence break, nor is a "." inside a heading ("vs. advisory");
                 # a "." before a capitalised word, and other punctuation, are.
+                # After a ~/ pointer CI skipped, the chain is always followed:
+                # the local run knows the heading's end and checks the chain
+                # exactly, so CI never fails text that passes locally.
                 gap = re.sub(r"`[^`]*`|\b\d+(\.\d+)*\.", "", text[ppos + 1 : pos])
-                if not re.search(r"[;:()]|\.\s+[A-Z]", gap):
+                if phome or not re.search(r"[;:()]|\.\s+[A-Z]", gap):
                     target, continued = ptarget, True
         if target is None:
             target = site.key
@@ -382,13 +387,13 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
             # Fixing the style failure before it fixes this one too.
             p.skipped = "style"
             found.append(p)
-            prev = (target, None, pos, para, True)
+            prev = (target, None, pos, para, True, False)
             continue
         p.problem = _style_problem(stripped, span, rest, said, world)
         p.style = p.problem is not None
         end = _resolve(p, rest, world, pos + 1)
         found.append(p)
-        prev = (target, end, pos, para, p.style)
+        prev = (target, end, pos, para, p.style, p.skipped == "home")
     return found
 
 
