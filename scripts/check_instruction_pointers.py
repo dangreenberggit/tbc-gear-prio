@@ -421,6 +421,75 @@ def run_check(world: World, out, err) -> int:
     return 1 if bad or errors else 0
 
 
+def file_key(world: World, arg: str) -> str:
+    """How pointers name the file the user typed."""
+    arg = arg.strip()
+    if arg.startswith("~/"):
+        return arg
+    path = Path(arg)
+    if path.is_absolute():
+        for base, prefix in ((world.repo, ""), (world.home, "~/")):
+            try:
+                return prefix + path.resolve().relative_to(base).as_posix()
+            except ValueError:
+                pass
+    return path.as_posix()
+
+
+def _by_heading(world: World, key: str):
+    doc = world.doc(key)
+    if doc is None:
+        return None, [], []
+    pointers, _ = collect(world)
+    into = [p for p in pointers if p.target == key and not p.style]
+    return doc, into, pointers
+
+
+def run_refs(world: World, arg: str, out, err, sites: bool = True) -> int:
+    path, sep, heading = arg.partition(" § ")
+    key = file_key(world, path)
+    doc, into, pointers = _by_heading(world, key)
+    if doc is None:
+        print(f"{key}: missing or unreadable", file=err)
+        return 1
+    if sep:
+        hits, _ = _match_heading(doc.heads, heading)
+        exact = [h for h in hits if norm(h) == norm(heading)] or hits
+        if len(exact) != 1:
+            print(f'{key} has no heading "{heading}" (headings: {", ".join(h for _, h in doc.heads)})', file=err)
+            return 1
+        mine = [p for p in into if p.heading == exact[0]]
+        n = len(mine)
+        print(f"{key} § {exact[0]}: {n} pointer{'s' * (n != 1)}", file=out)
+        for p in mine:
+            print(f"  {p.site.shown}:{p.line}", file=out)
+        return 0
+    print(key, file=out)
+    unused = []
+    for _, h in doc.heads:
+        mine = [p for p in into if p.heading == h]
+        print(f"  {len(mine)}  {h}", file=out)
+        if sites:
+            for p in mine:
+                print(f"       {p.site.shown}:{p.line}", file=out)
+        if not mine:
+            unused.append(h)
+    if sites:
+        print(f"safe to rename (0 pointers): {'; '.join(unused) or 'none'}", file=out)
+        dead = [p for p in into if p.problem]
+        if dead:
+            print("dead pointers into this file: " + "; ".join(f"{p.site.shown}:{p.line} § {p.said}" for p in dead), file=out)
+        mention = re.compile(re.escape(key) + r"(?!`?\s*§)")
+        count = 0
+        repo_keys, home_keys = site_keys(world)
+        for k in repo_keys + home_keys:
+            d = world.doc(k)
+            if d is not None and k != key:
+                count += len(mention.findall(d.text))
+        print(f"plain mentions of {key} without §: {count}", file=out)
+    return 0
+
+
 def main(argv: list[str], *, home: Path, ci: bool, out=sys.stdout, err=sys.stderr) -> int:
     ap = argparse.ArgumentParser(prog="check_instruction_pointers.py", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -434,6 +503,8 @@ def main(argv: list[str], *, home: Path, ci: bool, out=sys.stdout, err=sys.stder
     world = World(a.repo.resolve(), home, ci, a.home_overlay.resolve() if a.home_overlay else None)
     if a.cmd == "check":
         return run_check(world, out, err)
+    if a.cmd in ("refs", "headings") and a.arg:
+        return run_refs(world, a.arg, out, err, sites=a.cmd == "refs")
     ap.print_usage(err)
     return 2
 
@@ -717,6 +788,55 @@ def t_home_overlay_replaces_home_files():
     assert rc == 1 and "1 dead" in out, (out, err)
     assert str(tmp / "skills/new/SKILL.md") + ":1:" in err, err
     assert "general-task" not in err and "glm-task" not in err, err
+
+
+REFS_REPO = {
+    "AGENTS.md": (
+        "## Mine\n\nBy `docs/agents/a.md` § Report's rules; `docs/agents/a.md` § Report rules extra.\n"
+        "\nAlso `docs/agents/a.md` § Report, and § Gone. Read docs/agents/a.md and `docs/agents/a.md`.\n"
+    ),
+    "docs/workflow.md": "See `docs/agents/a.md` § Report.\n",
+    "docs/agents/a.md": "## Report\n## Report rules extra\n## Unused\n",
+}
+
+
+def t_refs_one_section_lists_its_sites():
+    rc, out, err = _run(REFS_REPO, ["refs", "docs/agents/a.md § Report rules extra"])
+    assert rc == 0, (out, err)
+    # Longest heading wins: line 3's "§ Report rules extra" is not § Report.
+    assert out.split() == ["docs/agents/a.md", "§", "Report", "rules", "extra:", "1", "pointer", "AGENTS.md:3"], out
+    rc, out, err = _run(REFS_REPO, ["refs", "docs/agents/a.md § Report"])
+    assert "3 pointers" in out and "AGENTS.md:3" in out and "AGENTS.md:5" in out and "docs/workflow.md:1" in out, out
+    rc, out, err = _run(REFS_REPO, ["refs", "docs/agents/a.md § Nope"])
+    assert rc == 1 and "no heading" in err, (out, err)
+
+
+def t_refs_file_lists_every_section():
+    rc, out, err = _run(REFS_REPO, ["refs", "docs/agents/a.md"])
+    assert rc == 0, (out, err)
+    lines = [l.strip() for l in out.splitlines()]
+    assert "3  Report" in lines and "1  Report rules extra" in lines and "0  Unused" in lines, out
+    assert "docs/workflow.md:1" in lines, out
+    assert "safe to rename (0 pointers): Unused" in lines, out
+    assert "dead pointers into this file: AGENTS.md:5 § Gone" in lines, out
+    assert "plain mentions of docs/agents/a.md without §: 2" in lines, out
+
+
+def t_headings_counts_without_sites():
+    rc, out, err = _run(REFS_REPO, ["headings", "docs/agents/a.md"])
+    lines = [l.strip() for l in out.splitlines()]
+    assert rc == 0 and "3  Report" in lines and "0  Unused" in lines, out
+    assert "docs/workflow.md:1" not in out, out
+
+
+def t_refs_home_file_by_tilde_or_full_path():
+    tmp_home_rc, out, err = _run(
+        {"AGENTS.md": "See `~/.claude/routing.md` § Decision table.\n"},
+        ["refs", "~/.claude/routing.md § Decision table"],
+        home_files=HOME,
+    )
+    assert "AGENTS.md:1" in out and "~/.claude/skills/x/SKILL.md:1" in out, out
+    assert "~/.claude_router/agents/glm-task.md:1" in out, out
 
 
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("t_")]
