@@ -302,7 +302,8 @@ def _style_problem(before: str, span: str | None, rest: str, said: str, world: W
         if not m:
             m = FILE_WORD.search(before)
             # and/or, re-read or v1.2 are prose; model-policy or ADR-0030 name a file.
-            if m and not (re.fullmatch(r"ADR-\d+", m.group(1), re.I) or m.group(1).lower() in world.stems()):
+            name = m.group(1).rsplit("/", 1)[-1] if m else ""
+            if m and not (re.fullmatch(r"ADR-\d+", name, re.I) or name.lower() in world.stems()):
                 m = None
         if m:
             return f"put the path in backticks: `{m.group(1)}` § {said} (write the file's full path)."
@@ -368,9 +369,10 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
             elif pend is None and re.search(r"(,|\band|\bor)\s*$", stripped):
                 # The heading's end is unknown (skipped or dead target). A
                 # numbered heading's "1." and code in the heading are not a
-                # sentence break; other punctuation is.
+                # sentence break, nor is a "." inside a heading ("vs. advisory");
+                # a "." before a capitalised word, and other punctuation, are.
                 gap = re.sub(r"`[^`]*`|\b\d+(\.\d+)*\.", "", text[ppos + 1 : pos])
-                if not re.search(r"[;:()]", gap):
+                if not re.search(r"[;:()]|\.\s+[A-Z]", gap):
                     target, continued = ptarget, True
         if target is None:
             target = site.key
@@ -1088,6 +1090,11 @@ def t_style_unbackticked_name_without_extension():
     # Re-check: words with - . / that name no file are prose.
     rc, out, err = _check({"AGENTS.md": "## 3. Steps\n\nRead and/or § 3, re-read § 3, e.g § 3, v1.2 § 3.\n"})
     assert rc == 0 and "4 checked" in out, (out, err)
+    # A folder before the name does not make it prose.
+    rc, out, err = _check(
+        {"AGENTS.md": "## A\n\nSee docs/agents/model-policy § A.\n", "docs/agents/model-policy.md": "## A\n"}
+    )
+    assert rc == 1 and "1 style" in out and "backticks" in err, (out, err)
 
 
 def t_ci_continuation_after_numbered_or_code_heading():
@@ -1099,6 +1106,17 @@ def t_ci_continuation_after_numbered_or_code_heading():
     ):
         rc, out, err = _check({"AGENTS.md": text}, ci=True, home_files={})
         assert rc == 0 and "2 into ~/.claude skipped" in out, (text, out, err)
+
+
+def t_sentence_break_ends_chain_after_skipped_pointer():
+    """A full stop and a new sentence end the chain, so a dead same-file pointer fails."""
+    for text in (
+        "## Mine\n\nSee `.scratch/p.md` § Draft. Then, § Gone covers it.\n",
+        "## Mine\n\nSee `.scratch/p.md` § Draft. Or § Gone covers it.\n",
+        "## Mine\n\nSee `.scratch/p.md` § Draft.\nThen, § Gone covers it.\n",
+    ):
+        rc, out, err = _check({"AGENTS.md": text})
+        assert rc == 1 and "1 dead" in out, (text, out, err)
 
 
 def t_ruled_out_forms_shown_in_code_are_examples():
