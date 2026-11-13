@@ -137,6 +137,14 @@ class World:
     ci: bool
     overlay: Path | None = None
     docs: dict[str, Doc | None] = field(default_factory=dict)
+    _stems: set[str] | None = None
+
+    def stems(self) -> set[str]:
+        """Names of the instruction files without folder or extension."""
+        if self._stems is None:
+            repo, home = site_keys(self)
+            self._stems = {Path(k).stem.lower() for k in repo + home}
+        return self._stems
 
     def home_path(self, rel: str) -> tuple[Path, bool]:
         """Where ~/<rel> is read from, and whether that is the overlay."""
@@ -290,7 +298,12 @@ def _style_problem(before: str, span: str | None, rest: str, said: str, world: W
         if "/" not in span and not (world.repo / span).is_file():
             return f"`{span}` has no folder and is not a root file of the repo; write its path, such as `docs/agents/{span}` § {said} or `~/.claude/{span}` § {said}."
     elif span is None:
-        m = UNBACKTICKED.search(before) or FILE_WORD.search(before)
+        m = UNBACKTICKED.search(before)
+        if not m:
+            m = FILE_WORD.search(before)
+            # and/or, re-read or v1.2 are prose; model-policy or ADR-0030 name a file.
+            if m and not (re.fullmatch(r"ADR-\d+", m.group(1), re.I) or m.group(1).lower() in world.stems()):
+                m = None
         if m:
             return f"put the path in backticks: `{m.group(1)}` § {said} (write the file's full path)."
     if not rest.startswith(" "):
@@ -357,7 +370,7 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
                 # numbered heading's "1." and code in the heading are not a
                 # sentence break; other punctuation is.
                 gap = re.sub(r"`[^`]*`|\b\d+(\.\d+)*\.", "", text[ppos + 1 : pos])
-                if not re.search(r"[.;:()]", gap):
+                if not re.search(r"[;:()]", gap):
                     target, continued = ptarget, True
         if target is None:
             target = site.key
@@ -1068,10 +1081,13 @@ def t_style_unbackticked_name_without_extension():
         "## Heading one\n\nSee model-policy § Heading one.\n",
         "## 3. Steps\n\nPer ADR-0030 § 3.\n",
     ):
-        rc, out, err = _check({"AGENTS.md": text})
+        rc, out, err = _check({"AGENTS.md": text, "docs/agents/model-policy.md": "x\n"})
         assert rc == 1 and "1 style" in out and "backticks" in err, (text, out, err)
     rc, out, err = _check({"AGENTS.md": "## 3. Steps\n\nDone. § 3 says so; in § 3 too.\n"})
     assert rc == 0, (out, err)
+    # Re-check: words with - . / that name no file are prose.
+    rc, out, err = _check({"AGENTS.md": "## 3. Steps\n\nRead and/or § 3, re-read § 3, e.g § 3, v1.2 § 3.\n"})
+    assert rc == 0 and "4 checked" in out, (out, err)
 
 
 def t_ci_continuation_after_numbered_or_code_heading():
@@ -1079,6 +1095,7 @@ def t_ci_continuation_after_numbered_or_code_heading():
     for text in (
         "`~/.claude/x.md` § 1. Brief and § 2. Plan.\n",
         "`~/.claude/x.md` § Run `pnpm x` first, and § Then.\n",
+        "`~/.claude/x.md` § Gates vs. advisory and § Claims.\n",
     ):
         rc, out, err = _check({"AGENTS.md": text}, ci=True, home_files={})
         assert rc == 0 and "2 into ~/.claude skipped" in out, (text, out, err)
