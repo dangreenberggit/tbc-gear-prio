@@ -245,8 +245,10 @@ def _match_heading(heads: list[tuple[int, str]], rest: str) -> tuple[list[str], 
 
 
 UNBACKTICKED = re.compile(r"(?:^|[\s(])(~/[\w./-]+|[\w./-]*[\w-]\.md)$")
-QUOTED = re.compile(r'(`[^`\n]+`),?\s*["\u201c]([^"\u201d\n]{1,120})["\u201d]')
-GLOBAL_RULE = re.compile(r'\bthe global rule\s+["\u201c]([^"\u201d\n]{1,120})["\u201d]', re.I)
+# A quote may wrap a line but not cross a blank line.
+_QUOTE = r'["\u201c]((?:(?!\n[ \t]*\n)[^"\u201d]){1,160})["\u201d]'
+QUOTED = re.compile(r"(`[^`\n]+`),?\s*" + _QUOTE)
+GLOBAL_RULE = re.compile(r"\bthe global rule\s+" + _QUOTE, re.I)
 
 
 def _style_problem(before: str, span: str | None, rest: str, said: str, world: World) -> str | None:
@@ -358,14 +360,15 @@ def quoted_pointers(site: Doc, world: World) -> list[Pointer]:
         if not _looks_like_path(path):
             continue
         doc = world.doc(path)
-        quote = m.group(2)
+        quote = re.sub(r"\s+", " ", m.group(2)).strip()
         if doc is not None and any(norm(h) == norm(quote) for _, h in doc.heads):
             p = Pointer(site, text.count("\n", 0, m.start()) + 1, path, quote)
             p.problem, p.style = f"write `{path}` § {quote}.", True
             found.append(p)
     for m in GLOBAL_RULE.finditer(text):
-        p = Pointer(site, text.count("\n", 0, m.start()) + 1, "~/.claude/AGENTS.md", m.group(1))
-        p.problem, p.style = f"write `~/.claude/AGENTS.md` § {m.group(1)}.", True
+        rule = re.sub(r"\s+", " ", m.group(1)).strip()
+        p = Pointer(site, text.count("\n", 0, m.start()) + 1, "~/.claude/AGENTS.md", rule)
+        p.problem, p.style = f"write `~/.claude/AGENTS.md` § {rule}.", True
         found.append(p)
     return found
 
@@ -769,6 +772,8 @@ def t_style_quoted_heading():
     ):
         rc, out, err = _style(text)
         assert rc == 1 and "1 style" in out and "§ Heading one" in err, (text, out, err)
+    rc, out, err = _style('See (`docs/agents/a.md`, "Heading\none") first.\n')
+    assert rc == 1 and "1 style" in out and "§ Heading one" in err, (out, err)
     # A quote that is no heading of that file is prose, not a pointer.
     rc, out, err = _style('`docs/agents/a.md` "says this".\n')
     assert rc == 0, (out, err)
