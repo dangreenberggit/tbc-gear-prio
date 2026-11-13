@@ -3,6 +3,7 @@ import {
   chmodSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   readdirSync,
   rmSync,
   unlinkSync,
@@ -309,6 +310,22 @@ const MOVES = [
   { what: "a VITEST variable", change: withEnv({ VITEST_MAX_THREADS: "1" }) },
   { what: "TZ", change: withEnv({ TZ: "Asia/Tokyo" }) },
   { what: "an LC_ variable", change: withEnv({ LC_ALL: "C" }) },
+  // mirrors:check (scripts/check_skill_mirrors.py) compares every file in
+  // both skills folders, ignored files and caches included, and fails on a
+  // file only one side has.
+  {
+    what: "a __pycache__ file in .agents/skills/",
+    change: (c) => put(c.root, ".agents/skills/s/__pycache__/x.pyc", "pyc"),
+  },
+  {
+    what: "a __pycache__ file in .claude/skills/",
+    change: (c) => put(c.root, ".claude/skills/s/__pycache__/x.pyc", "pyc"),
+  },
+  {
+    what: "an ignored editor file in .claude/skills/",
+    before: (c) => put(c.root, ".git/info/exclude", "*.swp\n"),
+    change: (c) => put(c.root, ".claude/skills/s/.SKILL.md.swp", "x"),
+  },
 ];
 
 // Inputs left out of the key on purpose (verify_cache.mjs header): a change
@@ -498,7 +515,7 @@ describe("verifyWithCache", () => {
     expect((await verify(c)).ran).toBe(true);
   });
 
-  it("names the parts that changed since this folder's last pass", async () => {
+  it("names the parts that changed since this folder's last stamp", async () => {
     const c = makeCheckout();
     await verify(c);
     put(c.root, "src/a.ts", "export const a = 3;\n");
@@ -507,6 +524,29 @@ describe("verifyWithCache", () => {
     expect(miss.ran).toBe(true);
     expect(miss.text).toMatch(/main-tree/);
     expect(miss.text).toMatch(/env/);
+  });
+
+  // A green run that leaves no stamp (here an input moved while it ran) is
+  // still a pass, so the next miss must not call the older stamp "the last
+  // pass": NODE_OPTIONS did not change since the run that just passed.
+  it("compares with the last stamp, and says so, when a later pass left none", async () => {
+    const c = makeCheckout();
+    await verify(c);
+    withEnv({ NODE_OPTIONS: "--no-warnings" })(c);
+    const unstamped = await verify(c, {
+      full: (cc) => {
+        put(cc.root, "src/a.ts", "export const a = 5;\n");
+        return { code: 0, ran: 7, skipped: 0 };
+      },
+    });
+    expect(unstamped.code).toBe(0);
+    expect(stamps(c)).toHaveLength(1);
+    const miss = await verify(c, {
+      full: () => ({ code: 1, ran: 0, skipped: 0 }),
+    });
+    expect(miss.text).toMatch(/env/);
+    expect(miss.text).not.toMatch(/since the last pass here/);
+    expect(miss.text).toMatch(/since the last pass stamped here: /);
   });
 
   it(`runs in full under ${FORCE_VAR}=1 and still leaves a stamp`, async () => {
@@ -576,6 +616,42 @@ describe("verifyWithCache", () => {
     });
     expect(stamps(c)).toHaveLength(1);
     expect((await verify(c)).ran).toBe(false);
+  });
+
+  // The stamp is a saving, not part of the verdict: a cache folder that
+  // cannot be written (read-only home, a full disk, or two sandboxed runs
+  // whose fresh PID namespaces give the same temp name) must not turn a
+  // green run red.
+  it("keeps a green run green when the stamp cannot be written", async () => {
+    const c = makeCheckout();
+    const blocker = join(tempDir("verify-cache-blocker-"), "file");
+    writeFileSync(blocker, "");
+    c.cacheDir = join(blocker, "store");
+    const run = await verify(c);
+    expect(run.ran).toBe(true);
+    expect(run.code).toBe(0);
+    expect(run.text).toMatch(/verify: no pass stamp -- /);
+  });
+
+  // The key reads ignored files such as .env and keyed variables such as
+  // DATABASE_URL; only digests may leave the process (owner's rule: leave
+  // secrets unread).
+  it("never prints or stores the bytes of .env or a keyed variable's value", async () => {
+    const marker = "s3cr3t-876-marker";
+    const c = makeCheckout();
+    put(c.root, ".env", `WCL_CLIENT_SECRET=${marker}\n`);
+    withEnv({ DATABASE_URL: `postgres://u:${marker}@h/db` })(c);
+    const runs = [await verify(c), await verify(c)];
+    put(c.root, ".env", `WCL_CLIENT_SECRET=${marker}-2\n`);
+    runs.push(await verify(c));
+    runs.push(await verify(c, { env: { ...c.env, [FORCE_VAR]: "1" } }));
+    for (const run of runs) expect(run.text).not.toContain(marker);
+    for (const name of readdirSync(c.cacheDir)) {
+      expect(readFileSync(join(c.cacheDir, name), "utf8")).not.toContain(
+        marker
+      );
+    }
+    expect(runs.map((r) => r.ran)).toEqual([true, false, true, true]);
   });
 
   it("runs in full when the stamp will not parse", async () => {

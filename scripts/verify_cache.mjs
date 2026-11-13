@@ -24,11 +24,13 @@
  *   GIT_CONFIG* reaches the key through `git config --list`.
  * - The values of command-scope proxy and credential git settings: the
  *   sandbox injects them, and no gate fetches over git. Their names stay in.
- * - Ignored files under .scratch/ and .claude/: no verify step reads them,
- *   eslint excludes both, vitest excludes .scratch/ and .claude/worktrees/,
- *   and agents write there while a run is going (the run-log hook under
- *   .scratch/agent-runs/, Claude Code under .claude/.cc-writes/).
- * - __pycache__/: Python checks each .pyc against its source's mtime and size.
+ * - Ignored files under .scratch/ and .claude/, except .claude/skills/: no
+ *   verify step reads them, eslint excludes both, vitest excludes .scratch/
+ *   and .claude/worktrees/, and agents write there while a run is going (the
+ *   run-log hook under .scratch/agent-runs/, Claude Code under
+ *   .claude/.cc-writes/).
+ * - __pycache__/, except in the two skills folders mirrors:check compares:
+ *   Python checks each .pyc against its source's mtime and size.
  * - *.tsbuildinfo: tsc's build history (it differs between checkouts built in
  *   a different order); `tsc --build` checks it against the sources, and the
  *   dist/ and dist-server/ files it emits are in the key.
@@ -253,8 +255,17 @@ const derivedCache = (p) =>
   segments(p).some((s) => s === "node_modules" || s === "__pycache__") ||
   p.endsWith(".tsbuildinfo");
 
+/**
+ * mirrors:check (scripts/check_skill_mirrors.py) compares every file in these
+ * folders, ignored files and caches included, so nothing in them is skipped.
+ */
+const MIRRORED_DIRS = [".claude/skills/", ".agents/skills/"];
+
 /** @returns {"skip" | "build-outputs" | "main-ignored"} */
 function mainIgnoredClass(p) {
+  if (MIRRORED_DIRS.some((dir) => `${p}/`.startsWith(dir))) {
+    return "main-ignored";
+  }
   const first = segments(p)[0];
   if (derivedCache(p) || [".claude", ".scratch", "vendor"].includes(first)) {
     return "skip";
@@ -580,7 +591,7 @@ export async function verifyWithCache({
       const moved = last?.parts ? changedParts(last.parts, before) : [];
       log(
         moved.length > 0
-          ? `verify: no cached pass for these inputs (changed since the last pass here: ${moved.join(", ")}); running in full.`
+          ? `verify: no cached pass for these inputs (changed since the last pass stamped here: ${moved.join(", ")}); running in full.`
           : "verify: no cached pass for these inputs; running in full."
       );
     }
@@ -614,15 +625,20 @@ export async function verifyWithCache({
     return result.code;
   }
   const key = keyOf(after);
-  writeStamp(cacheDir, key, {
-    schema: SCHEMA,
-    key,
-    writtenAt: new Date().toISOString(),
-    root,
-    ran: result.ran,
-    parts: after,
-    envNames: keyedEnvNames(env),
-  });
+  try {
+    writeStamp(cacheDir, key, {
+      schema: SCHEMA,
+      key,
+      writtenAt: new Date().toISOString(),
+      root,
+      ran: result.ran,
+      parts: after,
+      envNames: keyedEnvNames(env),
+    });
+  } catch (err) {
+    log(`verify: no pass stamp -- it could not be written (${err.message}).`);
+    return result.code;
+  }
   log(`verify: pass stamp written to ${stampPath(cacheDir, key)}`);
   return result.code;
 }
