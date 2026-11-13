@@ -10,7 +10,7 @@ The `gate-planner` reads only this section.
 
 **Workhorse types:** `~/.claude/routing.md` § Decision table. **Block
 size:** `~/.claude/model-policy.md` § Workhorse jobs. **Naming the model
-on every spawn:** § Claude Code of the same file.
+on every spawn:** `~/.claude/model-policy.md` § Claude Code.
 
 **Judgment agent:** `~/.claude/routing.md` § Decision table.
 
@@ -39,13 +39,13 @@ in the header comment of `scripts/tab-harness/test-review.mjs`.
 
 **Run-log folder:** `.scratch/agent-runs`
 
-**Report folder:** Report files: AGENTS.md § Subagent reports.
+**Report folder:** Report files: `AGENTS.md` § Subagent reports.
 
 ## Hand off
 
 **Review step:** `pre-merge-review`
 
-**Merge rule:** the AGENTS.md merge gate (AGENTS.md § Commits and merges)
+**Merge rule:** the AGENTS.md merge gate (`AGENTS.md` § Commits and merges)
 
 **Merge command:** `pnpm merge-to-dev`, after the ask
 
@@ -73,11 +73,11 @@ The only commands you run are the ones that
 
 ### Executor
 
-**Parallel-phase workers:** A slice's type: routing.md § Decision table.
+**Parallel-phase workers:** A slice's type: `~/.claude/routing.md` § Decision table.
 
 ## Checkouts
 
-**Pair:** When AGENTS.md § The forked tab repo says the work needs a
+**Pair:** When `AGENTS.md` § The forked tab repo says the work needs a
 pair, have a subagent make the pair with `pnpm wt:pair`;
 `isolation: worktree` has no fork.
 

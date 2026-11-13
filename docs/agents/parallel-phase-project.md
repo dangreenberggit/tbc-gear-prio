@@ -28,10 +28,10 @@ a pair instead of the plain worktree:
 so `pnpm verify` refuses it unless `TBC_VERIFY_WITHOUT_FORK=1` (steps:
 `docs/agents/paired-worktrees.md`). The pair is installed when the
 command prints `pair ready`; its folder is on the `main` line of that
-output. Before the merge, follow `docs/agents/paired-worktrees.md` "Land
-it on dev" steps 2-4 with `${FEATURE}` in place of `dev`, so the slice's
+output. Before the merge, follow `docs/agents/paired-worktrees.md` § Land
+it on dev, steps 2-4, with `${FEATURE}` in place of `dev`, so the slice's
 fork commits reach the clone's branch and the lock names them. Remove
-the pair as `docs/agents/paired-worktrees.md` "Remove it" says, and after
+the pair as `docs/agents/paired-worktrees.md` § Remove it says, and after
 the merge delete
 its fork branch with
 `git -C vendor/tbc-new-fork branch -d "${FEATURE}-${SLICE}"`.

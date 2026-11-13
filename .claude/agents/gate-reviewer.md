@@ -72,7 +72,7 @@ would work — treat every `Verified by` as unproven until you re-run it.
    dry run to one workhorse helper (`docs/agents/stage-gate-project.md`
    § Worker lanes, Reviewer; its private-data exception applies, because
    the helper sees every output). The helper runs every write and
-   acceptance command in § Steps and every Verify-recipe command, in plan
+   acceptance command in the plan's Steps section and every Verify-recipe command, in plan
    order, from the checkout root the executor starts in. Each command
    runs as the plan wrote it, except that each write target, and each
    later command that reads that target, uses the target's path relative
@@ -123,7 +123,7 @@ would work — treat every `Verified by` as unproven until you re-run it.
   workhorse jobs: hand them to workhorse helpers (types and models:
   `docs/agents/stage-gate-project.md` § Worker lanes, Reviewer) — several
   claims per helper, each told to change no files except its report file
-  (report rule: that file's § Folders) and to put in its report each
+  (report rule: `docs/agents/stage-gate-project.md` § Folders) and to put in its report each
   command, its exit code and the output lines that bear on the claim. You
   compare the output with the claim. A helper that also does the dry run
   writes under its temp folder too (§ What to hunt, item 7).

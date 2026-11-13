@@ -58,8 +58,8 @@ feature is absent, the refs that could contain it are in
 The machine facts are global (`~/.claude/AGENTS.md` § This machine).
 This repo's Node, pnpm, Go and protoc setup and its check:
 `docs/agents/known-traps.md` § Before running node / pnpm / test
-commands. Line endings and generated files: the same file, § Before any
-scripted or generated file edit.
+commands. Line endings and generated files: `docs/agents/known-traps.md`
+§ Before any scripted or generated file edit.
 
 ## The forked tab repo
 
@@ -83,7 +83,7 @@ staging part of a file commits the rest of it too. `pnpm verify` before
 every push. The integration branch is `dev`. After the user's merge ask,
 `pnpm merge-to-dev` is the only door: no `git merge` into `dev`, no
 `TBC_ALLOW_DEV_MERGE=1`. The loop, the review, mini-loops for tickets
-and the gates: `docs/workflow.md` § The loop and § Gates. **Agent
+and the gates: `docs/workflow.md` § The loop and § Gates — what's enforced vs. advisory. **Agent
 tooling** (`TOOLING_PATHS` in `scripts/check_merge_ready.py`) is the
 exception to the product review: a branch that changes only tooling gets
 `instruction-review` in its place (`docs/workflow.md` § The
@@ -101,8 +101,8 @@ in the same shell command as each `node`, `pnpm` or test command, for
 example `node --version; pnpm verify`; if it does not print v22, it
 discards the command's result and returns
 `NEEDS_JUDGMENT: node --version printed <output>`
-(`docs/agents/known-traps.md`, "Before running node / pnpm / test
-commands").
+(`docs/agents/known-traps.md` § Before running node / pnpm / test
+commands).
 
 ## Subagent reports
 

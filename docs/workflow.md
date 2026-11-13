@@ -11,7 +11,7 @@ because that would need updating every time a tool changes.
 
 ## Branch model
 
-- **`main`** — gated state. Receives a merge only when a PLAN.md §14 gate
+- **`main`** — gated state. Receives a merge only when a `PLAN.md` § 14 gate
   (phase or Stage 3T) is fully checked off in
   [`docs/verification-log.md`](verification-log.md), tagged `phase-1`,
   `phase-2`, etc., or `tab-1` for Stage 3T. Direct commits are refused by
@@ -27,8 +27,8 @@ because that would need updating every time a tool changes.
 ## The loop
 
 1. Branch off `dev`: `feat/<slug>`, or `phase-N/<slug>` for a PLAN.md phase.
-2. Red → green, one slice at a time (see the `tdd` skill). Commits: global
-   `AGENTS.md` § Git.
+2. Red → green, one slice at a time (see the `tdd` skill). Commits:
+   `~/.claude/AGENTS.md` § Git.
 3. `pnpm verify` before every push. This runs typecheck, lint, format check,
    and tests in one command — it's the thing every gate below actually
    calls, so there's one definition of "passing," not a different one per
@@ -54,17 +54,19 @@ because that would need updating every time a tool changes.
 
    **Agent tooling** is the exception to this review. The list is
    `TOOLING_PATHS` in `scripts/check_merge_ready.py`, and the owner
-   approves every change to it. The `pre-merge-review` skill, § Agent-tooling
-   branches, says what a tooling-only branch and a mixed branch get in its
-   place. On a tooling-only branch, `pnpm merge-to-dev` needs no review
-   file; a review file that exists is still checked.
+   approves every change to it. A tooling-only branch gets the
+   `instruction-review` skill in its place. On a mixed branch the product
+   review covers the files that
+   `python scripts/check_merge_ready.py --product-files` prints. On a
+   tooling-only branch, `pnpm merge-to-dev` needs no review file; a
+   review file that exists is still checked.
 
    Launch mini-loops for the new tickets a review files unless there is a
    stated reason to defer them: delegate to a planner, then the plan to an
    executor, then an independent reviewer.
 
 5. **Ask the user, then `pnpm merge-to-dev`.** The merge ask follows
-   global `AGENTS.md` § Git; here the branch's review is
+   `~/.claude/AGENTS.md` § Git; here the branch's review is
    the review file, or for a tooling-only branch the `instruction-review`
    result. `pnpm merge-to-dev` is the only supported door. It merges
    into `dev` only after three checks pass: `pnpm verify`; the review and
@@ -79,7 +81,7 @@ because that would need updating every time a tool changes.
    `--check-only` does there, see
    `docs/agents/paired-worktrees.md` § Land it on dev.
 
-6. `main` receives a merge from `dev` only when a PLAN.md §14 gate (a
+6. `main` receives a merge from `dev` only when a `PLAN.md` § 14 gate (a
    phase or Stage 3T) is fully checked off in `docs/verification-log.md`;
    tag it (`phase-N`, or `tab-1` for Stage 3T).
 
@@ -110,7 +112,7 @@ Cursor adapters. See the global `parallel-phase` skill
 | Review file before merge to `dev`                                              | `pnpm merge-to-dev` / `merge-ready` fail with no `docs/reviews/<branch>.md`, except when every changed file is on `TOOLING_PATHS` (`scripts/check_merge_ready.py`) | none                                                          |
 | Deferred findings filed as tickets                                             | `pnpm merge-to-dev` / `merge-ready` — every `defer` links an open carry-forward ticket                                                                             | `wontfix` with a reason, or fix on branch                     |
 | Phase open-blockers seen                                                       | `pnpm merge-to-dev` on `phase-N/*` fails if `Blocks: phase-N` tickets are open                                                                                     | `--ack-open-blockers`                                         |
-| Comment policy (why, not what; global `AGENTS.md` § Writing)                   | Not mechanically enforced — a `pre-merge-review` finding                                                                                                           | —                                                             |
+| Comment policy (why, not what; `~/.claude/AGENTS.md` § Writing)                | Not mechanically enforced — a `pre-merge-review` finding                                                                                                           | —                                                             |
 
 **The escape hatch is real and intentional** — spikes and throwaway
 exploration shouldn't be blocked by the full gate. It's safe specifically
@@ -173,7 +175,7 @@ only at pre-agreed seams" — and in practice it reliably produces exactly
 the tautological tests `tdd`'s `tests.md` warns against, written solely to
 move the number. Coverage is collected and reported (`vitest.config.ts`)
 so a regression is visible, but it doesn't fail the build. The actual
-sturdiness argument is narrower and stronger: PLAN.md §6 already commits to
+sturdiness argument is narrower and stronger: `PLAN.md` § 6 already commits to
 testing the whole engine at its one real interface (`rankUpgrades`) using
 recorded fixtures at all three seams, so the full pipeline runs
 deterministically offline in a unit test. That's the thing worth protecting
@@ -181,7 +183,7 @@ deterministically offline in a unit test. That's the thing worth protecting
 
 ## Why a lint rule instead of a design pattern for purity
 
-PLAN.md §4 states the rule directly: "enforced by lint rule, not by good
+`PLAN.md` § 4 states the rule directly: "enforced by lint rule, not by good
 intentions." `packages/core/src` has zero filesystem, network, `process`,
 or `console` access outside `seams/`, `cli.ts` and `cli-wiring.ts` (the
 exemption list in `eslint.config.js`) — everything crosses one
@@ -223,7 +225,7 @@ Invoke the `tdd` skill for any red/green work. The word **seam** means two
 different things across the docs; this section fixes both.
 
 **Architectural seams are three and only three**: `GearSource`,
-`SimRunner`, `Store` (PLAN.md §5), each with a recorded adapter, so the
+`SimRunner`, `Store` (`PLAN.md` § 5), each with a recorded adapter, so the
 engine runs deterministically offline from committed fixtures. Do not
 introduce a fourth port without agreeing it first. That is a rule about
 adapters, not about test placement.
@@ -233,7 +235,7 @@ adapters, not about test placement.
 "test at the seam" means here. Pure functions are also unit-tested
 directly, no agreement needed, where the logic is intricate and
 independently valuable: the gem solver, the ranking statistics, the 19→17
-slot mapping, `applyView` (PLAN.md §6). They touch no port and need no
+slot mapping, `applyView` (`PLAN.md` § 6). They touch no port and need no
 adapter. What is banned is asserting on stage internals: the eight stages
 must stay reorganisable without touching a test.
 
@@ -248,8 +250,9 @@ Green CI is the standing proof that the recorded-fixture path still works.
 ## Pre-merge review, in more detail
 
 Fresh context for each axis, the order of reviewers to try, and what
-to do on a rate-limit wall: the `pre-merge-review` skill (its opening and
-§ 2. Dispatch) and global `model-policy.md` § Four lanes.
+to do on a rate-limit wall: `~/.claude/skills/pre-merge-review/SKILL.md`
+§ 1. Review, and `~/.claude/model-policy.md` § Four lanes and
+§ Parallelism vs serial.
 
 The domain axis exists because PLAN.md and its findings docs carry a lot of
 hard-won, non-obvious facts (the 19→17 slot mapping, which enchant ID
@@ -260,7 +263,7 @@ numbers come out wrong.
 ## Adding a spec phase / closing a gate
 
 1. Do the work on `phase-N/<slug>` branches off `dev`.
-2. Check off PLAN.md §14's gate items as they're actually verified — with
+2. Check off `PLAN.md` § 14's gate items as they're actually verified — with
    evidence, in `docs/verification-log.md`, not just checked.
 3. Once every item for that gate is checked, merge `dev` → `main` and tag
    it: `git tag phase-N` (`tab-1` for Stage 3T).

@@ -8,7 +8,7 @@ record why they are two pins. ADR-0036 lets them move separately:
 - **Routine fork update (fork only)**, next section: the fork branch merges
   upstream `master`. Do it whenever `pnpm fork:upstream-status` shows content
   conflicts only.
-- **Moving the engine version (both pins)**, §0–§7: the full procedure, run
+- **Moving the engine version (both pins)**, § 0 to § 7: the full procedure, run
   when the command-line tool needs a newer engine.
 
 Both procedures run in a pair (`docs/agents/paired-worktrees.md`).
@@ -29,7 +29,7 @@ Run each one exactly as written. A bare `python scripts/<x>.py` or
 flags that no `package.json` script passes. The Go and protoc tools are on
 every WSL shell's PATH (`~/.claude/AGENTS.md` § This machine).
 
-Both procedures merge into `dev` at §7 step 5, and only when the owner asks.
+Both procedures merge into `dev` at § 7 step 5, and only when the owner asks.
 
 A pipe reports the **last** command's status, so append
 `; echo "rc=${PIPESTATUS[0]}"` or redirect and inspect separately.
@@ -46,7 +46,7 @@ A pipe reports the **last** command's status, so append
    dry-run conflicts by type. Content conflicts only: continue. Any location
    or modify/delete conflict means upstream moved something the fork builds
    on: stop here and plan that merge as its own piece of work. On git older
-   than 2.38 it stops with `exited 129` (rc 2); run §1's `read-tree` dry run
+   than 2.38 it stops with `exited 129` (rc 2); run § 1's `read-tree` dry run
    in its place.
 
 2. Record the unit-test result on the fork tip before merging
@@ -57,7 +57,7 @@ A pipe reports the **last** command's status, so append
    git -C <fork> merge upstream/master
    ```
 
-   Resolve conflicts by the rules in §4. For `package-lock.json`, take
+   Resolve conflicts by the rules in § 4. For `package-lock.json`, take
    upstream's version and run `npm --prefix <fork> install`.
 
 3. Regenerate the gitignored bindings: `make -C <fork> proto` and
@@ -79,8 +79,8 @@ A pipe reports the **last** command's status, so append
    `git -C <fork> rev-parse HEAD^2` (the upstream commit the merge brought in),
    and `pushed` to `false`, and append a dated sentence to `_comment`. If the
    merge changed anything under `<fork>/ui/features/upgrades/model/engine/`,
-   run the PROVENANCE cycle first (`docs/agents/known-traps.md`, "Before
-   editing a ported engine file"). Then run:
+   run the PROVENANCE cycle first (`docs/agents/known-traps.md` § Before
+   editing a ported engine file). Then run:
 
    ```bash
    pnpm -C <pair> sim-implemented-effects:generate
@@ -93,7 +93,7 @@ A pipe reports the **last** command's status, so append
    lock and the engine lock now name different upstream commits, and the
    listings disagree until the engine moves (ADR-0036 Consequence 3).
 
-7. Run the desktop gate (§5, last paragraphs) only when `dev` will receive this
+7. Run the desktop gate (§ 5, last paragraphs) only when `dev` will receive this
    re-pin.
 
 The engine lock does not move here. Between engine moves the two locks can name
@@ -127,8 +127,8 @@ git -C <fork> worktree list
 python -c "import json;l=json.load(open('<pair>/data/wowsims-fork.lock.json'));print(l['commit'],l['pushed'],l['branchedFrom'])"
 ```
 
-Read the `pushed` flag **before** you start and write it down. §5 sets it to
-`false` with the re-pin; only §7 step 7 sets it back to `true`.
+Read the `pushed` flag **before** you start and write it down. § 5 sets it to
+`false` with the re-pin; only § 7 step 7 sets it back to `true`.
 
 ### 1. Pick the sha and measure what the merge conflicts on
 
@@ -196,7 +196,7 @@ git -C <fork> diff --name-only <OLD_PIN> <TARGET_SHA> | sort > <pair>/.scratch/u
 comm -12 <pair>/.scratch/m.txt <pair>/.scratch/u.txt
 ```
 
-Prove the sha builds before pinning it (ADR-0030 §3). Run it **twice** and
+Prove the sha builds before pinning it (`docs/adr/0030-build-from-feature-backend-reforge-on-both-pins.md` § 3). Run it **twice** and
 compare the hashes:
 
 ```bash
@@ -204,13 +204,13 @@ pnpm -C <pair> fetch:wowsimcli --commit <TARGET_SHA> --tag-dir <TARGET_SHA>
 ```
 
 Two identical `sha256=` lines is the proof. `git -C <fork> worktree list` must
-print the same lines afterwards as in §0.
+print the same lines afterwards as in § 0.
 
 ### 2. Engine side
 
-Read `docs/agents/known-traps.md` § "Before moving the wowsims engine pin"
+Read `docs/agents/known-traps.md` § Before moving the wowsims engine pin
 first. Then write the expected regen list down **before** running anything
-(`data-pipeline-work` rule 2); §3 reconciles every changed path against it.
+(`data-pipeline-work` rule 2); § 3 reconciles every changed path against it.
 
 ```bash
 pnpm -C <pair> sync:wowsims --ref <TARGET_SHA>
@@ -228,10 +228,10 @@ branch upstream deleted. It exits 2 when the ref is not in `watchedRefs`, and
 `--watch-ref --ref master` exits 2 while another ref is still watched
 (`scripts/sync_wowsims.py`, `do_unwatch_ref` and `do_watch_ref`).
 
-The universes and pool listings are rebuilt in §5, not here.
+The universes and pool listings are rebuilt in § 5, not here.
 `scripts/assemble_universe.py` admits only ids listed in
 `data/equip-eligibility.json` and drops the ids listed as stub-only in
-`data/sim-implemented-effects.json`, and §5 regenerates both from the merged
+`data/sim-implemented-effects.json`, and § 5 regenerates both from the merged
 fork, so a sweep run here cannot add the items that the new upstream commit
 makes equippable.
 
@@ -268,7 +268,7 @@ If `currentPhase` in `<pair>/data/wowsims.lock.json` changed, bump
 
 ### 3. Diff against the prediction
 
-Reconcile every changed path against the list you wrote at the start of §2. A
+Reconcile every changed path against the list you wrote at the start of § 2. A
 path you did not predict is a finding to explain, not to absorb.
 
 Two traps. Predict the lock's rehashing entries, not upstream's changed files
@@ -425,8 +425,8 @@ file when db.json gains or loses a weapon type, or when the regenerated
 eligibility file gives a spec its first item of a weapon type or takes away
 its last one. If the file changes, say in the commit body which spec and
 weapon type moved and which db.json or eligibility change caused it.
-Reconcile the changed universes, reports and listings against the §2
-prediction as §3 says. Tests
+Reconcile the changed universes, reports and listings against the § 2
+prediction as § 3 says. Tests
 that pin a universe's size, such as `packages/core/test/pool.test.ts` and
 `pool-hardening.test.ts`, then fail on a membership change: re-pin them in the
 commit that rebuilds the universes, and say in that commit's body which ids
@@ -449,7 +449,7 @@ re-pin that breaks the embedded transport. The command checks every golden
 that `<pair>/data/desktop-gate/README.md` lists by spec id, and recording the
 run follows that README. A red gate blocks the re-pin until each red spec is
 explained. A spec the re-pin is meant to change gets its golden regenerated as
-that README's § Regenerating a golden says; any other red spec is a defect to
+`data/desktop-gate/README.md` § Regenerating a golden says; any other red spec is a defect to
 fix before the re-pin.
 
 ### 6. The tag trigger
@@ -478,7 +478,7 @@ ADR-0030 Consequence 4 accepts that risk; ticket 355 was filed when it bit.
 3. Regenerate the pin-derived artifacts.
 4. `pnpm -C <pair> verify`.
 5. Review, then ask the owner before landing it by
-   `docs/agents/paired-worktrees.md` "Land it on dev": the main folder merges
+   `docs/agents/paired-worktrees.md` § Land it on dev: the main folder merges
    `<fork-branch>` into the fork lock's `branch`, then, with the main folder on
    `dev`, runs `pnpm -C <main-folder> merge-to-dev <main-branch>`
    (`scripts/merge_to_dev.py` refuses a named branch from a folder not on

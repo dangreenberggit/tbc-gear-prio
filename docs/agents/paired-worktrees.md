@@ -58,8 +58,8 @@ run `pnpm sim-implemented-effects:generate` (it refuses until the lock
 names the fork's HEAD, so bump the lock first), and `pnpm verify`. Read the
 lock file's `_comment` history before touching it: it is the log of what
 each fork commit changed and why. The PROVENANCE cycle for ported engine
-files: `known-traps.md` § Before editing a ported engine file and § Before
-moving the wowsims engine pin.
+files: `docs/agents/known-traps.md` § Before editing a ported engine file and
+§ Before moving the wowsims engine pin.
 
 ## Work in it
 
@@ -114,7 +114,7 @@ moving the wowsims engine pin.
 ## Land it on dev
 
 The merge into `dev` runs from the main folder, and only when the owner asks
-(AGENTS.md § Commits and merges). The pair stays in place until the merge
+(`AGENTS.md` § Commits and merges). The pair stays in place until the merge
 prints `merged`; then the agent that ran the merge removes it (§ Remove it).
 The owner does not.
 
@@ -154,7 +154,7 @@ What step 3 does (full list: `scripts/merge_to_dev.py`, "Named branch"):
   it checks the branch's tip and prints a note saying so.
 
 The live tests of step 3 and their commands are in
-`docs/reviews/feat-merge-to-dev-arg.md`, "Live tests". It has not yet
+`docs/reviews/feat-merge-to-dev-arg.md` § Live tests. It has not yet
 merged into the real `dev`.
 
 **When `git merge dev` conflicts in the pair,** step 3 aborts that merge,
@@ -292,5 +292,5 @@ again.
 Live timings for one pair (2026-10-10, `--fork-detached --build`): main
 worktree 3 s, fork worktree 2 s, `pnpm install` 7 s with a warm store,
 `npm ci` 24 s, `make proto` 28 s, `make go-to-ts` 20 s, build 104 s; 188 s in
-all. The other live runs are in `docs/reviews/feat-worktree-pair.md`, "Live
-tests".
+all. The other live runs are in `docs/reviews/feat-worktree-pair.md` § Live
+tests.
