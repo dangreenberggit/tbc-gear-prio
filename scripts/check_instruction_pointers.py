@@ -1119,6 +1119,34 @@ def t_sentence_break_ends_chain_after_skipped_pointer():
         assert rc == 1 and "1 dead" in out, (text, out, err)
 
 
+def t_ci_never_fails_a_chain_that_passes_locally():
+    """On CI a skipped ~/ pointer's heading end is unknown. A chain after it
+    passes on CI whenever it passes locally, where the end is known; the local
+    run, which every push makes first, stays the strict one."""
+    home = {".claude/x.md": "## Notes (Claude Code)\n## Testing: seams\n## Gates vs. Advisory\n## Bars\n"}
+    for text in (
+        "Read `~/.claude/x.md` § Notes (Claude Code), § Bars.\n",
+        "Read `~/.claude/x.md` § Testing: seams and § Bars.\n",
+        "Read `~/.claude/x.md` § Gates vs. Advisory or § Bars.\n",
+    ):
+        local = _check({"AGENTS.md": text}, home_files=home)
+        assert local[0] == 0, (text, local)
+        rc, out, err = _check({"AGENTS.md": text}, ci=True, home_files={})
+        assert rc == 0 and "2 into ~/.claude skipped" in out, (text, out, err)
+    rc, out, err = _check({"AGENTS.md": "## Mine\n\nSee `~/.claude/x.md` § Bars. Then, § Gone covers it.\n"}, home_files=home)
+    assert rc == 1 and "1 dead" in out, (out, err)
+
+
+def t_closing_quote_after_a_path_is_not_a_quoted_heading():
+    """A quote that closes right after a path is prose, not `x.md` "Heading"."""
+    for text in (
+        'He said "see `docs/agents/a.md`" and then "go".\n',
+        '---\ndescription: "Values in `docs/agents/a.md`"\nmodel: "opus"\n---\n',
+    ):
+        rc, out, err = _style(text)
+        assert rc == 0, (text, out, err)
+
+
 def t_ruled_out_forms_shown_in_code_are_examples():
     """Review F8: a code span may show the ruled-out forms."""
     rc, out, err = _style(
