@@ -490,6 +490,35 @@ def run_refs(world: World, arg: str, out, err, sites: bool = True) -> int:
     return 0
 
 
+def run_mermaid(world: World, focus: str | None, out) -> int:
+    """A file-level chart: one node per file, one edge per file pair,
+    labelled with its pointer count; an edge with any dead pointer is red."""
+    pointers, _ = collect(world)
+    edges: dict[tuple[str, str], list[Pointer]] = {}
+    for p in pointers:
+        if p.skipped or p.style or p.target == p.site.key:
+            continue
+        edges.setdefault((p.site.key, p.target), []).append(p)
+    if focus:
+        f = file_key(world, focus)
+        edges = {k: v for k, v in edges.items() if f in k}
+    ids: dict[str, str] = {}
+    for a, b in sorted(edges):
+        for k in (a, b):
+            ids.setdefault(k, f"n{len(ids)}")
+    print("flowchart LR", file=out)
+    for k, i in ids.items():
+        print(f'  {i}["{k}"]', file=out)
+    red = []
+    for n, ((a, b), ps) in enumerate(sorted(edges.items())):
+        print(f"  {ids[a]} -->|{len(ps)}| {ids[b]}", file=out)
+        if any(p.problem for p in ps):
+            red.append(str(n))
+    if red:
+        print(f"  linkStyle {','.join(red)} stroke:red", file=out)
+    return 0
+
+
 def main(argv: list[str], *, home: Path, ci: bool, out=sys.stdout, err=sys.stderr) -> int:
     ap = argparse.ArgumentParser(prog="check_instruction_pointers.py", description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -499,8 +528,13 @@ def main(argv: list[str], *, home: Path, ci: bool, out=sys.stdout, err=sys.stder
     ap.add_argument("--home-overlay", type=Path)
     ap.add_argument("--mermaid", action="store_true")
     ap.add_argument("--focus")
+    ap.add_argument("--self-test", action="store_true")
     a = ap.parse_args(argv)
+    if a.self_test:
+        return self_test()
     world = World(a.repo.resolve(), home, ci, a.home_overlay.resolve() if a.home_overlay else None)
+    if a.mermaid:
+        return run_mermaid(world, a.focus, out)
     if a.cmd == "check":
         return run_check(world, out, err)
     if a.cmd in ("refs", "headings") and a.arg:
@@ -514,6 +548,9 @@ def main(argv: list[str], *, home: Path, ci: bool, out=sys.stdout, err=sys.stder
 # --------------------------------------------------------------------------
 
 
+_BASE: str | None = None  # self_test's temp folder; removed when it ends
+
+
 def _tree(base: Path, files: dict[str, str]) -> None:
     for rel, text in files.items():
         p = base / rel
@@ -524,7 +561,7 @@ def _tree(base: Path, files: dict[str, str]) -> None:
 def _run(files: dict[str, str], argv: list[str], *, ci: bool = False, home_files=None):
     """Write a repo (and a home with ~/.claude unless home_files is None and
     the caller wants none), run main, return (rc, stdout, stderr)."""
-    tmp = Path(tempfile.mkdtemp(prefix="ptr-selftest-"))
+    tmp = Path(tempfile.mkdtemp(prefix="ptr-selftest-", dir=_BASE))
     repo, home = tmp / "repo", tmp / "home"
     _tree(repo, files)
     if home_files is not None:
@@ -767,7 +804,7 @@ def t_scratch_targets_skipped_and_counted():
 
 
 def t_home_overlay_replaces_home_files():
-    tmp = Path(tempfile.mkdtemp(prefix="ptr-overlay-"))
+    tmp = Path(tempfile.mkdtemp(prefix="ptr-overlay-", dir=_BASE))
     _tree(
         tmp,
         {
@@ -839,17 +876,54 @@ def t_refs_home_file_by_tilde_or_full_path():
     assert "~/.claude_router/agents/glm-task.md:1" in out, out
 
 
+def t_mermaid_file_level_with_dead_edges_red():
+    files = dict(REFS_REPO)
+    files["docs/agents/b.md"] = "See `docs/agents/a.md` § Unused and `docs/workflow.md` § Nope.\n"
+    rc, out, err = _run(files, ["--mermaid"])
+    assert rc == 0, (out, err)
+    lines = [l.strip() for l in out.splitlines()]
+    assert lines[0] == "flowchart LR", out
+    nodes = {l.split("[")[0]: l.split('"')[1] for l in lines if '["' in l}
+    ids = {v: k for k, v in nodes.items()}
+    a, w, b, g = ids["AGENTS.md"], ids["docs/workflow.md"], ids["docs/agents/b.md"], ids["docs/agents/a.md"]
+    edges = [l for l in lines if "-->" in l]
+    # AGENTS.md -> a.md: 4 pointers (one dead); no self edge for AGENTS.md
+    assert f"{a} -->|4| {g}" in edges and f"{w} -->|1| {g}" in edges, edges
+    assert f"{b} -->|1| {g}" in edges and f"{b} -->|1| {w}" in edges, edges
+    assert len(edges) == 4, edges
+    red = [l for l in lines if l.startswith("linkStyle")]
+    dead_idx = sorted(edges.index(e) for e in (f"{a} -->|4| {g}", f"{b} -->|1| {w}"))
+    assert red == [f"linkStyle {','.join(map(str, dead_idx))} stroke:red"], (red, edges)
+
+
+def t_mermaid_focus_and_no_file_written():
+    files = dict(REFS_REPO)
+    files["docs/agents/b.md"] = "See `docs/workflow.md` § Nope.\n"
+    tmp = Path(tempfile.mkdtemp(prefix="ptr-mermaid-", dir=_BASE))
+    _tree(tmp / "repo", files)
+    (tmp / "home/.claude").mkdir(parents=True)
+    before = sorted(p for p in tmp.rglob("*"))
+    o, e = io.StringIO(), io.StringIO()
+    rc = main(["--repo", str(tmp / "repo"), "--mermaid", "--focus", "docs/workflow.md"], home=tmp / "home", ci=False, out=o, err=e)
+    assert rc == 0 and sorted(p for p in tmp.rglob("*")) == before, e.getvalue()
+    edges = [l.strip() for l in o.getvalue().splitlines() if "-->" in l]
+    assert len(edges) == 2 and all("|1|" in l for l in edges), edges  # workflow->a, b->workflow
+
+
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("t_")]
 
 
 def self_test() -> int:
+    global _BASE
     failed = 0
-    for t in TESTS:
-        try:
-            t()
-        except AssertionError as e:
-            failed += 1
-            print(f"  FAIL {t.__name__}: {e}", file=sys.stderr)
+    with tempfile.TemporaryDirectory(prefix="ptr-selftest-") as base:
+        _BASE = base
+        for t in TESTS:
+            try:
+                t()
+            except AssertionError as e:
+                failed += 1
+                print(f"  FAIL {t.__name__}: {e}", file=sys.stderr)
     if failed:
         print(f"check_instruction_pointers.py self-test: {failed} of {len(TESTS)} failed", file=sys.stderr)
         return 1
@@ -858,6 +932,4 @@ def self_test() -> int:
 
 
 if __name__ == "__main__":
-    if sys.argv[1:] == ["--self-test"]:
-        sys.exit(self_test())
     sys.exit(main(sys.argv[1:], home=Path.home(), ci=bool(os.environ.get("CI"))))
