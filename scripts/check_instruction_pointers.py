@@ -67,7 +67,7 @@ HOME_SITE_GLOBS = (
 )
 HOME_SKIP_PARTS = (".trash",)
 
-FENCE = re.compile(r"^\s*(```|~~~)")
+FENCE = re.compile(r"^\s*(`{3,}|~{3,})")
 HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
 CODE_SPAN = re.compile(r"(`+)((?:(?!\n[ \t]*\n).)+?)\1", re.S)
 CONNECTOR = re.compile(r"^\s*(,|,?\s*and|,?\s*or)\s*$", re.I)
@@ -81,13 +81,17 @@ def norm(text: str) -> str:
 
 def blank_fences(text: str) -> str:
     """The text with fenced blocks blanked, line count kept."""
-    out, inside = [], False
+    out, fence = [], None  # the open fence's marker
     for line in text.split("\n"):
-        if FENCE.match(line):
-            inside = not inside
+        m = FENCE.match(line)
+        if m and fence is None:
+            fence = m.group(1)
+            out.append("")
+        elif m and fence is not None and m.group(1)[0] == fence[0] and len(m.group(1)) >= len(fence):
+            fence = None
             out.append("")
         else:
-            out.append("" if inside else line)
+            out.append("" if fence is not None else line)
     return "\n".join(out)
 
 
@@ -158,34 +162,44 @@ class World:
         return self.docs[key]
 
 
-def _glob(base: Path, pattern: str) -> list[Path]:
+def _glob(base: Path, pattern: str, errors: list[str]) -> list[Path]:
+    """Files matching pattern; a folder on the way that cannot be listed
+    goes in errors, so an unreadable folder never passes as an empty one."""
     if "**" not in pattern:
+        parent = (base / pattern).parent
+        if parent.is_dir() and not os.access(parent, os.R_OK | os.X_OK):
+            errors.append(f"{parent}: cannot read")
         return sorted(p for p in base.glob(pattern) if p.is_file())
     top, _, name = pattern.partition("/**/")
     found = []
-    for d, dirs, files in os.walk(base / top, followlinks=True):
+
+    def walk_error(e: OSError) -> None:
+        if not isinstance(e, FileNotFoundError):  # an absent folder holds no sites
+            errors.append(f"{e.filename}: cannot read")
+
+    for d, dirs, files in os.walk(base / top, onerror=walk_error, followlinks=True):
         dirs[:] = [x for x in dirs if x not in HOME_SKIP_PARTS]
         found += [Path(d) / f for f in files if Path(f).match(name)]
     return sorted(found)
 
 
-def site_keys(world: World) -> tuple[list[str], list[str]]:
-    """Repo site keys and home site keys. Problems reading the home go in
-    the second list's place as an exception from the caller."""
+def site_keys(world: World, errors: list[str] | None = None) -> tuple[list[str], list[str]]:
+    """Repo site keys and home site keys; read errors go in errors."""
+    errors = [] if errors is None else errors
     repo = []
     for g in REPO_SITE_GLOBS:
-        repo += [p.relative_to(world.repo).as_posix() for p in _glob(world.repo, g)]
+        repo += [p.relative_to(world.repo).as_posix() for p in _glob(world.repo, g, errors)]
     home: list[str] = []
     if world.ci:
         return sorted(set(repo)), home
     for g in HOME_SITE_GLOBS:
-        home += ["~/" + p.relative_to(world.home).as_posix() for p in _glob(world.home, g)]
+        home += ["~/" + p.relative_to(world.home).as_posix() for p in _glob(world.home, g, errors)]
     if world.overlay is not None:
         for g in HOME_SITE_GLOBS:
             if g.startswith(".claude/"):
                 home += [
                     "~/.claude/" + p.relative_to(world.overlay).as_posix()
-                    for p in _glob(world.overlay, g[len(".claude/"):])
+                    for p in _glob(world.overlay, g[len(".claude/"):], errors)
                 ]
     return sorted(set(repo)), sorted(set(home))
 
@@ -245,6 +259,9 @@ def _match_heading(heads: list[tuple[int, str]], rest: str) -> tuple[list[str], 
     return [], 0
 
 
+# A file named in prose with no extension, such as model-policy or ADR-0030:
+# a word with a -, . or / inside it, right before the §.
+FILE_WORD = re.compile(r"(?:^|[\s(])(\w[\w./-]*[-./][\w./-]*\w)$")
 UNBACKTICKED = re.compile(r"(?:^|[\s(])(~/[\w./-]+|[\w./-]*[\w-]\.md)$")
 # A quote may wrap a line but not cross a blank line.
 _QUOTE = r'["\u201c]((?:(?!\n[ \t]*\n)[^"\u201d]){1,160})["\u201d]'
@@ -267,13 +284,15 @@ def _style_problem(before: str, span: str | None, rest: str, said: str, world: W
         m = re.search(r"`([^`]+)`$", inner)
         if m and _looks_like_path(m.group(1)):
             return f"drop the parentheses: `{m.group(1)}` § {said}."
+    if span is not None and span.startswith("/"):
+        return f"`{span}` is an absolute path; write a `~/` path or a path from the repo root."
     if span is not None and _looks_like_path(span):
         if "/" not in span and not (world.repo / span).is_file():
             return f"`{span}` has no folder and is not a root file of the repo; write its path, such as `docs/agents/{span}` § {said} or `~/.claude/{span}` § {said}."
     elif span is None:
-        m = UNBACKTICKED.search(before)
+        m = UNBACKTICKED.search(before) or FILE_WORD.search(before)
         if m:
-            return f"put the path in backticks: `{m.group(1)}` § {said}."
+            return f"put the path in backticks: `{m.group(1)}` § {said} (write the file's full path)."
     if not rest.startswith(" "):
         return f"write a space after §: `§ {said}`."
     if rest[1:2] in ('"', "\u201c"):
@@ -333,8 +352,13 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
             gap = text[pend:pos] if pend is not None else ""
             if pend is not None and CONNECTOR.match(gap):
                 target, continued = ptarget, True
-            elif pend is None and re.search(r"(,|\band|\bor)\s*$", stripped) and "`" not in text[ppos:pos] and "." not in text[ppos + 1 : pos]:
-                target, continued = ptarget, True
+            elif pend is None and re.search(r"(,|\band|\bor)\s*$", stripped):
+                # The heading's end is unknown (skipped or dead target). A
+                # numbered heading's "1." and code in the heading are not a
+                # sentence break; other punctuation is.
+                gap = re.sub(r"`[^`]*`|\b\d+(\.\d+)*\.", "", text[ppos + 1 : pos])
+                if not re.search(r"[.;:()]", gap):
+                    target, continued = ptarget, True
         if target is None:
             target = site.key
         said = _said(rest[1:] if rest[:1] == " " else rest)
@@ -356,18 +380,29 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
 def quoted_pointers(site: Doc, world: World) -> list[Pointer]:
     """Pointers written as a path and a quoted heading, with no §."""
     text = blank_fences(site.text)
+    spans = _spans(text)
+
+    def in_code(a: int, b: int) -> bool:
+        """Whether text[a:b] sits inside a code span that is not text[a:b]'s
+        own leading path span: a code example of the form."""
+        return any(x <= a and b <= y and not (x == a and y < b) for x, y, _ in spans)
+
     found = []
     for m in QUOTED.finditer(text):
         path = m.group(1).strip("`").strip()
-        if not _looks_like_path(path):
+        if not path.endswith(".md") or in_code(m.start(), m.end()):
             continue
-        doc = world.doc(path)
         quote = re.sub(r"\s+", " ", m.group(2)).strip()
-        if doc is not None and any(norm(h) == norm(quote) for _, h in doc.heads):
-            p = Pointer(site, text.count("\n", 0, m.start()) + 1, path, quote)
-            p.problem, p.style = f"write `{path}` § {quote}.", True
-            found.append(p)
+        p = Pointer(site, text.count("\n", 0, m.start()) + 1, path, quote)
+        p.problem = (
+            f"a path and a quote: write `{path}` § {quote} when it is a heading, "
+            f'or `{path}`: "{quote}" when it quotes the file.'
+        )
+        p.style = True
+        found.append(p)
     for m in GLOBAL_RULE.finditer(text):
+        if in_code(m.start(), m.end()):
+            continue
         rule = re.sub(r"\s+", " ", m.group(1)).strip()
         p = Pointer(site, text.count("\n", 0, m.start()) + 1, "~/.claude/AGENTS.md", rule)
         p.problem, p.style = f"write `~/.claude/AGENTS.md` § {rule}.", True
@@ -417,7 +452,7 @@ def collect(world: World) -> tuple[list[Pointer], list[str]]:
         claude = world.home / ".claude"
         if not claude.is_dir() or not os.access(claude, os.R_OK | os.X_OK):
             errors.append(f"{claude} is missing or unreadable; pointers into it cannot be checked (set CI only on CI).")
-    repo_keys, home_keys = site_keys(world)
+    repo_keys, home_keys = site_keys(world, errors)
     pointers: list[Pointer] = []
     read: set[str] = set()
     for key in repo_keys + home_keys:
@@ -512,7 +547,7 @@ def run_refs(world: World, arg: str, out, err, sites: bool = True) -> int:
         dead = [p for p in into if p.problem]
         if dead:
             print("dead pointers into this file: " + "; ".join(f"{p.site.shown}:{p.line} § {p.said}" for p in dead), file=out)
-        mention = re.compile(re.escape(key) + r"(?!`?\s*§)")
+        mention = re.compile(r"(?<![\w./~-])" + re.escape(key) + r"(?!`?\s*§)")
         count = 0
         repo_keys, home_keys = site_keys(world)
         for k in repo_keys + home_keys:
@@ -565,6 +600,9 @@ def main(argv: list[str], *, home: Path, ci: bool, out=sys.stdout, err=sys.stder
     a = ap.parse_args(argv)
     if a.self_test:
         return self_test()
+    if a.home_overlay is not None and not a.home_overlay.is_dir():
+        print(f"--home-overlay {a.home_overlay}: no such folder", file=err)
+        return 2
     world = World(a.repo.resolve(), home, ci, a.home_overlay.resolve() if a.home_overlay else None)
     if a.mermaid:
         return run_mermaid(world, a.focus, out)
@@ -781,8 +819,12 @@ def t_style_quoted_heading():
         assert rc == 1 and "1 style" in out and "§ Heading one" in err, (text, out, err)
     rc, out, err = _style('See (`docs/agents/a.md`, "Heading\none") first.\n')
     assert rc == 1 and "1 style" in out and "§ Heading one" in err, (out, err)
-    # A quote that is no heading of that file is prose, not a pointer.
-    rc, out, err = _style('`docs/agents/a.md` "says this".\n')
+    # A dead quoted heading is still the ruled-out form (review F3) ...
+    for text in ('See `docs/agents/a.md`, "Gone".\n', 'See `docs/agents/gone.md`, "Gone".\n'):
+        rc, out, err = _style(text)
+        assert rc == 1 and "1 style" in out, (text, out, err)
+    # ... and a quote of a file's text takes a colon.
+    rc, out, err = _style('`docs/agents/a.md`: "says this".\n')
     assert rc == 0, (out, err)
 
 
@@ -907,6 +949,7 @@ def t_refs_home_file_by_tilde_or_full_path():
         ["refs", "~/.claude/routing.md § Decision table"],
         home_files=HOME,
     )
+    assert tmp_home_rc == 0, (out, err)
     assert "AGENTS.md:1" in out and "~/.claude/skills/x/SKILL.md:1" in out, out
     assert "~/.claude_router/agents/glm-task.md:1" in out, out
 
@@ -1003,6 +1046,86 @@ def t_heading_does_not_run_past_its_paragraph():
     assert rc == 1 and 'no heading "Report"' in err, (out, err)
 
 
+def t_unreadable_home_folder_fails():
+    """Review F1: a folder under ~/.claude that cannot be listed is an error."""
+    tmp = Path(tempfile.mkdtemp(prefix="ptr-perm-", dir=_BASE))
+    _tree(tmp / "repo", {"AGENTS.md": "x\n"})
+    _tree(tmp / "home", {".claude/skills/s/SKILL.md": "`~/.claude/x.md` § Gone\n", ".claude/agents/a.md": "x\n"})
+    for sub in ("skills", "agents"):
+        d = tmp / "home/.claude" / sub
+        d.chmod(0)
+        try:
+            o, e = io.StringIO(), io.StringIO()
+            rc = main(["--repo", str(tmp / "repo"), "check"], home=tmp / "home", ci=False, out=o, err=e)
+        finally:
+            d.chmod(0o755)
+        assert rc == 1 and "cannot read" in e.getvalue(), (sub, o.getvalue(), e.getvalue())
+
+
+def t_style_unbackticked_name_without_extension():
+    """Review F2: a file named in prose before § is not a same-file pointer."""
+    for text in (
+        "## Heading one\n\nSee model-policy § Heading one.\n",
+        "## 3. Steps\n\nPer ADR-0030 § 3.\n",
+    ):
+        rc, out, err = _check({"AGENTS.md": text})
+        assert rc == 1 and "1 style" in out and "backticks" in err, (text, out, err)
+    rc, out, err = _check({"AGENTS.md": "## 3. Steps\n\nDone. § 3 says so; in § 3 too.\n"})
+    assert rc == 0, (out, err)
+
+
+def t_ci_continuation_after_numbered_or_code_heading():
+    """Review F7: on CI a chain into a skipped file stays skipped."""
+    for text in (
+        "`~/.claude/x.md` § 1. Brief and § 2. Plan.\n",
+        "`~/.claude/x.md` § Run `pnpm x` first, and § Then.\n",
+    ):
+        rc, out, err = _check({"AGENTS.md": text}, ci=True, home_files={})
+        assert rc == 0 and "2 into ~/.claude skipped" in out, (text, out, err)
+
+
+def t_ruled_out_forms_shown_in_code_are_examples():
+    """Review F8: a code span may show the ruled-out forms."""
+    rc, out, err = _style(
+        'Never write `` `docs/agents/a.md`, "Heading one" `` or `the global rule "Orchestrator mode"`.\n'
+    )
+    assert rc == 0, (out, err)
+
+
+def t_missing_overlay_folder_fails():
+    """Review F9: a mistyped --home-overlay is an error, not the live home."""
+    rc, out, err = _run({"AGENTS.md": "x\n"}, ["check", "--home-overlay", "/nonexistent/overlay"])
+    assert rc == 2 and "/nonexistent/overlay" in err, (rc, out, err)
+
+
+def t_longer_fence_holds_a_shorter_one():
+    """Review F13: a ```` fence may contain ``` lines."""
+    rc, out, err = _style("````\n```\n`x` § y\n```\n````\n\nSee `docs/agents/a.md` § Gone.\n")
+    assert rc == 1 and "1 dead" in out, (out, err)
+
+
+def t_absolute_path_is_ruled_out():
+    """Review F14: an absolute path would be missing on CI and elsewhere."""
+    rc, out, err = _style("See `/home/x/docs/agents/a.md` § Heading one.\n")
+    assert rc == 1 and "1 style" in out, (out, err)
+
+
+def t_ci_from_env():
+    """Review F15."""
+    assert ci_from_env({"CI": "true"}) and ci_from_env({"CI": "1"})
+    assert not ci_from_env({}) and not ci_from_env({"CI": ""}) and not ci_from_env({"CI": "false"})
+    assert not ci_from_env({"CI": "0"})
+
+
+def t_refs_mentions_are_whole_paths():
+    """Review F11: ~/.claude/AGENTS.md is not a mention of AGENTS.md."""
+    rc, out, err = _run(
+        {"AGENTS.md": "## A\n", "docs/workflow.md": "See `~/.claude/AGENTS.md` and docs/agents/home/AGENTS.md.\n"},
+        ["refs", "AGENTS.md"],
+    )
+    assert "plain mentions of AGENTS.md without §: 0" in out, out
+
+
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("t_")]
 
 
@@ -1014,7 +1137,7 @@ def self_test() -> int:
         for t in TESTS:
             try:
                 t()
-            except AssertionError as e:
+            except Exception as e:  # a crash is a failure too
                 failed += 1
                 print(f"  FAIL {t.__name__}: {e}", file=sys.stderr)
     if failed:
@@ -1024,5 +1147,9 @@ def self_test() -> int:
     return 0
 
 
+def ci_from_env(env) -> bool:
+    return env.get("CI", "").strip().lower() not in ("", "0", "false", "no")
+
+
 if __name__ == "__main__":
-    sys.exit(main(sys.argv[1:], home=Path.home(), ci=bool(os.environ.get("CI"))))
+    sys.exit(main(sys.argv[1:], home=Path.home(), ci=ci_from_env(os.environ)))
