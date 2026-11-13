@@ -71,7 +71,7 @@ FENCE = re.compile(r"^\s*(```|~~~)")
 HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
 CODE_SPAN = re.compile(r"(`+)((?:(?!\n[ \t]*\n).)+?)\1", re.S)
 CONNECTOR = re.compile(r"^\s*(,|,?\s*and|,?\s*or)\s*$", re.I)
-NUMBER = re.compile(r"(\d+)(?![\d]|\.\d)")
+NUMBER = re.compile(r"\d+(?:\.\d+)*")
 
 
 def norm(text: str) -> str:
@@ -237,8 +237,9 @@ def _match_heading(heads: list[tuple[int, str]], rest: str) -> tuple[list[str], 
         return best, index[best_len - 1] + 1
     m = NUMBER.match(n)
     if m:
-        num = m.group(1)
-        hits = [h for _, h in heads if re.match(rf"{num}(\.|\)|\s|$)", norm(h))]
+        num = m.group(0)
+        # "4" names "4. The interface", not "4.1 Options".
+        hits = [h for _, h in heads if re.match(re.escape(num) + r"(\.(?!\d)|\)|\s|$)", norm(h))]
         if hits:
             return hits, index[len(num) - 1] + 1
     return [], 0
@@ -963,6 +964,16 @@ def t_message_names_only_the_heading():
     assert 'no heading "Gone"' in err and 'no heading "Also gone"' in err, err
     rc, out, err = _style('See `docs/agents/a.md` § "Heading one" first.\n')
     assert "drop the quotes: `docs/agents/a.md` § Heading one." in err, err
+
+
+def t_numbered_heading_is_not_its_subsection():
+    rc, out, err = _check(
+        {
+            "AGENTS.md": "`PLAN.md` § 4 states it; `PLAN.md` § 4.1 and `PLAN.md` § 5.\n",
+            "PLAN.md": "## 4. The interface\n### 4.1 Options\n## 5. Seams\n### 5.1 Not a seam\n",
+        }
+    )
+    assert rc == 0 and "3 checked" in out, (out, err)
 
 
 TESTS = [v for k, v in sorted(globals().items()) if k.startswith("t_")]
