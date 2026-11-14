@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: .scratch/agent-reports/2026-11-13-general-task-pointer-check-build.md
 Blocks: none
@@ -55,3 +55,33 @@ differs per repo (say it in words, or give each repo the heading).
 Changes to pattern-text-extractor's `AGENTS.md` and agent files need the
 owner's OK of the text. Optional: run the check in that repo's own
 verify, which needs the script copied or shared.
+
+## Comments
+
+2026-11-13: closed here and moved to the two repos it concerns, so
+whoever works there sees it. The owner said "Ok" to this proposal: "the
+pattern-text-extractor part becomes a ticket in that repo's tracker; the
+global-pointer part becomes a note in `/home/daniel/setup`; 879 here
+gets closed, with a pointer to both."
+
+- pattern-text-extractor's own 18 lines and the stage-gate role names:
+  that repo's
+  `.scratch/carry-forward/issues/76-dead-and-misformed-section-pointers.md`.
+- The two global pointers (`routing.md:166`,
+  `skills/parallel-phase/adapters/claude-code.md:18`): an item in
+  `/home/daniel/setup/TODO.md`.
+
+Agents cannot write to either repo, so both arrive as patches for the
+owner to apply with `git am`:
+`/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-13-move-879/pattern-text-extractor-ticket-76.patch`
+and `/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-13-move-879/setup-todo-global-pointers.patch`
+(gitignored). The findings still stand. This repo changes only if the
+setup item settles on teaching the pointer check here to skip them.
+
+Verified by:
+`git -C /home/daniel/Code/Snug/pattern-text-extractor apply --check /home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-13-move-879/pattern-text-extractor-ticket-76.patch; git -C /home/daniel/setup apply --check /home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-13-move-879/setup-todo-global-pointers.patch`
+both rc 0 on 2026-11-13, against pattern-text-extractor `fd90eea` and
+setup `774ff88`. After the owner applies them,
+`ls /home/daniel/Code/Snug/pattern-text-extractor/.scratch/carry-forward/issues/76-*`
+and `grep -n 'pattern-text-extractor' /home/daniel/setup/TODO.md`
+show both homes.
