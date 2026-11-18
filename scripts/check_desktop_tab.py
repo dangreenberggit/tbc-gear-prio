@@ -182,11 +182,13 @@ class GatedRun:
 # reads it (amendment A-F31a); a --full run falls back to the eligible count
 # and must measure and pin the value first.
 GATED: dict[tuple[str, int], GatedRun] = {
-    # Pool: fixture "ret-p4", exclude 1118, include 1175. The 1118 is
-    # 1121 - 7 + 4: the current db.json replaced the old Hallow's End item ids
-    # (the fixture's _comment lists them). "P3" wears 32332 Torch of the
-    # Damned, a two-hander: 1118 - 30 off-hand-only (fork 213fc11db) - 74
-    # one-handers (fork 5ec8def25) = 1014.
+    # Pool: fixture "ret-p4", exclude 1116, include 1173. The 1116 is
+    # 1121 - 7 + 4 - 2: the current db.json replaced the old Hallow's End item
+    # ids (the fixture's _comment lists them), and fork 690fcdeb5 (ticket 753)
+    # keeps one id of each db.json twin, which drops 28379 and 28380 from
+    # every cell. "P3" wears 32332 Torch of the Damned, a two-hander: 1116 -
+    # 30 off-hand-only (fork 213fc11db) - 74 one-handers (fork 5ec8def25) =
+    # 1012.
     # Rows at cap 40: the pane shows 40, so none of the 16 worn items is inside
     # the first 40. Measured on the desktop binary at fork f06772929, on the
     # run-time pool (ticket 505), and the committed golden
@@ -196,16 +198,17 @@ GATED: dict[tuple[str, int], GatedRun] = {
         page="/tbc/paladin/retribution/",
         preset_tab="Phase 3",
         preset="P3",
-        expected_eligible=1014,
-        pool_cap=1175,
+        expected_eligible=1012,
+        pool_cap=1173,
         capped_rows={40: 40},
     ),
     # Mage's phase-3 tab also has "Arcane - Sword"; the staff is kept because a
     # worn two-hander is what makes the tab hold out a caster's off-hand items
     # and one-handers (ticket 700).
-    # Pool: fixture "mage-p4", exclude 610, include 640. "Arcane - Staff" wears
-    # 32374 Zhar'doom, Greatstaff of the Devourer, a two-hander: 610 - 31
-    # off-hand-only - 63 one-handers = 516.
+    # Pool: fixture "mage-p4", exclude 608, include 638 (2 fewer each since
+    # fork 690fcdeb5, as ret's). "Arcane - Staff" wears 32374 Zhar'doom,
+    # Greatstaff of the Devourer, a two-hander: 608 - 31 off-hand-only - 63
+    # one-handers = 514.
     # Rows at cap 40: 40, measured on the desktop binary at fork b71e25086 on
     # 2026-11-07 (rowCount=40, eligibleCount=516). At fork b603564ee it was 38
     # (2026-11-06, ticket 800): 2 of the 16 worn items were inside the first
@@ -214,13 +217,13 @@ GATED: dict[tuple[str, int], GatedRun] = {
         page="/tbc/mage/dps/",
         preset_tab="Phase 3",
         preset="Arcane - Staff",
-        expected_eligible=516,
-        pool_cap=640,
+        expected_eligible=514,
+        pool_cap=638,
         capped_rows={40: 40},
     ),
-    # Pool: fixture "rogue-p4", exclude 826, include 867. "P3 Swords" wears
-    # 32837 and 32838 Warglaive of Azzinoth in the two hands, so the hand rule
-    # removes nothing: 826.
+    # Pool: fixture "rogue-p4", exclude 824, include 865 (2 fewer each since
+    # fork 690fcdeb5, as ret's). "P3 Swords" wears 32837 and 32838 Warglaive
+    # of Azzinoth in the two hands, so the hand rule removes nothing: 824.
     # Rows at cap 40: 40, measured as mage's at fork b71e25086 (rowCount=40,
     # eligibleCount=826). At fork b603564ee it was 33: 7 of the 17 worn items
     # were inside the first 40.
@@ -228,12 +231,13 @@ GATED: dict[tuple[str, int], GatedRun] = {
         page="/tbc/rogue/dps/",
         preset_tab=None,
         preset="P3 Swords",
-        expected_eligible=826,
-        pool_cap=867,
+        expected_eligible=824,
+        pool_cap=865,
         capped_rows={40: 40},
     ),
-    # Pool: fixture "enh-p4", exclude 1039, include 1092. "P3 Preset" wears
-    # two 32262 Syphon of the Nathrezim, one-handers: 1039.
+    # Pool: fixture "enh-p4", exclude 1037, include 1090 (2 fewer each since
+    # fork 690fcdeb5, as ret's). "P3 Preset" wears two 32262 Syphon of the
+    # Nathrezim, one-handers: 1037.
     # Rows at cap 40, measured as mage's: of 16 distinct worn ids (32262 is
     # worn in both hands, and the cap keeps worn items by id, rank.ts
     # equippedIds), the pane shows 40 at fork b603564ee, so none is inside;
@@ -248,8 +252,8 @@ GATED: dict[tuple[str, int], GatedRun] = {
         page="/tbc/shaman/enhancement/",
         preset_tab=None,
         preset="P3 Preset",
-        expected_eligible=1039,
-        pool_cap=1092,
+        expected_eligible=1037,
+        pool_cap=1090,
         capped_rows={40: 40},
     ),
 }

@@ -62,3 +62,8 @@ player does not wear plus every worn one. This ticket's uncapped case is
 unchanged: an uncapped run still sims every worn item in the pool and lists
 none, so (e) still needs `full_rows` or the eligible count minus the worn
 items in the pool.
+
+**2026-11-17, branch `fix/desktop-gate-twin-counts`.** Fork `690fcdeb5`
+(ticket 753) dropped 28379 and 28380 from every pool, so enh's eligible
+count is now 1037, not 1039, and rogue's is 824, not 826. A fix here starts
+from the new counts in `GATED`.
