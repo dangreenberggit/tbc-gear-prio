@@ -51,3 +51,31 @@ node ./node_modules/oxfmt/dist/cli.js -c .oxfmtrc.json --check <files>
   re-run, because `upgrades_tab.tsx` is a layout-gate input.
 - Decide whether a gate should run the scoped check, so it cannot go stale
   again; record the decision here.
+
+## Progress 2026-11-17 (ticket 344's branch, `chore/344-pr-prep`)
+
+The tab moved since this ticket was filed: its files are now every file the
+fork added, under `ui/features/upgrades/` and `ui/app/tabs/UpgradesTabBody*`.
+Upstream CI runs `npm run fmt` (`oxfmt . --check`,
+`.github/workflows/run_tests.yml`), so the whole fork must pass, not a scoped
+list. Fork commit `5d688dd2a` is oxfmt alone over the 42 TypeScript files
+that failed (38 under `model/engine/`, plus `model/set_bonus_tip.ts`,
+`model/set_bonus_tip.test.ts`, `components/SetBonusPopover/SetBonusPopover.tsx`
+and `ui/app/tabs/UpgradesTabBody.unopened.test.tsx`); each file's AST is
+unchanged. What still
+fails, from the fork checkout:
+
+```
+npx oxfmt --check $(git diff --name-only --diff-filter=A 24606be6b HEAD)
+```
+
+22 files, all `ui/features/upgrades/model/data/*.json`. They are byte copies
+of this repo's `data/presets/` and `data/universes/` files, which
+`pnpm fork-universes:check` compares as bytes, so formatting them in the
+fork alone breaks that gate. Which way out is the owner's call, held in
+ticket 885 § What should ship ("Formatting of `model/data/*.json`"): an
+`ignorePatterns` entry in the fork's `.oxfmtrc.json`, or
+`scripts/sync_fork_universes.py` writing oxfmt's JSON layout on both sides.
+This ticket does the work once that is ruled.
+No gate runs oxfmt yet; once the JSON is settled, adding
+`oxfmt --check` to `scripts/check_fork_lint.py` keeps this from going stale.

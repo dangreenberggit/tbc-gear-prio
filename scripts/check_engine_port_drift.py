@@ -102,7 +102,12 @@ FORK_SLOTS_TS = ENGINE_DIR / "slots.ts"
 TS_UNION = r'export type {name} =\s*(?P<body>[^;]+);'
 # `export const NAME = [ "a", "b" ] as const;`
 TS_ARRAY = r'export const {name}\s*(?::[^=]+)?=\s*\[(?P<body>[^\]]*)\]'
-QUOTED = re.compile(r'"([^"]*)"')
+# Either quote style: core writes double quotes, the fork's oxfmt single.
+QUOTED = re.compile(r'"([^"]*)"|\'([^\']*)\'')
+
+
+def quoted_members(body: str) -> list[str]:
+    return [double or single for double, single in QUOTED.findall(body)]
 
 
 def ts_union_members(text: str, name: str, where: Path) -> list[str]:
@@ -110,7 +115,7 @@ def ts_union_members(text: str, name: str, where: Path) -> list[str]:
     if not m:
         print(f"could not find `export type {name}` in {where}", file=sys.stderr)
         raise SystemExit(2)
-    return QUOTED.findall(m.group("body"))
+    return quoted_members(m.group("body"))
 
 
 def ts_array_members(text: str, name: str, where: Path) -> list[str]:
@@ -118,7 +123,7 @@ def ts_array_members(text: str, name: str, where: Path) -> list[str]:
     if not m:
         print(f"could not find `export const {name}` in {where}", file=sys.stderr)
         raise SystemExit(2)
-    return QUOTED.findall(m.group("body"))
+    return quoted_members(m.group("body"))
 
 
 def compare_union(label: str, ours: list[str], theirs: list[str]) -> list[str]:
