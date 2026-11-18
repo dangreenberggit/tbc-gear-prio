@@ -64,6 +64,22 @@ OVERALL_CASES = [
 
 CAP = 40
 
+# An uncapped (--full) run lists every eligible item but the worn ones (ticket
+# 854): (spec, eligibleCount, rowCount) -> does (e) pass? The 2026-11-07 runs
+# at fork c9bb0acd3 read enh 1024 rows of 1039 (15 worn items in the pool) and
+# rogue 809 of 826 (17); fork 690fcdeb5 (ticket 753) then took 2 items out of
+# every pool, none of them worn, so the same gear now gives 1022 of 1037 and
+# 807 of 824.
+FULL_CASES = [
+    (("enh", 1037, 1022), True),
+    (("enh", 1037, 1037), False),  # every eligible item listed: the old fallback
+    (("enh", 1037, 1024), False),  # the 2026-11-07 row count on today's pool
+    (("enh", 1039, 1024), False),  # the 2026-11-07 run: the pool has moved
+    (("rogue", 824, 807), True),
+    (("rogue", 824, 809), False),
+    (("rogue", 826, 809), False),
+]
+
 
 def passing_readback(spec: str) -> dict:
     """A readback that meets (a)-(f) for `spec` at the gate's phase and cap."""
@@ -81,10 +97,35 @@ def passing_readback(spec: str) -> dict:
     }
 
 
-def gate_ok(rb: dict, spec: str) -> bool:
+def gate_ok(rb: dict, spec: str, candidates: int = CAP) -> bool:
     with contextlib.redirect_stdout(io.StringIO()):
-        ok, _ = g.assert_gate(rb, CAP, spec, g.DESKTOP_PHASE)
+        ok, _ = g.assert_gate(rb, candidates, spec, g.DESKTOP_PHASE)
     return ok
+
+
+def full_readback(spec: str, eligible: int, rows: int) -> dict:
+    return {**passing_readback(spec), "candidatesRequested": 0,
+            "eligibleCount": eligible, "rowCount": rows}
+
+
+def full_problems() -> list[str]:
+    """(e) on an uncapped run: ticket 854's numbers, then each spec's own pins
+    (expected_eligible less worn_in_pool), which pass, and one row more,
+    which fails."""
+    problems = [
+        f"uncapped (e) for {spec} eligible {eligible} rows {rows} gave {got}, "
+        f"want {want}"
+        for (spec, eligible, rows), want in FULL_CASES
+        if (got := gate_ok(full_readback(spec, eligible, rows), spec, 0)) != want
+    ]
+    for spec in g.gated_specs(g.DESKTOP_PHASE):
+        run = g.GATED[(spec, g.DESKTOP_PHASE)]
+        rows = run.expected_eligible - run.worn_in_pool
+        if not gate_ok(full_readback(spec, run.expected_eligible, rows), spec, 0):
+            problems.append(f"{spec}: uncapped (e) fails on {rows} rows")
+        if gate_ok(full_readback(spec, run.expected_eligible, rows + 1), spec, 0):
+            problems.append(f"{spec}: uncapped (e) passed on {rows + 1} rows")
+    return problems
 
 
 def table_problems() -> list[str]:
@@ -267,8 +308,9 @@ def check_spec_problems() -> tuple[list[str], int]:
     except (OSError, KeyError):
         return problems, 0  # table_problems names the missing pin or golden
     broken = {**good, "panicHit": True}
-    uncapped = {**passing_readback(spec), "candidatesRequested": 0,
-                "rowCount": g.GATED[(spec, phase)].expected_eligible}
+    run = g.GATED[(spec, phase)]
+    uncapped = full_readback(spec, run.expected_eligible,
+                             run.expected_eligible - run.worn_in_pool)
     absent = g.ROOT / "data/desktop-gate/golden-absent-for-verdict-check.json"
 
     # (name, readback, bytes_rc, update_golden, candidates,
@@ -407,7 +449,7 @@ def main() -> int:
         for rcs, want in OVERALL_CASES
         if (got := g.overall_rc(rcs)) != want
     ] + table_problems() + fixture_problems() + harness_problems() \
-        + assertion_problems() + build_env_problems()
+        + assertion_problems() + full_problems() + build_env_problems()
     spec_problems, spec_cases = check_spec_problems()
     problems += spec_problems
     harness_run_problems, harness_run_cases = run_harness_problems()
@@ -417,7 +459,7 @@ def main() -> int:
     if problems:
         return 1
     count = (len(GOFLAGS_CASES) + len(CASES) + len(GOLDEN_CASES)
-             + len(OVERALL_CASES) + spec_cases + harness_run_cases + 1)
+             + len(OVERALL_CASES) + len(FULL_CASES) + spec_cases + harness_run_cases + 1)
     print(f"check_desktop_tab_verdict.py ok ({count} verdict cases, "
           f"{len(g.gated_specs(g.DESKTOP_PHASE))} gated specs)")
     return 0

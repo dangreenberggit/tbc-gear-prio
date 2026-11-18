@@ -137,7 +137,9 @@ class GatedRun:
     hand_rule_off_hand_only: int
     hand_rule_one_handers: int
     capped_rows: dict[int, int]  # cap -> rows the list pane shows
-    full_rows: int | None = None
+    # Distinct worn item ids in the eligible pool: an uncapped run sims them
+    # and lists none, so it shows expected_eligible - worn_in_pool rows.
+    worn_in_pool: int
 
 
 # The one source for each gated spec's page, start preset and pinned counts;
@@ -183,12 +185,22 @@ class GatedRun:
 # N minus those worn items. Every count below was measured at fork b71e25086
 # by the owner's desktop-gate run of 2026-11-07: 40 for each spec.
 #
-# full_rows: the measured full-pool row count for the --full branch of
-# assertion (e). An uncapped run lands fewer rows than eligible candidates,
-# because screened-out candidates do not all land as rows (C14 false). No
-# entry has it: the gate runs capped at 40 < eligible, and a capped run never
-# reads it (amendment A-F31a); a --full run falls back to the eligible count
-# and must measure and pin the value first.
+# worn_in_pool: the --full branch of assertion (e) expects expected_eligible -
+# worn_in_pool rows (ticket 854). An uncapped run sims every eligible item,
+# and the worn ones are owned rows that miss the cutoff, so paneRows leaves
+# them out. Chosen over pinning a measured full_rows: the expected count is
+# derived from the pinned eligible count, so a pool change that touches no
+# worn item (such as fork 690fcdeb5) needs no new uncapped run. Neither the
+# harness readback (presetWorn holds names, not pool membership) nor the pool
+# fixture (sizes only) gives the worn-in-pool count, so it is pinned: each
+# value counts the start preset's distinct item ids
+# (model/pool_source.presets.fixture.json) that are in the eligible pool
+# (dbPoolFor(spec, 4, "exclude") less the hand rule), measured at fork
+# 1410a775e by a vitest probe in the main checkout (gitignored:
+# .scratch/desktop-gate/worn-in-pool-probe/). The owner's uncapped runs of
+# 2026-11-07 at fork c9bb0acd3 agree for the two specs run: enh 1024 rows of
+# 1039, rogue 809 of 826 (ticket 854). A change to a start preset or to which
+# worn items the pool holds must re-measure it.
 GATED: dict[tuple[str, int], GatedRun] = {
     # Pool: fixture "ret-p4", exclude 1116, include 1173. The 1116 is
     # 1121 - 7 + 4 - 2: the current db.json replaced the old Hallow's End item
@@ -211,6 +223,7 @@ GATED: dict[tuple[str, int], GatedRun] = {
         hand_rule_off_hand_only=30,
         hand_rule_one_handers=74,
         capped_rows={40: 40},
+        worn_in_pool=15,  # of 16 worn ids; 27484 Libram of Avengement is not in the pool
     ),
     # Mage's phase-3 tab also has "Arcane - Sword"; the staff is kept because a
     # worn two-hander is what makes the tab hold out a caster's off-hand items
@@ -232,6 +245,7 @@ GATED: dict[tuple[str, int], GatedRun] = {
         hand_rule_off_hand_only=31,
         hand_rule_one_handers=63,
         capped_rows={40: 40},
+        worn_in_pool=16,  # all 16 worn ids
     ),
     # Pool: fixture "rogue-p4", exclude 824, include 865 (2 fewer each since
     # fork 690fcdeb5, as ret's). "P3 Swords" wears 32837 and 32838 Warglaive
@@ -248,6 +262,7 @@ GATED: dict[tuple[str, int], GatedRun] = {
         hand_rule_off_hand_only=0,
         hand_rule_one_handers=0,
         capped_rows={40: 40},
+        worn_in_pool=17,  # all 17 worn ids
     ),
     # Pool: fixture "enh-p4", exclude 1037, include 1090 (2 fewer each since
     # fork 690fcdeb5, as ret's). "P3 Preset" wears two 32262 Syphon of the
@@ -271,6 +286,7 @@ GATED: dict[tuple[str, int], GatedRun] = {
         hand_rule_off_hand_only=0,
         hand_rule_one_handers=0,
         capped_rows={40: 40},
+        worn_in_pool=15,  # of 16 worn ids; 27815 Totem of the Astral Winds is not in the pool
     ),
 }
 
@@ -780,16 +796,17 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
     run = GATED.get((spec, phase))
     expected = run.expected_eligible if run else None
     cap = run.pool_cap if run else None
-    full_rows = run.full_rows if run else None
     requested = rb.get("candidatesRequested") or 0
-    # C14 is FALSE (D4): an uncapped run lands full_rows (< eligibleCount), not
-    # eligibleCount, because screened-out candidates do not all land as rows. A
-    # capped run lands its pinned capped_rows, the cap itself: worn items take
-    # no cap place (fork b71e25086), and they are simmed but not listed.
-    if requested > 0:
-        expected_rows = run.capped_rows.get(requested) if run else None
+    # Worn items are simmed but not listed: a capped run lands its pinned
+    # capped_rows, the cap itself, since worn items take no cap place (fork
+    # b71e25086); an uncapped run lands every eligible item but the worn ones
+    # (ticket 854).
+    if run is None:
+        expected_rows = None
+    elif requested > 0:
+        expected_rows = run.capped_rows.get(requested)
     else:
-        expected_rows = full_rows if full_rows is not None else eligible
+        expected_rows = run.expected_eligible - run.worn_in_pool
     # An unpinned spec/phase fails (e): a gate that passed on numbers nobody
     # measured would hide a pool change.
     e_ok = (expected_rows is not None and rb.get("rowCount") == expected_rows
@@ -799,7 +816,8 @@ def assert_gate(rb: dict, candidates: int, spec: str, phase: int) -> tuple[bool,
          f"rowCount={rb.get('rowCount')} expected={expected_rows or 'unpinned'} "
          f"eligibleCount={eligible} expected_eligible={expected or 'unpinned'} "
          f"cap={cap or 'unpinned'} "
-         f"(uncapped uses full_rows={full_rows}, C14 false)")
+         f"worn_in_pool={run.worn_in_pool if run else 'unpinned'} "
+         "(uncapped expects expected_eligible - worn_in_pool rows)")
 
     mark("f", not rb.get("panicHit"), f"panicHit={rb.get('panicHit')}")
 
