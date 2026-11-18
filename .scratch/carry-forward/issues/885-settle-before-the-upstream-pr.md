@@ -8,14 +8,16 @@ Related: 344, 544
 # What to settle before the Upgrades tab goes upstream
 
 Ticket 344's pass (fork `9a54b4e31` and `5d688dd2a`, then the review fixes
-`c922f7efc` to `e8de08ded`) changed comments and formatting only. These items need a code, text or test change, or an edit
+`c922f7efc` to `e8de08ded`, the naming pass `1b18e5fae` to `b23f50100`, and
+`99c27adc8`) changed comments, formatting and names only, with no change in
+behaviour. These items need a code, text or test change, or an edit
 to an upstream file, so each waits on an owner ruling. `blocked` because
 only the owner can move them.
 
 ## Text that still cites this repo
 
 - **String literals in shipping code** (text the tab or its errors can show):
-  `ui/features/upgrades/model/engine/se.ts:43` (`PLAN.md §10`) and `:68`
+  `ui/features/upgrades/model/engine/se.ts:49` (`PLAN.md §10`) and `:74`
   (`ticket 236; upstream vendor/tbc-new-fork/sim/core/sim.go:248-251`), two
   `DegenerateSeedsError` messages; `model/engine/disclosure.ts:57`
   (`ticket 351`) and `:113` (`see PLAN.md §14's 2026-08-09 amendment`),
@@ -39,10 +41,12 @@ only the owner can move them.
 - `model/results_view.test.ts:39` reads
   `../../../../../../packages/core/test/fixtures/tab-recordings/ret-p3-p2.json`,
   a file in this repo, so in wowsims its test at line 283 always skips.
-- `TAB_REPLICATE_SEED_COUNT` and `observeRow` (`model/run_progress.ts`) copy
-  engine values; the test that keeps the copies equal
-  (`fork-run-progress.test.ts`) is in this repo, so nothing checks them in
-  wowsims.
+- `lastCandidateDoneFor` (`model/run_progress.ts:33`) solves the engine's
+  sim total (`model/engine/rank.ts:1221-1222`) by hand. The test that checks
+  it against the engine and recorded runs (`fork-run-progress.test.ts`) is in
+  this repo, so nothing checks it in wowsims. The seed count and the
+  replication filter are no longer copies: since fork `1b18e5fae` both files
+  read them from `model/engine/se.ts`.
 
 ## What should ship
 
@@ -62,10 +66,10 @@ only the owner can move them.
 - **Options only tests reach.** The partner rules `sum-of-singles-plain`,
   `single-swap` and `every-combination` (`model/engine/partner-choice.ts:18`;
   its header says the first two "are kept only for that scoring"),
-  `Deps.partnerRule` (`model/engine/rank.ts:152`), `Ranking.partnerAudit`
-  (`rank.ts:522`, `PartnerAudit` at `partner-choice.ts:135`) and set-screen
+  `Deps.partnerRule` (`model/engine/rank.ts:159`), `Ranking.partnerAudit`
+  (`rank.ts:529`, `PartnerAudit` at `partner-choice.ts:135`) and set-screen
   `record` mode (`model/engine/set-screen.ts:24`, `Deps.setScreen` at
-  `rank.ts:160`). The tab sets none of them: it passes `setScreen: 'on'`
+  `rank.ts:167`). The tab sets none of them: it passes `setScreen: 'on'`
   (`model/run.ts:129`) and
   no `partnerRule`. Since fork `02cca7b70` deleted the tab's check hook, only
   this repo's `packages/core/test/fork-set-net.test.ts` sets them (for

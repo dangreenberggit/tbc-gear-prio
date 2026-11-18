@@ -132,6 +132,12 @@ TypeScript file's AST equals the one at fork `1410a775e`, with comments,
 quote style, trailing commas and parentheses ignored. E-W3 passed before
 each round of engine hashes moved.
 
+Then the naming check the owner approved on 2026-11-18: `1b18e5fae` (shared
+names in place of hand copies and magic numbers), `c04da370b` (renames) and
+`b23f50100` (comments that only repeated a name). These change names, not
+behaviour; the evidence is in the review file. Last, `99c27adc8` fixed six
+comments the check of the fixes flagged; its AST equals `b23f50100`'s.
+
 The finish-line plan's step 2 grep went from 26 files (18 when the plan was
 written) to 3, none of them a comment:
 
@@ -141,7 +147,7 @@ grep -rln 'ADR-\|PLAN.md\|tbc-gear-prio' vendor/tbc-new-fork/ui/features/upgrade
 
 The three are the test name at `model/assumptions.test.ts:13` (`ADR-0037`)
 and the string literals at `model/engine/disclosure.ts:113` and
-`model/engine/se.ts:43` (`PLAN.md`). The plan's acceptance of 0 waits on
+`model/engine/se.ts:49` (`PLAN.md`). The plan's acceptance of 0 waits on
 ticket 885's ruling on strings and test names.
 
 Verified by: `docs/reviews/chore-344-pr-prep.md`
