@@ -25,6 +25,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import check_desktop_tab as g  # noqa: E402
 import go_env  # noqa: E402
+from _fork_gate import ForkGateError, require_pinned_fork  # noqa: E402
+
+POOL_FIXTURE = g.FORK_ROOT / "ui/features/upgrades/model/pool_source.cells.fixture.json"
 
 # GOFLAGS the caller has -> GOFLAGS the build gets (ticket 856)
 GOFLAGS_CASES = [
@@ -113,6 +116,60 @@ def table_problems() -> list[str]:
     gated = {g.golden_path(s, phase, CAP).name for s in specs}
     if on_disk != gated:
         problems.append(f"goldens on disk {sorted(on_disk)} != gated {sorted(gated)}")
+    return problems
+
+
+def pool_count_problems(cells: dict) -> list[str]:
+    """Each gated spec's pool_cap is its fixture cell's include size, and its
+    expected_eligible is the exclude size less the hand-rule counts (ticket
+    884: a fork change moved every cell and the pins went stale unseen)."""
+    problems = []
+    for spec in g.gated_specs(g.DESKTOP_PHASE):
+        run = g.GATED[(spec, g.DESKTOP_PHASE)]
+        name = f"{spec}-p{g.DESKTOP_PHASE}"
+        cell = cells.get(name)
+        if not isinstance(cell, dict):
+            problems.append(f"{spec}: the pool fixture has no cell {name}")
+            continue
+        if run.pool_cap != cell.get("include"):
+            problems.append(f"{spec}: pool_cap {run.pool_cap}, fixture {name} "
+                            f"include {cell.get('include')}")
+        exclude = cell.get("exclude")
+        want = (exclude - run.hand_rule_off_hand_only - run.hand_rule_one_handers
+                if isinstance(exclude, int) else None)
+        if run.expected_eligible != want:
+            problems.append(
+                f"{spec}: expected_eligible {run.expected_eligible}, fixture "
+                f"{name} exclude {exclude} - {run.hand_rule_off_hand_only} "
+                f"off-hand-only - {run.hand_rule_one_handers} one-handers = {want}")
+    return problems
+
+
+def fixture_problems() -> list[str]:
+    """pool_count_problems against the pinned fork's pool fixture, and a
+    check that it reports a cell one off. Skips, as the other fork gates do
+    (_fork_gate.py), when the fork clone is absent."""
+    check = "desktop-gate pool fixture check"
+    if not g.FORK_ROOT.is_dir():
+        print(f"{check}: skipped -- vendor/tbc-new-fork is absent (it is "
+              "gitignored, so a fresh clone has none). Clone the fork to check "
+              "GATED's pool counts against its pool fixture.")
+        return []
+    try:
+        require_pinned_fork(check, g.FORK_ROOT)
+    except ForkGateError as exc:
+        return [exc.message]
+    try:
+        cells = json.loads(POOL_FIXTURE.read_text(encoding="utf-8"))["cells"]
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return [f"{check}: could not read cells from {POOL_FIXTURE}: {exc}"]
+    problems = pool_count_problems(cells)
+    spec = g.gated_specs(g.DESKTOP_PHASE)[0]
+    name = f"{spec}-p{g.DESKTOP_PHASE}"
+    for size in ("include", "exclude"):
+        moved = {**cells, name: {**cells[name], size: cells[name][size] + 1}}
+        if not pool_count_problems(moved):
+            problems.append(f"{check}: passed with {name} {size} one too high")
     return problems
 
 
@@ -349,8 +406,8 @@ def main() -> int:
         f"overall_rc({rcs}) gave {got}, want {want}"
         for rcs, want in OVERALL_CASES
         if (got := g.overall_rc(rcs)) != want
-    ] + table_problems() + harness_problems() + assertion_problems() \
-        + build_env_problems()
+    ] + table_problems() + fixture_problems() + harness_problems() \
+        + assertion_problems() + build_env_problems()
     spec_problems, spec_cases = check_spec_problems()
     problems += spec_problems
     harness_run_problems, harness_run_cases = run_harness_problems()

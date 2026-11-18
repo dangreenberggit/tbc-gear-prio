@@ -131,6 +131,11 @@ class GatedRun:
     preset: str
     expected_eligible: int
     pool_cap: int
+    # The worn-gear hand rule's counts, which the pool fixture does not apply:
+    # expected_eligible is the fixture's exclude size less these two
+    # (check_desktop_tab_verdict.py pool_count_problems checks it).
+    hand_rule_off_hand_only: int
+    hand_rule_one_handers: int
     capped_rows: dict[int, int]  # cap -> rows the list pane shows
     full_rows: int | None = None
 
@@ -155,15 +160,18 @@ class GatedRun:
 # applies that exclusion (hooks/useUpgradesSettings.ts
 # effectiveExcludedSources), which leaves the exclude pool. pool_cap is the
 # include size, the upper bound with every source ticked. The count then
-# applies the worn-gear hand rule the fixture does not: while the main hand is
-# a two-hander it leaves out the off-hand-only items and the one-handed
-# weapons, as a run does (model/settings_pool.ts eligibleCount,
-# model/engine/rank.ts). The rule came in with fork commits 213fc11db
+# applies the worn-gear hand rule the fixture does not (hand_rule_off_hand_only
+# and hand_rule_one_handers): while the main hand is a two-hander it leaves out
+# the off-hand-only items and the one-handed weapons, as a run does
+# (model/settings_pool.ts eligibleCount, model/engine/rank.ts). The rule came in with fork commits 213fc11db
 # (off-hand) and 5ec8def25 (one-handers). The off-hand and one-hander counts
 # come from listing each exclude pool (testing/db_pool.ts dbPoolFor(spec, 4,
 # "exclude"), whose size the fixture pins) and reading each weapon's handType
 # in db.json. No pool holds a Kael'thas legendary, which the count also leaves
-# out (engine/kael-temp.ts).
+# out (engine/kael-temp.ts). pnpm verify checks pool_cap and expected_eligible
+# against the pinned fork's fixture (check_desktop_tab_verdict.py
+# pool_count_problems, ticket 884), so a fork change that moves a cell fails
+# verify, not the next hand run.
 #
 # capped_rows: the measured row count of a capped run, per cap: the rows the
 # Upgrades list pane shows. Since fork b71e25086 the cap sims the first N
@@ -200,6 +208,8 @@ GATED: dict[tuple[str, int], GatedRun] = {
         preset="P3",
         expected_eligible=1012,
         pool_cap=1173,
+        hand_rule_off_hand_only=30,
+        hand_rule_one_handers=74,
         capped_rows={40: 40},
     ),
     # Mage's phase-3 tab also has "Arcane - Sword"; the staff is kept because a
@@ -219,6 +229,8 @@ GATED: dict[tuple[str, int], GatedRun] = {
         preset="Arcane - Staff",
         expected_eligible=514,
         pool_cap=638,
+        hand_rule_off_hand_only=31,
+        hand_rule_one_handers=63,
         capped_rows={40: 40},
     ),
     # Pool: fixture "rogue-p4", exclude 824, include 865 (2 fewer each since
@@ -233,6 +245,8 @@ GATED: dict[tuple[str, int], GatedRun] = {
         preset="P3 Swords",
         expected_eligible=824,
         pool_cap=865,
+        hand_rule_off_hand_only=0,
+        hand_rule_one_handers=0,
         capped_rows={40: 40},
     ),
     # Pool: fixture "enh-p4", exclude 1037, include 1090 (2 fewer each since
@@ -254,6 +268,8 @@ GATED: dict[tuple[str, int], GatedRun] = {
         preset="P3 Preset",
         expected_eligible=1037,
         pool_cap=1090,
+        hand_rule_off_hand_only=0,
+        hand_rule_one_handers=0,
         capped_rows={40: 40},
     ),
 }
