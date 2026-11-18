@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: .scratch/agent-reports/2026-11-07-general-task-candidate-cap-options.md (main checkout, gitignored; investigation of tickets 820 and 821)
 Blocks: none
@@ -67,3 +67,43 @@ items in the pool.
 (ticket 753) dropped 28379 and 28380 from every pool, so enh's eligible
 count is now 1037, not 1039, and rogue's is 824, not 826. A fix here starts
 from the new counts in `GATED`.
+
+## Closed (2026-11-17, branch `fix/884-854-desktop-gate-counts`)
+
+The (e) check of an uncapped run now expects `expected_eligible -
+worn_in_pool` rows, with `worn_in_pool` pinned per spec: the start preset's
+distinct item ids that are in the eligible pool. `full_rows` is gone. The
+comment above `GATED` says why: the count is derived from the pinned eligible
+count, so a pool change that touches no worn item needs no new uncapped run,
+and neither the harness readback (`presetWorn` holds names) nor the pool
+fixture (sizes only) gives the worn-in-pool count, so that one number is
+pinned. Values, measured at fork `1410a775e` with `dbPoolFor` over each
+preset's ids (probe in the main checkout, gitignored:
+`.scratch/desktop-gate/worn-in-pool-probe/`): ret 15 (27484 Libram of
+Avengement is not in the pool), mage 16, rogue 17, enh 15 (27815 Totem of
+the Astral Winds is not in the pool). The enh and rogue values agree with
+this ticket's runs (1039 - 1024 = 15, 826 - 809 = 17). No preset wears 28379
+or 28380, so fork `690fcdeb5` changed the eligible counts only: a correct
+uncapped run should now show enh 1022 of 1037 and rogue 807 of 824, and the
+2026-11-07 numbers (1024 of 1039, 809 of 826) fail (e) on today's pins
+because the eligible count moved.
+
+Live runs, 2026-11-17, fork `1410a775e`, in the agent sandbox with
+`PLAYWRIGHT_BROWSERS_PATH=<main>/.scratch/agent-reports/2026-11-03-p45-runs/pwshim`
+and `--no-build` on the owner's build of that fork (logs
+`.scratch/agent-reports/2026-11-17-desktop-gate-{enh,rogue}-full.log`,
+gitignored):
+
+```
+(e) pass: rowCount=1022 expected=1022 eligibleCount=1037 expected_eligible=1037 cap=1090 worn_in_pool=15
+desktop-gate: PASS (enh PASS).
+(e) pass: rowCount=807 expected=807 eligibleCount=824 expected_eligible=824 cap=865 worn_in_pool=17
+desktop-gate: PASS (rogue PASS).
+```
+
+Verified by: the two live runs above, and `pnpm desktop-gate:unit:check`. Its `FULL_CASES` hold this
+ticket's numbers: enh 1022 of 1037 and rogue 807 of 824 pass (e); enh 1037
+of 1037 (the old fallback), 1024 of 1037 and 1024 of 1039, and rogue 809 of
+824 and 809 of 826 fail. Before the gate change enh 1022 and rogue 807
+failed and enh 1037 of 1037 passed. `full_problems` also passes each spec on
+its own pins and fails it one row over.

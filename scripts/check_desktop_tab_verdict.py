@@ -25,6 +25,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import check_desktop_tab as g  # noqa: E402
 import go_env  # noqa: E402
+from _fork_gate import ForkGateError, require_pinned_fork  # noqa: E402
+
+POOL_FIXTURE = g.FORK_ROOT / "ui/features/upgrades/model/pool_source.cells.fixture.json"
 
 # GOFLAGS the caller has -> GOFLAGS the build gets (ticket 856)
 GOFLAGS_CASES = [
@@ -61,6 +64,22 @@ OVERALL_CASES = [
 
 CAP = 40
 
+# An uncapped (--full) run lists every eligible item but the worn ones (ticket
+# 854): (spec, eligibleCount, rowCount) -> does (e) pass? The 2026-11-07 runs
+# at fork c9bb0acd3 read enh 1024 rows of 1039 (15 worn items in the pool) and
+# rogue 809 of 826 (17); fork 690fcdeb5 (ticket 753) then took 2 items out of
+# every pool, none of them worn, so the same gear now gives 1022 of 1037 and
+# 807 of 824.
+FULL_CASES = [
+    (("enh", 1037, 1022), True),
+    (("enh", 1037, 1037), False),  # every eligible item listed: the old fallback
+    (("enh", 1037, 1024), False),  # the 2026-11-07 row count on today's pool
+    (("enh", 1039, 1024), False),  # the 2026-11-07 run: the pool has moved
+    (("rogue", 824, 807), True),
+    (("rogue", 824, 809), False),
+    (("rogue", 826, 809), False),
+]
+
 
 def passing_readback(spec: str) -> dict:
     """A readback that meets (a)-(f) for `spec` at the gate's phase and cap."""
@@ -78,10 +97,35 @@ def passing_readback(spec: str) -> dict:
     }
 
 
-def gate_ok(rb: dict, spec: str) -> bool:
+def gate_ok(rb: dict, spec: str, candidates: int = CAP) -> bool:
     with contextlib.redirect_stdout(io.StringIO()):
-        ok, _ = g.assert_gate(rb, CAP, spec, g.DESKTOP_PHASE)
+        ok, _ = g.assert_gate(rb, candidates, spec, g.DESKTOP_PHASE)
     return ok
+
+
+def full_readback(spec: str, eligible: int, rows: int) -> dict:
+    return {**passing_readback(spec), "candidatesRequested": 0,
+            "eligibleCount": eligible, "rowCount": rows}
+
+
+def full_problems() -> list[str]:
+    """(e) on an uncapped run: ticket 854's numbers, then each spec's own pins
+    (expected_eligible less worn_in_pool), which pass, and one row more,
+    which fails."""
+    problems = [
+        f"uncapped (e) for {spec} eligible {eligible} rows {rows} gave {got}, "
+        f"want {want}"
+        for (spec, eligible, rows), want in FULL_CASES
+        if (got := gate_ok(full_readback(spec, eligible, rows), spec, 0)) != want
+    ]
+    for spec in g.gated_specs(g.DESKTOP_PHASE):
+        run = g.GATED[(spec, g.DESKTOP_PHASE)]
+        rows = run.expected_eligible - run.worn_in_pool
+        if not gate_ok(full_readback(spec, run.expected_eligible, rows), spec, 0):
+            problems.append(f"{spec}: uncapped (e) fails on {rows} rows")
+        if gate_ok(full_readback(spec, run.expected_eligible, rows + 1), spec, 0):
+            problems.append(f"{spec}: uncapped (e) passed on {rows + 1} rows")
+    return problems
 
 
 def table_problems() -> list[str]:
@@ -114,6 +158,84 @@ def table_problems() -> list[str]:
     if on_disk != gated:
         problems.append(f"goldens on disk {sorted(on_disk)} != gated {sorted(gated)}")
     return problems
+
+
+def pool_count_problems(cells: dict) -> list[str]:
+    """Each gated spec's pool_cap is its fixture cell's include size, and its
+    expected_eligible is the exclude size less the hand-rule counts (ticket
+    884: a fork change moved every cell and the pins went stale unseen)."""
+    problems = []
+    for spec in g.gated_specs(g.DESKTOP_PHASE):
+        run = g.GATED[(spec, g.DESKTOP_PHASE)]
+        name = f"{spec}-p{g.DESKTOP_PHASE}"
+        cell = cells.get(name)
+        if not isinstance(cell, dict):
+            problems.append(f"{spec}: the pool fixture has no cell {name}")
+            continue
+        if run.pool_cap != cell.get("include"):
+            problems.append(f"{spec}: pool_cap {run.pool_cap}, fixture {name} "
+                            f"include {cell.get('include')}")
+        exclude = cell.get("exclude")
+        want = (exclude - run.hand_rule_off_hand_only - run.hand_rule_one_handers
+                if isinstance(exclude, int) else None)
+        if run.expected_eligible != want:
+            problems.append(
+                f"{spec}: expected_eligible {run.expected_eligible}, fixture "
+                f"{name} exclude {exclude} - {run.hand_rule_off_hand_only} "
+                f"off-hand-only - {run.hand_rule_one_handers} one-handers = {want}")
+    return problems
+
+
+def fixture_problems() -> list[str]:
+    """pool_count_problems against the pinned fork's pool fixture, and a
+    check that it reports a cell one off. Skips, as the other fork gates do
+    (_fork_gate.py), when the fork clone is absent."""
+    check = "desktop-gate pool fixture check"
+    if not g.FORK_ROOT.is_dir():
+        print(f"{check}: skipped -- vendor/tbc-new-fork is absent (it is "
+              "gitignored, so a fresh clone has none). Clone the fork to check "
+              "GATED's pool counts against its pool fixture.")
+        return []
+    try:
+        require_pinned_fork(check, g.FORK_ROOT)
+    except ForkGateError as exc:
+        return [exc.message]
+    try:
+        cells = json.loads(POOL_FIXTURE.read_text(encoding="utf-8"))["cells"]
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return [f"{check}: could not read cells from {POOL_FIXTURE}: {exc}"]
+    return cells_problems(cells)
+
+
+def cells_problems(cells: dict) -> list[str]:
+    """pool_count_problems on the fixture's cells, plus a check that it
+    reports the first gated spec's cell one off."""
+    check = "desktop-gate pool fixture check"
+    problems = pool_count_problems(cells)
+    # The one-off self-test needs a whole cell; a missing or broken cell is
+    # already a problem above.
+    if problems:
+        return problems
+    spec = g.gated_specs(g.DESKTOP_PHASE)[0]
+    name = f"{spec}-p{g.DESKTOP_PHASE}"
+    for size in ("include", "exclude"):
+        moved = {**cells, name: {**cells[name], size: cells[name][size] + 1}}
+        if not pool_count_problems(moved):
+            problems.append(f"{check}: passed with {name} {size} one too high")
+    return problems
+
+
+def missing_cell_problems() -> list[str]:
+    """A fixture without a gated spec's cell is reported, not a crash."""
+    spec = g.gated_specs(g.DESKTOP_PHASE)[0]
+    name = f"{spec}-p{g.DESKTOP_PHASE}"
+    try:
+        got = cells_problems({})
+    except Exception as exc:  # noqa: BLE001 -- the crash is what this checks
+        return [f"cells_problems({{}}) raised {exc!r}, want a 'no cell {name}' problem"]
+    if not any(f"no cell {name}" in p for p in got):
+        return [f"cells_problems({{}}) gave {got!r}, want a 'no cell {name}' problem"]
+    return []
 
 
 def harness_problems() -> list[str]:
@@ -210,8 +332,9 @@ def check_spec_problems() -> tuple[list[str], int]:
     except (OSError, KeyError):
         return problems, 0  # table_problems names the missing pin or golden
     broken = {**good, "panicHit": True}
-    uncapped = {**passing_readback(spec), "candidatesRequested": 0,
-                "rowCount": g.GATED[(spec, phase)].expected_eligible}
+    run = g.GATED[(spec, phase)]
+    uncapped = full_readback(spec, run.expected_eligible,
+                             run.expected_eligible - run.worn_in_pool)
     absent = g.ROOT / "data/desktop-gate/golden-absent-for-verdict-check.json"
 
     # (name, readback, bytes_rc, update_golden, candidates,
@@ -349,8 +472,8 @@ def main() -> int:
         f"overall_rc({rcs}) gave {got}, want {want}"
         for rcs, want in OVERALL_CASES
         if (got := g.overall_rc(rcs)) != want
-    ] + table_problems() + harness_problems() + assertion_problems() \
-        + build_env_problems()
+    ] + table_problems() + fixture_problems() + missing_cell_problems() + harness_problems() \
+        + assertion_problems() + full_problems() + build_env_problems()
     spec_problems, spec_cases = check_spec_problems()
     problems += spec_problems
     harness_run_problems, harness_run_cases = run_harness_problems()
@@ -360,7 +483,7 @@ def main() -> int:
     if problems:
         return 1
     count = (len(GOFLAGS_CASES) + len(CASES) + len(GOLDEN_CASES)
-             + len(OVERALL_CASES) + spec_cases + harness_run_cases + 1)
+             + len(OVERALL_CASES) + len(FULL_CASES) + spec_cases + harness_run_cases + 2)
     print(f"check_desktop_tab_verdict.py ok ({count} verdict cases, "
           f"{len(g.gated_specs(g.DESKTOP_PHASE))} gated specs)")
     return 0
