@@ -1,7 +1,7 @@
 # Pre-merge review — fix/884-854-desktop-gate-counts
 
 Diffed against: `a254fbf2...2d13bd93..6701643a` (`dev` = `origin/dev` at the
-start). The review's fixes are `3dd50851` and the commit holding this file.
+start). The review's fixes are `3dd50851` and `ad65b808`; this file is `3f8bcc01`.
 Only `scripts/check_desktop_tab.py`, `scripts/check_desktop_tab_verdict.py`
 and tickets 884 and 854. No fork change and no re-pin; the fork clone was
 clean at `1410a775e`, the lock's `commit`.
@@ -64,7 +64,7 @@ desktop-gate: PASS (rogue PASS).
 condition is a live `--full` pass on enh and rogue; the closing note said the
 runs "were not run", and stated 1022 of 1037 and 807 of 824 as if seen. Fixed
 in `3dd50851` (ticket set to `blocked`, the numbers worded as expected), then
-closed in the commit holding this file with the two live runs above.
+closed in `ad65b808` with the two live runs above.
 
 **M1 (low, adversarial): a fixture with no cell for a gated spec crashed the
 check.** `fixture_problems` ran its one-off self-test with `cells[name]` even
