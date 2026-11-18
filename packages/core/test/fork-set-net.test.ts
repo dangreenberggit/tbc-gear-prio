@@ -342,7 +342,7 @@ type PoolSpec = {
 type Scenario = {
   worn: WornSpec[];
   pool: PoolSpec[];
-  measureBrokenSetValue?: boolean;
+  measureSetBonuses?: boolean;
   /** Overrides the module's per-item values for this scenario only. */
   itemValue?: ReadonlyMap<number, number>;
   /** Overrides the module's per-set bonuses for this scenario only. */
@@ -687,7 +687,7 @@ async function runScenario(scenario: Scenario): Promise<{
     epWeights: feralWeights,
     itemEp: await statsOnlyItemEp(feralWeights),
     pool,
-    ...(scenario.measureBrokenSetValue ? { measureBrokenSetValue: true } : {}),
+    ...(scenario.measureSetBonuses ? { measureSetBonuses: true } : {}),
     ...(scenario.partnerRule ? { partnerRule: scenario.partnerRule } : {}),
     ...(scenario.setScreen ? { setScreen: scenario.setScreen } : {}),
     ...(controller ? { signal: controller.signal } : {}),
@@ -745,7 +745,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     const { ranking, runCount } = await runScenario({
       worn: wornGear({}),
       pool: TH_POOL,
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     const bonuses = ranking.setBonuses ?? [];
     const b2 = bonuses.find((b) => b.setId === 676 && b.threshold === 2);
@@ -776,7 +776,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
         { itemId: NEUTRAL.hands[0], slot: "hands" },
         { itemId: NEUTRAL.legs[0], slot: "legs" },
       ],
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     // Exactly one B sim: Malorne 2pc.
     const bsv = ranking.brokenSetValues ?? [];
@@ -809,7 +809,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     const worn1 = await runScenario({
       worn: wornGear({ hands: THUNDERHEART.hands }),
       pool: TH_POOL.filter((p) => p.slot !== "hands"),
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     const row1 = worn1.ranking.items.find((i) => i.setContext?.setId === 676);
     expect(row1?.setContext?.piecesWornBefore).toBe(1);
@@ -832,7 +832,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
         chest: THUNDERHEART.chest,
       }),
       pool: [{ itemId: THUNDERHEART.shoulder, slot: "shoulder" }],
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     const row3 = worn3.ranking.items.find((i) => i.setContext?.setId === 676);
     expect(row3?.setContext?.piecesWornBefore).toBe(3);
@@ -855,7 +855,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
         { itemId: NEUTRAL.hands[0], slot: "hands" },
         { itemId: NEUTRAL.legs[0], slot: "legs" },
       ],
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     const bsv = (ranking.brokenSetValues ?? []).filter(
       (b) => b.setId === 640 && b.threshold === 2
@@ -879,7 +879,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     const { ranking } = await runScenario({
       worn: wornGear({ hands: MALORNE.hands, legs: MALORNE.legs }),
       pool: TH_POOL, // only Thunderheart, no neutrals
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     const bsv = (ranking.brokenSetValues ?? []).find(
       (b) => b.setId === 640 && b.threshold === 2
@@ -910,7 +910,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
       { itemId: NEUTRAL.legs[0], slot: "legs" as const },
     ];
     const off = await runScenario({ worn, pool });
-    const on = await runScenario({ worn, pool, measureBrokenSetValue: true });
+    const on = await runScenario({ worn, pool, measureSetBonuses: true });
     expect(off.ranking.brokenSetValues ?? []).toHaveLength(0);
     // The flag adds one ladder rung per worn Malorne piece (2), two gate sims
     // for each count the pool reaches (2, 3 and 4: 6) and the step gears no
@@ -1085,9 +1085,9 @@ async function viewModule(): Promise<ViewMod> {
 }
 
 /** Runs a scenario with the B flag off and on, for the sim-count invariant. */
-async function runOffOn(scenario: Omit<Scenario, "measureBrokenSetValue">) {
+async function runOffOn(scenario: Omit<Scenario, "measureSetBonuses">) {
   const off = await runScenario(scenario);
-  const on = await runScenario({ ...scenario, measureBrokenSetValue: true });
+  const on = await runScenario({ ...scenario, measureSetBonuses: true });
   return { off, on };
 }
 
@@ -1214,7 +1214,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     const { ranking: r } = await runScenario({
       worn: wornGear({ ...MALORNE_4, legs: MALORNE.legs }),
       pool: TH_OVER_MALORNE_POOL,
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     // Naive Σs − Δ for (640,2) is B_2 + B_4 = 110.
     expect(near(bsvDps(r, 640, 4)!, 70, 0.5)).toBe(true);
@@ -1331,11 +1331,11 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     const setValue = await importForkUpgrades<{
       netInflation: (
         keys: ReadonlyArray<{
-          membersPkg: number;
-          members2pc: number;
-          pkgEnd: number;
-          twoPcEnd: number;
-          B: number;
+          piecesBreakingAlone: number;
+          twoPcPiecesBreakingAlone: number;
+          allPiecesBreak: number;
+          allTwoPcPiecesBreak: number;
+          brokenBonusDps: number;
         }>
       ) => number;
     }>("engine/set-value.ts");
@@ -1354,7 +1354,13 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     const raw2pc = bonus2 - broken;
     const raw = pkgDelta - singles - raw2pc;
     const inflation = setValue.netInflation([
-      { membersPkg: 0, members2pc: 0, pkgEnd: 0, twoPcEnd: 1, B: broken },
+      {
+        piecesBreakingAlone: 0,
+        twoPcPiecesBreakingAlone: 0,
+        allPiecesBreak: 0,
+        allTwoPcPiecesBreak: 1,
+        brokenBonusDps: broken,
+      },
     ]);
     expect(raw).toBe(100);
     expect(raw - inflation).toBe(bonus4);
@@ -1397,7 +1403,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
         { itemId: THUNDERHEART.shoulder, slot: "shoulder" },
         { itemId: THUNDERHEART.chest, slot: "chest" },
       ],
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     // At worn 2 the 2pc package loop skips threshold 2 before pushing anything.
     expect(
@@ -1640,7 +1646,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       worn: TH_HANDS_LEGS,
       pool: [...setPool(NORDRASSIL), ...NEUTRAL_HANDS_LEGS],
       itemValue: withSetValues(Object.values(NORDRASSIL)),
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     for (const id of [NORDRASSIL.chest, NORDRASSIL.head, NORDRASSIL.shoulder]) {
       const row = thRow(r, id);
@@ -1839,7 +1845,7 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
         { itemId: NEUTRAL.head[0], slot: "head" },
         { itemId: NEUTRAL.chest[0], slot: "chest" },
       ],
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     expect(near(r.baseline.dps, 3140, 0.5)).toBe(true);
     const th4 = bonusOf(r, 676, 4);
@@ -1957,7 +1963,7 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     const { ranking: r } = await runScenario({
       worn: wornGear(MALORNE_4),
       pool: TH_OVER_MALORNE_POOL,
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
       failWhen: (ids) =>
         (ids.includes(COPY_OFFSET + MALORNE.shoulder) &&
           ids.includes(COPY_OFFSET + MALORNE.chest) &&
@@ -1989,7 +1995,7 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
       { itemId: NEUTRAL.chest[0], slot: "chest" },
       { itemId: NEUTRAL.hands[0], slot: "hands" },
     ],
-    measureBrokenSetValue: true,
+    measureSetBonuses: true,
     reportsSetBonuses: true,
     failWhen: (ids) =>
       ids.includes(SET_KEPT_OFFSET + MALORNE.chest) &&
@@ -2185,7 +2191,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
     const { ranking: r } = await runScenario({
       worn: wornGear(MALORNE_4),
       pool: TH_OVER_MALORNE_POOL,
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     // K5: with the flag the ranking is a step ranking, so each eligible
     // future's pieces are its partner choice, in slot order, and carry no
@@ -2551,7 +2557,7 @@ describe.skipIf(!forkPresent)(
       const on = await runScenario({
         worn: wornGear({}),
         pool: TH_HANDS_LEGS_POOL,
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       });
       // Only the 2pc package is measured (two pieces cannot reach the 4pc),
       // and nothing worn is broken, so the flag adds the gate's two sims and
@@ -2601,7 +2607,7 @@ describe.skipIf(!forkPresent)(
       const { ranking } = await runScenario({
         worn: wornGear({}),
         pool: TH_HANDS_LEGS_POOL,
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
         interactions: [
           { ids: [THUNDERHEART.hands, THUNDERHEART.legs], dps: 9 },
         ],
@@ -2626,7 +2632,7 @@ describe.skipIf(!forkPresent)(
         runScenario({
           worn: wornGear({}),
           pool,
-          measureBrokenSetValue: true,
+          measureSetBonuses: true,
           idEffects: new Map([[THUNDERHEART.hands, 15]]),
         });
       // (i) chest and gloves: the gloves are last in slot order.
@@ -2730,7 +2736,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
       }),
       itemValue: withSetValues(Object.values(MALORNE)),
       setBonuses: { ...SET_BONUSES, 659: { b2: 30, b4: 20 } },
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     expect(near(r.baseline.dps, 3050, 0.5)).toBe(true);
     expect(ladderOf(r, 659)).toEqual([
@@ -2813,7 +2819,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
         { itemId: NEUTRAL.chest[0], slot: "chest" },
       ],
       setBonuses: { ...SET_BONUSES, 619: { b2: 0, b3: 25, b4: 0 } },
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     expect(near(r.baseline.dps, 3025, 0.5)).toBe(true);
     expect(ladderOf(r, 619)).toEqual([
@@ -2839,7 +2845,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
     const five = await runScenario({
       worn: wornGear({ ...MALORNE_4, legs: MALORNE.legs }),
       pool: TH_OVER_MALORNE_POOL,
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     expect(ladderOf(five.ranking, 640)).toEqual([
       [2, 40, true],
@@ -2869,7 +2875,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
       ],
       itemValue: withSetValues([MALORNE.chest]),
       setBonuses: { ...SET_BONUSES, 659: { b2: 30, b4: 20 } },
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     expect(ladderOf(three.ranking, 659)).toEqual([
       [2, 30, true],
@@ -2883,7 +2889,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
     const none = await runScenario({
       worn: wornGear(PRIMAL_INTENT),
       pool: [{ itemId: THUNDERHEART.chest, slot: "chest" }],
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     expect(ladderOf(none.ranking, 619)).toEqual([
       [2, 0, false],
@@ -2909,7 +2915,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
       ],
       setBonuses: { ...SET_BONUSES, 586: { b2: 40, b4: 0 } },
       idEffects: new Map([[PURSUIT.hands, 15]]),
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     expect(near(r.baseline.dps, 3055, 0.5)).toBe(true);
     // The gloves are the second piece in slot order, so the ladder changes
@@ -2948,7 +2954,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
         ...SET_BONUSES,
         530: { b2: 10, b4: 20, b6: 30, b8: 40 },
       },
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     });
     expect(near(r.baseline.dps, 3100, 0.5)).toBe(true);
     expect(ladderOf(r, 530)).toEqual([
@@ -3106,7 +3112,7 @@ const R_SCENARIO: Scenario = {
   worn: wornGear({}),
   pool: TH_FOUR_POOL,
   interactions: [{ ids: TH_FOUR, dps: -40 }],
-  measureBrokenSetValue: true,
+  measureSetBonuses: true,
 };
 
 // 511-PS: worn Malorne shoulder and chest, model 2pc 90. Own values chosen so
@@ -3122,7 +3128,7 @@ const PS_SCENARIO: Scenario = {
     [THUNDERHEART.hands, 6],
     [THUNDERHEART.legs, -12],
   ]),
-  measureBrokenSetValue: true,
+  measureSetBonuses: true,
 };
 
 describe.skipIf(!forkPresent)(
@@ -3146,7 +3152,7 @@ describe.skipIf(!forkPresent)(
       const off = await runScenario(scenario);
       const on = await runScenario({
         ...scenario,
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       });
       // Without the flag, the table's 4pc package minus its singles reads the
       // +17 as a bonus: −103 − (−120).
@@ -3275,7 +3281,7 @@ describe.skipIf(!forkPresent)(
       const { ranking: r } = await runScenario({
         worn: wornGear({ hands: MALORNE.hands, legs: MALORNE.legs }),
         pool: TH_FOUR_POOL,
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       });
       expect(sortedIds(bonusOf(r, 676, 2)?.packageItemIds)).toEqual([
         THUNDERHEART.chest,
@@ -3322,7 +3328,7 @@ describe.skipIf(!forkPresent)(
       const base: Scenario = {
         worn: wornGear({}),
         pool: TH_FOUR_POOL,
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       };
       // The (676, 4) gate's "off" sim is the only request with a set-less
       // Pauldrons: the 4-piece package copies its first piece in slot order.
@@ -3381,7 +3387,7 @@ describe.skipIf(!forkPresent)(
       const { ranking: r, calls } = await runScenario({
         worn: wornGear({ hands: MALORNE.hands, legs: MALORNE.legs }),
         pool: [...TH_FOUR_POOL, { itemId: THUNDERHEART.wrist, slot: "wrist" }],
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       });
       const three = bonusOf(r, 676, 3);
       expect(three?.sameGearDps).toBe(0);
@@ -3441,7 +3447,7 @@ describe.skipIf(!forkPresent)(
           Object.values(PRIMAL_INTENT).map((id) => [id, 100] as const)
         ),
         setBonuses: { ...SET_BONUSES, 619: { b2: 0, b3: 25, b4: 0 } },
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       });
       const chest = thRow(r, PRIMAL_INTENT.chest);
       expect(futureOf(chest, 2)?.belowGate).toBe(true);
@@ -3467,7 +3473,7 @@ describe.skipIf(!forkPresent)(
           Object.values(CRYSTALFORGE).map((id) => [id, 100] as const)
         ),
         setBonuses: { ...SET_BONUSES, 629: { b2: 30, b4: 0 } },
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
         failWhen: (ids) =>
           ids.includes(COPY_OFFSET + CRYSTALFORGE.chest) &&
           ids.includes(CRYSTALFORGE.hands) &&
@@ -3495,7 +3501,7 @@ describe.skipIf(!forkPresent)(
             Object.values(CRYSTALFORGE).map((id) => [id, 100] as const)
           ),
           setBonuses: { ...SET_BONUSES, 629: { b2, b4: 0 } },
-          measureBrokenSetValue: true,
+          measureSetBonuses: true,
         });
       const yes = (await crystalforge(30)).ranking;
       expect(yes.crossingGates).toEqual([
@@ -3529,7 +3535,7 @@ describe.skipIf(!forkPresent)(
           Object.values(PRIMAL_INTENT).map((id) => [id, 100] as const)
         ),
         setBonuses: { ...SET_BONUSES, 619: { b2: 0, b3: 25, b4: 0 } },
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       });
       const waist = thRow(pi, PRIMAL_INTENT.waist);
       expect(waist.setContext?.crossesThreshold).toBe(true);
@@ -3548,7 +3554,7 @@ describe.skipIf(!forkPresent)(
           Object.values(CRYPTSTALKER).map((id) => [id, 100] as const)
         ),
         setBonuses: { ...SET_BONUSES, 530: { b2: 10, b4: 20, b6: 30, b8: 40 } },
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       });
       expect(
         (r.setBonuses ?? [])
@@ -3627,7 +3633,7 @@ describe.skipIf(!forkPresent)(
           [THUNDERHEART.shoulder, 110],
           [THUNDERHEART.chest, 110],
         ]),
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       };
       const z = thRow((await runScenario(scenario)).ranking, THUNDERHEART.legs);
       const z0 = thRow(
@@ -3757,7 +3763,7 @@ describe.skipIf(!forkPresent)(
           [THUNDERHEART.waist, 120],
           [THUNDERHEART.hands, 110],
         ]),
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       });
       const legs = thRow(r, THUNDERHEART.legs);
       const stops = stopTerms(view, legs);
@@ -3835,7 +3841,7 @@ describe.skipIf(!forkPresent)(
           [19905, 100],
         ]),
         setBonuses: { ...SET_BONUSES, 462: { b2: 40, b4: 0 } },
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       });
       // No bonus is in reach, so the set has no entry (ticket 644).
       expect(
@@ -3867,7 +3873,7 @@ const SR_SCENARIO: Scenario = {
     { itemId: THUNDERHEART.chest, slot: "chest" },
     { itemId: THUNDERHEART.legs, slot: "legs" },
   ],
-  measureBrokenSetValue: true,
+  measureSetBonuses: true,
   // The production runner always reads the active bonuses.
   reportsSetBonuses: true,
 };
@@ -4007,7 +4013,7 @@ describe.skipIf(!forkPresent)(
         ),
         setBonuses: { ...SET_BONUSES, 626: { b2: 0, b4: 0 } },
         interactions: [{ ids: Object.values(JUSTICAR), dps: 17 }],
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
         setScreen: "record",
         reportsSetBonuses: true,
       });
@@ -4112,7 +4118,7 @@ const PC_SCENARIO: Scenario = {
   ],
   itemValue: withValues([[THUNDERHEART.chest, 110]]),
   interactions: [{ ids: [THUNDERHEART.hands, THUNDERHEART.legs], dps: 20 }],
-  measureBrokenSetValue: true,
+  measureSetBonuses: true,
 };
 
 describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
@@ -4361,7 +4367,7 @@ const SB_SCENARIO: Scenario = {
     626: { b2: 20, b4: 0 },
     629: { b2: 20, b4: 0 },
   },
-  measureBrokenSetValue: true,
+  measureSetBonuses: true,
   reportsSetBonuses: true,
 };
 
@@ -4393,7 +4399,7 @@ const SD_SCENARIO: Scenario = {
     [PURSUIT.hands, -12.375],
   ]),
   setBonuses: { ...SET_BONUSES, 586: { b2: 20, b4: 0 } },
-  measureBrokenSetValue: true,
+  measureSetBonuses: true,
   reportsSetBonuses: true,
 };
 
@@ -4851,7 +4857,7 @@ const LR_SCENARIO: Scenario = {
     [THUNDERHEART.chest, 12],
     [THUNDERHEART.hands, 6],
   ]),
-  measureBrokenSetValue: true,
+  measureSetBonuses: true,
 };
 
 // 511-L2: worn Malorne 4 (head, shoulder, chest, hands); only the
@@ -4875,7 +4881,7 @@ const L2_SCENARIO: Scenario = {
     [THUNDERHEART.chest, 20],
     [THUNDERHEART.legs, 10],
   ]),
-  measureBrokenSetValue: true,
+  measureSetBonuses: true,
 };
 
 describe.skipIf(!forkPresent)(
@@ -5309,7 +5315,7 @@ const STOP_SCENARIOS: ReadonlyArray<readonly [string, Scenario]> = [
     {
       worn: wornGear({ hands: THUNDERHEART.hands }),
       pool: TH_POOL.filter((p) => p.slot !== "hands"),
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
       setScreen: "on",
       reportsSetBonuses: true,
     },
@@ -5323,7 +5329,7 @@ const STOP_SCENARIOS: ReadonlyArray<readonly [string, Scenario]> = [
         { itemId: NEUTRAL.hands[0], slot: "hands" },
         { itemId: NEUTRAL.legs[0], slot: "legs" },
       ],
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
       reportsSetBonuses: true,
     },
   ],
@@ -5951,7 +5957,7 @@ describe.skipIf(!forkPresent)(
           ],
           itemValue: values,
           setBonuses: SWEEP_BONUSES,
-          measureBrokenSetValue: true,
+          measureSetBonuses: true,
         });
         // At k = 0 the engine drops both head candidates (Malorne 29098,
         // Nordrassil 30228); the ranking's substitutions say gem repair found
@@ -6028,7 +6034,7 @@ describe.skipIf(!forkPresent)(
         ],
         itemValue: values,
         setBonuses: SWEEP_BONUSES,
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       };
       const plain = await runScenario(scenario);
       const withTerm = await runScenario({
@@ -6104,7 +6110,7 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
         { itemId: THUNDERHEART.legs, slot: "legs" },
         { itemId: THUNDERHEART.wrist, slot: "wrist" },
       ],
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     };
     const unread = await runScenario(scenario);
     const read = await runScenario({ ...scenario, reportsSetBonuses: true });
@@ -6137,7 +6143,7 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
         { itemId: THUNDERHEART.wrist, slot: "wrist" },
         { itemId: THUNDERHEART.waist, slot: "waist" },
       ],
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
       reportsSetBonuses: true,
     };
     const { ranking } = await runScenario(scenario);
@@ -6180,7 +6186,7 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
           { itemId: THUNDERHEART.waist, slot: "waist" },
           { itemId: THUNDERHEART.feet, slot: "feet" },
         ],
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
         setScreen: "on",
         reportsSetBonuses: true,
       });
@@ -6204,7 +6210,7 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
         { itemId: THUNDERHEART.legs, slot: "legs" },
         { itemId: THUNDERHEART.wrist, slot: "wrist" },
       ],
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
       reportsSetBonuses: true,
     };
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
@@ -6256,7 +6262,7 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
           { itemId: MALORNE.head, slot: "head" },
           { itemId: MALORNE.hands, slot: "hands" },
         ],
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
         reportsSetBonuses: true,
       });
       for (const id of [MALORNE.head, MALORNE.hands]) {
@@ -6297,7 +6303,7 @@ describe.skipIf(!forkPresent)("set requests that cannot be built (869)", () => {
   const noThunderheartRows: Scenario = {
     worn: wornGear({}),
     pool: TH_POOL,
-    measureBrokenSetValue: true,
+    measureSetBonuses: true,
     databaseWithout: TH_IDS,
   };
 
@@ -6431,7 +6437,7 @@ describe.skipIf(!forkPresent)(
         const { ranking } = await runScenario({
           worn: wornGear({}),
           pool: TH_FOUR_POOL,
-          measureBrokenSetValue: true,
+          measureSetBonuses: true,
           composeFailsWhen: (ids) =>
             ids[SHOULDER_SLOT] === THUNDERHEART.shoulder &&
             thSlots.filter((slot) => ids[slot] !== 0).length === 2,
@@ -6504,7 +6510,7 @@ describe.skipIf(!forkPresent)(
         { itemId: THUNDERHEART.chest, slot: "chest" },
         { itemId: THUNDERHEART.hands, slot: "hands" },
       ],
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
       databaseWithout: [MALORNE.hands],
     };
 
@@ -6660,7 +6666,7 @@ describe.skipIf(!forkPresent)(
         itemValue: withSetValues(Object.values(MALORNE)),
         setBonuses: { 676: { b2: 3.5, b4: B4_TH }, 640: { b2: 40, b4: 30 } },
         iterations: 7200,
-        measureBrokenSetValue: true,
+        measureSetBonuses: true,
       });
       const th2 = (r.wornSetLadder ?? []).find(
         (e) => e.setId === 676 && e.count === 2

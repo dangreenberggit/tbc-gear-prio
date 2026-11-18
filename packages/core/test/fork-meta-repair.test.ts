@@ -1177,7 +1177,7 @@ type SpecRun = {
   /** The DPS of a request; defaults to a flat model. */
   dps?: (req: RaidSimRequest) => number;
   store?: unknown;
-  measureBrokenSetValue?: boolean;
+  measureSetBonuses?: boolean;
   setScreen?: string;
   controller?: AbortController;
   /** The raid sim skeleton; defaults to the ret P2 preset's. */
@@ -1295,7 +1295,7 @@ async function runSpec(o: SpecRun) {
       epWeights: o.epWeights ?? retWeights,
       itemEp: await statsOnlyItemEp(o.epWeights ?? retWeights),
       pool,
-      ...(o.measureBrokenSetValue ? { measureBrokenSetValue: true } : {}),
+      ...(o.measureSetBonuses ? { measureSetBonuses: true } : {}),
       ...(o.setScreen ? { setScreen: o.setScreen } : {}),
       ...(o.controller ? { signal: o.controller.signal } : {}),
       ...(o.simDatabaseFor ? { simDatabaseFor: o.simDatabaseFor } : {}),
@@ -2024,7 +2024,7 @@ async function brRun(
   let call = 0;
   return runSpec({
     pool: BR_POOL,
-    measureBrokenSetValue: true,
+    measureSetBonuses: true,
     setScreen: "on",
     dps: brDps,
     controller: new AbortController(),
@@ -2164,7 +2164,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       // build it skips the package with the meta-off note (`rank.ts`, the
       // package loop); the same failure while rebuilding one of the
       // package's versions does the same, and the run goes on. Every
-      // version's rebuild goes through the one catch in `versionGears`.
+      // version's rebuild goes through the one catch in `requestsPerLayout`.
       // Burning Rage's 1000 hit puts each set-kept version's budget near
       // −990 rating, and only those repairs fail. No sim ran for the bonus,
       // so no note says one failed.
@@ -2324,7 +2324,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
   it("535-V7: a first step whose gear before has set hit the run's budget missed is skipped, not mismeasured", async () => {
     // Oracle: a first step's split pairs with the gear before built on the
     // run's budget. Here the row's single swap completes Justicar 2pc, whose
-    // hit that budget misses, so `versionGears`' entry 0 is a rebuild that
+    // hit that budget misses, so `requestsPerLayout`' entry 0 is a rebuild that
     // differs from it, and the split is skipped.
     const s = await stepScenario("V7");
     const e = s.e;
@@ -2490,7 +2490,7 @@ async function stepScenario(kind: "V6" | "V7") {
   const run = await runSpec({
     worn,
     pool,
-    measureBrokenSetValue: true,
+    measureSetBonuses: true,
     dps: await stepDps(),
     controller: new AbortController(),
     computeStats: (req) => Promise.resolve(stats(req)),
