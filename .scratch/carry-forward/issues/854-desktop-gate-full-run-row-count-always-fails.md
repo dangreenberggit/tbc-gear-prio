@@ -1,8 +1,8 @@
-Status: closed
+Status: blocked
 Type: bug
 Origin: .scratch/agent-reports/2026-11-07-general-task-candidate-cap-options.md (main checkout, gitignored; investigation of tickets 820 and 821)
 Blocks: none
-Blocked by: none
+Blocked by: the owner's live `--full` runs of enh and rogue (they need Chrome outside the sandbox)
 Related: 800, 820, 821
 
 # The uncapped desktop gate run always fails its row-count check
@@ -68,7 +68,7 @@ items in the pool.
 count is now 1037, not 1039, and rogue's is 824, not 826. A fix here starts
 from the new counts in `GATED`.
 
-## Closed (2026-11-17, branch `fix/884-854-desktop-gate-counts`)
+## Fix (2026-11-17, branch `fix/884-854-desktop-gate-counts`), waiting on a live run
 
 The (e) check of an uncapped run now expects `expected_eligible -
 worn_in_pool` rows, with `worn_in_pool` pinned per spec: the start preset's
@@ -84,13 +84,15 @@ Avengement is not in the pool), mage 16, rogue 17, enh 15 (27815 Totem of
 the Astral Winds is not in the pool). The enh and rogue values agree with
 this ticket's runs (1039 - 1024 = 15, 826 - 809 = 17). No preset wears 28379
 or 28380, so fork `690fcdeb5` changed the eligible counts only: a correct
-uncapped run now shows enh 1022 of 1037 and rogue 807 of 824, and the
+uncapped run should now show enh 1022 of 1037 and rogue 807 of 824 (expected
+from the pins, not yet seen in a run), and the
 2026-11-07 numbers (1024 of 1039, 809 of 826) fail (e) on today's pins
 because the eligible count moved.
 
 The live `--full` runs need Chrome outside the sandbox and were not run.
+Close this ticket with their output: `(e) pass` on both specs.
 
-Verified by: `pnpm desktop-gate:unit:check`. Its `FULL_CASES` hold this
+Verified so far by: `pnpm desktop-gate:unit:check`. Its `FULL_CASES` hold this
 ticket's numbers: enh 1022 of 1037 and rogue 807 of 824 pass (e); enh 1037
 of 1037 (the old fallback), 1024 of 1037 and 1024 of 1039, and rogue 809 of
 824 and 809 of 826 fail. Before the gate change enh 1022 and rogue 807

@@ -204,7 +204,18 @@ def fixture_problems() -> list[str]:
         cells = json.loads(POOL_FIXTURE.read_text(encoding="utf-8"))["cells"]
     except (OSError, ValueError, KeyError, TypeError) as exc:
         return [f"{check}: could not read cells from {POOL_FIXTURE}: {exc}"]
+    return cells_problems(cells)
+
+
+def cells_problems(cells: dict) -> list[str]:
+    """pool_count_problems on the fixture's cells, plus a check that it
+    reports the first gated spec's cell one off."""
+    check = "desktop-gate pool fixture check"
     problems = pool_count_problems(cells)
+    # The one-off self-test needs a whole cell; a missing or broken cell is
+    # already a problem above.
+    if problems:
+        return problems
     spec = g.gated_specs(g.DESKTOP_PHASE)[0]
     name = f"{spec}-p{g.DESKTOP_PHASE}"
     for size in ("include", "exclude"):
@@ -212,6 +223,19 @@ def fixture_problems() -> list[str]:
         if not pool_count_problems(moved):
             problems.append(f"{check}: passed with {name} {size} one too high")
     return problems
+
+
+def missing_cell_problems() -> list[str]:
+    """A fixture without a gated spec's cell is reported, not a crash."""
+    spec = g.gated_specs(g.DESKTOP_PHASE)[0]
+    name = f"{spec}-p{g.DESKTOP_PHASE}"
+    try:
+        got = cells_problems({})
+    except Exception as exc:  # noqa: BLE001 -- the crash is what this checks
+        return [f"cells_problems({{}}) raised {exc!r}, want a 'no cell {name}' problem"]
+    if not any(f"no cell {name}" in p for p in got):
+        return [f"cells_problems({{}}) gave {got!r}, want a 'no cell {name}' problem"]
+    return []
 
 
 def harness_problems() -> list[str]:
@@ -448,7 +472,7 @@ def main() -> int:
         f"overall_rc({rcs}) gave {got}, want {want}"
         for rcs, want in OVERALL_CASES
         if (got := g.overall_rc(rcs)) != want
-    ] + table_problems() + fixture_problems() + harness_problems() \
+    ] + table_problems() + fixture_problems() + missing_cell_problems() + harness_problems() \
         + assertion_problems() + full_problems() + build_env_problems()
     spec_problems, spec_cases = check_spec_problems()
     problems += spec_problems
@@ -459,7 +483,7 @@ def main() -> int:
     if problems:
         return 1
     count = (len(GOFLAGS_CASES) + len(CASES) + len(GOLDEN_CASES)
-             + len(OVERALL_CASES) + len(FULL_CASES) + spec_cases + harness_run_cases + 1)
+             + len(OVERALL_CASES) + len(FULL_CASES) + spec_cases + harness_run_cases + 2)
     print(f"check_desktop_tab_verdict.py ok ({count} verdict cases, "
           f"{len(g.gated_specs(g.DESKTOP_PHASE))} gated specs)")
     return 0
