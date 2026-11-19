@@ -74,6 +74,25 @@ start with `packages/`. Line numbers were re-checked against the fork at
   (`:31`; `'highest-credit'` was `'best-stop'` before the rename pass), are read
   only in `view.ts`.
 
+- **Unused `needed` and `pool` in the set screen's estimate call.**
+  `estimatedDeltaAt` in `model/engine/rank.ts` passes `needed: rest.length`
+  (`:1854`) and `pool: []` (`:1855`) to `estimateCombinedDelta`, which never
+  reads either field (`model/engine/partner-choice.ts`, `estimateCombinedDelta`
+  reads only `row`, `brokenBy` and `breakDps` from the query). They are there
+  because it takes a whole `PartnerQuery`. Narrowing its parameter to
+  `Pick<PartnerQuery, 'row' | 'brokenBy' | 'breakDps'>` would drop them; that
+  is a type change, not a rename. Found by the 2026-11-19 sum-of-singles
+  reread (`.scratch/agent-reports/2026-11-19-general-task-sum-of-singles-reread.md`
+  in the main checkout, item 7). Lines are at the reader-fixes fork commit.
+
+- **"package" left in developer log text.** The renames left the coined word
+  in three `console.warn` lines in `model/engine/rank.ts`: "bonus package not
+  measured" (`:1951`, `:2091`) and "the package's gem repair failed" (about
+  `:3488`; `packages/core/test/fork-set-net.test.ts` matches this one). Say
+  "added pieces" and update the test's match. The unused
+  `setPotentialDisclosureLine` (`model/engine/disclosure.ts:110-112`, see D2
+  above) also says "completion-package". Lines are at fork `33e84fabc`.
+
 ## Resolved during the rename pass (no action)
 
 - **D4 — `GemColour` alias.** Resolved. Batch 4 deleted the `GemColour = number`
