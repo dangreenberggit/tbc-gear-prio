@@ -144,7 +144,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 3,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "bonusGearMeasured": true,
           "singleDeltaDps": 39.5,
           "singleBreaks": [
             {
@@ -172,8 +172,8 @@
                   "name": "Spellfire Gloves"
                 }
               ],
-              "stepGearDps": 52,
-              "stepGearSe": 2
+              "bonusGearDps": 52,
+              "bonusGearSe": 2
             }
           ]
         }

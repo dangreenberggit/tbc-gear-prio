@@ -200,7 +200,7 @@ const simFailedLine = (threshold: number, onSomeRows = false) => ({
 });
 
 /**
- * The line for a step whose bonus-off sim failed (ticket 863): the step is
+ * The line for an increment whose bonus-off sim failed (ticket 863): the increment is
  * still measured, but its break is not split from its pieces.
  */
 const breakSplitFailedLine = (threshold: number) => ({
@@ -419,7 +419,7 @@ type ForkRanking = {
       piecesAfterSwap: number;
       crossesThreshold: boolean;
       nextThreshold: number | null;
-      stepRanking?: true;
+      bonusGearMeasured?: true;
       singleDeltaDps?: number;
       singleBreaks?: Array<{ setId: number; threshold: number; dps?: number }>;
       futureBonuses?: Array<{
@@ -428,9 +428,9 @@ type ForkRanking = {
         dps?: number;
         sameGearDps?: number;
         sameGearSe?: number;
-        belowGate?: true;
-        stepGearDps?: number;
-        stepGearSe?: number;
+        belowNoise?: true;
+        bonusGearDps?: number;
+        bonusGearSe?: number;
         partnerUnmeasured?: string;
         partnerRule?: string;
         breaks?: Array<{ setId: number; threshold: number; dps?: number }>;
@@ -442,13 +442,13 @@ type ForkRanking = {
     };
   }>;
   baseline: { dps: number };
-  setStepSims?: {
+  bonusGearSims?: {
     partnerRule: string;
     gears: number;
     simmed: number;
     fromStore: number;
   };
-  crossingGates?: Array<{
+  crossingChecks?: Array<{
     setId: number;
     count: number;
     itemId: number;
@@ -478,7 +478,7 @@ type ForkRanking = {
     bonusDpsNet?: number;
     sameGearDps?: number;
     sameGearSe?: number;
-    belowGate?: true;
+    belowNoise?: true;
     unmeasured?: string;
     selfConfound?: { threshold: number; dps?: number };
     breaks?: Array<{ setId: number; threshold: number }>;
@@ -816,9 +816,9 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     const row1 = worn1.ranking.items.find((i) => i.setContext?.setId === 676);
     expect(row1?.setContext?.piecesWornBefore).toBe(1);
     // Ticket 511 (K5): every count above the swap's count is a future. The
-    // model has no bonus at 3 or 5, so those two are below the gate.
+    // model has no bonus at 3 or 5, so those two are within the noise.
     const fut1 = row1?.setContext?.futureBonuses ?? [];
-    expect(fut1.map((f) => [f.threshold, f.belowGate ?? false])).toEqual([
+    expect(fut1.map((f) => [f.threshold, f.belowNoise ?? false])).toEqual([
       [3, true],
       [4, false],
       [5, true],
@@ -904,7 +904,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     ).toBe(true);
   });
 
-  it("case 8: flag absent — no brokenSetValues; the flag adds only the ladder, gate and step-gear sims", async () => {
+  it("case 8: flag absent — no brokenSetValues; the flag adds only the ladder, check and bonus-gear sims", async () => {
     const worn = wornGear({ hands: MALORNE.hands, legs: MALORNE.legs });
     const pool = [
       ...TH_POOL,
@@ -914,8 +914,8 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     const off = await runScenario({ worn, pool });
     const on = await runScenario({ worn, pool, measureSetBonuses: true });
     expect(off.ranking.brokenSetValues ?? []).toHaveLength(0);
-    // The flag adds one ladder rung per worn Malorne piece (2), two gate sims
-    // for each count the pool reaches (2, 3 and 4: 6) and the step gears no
+    // The flag adds one ladder rung per worn Malorne piece (2), two check sims
+    // for each count the pool reaches (2, 3 and 4: 6) and the bonus gears no
     // package sim already covers, the close calls' included (5), and nothing
     // else (tickets 511 and 512; derivations "Ticket 511 (K5)" and "The
     // close-calls partner rule", case 8).
@@ -925,7 +925,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     ).length;
     expect(bCount).toBe(1);
     // K6B adds one bonus-off sim: the Pauldrons and Chestguard rows' 4pc
-    // steps share one gear before (Pauldrons + Chestguard) and lose Malorne
+    // increments share one gear before (Pauldrons + Chestguard) and lose Malorne
     // 2pc by replacing the same two pieces.
     expect(on.runCount - off.runCount).toBe(2 + 6 + 5 + 1);
   });
@@ -1069,7 +1069,7 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit views (467)", () => {
  * ------------------------------------------------------------------ */
 
 /**
- * The cutoff these cases pass the view. A step ranking's figures are gated at
+ * The cutoff these cases pass the view. A bonus-gear ranking's figures are checked against
  * its bar, 5; a flag-off bonus at √2 × 5 ≈ 7.07 (ticket 623).
  */
 const FLOOR = { absDps: 5 };
@@ -1174,7 +1174,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
       expect((ctx.commitBreaks ?? []).map(brk)).toEqual([
         { setId: 640, threshold: 2, dps: 40 },
       ]);
-      // K5: count 3 has no model bonus, so it is a below-gate future.
+      // K5: count 3 has no model bonus, so it is a within-noise future.
       expect((ctx.futureBonuses ?? []).map(fut)).toEqual([
         { threshold: 2, piecesNeeded: 2, dps: 50 },
         { threshold: 3, piecesNeeded: 3, dps: undefined },
@@ -1188,11 +1188,11 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
         true
       );
     }
-    // One ladder rung per worn Malorne piece (4), two gate sims for each of
-    // the counts 2, 3 and 4 (tickets 511 and 512), and the step gears no
+    // One ladder rung per worn Malorne piece (4), two check sims for each of
+    // the counts 2, 3 and 4 (tickets 511 and 512), and the bonus gears no
     // package covers: every pair but the 2pc package, since each row's three
     // 2pc partner sets are close calls (K5S).
-    // K6B: three bonus-off sims, one per distinct gear before a 4pc step
+    // K6B: three bonus-off sims, one per distinct gear before a 4pc increment
     // that newly loses Malorne 2pc (Gauntlets + Cover, shared by those two
     // rows; Gauntlets + Chestguard; Gauntlets + Pauldrons).
     expect(on.runCount - off.runCount).toBe(4 + 6 + 5 + 3);
@@ -1306,8 +1306,8 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     );
     // The ladder sims one rung per worn Malorne piece (3), however many rows
     // share a break; (640,3) reads 0 and is not counted, so one B is kept.
-    // The others are the gates of counts 2 to 5 (8, ticket 511) and the
-    // nine step gears no package covers, the close calls' included (K5S).
+    // The others are the checks of counts 2 to 5 (8, ticket 511) and the
+    // nine bonus gears no package covers, the close calls' included (K5S).
     const measured = (r.brokenSetValues ?? []).filter(
       (b) => b.dps !== undefined
     ).length;
@@ -1432,7 +1432,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
 
 /* ------------------------------------------------------------------ *
  * Tickets 490-493: breaks charged along each future's own path, one
- * stopping point chosen on full values, the "not counted" rule, and the
+ * credited bonus chosen on full values, the "not counted" rule, and the
  * worn-1 4pc recovered with one pair sim. Every literal is derived by hand
  * from the controlled model in docs/set-bonus-fixture-derivations.md.
  * ------------------------------------------------------------------ */
@@ -1458,7 +1458,7 @@ function bonusOf(ranking: ForkRanking, setId: number, threshold: number) {
   );
 }
 
-type SetCreditRule = "best-stop" | "full-path";
+type SetCreditRule = "highest-credit" | "full-path";
 
 type SubLineMod = ViewMod & {
   setPotentialCredit: (
@@ -1474,7 +1474,7 @@ type SubLineMod = ViewMod & {
     rule?: SetCreditRule
   ) => {
     credit: number;
-    stopThreshold: number;
+    creditedThreshold: number;
     terms: Array<
       | {
           kind: "bonus";
@@ -1533,10 +1533,10 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
     const r = on.ranking;
     expect(near(r.baseline.dps, 3250, 0.5)).toBe(true);
     expect(near(bsvDps(r, 676, 2)!, 50, 0.5)).toBe(true);
-    // Two ladder rungs (Thunderheart worn 2), two gate sims for each of the
-    // Malorne counts 2 to 5 (8), eight step gears no package covers (the
+    // Two ladder rungs (Thunderheart worn 2), two check sims for each of the
+    // Malorne counts 2 to 5 (8), eight bonus gears no package covers (the
     // close calls' included, K5S), and one package sim fewer: the 4pc, worth
-    // 0 here, is below the gate (K5).
+    // 0 here, is within the noise (K5).
     expect(on.runCount - off.runCount).toBe(2 + 8 + 8 - 1);
     expect(sortedIds(bonusOf(r, 640, 2)?.packageItemIds)).toEqual([
       29096, 29098,
@@ -1548,7 +1548,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       const row = thRow(r, id);
       expect(near(row.deltaDps, 100, 0.5)).toBe(true);
       expect(row.setContext?.singleBreaks ?? []).toEqual([]);
-      // K5: the Malorne 4pc is worth 0 here, so it is below the gate, has no
+      // K5: the Malorne 4pc is worth 0 here, so it is within the noise, has no
       // package and no path, and the top measured package is the 2pc, which
       // breaks nothing.
       expect((row.setContext?.futureBonuses ?? []).map(futB)).toEqual([
@@ -1572,9 +1572,9 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       expect((row.setContext?.singleBreaks ?? []).map(brk)).toEqual([
         TH2_BREAK,
       ]);
-      // K5: a step future names every worn bonus its step gear loses, so the
+      // K5: a bonus-gear future names every worn bonus its bonus gear loses, so the
       // 2pc names the row's own Thunderheart 2pc break; the rest are below
-      // the gate.
+      // the check.
       expect(
         (row.setContext?.futureBonuses ?? []).map((f) => [
           f.threshold,
@@ -1613,7 +1613,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
     ]);
     // Each rule on this row directly, so the rule the engine does not ship
     // still runs. Since 502 the path pieces' own stats count: R_2 = 40 + 100,
-    // R_4 = 140 + 30 + 100 + 0 − 50 = 220, so both rules stop at the 4pc
+    // R_4 = 140 + 30 + 100 + 0 − 50 = 220, so both rules credit the 4pc
     // (full 220, split 20 + 7.5 − 50 = −22.5). 502-B separates the rules.
     const ctx = chest.setContext;
     expect(
@@ -1627,11 +1627,15 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       )
     ).toBe(true);
     expect(
-      near(view.setPotentialCredit(ctx, FLOOR, "full", "best-stop"), 220, 0.5)
+      near(
+        view.setPotentialCredit(ctx, FLOOR, "full", "highest-credit"),
+        220,
+        0.5
+      )
     ).toBe(true);
     expect(
       near(
-        view.setPotentialCredit(ctx, FLOOR, "split", "best-stop"),
+        view.setPotentialCredit(ctx, FLOOR, "split", "highest-credit"),
         -22.5,
         0.5
       )
@@ -1654,7 +1658,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       const row = thRow(r, id);
       expect(near(row.deltaDps, 100, 0.5)).toBe(true);
       // K5: the model gives Nordrassil no bonus, so every count it can reach
-      // is below the gate: no package, no path, no top package (W-S3).
+      // is within the noise: no package, no path, no top package (W-S3).
       expect((row.setContext?.futureBonuses ?? []).map(futB)).toEqual([
         { threshold: 2, piecesNeeded: 2, dps: undefined, breaks: [] },
         { threshold: 3, piecesNeeded: 3, dps: undefined, breaks: [] },
@@ -1799,11 +1803,11 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     expect(near(bsvDps(r, 640, 2)!, 40, 0.5)).toBe(true);
     expect(near(th4!.bonusDpsNet!, 80, 0.5)).toBe(true);
     // Three ladder rungs (Malorne worn 3; Thunderheart worn 1 has no
-    // ladder), the crossing gate's two sims, and two gate sims for each of
+    // ladder), the crossing check's two sims, and two check sims for each of
     // the counts 3, 4 and 5. The 2pc is one piece at worn 1, so it is not
-    // measured and has no gate. Three step gears no package covers: every
+    // measured and has no check. Three bonus gears no package covers: every
     // 4pc partner set ties, so each is a close call (K5S).
-    // K6B: four bonus-off sims, because each row's 4pc step newly loses
+    // K6B: four bonus-off sims, because each row's 4pc increment newly loses
     // Malorne 2pc from its own single swap, a different gear before each.
     expect(on.runCount - off.runCount).toBe(3 + 2 + 6 + 3 + 4);
     for (const id of [
@@ -1825,14 +1829,14 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
         { threshold: 5, piecesNeeded: 4, dps: undefined, breaks: [] },
       ]);
       // 502: 80 + two other pieces at 150 − 50 = 100 each − 40. K5: the
-      // stop gear's sim, 3530 − 3140 = 390, less the row's 150.
+      // credited gear's sim, 3530 − 3140 = 390, less the row's 150.
       expect(
         near(view.rankableSetPotential(row, FLOOR, "full"), 240, 0.5)
       ).toBe(true);
     }
   });
 
-  it("492-N: with no break-free pair the worn-1 4pc net stays unset; the step rule credits the rows from their step gear", async () => {
+  it("492-N: with no break-free pair the worn-1 4pc net stays unset; the bonus-gear rule credits the rows from their bonus gear", async () => {
     const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
     const { ranking: r } = await runScenario({
       worn: wornGear({
@@ -1858,8 +1862,8 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     expect(near(bsvDps(r, 640, 2)!, 40, 0.5)).toBe(true);
     // The confounded net would be 20 − (2 − 0 − 1 + 0)·40 = −20; true is 80.
     expect(th4!.bonusDpsNet).toBeUndefined();
-    // K5: a step ranking reads no `bonusDpsNet` (C120). The 4pc's gate
-    // cleared, so each row is credited from the sim of its stop gear, the
+    // K5: a bonus-gear ranking reads no `bonusDpsNet` (C120). The 4pc's check
+    // cleared, so each row is credited from the sim of its credited gear, the
     // worn TH hands plus head, chest and legs: 3530 − 3140 = 390. The head
     // and chest rows break the Malorne 2pc alone: d = 100 + 50 − 40 = 110.
     for (const [id, d, credit] of [
@@ -1869,12 +1873,12 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     ] as const) {
       const row = thRow(r, id);
       const future = row.setContext?.futureBonuses ?? [];
-      expect(future.map((f) => [f.threshold, f.belowGate ?? false])).toEqual([
+      expect(future.map((f) => [f.threshold, f.belowNoise ?? false])).toEqual([
         [3, true],
         [4, false],
       ]);
       expect(future[1]!.dps).toBeUndefined();
-      expect(future[1]!.stepGearDps).toBeCloseTo(390, 9);
+      expect(future[1]!.bonusGearDps).toBeCloseTo(390, 9);
       expect(row.deltaDps).toBeCloseTo(d, 9);
       expect(view.rankableSetPotential(row, FLOOR, "full")).toBeCloseTo(
         credit,
@@ -1923,11 +1927,11 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
     ]);
     // Ticket 863: the failed rung's error reaches the player.
     expect(setSkipLines(r)).toEqual([wornSetFailedLine]);
-    // Four ladder rungs (one fails) and two gate sims for each of the
-    // Thunderheart counts 2, 3 and 4 (tickets 511 and 512). No step gear:
+    // Four ladder rungs (one fails) and two check sims for each of the
+    // Thunderheart counts 2, 3 and 4 (tickets 511 and 512). No bonus gear:
     // every partner choice needs the unmeasured (640, 4) (K5, W-Z1).
     expect(on.runCount - off.runCount).toBe(4 + 6);
-    expect(r.setStepSims?.gears).toBe(0);
+    expect(r.bonusGearSims?.gears).toBe(0);
     expect(netOf(r, 676, 2)).toBeUndefined();
     expect(netOf(r, 676, 4)).toBeUndefined();
     for (const id of TH_FOUR_IDS) {
@@ -1949,7 +1953,7 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
         [3, null],
         [4, "break-unmeasured"],
       ]);
-      expect(futures.every((f) => f.stepGearDps === undefined)).toBe(true);
+      expect(futures.every((f) => f.bonusGearDps === undefined)).toBe(true);
       expect(view.rankableSetPotential(row, FLOOR, "full")).toBe(0);
       expect(view.setBonusSubLine(row.setContext, true)).toBe("not_counted");
     }
@@ -2099,7 +2103,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
     }
   });
 
-  it("502-B: a step whose bonus floors to 0 is never the stop, but its pieces still count", async () => {
+  it("502-B: an increment whose bonus floors to 0 is never the credited bonus, but its pieces still count", async () => {
     const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
     const allFloored = {
       setContext: {
@@ -2135,9 +2139,9 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
     expect(
       view.rankableSetPotential({ setContext: twoFloored }, FLOOR, "full")
     ).toBeCloseTo(105, 9);
-    expect(view.setPotentialTerms(twoFloored, FLOOR).stopThreshold).toBe(4);
+    expect(view.setPotentialTerms(twoFloored, FLOOR).creditedThreshold).toBe(4);
 
-    // The rules differ when a later eligible step lowers the total.
+    // The rules differ when a later eligible increment lowers the total.
     const discriminator = {
       futureBonuses: [
         {
@@ -2156,10 +2160,10 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
       ],
     };
     expect(
-      view.setPotentialCredit(discriminator, FLOOR, "full", "best-stop")
+      view.setPotentialCredit(discriminator, FLOOR, "full", "highest-credit")
     ).toBeCloseTo(140, 9);
     expect(
-      view.setPotentialCredit(discriminator, FLOOR, "split", "best-stop")
+      view.setPotentialCredit(discriminator, FLOOR, "split", "highest-credit")
     ).toBeCloseTo(20, 9);
     expect(
       view.setPotentialCredit(discriminator, FLOOR, "full", "full-path")
@@ -2195,10 +2199,10 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
       pool: TH_OVER_MALORNE_POOL,
       measureSetBonuses: true,
     });
-    // K5: with the flag the ranking is a step ranking, so each eligible
+    // K5: with the flag the ranking is a bonus-gear ranking, so each eligible
     // future's pieces are its partner choice, in slot order, and carry no
-    // own-stat figure (the stop gear's sim holds them); count 3 is below the
-    // gate and has none.
+    // own-stat figure (the credited gear's sim holds them); count 3 is below the
+    // check and has none.
     const hands = thRow(r, THUNDERHEART.hands);
     const future = hands.setContext?.futureBonuses ?? [];
     expect(future.map((f) => f.threshold)).toEqual([2, 3, 4]);
@@ -2215,7 +2219,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
       for (const p of f.pieces ?? []) expect(p.dps).toBeUndefined();
   });
 
-  it("502-D: the terms are itemised by step, add up to the credit and end at the stop", async () => {
+  it("502-D: the terms are itemised by increment, add up to the credit and end at the credited bonus", async () => {
     const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
     const M = "Malorne Harness";
     const ctx = (bDps: number) => ({
@@ -2243,7 +2247,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
     });
     const full = view.setPotentialTerms(ctx(20), FLOOR);
     expect(full.credit).toBeCloseTo(130, 9);
-    expect(full.stopThreshold).toBe(4);
+    expect(full.creditedThreshold).toBe(4);
     expect(full.terms).toEqual([
       {
         kind: "bonus",
@@ -2270,7 +2274,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
 
     const early = view.setPotentialTerms(ctx(-100), FLOOR);
     expect(early.credit).toBeCloseTo(80, 9);
-    expect(early.stopThreshold).toBe(2);
+    expect(early.creditedThreshold).toBe(2);
     expect(early.terms.map((t) => t.kind)).toEqual(["bonus", "piece", "break"]);
 
     const floored = view.setPotentialTerms(
@@ -2340,13 +2344,13 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
     ]);
   });
 
-  it("502-G: a worn bonus below the gate is not a break; the pieces' own stats still hold it", async () => {
+  it("502-G: a worn bonus within the noise is not a break; the pieces' own stats still hold it", async () => {
     // Ticket 512 replaced "a path break below the floor is charged at its
     // measured value": on the flag path a worn bonus that measures at or
-    // below the noise gate is not a break at all, so no line charges it and
+    // within the noise is not a break at all, so no line charges it and
     // no piece adds it back. The chest row still ends at pkgΔ4, because the
     // hands piece's own stats (its single, −2) hold the loss. The bonus is
-    // worth 2, below the 3 DPS bar; it was 4 while the gate's floor was
+    // worth 2, below the 3 DPS bar; it was 4 while the check's floor was
     // √2 × 3 (ticket 623).
     const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
     const { on } = await runMalorneOverThunderheart2pc({
@@ -2367,16 +2371,16 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
     const f4 = (chest.setContext?.futureBonuses ?? []).find(
       (f) => f.threshold === 4
     );
-    // K5: the pieces are the 4pc's partner choice, and the stop gear's sim,
+    // K5: the pieces are the 4pc's partner choice, and the credited gear's sim,
     // not the pieces' own stats, holds the hands' −2 (3570 − 3202 = 368).
     expect((f4?.pieces ?? []).map((p) => p.itemId)).toEqual([
       MALORNE.head,
       MALORNE.shoulder,
       MALORNE.hands,
     ]);
-    expect(f4?.stepGearDps).toBeCloseTo(368, 9);
+    expect(f4?.bonusGearDps).toBeCloseTo(368, 9);
     const res = view.setPotentialTerms(chest.setContext, FLOOR);
-    expect(res.stopThreshold).toBe(4);
+    expect(res.creditedThreshold).toBe(4);
     expect(res.terms.filter((t) => t.kind === "break")).toEqual([]);
     expect(view.rankableSetPotential(chest, FLOOR, "full")).toBeCloseTo(268, 9);
     expect(
@@ -2386,7 +2390,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
 });
 
 /* ------------------------------------------------------------------ *
- * Set-less copies and the same-gear gate (ticket 511)
+ * Set-less copies and the same-gear check (ticket 511)
  * ------------------------------------------------------------------ */
 
 type CopiesMod = {
@@ -2440,7 +2444,7 @@ const TH_HANDS_LEGS_POOL: PoolSpec[] = [
 ];
 
 describe.skipIf(!forkPresent)(
-  "set-less copies and the same-gear gate (511)",
+  "set-less copies and the same-gear check (511)",
   () => {
     it("511-C: a copy swaps the id, keeps the stats and drops the set", async () => {
       const copies = await importForkUpgrades<CopiesMod>(
@@ -2562,7 +2566,7 @@ describe.skipIf(!forkPresent)(
         measureSetBonuses: true,
       });
       // Only the 2pc package is measured (two pieces cannot reach the 4pc),
-      // and nothing worn is broken, so the flag adds the gate's two sims and
+      // and nothing worn is broken, so the flag adds the check's two sims and
       // nothing else.
       expect(on.runCount - off.runCount).toBe(2);
       const copyCalls = on.calls.filter((ids) =>
@@ -2601,11 +2605,11 @@ describe.skipIf(!forkPresent)(
       expect(
         futures.find((f) => f.threshold === 4)?.sameGearDps
       ).toBeUndefined();
-      // Without the flag there is no gate.
+      // Without the flag there is no check.
       expect(bonusOf(off.ranking, 676, 2)?.sameGearDps).toBeUndefined();
     });
 
-    it("511-G2: the gate leaves out stats worth more together; package minus singles keeps them", async () => {
+    it("511-G2: the check leaves out stats worth more together; package minus singles keeps them", async () => {
       const { ranking } = await runScenario({
         worn: wornGear({}),
         pool: TH_HANDS_LEGS_POOL,
@@ -2624,9 +2628,9 @@ describe.skipIf(!forkPresent)(
     it("511-H: a set piece with an id-keyed effect changes no same-gear bonus", async () => {
       // Scenario kind: a set package in which a piece with a Go effect keyed
       // by its item id (hunter and warrior PvP gloves, `RegisterPvPGloveMod`;
-      // any `itemEffects[eq.ID]` entry) is among the pieces the gate changes.
+      // any `itemEffects[eq.ID]` entry) is among the pieces the check changes.
       // Until ticket 511's gain side leaves the six-set table, only a set in
-      // that table has a package to gate, so the example is a druid set
+      // that table has a package to check, so the example is a druid set
       // piece given a model id effect: Thunderheart Gauntlets 31034, effect
       // 15, Thunderheart 2pc 50. 512-H covers the PvP gloves on the break
       // side.
@@ -2643,7 +2647,7 @@ describe.skipIf(!forkPresent)(
         { itemId: THUNDERHEART.hands, slot: "hands" },
       ]);
       // (ii) gloves and legs: the gloves are first in slot order, so they are
-      // the piece the gate copies. Copied on one side only they would add 15.
+      // the piece the check copies. Copied on one side only they would add 15.
       const second = await scenario([
         { itemId: THUNDERHEART.hands, slot: "hands" },
         { itemId: THUNDERHEART.legs, slot: "legs" },
@@ -2664,7 +2668,7 @@ describe.skipIf(!forkPresent)(
 /* ------------------------------------------------------------------ *
  * Ticket 512: set breaks with no list. Under the flag the break side
  * measures every count of every worn set with the ladder and charges a
- * count only when it clears the noise gate. Each case stands for a kind
+ * count only when it clears the noise check. Each case stands for a kind
  * of situation; its set is the example. Every literal is derived by hand
  * in docs/set-bonus-fixture-derivations.md, "Ticket 512".
  * ------------------------------------------------------------------ */
@@ -2759,9 +2763,9 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
     expect(near(netOf(r, 640, 2)!, 40, 0.5)).toBe(true);
     expect(near(netOf(r, 640, 4)!, 70, 0.5)).toBe(true);
     // The Mantle row breaks the 4pc alone (20, inside its deltaDps). K5: each
-    // eligible future names every worn bonus its step gear loses against the
+    // eligible future names every worn bonus its bonus gear loses against the
     // current gear, the row's own break included; count 3 has no model bonus
-    // and is below the gate.
+    // and is within the noise.
     const mantle = thRow(r, MALORNE.shoulder);
     expect(near(mantle.deltaDps, 80, 0.5)).toBe(true);
     expect((mantle.setContext?.singleBreaks ?? []).map(brk)).toEqual([
@@ -2791,18 +2795,19 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
       bonusOf(r, 640, 4)!.packageDeltaDps!,
       9
     );
-    // K5 (step rule): the stop is the 4pc, and its term names the
-    // Wastewalker bonuses its gear loses. ON = model(stop gear) − model(G):
+    // K5 (bonus-gear rule): the credited bonus is the 4pc, and its term names the
+    // Wastewalker bonuses its gear loses. ON = model(credited gear) − model(G):
     // four Malorne pieces 400 + 40 + 70 and no Wastewalker, 3510 − 3050.
-    const stepView = await importForkUpgrades<StepViewMod>("engine/view.ts");
-    const stops = stepView
+    const bonusGearView =
+      await importForkUpgrades<BonusGearViewMod>("engine/view.ts");
+    const outcomes = bonusGearView
       .setPotentialTerms(mantle.setContext, FLOOR)
-      .terms.filter((t) => t.kind === "stop");
-    expect(stops.map((t) => [t.threshold, t.isStop])).toEqual([
+      .terms.filter((t) => t.kind === "outcome");
+    expect(outcomes.map((t) => [t.threshold, t.isCredited])).toEqual([
       [2, false],
       [4, true],
     ]);
-    expect(stops[1]!.broken.map((b) => [b.setId, b.threshold])).toEqual([
+    expect(outcomes[1]!.broken.map((b) => [b.setId, b.threshold])).toEqual([
       [659, 4],
       [659, 2],
     ]);
@@ -2991,77 +2996,77 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
 /* ------------------------------------------------------------------ *
  * Ticket 511, K5: set rows valued by simmed gear (option A). With the
  * flag, the gain side tries every count the pool reaches with no list, the
- * gate runs before the package sim, and a row is credited from the sim of
- * its stop gear: the current gear plus the row plus the partner pieces
+ * check runs before the package sim, and a row is credited from the sim of
+ * its credited gear: the current gear plus the row plus the partner pieces
  * `choosePartners` picks. Each case stands for a kind of situation; its
  * set is the example. Every literal is derived by hand in
  * docs/set-bonus-fixture-derivations.md, "Ticket 511: set rows valued by
  * simmed gear".
  * ------------------------------------------------------------------ */
 
-type StopTerm = {
-  kind: "stop";
+type OutcomeTerm = {
+  kind: "outcome";
   threshold: number;
   setName: string;
   pieces: Array<{ itemId: number; name: string }>;
   broken: Array<{ setId: number; threshold: number; dps?: number }>;
-  totalDps: number;
-  isStop: boolean;
+  bonusGearDps: number;
+  isCredited: boolean;
 };
 
-/** One step of the "steps that add up" popover (K6). */
-type StepTerm = {
-  kind: "step";
+/** One increment of the "increments that add up" popover (K6). */
+type IncrementTerm = {
+  kind: "increment";
   threshold: number;
   setName: string;
   pieces: Array<{ itemId: number; name: string }>;
   broken: Array<{ setId: number; threshold: number; dps?: number }>;
   dps: number;
-  isStop: boolean;
+  isCredited: boolean;
 };
 
-type StepViewMod = ViewMod & {
+type BonusGearViewMod = ViewMod & {
   setPotentialTerms: (
     ctx: unknown,
     cutoff: { absDps: number }
   ) => {
     credit: number;
-    stopThreshold: number;
-    terms: Array<StopTerm | { kind: "bonus" | "piece" | "break" }>;
+    creditedThreshold: number;
+    terms: Array<OutcomeTerm | { kind: "bonus" | "piece" | "break" }>;
   };
-  setPotentialSteps: (
+  setPotentialIncrements: (
     ctx: unknown,
     cutoff: { absDps: number }
-  ) => StepTerm[] | null;
+  ) => IncrementTerm[] | null;
   setCreditUnmeasured: (ctx: unknown) => boolean;
   setBonusSubLine: (
     ctx: unknown,
     on: boolean
   ) => "not_counted" | "hover_hint" | null;
   crossingLabelCount: (ctx: unknown) => number | null;
-  stepEligible: (future: unknown, cutoff: { absDps: number }) => boolean;
+  canBeCredited: (future: unknown, cutoff: { absDps: number }) => boolean;
 };
 
-async function stepView(): Promise<StepViewMod> {
-  return importForkUpgrades<StepViewMod>("engine/view.ts");
+async function bonusGearView(): Promise<BonusGearViewMod> {
+  return importForkUpgrades<BonusGearViewMod>("engine/view.ts");
 }
 
-/** The `"stop"` terms of a step ranking's row, in count order. */
-function stopTerms(view: StepViewMod, row: { setContext?: unknown }) {
+/** The `"outcome"` terms of a bonus-gear ranking's row, in count order. */
+function outcomeTerms(view: BonusGearViewMod, row: { setContext?: unknown }) {
   return view
     .setPotentialTerms(row.setContext, FLOOR)
-    .terms.filter((t): t is StopTerm => t.kind === "stop");
+    .terms.filter((t): t is OutcomeTerm => t.kind === "outcome");
 }
 
-/** A row's steps as [count, added piece ids, dps, isStop, newly broken]. */
-function stepsOf(view: StepViewMod, row: { setContext?: unknown }) {
+/** A row's increments as [count, added piece ids, dps, isCredited, newly broken]. */
+function incrementsOf(view: BonusGearViewMod, row: { setContext?: unknown }) {
   return view
-    .setPotentialSteps(row.setContext, FLOOR)
+    .setPotentialIncrements(row.setContext, FLOOR)
     ?.map((s) => [
       s.threshold,
       s.pieces.map((p) => p.itemId),
       Number(s.dps.toFixed(9)),
-      s.isStop,
+      s.isCredited,
       s.broken.map((b) => [b.setId, b.threshold]),
     ]);
 }
@@ -3141,7 +3146,7 @@ describe.skipIf(!forkPresent)(
       // (a ret set's Judgement and healing bonuses), while its pieces' stats
       // are worth more worn together. Example: Justicar 626, own value −30
       // each, model bonuses 0, +17 when all four are worn.
-      const view = await stepView();
+      const view = await bonusGearView();
       const scenario: Scenario = {
         worn: wornGear({}),
         pool: setPool(JUSTICAR),
@@ -3162,11 +3167,11 @@ describe.skipIf(!forkPresent)(
       for (const t of [2, 3, 4]) {
         const b = bonusOf(on.ranking, 626, t);
         expect(b?.sameGearDps).toBe(0);
-        expect(b?.belowGate).toBe(true);
+        expect(b?.belowNoise).toBe(true);
         expect(b?.bonusDps).toBeUndefined();
       }
-      // No package, pair or step sim: no request wears two real Justicar
-      // pieces without a copy among them. Base, four singles, three gates.
+      // No package, pair or bonus-gear sim: no request wears two real Justicar
+      // pieces without a copy among them. Base, four singles, three checks.
       const justicarIds = new Set<number>(Object.values(JUSTICAR));
       expect(
         on.calls.filter(
@@ -3176,7 +3181,7 @@ describe.skipIf(!forkPresent)(
         )
       ).toEqual([]);
       expect(on.runCount).toBe(1 + 4 + 6);
-      expect(on.ranking.setStepSims).toEqual({
+      expect(on.ranking.bonusGearSims).toEqual({
         partnerRule: "close-calls",
         gears: 0,
         simmed: 0,
@@ -3188,47 +3193,47 @@ describe.skipIf(!forkPresent)(
       }
     });
 
-    it("511-R: a row inside the 4-piece group is credited from its stop gear's sim, interaction included", async () => {
+    it("511-R: a row inside the 4-piece group is credited from its credited gear's sim, interaction included", async () => {
       // Scenario kind: a tier set whose pieces' stats interact (here they lose
       // 40 worn together), with a count that has no bonus between the two
       // that do. Example: Thunderheart 676, model 2pc 50 and 4pc 80.
-      const view = await stepView();
+      const view = await bonusGearView();
       const { ranking: r } = await runScenario(R_SCENARIO);
       expect(bonusOf(r, 676, 2)?.sameGearDps).toBeCloseTo(50, 9);
       expect(bonusOf(r, 676, 4)?.sameGearDps).toBeCloseTo(80, 9);
-      expect(bonusOf(r, 676, 3)?.belowGate).toBe(true);
+      expect(bonusOf(r, 676, 3)?.belowNoise).toBe(true);
       const hands = thRow(r, THUNDERHEART.hands);
-      expect(hands.setContext?.stepRanking).toBe(true);
+      expect(hands.setContext?.bonusGearMeasured).toBe(true);
       expect(hands.setContext?.singleDeltaDps).toBeCloseTo(100, 9);
-      // The stop gear wears all four: 400 + 50 + 80 − 40 = 490 over 3000.
-      expect(futureOf(hands, 4)?.stepGearDps).toBeCloseTo(490, 9);
-      // G10-4: a below-gate count among the futures does not zero the row.
-      expect(futureOf(hands, 3)?.belowGate).toBe(true);
+      // The credited gear wears all four: 400 + 50 + 80 − 40 = 490 over 3000.
+      expect(futureOf(hands, 4)?.bonusGearDps).toBeCloseTo(490, 9);
+      // G10-4: a within-noise count among the futures does not zero the row.
+      expect(futureOf(hands, 3)?.belowNoise).toBe(true);
       expect(view.setCreditUnmeasured(hands.setContext)).toBe(false);
       const credit = view.rankableSetPotential(hands, FLOOR, "full");
       expect(credit).toBeCloseTo(390, 9);
-      // W-S1: ON = the stop gear's sim = the 4-piece package delta.
+      // W-S1: ON = the credited gear's sim = the 4-piece package delta.
       expect(hands.deltaDps + credit).toBeCloseTo(490, 9);
       expect(bonusOf(r, 676, 4)?.packageDeltaDps).toBeCloseTo(490, 9);
       expect(
-        stopTerms(view, hands).map((t) => [t.threshold, t.isStop])
+        outcomeTerms(view, hands).map((t) => [t.threshold, t.isCredited])
       ).toEqual([
         [2, false],
         [4, true],
       ]);
-      // K6 "steps that add up": the 2pc partner (Chestguard) is inside the
-      // 4pc partner set, so the row's steps are differences of its totals:
+      // K6 "increments that add up": the 2pc partner (Chestguard) is inside the
+      // 4pc partner set, so the row's increments are differences of its totals:
       // 250 − 100 = 150 for the Chestguard, then 490 − 250 = 240 for the
       // Pauldrons and Leggings. They add up to the credit, 390.
-      expect(stepsOf(view, hands)).toEqual([
+      expect(incrementsOf(view, hands)).toEqual([
         [2, [THUNDERHEART.chest], 150, false, []],
         [4, [THUNDERHEART.shoulder, THUNDERHEART.legs], 240, true, []],
       ]);
       // Every row's three 2pc partner sets tie on estimate, so all are close
       // calls: the choices sim the six pairs (12 calls; the 2pc package,
-      // hands + chest, from the store), then the four distinct step gears
+      // hands + chest, from the store), then the four distinct bonus gears
       // come from the store (K5S).
-      expect(r.setStepSims).toEqual({
+      expect(r.bonusGearSims).toEqual({
         partnerRule: "close-calls",
         gears: 4,
         simmed: 5,
@@ -3238,16 +3243,16 @@ describe.skipIf(!forkPresent)(
       for (const id of TH_FOUR) {
         const row = thRow(r, id);
         const c = view.rankableSetPotential(row, FLOOR, "full");
-        const stop = stopTerms(view, row).find((t) => t.isStop)!;
-        expect(row.deltaDps + c).toBeCloseTo(stop.totalDps, 6);
+        const credited = outcomeTerms(view, row).find((t) => t.isCredited)!;
+        expect(row.deltaDps + c).toBeCloseTo(credited.bonusGearDps, 6);
       }
     });
 
-    it("511-S2: a row whose 4pc does not pay stops at the 2pc", async () => {
+    it("511-S2: a row whose 4pc does not pay is credited at the 2pc", async () => {
       // Scenario kind: a 4pc worth less than what its extra pieces cost. As
       // 511-R with model 4pc 10, and own value −40 for the two pieces only the
       // 4-piece set adds (Pauldrons and Leggings).
-      const view = await stepView();
+      const view = await bonusGearView();
       const { ranking: r } = await runScenario({
         ...R_SCENARIO,
         setBonuses: { ...SET_BONUSES, 676: { b2: 50, b4: 10 } },
@@ -3258,7 +3263,7 @@ describe.skipIf(!forkPresent)(
       });
       const hands = thRow(r, THUNDERHEART.hands);
       expect(
-        stopTerms(view, hands).map((t) => [t.threshold, t.isStop])
+        outcomeTerms(view, hands).map((t) => [t.threshold, t.isCredited])
       ).toEqual([
         [2, true],
         [4, false],
@@ -3269,17 +3274,17 @@ describe.skipIf(!forkPresent)(
       expect(futureOf(hands, 2)?.pieces?.map((p) => p.itemId)).toEqual([
         THUNDERHEART.chest,
       ]);
-      // K6: only the steps up to the stop: 250 − 100 = 150.
-      expect(stepsOf(view, hands)).toEqual([
+      // K6: only the increments up to the credited bonus: 250 − 100 = 150.
+      expect(incrementsOf(view, hands)).toEqual([
         [2, [THUNDERHEART.chest], 150, true, []],
       ]);
     });
 
-    it("511-P4: a row in the 4-piece group only keeps its own break and is credited at its stop gear", async () => {
+    it("511-P4: a row in the 4-piece group only keeps its own break and is credited from its credited gear", async () => {
       // Scenario kind: a set piece outside the best 2-piece package, whose own
       // swap breaks a worn bonus. Example: worn Malorne hands and legs (2pc
       // 40); the Thunderheart Gauntlets replace the Malorne hands.
-      const view = await stepView();
+      const view = await bonusGearView();
       const { ranking: r } = await runScenario({
         worn: wornGear({ hands: MALORNE.hands, legs: MALORNE.legs }),
         pool: TH_FOUR_POOL,
@@ -3293,17 +3298,19 @@ describe.skipIf(!forkPresent)(
       expect((hands.setContext?.singleBreaks ?? []).map(brk)).toEqual([
         { setId: 640, threshold: 2, dps: 40 },
       ]);
-      // Stop gear: four Thunderheart, Malorne at 0: 3530 − 3040 = 490.
+      // Credited gear: four Thunderheart, Malorne at 0: 3530 − 3040 = 490.
       const credit = view.rankableSetPotential(hands, FLOOR, "full");
       expect(credit).toBeCloseTo(430, 9);
       expect(hands.deltaDps + credit).toBeCloseTo(490, 9);
-      expect(stopTerms(view, hands).find((t) => t.isStop)?.threshold).toBe(4);
+      expect(
+        outcomeTerms(view, hands).find((t) => t.isCredited)?.threshold
+      ).toBe(4);
     });
 
     it("511-O: a row outside the groups moves one for one with its own value", async () => {
       // Scenario kind: a set piece weaker than every package piece. As 511-R
       // plus the Thunderheart Wristguards at own value v, run at v = 10 and 35.
-      const view = await stepView();
+      const view = await bonusGearView();
       const on = async (v: number) => {
         const { ranking } = await runScenario({
           ...R_SCENARIO,
@@ -3317,33 +3324,35 @@ describe.skipIf(!forkPresent)(
         return row.deltaDps + view.rankableSetPotential(row, FLOOR, "full");
       };
       const at10 = await on(10);
-      // W-S4: the stop gear is wrist + Gauntlets + Chestguard + Leggings:
+      // W-S4: the credited gear is wrist + Gauntlets + Chestguard + Leggings:
       // 10 + 300 + 50 + 80 (the four-piece interaction needs the Pauldrons).
       expect(at10).toBeCloseTo(440, 9);
       expect((await on(35)) - at10).toBeCloseTo(25, 9);
     });
 
-    it("511-U: a failed gate sim makes the set's rows unmeasured; a failed step sim, only its row", async () => {
+    it("511-U: a failed check sim makes the set's rows unmeasured; a failed bonus-gear sim, only its row", async () => {
       // Scenario kind: a sim that fails mid-run. Example: 511-R's pool, model
       // with no interaction.
-      const view = await stepView();
+      const view = await bonusGearView();
       const base: Scenario = {
         worn: wornGear({}),
         pool: TH_FOUR_POOL,
         measureSetBonuses: true,
       };
-      // The (676, 4) gate's "off" sim is the only request with a set-less
+      // The (676, 4) check's "off" sim is the only request with a set-less
       // Pauldrons: the 4-piece package copies its first piece in slot order.
-      const gate = await runScenario({
+      const failedCheck = await runScenario({
         ...base,
         failWhen: (ids) => ids.includes(COPY_OFFSET + THUNDERHEART.shoulder),
       });
-      expect(bonusOf(gate.ranking, 676, 4)?.unmeasured).toBe("sim-failed");
-      expect(bonusOf(gate.ranking, 676, 4)?.sameGearDps).toBeUndefined();
-      // Ticket 863: the line carries the gate sim's own error.
-      expect(setSkipLines(gate.ranking)).toEqual([simFailedLine(4)]);
+      expect(bonusOf(failedCheck.ranking, 676, 4)?.unmeasured).toBe(
+        "sim-failed"
+      );
+      expect(bonusOf(failedCheck.ranking, 676, 4)?.sameGearDps).toBeUndefined();
+      // Ticket 863: the line carries the check sim's own error.
+      expect(setSkipLines(failedCheck.ranking)).toEqual([simFailedLine(4)]);
       for (const id of TH_FOUR) {
-        const row = thRow(gate.ranking, id);
+        const row = thRow(failedCheck.ranking, id);
         expect(view.setCreditUnmeasured(row.setContext)).toBe(true);
         expect(view.rankableSetPotential(row, FLOOR)).toBe(0);
         expect(view.setBonusSubLine(row.setContext, true)).toBe("not_counted");
@@ -3351,41 +3360,41 @@ describe.skipIf(!forkPresent)(
       // W-S7: every 2pc gear of the Pauldrons row (the Pauldrons and one
       // other real Thunderheart piece) fails. Its three partner sets are close
       // calls, so one failure alone would only skip that set (K5S); with all
-      // three failed the row keeps Z's choice, whose step sim fails too.
+      // three failed the row keeps Z's choice, whose bonus-gear sim fails too.
       const thSlots = [SHOULDER_SLOT, CHEST_SLOT, HANDS_SLOT, LEGS_SLOT];
-      const step = await runScenario({
+      const bonusGearFail = await runScenario({
         ...base,
         failWhen: (ids) =>
           ids[SHOULDER_SLOT] === THUNDERHEART.shoulder &&
           thSlots.filter((slot) => ids[slot] !== 0).length === 2,
       });
-      const pauldrons = thRow(step.ranking, THUNDERHEART.shoulder);
-      expect(futureOf(pauldrons, 2)?.stepGearDps).toBeUndefined();
-      // Ticket 863: the failed step sims' error reaches the player once.
-      const stepLines = setSkipLines(step.ranking);
-      expect(stepLines).toContainEqual(simFailedLine(2, true));
-      expect(new Set(stepLines.map((l) => `${l.field}|${l.detail}`)).size).toBe(
-        stepLines.length
-      );
+      const pauldrons = thRow(bonusGearFail.ranking, THUNDERHEART.shoulder);
+      expect(futureOf(pauldrons, 2)?.bonusGearDps).toBeUndefined();
+      // Ticket 863: the failed bonus-gear sims' error reaches the player once.
+      const bonusGearLines = setSkipLines(bonusGearFail.ranking);
+      expect(bonusGearLines).toContainEqual(simFailedLine(2, true));
+      expect(
+        new Set(bonusGearLines.map((l) => `${l.field}|${l.detail}`)).size
+      ).toBe(bonusGearLines.length);
       expect(view.rankableSetPotential(pauldrons, FLOOR)).toBe(0);
       expect(view.setCreditUnmeasured(pauldrons.setContext)).toBe(true);
-      // The others stop at the 4pc: 400 + 130 − 100.
+      // The others are credited at the 4pc: 400 + 130 − 100.
       for (const id of [
         THUNDERHEART.chest,
         THUNDERHEART.hands,
         THUNDERHEART.legs,
       ]) {
         expect(
-          view.rankableSetPotential(thRow(step.ranking, id), FLOOR)
+          view.rankableSetPotential(thRow(bonusGearFail.ranking, id), FLOOR)
         ).toBeCloseTo(430, 9);
       }
     });
 
-    it("511-K: a count with no bonus runs its two gate sims and nothing else, and is never a package", async () => {
+    it("511-K: a count with no bonus runs its two check sims and nothing else, and is never a package", async () => {
       // Scenario kind: a count between two bonuses (every tier set at 3).
       // Example: worn Malorne hands and legs, Thunderheart pool of five; the
       // model has b2 and b4 only.
-      const view = await stepView();
+      const view = await bonusGearView();
       const { ranking: r, calls } = await runScenario({
         worn: wornGear({ hands: MALORNE.hands, legs: MALORNE.legs }),
         pool: [...TH_FOUR_POOL, { itemId: THUNDERHEART.wrist, slot: "wrist" }],
@@ -3393,13 +3402,13 @@ describe.skipIf(!forkPresent)(
       });
       const three = bonusOf(r, 676, 3);
       expect(three?.sameGearDps).toBe(0);
-      expect(three?.belowGate).toBe(true);
+      expect(three?.belowNoise).toBe(true);
       expect(sortedIds(three?.packageItemIds)).toEqual([
         THUNDERHEART.chest,
         THUNDERHEART.shoulder,
         THUNDERHEART.wrist,
       ]);
-      // W-G1: the 3-piece package keeps both worn Malorne pieces; its gate
+      // W-G1: the 3-piece package keeps both worn Malorne pieces; its check
       // copies the Pauldrons (first in slot order) and nothing else wears it.
       const onThreeGear = (ids: readonly number[]) =>
         ids[CHEST_SLOT] === THUNDERHEART.chest &&
@@ -3419,9 +3428,9 @@ describe.skipIf(!forkPresent)(
       expect(
         threeGear.filter((ids) => ids[SHOULDER_SLOT] === THUNDERHEART.shoulder)
       ).toEqual([]);
-      // W-K1 (F7): no row takes its top package or packages from a below-gate
+      // W-K1 (F7): no row takes its top package or packages from a within-noise
       // entry. The top measured package is the 4pc (3530 − 3040 = 490), not
-      // the below-gate 5pc.
+      // the within-noise 5pc.
       for (const id of [
         THUNDERHEART.shoulder,
         THUNDERHEART.chest,
@@ -3433,15 +3442,15 @@ describe.skipIf(!forkPresent)(
         expect(
           (row.setContext?.packages ?? []).map((p) => p.threshold)
         ).toEqual([2, 4]);
-        // Never a stop.
-        expect(stopTerms(view, row).map((t) => t.threshold)).toEqual([2, 4]);
+        // Never the credited bonus.
+        expect(outcomeTerms(view, row).map((t) => t.threshold)).toEqual([2, 4]);
       }
     });
 
-    it("511-T: a set whose only bonus needs 3 pieces is a step", async () => {
+    it("511-T: a set whose only bonus needs 3 pieces can be credited", async () => {
       // Scenario kind: a three-piece crafted set (cloth, leather, mail).
       // Example: Primal Intent 619, own value 100 each, model 3pc 25 only.
-      const view = await stepView();
+      const view = await bonusGearView();
       const { ranking: r } = await runScenario({
         worn: wornGear({}),
         pool: setPool(PRIMAL_INTENT),
@@ -3452,19 +3461,21 @@ describe.skipIf(!forkPresent)(
         measureSetBonuses: true,
       });
       const chest = thRow(r, PRIMAL_INTENT.chest);
-      expect(futureOf(chest, 2)?.belowGate).toBe(true);
-      expect(view.stepEligible(futureOf(chest, 3), FLOOR)).toBe(true);
-      // Stop gear: all three, 300 + 25.
-      expect(futureOf(chest, 3)?.stepGearDps).toBeCloseTo(325, 9);
-      expect(stopTerms(view, chest).find((t) => t.isStop)?.threshold).toBe(3);
+      expect(futureOf(chest, 2)?.belowNoise).toBe(true);
+      expect(view.canBeCredited(futureOf(chest, 3), FLOOR)).toBe(true);
+      // Credited gear: all three, 300 + 25.
+      expect(futureOf(chest, 3)?.bonusGearDps).toBeCloseTo(325, 9);
+      expect(
+        outcomeTerms(view, chest).find((t) => t.isCredited)?.threshold
+      ).toBe(3);
       expect(view.rankableSetPotential(chest, FLOOR)).toBeCloseTo(225, 9);
     });
 
-    it("863-X: a failed crossing gate sim leaves the gate not cleared and shows the sim's error", async () => {
+    it("863-X: a failed crossing check sim leaves the check not cleared and shows the sim's error", async () => {
       // Scenario kind: 511-X's Crystalforge 629 worn at 1, model 2pc 30. The
-      // crossing gate copies the chest, the lower slot, so its "off" sim is
+      // crossing check copies the chest, the lower slot, so its "off" sim is
       // the one request with a set-less chest, the hands and no legs. At worn
-      // 1 the 2pc package adds one piece, so it runs no gate of its own.
+      // 1 the 2pc package adds one piece, so it runs no check of its own.
       const { ranking } = await runScenario({
         worn: wornGear({ chest: CRYSTALFORGE.chest }),
         pool: [
@@ -3481,17 +3492,17 @@ describe.skipIf(!forkPresent)(
           ids.includes(CRYSTALFORGE.hands) &&
           !ids.includes(CRYSTALFORGE.legs),
       });
-      expect(ranking.crossingGates).toEqual([
+      expect(ranking.crossingChecks).toEqual([
         { setId: 629, count: 2, itemId: CRYSTALFORGE.hands, cleared: false },
       ]);
       expect(setSkipLines(ranking)).toEqual([simFailedLine(2)]);
     });
 
-    it("511-X: one added piece crosses a bonus only when that count's crossing gate clears", async () => {
+    it("511-X: one added piece crosses a bonus only when that count's crossing check clears", async () => {
       // Scenario kind: a set worn one short of a bonus, with a candidate in a
       // free slot. Examples: Crystalforge 629 worn at 1 (chest) with model 2pc
       // 30, then 0; Primal Intent 619 worn at 2 with model 3pc 25.
-      const view = await stepView();
+      const view = await bonusGearView();
       const crystalforge = (b2: number) =>
         runScenario({
           worn: wornGear({ chest: CRYSTALFORGE.chest }),
@@ -3506,7 +3517,7 @@ describe.skipIf(!forkPresent)(
           measureSetBonuses: true,
         });
       const yes = (await crystalforge(30)).ranking;
-      expect(yes.crossingGates).toEqual([
+      expect(yes.crossingChecks).toEqual([
         {
           setId: 629,
           count: 2,
@@ -3520,9 +3531,9 @@ describe.skipIf(!forkPresent)(
       expect(hands.setContext?.crossesThreshold).toBe(true);
       expect(view.crossingLabelCount(hands.setContext)).toBe(2);
       const no = (await crystalforge(0)).ranking;
-      expect(no.crossingGates?.map((g) => [g.count, g.dps, g.cleared])).toEqual(
-        [[2, 0, false]]
-      );
+      expect(
+        no.crossingChecks?.map((g) => [g.count, g.dps, g.cleared])
+      ).toEqual([[2, 0, false]]);
       const handsNo = thRow(no, CRYSTALFORGE.hands);
       expect(handsNo.setContext?.crossesThreshold).toBe(false);
       expect(view.crossingLabelCount(handsNo.setContext)).toBeNull();
@@ -3544,11 +3555,11 @@ describe.skipIf(!forkPresent)(
       expect(view.crossingLabelCount(waist.setContext)).toBe(3);
     });
 
-    it("511-E: a set with bonuses above 4 pieces gets every count, and a row can stop at 8", async () => {
+    it("511-E: a set with bonuses above 4 pieces gets every count, and a row can be credited at 8", async () => {
       // Scenario kind: a set with bonuses at 6 or 8 pieces. Example:
       // Cryptstalker 530, own value 100 each, model 2pc 10, 4pc 20, 6pc 30,
       // 8pc 40, nothing worn, all eight pieces in the pool.
-      const view = await stepView();
+      const view = await bonusGearView();
       const { ranking: r } = await runScenario({
         worn: wornGear({}),
         pool: setPool(CRYPTSTALKER),
@@ -3561,7 +3572,7 @@ describe.skipIf(!forkPresent)(
       expect(
         (r.setBonuses ?? [])
           .filter((b) => b.setId === 530)
-          .map((b) => [b.threshold, b.belowGate ?? false, b.sameGearDps])
+          .map((b) => [b.threshold, b.belowNoise ?? false, b.sameGearDps])
       ).toEqual([
         [2, false, 10],
         [3, true, 0],
@@ -3571,9 +3582,11 @@ describe.skipIf(!forkPresent)(
         [7, true, 0],
         [8, false, 40],
       ]);
-      // W-E1: the stop gear wears all eight, 800 + 100, less the row's 100.
+      // W-E1: the credited gear wears all eight, 800 + 100, less the row's 100.
       const hands = thRow(r, CRYPTSTALKER.hands);
-      expect(stopTerms(view, hands).find((t) => t.isStop)?.threshold).toBe(8);
+      expect(
+        outcomeTerms(view, hands).find((t) => t.isCredited)?.threshold
+      ).toBe(8);
       expect(view.rankableSetPotential(hands, FLOOR)).toBeCloseTo(800, 9);
     });
 
@@ -3588,7 +3601,7 @@ describe.skipIf(!forkPresent)(
         THUNDERHEART.chest,
       ]);
       // model(G + Pauldrons + Chestguard) − model(G) = 3070 − 3090.
-      expect(futureOf(pauldrons, 2)?.stepGearDps).toBeCloseTo(-20, 9);
+      expect(futureOf(pauldrons, 2)?.bonusGearDps).toBeCloseTo(-20, 9);
       const { ranking: t } = await runScenario({
         ...PS_SCENARIO,
         partnerRule: "single-swap",
@@ -3598,13 +3611,13 @@ describe.skipIf(!forkPresent)(
         THUNDERHEART.hands,
       ]);
       // Pauldrons + Gauntlets keep the Malorne chest: 3064 − 3090.
-      expect(futureOf(todays, 2)?.stepGearDps).toBeCloseTo(-26, 9);
+      expect(futureOf(todays, 2)?.bonusGearDps).toBeCloseTo(-26, 9);
       // K6: the Gauntlets row, as on the owner's demo. 2pc with the
-      // Leggings: 6 − 12 + 50 = 44, a step of 38. 4pc with the Pauldrons and
-      // Chestguard: 6 + 8 + 12 − 12 + 50 + 80 − 90 = 54, a step of 10 that
+      // Leggings: 6 − 12 + 50 = 44, an increment of 38. 4pc with the Pauldrons and
+      // Chestguard: 6 + 8 + 12 − 12 + 50 + 80 − 90 = 54, an increment of 10 that
       // breaks Malorne 2pc. The Gauntlets alone break nothing.
-      const view = await stepView();
-      expect(stepsOf(view, thRow(z, THUNDERHEART.hands))).toEqual([
+      const view = await bonusGearView();
+      expect(incrementsOf(view, thRow(z, THUNDERHEART.hands))).toEqual([
         [2, [THUNDERHEART.legs], 38, false, []],
         [4, [THUNDERHEART.shoulder, THUNDERHEART.chest], 10, true, [[640, 2]]],
       ]);
@@ -3654,7 +3667,7 @@ describe.skipIf(!forkPresent)(
         THUNDERHEART.waist,
       ]);
       expect(futureOf(z, 4)?.breaks ?? []).toEqual([]);
-      expect(futureOf(z, 4)?.stepGearDps).toBeCloseTo(540, 9);
+      expect(futureOf(z, 4)?.bonusGearDps).toBeCloseTo(540, 9);
       // Z0 takes both replacers and loses it: 100 + 320 + 130 − 30 = 520.
       expect(futureOf(z0, 4)?.pieces?.map((p) => p.itemId)).toEqual([
         THUNDERHEART.shoulder,
@@ -3664,7 +3677,7 @@ describe.skipIf(!forkPresent)(
       expect((futureOf(z0, 4)?.breaks ?? []).map(brk)).toEqual([
         { setId: 659, threshold: 2, dps: 30 },
       ]);
-      expect(futureOf(z0, 4)?.stepGearDps).toBeCloseTo(520, 9);
+      expect(futureOf(z0, 4)?.bonusGearDps).toBeCloseTo(520, 9);
     });
 
     it("511-PR: the partner rule is swapped in one place, and each rule has its own cache key", async () => {
@@ -3675,7 +3688,7 @@ describe.skipIf(!forkPresent)(
       }>("engine/seams/store.ts");
       const store = new storeMod.MemoryStore();
       const unset = await runScenario({ ...PS_SCENARIO, store });
-      expect(unset.ranking.setStepSims?.partnerRule).toBe("close-calls");
+      expect(unset.ranking.bonusGearSims?.partnerRule).toBe("close-calls");
       // W-H1: unset, the hashed object has no partnerRule key, as before K5.
       expect(unset.ranking.contentHash).not.toContain('"partnerRule"');
       const again = await runScenario({ ...PS_SCENARIO, store });
@@ -3690,7 +3703,7 @@ describe.skipIf(!forkPresent)(
       expect(single.ranking.contentHash).toContain(
         '"partnerRule":"single-swap"'
       );
-      expect(single.ranking.setStepSims?.partnerRule).toBe("single-swap");
+      expect(single.ranking.bonusGearSims?.partnerRule).toBe("single-swap");
       // pathToThreshold's pieces: the 2pc package is Gauntlets + Leggings, so
       // the Pauldrons row adds the better of the two.
       expect(
@@ -3751,7 +3764,7 @@ describe.skipIf(!forkPresent)(
       // Thunderheart Leggings row (100); the Gauntlets (110) replace nothing,
       // the Chestguard, Wristguards and Waistguard (120 each) each replace a
       // Primal Intent piece.
-      const view = await stepView();
+      const view = await bonusGearView();
       const { ranking: r } = await runScenario({
         worn: wornGear(PRIMAL_INTENT),
         pool: [
@@ -3771,30 +3784,30 @@ describe.skipIf(!forkPresent)(
         measureSetBonuses: true,
       });
       const legs = thRow(r, THUNDERHEART.legs);
-      const stops = stopTerms(view, legs);
+      const outcomes = outcomeTerms(view, legs);
       expect(
-        stops.map((t) => [t.threshold, t.pieces.map((p) => p.itemId)])
+        outcomes.map((t) => [t.threshold, t.pieces.map((p) => p.itemId)])
       ).toEqual([
         [2, [THUNDERHEART.hands]],
         [4, [THUNDERHEART.chest, THUNDERHEART.wrist, THUNDERHEART.waist]],
       ]);
       // Totals over 3080: 2pc 100 + 110 + 50 (Primal Intent kept) = 260; 4pc
       // 100 + 360 + 130, Primal Intent at 0, = 510.
-      expect(stops.map((t) => t.totalDps)).toEqual([260, 510]);
-      expect(stops.map((t) => t.isStop)).toEqual([false, true]);
+      expect(outcomes.map((t) => t.bonusGearDps)).toEqual([260, 510]);
+      expect(outcomes.map((t) => t.isCredited)).toEqual([false, true]);
       expect(view.rankableSetPotential(legs, FLOOR)).toBeCloseTo(510 - 100, 9);
       // K6: the 2pc partner (Gauntlets) is not in the 4pc partner set, so
-      // there are no steps; the tab shows the totals as separate outcomes.
-      expect(view.setPotentialSteps(legs.setContext, FLOOR)).toBeNull();
+      // there are no increments; the tab shows the totals as separate outcomes.
+      expect(view.setPotentialIncrements(legs.setContext, FLOOR)).toBeNull();
     });
 
-    it("511-CB: a step ranking's credit and disclosure do not read the top package's breaks", async () => {
+    it("511-CB: a bonus-gear ranking's credit and disclosure do not read the top package's breaks", async () => {
       // Scenario kind: the top package breaks a worn bonus that the row's own
-      // stop gear keeps, and that bonus's value is unmeasured. Before K5 it
-      // zeroed the row (477-P); a step ranking never reads `commitBreaks`.
-      const view = await stepView();
+      // credited gear keeps, and that bonus's value is unmeasured. Before K5 it
+      // zeroed the row (477-P); a bonus-gear ranking never reads `commitBreaks`.
+      const view = await bonusGearView();
       const ctx = {
-        stepRanking: true,
+        bonusGearMeasured: true,
         setName: "Thunderheart Harness",
         piecesWornBefore: 0,
         singleDeltaDps: 30,
@@ -3804,7 +3817,7 @@ describe.skipIf(!forkPresent)(
             piecesNeeded: 2,
             sameGearDps: 50,
             sameGearSe: 0.6,
-            stepGearDps: 170,
+            bonusGearDps: 170,
             pieces: [piece(2, "B")],
           },
         ],
@@ -3822,11 +3835,11 @@ describe.skipIf(!forkPresent)(
       );
       expect(view.setBonusSubLine(withCommit, true)).toBe("hover_hint");
       expect(
-        view.setBonusSubLine({ stepRanking: true, commitBreaks }, true)
+        view.setBonusSubLine({ bonusGearMeasured: true, commitBreaks }, true)
       ).toBeNull();
       const terms = view.setPotentialTerms(withCommit, FLOOR).terms;
-      expect(terms.map((t) => t.kind)).toEqual(["stop"]);
-      expect((terms[0] as StopTerm).broken).toEqual([]);
+      expect(terms.map((t) => t.kind)).toEqual(["outcome"]);
+      expect((terms[0] as OutcomeTerm).broken).toEqual([]);
     });
 
     it("511-A3R: two set rings key to one slot, so their 2pc is out of reach (known limit d)", async () => {
@@ -3852,7 +3865,7 @@ describe.skipIf(!forkPresent)(
       expect(
         (r.setBonuses ?? []).map((b) => [b.setId, b.threshold, b.unmeasured])
       ).toEqual([]);
-      expect(r.setStepSims?.gears).toBe(0);
+      expect(r.bonusGearSims?.gears).toBe(0);
     });
   }
 );
@@ -3866,7 +3879,7 @@ describe.skipIf(!forkPresent)(
 // Worn: Thunderheart Gauntlets (Thunderheart at 1) and Malorne shoulder and
 // chest (Malorne 2pc, so the worn-set ladder runs). Pool: the Thunderheart
 // Pauldrons, Chestguard and Leggings, so Thunderheart reaches 4 and has a
-// crossing gate (the Leggings fill a slot Thunderheart does not).
+// crossing check (the Leggings fill a slot Thunderheart does not).
 const SR_SCENARIO: Scenario = {
   worn: wornGear({
     hands: THUNDERHEART.hands,
@@ -3888,13 +3901,13 @@ const SCREEN_COUNT_N = [100, 300, 1000];
 
 /** Everything the screen must leave alone, from one run. */
 async function screenFreeParts(ranking: ForkRanking) {
-  const view = await stepView();
+  const view = await bonusGearView();
   return {
     setBonuses: ranking.setBonuses,
     brokenSetValues: ranking.brokenSetValues,
     wornSetLadder: ranking.wornSetLadder,
-    crossingGates: ranking.crossingGates,
-    setStepSims: ranking.setStepSims,
+    crossingChecks: ranking.crossingChecks,
+    bonusGearSims: ranking.bonusGearSims,
     rows: ranking.items.map((row) => ({
       itemId: row.itemId,
       deltaDps: row.deltaDps,
@@ -3909,12 +3922,12 @@ describe.skipIf(!forkPresent)(
   () => {
     it("511-SR: record mode filters nothing, and records each reading with its paired error", async () => {
       // Scenario kind: a check run with the screen in record mode, on gear
-      // that has a worn-set ladder, a crossing gate and a set to collect.
+      // that has a worn-set ladder, a crossing check and a set to collect.
       const off = await runScenario(SR_SCENARIO);
       const on = await runScenario({ ...SR_SCENARIO, setScreenMode: "record" });
       expect(off.ranking.setScreen).toBeUndefined();
       expect(off.ranking.wornSetLadder?.length).toBeGreaterThan(0);
-      expect(off.ranking.crossingGates?.length).toBeGreaterThan(0);
+      expect(off.ranking.crossingChecks?.length).toBeGreaterThan(0);
       // W-SR1: the screen changes nothing else in the ranking.
       expect(await screenFreeParts(on.ranking)).toEqual(
         await screenFreeParts(off.ranking)
@@ -4136,7 +4149,7 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
     // Scenario kind: a row whose partner sets' estimates are close, while
     // their pieces' stats interact so that the estimate's order is wrong.
     // Example: PC_SCENARIO, the Thunderheart Gauntlets row's 2pc.
-    const view = await stepView();
+    const view = await bonusGearView();
     const { ranking: r } = await runScenario(PC_SCENARIO);
     const hands = thRow(r, THUNDERHEART.hands);
     expect(futureOf(hands, 2)?.partnerRule).toBe("close-calls");
@@ -4144,7 +4157,7 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
       THUNDERHEART.legs,
     ]);
     // model(G + Gauntlets + Leggings) − model(G) = 200 + 50 + 20.
-    expect(futureOf(hands, 2)?.stepGearDps).toBeCloseTo(270, 9);
+    expect(futureOf(hands, 2)?.bonusGearDps).toBeCloseTo(270, 9);
     expect(view.rankableSetPotential(hands, FLOOR)).toBeCloseTo(170, 9);
     // The Chestguard row's two sets tie on estimate and on sim (260 each):
     // Z's order, the lower id.
@@ -4154,7 +4167,7 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
     // Choices sim chest + hands (the 2pc package, from the store), chest +
     // legs and hands + legs once each, then the two chosen gears come from
     // the store.
-    expect(r.setStepSims).toEqual({
+    expect(r.bonusGearSims).toEqual({
       partnerRule: "close-calls",
       gears: 2,
       simmed: 2,
@@ -4170,8 +4183,8 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
     expect(futureOf(zHands, 2)?.pieces?.map((p) => p.itemId)).toEqual([
       THUNDERHEART.chest,
     ]);
-    expect(futureOf(zHands, 2)?.stepGearDps).toBeCloseTo(260, 9);
-    expect(z.setStepSims).toEqual({
+    expect(futureOf(zHands, 2)?.bonusGearDps).toBeCloseTo(260, 9);
+    expect(z.bonusGearSims).toEqual({
       partnerRule: "sum-of-singles",
       gears: 2,
       simmed: 1,
@@ -4195,14 +4208,14 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
         ],
       });
       const f = futureOf(thRow(ranking, THUNDERHEART.hands), 2);
-      return [f?.pieces?.map((p) => p.itemId), f?.stepGearDps];
+      return [f?.pieces?.map((p) => p.itemId), f?.bonusGearDps];
     };
     expect(await handsPieces(79)).toEqual([[THUNDERHEART.legs], 269]);
     expect(await handsPieces(78)).toEqual([[THUNDERHEART.chest], 260]);
   });
 
   it("511-PC: a candidate whose sim fails is skipped; when every one fails, Z's choice stands", async () => {
-    const view = await stepView();
+    const view = await bonusGearView();
     // Real (not copied) Thunderheart pieces worn, in slot order.
     const realTh = (ids: readonly number[]) =>
       [CHEST_SLOT, HANDS_SLOT, LEGS_SLOT]
@@ -4219,14 +4232,14 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
     expect(futureOf(oneHands, 2)?.pieces?.map((p) => p.itemId)).toEqual([
       THUNDERHEART.chest,
     ]);
-    expect(futureOf(oneHands, 2)?.stepGearDps).toBeCloseTo(260, 9);
+    expect(futureOf(oneHands, 2)?.bonusGearDps).toBeCloseTo(260, 9);
     // Every row's 2pc is measured on a partner set whose sim worked, so no
-    // line says the 2pc went unmeasured. The 3pc's same-gear gate sims wear
+    // line says the 2pc went unmeasured. The 3pc's same-gear check sims wear
     // the failing Gauntlets and Leggings with a copied Chestguard, so the 3pc
     // line is true.
     expect(setSkipLines(one.ranking)).toEqual([simFailedLine(3)]);
     // Both of the Gauntlets row's gears fail: the row keeps Z's choice, the
-    // Chestguard, whose step sim fails again, so the row is unmeasured.
+    // Chestguard, whose bonus-gear sim fails again, so the row is unmeasured.
     const both = await runScenario({
       ...PC_SCENARIO,
       failWhen: (ids) =>
@@ -4237,9 +4250,9 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
     expect(futureOf(bothHands, 2)?.pieces?.map((p) => p.itemId)).toEqual([
       THUNDERHEART.chest,
     ]);
-    expect(futureOf(bothHands, 2)?.stepGearDps).toBeUndefined();
+    expect(futureOf(bothHands, 2)?.bonusGearDps).toBeUndefined();
     expect(view.setCreditUnmeasured(bothHands.setContext)).toBe(true);
-    // Ticket 863: the step sims' error reaches the player.
+    // Ticket 863: the bonus-gear sims' error reaches the player.
     expect(setSkipLines(both.ranking)).toContainEqual(simFailedLine(2, true));
     // The every-combination rule finds no partner set when every sim fails,
     // so the row is unmeasured and the line still names the bonus.
@@ -4252,7 +4265,7 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
     });
     const everyHands = thRow(every.ranking, THUNDERHEART.hands);
     expect(futureOf(everyHands, 2)?.pieces).toBeUndefined();
-    expect(futureOf(everyHands, 2)?.stepGearDps).toBeUndefined();
+    expect(futureOf(everyHands, 2)?.bonusGearDps).toBeUndefined();
     expect(setSkipLines(every.ranking)).toContainEqual(simFailedLine(2, true));
   });
 });
@@ -4383,7 +4396,7 @@ const SB_SCENARIO: Scenario = {
 
 // 511-SD: worn Gauntlets of Malorne (Malorne at 1). Malorne's three pool
 // pieces are worth −155 each, so its best case is −115 + 110 = −5; its
-// crossing gate still clears (2pc 40). Thunderheart wrist, waist and feet
+// crossing check still clears (2pc 40). Thunderheart wrist, waist and feet
 // (−15, −15, −100) measure −30 + 50 = 20; Gladiator's Pursuit chest and
 // hands (−12.375 each, 2pc 20) measure −4.75.
 const SD_SCENARIO: Scenario = {
@@ -4524,7 +4537,7 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
     // Scenario kind: a set whose bonuses do nothing for this spec, beside a
     // set worth collecting. Example: Justicar 626 next to 511-SR's
     // Thunderheart (w = 1, R = 4, 2pc 50, 4pc 80).
-    const view = await stepView();
+    const view = await bonusGearView();
     const off = await runScenario(SN_SCENARIO);
     const on = await runScenario({ ...SN_SCENARIO, setScreenMode: "on" });
     const screen = onScreenOf(on.ranking)!;
@@ -4549,7 +4562,7 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
       [676, true, "top-k"],
     ]);
     // W-ON2: after the singles, only the two screen sims wear a Justicar
-    // copy; the off run sends its gate sims too.
+    // copy; the off run sends its check sims too.
     const justicar = Object.values(JUSTICAR);
     const onCopies = on.calls
       .map((ids, i) => [ids, on.callOpts[i]!] as const)
@@ -4635,9 +4648,9 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
   it("511-SD: a set whose best case loses to current gear is dropped, even below K", async () => {
     // Scenario kind: a worn set's other pieces are much worse than the
     // player's gear (a level-60 or off-spec set). Example: SD_SCENARIO;
-    // 2σ = 4.898979. The dropped set is worn at 1 and its crossing gate
+    // 2σ = 4.898979. The dropped set is worn at 1 and its crossing check
     // clears, so its rows keep a crossing line (GON-2).
-    const view = await stepView();
+    const view = await bonusGearView();
     const off = await runScenario(SD_SCENARIO);
     const on = await runScenario({ ...SD_SCENARIO, setScreenMode: "on" });
     const screen = onScreenOf(on.ranking)!;
@@ -4656,14 +4669,14 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
       [640, false, "below-zero"],
       [676, true, "top-k"],
     ]);
-    // GON-2: the dropped worn set's crossing gate cleared, and its rows keep
+    // GON-2: the dropped worn set's crossing check cleared, and its rows keep
     // the off run's single breaks, crossing and piece count.
     expect(
-      (on.ranking.crossingGates ?? [])
+      (on.ranking.crossingChecks ?? [])
         .filter((g) => g.setId === 640)
         .map((g) => [g.count, g.cleared])
     ).toEqual([[2, true]]);
-    expect(on.ranking.crossingGates).toEqual(off.ranking.crossingGates);
+    expect(on.ranking.crossingChecks).toEqual(off.ranking.crossingChecks);
     const malorne = [MALORNE.shoulder, MALORNE.chest, MALORNE.legs];
     expect(droppedRowParts(on.ranking, malorne)).toEqual(
       droppedRowParts(off.ranking, malorne)
@@ -4712,15 +4725,15 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
 
   it("511-SL: the screen on changes only the gain-side set list", async () => {
     // Scenario kind: Q6's invariant. (a) 511-SN's gear, which wears Malorne
-    // 2pc (so the ladder runs) and gives Thunderheart a crossing gate;
+    // 2pc (so the ladder runs) and gives Thunderheart a crossing check;
     // (b) 511-SR's gear, where every set survives.
     const offA = await runScenario(SN_SCENARIO);
     const onA = await runScenario({ ...SN_SCENARIO, setScreenMode: "on" });
     expect(offA.ranking.wornSetLadder?.length).toBeGreaterThan(0);
-    expect(offA.ranking.crossingGates?.length).toBeGreaterThan(0);
+    expect(offA.ranking.crossingChecks?.length).toBeGreaterThan(0);
     expect(onA.ranking.wornSetLadder).toEqual(offA.ranking.wornSetLadder);
     expect(onA.ranking.brokenSetValues).toEqual(offA.ranking.brokenSetValues);
-    expect(onA.ranking.crossingGates).toEqual(offA.ranking.crossingGates);
+    expect(onA.ranking.crossingChecks).toEqual(offA.ranking.crossingChecks);
     // Without the screen sims and Justicar's off-run gain sims, the two
     // runs send the same requests with the same options, in order.
     const justicar = Object.values(JUSTICAR);
@@ -4783,13 +4796,13 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
  * The popover's split break lines (511, K6B)
  * ------------------------------------------------------------------ */
 
-/** A K6 step with the two line values a breaking step splits into (K6B). */
-type SplitStepTerm = StepTerm & {
+/** A K6 increment with the two line values a breaking increment splits into (K6B). */
+type SplitIncrementTerm = IncrementTerm & {
   breaksLineDps?: number;
   piecesLineDps?: number;
 };
 
-/** The K6B fields of a step ranking's future, read through a cast. */
+/** The K6B fields of a bonus-gear ranking's future, read through a cast. */
 type BonusOffFields = {
   bonusOffDps?: number;
   bonusOffSe?: number;
@@ -4801,7 +4814,7 @@ type SetBonusOffSims = {
   simmed: number;
   fromStore: number;
   failedGears: number;
-  skippedSteps: number;
+  skippedIncrements: number;
   beforeInStore: number;
 };
 
@@ -4815,12 +4828,16 @@ const nineOrNull = (v: number | undefined) =>
   v === undefined ? null : Number(v.toFixed(9));
 
 /**
- * A row's steps as [count, added piece ids, dps, Breaks line, pieces line,
- * newly broken]; a line value is null when the step is not split.
+ * A row's increments as [count, added piece ids, dps, Breaks line, pieces line,
+ * newly broken]; a line value is null when the increment is not split.
  */
-function splitStepsOf(view: StepViewMod, row: { setContext?: unknown }) {
+function splitIncrementsOf(
+  view: BonusGearViewMod,
+  row: { setContext?: unknown }
+) {
   return (
-    view.setPotentialSteps(row.setContext, FLOOR) as SplitStepTerm[] | null
+    view.setPotentialIncrements(row.setContext, FLOOR) as
+      SplitIncrementTerm[] | null
   )?.map((s) => [
     s.threshold,
     s.pieces.map((p) => p.itemId),
@@ -4832,15 +4849,15 @@ function splitStepsOf(view: StepViewMod, row: { setContext?: unknown }) {
 }
 
 /**
- * Checks that every split step of the ranking's rows adds up to its step
- * value (W-L1), and returns how many split steps there are.
+ * Checks that every split increment of the ranking's rows adds up to its increment
+ * value (W-L1), and returns how many split increments there are.
  */
-function expectSplitLinesAddUp(view: StepViewMod, ranking: ForkRanking) {
+function expectSplitLinesAddUp(view: BonusGearViewMod, ranking: ForkRanking) {
   let split = 0;
   for (const row of ranking.items) {
-    const steps = view.setPotentialSteps(row.setContext, FLOOR) as
-      SplitStepTerm[] | null;
-    for (const s of steps ?? []) {
+    const increments = view.setPotentialIncrements(row.setContext, FLOOR) as
+      SplitIncrementTerm[] | null;
+    for (const s of increments ?? []) {
       if (s.breaksLineDps === undefined) continue;
       split += 1;
       expect(
@@ -4856,7 +4873,7 @@ const ZERO_BONUS_OFF: SetBonusOffSims = {
   simmed: 0,
   fromStore: 0,
   failedGears: 0,
-  skippedSteps: 0,
+  skippedIncrements: 0,
   beforeInStore: 0,
 };
 
@@ -4881,7 +4898,7 @@ const LR_SCENARIO: Scenario = {
 };
 
 // 511-L2: worn Malorne 4 (head, shoulder, chest, hands); only the
-// Thunderheart 4pc pays, so it is every row's only gated future.
+// Thunderheart 4pc pays, so it is every row's only future above noise.
 const L2_SCENARIO: Scenario = {
   worn: wornGear(MALORNE_4),
   pool: [
@@ -4907,18 +4924,18 @@ const L2_SCENARIO: Scenario = {
 describe.skipIf(!forkPresent)(
   "the popover's split break lines (511, K6B)",
   () => {
-    it("511-LS: a step that newly loses a worn bonus is split into its Breaks line and its pieces line", async () => {
-      // Scenario kind: the owner's demo row, a 4pc step that replaces both
+    it("511-LS: an increment that newly loses a worn bonus is split into its Breaks line and its pieces line", async () => {
+      // Scenario kind: the owner's demo row, a 4pc increment that replaces both
       // worn Malorne pieces. Example: PS_SCENARIO (feral P2 BiS shape).
-      const view = await stepView();
+      const view = await bonusGearView();
       const run = await runScenario(PS_SCENARIO);
       const r = run.ranking;
       const hands = thRow(r, THUNDERHEART.hands);
       const legs = thRow(r, THUNDERHEART.legs);
-      // The gear before the 4pc step, Gauntlets + Leggings, is +44; with the
+      // The gear before the 4pc increment, Gauntlets + Leggings, is +44; with the
       // Malorne shoulder and chest set-less it is 6 − 12 + 50 − 90 = −46.
       // Breaks −46 − 44 = −90; pieces 54 − (−46) = 100; −90 + 100 = 10.
-      expect(splitStepsOf(view, hands)).toEqual([
+      expect(splitIncrementsOf(view, hands)).toEqual([
         [2, [THUNDERHEART.legs], 38, null, null, []],
         [
           4,
@@ -4929,9 +4946,9 @@ describe.skipIf(!forkPresent)(
           [[640, 2]],
         ],
       ]);
-      // The Leggings row's 4pc step has the same gear before (folded in slot
+      // The Leggings row's 4pc increment has the same gear before (folded in slot
       // order) and the same replaced pieces, so it shares the sim.
-      expect(splitStepsOf(view, legs)).toEqual([
+      expect(splitIncrementsOf(view, legs)).toEqual([
         [2, [THUNDERHEART.hands], 56, null, null, []],
         [
           4,
@@ -4946,13 +4963,13 @@ describe.skipIf(!forkPresent)(
         const f = bonusOffOf(row, 4)!;
         expect(f.bonusOffDps).toBeCloseTo(-46, 9);
         expect(f.bonusOff).toEqual([{ setId: 640, threshold: 2 }]);
-        expect(f.bonusOffSe).toBe(futureOf(row, 4)?.stepGearSe);
+        expect(f.bonusOffSe).toBe(futureOf(row, 4)?.bonusGearSe);
         expect(bonusOffOf(row, 2)?.bonusOffDps).toBeUndefined();
       }
-      // Their own swap already broke Malorne 2pc: no step newly loses it.
+      // Their own swap already broke Malorne 2pc: no increment newly loses it.
       for (const id of [THUNDERHEART.shoulder, THUNDERHEART.chest]) {
         const row = thRow(r, id);
-        for (const s of splitStepsOf(view, row) ?? []) {
+        for (const s of splitIncrementsOf(view, row) ?? []) {
           expect(s[3]).toBeNull();
           expect(s[4]).toBeNull();
         }
@@ -4965,7 +4982,7 @@ describe.skipIf(!forkPresent)(
         simmed: 1,
         fromStore: 0,
         failedGears: 0,
-        skippedSteps: 0,
+        skippedIncrements: 0,
         beforeInStore: 1,
       });
       const offIds = [
@@ -4980,12 +4997,12 @@ describe.skipIf(!forkPresent)(
       expect(expectSplitLinesAddUp(view, r)).toBe(2);
     });
 
-    it("511-LN: steps that break nothing are not split and add no sim", async () => {
-      // Scenario kind: nothing worn, so no step can lose a worn bonus.
+    it("511-LN: increments that break nothing are not split and add no sim", async () => {
+      // Scenario kind: nothing worn, so no increment can lose a worn bonus.
       // Example: 511-R's scenario.
-      const view = await stepView();
+      const view = await bonusGearView();
       const { ranking: r } = await runScenario(R_SCENARIO);
-      expect(splitStepsOf(view, thRow(r, THUNDERHEART.hands))).toEqual([
+      expect(splitIncrementsOf(view, thRow(r, THUNDERHEART.hands))).toEqual([
         [2, [THUNDERHEART.chest], 150, null, null, []],
         [4, [THUNDERHEART.shoulder, THUNDERHEART.legs], 240, null, null, []],
       ]);
@@ -4997,7 +5014,7 @@ describe.skipIf(!forkPresent)(
       }
       expect(expectSplitLinesAddUp(view, r)).toBe(0);
       expect(bonusOffSimsOf(r)).toEqual(ZERO_BONUS_OFF);
-      expect(r.setStepSims).toEqual({
+      expect(r.bonusGearSims).toEqual({
         partnerRule: "close-calls",
         gears: 4,
         simmed: 5,
@@ -5005,26 +5022,26 @@ describe.skipIf(!forkPresent)(
       });
     });
 
-    it("511-LR: a first step's bonus-off request is the row's single-swap request with copies", async () => {
-      // Scenario kind: a row whose first step breaks a worn bonus, so the
-      // gear before the step is the row's own single swap. Example: worn
+    it("511-LR: a first increment's bonus-off request is the row's single-swap request with copies", async () => {
+      // Scenario kind: a row whose first increment breaks a worn bonus, so the
+      // gear before the increment is the row's own single swap. Example: worn
       // Malorne shoulder and chest, Gauntlets row with a Chestguard partner.
-      const view = await stepView();
+      const view = await bonusGearView();
       const run = await runScenario(LR_SCENARIO);
       const r = run.ranking;
       const hands = thRow(r, THUNDERHEART.hands);
       expect(hands.setContext?.singleDeltaDps).toBeCloseTo(6, 9);
-      // 2pc with the Chestguard: 6 + 12 + 150 − 90 = 78, a step of 72. The
+      // 2pc with the Chestguard: 6 + 12 + 150 − 90 = 78, an increment of 72. The
       // Gauntlets swap with the Malorne chest set-less: 6 − 90 = −84.
       // Breaks −84 − 6 = −90; pieces 78 − (−84) = 162.
-      expect(splitStepsOf(view, hands)).toEqual([
+      expect(splitIncrementsOf(view, hands)).toEqual([
         [2, [THUNDERHEART.chest], 72, -90, 162, [[640, 2]]],
       ]);
       // The Chestguard row breaks Malorne 2pc itself: 12 − 90 = −78; its
-      // step with the Gauntlets is 78 − (−78) = 156 and is not split.
+      // increment with the Gauntlets is 78 − (−78) = 156 and is not split.
       const chest = thRow(r, THUNDERHEART.chest);
       expect(chest.deltaDps).toBeCloseTo(-78, 9);
-      expect(splitStepsOf(view, chest)).toEqual([
+      expect(splitIncrementsOf(view, chest)).toEqual([
         [2, [THUNDERHEART.hands], 156, null, null, []],
       ]);
       expect(bonusOffSimsOf(r)).toEqual({
@@ -5032,7 +5049,7 @@ describe.skipIf(!forkPresent)(
         simmed: 1,
         fromStore: 0,
         failedGears: 0,
-        skippedSteps: 0,
+        skippedIncrements: 0,
         beforeInStore: 1,
       });
       // Request identity (C244): undo the copy and the bonus-off request is
@@ -5078,19 +5095,19 @@ describe.skipIf(!forkPresent)(
       expect(expectSplitLinesAddUp(view, r)).toBe(1);
     });
 
-    it("511-L2: a step that loses two bonuses gets one Breaks line valued by one sim", async () => {
+    it("511-L2: an increment that loses two bonuses gets one Breaks line valued by one sim", async () => {
       // Scenario kind: a worn 4-piece set whose 2pc and 4pc are both lost
-      // by one step. Example: worn Malorne 4, the Thunderheart Leggings row
+      // by one increment. Example: worn Malorne 4, the Thunderheart Leggings row
       // taking the Cover, Pauldrons and Chestguard.
-      const view = await stepView();
+      const view = await bonusGearView();
       const run = await runScenario(L2_SCENARIO);
       const r = run.ranking;
       expect(r.baseline.dps).toBeCloseTo(3110, 9);
-      // Leggings: 4pc gear 10 + 60 + 80 − 110 = +40, a step of 30. With the
+      // Leggings: 4pc gear 10 + 60 + 80 − 110 = +40, an increment of 30. With the
       // Malorne head, shoulder and chest set-less: 10 − 110 = −100.
       // Breaks −100 − 10 = −110 (40 + 70 together); pieces 40 + 100 = 140.
       const legs = thRow(r, THUNDERHEART.legs);
-      expect(splitStepsOf(view, legs)).toEqual([
+      expect(splitIncrementsOf(view, legs)).toEqual([
         [
           4,
           [THUNDERHEART.head, THUNDERHEART.shoulder, THUNDERHEART.chest],
@@ -5108,8 +5125,8 @@ describe.skipIf(!forkPresent)(
         { setId: 640, threshold: 2 },
       ]);
       // Cover, Pauldrons, Chestguard: single 20 − 70 = −50 (own break 4pc);
-      // the 4pc step is 40 + 50 = 90 and newly loses the 2pc. The bonus-off
-      // gear copies the two Malorne pieces the step replaces: 20 − 110 = −90.
+      // the 4pc increment is 40 + 50 = 90 and newly loses the 2pc. The bonus-off
+      // gear copies the two Malorne pieces the increment replaces: 20 − 110 = −90.
       const others = [
         THUNDERHEART.head,
         THUNDERHEART.shoulder,
@@ -5118,7 +5135,7 @@ describe.skipIf(!forkPresent)(
       for (const id of others) {
         const row = thRow(r, id);
         expect(row.deltaDps).toBeCloseTo(-50, 9);
-        expect(splitStepsOf(view, row)).toEqual([
+        expect(splitIncrementsOf(view, row)).toEqual([
           [
             4,
             [...others.filter((o) => o !== id), THUNDERHEART.legs],
@@ -5134,7 +5151,7 @@ describe.skipIf(!forkPresent)(
         simmed: 4,
         fromStore: 0,
         failedGears: 0,
-        skippedSteps: 0,
+        skippedIncrements: 0,
         beforeInStore: 4,
       });
       // The Leggings row's request: head, shoulder and chest are copies, the
@@ -5151,11 +5168,11 @@ describe.skipIf(!forkPresent)(
       expect(expectSplitLinesAddUp(view, r)).toBe(4);
     });
 
-    it("511-LF: a failed bonus-off sim leaves the step as K6 showed it", async () => {
+    it("511-LF: a failed bonus-off sim leaves the increment as K6 showed it", async () => {
       // Scenario kind: the bonus-off sim fails. Example: PS_SCENARIO with
       // the fake sim failing the one request that wears the Malorne
       // shoulder's set-less copy with the Gauntlets and the Leggings.
-      const view = await stepView();
+      const view = await bonusGearView();
       const failId = COPY_OFFSET + MALORNE.shoulder;
       const { ranking: r } = await runScenario({
         ...PS_SCENARIO,
@@ -5174,11 +5191,11 @@ describe.skipIf(!forkPresent)(
         null,
         [[640, 2]],
       ];
-      expect(splitStepsOf(view, hands)).toEqual([
+      expect(splitIncrementsOf(view, hands)).toEqual([
         [2, [THUNDERHEART.legs], 38, null, null, []],
         fourPc,
       ]);
-      expect(splitStepsOf(view, legs)).toEqual([
+      expect(splitIncrementsOf(view, legs)).toEqual([
         [2, [THUNDERHEART.hands], 56, null, null, []],
         fourPc,
       ]);
@@ -5194,26 +5211,26 @@ describe.skipIf(!forkPresent)(
         simmed: 0,
         fromStore: 0,
         failedGears: 1,
-        skippedSteps: 0,
+        skippedIncrements: 0,
         beforeInStore: 1,
       });
       // Ticket 863: the bonus-off sim's error names the lost Malorne 2pc,
-      // whose cost the step does not show apart from its pieces.
+      // whose cost the increment does not show apart from its pieces.
       expect(setSkipLines(r)).toEqual([breakSplitFailedLine(2)]);
       // The credits are 511-PS's: 54 − 6 and 54 + 12.
       expect(view.rankableSetPotential(hands, FLOOR)).toBeCloseTo(48, 9);
       expect(view.rankableSetPotential(legs, FLOOR)).toBeCloseTo(66, 9);
     });
 
-    it("511-LV: the view splits a step only when the bonus-off sim names exactly its lost bonuses", async () => {
-      // Scenario kind: the view's rule on a hand-built step-ranking row.
+    it("511-LV: the view splits an increment only when the bonus-off sim names exactly its lost bonuses", async () => {
+      // Scenario kind: the view's rule on a hand-built bonus-gear ranking row.
       // Example: the 511-LS Gauntlets row's figures.
-      const view = await stepView();
+      const view = await bonusGearView();
       const ctxWith = (
         two: BonusOffFields = {},
         four: BonusOffFields = {}
       ) => ({
-        stepRanking: true,
+        bonusGearMeasured: true,
         setId: 676,
         setName: "Thunderheart Harness",
         singleDeltaDps: 6,
@@ -5223,7 +5240,7 @@ describe.skipIf(!forkPresent)(
             piecesNeeded: 1,
             sameGearDps: 50,
             sameGearSe: 1,
-            stepGearDps: 44,
+            bonusGearDps: 44,
             pieces: [{ itemId: THUNDERHEART.legs, name: "Leggings" }],
             ...two,
           },
@@ -5232,7 +5249,7 @@ describe.skipIf(!forkPresent)(
             piecesNeeded: 3,
             sameGearDps: 80,
             sameGearSe: 1,
-            stepGearDps: 54,
+            bonusGearDps: 54,
             pieces: [
               { itemId: THUNDERHEART.shoulder, name: "Pauldrons" },
               { itemId: THUNDERHEART.chest, name: "Chestguard" },
@@ -5251,7 +5268,7 @@ describe.skipIf(!forkPresent)(
         ],
       });
       const fourOf = (ctx: unknown) =>
-        (view.setPotentialSteps(ctx, FLOOR) as SplitStepTerm[])[1]!;
+        (view.setPotentialIncrements(ctx, FLOOR) as SplitIncrementTerm[])[1]!;
       // (a) The bonus-off sim names the lost Malorne 2pc: split.
       const a = fourOf(
         ctxWith(
@@ -5272,20 +5289,23 @@ describe.skipIf(!forkPresent)(
       expect("breaksLineDps" in b).toBe(false);
       expect("piecesLineDps" in b).toBe(false);
       expect(b.dps).toBeCloseTo(10, 9);
-      // (c) A ranking saved before K6B: today's steps, no line fields.
-      const c = view.setPotentialSteps(ctxWith(), FLOOR) as SplitStepTerm[];
+      // (c) A ranking saved before K6B: today's increments, no line fields.
+      const c = view.setPotentialIncrements(
+        ctxWith(),
+        FLOOR
+      ) as SplitIncrementTerm[];
       expect(c).toEqual([
         {
-          kind: "step",
+          kind: "increment",
           threshold: 2,
           setName: "Thunderheart Harness",
           pieces: [{ itemId: THUNDERHEART.legs, name: "Leggings" }],
           broken: [],
           dps: 38,
-          isStop: false,
+          isCredited: false,
         },
         {
-          kind: "step",
+          kind: "increment",
           threshold: 4,
           setName: "Thunderheart Harness",
           pieces: [
@@ -5301,19 +5321,19 @@ describe.skipIf(!forkPresent)(
             },
           ],
           dps: 10,
-          isStop: true,
+          isCredited: true,
         },
       ]);
       for (const s of c) {
         expect("breaksLineDps" in s).toBe(false);
         expect("piecesLineDps" in s).toBe(false);
       }
-      // (d) A bonus-off value on a step that loses nothing: not split.
+      // (d) A bonus-off value on an increment that loses nothing: not split.
       const d = (
-        view.setPotentialSteps(
+        view.setPotentialIncrements(
           ctxWith({ bonusOffDps: -12, bonusOff: [] }),
           FLOOR
-        ) as SplitStepTerm[]
+        ) as SplitIncrementTerm[]
       )[0]!;
       expect("breaksLineDps" in d).toBe(false);
       expect("piecesLineDps" in d).toBe(false);
@@ -5475,7 +5495,7 @@ describe.skipIf(!forkPresent)("Stop after the candidate loop (533)", () => {
       "set screen": fulls.some((f) =>
         f.callOpts.some((o) => o.saveAllValues === true)
       ),
-      "same-gear gate": rankings.some((r) =>
+      "same-gear check": rankings.some((r) =>
         (r.setBonuses ?? []).some((e) => e.sameGearDps !== undefined)
       ),
       "package sim": rankings.some((r) =>
@@ -5484,10 +5504,12 @@ describe.skipIf(!forkPresent)("Stop after the candidate loop (533)", () => {
       "worn-1 pair sim": rankings.some((r) =>
         (r.setBonuses ?? []).some((e) => e.selfConfound?.dps !== undefined)
       ),
-      "crossing gate": rankings.some((r) =>
-        (r.crossingGates ?? []).some((e) => e.dps !== undefined)
+      "crossing check": rankings.some((r) =>
+        (r.crossingChecks ?? []).some((e) => e.dps !== undefined)
       ),
-      "step-gear sim": rankings.some((r) => (r.setStepSims?.simmed ?? 0) > 0),
+      "bonus-gear sim": rankings.some(
+        (r) => (r.bonusGearSims?.simmed ?? 0) > 0
+      ),
       "bonus-off sim": rankings.some(
         (r) => (bonusOffSimsOf(r)?.simmed ?? 0) > 0
       ),
@@ -5495,11 +5517,11 @@ describe.skipIf(!forkPresent)("Stop after the candidate loop (533)", () => {
     expect(kinds).toEqual({
       "worn-set counts": true,
       "set screen": true,
-      "same-gear gate": true,
+      "same-gear check": true,
       "package sim": true,
       "worn-1 pair sim": true,
-      "crossing gate": true,
-      "step-gear sim": true,
+      "crossing check": true,
+      "bonus-gear sim": true,
       "bonus-off sim": true,
     });
   }, 120_000);
@@ -5845,8 +5867,8 @@ const SWEEP_SLOTS: readonly SweepSlot[] = [
 ];
 
 // The Malorne and Nordrassil 4pc are worth far more than any 2pc (40) or any
-// break (at most 50 + 80), so the 4pc is the best stop at every worn count
-// and each row's 4pc step is printed.
+// break (at most 50 + 80), so the 4pc is the credited bonus at every worn count
+// and each row's 4pc increment is printed.
 const MALORNE_2PC_DPS = 40;
 const MALORNE_4PC_DPS = 400;
 const NORDRASSIL_4PC_DPS = 400;
@@ -5881,14 +5903,14 @@ const isTh = (id: number) =>
   (Object.values(THUNDERHEART) as number[]).includes(id);
 
 /**
- * The model's value of one step of a row's popover: the Breaks line is the
- * Thunderheart bonuses the step newly loses, at their model value; the pieces
+ * The model's value of one increment of a row's popover: the Breaks line is the
+ * Thunderheart bonuses the increment newly loses, at their model value; the pieces
  * line is the added pieces' own values minus the pieces they replace, plus
- * the bonuses of the row's set the step newly reaches. The gear before the
- * step is the worn gear with the row's slot and every earlier step's slots
+ * the bonuses of the row's set the increment newly reaches. The gear before the
+ * increment is the worn gear with the row's slot and every earlier increment's slots
  * replaced.
  */
-function modelStepLines(opts: {
+function modelIncrementLines(opts: {
   worn: Record<SweepSlot, number>;
   rowId: number;
   setId: number;
@@ -5929,13 +5951,13 @@ describe.skipIf(!forkPresent)(
     // and the live run's Nordrassil drop (ADR-0035 band rule) is not
     // reproduced here; the live sweep examines that drop.
 
-    it("497-A: at worn Thunderheart 0-4 the 4pc Breaks line is the Thunderheart bonuses the step loses and the pieces line is pieces plus the bonus", async () => {
+    it("497-A: at worn Thunderheart 0-4 the 4pc Breaks line is the Thunderheart bonuses the increment loses and the pieces line is pieces plus the bonus", async () => {
       // Scenario kind: worn Malorne 0, worn Thunderheart k in the live
       // sweep's order, Malorne and Nordrassil candidates whose 4pc pays far
       // more than any break. A leak of Thunderheart loss into the 4pc lines
       // moves one of them off the model value by a fixed amount.
       //
-      // Hand-derived 4pc step (set pieces 100, neutral 120, Thunderheart 100;
+      // Hand-derived 4pc increment (set pieces 100, neutral 120, Thunderheart 100;
       // Breaks / pieces). Replacing a neutral piece is -20 a piece, a
       // Thunderheart piece 0, plus 400 for the 4pc:
       //   k=0 Malorne: 2 neutral added               ->  none / 360
@@ -5947,13 +5969,13 @@ describe.skipIf(!forkPresent)(
       //       Nordrassil chest: Th hands, legs + 1   ->   -50 / 380
       //   k=3 every Malorne row: 2 Thunderheart      ->   -50 / 400
       //       Nordrassil chest: 2 Th + 1 neutral     ->   -50 / 380
-      //   k=4 head: 2pc step -80 (the 4pc) / 40; 4pc step -50 / 400
+      //   k=4 head: 2pc increment -80 (the 4pc) / 40; 4pc increment -50 / 400
       //       a Thunderheart slot's row (own swap broke the 4pc): -50 / 400
-      // Which pieces a step adds is the engine's partner choice (ties, and
+      // Which pieces an increment adds is the engine's partner choice (ties, and
       // the close-calls estimate); the assertions price the pieces the
       // engine printed with the model, so a different partner moves the
       // expected value with it and only a leak fails.
-      const view = await stepView();
+      const view = await bonusGearView();
       const values = withSetValues([
         ...Object.values(MALORNE),
         ...Object.values(NORDRASSIL),
@@ -5962,7 +5984,7 @@ describe.skipIf(!forkPresent)(
         ...Object.values(MALORNE).map((id) => ({ id, setId: 640 })),
         { id: NORDRASSIL.chest, setId: 641 },
       ];
-      let fourPcStepsWithBreaks = 0;
+      let fourPcIncrementsWithBreaks = 0;
       for (let k = 0; k <= 4; k += 1) {
         const worn = sweepWorn(k);
         const { ranking: r } = await runScenario({
@@ -5981,7 +6003,7 @@ describe.skipIf(!forkPresent)(
         });
         // At k = 0 the engine drops both head candidates (Malorne 29098,
         // Nordrassil 30228); the ranking's substitutions say gem repair found
-        // no recolour that activates their meta (32409: 2 red, 2 yellow,
+        // no recolor that activates their meta (32409: 2 red, 2 yellow,
         // 2 blue) over this gemless gear, as in 512-C. From k = 1 both rank
         // (hypothesis: the worn Thunderheart pieces add the sockets the
         // repair needs). It is the fixture's gear, not a set-bonus path, so
@@ -5994,16 +6016,18 @@ describe.skipIf(!forkPresent)(
             setId === 640 ? MALORNE_4PC_DPS : NORDRASSIL_4PC_DPS,
             9
           );
-          const steps = view.setPotentialSteps(row.setContext, FLOOR) as
-            SplitStepTerm[] | null;
-          expect(steps, `${where}: steps nest`).not.toBeNull();
-          const step4 = steps!.find((s) => s.threshold === 4);
-          expect(step4, `${where}: 4pc step`).toBeDefined();
+          const increments = view.setPotentialIncrements(
+            row.setContext,
+            FLOOR
+          ) as SplitIncrementTerm[] | null;
+          expect(increments, `${where}: increments nest`).not.toBeNull();
+          const increment4 = increments!.find((s) => s.threshold === 4);
+          expect(increment4, `${where}: 4pc increment`).toBeDefined();
           const setIds = Object.values(setId === 640 ? MALORNE : NORDRASSIL);
           const earlier: number[] = [];
-          for (const s of steps!) {
+          for (const s of increments!) {
             const added = s.pieces.map((p) => p.itemId);
-            const want = modelStepLines({
+            const want = modelIncrementLines({
               worn,
               rowId: id,
               setId,
@@ -6012,22 +6036,22 @@ describe.skipIf(!forkPresent)(
               added,
               values,
             });
-            const at = `${where} step ${s.threshold}`;
+            const at = `${where} increment ${s.threshold}`;
             if (want.breaks === 0) {
               expect(s.breaksLineDps, at).toBeUndefined();
               expect(s.dps, at).toBeCloseTo(want.pieces, 9);
             } else {
               expect(s.breaksLineDps, at).toBeCloseTo(want.breaks, 9);
               expect(s.piecesLineDps, at).toBeCloseTo(want.pieces, 9);
-              if (s.threshold === 4) fourPcStepsWithBreaks += 1;
+              if (s.threshold === 4) fourPcIncrementsWithBreaks += 1;
             }
             earlier.push(...added);
           }
         }
         expectSplitLinesAddUp(view, r);
       }
-      // The sweep reaches a 4pc step that breaks Thunderheart (k >= 2).
-      expect(fourPcStepsWithBreaks).toBeGreaterThan(0);
+      // The sweep reaches a 4pc increment that breaks Thunderheart (k >= 2).
+      expect(fourPcIncrementsWithBreaks).toBeGreaterThan(0);
       // Every feral run reads hit (ticket 830), so each repair searches with
       // the hit term; alone, this sweep took 57 s on 2026-11-09.
     }, 180_000);
@@ -6036,11 +6060,11 @@ describe.skipIf(!forkPresent)(
       // Scenario kind: worn Thunderheart hands and legs (k = 2), the Malorne
       // head row. Thunderheart hands are worth 300 so no Malorne 4pc replaces
       // them; the 4pc gear is Malorne head, shoulder, chest and legs over the
-      // worn Thunderheart hands, and its step replaces the Thunderheart legs,
+      // worn Thunderheart hands, and its increment replaces the Thunderheart legs,
       // losing the Thunderheart 2pc (-50). The interaction (Malorne shoulder
       // + chest + Thunderheart hands, -15) fires on the 4pc gear only, not on
       // the gear the Breaks line prices.
-      const view = await stepView();
+      const view = await bonusGearView();
       const values = withValues([
         ...Object.values(MALORNE).map((id) => [id, V_TH] as const),
         [THUNDERHEART.hands, 300],
@@ -6066,15 +6090,15 @@ describe.skipIf(!forkPresent)(
           },
         ],
       });
-      const step4Of = (r: ForkRanking) => {
-        const steps = view.setPotentialSteps(
+      const increment4Of = (r: ForkRanking) => {
+        const increments = view.setPotentialIncrements(
           thRow(r, MALORNE.head).setContext,
           FLOOR
-        ) as SplitStepTerm[] | null;
-        return steps?.find((s) => s.threshold === 4);
+        ) as SplitIncrementTerm[] | null;
+        return increments?.find((s) => s.threshold === 4);
       };
-      const a = step4Of(plain.ranking);
-      const b = step4Of(withTerm.ranking);
+      const a = increment4Of(plain.ranking);
+      const b = increment4Of(withTerm.ranking);
       expect(a).toBeDefined();
       expect(b).toBeDefined();
       for (const s of [a!, b!]) {
@@ -6104,7 +6128,7 @@ const countsOf = (ranking: ForkRanking, setId: number) =>
     .filter((b) => b.setId === setId)
     .map((b) => b.threshold);
 const crossingCountsOf = (ranking: ForkRanking, setId: number) =>
-  (ranking.crossingGates ?? [])
+  (ranking.crossingChecks ?? [])
     .filter((g) => g.setId === setId)
     .map((g) => g.count);
 const futureCountsOf = (ranking: ForkRanking, setId: number) =>
@@ -6270,7 +6294,7 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
     // Scenario kind: each piece's single can switch the meta gem on, the
     // package's gear cannot. Example: Malorne Harness 640 over gemless gear.
     // The worn Gloves of Dexterous Manipulation have two sockets, so the
-    // Stag-Helm's single has three to recolour for its meta; the package puts
+    // Stag-Helm's single has three to recolor for its meta; the package puts
     // the socketless Gauntlets of Malorne in their place and leaves only the
     // helm's own, which is too few (as 512-C finds for the Thunderheart Cover).
     const GLOVES_TWO_SOCKETS = 28506;
@@ -6351,7 +6375,7 @@ describe.skipIf(!forkPresent)("set requests that cannot be built (869)", () => {
     }
   });
 
-  it("869-G: a same-gear gate whose requests cannot be built gives a line with the error", async () => {
+  it("869-G: a same-gear check whose requests cannot be built gives a line with the error", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
       const { ranking } = await runScenario(noThunderheartRows);
@@ -6448,8 +6472,8 @@ describe.skipIf(!forkPresent)(
       }
     });
 
-    it("872-S: a step gear whose request cannot be built gives a line on some rows", async () => {
-      // 511-U's step case, with the compose of each Pauldrons 2pc step gear
+    it("872-S: a bonus gear whose request cannot be built gives a line on some rows", async () => {
+      // 511-U's bonus-gear case, with the compose of each Pauldrons 2pc bonus gear
       // failing in place of its sim.
       const thSlots = [SHOULDER_SLOT, CHEST_SLOT, HANDS_SLOT, LEGS_SLOT];
       const warn = quiet();
@@ -6625,15 +6649,15 @@ describe.skipIf(!forkPresent)(
       };
     }
 
-    it("623-A: a step future worth 3.5 on the same gear, se 1, is credited under the 3 DPS bar", async () => {
+    it("623-A: a bonus-gear future worth 3.5 on the same gear, se 1, is credited under the 3 DPS bar", async () => {
       // Scenario kind: Set potential on, a future whose same-gear value (one
       // sim with the bonus minus one without) sits between the 3 DPS item bar
       // and √2 × 3 ≈ 4.24. Its se of 1 puts the 2·se part at 2, so the bar
-      // decides. The stop gear is 3.5 over current gear, so the row's figure
+      // decides. The credited gear is 3.5 over current gear, so the row's figure
       // is 0 + 3.5 and it sorts above the 3.2 row.
       const view = await importForkUpgrades<BarViewMod>("engine/view.ts");
       const ranking = await rankingWith({
-        stepRanking: true,
+        bonusGearMeasured: true,
         setId: 676,
         setName: "Thunderheart Harness",
         piecesWornBefore: 1,
@@ -6644,7 +6668,7 @@ describe.skipIf(!forkPresent)(
             piecesNeeded: 1,
             sameGearDps: 3.5,
             sameGearSe: 1,
-            stepGearDps: 3.5,
+            bonusGearDps: 3.5,
             pieces: [{ itemId: THUNDERHEART.legs, name: "Leggings" }],
           },
         ],

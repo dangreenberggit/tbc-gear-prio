@@ -6,8 +6,8 @@
  * recordings in `fixtures/tab-recordings/`, so a wrong figure on a row no
  * render captured, or one below the popover's 0.1 DPS resolution, still fails.
  * The reference walk below is written from the rule's statement (design.md §1
- * of the 502 stage, ADR-0034), not from `view.ts`. A step ranking (ticket 511:
- * rows carry `setContext.stepRanking`) is checked against `referenceStep`,
+ * of the 502 stage, ADR-0034), not from `view.ts`. A bonus-gear ranking (ticket 511:
+ * rows carry `setContext.bonusGearMeasured`) is checked against `referenceBonusGear`,
  * written from plan 511-512-set-credit's rule for one row, instead.
  *
  * The recordings are frozen test data: nothing automatic re-records them, and
@@ -46,8 +46,8 @@ type Future = {
   pieces?: Piece[];
   sameGearDps?: number;
   sameGearSe?: number;
-  belowGate?: true;
-  stepGearDps?: number;
+  belowNoise?: true;
+  bonusGearDps?: number;
   partnerUnmeasured?: string;
 };
 type SetContext = {
@@ -56,7 +56,7 @@ type SetContext = {
   piecesWornBefore: number;
   piecesAfterSwap: number;
   crossesThreshold: boolean;
-  stepRanking?: true;
+  bonusGearMeasured?: true;
   singleDeltaDps?: number;
   singleBreaks?: Break[];
   futureBonuses?: Future[];
@@ -89,7 +89,12 @@ type Ranking = {
 
 type Term =
   | { kind: "bonus" | "piece" | "break"; dps: number }
-  | { kind: "stop"; threshold: number; totalDps: number; isStop: boolean };
+  | {
+      kind: "outcome";
+      threshold: number;
+      bonusGearDps: number;
+      isCredited: boolean;
+    };
 type ViewMod = {
   applyView: (
     r: Ranking,
@@ -108,7 +113,7 @@ type ViewMod = {
   setPotentialTerms: (
     ctx: SetContext | undefined,
     cutoff: Cutoff
-  ) => { credit: number; stopThreshold: number; terms: Term[] };
+  ) => { credit: number; creditedThreshold: number; terms: Term[] };
 };
 type CutoffMod = { setBonusNoiseFloorDps: (cutoff: Cutoff) => number };
 
@@ -120,20 +125,20 @@ function load(name: string): Ranking {
 }
 
 /**
- * R1 as the owner approved it: walk the futures in threshold order; each step
+ * R1 as the owner approved it: walk the futures in threshold order; each increment
  * adds its floored bonus, the own stats of each path piece not yet counted,
- * and minus each path break not yet charged at its measured value. Only a step
- * whose floored bonus is above 0 can be the stop; the credit is the largest
- * running total at such a step, or 0. Any unmeasured figure gives 0.
+ * and minus each path break not yet charged at its measured value. Only an increment
+ * whose floored bonus is above 0 can be the credited bonus; the credit is the largest
+ * running total at such an increment, or 0. Any unmeasured figure gives 0.
  */
 function referenceR1(
   ctx: SetContext | undefined,
   floor: number
-): { credit: number; stop: number } {
+): { credit: number; creditedThreshold: number } {
   const futures = [...(ctx?.futureBonuses ?? [])].sort(
     (a, b) => a.threshold - b.threshold
   );
-  if (futures.length === 0) return { credit: 0, stop: 0 };
+  if (futures.length === 0) return { credit: 0, creditedThreshold: 0 };
   const unmeasured =
     futures.some(
       (f) =>
@@ -141,11 +146,11 @@ function referenceR1(
         (f.breaks ?? []).some((b) => b.dps === undefined) ||
         (f.pieces ?? []).some((p) => p.dps === undefined)
     ) || (ctx?.commitBreaks ?? []).some((b) => b.dps === undefined);
-  if (unmeasured) return { credit: 0, stop: 0 };
+  if (unmeasured) return { credit: 0, creditedThreshold: 0 };
   const counted = new Set<number>();
   const charged = new Set<string>();
   let running = 0;
-  let best = { credit: 0, stop: 0 };
+  let best = { credit: 0, creditedThreshold: 0 };
   for (const f of futures) {
     const bonus = f.dps! > floor ? f.dps! : 0;
     running += bonus;
@@ -161,45 +166,49 @@ function referenceR1(
       running -= b.dps!;
     }
     if (bonus > 0 && running > best.credit)
-      best = { credit: running, stop: f.threshold };
+      best = { credit: running, creditedThreshold: f.threshold };
   }
   return best;
 }
 
 /**
- * The step rule for one row (ticket 511), from the plan's statement: a
- * future is eligible when its same-gear value clears the gate,
+ * The bonus-gear rule for one row (ticket 511), from the plan's statement: a
+ * future is eligible when its same-gear value clears the noise check,
  * B' > max(floor, 2·se). The row is unmeasured, and credited 0, exactly when
- * a future lacks its same-gear value and is not below the gate, or an
- * eligible future lacks its step gear's sim or its partner choice. Otherwise
- * walk the eligible futures in count order with c = stepGearDps − d_r; the
- * stop is a future whose c is strictly greater than the best so far, which
+ * a future lacks its same-gear value and is not within the noise, or an
+ * eligible future lacks its bonus gear's sim or its partner choice. Otherwise
+ * walk the eligible futures in count order with c = bonusGearDps − d_r; the
+ * credited bonus is a future whose c is strictly greater than the best so far, which
  * starts at 0, and the credit is the best c.
  */
-function referenceStep(
+function referenceBonusGear(
   ctx: SetContext,
   floor: number
-): { credit: number; stop: number; stopTotal: number } {
-  const none = { credit: 0, stop: 0, stopTotal: 0 };
+): { credit: number; creditedThreshold: number; creditedTotal: number } {
+  const none = { credit: 0, creditedThreshold: 0, creditedTotal: 0 };
   const futures = [...(ctx.futureBonuses ?? [])].sort(
     (a, b) => a.threshold - b.threshold
   );
   const eligible = (f: Future) =>
-    !f.belowGate &&
+    !f.belowNoise &&
     f.sameGearDps !== undefined &&
     f.sameGearDps > Math.max(floor, 2 * (f.sameGearSe ?? 0));
   const unmeasured = futures.some(
     (f) =>
-      (f.sameGearDps === undefined && !f.belowGate) ||
+      (f.sameGearDps === undefined && !f.belowNoise) ||
       (eligible(f) &&
-        (f.stepGearDps === undefined || f.partnerUnmeasured !== undefined))
+        (f.bonusGearDps === undefined || f.partnerUnmeasured !== undefined))
   );
   if (unmeasured || ctx.singleDeltaDps === undefined) return none;
   let best = none;
   for (const f of futures.filter(eligible)) {
-    const c = f.stepGearDps! - ctx.singleDeltaDps;
+    const c = f.bonusGearDps! - ctx.singleDeltaDps;
     if (c > best.credit)
-      best = { credit: c, stop: f.threshold, stopTotal: f.stepGearDps! };
+      best = {
+        credit: c,
+        creditedThreshold: f.threshold,
+        creditedTotal: f.bonusGearDps!,
+      };
   }
   return best;
 }
@@ -230,11 +239,11 @@ function ownFromRow(row: Row, setBonuses: SetBonus[]): number | undefined {
   return own;
 }
 
-// ON top 16 of the tab's view, printed at 4 decimals. Every file is a step
+// ON top 16 of the tab's view, printed at 4 decimals. Every file is a bonus-gear
 // ranking: each row's credit is the one check 3s compares with
-// `referenceStep`, written from the step rule, so this list pins the order
+// `referenceBonusGear`, written from the bonus-gear rule, so this list pins the order
 // and sums that check already holds row by row. No ret row gets Set
-// potential (no ret bonus clears its same-gear gate and the screen drops
+// potential (no ret bonus clears its same-gear check and the screen drops
 // Justicar), so ret's figures are its rows' deltaDps. Shadowmaster's Boots
 // and Bindings of Lightning Reflexes are outside ret's paired-replicate top 8
 // (PAIRED_REPLICATE_TOP_N), where two arena weapons sit, so they show their
@@ -278,9 +287,9 @@ const PINNED_ON_TOP16: Record<string, Array<[string, number]>> = {
   ],
 };
 
-// Identity rows are counted on rankings without the step rule only. A step
+// Identity rows are counted on rankings without the bonus-gear rule only. A bonus-gear
 // ranking (every file here) checks its credited
-// rows against their stop gear's sim in check 4s instead.
+// rows against their credited gear's sim in check 4s instead.
 const FIXTURES: Array<{ name: string; identityRows: number }> = [
   { name: "feral-p3-nordrassil4", identityRows: 0 },
   { name: "feral-p3-p2bis", identityRows: 0 },
@@ -297,10 +306,10 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
       const { setBonusNoiseFloorDps } =
         await importForkUpgrades<CutoffMod>("engine/cutoff.ts");
       const ranking = load(name);
-      // A step ranking's same-gear value is one sim minus another, so its
-      // gate floor is the item bar; a flag-off bonus folds four sims and gets
+      // A bonus-gear ranking's same-gear value is one sim minus another, so its
+      // check floor is the item bar; a flag-off bonus folds four sims and gets
       // the √2 floor (ticket 623).
-      const stepFloor = ranking.cutoff.absDps;
+      const bonusGearFloor = ranking.cutoff.absDps;
       const fourSimFloor = setBonusNoiseFloorDps(ranking.cutoff);
       const setBonuses = ranking.setBonuses ?? [];
       const byId = new Map(ranking.items.map((r) => [r.itemId, r]));
@@ -310,19 +319,22 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
         const ctx = row.setContext;
         const where = `${name} row ${row.itemId} ${row.name}`;
 
-        if (ctx?.stepRanking) {
-          // 3s. the shipped credit equals the step rule's reference walk
-          const ref = referenceStep(ctx, stepFloor);
+        if (ctx?.bonusGearMeasured) {
+          // 3s. the shipped credit equals the bonus-gear rule's reference walk
+          const ref = referenceBonusGear(ctx, bonusGearFloor);
           const credit = view.rankableSetPotential(row, ranking.cutoff, "full");
           expect(Math.abs(credit - ref.credit), `${where} credit`).toBeLessThan(
             1e-9
           );
           // 4s. a credited row that replication did not rewrite shows the sim
-          // of its stop gear
-          if (ref.stop !== 0 && row.seMethod !== "paired-replicate") {
+          // of its credited gear
+          if (
+            ref.creditedThreshold !== 0 &&
+            row.seMethod !== "paired-replicate"
+          ) {
             expect(
-              Math.abs(row.deltaDps + credit - ref.stopTotal),
-              `${where} stop gear`
+              Math.abs(row.deltaDps + credit - ref.creditedTotal),
+              `${where} credited gear`
             ).toBeLessThanOrEqual(1e-6);
           }
           continue;
@@ -363,12 +375,12 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
           expect(Math.abs(sum - credit), `${where} terms`).toBeLessThan(1e-9);
         }
 
-        // 4. a row whose stop path is a measured package shows its delta
-        if (ref.stop === 0 || !ctx) continue;
+        // 4. a row whose credited path is a measured package shows its delta
+        if (ref.creditedThreshold === 0 || !ctx) continue;
         const pkg = setBonuses.find(
           (b) =>
             b.setId === ctx.setId &&
-            b.threshold === ref.stop &&
+            b.threshold === ref.creditedThreshold &&
             b.unmeasured === undefined &&
             b.packageItemIds.includes(row.itemId)
         );

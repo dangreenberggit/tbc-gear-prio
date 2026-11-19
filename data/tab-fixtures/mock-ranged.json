@@ -361,7 +361,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "bonusGearMeasured": true,
           "singleDeltaDps": 18.66,
           "singleBreaks": [
             {
@@ -385,8 +385,8 @@
                   "name": "Beast Lord Mantle"
                 }
               ],
-              "stepGearDps": 31.16,
-              "stepGearSe": 2
+              "bonusGearDps": 31.16,
+              "bonusGearSe": 2
             },
             {
               "threshold": 4,
@@ -417,8 +417,8 @@
                   "dps": 14.5
                 }
               ],
-              "stepGearDps": 37.16,
-              "stepGearSe": 2
+              "bonusGearDps": 37.16,
+              "bonusGearSe": 2
             }
           ]
         }

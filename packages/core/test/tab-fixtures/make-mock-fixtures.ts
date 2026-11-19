@@ -10,7 +10,7 @@
  *
  * The figures are made up. The rows are real: every row is an (item id, slot)
  * pair read from the spec's own preset gear files, so icons and quality
- * colours resolve, and the gear is a copy of one preset file. Item names come
+ * colors resolve, and the gear is a copy of one preset file. Item names come
  * from the fork's item database. The set rows are swaps the game allows on that
  * gear: the piece counts come from the gear, and the bonus counts from the
  * fork's Go set definitions. The output is deterministic.
@@ -77,8 +77,8 @@ type MockFuture = {
   partnerRule: "close-calls";
   pieces: Array<{ itemId: number; name: string }>;
   breaks?: SetBreak[];
-  stepGearDps: number;
-  stepGearSe: number;
+  bonusGearDps: number;
+  bonusGearSe: number;
 };
 
 type MockSetContext = {
@@ -88,7 +88,7 @@ type MockSetContext = {
   piecesAfterSwap: number;
   nextThreshold: number | null;
   crossesThreshold: boolean;
-  stepRanking: true;
+  bonusGearMeasured: true;
   singleDeltaDps: number;
   singleBreaks?: SetBreak[];
   futureBonuses?: MockFuture[];
@@ -807,7 +807,7 @@ class Builder {
         piecesAfterSwap: after,
         nextThreshold: counts.find((t) => t > after) ?? null,
         crossesThreshold: crosses,
-        stepRanking: true,
+        bonusGearMeasured: true,
         singleDeltaDps: deltaDps,
         ...(singleBreaks.length > 0 ? { singleBreaks } : {}),
         ...(futures.length > 0
@@ -821,8 +821,8 @@ class Builder {
                 partnerRule: "close-calls" as const,
                 pieces: f.pieces,
                 ...(f.breaks.length > 0 ? { breaks: f.breaks } : {}),
-                stepGearDps: round2(deltaDps + 12.5 + 6 * f.k),
-                stepGearSe: 2,
+                bonusGearDps: round2(deltaDps + 12.5 + 6 * f.k),
+                bonusGearSe: 2,
               })),
             }
           : {}),

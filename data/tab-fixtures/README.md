@@ -3,7 +3,7 @@
 Each `*.json` file here is a made-up Upgrades-tab result. The tab renders it
 in seconds with no backend and no sim run (ticket 504). The figures are made
 up and mean nothing; the rows are real items from the spec's own preset gear
-files, so icons and quality colours resolve. Each file loads on one spec
+files, so icons and quality colors resolve. Each file loads on one spec
 page, and every spec page the tab ranks has at least one, so the page checks
 below reach every page (ticket 801). A file whose row in the table names a UI
 difference also covers that difference, on a page that has it; a file whose
@@ -44,8 +44,8 @@ The set-bonus rows are swaps the game allows on the file's gear: a row breaks
 only a bonus that is active, from a slot that holds a piece of that set; its
 piece counts are the gear's; and it crosses or reaches only a count at which
 its set has a bonus. The generator reads those counts from the fork's Go set
-definitions (`sim/**/*.go`). Every set row is marked as a step ranking, as on
-a real run, and a row that more pieces of its set would take to a bonus lists
+definitions (`sim/**/*.go`). Every set row is marked as valued on its bonus
+gear (`bonusGearMeasured`), as on a real run, and a row that more pieces of its set would take to a bonus lists
 that bonus, so the popover shows the bonuses a row can reach.
 `mock-set-bonus` is on the warrior page because no feral preset wears a set
 one piece short of a bonus, and a crossing row needs that.

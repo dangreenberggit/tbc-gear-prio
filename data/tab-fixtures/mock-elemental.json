@@ -481,7 +481,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 3,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "bonusGearMeasured": true,
           "singleDeltaDps": 3.5,
           "singleBreaks": [
             {
@@ -509,8 +509,8 @@
                   "name": "Netherstrike Bracers"
                 }
               ],
-              "stepGearDps": 16,
-              "stepGearSe": 2
+              "bonusGearDps": 16,
+              "bonusGearSe": 2
             }
           ]
         }
