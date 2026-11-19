@@ -1989,7 +1989,7 @@ function multisetMinus(a: readonly number[], b: readonly number[]): number[] {
   return out;
 }
 
-/** The received requests that are the screen's top (set-kept) and bottom (set-less) rungs. */
+/** The received requests that are the screen's top (set-kept) and bottom (set-less) count sims. */
 function brVersions(requests: readonly RaidSimRequest[]) {
   const all = requests.map(requestItems);
   const kept = all.filter(

@@ -458,15 +458,15 @@ type ForkRanking = {
   partnerAudit?: Array<{
     itemId: number;
     setId: number;
-    count: number;
+    threshold: number;
     audit: {
-      sets: Array<{
+      combinations: Array<{
         itemIds: number[];
-        totalDps: number | null;
-        estimateZ: number | null;
-        estimateZ0: number | null;
+        deltaDps: number | null;
+        estimate: number | null;
+        plainEstimate: number | null;
       }>;
-      chosen: { itemIds: number[]; totalDps: number };
+      chosen: { itemIds: number[]; deltaDps: number };
     };
   }>;
   setBonuses?: Array<{
@@ -501,14 +501,14 @@ type ForkRanking = {
     mode: string;
     seed: number;
     pairIterations: number[];
-    ladderIterations: number[];
+    countIterations: number[];
     sets: Array<{
       setId: number;
       worn: number;
       reach: number;
       packageItemIds: number[];
       pairs: Array<{ iterations: number; dps?: number; pairedSe?: number }>;
-      rungs: Array<{
+      countSims: Array<{
         iterations: number;
         count: number;
         dps?: number;
@@ -2690,8 +2690,8 @@ const CRYPTSTALKER = {
   feet: 22440,
 } as const;
 
-/** One worn set's ladder as [count, rounded dps, counted]. */
-const ladderOf = (ranking: ForkRanking, setId: number) =>
+/** One worn set's counts as [count, rounded dps, counted]. */
+const wornSetCountsOf = (ranking: ForkRanking, setId: number) =>
   (ranking.wornSetLadder ?? [])
     .filter((e) => e.setId === setId)
     .map((e) => [
@@ -2739,7 +2739,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
       measureSetBonuses: true,
     });
     expect(near(r.baseline.dps, 3050, 0.5)).toBe(true);
-    expect(ladderOf(r, 659)).toEqual([
+    expect(wornSetCountsOf(r, 659)).toEqual([
       [2, 30, true],
       [3, 0, false],
       [4, 20, true],
@@ -2822,7 +2822,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
       measureSetBonuses: true,
     });
     expect(near(r.baseline.dps, 3025, 0.5)).toBe(true);
-    expect(ladderOf(r, 619)).toEqual([
+    expect(wornSetCountsOf(r, 619)).toEqual([
       [2, 0, false],
       [3, 25, true],
     ]);
@@ -2847,7 +2847,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
       pool: TH_OVER_MALORNE_POOL,
       measureSetBonuses: true,
     });
-    expect(ladderOf(five.ranking, 640)).toEqual([
+    expect(wornSetCountsOf(five.ranking, 640)).toEqual([
       [2, 40, true],
       [3, 0, false],
       [4, 70, true],
@@ -2877,7 +2877,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
       setBonuses: { ...SET_BONUSES, 659: { b2: 30, b4: 20 } },
       measureSetBonuses: true,
     });
-    expect(ladderOf(three.ranking, 659)).toEqual([
+    expect(wornSetCountsOf(three.ranking, 659)).toEqual([
       [2, 30, true],
       [3, 0, false],
     ]);
@@ -2891,7 +2891,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
       pool: [{ itemId: THUNDERHEART.chest, slot: "chest" }],
       measureSetBonuses: true,
     });
-    expect(ladderOf(none.ranking, 619)).toEqual([
+    expect(wornSetCountsOf(none.ranking, 619)).toEqual([
       [2, 0, false],
       [3, 0, false],
     ]);
@@ -2921,7 +2921,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
     // The gloves are the second piece in slot order, so the ladder changes
     // their set membership; they are a copy in both rungs, so the 15 is in
     // neither. A rung with the real gloves would read 55.
-    expect(ladderOf(r, 586)).toEqual([[2, 40, true]]);
+    expect(wornSetCountsOf(r, 586)).toEqual([[2, 40, true]]);
     expect(near(bsvDps(r, 586, 2)!, 40, 0.5)).toBe(true);
     const chest = thRow(r, THUNDERHEART.chest);
     expect(near(chest.deltaDps, 60, 0.5)).toBe(true);
@@ -2957,7 +2957,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
       measureSetBonuses: true,
     });
     expect(near(r.baseline.dps, 3100, 0.5)).toBe(true);
-    expect(ladderOf(r, 530)).toEqual([
+    expect(wornSetCountsOf(r, 530)).toEqual([
       [2, 10, true],
       [3, 0, false],
       [4, 20, true],
@@ -2991,7 +2991,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
  * flag, the gain side tries every count the pool reaches with no list, the
  * gate runs before the package sim, and a row is credited from the sim of
  * its stop gear: the current gear plus the row plus the partner pieces
- * `choosePartnerSet` picks. Each case stands for a kind of situation; its
+ * `choosePartners` picks. Each case stands for a kind of situation; its
  * set is the example. Every literal is derived by hand in
  * docs/set-bonus-fixture-derivations.md, "Ticket 511: set rows valued by
  * simmed gear".
@@ -3708,17 +3708,20 @@ describe.skipIf(!forkPresent)(
       // One entry per row and eligible bonus: four rows, counts 2 and 4.
       expect(audit).toHaveLength(8);
       for (const entry of audit) {
-        expect(entry.audit.sets).toHaveLength(entry.count === 2 ? 3 : 1);
-        for (const set of entry.audit.sets) expect(set.totalDps).not.toBeNull();
+        expect(entry.audit.combinations).toHaveLength(
+          entry.threshold === 2 ? 3 : 1
+        );
+        for (const combination of entry.audit.combinations)
+          expect(combination.deltaDps).not.toBeNull();
       }
       const p2 = audit.find(
-        (e) => e.itemId === THUNDERHEART.shoulder && e.count === 2
+        (e) => e.itemId === THUNDERHEART.shoulder && e.threshold === 2
       )!;
       // Each partner's total over 3090: Chestguard 3070, Gauntlets 3064,
       // Leggings 3046 (Malorne chest kept in the last two); Z's estimates
       // −82 + d_p, plus 90 back for the shared Malorne loss.
       expect(
-        p2.audit.sets.map((s) => [s.itemIds[0], s.totalDps, s.estimateZ])
+        p2.audit.combinations.map((s) => [s.itemIds[0], s.deltaDps, s.estimate])
       ).toEqual([
         [THUNDERHEART.chest, -20, -70],
         [THUNDERHEART.hands, -26, -76],
@@ -3826,7 +3829,7 @@ describe.skipIf(!forkPresent)(
 
     it("511-A3R: two set rings key to one slot, so their 2pc is out of reach (known limit d)", async () => {
       // Scenario kind: a set with two pieces of a two-slot item type (rings,
-      // trinkets, one-hand weapons). `selectPackage` keys each candidate to
+      // trinkets, one-hand weapons). `selectAddedPieces` keys each candidate to
       // its first sim slot (C138), so both rings fight over finger1 and the
       // set never reaches 2. Example: Zanzil's Concentration 462 (19893 and
       // 19905), model 2pc 40. This pins today's limit; ADR-0035 records it.
@@ -3879,7 +3882,7 @@ const SR_SCENARIO: Scenario = {
 };
 
 const SCREEN_PAIR_N = [10, 100, 300, 1000];
-const SCREEN_LADDER_N = [100, 300, 1000];
+const SCREEN_COUNT_N = [100, 300, 1000];
 
 /** Everything the screen must leave alone, from one run. */
 async function screenFreeParts(ranking: ForkRanking) {
@@ -3960,7 +3963,7 @@ describe.skipIf(!forkPresent)(
       expect(screen.mode).toBe("record");
       expect(screen.seed).toBe(11);
       expect(screen.pairIterations).toEqual(SCREEN_PAIR_N);
-      expect(screen.ladderIterations).toEqual(SCREEN_LADDER_N);
+      expect(screen.countIterations).toEqual(SCREEN_COUNT_N);
       expect(
         screen.sets.map((s) => [s.setId, s.worn, s.reach, s.packageItemIds])
       ).toEqual([
@@ -3978,17 +3981,22 @@ describe.skipIf(!forkPresent)(
       );
       // Rungs at counts 1 … 4: 3000 + four pieces' 400, plus the bonuses on.
       expect(
-        set.rungs.map((r) => [r.iterations, r.count, r.dps, r.pairedSeToPrev])
+        set.countSims.map((r) => [
+          r.iterations,
+          r.count,
+          r.dps,
+          r.pairedSeToPrev,
+        ])
       ).toEqual(
-        SCREEN_LADDER_N.flatMap((n) => [
+        SCREEN_COUNT_N.flatMap((n) => [
           [n, 1, 3400, undefined],
           [n, 2, 3450, 0],
           [n, 3, 3450, 0],
           [n, 4, 3530, 0],
         ])
       );
-      for (const rung of set.rungs) {
-        expect(rung.se).toBeCloseTo(30 / Math.sqrt(rung.iterations), 9);
+      for (const countSim of set.countSims) {
+        expect(countSim.se).toBeCloseTo(30 / Math.sqrt(countSim.iterations), 9);
       }
       // 8 + 3·(R − w − 1) sims; the ladder's rungs 1 and 4 at each of its
       // three counts come from the store.
@@ -4027,7 +4035,7 @@ describe.skipIf(!forkPresent)(
       expect(set.pairs.map((p) => [p.iterations, p.dps])).toEqual(
         SCREEN_PAIR_N.map((n) => [n, 0])
       );
-      expect(new Set(set.rungs.map((rung) => rung.dps))).toEqual(
+      expect(new Set(set.countSims.map((countSim) => countSim.dps))).toEqual(
         new Set([2897])
       );
       expect(screen.simmed).toBe(8 + 3 * (4 - 0 - 1));
@@ -4053,12 +4061,12 @@ describe.skipIf(!forkPresent)(
       const set = on.ranking.setScreen!.sets[0]!;
       // W-SR3: only that rung's reading is lost; its two paired errors need it.
       expect(
-        set.rungs
+        set.countSims
           .filter((r) => r.dps === undefined)
           .map((r) => [r.iterations, r.count, r.se])
       ).toEqual([[300, 2, undefined]]);
       expect(
-        set.rungs
+        set.countSims
           .filter((r) => r.count > 1 && r.pairedSeToPrev === undefined)
           .map((r) => [r.iterations, r.count])
       ).toEqual([
@@ -5449,7 +5457,7 @@ describe.skipIf(!forkPresent)("Stop after the candidate loop (533)", () => {
     );
     const rankings = fulls.map((f) => f.ranking);
     const kinds = {
-      "worn-set ladder": rankings.some((r) =>
+      "worn-set counts": rankings.some((r) =>
         (r.wornSetLadder ?? []).some((e) => e.dps !== undefined)
       ),
       "set screen": fulls.some((f) =>
@@ -5473,7 +5481,7 @@ describe.skipIf(!forkPresent)("Stop after the candidate loop (533)", () => {
       ),
     };
     expect(kinds).toEqual({
-      "worn-set ladder": true,
+      "worn-set counts": true,
       "set screen": true,
       "same-gear gate": true,
       "package sim": true,
@@ -5532,7 +5540,7 @@ type SwapBreak = {
   dps?: number;
 };
 type SwapBreaksMod = {
-  singleSwapBreaks: (
+  ownSwapBreaks: (
     row: Record<string, unknown>,
     brokenSetValues: readonly Record<string, unknown>[] | undefined,
     wornItemIds: readonly number[] | undefined,
@@ -5558,18 +5566,18 @@ describe.skipIf(!forkPresent)(
     const LEGGINGS_29995 = { itemId: 29995, slot: "legs" };
 
     it("536-A: a non-set legs swap over four Malorne pieces breaks the 4pc", async () => {
-      const { singleSwapBreaks } = await view();
+      const { ownSwapBreaks } = await view();
       expect(
-        singleSwapBreaks(LEGGINGS_29995, MALORNE_4_VALUES, MALORNE_4, "feral")
+        ownSwapBreaks(LEGGINGS_29995, MALORNE_4_VALUES, MALORNE_4, "feral")
       ).toEqual([
         { setId: 640, setName: "Malorne Harness", threshold: 4, dps: 23 },
       ]);
     });
 
     it("536-B: a row with a setContext keeps the engine's own singleBreaks", async () => {
-      const { singleSwapBreaks } = await view();
+      const { ownSwapBreaks } = await view();
       expect(
-        singleSwapBreaks(
+        ownSwapBreaks(
           { ...LEGGINGS_29995, setContext: {} },
           MALORNE_4_VALUES,
           MALORNE_4,
@@ -5579,9 +5587,9 @@ describe.skipIf(!forkPresent)(
     });
 
     it("536-C: a two-hander that clears the off hand counts the removed piece", async () => {
-      const { singleSwapBreaks } = await view();
+      const { ownSwapBreaks } = await view();
       expect(
-        singleSwapBreaks(
+        ownSwapBreaks(
           {
             itemId: 1263,
             slot: "weapon",
@@ -5604,9 +5612,9 @@ describe.skipIf(!forkPresent)(
     });
 
     it("536-D: a ring goes where the engine put it (slotChoice)", async () => {
-      const { singleSwapBreaks } = await view();
+      const { ownSwapBreaks } = await view();
       expect(
-        singleSwapBreaks(
+        ownSwapBreaks(
           { itemId: 11980, slot: "finger", slotChoice: "finger2" },
           [
             {
@@ -5630,9 +5638,9 @@ describe.skipIf(!forkPresent)(
     });
 
     it("536-E: with no slotChoice, the slot follows the spec and the item's hand", async () => {
-      const { singleSwapBreaks } = await view();
+      const { ownSwapBreaks } = await view();
       expect(
-        singleSwapBreaks(
+        ownSwapBreaks(
           { itemId: 18392, slot: "weapon" },
           [
             {
@@ -5653,9 +5661,9 @@ describe.skipIf(!forkPresent)(
     const SHOULDERPADS_30055 = { itemId: 30055, slot: "shoulder" };
 
     it("536-F: a lost count with no brokenSetValues entry was never active, so it is no break", async () => {
-      const { singleSwapBreaks } = await view();
+      const { ownSwapBreaks } = await view();
       expect(
-        singleSwapBreaks(
+        ownSwapBreaks(
           SHOULDERPADS_30055,
           [{ setId: 640, setName: "Malorne Harness", threshold: 2, dps: 84 }],
           idsOf({
@@ -5669,9 +5677,9 @@ describe.skipIf(!forkPresent)(
     });
 
     it("536-G: one worn piece going to none breaks nothing", async () => {
-      const { singleSwapBreaks } = await view();
+      const { ownSwapBreaks } = await view();
       expect(
-        singleSwapBreaks(
+        ownSwapBreaks(
           SHOULDERPADS_30055,
           [
             {
@@ -5688,8 +5696,8 @@ describe.skipIf(!forkPresent)(
     });
 
     it("536-H: an unmeasured break is listed with no dps", async () => {
-      const { singleSwapBreaks } = await view();
-      const breaks = singleSwapBreaks(
+      const { ownSwapBreaks } = await view();
+      const breaks = ownSwapBreaks(
         SHOULDERPADS_30055,
         [
           {
@@ -5709,9 +5717,9 @@ describe.skipIf(!forkPresent)(
     });
 
     it("536-I: a piece of another set breaks the worn set and not its own", async () => {
-      const { singleSwapBreaks } = await view();
+      const { ownSwapBreaks } = await view();
       expect(
-        singleSwapBreaks(
+        ownSwapBreaks(
           { itemId: NORDRASSIL.shoulder, slot: "shoulder" },
           [{ setId: 640, setName: "Malorne Harness", threshold: 2, dps: 84 }],
           idsOf({ shoulder: MALORNE.shoulder, chest: MALORNE.chest }),
@@ -5723,8 +5731,8 @@ describe.skipIf(!forkPresent)(
     });
 
     it("536-J: an owned row, an unsimmed row, or missing inputs give no breaks", async () => {
-      const { singleSwapBreaks } = await view();
-      const cases: Record<string, Parameters<typeof singleSwapBreaks>> = {
+      const { ownSwapBreaks } = await view();
+      const cases: Record<string, Parameters<typeof ownSwapBreaks>> = {
         owned: [
           { ...LEGGINGS_29995, owned: true },
           MALORNE_4_VALUES,
@@ -5747,7 +5755,7 @@ describe.skipIf(!forkPresent)(
         ],
       };
       const got = Object.fromEntries(
-        Object.entries(cases).map(([k, args]) => [k, singleSwapBreaks(...args)])
+        Object.entries(cases).map(([k, args]) => [k, ownSwapBreaks(...args)])
       );
       expect(got).toEqual({
         owned: [],
@@ -5759,9 +5767,9 @@ describe.skipIf(!forkPresent)(
     });
 
     it("536-K: a two-hander that breaks two sets lists both, by set id", async () => {
-      const { singleSwapBreaks } = await view();
+      const { ownSwapBreaks } = await view();
       expect(
-        singleSwapBreaks(
+        ownSwapBreaks(
           {
             itemId: 1263,
             slot: "weapon",

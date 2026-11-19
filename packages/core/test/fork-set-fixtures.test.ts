@@ -443,7 +443,7 @@ type FixtureFile = {
   };
 };
 type SwapBreaksMod = {
-  singleSwapBreaks: (
+  ownSwapBreaks: (
     row: Record<string, unknown>,
     brokenSetValues: Break[] | undefined,
     wornItemIds: readonly number[] | undefined,
@@ -467,7 +467,7 @@ const byNameThenCount = (a: [string, number], b: [string, number]) =>
 
 describe.skipIf(!forkPresent)("own-swap breaks on tab fixtures (536)", () => {
   it("536-X: the render-time rule reproduces the engine's breaks on every fixture row", async () => {
-    const { singleSwapBreaks } =
+    const { ownSwapBreaks } =
       await importForkUpgrades<SwapBreaksMod>("engine/view.ts");
     const { SIM_ORDER } = await importForkUpgrades<SlotsMod>("engine/slots.ts");
 
@@ -483,7 +483,7 @@ describe.skipIf(!forkPresent)("own-swap breaks on tab fixtures (536)", () => {
       for (const row of ranking.items) {
         const where = `${name} row ${row.itemId} ${row.name}`;
         if (row.setContext) {
-          const got = singleSwapBreaks(
+          const got = ownSwapBreaks(
             { ...row, setContext: undefined },
             ranking.brokenSetValues,
             wornItemIds,
@@ -494,7 +494,7 @@ describe.skipIf(!forkPresent)("own-swap breaks on tab fixtures (536)", () => {
           if (want.length > 0) setRows += 1;
           continue;
         }
-        const got = singleSwapBreaks(
+        const got = ownSwapBreaks(
           row,
           ranking.brokenSetValues,
           wornItemIds,
@@ -522,7 +522,7 @@ describe.skipIf(!forkPresent)("own-swap breaks on tab fixtures (536)", () => {
       if (name === "feral-p2-malorne4") {
         const row = ranking.items.find((r) => r.itemId === 29995)!;
         expect(
-          singleSwapBreaks(row, ranking.brokenSetValues, wornItemIds, spec)
+          ownSwapBreaks(row, ranking.brokenSetValues, wornItemIds, spec)
         ).toEqual([
           {
             setId: 640,
