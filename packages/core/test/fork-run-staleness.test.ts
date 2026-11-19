@@ -4,7 +4,7 @@
  * while the run is in flight leaves the result measured on old inputs.
  *
  * The React tab keeps no tracker object. A run records `inputsSignature` (built
- * from `liveInputsKey` and the settings, `model/run_inputs.ts`) in its
+ * from `pageInputsSignature` and the settings, `model/run_inputs.ts`) in its
  * `measuredOn` when it starts; `selectSettledSignature` (`model/upgrades_store.ts`)
  * reads it back once the run is done or stopped; and `useRunStale` calls the
  * result stale when the signature built from the page now differs. These tests
@@ -97,12 +97,12 @@ describe.skipIf(!forkPresent)("Upgrades run staleness", () => {
     settledSignature = upgradesStore.selectSettledSignature;
     createStore = upgradesStore.createUpgradesStore;
 
-    const { inputsSignature, liveInputsKey } = await importForkUpgrades<{
+    const { inputsSignature, pageInputsSignature } = await importForkUpgrades<{
       inputsSignature(input: {
         liveKey: string;
         settings: RunSettings;
       }): string;
-      liveInputsKey(sim: LiveInputsSource): string;
+      pageInputsSignature(sim: LiveInputsSource): string;
     }>("run_inputs.ts");
     const { Raid } = await importProto<{ Raid: ProtoMessage }>("api.ts");
     const { Encounter } = await importProto<{ Encounter: ProtoMessage }>(
@@ -112,7 +112,7 @@ describe.skipIf(!forkPresent)("Upgrades run staleness", () => {
     // "an input changed" here is the phase selector moving.
     signatureAtPhase = (phase) =>
       inputsSignature({
-        liveKey: liveInputsKey({
+        liveKey: pageInputsSignature({
           raid: { toProto: () => Raid.create() },
           encounter: { toProto: () => Encounter.create({ duration: 180 }) },
           getPhase: () => phase,

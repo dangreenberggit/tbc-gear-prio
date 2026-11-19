@@ -360,8 +360,8 @@ type Scenario = {
   failStack?: (call: number) => string;
   /** `Deps.partnerRule` (ticket 511); absent means the engine's default. */
   partnerRule?: string;
-  /** `Deps.setScreen` (ticket 511, K5R); absent means off. */
-  setScreen?: string;
+  /** `Deps.setScreenMode` (ticket 511, K5R); absent means off. */
+  setScreenMode?: string;
   /** A store shared between runs, to see what the ranking cache serves. */
   store?: Record<string, unknown>;
   /** The 0-based fake sim call during which the run's Stop fires (ticket 533). */
@@ -689,7 +689,9 @@ async function runScenario(scenario: Scenario): Promise<{
     pool,
     ...(scenario.measureSetBonuses ? { measureSetBonuses: true } : {}),
     ...(scenario.partnerRule ? { partnerRule: scenario.partnerRule } : {}),
-    ...(scenario.setScreen ? { setScreen: scenario.setScreen } : {}),
+    ...(scenario.setScreenMode
+      ? { setScreenMode: scenario.setScreenMode }
+      : {}),
     ...(controller ? { signal: controller.signal } : {}),
     ...(scenario.databaseWithout ||
     scenario.databaseOmits ||
@@ -1342,7 +1344,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     // A model, not the formula: a 4pc package worth 60, whose 2pc package's
     // end state breaks a worn bonus worth 40 that the 4pc package's end state
     // keeps, and no member single breaks it. The pieces' own stats are 500
-    // and the 2pc bonus is 30. `computeSynergy` gives pkgΔ − Σsingles − raw2pc.
+    // and the 2pc bonus is 30. `computeBonusDps` gives pkgΔ − Σsingles − raw2pc.
     // The 2pc package's Δ is its pieces' stats plus 30 minus the 40 its end
     // state breaks, so its raw synergy over its singles is 30 − 40.
     const pieces = 500;
@@ -1510,7 +1512,7 @@ const setPool = (set: Readonly<Partial<Record<PoolSpec["slot"], number>>>) =>
     ([slot, itemId]) => ({ itemId, slot })
   );
 
-async function run490(setBonuses?: SetBonusTable) {
+async function runMalorneOverThunderheart2pc(setBonuses?: SetBonusTable) {
   return runOffOn({
     worn: TH_HANDS_LEGS,
     pool: [...setPool(MALORNE), ...NEUTRAL_HANDS_LEGS],
@@ -1524,7 +1526,7 @@ const TH2_BREAK = { setId: 676, threshold: 2, dps: 50 };
 describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
   it("490-A: a Malorne head/shoulder/chest row is not charged the Thunderheart 2pc its 2pc does not need", async () => {
     const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
-    const { off, on } = await run490({
+    const { off, on } = await runMalorneOverThunderheart2pc({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 0 },
     });
@@ -1598,7 +1600,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
 
   it("490-B: a real 4pc worth less than the break it needs", async () => {
     const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
-    const { on } = await run490({
+    const { on } = await runMalorneOverThunderheart2pc({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 30 },
     });
@@ -2081,7 +2083,7 @@ const piece = (itemId: number, name: string, dps?: number) => ({
 describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
   it("502-A: a package member's ON figure equals the measured package delta", async () => {
     const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
-    const { on } = await run490({
+    const { on } = await runMalorneOverThunderheart2pc({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 30 },
     });
@@ -2328,7 +2330,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
 
   it("502-F: with Set potential off, set rows sort on deltaDps alone", async () => {
     const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
-    const { on } = await run490({
+    const { on } = await runMalorneOverThunderheart2pc({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 30 },
     });
@@ -2347,7 +2349,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
     // worth 2, below the 3 DPS bar; it was 4 while the gate's floor was
     // √2 × 3 (ticket 623).
     const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
-    const { on } = await run490({
+    const { on } = await runMalorneOverThunderheart2pc({
       676: { b2: 2, b4: B4_TH },
       640: { b2: 40, b4: 30 },
     });
@@ -3909,7 +3911,7 @@ describe.skipIf(!forkPresent)(
       // Scenario kind: a check run with the screen in record mode, on gear
       // that has a worn-set ladder, a crossing gate and a set to collect.
       const off = await runScenario(SR_SCENARIO);
-      const on = await runScenario({ ...SR_SCENARIO, setScreen: "record" });
+      const on = await runScenario({ ...SR_SCENARIO, setScreenMode: "record" });
       expect(off.ranking.setScreen).toBeUndefined();
       expect(off.ranking.wornSetLadder?.length).toBeGreaterThan(0);
       expect(off.ranking.crossingGates?.length).toBeGreaterThan(0);
@@ -4022,7 +4024,7 @@ describe.skipIf(!forkPresent)(
         setBonuses: { ...SET_BONUSES, 626: { b2: 0, b4: 0 } },
         interactions: [{ ids: Object.values(JUSTICAR), dps: 17 }],
         measureSetBonuses: true,
-        setScreen: "record",
+        setScreenMode: "record",
         reportsSetBonuses: true,
       });
       const screen = r.setScreen!;
@@ -4048,7 +4050,7 @@ describe.skipIf(!forkPresent)(
       const off = await runScenario(SR_SCENARIO);
       const on = await runScenario({
         ...SR_SCENARIO,
-        setScreen: "record",
+        setScreenMode: "record",
         failWhen: (ids, opts) =>
           opts.saveAllValues === true &&
           opts.iterations === 300 &&
@@ -4524,7 +4526,7 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
     // Thunderheart (w = 1, R = 4, 2pc 50, 4pc 80).
     const view = await stepView();
     const off = await runScenario(SN_SCENARIO);
-    const on = await runScenario({ ...SN_SCENARIO, setScreen: "on" });
+    const on = await runScenario({ ...SN_SCENARIO, setScreenMode: "on" });
     const screen = onScreenOf(on.ranking)!;
     expectOnModeSims(on, 2);
     expect(screen.sigma).toBeCloseTo(SIGMA_FAKE, 9);
@@ -4603,7 +4605,7 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
   it("511-SB: a close third set survives in the band; the fourth does not", async () => {
     // Scenario kind: three sets with real bonuses whose best cases are
     // close (like C5's 617). Example: SB_SCENARIO; band 3.464102.
-    const on = await runScenario({ ...SB_SCENARIO, setScreen: "on" });
+    const on = await runScenario({ ...SB_SCENARIO, setScreenMode: "on" });
     const screen = onScreenOf(on.ranking)!;
     expectOnModeSims(on, 4);
     expect(screen.sigma).toBeCloseTo(2.44949, 6);
@@ -4637,7 +4639,7 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
     // clears, so its rows keep a crossing line (GON-2).
     const view = await stepView();
     const off = await runScenario(SD_SCENARIO);
-    const on = await runScenario({ ...SD_SCENARIO, setScreen: "on" });
+    const on = await runScenario({ ...SD_SCENARIO, setScreenMode: "on" });
     const screen = onScreenOf(on.ranking)!;
     expectOnModeSims(on, 3);
     expect(
@@ -4688,7 +4690,7 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
     const off = await runScenario(SR_SCENARIO);
     const on = await runScenario({
       ...SR_SCENARIO,
-      setScreen: "on",
+      setScreenMode: "on",
       failWhen: (ids, opts) =>
         opts.saveAllValues === true &&
         opts.iterations === 300 &&
@@ -4713,7 +4715,7 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
     // 2pc (so the ladder runs) and gives Thunderheart a crossing gate;
     // (b) 511-SR's gear, where every set survives.
     const offA = await runScenario(SN_SCENARIO);
-    const onA = await runScenario({ ...SN_SCENARIO, setScreen: "on" });
+    const onA = await runScenario({ ...SN_SCENARIO, setScreenMode: "on" });
     expect(offA.ranking.wornSetLadder?.length).toBeGreaterThan(0);
     expect(offA.ranking.crossingGates?.length).toBeGreaterThan(0);
     expect(onA.ranking.wornSetLadder).toEqual(offA.ranking.wornSetLadder);
@@ -4732,7 +4734,7 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
     expectOnModeSims(onA, 2);
 
     const offB = await runScenario(SR_SCENARIO);
-    const onB = await runScenario({ ...SR_SCENARIO, setScreen: "on" });
+    const onB = await runScenario({ ...SR_SCENARIO, setScreenMode: "on" });
     expect(verdictsOf(onScreenOf(onB.ranking))).toEqual([[676, true, "top-k"]]);
     expect(await screenFreeParts(onB.ranking)).toEqual(
       await screenFreeParts(offB.ranking)
@@ -4751,12 +4753,22 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
     expect(unset.ranking.setScreen).toBeUndefined();
     // "on" on the same store is not served the cached ranking: it sends only
     // its two screen sims and answers everything else from the store.
-    const on = await runScenario({ ...SR_SCENARIO, store, setScreen: "on" });
+    const on = await runScenario({
+      ...SR_SCENARIO,
+      store,
+      setScreenMode: "on",
+    });
     expect(on.ranking.contentHash).toContain('"setScreen":"on"');
     expect(onScreenOf(on.ranking)?.mode).toBe("on");
     expect(on.runCount).toBe(2);
-    const explicitOff = await runScenario({ ...SR_SCENARIO, setScreen: "off" });
-    const record = await runScenario({ ...SR_SCENARIO, setScreen: "record" });
+    const explicitOff = await runScenario({
+      ...SR_SCENARIO,
+      setScreenMode: "off",
+    });
+    const record = await runScenario({
+      ...SR_SCENARIO,
+      setScreenMode: "record",
+    });
     const hashes = new Set([
       on.ranking.contentHash,
       explicitOff.ranking.contentHash,
@@ -5317,14 +5329,14 @@ describe.skipIf(!forkPresent)(
  * ------------------------------------------------------------------ */
 
 const STOP_SCENARIOS: ReadonlyArray<readonly [string, Scenario]> = [
-  ["511-SR gear, screen on", { ...SR_SCENARIO, setScreen: "on" }],
+  ["511-SR gear, screen on", { ...SR_SCENARIO, setScreenMode: "on" }],
   [
     "492-F gear, flag and screen on",
     {
       worn: wornGear({ hands: THUNDERHEART.hands }),
       pool: TH_POOL.filter((p) => p.slot !== "hands"),
       measureSetBonuses: true,
-      setScreen: "on",
+      setScreenMode: "on",
       reportsSetBonuses: true,
     },
   ],
@@ -5413,7 +5425,7 @@ describe.skipIf(!forkPresent)("Stop after the candidate loop (533)", () => {
   it("533-R: a Stop during any replication sim sends no further sim and returns the last-candidate Stop result", async () => {
     const scenario: Scenario = {
       ...SR_SCENARIO,
-      setScreen: "on",
+      setScreenMode: "on",
       // At least ITERATIONS apart, or the seed guard refuses them (ticket 530).
       seeds: [11, 5011, 10011],
     };
@@ -5497,7 +5509,7 @@ describe.skipIf(!forkPresent)("Replicate seeds (530)", () => {
   it("530-D: with no seeds, the five replicates run at 11 + k × iterations", async () => {
     const run = await runScenario({
       ...SR_SCENARIO,
-      setScreen: "on",
+      setScreenMode: "on",
       seeds: "engine-default",
       iterations: 3000,
     });
@@ -5913,7 +5925,7 @@ function modelStepLines(opts: {
 describe.skipIf(!forkPresent)(
   "497: worn Thunderheart sweep, the printed 4pc lines",
   () => {
-    // Screen off: the scenarios send no `setScreen`, so every set is measured
+    // Screen off: the scenarios send no `setScreenMode`, so every set is measured
     // and the live run's Nordrassil drop (ADR-0035 band rule) is not
     // reproduced here; the live sweep examines that drop.
 
@@ -6195,7 +6207,7 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
           { itemId: THUNDERHEART.feet, slot: "feet" },
         ],
         measureSetBonuses: true,
-        setScreen: "on",
+        setScreenMode: "on",
         reportsSetBonuses: true,
       });
       expect(countsOf(ranking, 676)).toEqual(counts);
@@ -6320,7 +6332,7 @@ describe.skipIf(!forkPresent)("set requests that cannot be built (869)", () => {
     try {
       const { ranking } = await runScenario({
         ...noThunderheartRows,
-        setScreen: "on",
+        setScreenMode: "on",
       });
       const onSets = (
         ranking.setScreen as unknown as {

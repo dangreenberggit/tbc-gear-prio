@@ -42,7 +42,7 @@ import {
  * repair scores layouts (`meta-repair.ts` `valueModel`), and a version read of
  * 1e308 percent still repaired, so the test fakes the failure instead.
  * While `belowRemaining` is set, a repair whose hit budget is below it throws
- * the fork's own `MetaStepBudgetExceededError`; every other repair, and every
+ * the fork's own `MetaStepLimitExceededError`; every other repair, and every
  * other test, gets the real one.
  */
 const repairFault = vi.hoisted(() => ({
@@ -55,20 +55,20 @@ vi.mock(
   async (importOriginal) => {
     type Repair = (opts: { hitCap?: { remaining: number } }) => unknown;
     const real = await importOriginal<{
-      repairAndMinimize: Repair;
-      MetaStepBudgetExceededError: new (message: string) => Error;
+      repairMetaGems: Repair;
+      MetaStepLimitExceededError: new (message: string) => Error;
     }>();
-    const repairAndMinimize: Repair = (opts) => {
+    const repairMetaGems: Repair = (opts) => {
       const below = repairFault.belowRemaining;
       if (below !== undefined && (opts.hitCap?.remaining ?? 0) < below) {
         repairFault.fired += 1;
-        throw new real.MetaStepBudgetExceededError(
+        throw new real.MetaStepLimitExceededError(
           "meta repair exceeded step budget"
         );
       }
-      return real.repairAndMinimize(opts);
+      return real.repairMetaGems(opts);
     };
-    return { ...real, repairAndMinimize };
+    return { ...real, repairMetaGems };
   }
 );
 
@@ -234,16 +234,16 @@ type GemEntry = {
   quality: number;
 };
 type GemContext = {
-  readonly fillPalette: readonly GemEntry[];
+  readonly fillGems: readonly GemEntry[];
   readonly weights: Readonly<Record<string, number>>;
   readonly spec?: string;
-  readonly repairHitCap?: {
+  readonly repairHitBudget?: {
     readonly stat: number;
     readonly baselineRemaining: number;
     readonly baselineGearHit: number;
   };
 };
-type RepairSwap = {
+type GemRecolour = {
   itemId: number;
   itemIndex: number;
   socketIndex: number;
@@ -252,7 +252,7 @@ type RepairSwap = {
 };
 type SwapOutcome = {
   equipment: SimItemSpec[];
-  swaps: readonly RepairSwap[];
+  recolours: readonly GemRecolour[];
 };
 type FixtureRow = {
   itemId: number;
@@ -291,7 +291,7 @@ type Engine = {
   };
   cg: {
     gemContext: (
-      palette: readonly GemEntry[],
+      phaseGems: readonly GemEntry[],
       weights: Readonly<Record<string, number>>,
       spec?: string
     ) => GemContext;
@@ -319,7 +319,7 @@ type Engine = {
 type SocketedItem = { itemId: number; gems: number[] };
 type RepairLayout = {
   items: SocketedItem[];
-  changes: RepairSwap[];
+  recolours: GemRecolour[];
   value: number;
   work: number;
 };
@@ -328,18 +328,22 @@ type MetaRepairMod = {
   bestMinimalRepair: (opts: {
     items: readonly SocketedItem[];
     weights: Readonly<Record<string, number>>;
-    palette: readonly GemEntry[];
+    allowedGems: readonly GemEntry[];
     hitCap?: HitCapBudget;
     maxChanges: number;
     workLimit?: number;
   }) => RepairLayout | { overLimit: true; work: number } | undefined;
-  repairAndMinimize: (opts: {
+  repairMetaGems: (opts: {
     items: readonly SocketedItem[];
     epWeights: Readonly<Record<string, number>>;
-    palette: readonly GemEntry[];
+    allowedGems: readonly GemEntry[];
     hitCap?: HitCapBudget;
     workLimit?: number;
-  }) => { items: SocketedItem[]; metaAdjusted: boolean; swaps: RepairSwap[] };
+  }) => {
+    items: SocketedItem[];
+    metaAdjusted: boolean;
+    recolours: GemRecolour[];
+  };
 };
 type ColourCounts = { red: number; yellow: number; blue: number };
 type MetaMod = {
@@ -559,7 +563,7 @@ async function retCapped() {
   )!;
   const capped: GemContext = {
     ...gems,
-    repairHitCap: {
+    repairHitBudget: {
       stat: MELEE_HIT,
       baselineRemaining: budget.remaining,
       baselineGearHit: 52,
@@ -714,7 +718,7 @@ describe.skipIf(!forkPresent)("exact repair (535)", () => {
     const found = e.mr.bestMinimalRepair({
       items,
       weights: ctx.weights,
-      palette: ctx.fillPalette,
+      allowedGems: ctx.fillGems,
       maxChanges: 7,
     });
     const ms = performance.now() - t0;
@@ -725,10 +729,10 @@ describe.skipIf(!forkPresent)("exact repair (535)", () => {
 
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
-      const repaired = e.mr.repairAndMinimize({
+      const repaired = e.mr.repairMetaGems({
         items,
         epWeights: ctx.weights,
-        palette: ctx.fillPalette,
+        allowedGems: ctx.fillGems,
         workLimit: 1000,
       });
       expect(metaOf(e, repaired.items).status.kind).toBe("active");
@@ -937,7 +941,7 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
         fx.spec === "ret" ? budget.remaining : FERAL_CAP_RATING - gBase;
       const cappedFx: GemContext = {
         ...gemsFx,
-        repairHitCap: {
+        repairHitBudget: {
           stat: MELEE_HIT,
           baselineRemaining: rBase,
           baselineGearHit: gBase,
@@ -975,7 +979,7 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
             const opts = {
               items: pre.socketed,
               weights: gemsFx.weights,
-              palette: gemsFx.fillPalette,
+              allowedGems: gemsFx.fillGems,
               hitCap: { stat: MELEE_HIT, remaining },
             };
             const atD = e.mr.bestMinimalRepair({ ...opts, maxChanges: d });
@@ -1034,7 +1038,7 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
               expect(
                 brute !== undefined && Math.abs(own - brute) <= 1e-9,
                 `${where}: search ${own}, brute force ${brute}, layout ${JSON.stringify(
-                  layoutD.changes.map((c) => [
+                  layoutD.recolours.map((c) => [
                     c.itemId,
                     c.socketIndex,
                     c.from,
@@ -1049,7 +1053,7 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
               const full = bruteForceBestValue(fork, oracleOpts(1), "full");
               expect(
                 full !== undefined && Math.abs(full - layoutD.value) <= 1e-9,
-                `${where}: search ${layoutD.value}, full-palette brute force ${full}`
+                `${where}: search ${layoutD.value}, full gem list brute force ${full}`
               ).toBe(true);
             }
           }
@@ -1097,12 +1101,12 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
     const found = e.mr.bestMinimalRepair({
       items: pre.socketed,
       weights: gems.weights,
-      palette: gems.fillPalette,
+      allowedGems: gems.fillGems,
       hitCap: { stat: MELEE_HIT, remaining: 93 },
       maxChanges: 3,
     });
     expect(isLayout(found)).toBe(true);
-    const changes = (found as RepairLayout).changes;
+    const changes = (found as RepairLayout).recolours;
     expect(changes.map((c) => `${c.from}->${c.to}`).sort()).toEqual([
       `${BOLD}->${RIGID}`,
       `${BOLD}->${RIGID}`,
@@ -1178,7 +1182,7 @@ type SpecRun = {
   dps?: (req: RaidSimRequest) => number;
   store?: unknown;
   measureSetBonuses?: boolean;
-  setScreen?: string;
+  setScreenMode?: string;
   controller?: AbortController;
   /** The raid sim skeleton; defaults to the ret P2 preset's. */
   skeleton?: RaidSimRequest;
@@ -1296,7 +1300,7 @@ async function runSpec(o: SpecRun) {
       itemEp: await statsOnlyItemEp(o.epWeights ?? retWeights),
       pool,
       ...(o.measureSetBonuses ? { measureSetBonuses: true } : {}),
-      ...(o.setScreen ? { setScreen: o.setScreen } : {}),
+      ...(o.setScreenMode ? { setScreenMode: o.setScreenMode } : {}),
       ...(o.controller ? { signal: o.controller.signal } : {}),
       ...(o.simDatabaseFor ? { simDatabaseFor: o.simDatabaseFor } : {}),
     }
@@ -2025,7 +2029,7 @@ async function brRun(
   return runSpec({
     pool: BR_POOL,
     measureSetBonuses: true,
-    setScreen: "on",
+    setScreenMode: "on",
     dps: brDps,
     controller: new AbortController(),
     computeStats: (req) => {
@@ -2125,7 +2129,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
 
   it.each(["on", "off"])(
     "852-V: a failed set-version read fails the run with the sim's error (set screen %s)",
-    async (setScreen) => {
+    async (setScreenMode) => {
       // Oracle: a set version's read is a sim call, so its failure ends the
       // run with the sim's own message, as a failed baseline sim does. No
       // version goes on with the shared layout under a note of the tab's own
@@ -2147,7 +2151,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       };
       let versionReads = 0;
       await expect(
-        brRun(20, { setScreen }, (req) => {
+        brRun(20, { setScreenMode }, (req) => {
           if (!isPackage(req)) return Promise.resolve(stats(req));
           versionReads += 1;
           return Promise.reject(new Error("worker died"));
@@ -2159,7 +2163,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
 
   it.each(["off", "on"])(
     "852-R: a gem repair that fails on a set version skips that set bonus, as on its own build (set screen %s)",
-    async (setScreen) => {
+    async (setScreenMode) => {
       // Oracle: a failed gem repair is no failed sim. On a set package's own
       // build it skips the package with the meta-off note (`rank.ts`, the
       // package loop); the same failure while rebuilding one of the
@@ -2172,7 +2176,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       let run;
       try {
-        run = await brRun(1000, { setScreen });
+        run = await brRun(1000, { setScreenMode });
       } finally {
         repairFault.belowRemaining = undefined;
         warn.mockRestore();
@@ -2195,7 +2199,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
 
   it.each(["off", "on"])(
     "852-R every line: a gem repair that fails on a set version gives no line with an error and none that says a request was not built (set screen %s)",
-    async (setScreen) => {
+    async (setScreenMode) => {
       // Oracle: the run's error toast shows the first line with an `error`
       // (`run_session.ts`), so a failed gem repair, which is no failed call,
       // must give no such line, and each caller says what it says for a
@@ -2208,7 +2212,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       let run;
       try {
-        run = await brRun(1000, { setScreen });
+        run = await brRun(1000, { setScreenMode });
       } finally {
         repairFault.belowRemaining = undefined;
         warn.mockRestore();
@@ -2339,16 +2343,16 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       s.gems
     );
     expect(metaOf(e, pre.socketed).status.kind).toBe("inactive");
-    const cap = s.gems.repairHitCap!;
+    const hitBudget = s.gems.repairHitBudget!;
     const rebuilt = e.rank.candidateSwapWithRepairs(
       s.worn,
       legs,
       JUSTICAR.legs,
       {
         ...s.gems,
-        repairHitCap: {
-          ...cap,
-          baselineRemaining: cap.baselineRemaining - V_BONUS_HIT,
+        repairHitBudget: {
+          ...hitBudget,
+          baselineRemaining: hitBudget.baselineRemaining - V_BONUS_HIT,
         },
       }
     ).equipment;
@@ -2475,7 +2479,7 @@ async function stepScenario(kind: "V6" | "V7") {
   )!;
   const gems: GemContext = {
     ...e.cg.gemContext(e.gems.gemsForPhase(3), retWeights, "ret"),
-    repairHitCap: {
+    repairHitBudget: {
       stat: MELEE_HIT,
       baselineRemaining: budget.remaining,
       baselineGearHit,
@@ -2613,16 +2617,16 @@ describe.skipIf(!forkPresent)(
       // on that budget minus 40, not the one on the run's budget.
       const s = await stepScenario("V7");
       const legs = SIM_ORDER.indexOf("legs");
-      const cap = s.gems.repairHitCap!;
+      const hitBudget = s.gems.repairHitBudget!;
       const own = s.e.rank.candidateSwapWithRepairs(
         s.worn,
         legs,
         JUSTICAR.legs,
         {
           ...s.gems,
-          repairHitCap: {
-            ...cap,
-            baselineRemaining: cap.baselineRemaining - V_BONUS_HIT,
+          repairHitBudget: {
+            ...hitBudget,
+            baselineRemaining: hitBudget.baselineRemaining - V_BONUS_HIT,
           },
         }
       ).equipment;

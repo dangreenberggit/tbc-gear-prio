@@ -45,7 +45,7 @@ export type OracleOpts = {
   /** The gear before repair, in SIM_ORDER; the head (index 0) holds the meta. */
   items: readonly OracleItem[];
   weights: Readonly<Record<string, number>>;
-  palette: readonly OracleGem[];
+  allowedGems: readonly OracleGem[];
   hitCap?: { stat: number; remaining: number };
   maxChanges: number;
 };
@@ -155,16 +155,16 @@ function metaIdOf(fork: OracleFork, items: readonly OracleItem[]) {
 }
 
 /**
- * The candidate gems for every socket. "full" is every non-meta palette gem.
+ * The candidate gems for every socket. "full" is every non-meta allowed gem.
  * "reduced" is, for each (colour, hit amount) group, the non-unique gem with
- * the highest non-hit EP (the first in palette order on a tie), plus each
+ * the highest non-hit EP (the first in allowed-gems order on a tie), plus each
  * unique gem whose non-hit EP beats it.
  */
 export function candidatePool(
   opts: OracleOpts,
   pool: "reduced" | "full"
 ): OracleGem[] {
-  const coloured = opts.palette.filter((g) => g.colour !== META_COLOUR);
+  const coloured = opts.allowedGems.filter((g) => g.colour !== META_COLOUR);
   if (pool === "full") return coloured;
   const stat = opts.hitCap?.stat ?? MELEE_HIT_RATING;
   const hitOf = (g: OracleGem) => (opts.hitCap ? (g.stats[stat] ?? 0) : 0);
@@ -273,7 +273,7 @@ export function bruteForceBestValue(
     const c = chosen[k]!;
     const from = opts.items[c.item]!.gems[c.socket] ?? 0;
     for (const g of gems) {
-      // Condition 1: a non-meta palette gem, and a change, not the same gem.
+      // Condition 1: a non-meta allowed gem, and a change, not the same gem.
       if (g.id === from) continue;
       layout[c.item]!.gems[c.socket] = g.id;
       assign(k + 1);

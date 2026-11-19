@@ -330,7 +330,7 @@ const setPhase = (phase) => `(async () => {
 // asserted, so a silently rejected cap cannot pose as an uncapped run.
 const setCandidates = (n) => `(async () => {
 	${WF}
-	const sel = '[data-testid="upgrades-candidates-picker"] input';
+	const sel = '[data-testid="upgrades-candidate-cap-picker"] input';
 	const input = await wf(()=>document.querySelector(sel),15000);
 	if(!input) return {error:'no candidates input'};
 	const nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,'value').set;

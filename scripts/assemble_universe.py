@@ -1458,8 +1458,8 @@ def sunmote_upgrade_pairs(
 # a lazy `AL(?:IL)?\["(.*?)"\]`) ran past the `AL["..."]` key on five Tier
 # 0.5 boss lines. So the key's closing `"]` inside a name marks the overrun,
 # and the boss is the text before it. npc 6907 'Eric "The Swift"' has quotes
-# in a real name and no `"]`. The fork tab's `overrunNpcKey`
-# (ui/features/upgrades/utils/item_source.ts) applies the same test and
+# in a real name and no `"]`. The fork tab's `nameBeforeOverrunKey`
+# (ui/features/upgrades/utils/gear_selector_source.ts) applies the same test and
 # recovery, so the universe and the tab name the same boss.
 GARBLED_NPC_NAME_RE = re.compile(r'"\]')
 
