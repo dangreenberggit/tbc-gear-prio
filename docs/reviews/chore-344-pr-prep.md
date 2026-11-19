@@ -74,6 +74,7 @@ the review `2026-11-18-general-task-344-pr-prep-review.md`; the fixes
    seven small problems, P1–P7.
 6. **P1–P7.** An Opus `general-task` fixed P1–P6 in fork `99c27adc8`
    (comments only) and P7 in the tickets, re-pinned, and wrote this file.
+7. **Two renames (follow-up).** See § Follow-up 2026-11-18: two renames.
 
 ## Check output
 
@@ -157,6 +158,8 @@ Check of the fixes (P), at fork `b23f50100`:
 | P5  | Standards | fixed       | `99c27adc8`: "Passed as undefined for a spec with no ranking data, which has no defaults."                                                                                                                                                                                                   |
 | P6  | Standards | fixed       | `99c27adc8`: both restating comments deleted. "noise check" is now "the same-gear check" in all four `rank.ts` comments, the name the code uses (`clearsSameGearGate`), and one names `measureSameGearBonus`                                                                                 |
 | P7  | Standards | fixed       | 885 and 344 now cite `se.ts:49`, `:74` and `rank.ts:159`, `:167`, `:529`, each re-read at `99c27adc8`                                                                                                                                                                                        |
+| Q3a | Standards | fixed       | `1283e6eb7`: `statsAt` is `sumOfSinglesDpsAt` (§ Follow-up 2026-11-18: two renames)                                                                                                                                                                                                          |
+| Q3b | Standards | fixed       | `1283e6eb7`: the tab's `DEFAULT_ITERATIONS` is `TAB_DEFAULT_ITERATIONS` (§ Follow-up 2026-11-18: two renames)                                                                                                                                                                                |
 
 ## Notes
 
@@ -189,8 +192,8 @@ Check of the fixes (P), at fork `b23f50100`:
   review report § Notes, with no ruling.
 - **Names the check left alone:** `statsAt` (`set-screen.ts`, `rank.ts`)
   returns a DPS estimate, not stats; two `DEFAULT_ITERATIONS` (engine 5000,
-  tab field 3000) share a name. Neither was in the approved set; untested
-  whether the owner wants them renamed.
+  tab field 3000) share a name. Neither was in the approved set. The owner
+  then asked for both to be fixed; see § Follow-up 2026-11-18: two renames.
 - Not re-measured by the checker: the density figures, and reasons the
   helper reports kept but did not verify (listed in
   `2026-11-18-general-task-344-pr-prep-fixes.md` § Comments whose reason was
@@ -198,3 +201,41 @@ Check of the fixes (P), at fork `b23f50100`:
 - The reviewer detached the fork worktree's HEAD once by mistake while
   measuring density and restored it at once; no gate ran while it was
   detached (review report § Process note).
+
+## Follow-up 2026-11-18: two renames
+
+The owner, about both names in § Notes: "that sounds like it needs fixing
+and is just wrong". Both claims were true, and fork `1283e6eb7` renames
+them. The report is
+`2026-11-18-general-task-344-q3-renames.md`.
+
+- **Q3a.** `statsAt` returns `sumOfSinglesEstimate(...)`, a DPS figure
+  (`rank.ts:1815-1844`, `partner-choice.ts:96-100`), so it is now
+  `sumOfSinglesDpsAt`. Its local `stats` in `set-screen.ts` is now
+  `estimate`. The recorded field `bestStats` keeps its name
+  (`testing/set_bonus_tip_on.snapshot.json`), and its doc now says it holds
+  DPS. The field's doc is now two lines, because the name says what the
+  value is.
+- **Q3b.** `run_state.ts`'s `DEFAULT_ITERATIONS` (3000) is the tab field's
+  default, and `rank.ts`'s (5000) is the engine's, used when a caller passes
+  no count. The tab always passes one (`run.ts:102`). The tab's constant is
+  now `TAB_DEFAULT_ITERATIONS`, after the `TAB_REPLICATE_SEED_COUNT` /
+  `DEFAULT_SEED_COUNT` split. The engine's keeps the name that core's
+  `rank.ts:537` and two `packages/core/test` comments use. Its comment said
+  "the ranking's published numbers come from a full per-candidate sim at
+  this count"; that was wrong for the tab, so it now says the tab passes
+  its own count.
+- **Renames** were made with the TypeScript 5.9.3 language service: 4
+  `statsAt` sites, 4 `stats`, 6 `DEFAULT_ITERATIONS`. After the renames,
+  `git grep -w statsAt` finds nothing in the fork. `DEFAULT_ITERATIONS`
+  appears only in `rank.ts`, 3 times. Core has no `statsAt`. No string,
+  `Pick`/`Omit` key, spread or fixture held either name. No edited file
+  exists in `upstream/master`.
+
+| Check                            | Commit                      | Result                                                                                                                                                                                  |
+| -------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AST, no map                      | fork `99c27adc8..1283e6eb7` | `files=5 ast-equal=0 differ=5`, each differing only on the renamed names                                                                                                                |
+| AST, old-to-new map              | fork `99c27adc8..1283e6eb7` | `{statsAt, stats}`: `rank.ts` and `set-screen.ts` equal; `{DEFAULT_ITERATIONS}`: `run_state.ts`, `run_state.test.ts`, `useUpgradesStore.ts` equal. Each file is equal under its own map |
+| E-W3 + run progress              | fork `1283e6eb7`            | v22.23.2, rc 0, `Test Files 2 passed (2)`, `Tests 59 passed (59)`; also green before the hashes moved                                                                                   |
+| `TBC_VERIFY_FRESH=1 pnpm verify` | pair, fork `1283e6eb7`      | v22.23.2, rc 0, `gates: 1742 ran, 0 skipped`, `engine port drift check ok: 36 ported files match engine.md`, `fork tests check ok ... Tests 907 passed`                                 |
+| oxfmt, oxlint on the five files  | fork `1283e6eb7`            | rc 0, rc 0                                                                                                                                                                              |
