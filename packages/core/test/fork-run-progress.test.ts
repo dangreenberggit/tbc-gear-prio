@@ -57,7 +57,7 @@ type RunTimeline = {
   sims: ReadonlyArray<{ t: number; done: number; afterRanking: boolean }>;
   rankingAt: number | undefined;
   total: number;
-  boundary: number | null;
+  lastCandidateDone: number | null;
   concurrency: number;
   now: number;
   qualifyingRows: number;
@@ -71,7 +71,7 @@ type RunProgressView = {
   stage: string;
   done?: number;
   total?: number;
-  boundary: number | null;
+  lastCandidateDone: number | null;
   remainingMs?: number;
   qualifyingRows: number;
 };
@@ -85,7 +85,7 @@ type Tracker = {
 
 type RunProgressModule = {
   TAB_REPLICATE_SEED_COUNT: number;
-  replicationBoundary(
+  lastCandidateDoneFor(
     total: number,
     seedCount: number,
     topN: number
@@ -153,7 +153,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     });
   });
 
-  describe("replicationBoundary", () => {
+  describe("lastCandidateDoneFor", () => {
     // total = 1 + c + 4 * (1 + min(8, c)) with five seeds and top-N 8,
     // written out by hand for each c.
     it.each([
@@ -166,15 +166,15 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       [277, 241], // c = 240: 1 + 240 + 36
       [401, 365], // c = 364: run 1's total and boundary
     ])("total %i gives boundary %i", (total, boundary) => {
-      expect(mod.replicationBoundary(total, 5, 8)).toBe(boundary);
+      expect(mod.lastCandidateDoneFor(total, 5, 8)).toBe(boundary);
     });
 
     it("returns the total itself with a single seed", () => {
-      expect(mod.replicationBoundary(57, 1, 8)).toBe(57);
+      expect(mod.lastCandidateDoneFor(57, 1, 8)).toBe(57);
     });
 
     it.each([7, 38])("returns null for total %i, which no c gives", (total) => {
-      expect(mod.replicationBoundary(total, 5, 8)).toBeNull();
+      expect(mod.lastCandidateDoneFor(total, 5, 8)).toBeNull();
     });
   });
 
@@ -193,7 +193,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
         expect(t.view()).toMatchObject({ phase: "preparing", stage });
       }
       expect(t.view().done).toBeUndefined();
-      expect(t.view().boundary).toBeNull();
+      expect(t.view().lastCandidateDone).toBeNull();
     });
 
     it("walks candidates, set bonuses, replication and ranking", () => {
@@ -204,7 +204,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
         phase: "candidates",
         done: 1,
         total: 57,
-        boundary: 21,
+        lastCandidateDone: 21,
       });
       t.observe(sim(20, 57), 200);
       expect(t.view().phase).toBe("candidates");
@@ -255,10 +255,16 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       const t = tracker({ kind: "linear" });
       t.observe(sim(1, 57), 100);
       t.observe(sim(22, 57), 200);
-      expect(t.view()).toMatchObject({ phase: "candidates", boundary: null });
+      expect(t.view()).toMatchObject({
+        phase: "candidates",
+        lastCandidateDone: null,
+      });
       // The boundary stays dropped, so done == 21 is not the set phase.
       t.observe(sim(21, 57), 250);
-      expect(t.view()).toMatchObject({ phase: "candidates", boundary: null });
+      expect(t.view()).toMatchObject({
+        phase: "candidates",
+        lastCandidateDone: null,
+      });
       t.observe(RANKING, 300);
       expect(t.view().phase).toBe("replication");
     });
@@ -358,7 +364,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       sims,
       rankingAt: undefined,
       total: 47,
-      boundary: 11,
+      lastCandidateDone: 11,
       concurrency: 4,
       now: 1_000,
       qualifyingRows: 4,
@@ -374,7 +380,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     });
 
     it("uses the boundary the tab solves for total 47", () => {
-      expect(mod.replicationBoundary(47, 5, 8)).toBe(11);
+      expect(mod.lastCandidateDoneFor(47, 5, 8)).toBe(11);
     });
 
     it.each([
@@ -412,7 +418,10 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       (slowdown) => {
         // 1000 / 4 * (47 - 5)
         expect(
-          mod.estimateRemainingMs(config(slowdown), run({ boundary: null }))
+          mod.estimateRemainingMs(
+            config(slowdown),
+            run({ lastCandidateDone: null })
+          )
         ).toBeCloseTo(10_500, 6);
       }
     );
@@ -535,7 +544,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       ],
       rankingAt: 5_000,
       total: 57,
-      boundary: 21,
+      lastCandidateDone: 21,
       concurrency: 4,
       now: 8_000,
       qualifyingRows: 1,
@@ -811,7 +820,7 @@ async function recordRun(
       epWeights: feralWeights,
       itemEp: await statsOnlyItemEp(feralWeights),
       pool,
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     },
     (progress) => events.push({ progress, simCallsSoFar: simCalls })
   );
@@ -823,7 +832,7 @@ describe.skipIf(!forkPresent || !moduleExists())(
   () => {
     let mod: RunProgressModule;
     let topN: number;
-    // Seven candidates take the small-pool branch of `replicationBoundary`.
+    // Seven candidates take the small-pool branch of `lastCandidateDoneFor`.
     // Twelve, all above the cutoff, take the large-pool branch and pass the
     // top-N cap on re-simmed rows.
     const recordings: Record<"seven" | "twelve", RecordedEvent[]> = {
@@ -938,7 +947,7 @@ describe.skipIf(!forkPresent || !moduleExists())(
         const candidates = sims.length - 1;
         expect(candidates).toBeGreaterThan(0);
         expect(
-          mod.replicationBoundary(
+          mod.lastCandidateDoneFor(
             first.total,
             mod.TAB_REPLICATE_SEED_COUNT,
             topN

@@ -450,7 +450,7 @@ async function runRanking(skeleton: RaidSimRequest): Promise<RaidSimRequest[]> {
         source: { kind: "badge" as const, cost: 1 },
       })),
       simDatabaseFor: simDatabaseResolverFor(stubPlayer(), skeleton),
-      measureBrokenSetValue: true,
+      measureSetBonuses: true,
     }
   );
   return requests;
