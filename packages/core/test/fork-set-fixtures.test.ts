@@ -94,7 +94,7 @@ type ViewMod = {
   applyView: (
     r: Ranking,
     v: {
-      hideOwned?: boolean;
+      hideWorn?: boolean;
       withSetPotential?: boolean;
       setCredit?: "full" | "split";
     }
@@ -386,7 +386,7 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
       const pinned = PINNED_ON_TOP16[name];
       if (pinned) {
         const on = view.applyView(ranking, {
-          hideOwned: false,
+          hideWorn: false,
           withSetPotential: true,
           setCredit: "full",
         });
@@ -409,7 +409,7 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
         );
       }
       const off = view.applyView(ranking, {
-        hideOwned: false,
+        hideWorn: false,
         withSetPotential: false,
         setCredit: "full",
       });

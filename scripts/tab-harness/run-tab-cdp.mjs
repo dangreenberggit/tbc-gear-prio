@@ -486,7 +486,7 @@ const pollDone = (ms, trace) => `(async () => {
 const readResults = `(async () => {
 	${WF}
 	${ROW_HELPERS}
-	const pane = document.getElementById('upgrades-pane-shopping-list');
+	const pane = document.getElementById('upgrades-pane-all-slots');
 	if(!pane) return {error:'no Upgrades list pane'};
 	const group = pane.querySelector('[data-testid="upgrades-below-cutoff"]');
 	if (group && !group.querySelector('[data-testid="upgrades-results-table"]')) {

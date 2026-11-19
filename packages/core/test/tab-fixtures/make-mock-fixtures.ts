@@ -36,8 +36,8 @@ import {
 } from "../../src/slots-sim-order.generated.js";
 import type { Race } from "../../src/types.js";
 
-/** The fork's line, which keeps a failed call's own error apart (ticket 874). */
-type ForkSubstitution = Substitution & { error?: string };
+/** The fork's `RunNote`, which keeps a failed call's own error apart (ticket 874). */
+type ForkRunNote = Substitution & { error?: string };
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
 const FORK = join(ROOT, "vendor/tbc-new-fork");
@@ -124,7 +124,7 @@ type MockRanking = {
   };
   baseline: { dps: number; stdev: number; metaAdjusted: boolean };
   assumptions: Assumptions;
-  substitutions: ForkSubstitution[];
+  substitutions: ForkRunNote[];
   items: MockRow[];
   complete: true;
   durationMs: number;
@@ -923,14 +923,14 @@ class Builder {
   /**
    * Two 704 headings and ten item lines, every line's field and detail
    * distinct (review R4). An item line is written as the fork's
-   * `candidateSkipSubstitution` writes it: the item id after the sentence,
+   * `candidateSkipNote` writes it: the item id after the sentence,
    * and a failed sim's error apart in `error`. The page shows the sentence
    * only.
    */
-  private droppedList(pairs: Pair[], chosen: Pair[]): ForkSubstitution[] {
+  private droppedList(pairs: Pair[], chosen: Pair[]): ForkRunNote[] {
     const rowIds = new Set(chosen.map((p) => p.itemId));
     const seenIds = new Set<number>();
-    const lines: ForkSubstitution[] = [
+    const lines: ForkRunNote[] = [
       {
         field: "One-handed weapons",
         detail:

@@ -132,7 +132,7 @@ const runAndStopExpression = (rows, timeoutMs) => `(async () => {
 			if (!table) return { error: 'no in-flight results table to read' };
 			const count = tableRowCount(table);
 			const read = await collectRows(table, tr => ({
-				owned: tr.dataset.owned === 'true',
+				owned: tr.dataset.worn === 'true',
 				name: tr.querySelector('[data-testid="upgrades-item-name"]')?.textContent.trim(),
 			}));
 			if (!read.error && tableRowCount(table) === count) return { count, rows: read.rows };
