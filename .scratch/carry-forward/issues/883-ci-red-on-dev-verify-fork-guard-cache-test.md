@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Verified by: `gh run view 44831711249 --repo dangreenberggit/tbc-gear-prio` (green on tbc-gear-prio@fb870cfa); review in docs/reviews/fix-883-ci-verify-cache-test.md
 Type: task
 Origin: docs/reviews/feat-instruction-pointer-check.md
 Blocks: none
@@ -36,3 +37,18 @@ driver with `GITHUB_ACTIONS` and `CI` removed from its env, so it tests
 the no-key path it names. Optionally add a second case that sets
 `CI=1` and expects `this is CI`. Done when a CI run on `dev` gets past
 `scripts/verify_fork_guard.test.mjs` and runs `pointers:selftest`.
+
+## Closing note (2026-11-20)
+
+The test was wrong, not the code. `cachePolicy()` turns the cache off on
+CI on purpose, and the test helper cleared `GITHUB_ACTIONS` but not `CI`,
+which GitHub's runner also sets. The helper now clears both, and a new
+case checks the CI path. Merged to `dev` as fb870cfa (branch commit
+7bf2418a).
+
+`CI=true pnpm exec vitest run scripts/verify_fork_guard.test.mjs` failed
+before the fix (1 failed, 15 passed) and passes after (17 passed). CI run
+44831711249 on `dev` is green. Its log shows
+`check_instruction_pointers.py self-test ok (48 tests)` and
+`gates: 1469 ran, 278 skipped`, so `pointers:selftest` and the later steps
+now run on CI.
