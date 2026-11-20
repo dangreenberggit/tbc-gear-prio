@@ -133,8 +133,12 @@ function runDriver({ withFork, step, steps, env: extraEnv = {} }) {
             : { "verify:steps": "pnpm run stub", stub: step },
       })
     );
-    const env = { ...process.env, ...extraEnv };
+    // GitHub's runner sets both GITHUB_ACTIONS and CI; clear them so each
+    // case tests the path it names, not the runner's (ticket 883).
+    const env = { ...process.env };
     delete env.GITHUB_ACTIONS;
+    delete env.CI;
+    Object.assign(env, extraEnv);
     if (!(OPT_OUT in extraEnv)) delete env[OPT_OUT];
 
     const result = spawnSync(
@@ -197,6 +201,19 @@ describe("run_verify.mjs", () => {
     const result = runDriver({ withFork: true, step: MARK_STEP });
     expect(result.stdout).toContain(
       "verify: cache off -- could not compute the inputs key"
+    );
+    expect(result.stepRan).toBe(true);
+    expect(result.status).toBe(0);
+  });
+
+  it("runs in full on CI without reading or writing the cache", () => {
+    const result = runDriver({
+      withFork: true,
+      step: MARK_STEP,
+      env: { CI: "true" },
+    });
+    expect(result.stdout).toContain(
+      "verify: cache off -- this is CI; running in full."
     );
     expect(result.stepRan).toBe(true);
     expect(result.status).toBe(0);
