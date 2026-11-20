@@ -7,7 +7,7 @@
  * render captured, or one below the popover's 0.1 DPS resolution, still fails.
  * The reference walk below is written from the rule's statement (design.md §1
  * of the 502 stage, ADR-0034), not from `view.ts`. A bonus-gear ranking (ticket 511:
- * rows carry `setContext.bonusGearMeasured`) is checked against `referenceBonusGear`,
+ * rows carry `setContext.usesBonusGear`) is checked against `referenceBonusGear`,
  * written from plan 511-512-set-credit's rule for one row, instead.
  *
  * The recordings are frozen test data: nothing automatic re-records them, and
@@ -56,7 +56,7 @@ type SetContext = {
   piecesWornBefore: number;
   piecesAfterSwap: number;
   crossesThreshold: boolean;
-  bonusGearMeasured?: true;
+  usesBonusGear?: true;
   singleDeltaDps?: number;
   singleBreaks?: Break[];
   futureBonuses?: Future[];
@@ -319,7 +319,7 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
         const ctx = row.setContext;
         const where = `${name} row ${row.itemId} ${row.name}`;
 
-        if (ctx?.bonusGearMeasured) {
+        if (ctx?.usesBonusGear) {
           // 3s. the shipped credit equals the bonus-gear rule's reference walk
           const ref = referenceBonusGear(ctx, bonusGearFloor);
           const credit = view.rankableSetPotential(row, ranking.cutoff, "full");

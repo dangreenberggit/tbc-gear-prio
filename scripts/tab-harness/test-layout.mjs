@@ -326,7 +326,7 @@ const postRunExpression = `(async () => {
 // popover is portaled, so it is looked up in the document, not the tab root.
 const SET_BONUS_FIGURE = `${RESULT_ROW}:has(small[data-testid="upgrades-set-bonus"]) [data-testid="upgrades-delta-cell"] button`;
 const SET_BONUS_POPOVER = '[data-testid="upgrades-set-bonus-popover"]';
-const figureCentreExpression = `(async () => {
+const figureCenterExpression = `(async () => {
 	${PAGE_HELPERS}
 	// Only the rows near the view are rendered (rows.mjs), so walk the page's
 	// scroll box down until a row with a set-bonus figure renders.
@@ -367,7 +367,7 @@ async function moveMouse(send, x, y) {
 
 /** Check 17: hovers the first set-bonus figure in the open pane, reads where its popover opened, then closes it. */
 async function judgePopover(send, width) {
-  const at = await H.evaluate(send, figureCentreExpression);
+  const at = await H.evaluate(send, figureCenterExpression);
   if (!at) {
     check(17, width, false, { error: "no set-bonus figure in the open pane" });
     return;

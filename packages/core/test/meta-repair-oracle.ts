@@ -46,7 +46,7 @@ export type OracleOpts = {
   items: readonly OracleItem[];
   weights: Readonly<Record<string, number>>;
   allowedGems: readonly OracleGem[];
-  hitCap?: { stat: number; remaining: number };
+  hitBudget?: { stat: number; remaining: number };
   maxChanges: number;
 };
 
@@ -106,7 +106,7 @@ export function repairValue(
   opts: OracleOpts,
   layout: readonly OracleItem[]
 ): number {
-  const stat = opts.hitCap?.stat ?? MELEE_HIT_RATING;
+  const stat = opts.hitBudget?.stat ?? MELEE_HIT_RATING;
   const nonHit = (stats: readonly number[]) =>
     weighted(stats, opts.weights, stat);
   let v = 0;
@@ -130,8 +130,8 @@ export function repairValue(
   }
   const w = opts.weights[String(stat)] ?? 0;
   const dH = layoutHit(fork, layout, stat) - layoutHit(fork, opts.items, stat);
-  if (opts.hitCap) {
-    const r = opts.hitCap.remaining;
+  if (opts.hitBudget) {
+    const r = opts.hitBudget.remaining;
     v += w * (Math.min(dH, r) - Math.min(0, r));
   } else {
     v += w * dH;
@@ -166,10 +166,10 @@ export function candidatePool(
 ): OracleGem[] {
   const colored = opts.allowedGems.filter((g) => g.color !== META_COLOR);
   if (pool === "full") return colored;
-  const stat = opts.hitCap?.stat ?? MELEE_HIT_RATING;
-  const hitOf = (g: OracleGem) => (opts.hitCap ? (g.stats[stat] ?? 0) : 0);
+  const stat = opts.hitBudget?.stat ?? MELEE_HIT_RATING;
+  const hitOf = (g: OracleGem) => (opts.hitBudget ? (g.stats[stat] ?? 0) : 0);
   const nonHit = (g: OracleGem) =>
-    opts.hitCap
+    opts.hitBudget
       ? weighted(g.stats, opts.weights, stat)
       : weighted(g.stats, opts.weights, -1);
   const groups = new Map<string, OracleGem[]>();

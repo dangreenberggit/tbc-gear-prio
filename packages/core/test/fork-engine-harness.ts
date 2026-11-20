@@ -8,9 +8,9 @@
  * evaluate, and none of them is a property of the engine itself:
  *
  * 1. **`window` exists at module scope.** `constants/other.ts` reads
- *    `window.location.pathname` while initialising, and `proto_utils/utils.ts`
+ *    `window.location.pathname` while initializing, and `proto_utils/utils.ts`
  *    builds a `new URL()` from `window.location.protocol`/`host` inside a static
- *    initialiser on the druid spec. Both run on import, before any test body.
+ *    initializer on the druid spec. Both run on import, before any test body.
  * 2. **`Database` is populated.** `getItem`/`getGem` call `Database.getSync()`,
  *    which throws unless `Database.get()` has resolved. `get()` only fills the
  *    singleton by `fetch`ing a page-relative URL, and there is no exported way
@@ -20,7 +20,7 @@
  *    root `vitest.config.ts`; see that alias and the stub it points at.
  *
  * The stubs are as small as the import graph allows and serve real committed
- * data, so nothing here fabricates engine behaviour — they only stand in for the
+ * data, so nothing here fabricates engine behavior — they only stand in for the
  * browser the engine expects to be running inside. Anything a stub returns that
  * a test then asserted on would be a test asserting on this file; no test does.
  *

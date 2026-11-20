@@ -1,7 +1,7 @@
 // The Chromium the tab harnesses drive: the one the pinned `playwright`
 // devDependency installs. Asking Playwright for the path, instead of
 // searching its cache folder, follows its own per-OS layout and the browser
-// revision this repo pins, and honours PLAYWRIGHT_BROWSERS_PATH.
+// revision this repo pins, and honors PLAYWRIGHT_BROWSERS_PATH.
 //
 // package.json pins `playwright` to an exact version because each Playwright
 // release names its own Chromium build (in playwright-core's browsers.json),

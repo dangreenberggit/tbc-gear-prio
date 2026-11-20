@@ -419,7 +419,7 @@ type ForkRanking = {
       piecesAfterSwap: number;
       crossesThreshold: boolean;
       nextThreshold: number | null;
-      bonusGearMeasured?: true;
+      usesBonusGear?: true;
       singleDeltaDps?: number;
       singleBreaks?: Array<{ setId: number; threshold: number; dps?: number }>;
       futureBonuses?: Array<{
@@ -1480,7 +1480,7 @@ type SubLineMod = ViewMod & {
           kind: "bonus";
           setName: string;
           threshold: number;
-          have: number;
+          worn: number;
           dps: number;
         }
       | { kind: "piece"; itemId: number; name: string; dps: number }
@@ -2219,7 +2219,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
       for (const p of f.pieces ?? []) expect(p.dps).toBeUndefined();
   });
 
-  it("502-D: the terms are itemised by increment, add up to the credit and end at the credited bonus", async () => {
+  it("502-D: the terms are itemized by increment, add up to the credit and end at the credited bonus", async () => {
     const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
     const M = "Malorne Harness";
     const ctx = (bDps: number) => ({
@@ -2253,7 +2253,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
         kind: "bonus",
         setName: "Thunderheart Harness",
         threshold: 2,
-        have: 0,
+        worn: 0,
         dps: 50,
       },
       { kind: "piece", itemId: 1, name: "A", dps: 100 },
@@ -2262,7 +2262,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
         kind: "bonus",
         setName: "Thunderheart Harness",
         threshold: 4,
-        have: 0,
+        worn: 0,
         dps: 80,
       },
       { kind: "piece", itemId: 2, name: "B", dps: 20 },
@@ -3203,7 +3203,7 @@ describe.skipIf(!forkPresent)(
       expect(bonusOf(r, 676, 4)?.sameGearDps).toBeCloseTo(80, 9);
       expect(bonusOf(r, 676, 3)?.belowNoise).toBe(true);
       const hands = thRow(r, THUNDERHEART.hands);
-      expect(hands.setContext?.bonusGearMeasured).toBe(true);
+      expect(hands.setContext?.usesBonusGear).toBe(true);
       expect(hands.setContext?.singleDeltaDps).toBeCloseTo(100, 9);
       // The credited gear wears all four: 400 + 50 + 80 − 40 = 490 over 3000.
       expect(futureOf(hands, 4)?.bonusGearDps).toBeCloseTo(490, 9);
@@ -3807,7 +3807,7 @@ describe.skipIf(!forkPresent)(
       // zeroed the row (477-P); a bonus-gear ranking never reads `commitBreaks`.
       const view = await bonusGearView();
       const ctx = {
-        bonusGearMeasured: true,
+        usesBonusGear: true,
         setName: "Thunderheart Harness",
         piecesWornBefore: 0,
         singleDeltaDps: 30,
@@ -3835,7 +3835,7 @@ describe.skipIf(!forkPresent)(
       );
       expect(view.setBonusSubLine(withCommit, true)).toBe("hover_hint");
       expect(
-        view.setBonusSubLine({ bonusGearMeasured: true, commitBreaks }, true)
+        view.setBonusSubLine({ usesBonusGear: true, commitBreaks }, true)
       ).toBeNull();
       const terms = view.setPotentialTerms(withCommit, FLOOR).terms;
       expect(terms.map((t) => t.kind)).toEqual(["outcome"]);
@@ -5230,7 +5230,7 @@ describe.skipIf(!forkPresent)(
         two: BonusOffFields = {},
         four: BonusOffFields = {}
       ) => ({
-        bonusGearMeasured: true,
+        usesBonusGear: true,
         setId: 676,
         setName: "Thunderheart Harness",
         singleDeltaDps: 6,
@@ -6657,7 +6657,7 @@ describe.skipIf(!forkPresent)(
       // is 0 + 3.5 and it sorts above the 3.2 row.
       const view = await importForkUpgrades<BarViewMod>("engine/view.ts");
       const ranking = await rankingWith({
-        bonusGearMeasured: true,
+        usesBonusGear: true,
         setId: 676,
         setName: "Thunderheart Harness",
         piecesWornBefore: 1,

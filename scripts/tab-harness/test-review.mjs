@@ -17,7 +17,7 @@
 //   interactions: [ {click: sel} | {hover: sel} | {wait: ms} | {snapshot: label} ]
 //                 in order. A click or hover acts on the first VISIBLE match
 //                 (a hidden sub-tab pane holds copies of most elements),
-//                 scrolled to the centre first. A hover moves the mouse away and
+//                 scrolled to the center first. A hover moves the mouse away and
 //                 then onto the target, two mouseMoved events, and waits for
 //                 the popup (stage 558-p2 amendment A-K3-hover). `optional: true`
 //                 on a click or hover skips it when no match is visible
@@ -40,7 +40,7 @@
 // textContent); attr:<sel>:<name>; prop:<sel>:<name> (a DOM property, such as
 // scrollWidth); exists:<sel>; count:<sel> (all matches);
 // shown:<sel> (visible matches).
-// count: on result rows counts only the rows the virtualised table rendered;
+// count: on result rows counts only the rows the virtualized table rendered;
 // for the ranked row count read the tbody's data-row-count with attr: (rows.mjs).
 
 import { spawnSync } from "node:child_process";
@@ -117,8 +117,8 @@ async function readFacts(send, specs, errors) {
   return facts;
 }
 
-/** The centre of the first visible match, scrolled to the middle of the viewport, or null. */
-const centreOf = (send, sel) =>
+/** The center of the first visible match, scrolled to the middle of the viewport, or null. */
+const centerOf = (send, sel) =>
   H.evaluate(
     send,
     `(async () => { ${PAGE_HELPERS}
@@ -145,7 +145,7 @@ async function interact(send, step, specs, steps, errors) {
     errors.push(`unknown interaction: ${JSON.stringify(step)}`);
     return;
   }
-  const at = await centreOf(send, sel);
+  const at = await centerOf(send, sel);
   if (!at) {
     if (!step.optional)
       errors.push(`interaction target not found or not visible: ${sel}`);
@@ -189,16 +189,16 @@ const CLIP_MARGIN = 200;
  * app's own scroller, not the window, so content past the viewport never
  * paints and a document-coordinate clip of it comes out blank (stage 558-p3
  * visual review K5, B2). So the viewport is made tall enough for the target
- * plus a margin, the target is centred below the sticky nav, and the clip is
+ * plus a margin, the target is centered below the sticky nav, and the clip is
  * taken in viewport coordinates; the height is restored afterwards. `inPlace`
  * clips where the target already is, for the first capture after a hover,
  * because a scroll moves the page under the pointer and closes the popup.
  */
 async function clip(send, sel, file, width, inPlace) {
-  const measure = (centre) => `(async () => { ${PAGE_HELPERS}
+  const measure = (center) => `(async () => { ${PAGE_HELPERS}
 		const el = firstShown(${JSON.stringify(sel)});
 		if (!el) return null;
-		if (${centre}) { el.scrollIntoView({ block: 'center', inline: 'nearest' }); await new Promise(r => setTimeout(r, 200)); }
+		if (${center}) { el.scrollIntoView({ block: 'center', inline: 'nearest' }); await new Promise(r => setTimeout(r, 200)); }
 		const r = el.getBoundingClientRect();
 		return { x: r.left, y: r.top, width: r.width, height: r.height };
 	})()`;

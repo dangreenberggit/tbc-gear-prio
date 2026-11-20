@@ -59,7 +59,7 @@ TSX_LOADER = ROOT / "node_modules/tsx/dist/loader.mjs"
 COMMITTED = ROOT / "data/equip-eligibility.json"
 ASSEMBLE = ROOT / "scripts/assemble_universe.py"
 
-# How many differing ids to name before summarising. A real drift is usually a
+# How many differing ids to name before summarizing. A real drift is usually a
 # handful; a rule change is hundreds and the count is the useful part.
 MAX_LISTED = 15
 

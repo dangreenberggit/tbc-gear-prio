@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/chore-344-pr-prep.md
 Blocked by: none
@@ -61,3 +61,25 @@ engine file).
   `packages/core/test/fixtures/tab-recordings/README.md:33-37` lists six of
   the seven keys batch 4 renamed; `stepGearSe` → `bonusGearSe` is missing.
   Add it after `stepGearDps` → `bonusGearDps`.
+
+## Closed 2026-11-19
+
+All four items are fixed on `chore/344-pr-prep`, fork commits `a58638ea1`
+(N-1), `d9fb4b7f2` (N-6) and `e7f36edd0` (N-7b), plus our side's tests,
+stored files and the recordings README (B-2).
+
+- N-1 became `usesBonusGear`, not the suggested `bonusGearRanking`: the
+  field is a `true` flag, and "ranking" names the result list, so a reader
+  could take `bonusGearRanking` for a ranking (rule 5). `usesBonusGear`
+  follows `usesSpellHitBudget` and says only which method valued the
+  bonuses, so `setCreditUnmeasured(ctx) && ctx.usesBonusGear` reads
+  correctly.
+- Stored files: 707 `bonusGearMeasured` keys became `usesBonusGear` (6
+  recordings: 86, 113, 113, 113, 134 and 118; the popover snapshot: 16; the
+  11 mock fixtures: 1 each, 4 in `mock-set-bonus`). For each file, the HEAD
+  version with that key renamed in memory deep-equals the new file and is
+  byte-identical as text; no old key is left, no `usesBonusGear` existed
+  before, line counts are unchanged and there is no CRLF.
+
+Verified by: `docs/reviews/chore-344-pr-prep.md`, `tbc-new-fork@93027b6c9`,
+and `pnpm tab-fixtures:mock --check`.

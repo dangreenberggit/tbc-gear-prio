@@ -53,14 +53,14 @@ const repairFault = vi.hoisted(() => ({
 vi.mock(
   "../../../vendor/tbc-new-fork/ui/features/upgrades/model/engine/meta-repair.ts",
   async (importOriginal) => {
-    type Repair = (opts: { hitCap?: { remaining: number } }) => unknown;
+    type Repair = (opts: { hitBudget?: { remaining: number } }) => unknown;
     const real = await importOriginal<{
       repairMetaGems: Repair;
       MetaRecolorLimitExceededError: new (message: string) => Error;
     }>();
     const repairMetaGems: Repair = (opts) => {
       const below = repairFault.belowRemaining;
-      if (below !== undefined && (opts.hitCap?.remaining ?? 0) < below) {
+      if (below !== undefined && (opts.hitBudget?.remaining ?? 0) < below) {
         repairFault.fired += 1;
         throw new real.MetaRecolorLimitExceededError(
           "meta repair exceeded its recolor limit"
@@ -329,7 +329,7 @@ type MetaRepairMod = {
     items: readonly SocketedItem[];
     weights: Readonly<Record<string, number>>;
     allowedGems: readonly GemEntry[];
-    hitCap?: HitCapBudget;
+    hitBudget?: HitCapBudget;
     maxChanges: number;
     workLimit?: number;
   }) => RepairLayout | { overLimit: true; work: number } | undefined;
@@ -337,7 +337,7 @@ type MetaRepairMod = {
     items: readonly SocketedItem[];
     epWeights: Readonly<Record<string, number>>;
     allowedGems: readonly GemEntry[];
-    hitCap?: HitCapBudget;
+    hitBudget?: HitCapBudget;
     workLimit?: number;
   }) => {
     items: SocketedItem[];
@@ -980,7 +980,7 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
               items: pre.socketed,
               weights: gemsFx.weights,
               allowedGems: gemsFx.fillGems,
-              hitCap: { stat: MELEE_HIT, remaining },
+              hitBudget: { stat: MELEE_HIT, remaining },
             };
             const atD = e.mr.bestMinimalRepair({ ...opts, maxChanges: d });
             const atD1 = e.mr.bestMinimalRepair({ ...opts, maxChanges: d + 1 });
@@ -1102,7 +1102,7 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
       items: pre.socketed,
       weights: gems.weights,
       allowedGems: gems.fillGems,
-      hitCap: { stat: MELEE_HIT, remaining: 93 },
+      hitBudget: { stat: MELEE_HIT, remaining: 93 },
       maxChanges: 3,
     });
     expect(isLayout(found)).toBe(true);

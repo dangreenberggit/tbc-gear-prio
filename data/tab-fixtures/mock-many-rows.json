@@ -917,7 +917,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": 9.39,
           "singleBreaks": [
             {

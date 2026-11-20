@@ -280,7 +280,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": 28.13,
           "singleBreaks": [
             {
@@ -373,7 +373,7 @@
           "piecesAfterSwap": 2,
           "nextThreshold": null,
           "crossesThreshold": true,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": 24.34,
           "singleBreaks": [
             {
@@ -560,7 +560,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": 5.39,
           "singleBreaks": [
             {
@@ -635,7 +635,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": 3.5,
           "singleBreaks": [
             {

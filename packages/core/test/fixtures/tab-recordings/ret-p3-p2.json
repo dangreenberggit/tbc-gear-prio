@@ -662,7 +662,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 2,
@@ -830,7 +830,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 2,
@@ -1377,7 +1377,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": 0
         }
       },
@@ -2945,7 +2945,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -10.206588017760168
         }
       },
@@ -3363,7 +3363,7 @@
           "piecesAfterSwap": 2,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 3,
@@ -3616,7 +3616,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 2,
@@ -3923,7 +3923,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -14.94351039403773
         }
       },
@@ -3961,7 +3961,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 2,
@@ -4031,7 +4031,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -15.083083795831499
         }
       },
@@ -4236,7 +4236,7 @@
           "piecesAfterSwap": 2,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 3,
@@ -4566,7 +4566,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 2,
@@ -4688,7 +4688,7 @@
           "piecesAfterSwap": 2,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 3,
@@ -4767,7 +4767,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -18.10918529782657
         }
       },
@@ -5009,7 +5009,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -20.74816990774798
         }
       },
@@ -5317,7 +5317,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -24.143345328707255
         }
       },
@@ -5379,7 +5379,7 @@
           "piecesAfterSwap": 2,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 3,
@@ -5500,7 +5500,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -26.22279535958478
         }
       },
@@ -5553,7 +5553,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -26.71050229900038
         }
       },
@@ -5609,7 +5609,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -27.148967789582912
         }
       },
@@ -5825,7 +5825,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -30.452674544696038
         }
       },
@@ -5883,7 +5883,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -30.480956977922233
         }
       },
@@ -5922,7 +5922,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -30.532615859807265
         }
       },
@@ -6024,7 +6024,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -30.940581526054757
         }
       },
@@ -6070,7 +6070,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -31.048159566607865
         }
       },
@@ -6124,7 +6124,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -31.58559461512914
         }
       },
@@ -6227,7 +6227,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -32.59762432142452
         }
       },
@@ -6443,7 +6443,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -33.579962730058924
         }
       },
@@ -6704,7 +6704,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -35.42891008350807
         }
       },
@@ -7002,7 +7002,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -36.78148025331916
         }
       },
@@ -8069,7 +8069,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -38.93534973994133
         }
       },
@@ -8272,7 +8272,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -39.388018046356365
         }
       },
@@ -8899,7 +8899,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -40.51408147852521
         }
       },
@@ -9888,7 +9888,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -42.26500364769049
         }
       },
@@ -10007,7 +10007,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -42.657546178071016
         }
       },
@@ -10379,7 +10379,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -43.495204131788796
         }
       },
@@ -10934,7 +10934,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -45.147817083459586
         }
       },
@@ -11322,7 +11322,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -46.30745677406571
         }
       },
@@ -11906,7 +11906,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -49.25159995442846
         }
       },
@@ -12352,7 +12352,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -53.13732048547399
         }
       },
@@ -13082,7 +13082,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -57.3781518564283
         }
       },
@@ -14049,7 +14049,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -61.50887705090213
         }
       },
@@ -14618,7 +14618,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -63.27281705220321
         }
       },
@@ -14820,7 +14820,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -64.18329848023177
         }
       },
@@ -14951,7 +14951,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -65.21884937792993
         }
       },
@@ -14989,7 +14989,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -65.40961340106787
         }
       },
@@ -15111,7 +15111,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -65.89764371294177
         }
       },
@@ -15149,7 +15149,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -66.18663947160394
         }
       },
@@ -15187,7 +15187,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -66.28431191689106
         }
       },
@@ -15225,7 +15225,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -66.35082543119461
         }
       },
@@ -15257,7 +15257,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -66.40802530131486
         }
       },
@@ -15351,7 +15351,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -66.89792531698436
         }
       },
@@ -15383,7 +15383,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -67.15445577562014
         }
       },
@@ -15462,7 +15462,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -67.27511624201566
         }
       },
@@ -15584,7 +15584,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -67.38589467627662
         }
       },
@@ -15616,7 +15616,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -67.44282925989387
         }
       },
@@ -15648,7 +15648,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -67.75889042768245
         }
       },
@@ -15680,7 +15680,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -67.82457255772601
         }
       },
@@ -15712,7 +15712,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -68.27115669776231
         }
       },
@@ -15810,7 +15810,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -68.85781086082807
         }
       },
@@ -15930,7 +15930,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -69.5904545675096
         }
       },
@@ -15962,7 +15962,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -69.83573784373766
         }
       },
@@ -15994,7 +15994,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -70.00759406116526
         }
       },
@@ -16072,7 +16072,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -71.33195288720071
         }
       },
@@ -16392,7 +16392,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -76.12076043952334
         }
       },
@@ -16430,7 +16430,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -76.22802766708855
         }
       },
@@ -16468,7 +16468,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -76.34464558128207
         }
       },
@@ -16590,7 +16590,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -76.93107328503629
         }
       },
@@ -16694,7 +16694,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -77.16305279386984
         }
       },
@@ -16732,7 +16732,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -77.16595877193936
         }
       },
@@ -16770,7 +16770,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -77.21541463760104
         }
       },
@@ -16852,7 +16852,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -77.39285991024462
         }
       },
@@ -16934,7 +16934,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -77.4720218923112
         }
       },
@@ -17016,7 +17016,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -77.67710878737626
         }
       },
@@ -17054,7 +17054,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -77.6790319964407
         }
       },
@@ -17086,7 +17086,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -77.74000657836473
         }
       },
@@ -17148,7 +17148,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -77.84167770539557
         }
       },
@@ -17278,7 +17278,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -78.16947969594776
         }
       },
@@ -17338,7 +17338,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -78.40317984363128
         }
       },
@@ -17414,7 +17414,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -78.61451339673113
         }
       },
@@ -17566,7 +17566,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -79.09530426910305
         }
       },
@@ -17624,7 +17624,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -79.47660343029656
         }
       },
@@ -17680,7 +17680,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -79.75586888227554
         }
       },
@@ -17736,7 +17736,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -80.18914565699811
         }
       },
@@ -17808,7 +17808,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -80.62758840012407
         }
       },
@@ -18148,7 +18148,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -84.23675630471485
         }
       },
@@ -18186,7 +18186,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -84.39902906093357
         }
       },
@@ -18238,7 +18238,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -84.96326029388524
         }
       },
@@ -18314,7 +18314,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -85.70980450412867
         }
       },
@@ -18398,7 +18398,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -86.17379228514733
         }
       },
@@ -18455,7 +18455,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -86.756990247781
         }
       },
@@ -18487,7 +18487,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -87.11520132054375
         }
       },
@@ -18597,7 +18597,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -87.55230973050698
         }
       },
@@ -18671,7 +18671,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -88.85466787735368
         }
       },
@@ -18765,7 +18765,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -89.27535684818076
         }
       },
@@ -18873,7 +18873,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -90.01598287113916
         }
       },
@@ -19164,7 +19164,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -91.41677718188976
         }
       },
@@ -19330,7 +19330,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -92.43937338160072
         }
       },
@@ -19386,7 +19386,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -92.65115615822174
         }
       },
@@ -19580,7 +19580,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -93.3360821474862
         }
       },
@@ -19612,7 +19612,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -93.35116788140294
         }
       },
@@ -19750,7 +19750,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -94.04028679842804
         }
       },
@@ -19788,7 +19788,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -94.46558611756745
         }
       },
@@ -19826,7 +19826,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -95.04217460407403
         }
       },
@@ -19858,7 +19858,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -95.0501492449348
         }
       },
@@ -19896,7 +19896,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -95.2371784058821
         }
       },
@@ -19928,7 +19928,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -95.6427783368481
         }
       },
@@ -19966,7 +19966,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -95.75215662238861
         }
       },
@@ -19998,7 +19998,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -96.62710244619484
         }
       },
@@ -20030,7 +20030,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -96.6360029546347
         }
       },
@@ -20062,7 +20062,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -96.94378386117478
         }
       },
@@ -20142,7 +20142,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -97.08280184370096
         }
       },
@@ -20208,7 +20208,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -97.38534291358337
         }
       },
@@ -20324,7 +20324,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -98.32850062639318
         }
       },
@@ -20408,7 +20408,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -98.46511299665895
         }
       },
@@ -20560,7 +20560,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -99.41620033650156
         }
       },
@@ -21516,7 +21516,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -106.98261305179494
         }
       },
@@ -21652,7 +21652,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -108.66182581223416
         }
       },
@@ -21999,7 +21999,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "bonusGearMeasured": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -114.36959730106605
         }
       },

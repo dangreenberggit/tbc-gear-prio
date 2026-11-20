@@ -342,7 +342,7 @@ describe.skipIf(!forkPresent)(
 );
 
 /* ------------------------------------------------------------------ *
- * 522-G's ranking, modelled on fork-set-net.test.ts `runScenario`
+ * 522-G's ranking, modeled on fork-set-net.test.ts `runScenario`
  * ------------------------------------------------------------------ */
 
 const SIM_VERSION = "v0.0.101";

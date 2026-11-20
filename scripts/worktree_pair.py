@@ -327,7 +327,7 @@ LONG_PREFIX = "\\\\?\\"
 def long_path(p: str) -> str:
     """`p` with the `\\\\?\\` prefix that lifts Windows' 260-character limit.
 
-    Windows does not normalise a prefixed path, so slashes are turned into
+    Windows does not normalize a prefixed path, so slashes are turned into
     backslashes first.
     """
     p = p.replace("/", "\\")

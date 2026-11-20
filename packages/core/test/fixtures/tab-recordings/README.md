@@ -32,9 +32,12 @@ in this folder.
 
 The 2026-11-18 naming review renamed some stored keys in these files in place,
 by script, with no re-record and no value change: `stepRanking` →
-`bonusGearMeasured`, `stepGearDps` → `bonusGearDps`, `setStepSims` →
-`bonusGearSims`, `skippedSteps` → `skippedIncrements`, `crossingGates` →
-`crossingChecks`, and `belowGate` → `belowNoise`.
+`bonusGearMeasured`, `stepGearDps` → `bonusGearDps`, `stepGearSe` →
+`bonusGearSe`, `setStepSims` → `bonusGearSims`, `skippedSteps` →
+`skippedIncrements`, `crossingGates` → `crossingChecks`, and `belowGate` →
+`belowNoise`. Its pre-merge review (2026-11-19) renamed `bonusGearMeasured`
+to `usesBonusGear` the same way, since the key marks how the ranking valued
+its bonuses, not that each one was measured.
 
 ## When a rule changes on purpose
 

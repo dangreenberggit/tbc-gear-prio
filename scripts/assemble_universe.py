@@ -235,7 +235,7 @@ class SpecProfile:
         self.ep_weights = ep_weights
         # Optional, keyed by the phase a file's weights were transcribed for.
         # ep_weights_for_phase() picks the highest key <= max_phase and falls
-        # back to `ep_weights` (the pre-existing single-file behaviour) when
+        # back to `ep_weights` (the pre-existing single-file behavior) when
         # this is empty or has no entry at or below max_phase -- so a spec
         # that never sets it, like feral, is byte-for-byte unaffected.
         self.ep_weights_by_phase = ep_weights_by_phase or {}
@@ -328,7 +328,7 @@ def arena_season(name: object) -> int | None:
 def _arena_gear_ids() -> frozenset[int]:
     """Arena gear: every item of the four Gladiator season lines in the pinned db.
 
-    Only those four lines are matched. Honour PvP gear ("Veteran's",
+    Only those four lines are matched. Honor PvP gear ("Veteran's",
     "Vindicator's", Marshal) is not arena gear, and a name net that wide
     doubles the count to 1,011 and sweeps in vanilla world drops such as 19822
     Zandalar Vindicator's Breastplate, which is Zul'Gurub loot.
@@ -486,7 +486,7 @@ SPEC_PROFILES: dict[str, SpecProfile] = {
         # Polearms: the sim says a druid can hold one, and it is right. This is
         # a pool call on top of that, ruled by the SME gate for this branch --
         # see .scratch/handoffs/sme-rank-judgment-upgrades-dedup-wowsims-feral-
-        # polearms.md. Cheap to delete if TBC itemisation ever changes under
+        # polearms.md. Cheap to delete if TBC itemization ever changes under
         # the pin, which is the only thing holding the argument up.
         policy_excluded_weapon_types=frozenset({WEAPON_POLEARM}),
         policy_exclusion_note=(
@@ -1010,7 +1010,7 @@ CURATED_SET_PHASE: dict[str, int] = {
 
 
 def curated_set_phase(label: str) -> int | None:
-    """The phase a curated set is BiS for, or None if unrecognised.
+    """The phase a curated set is BiS for, or None if unrecognized.
 
     `feral_p2_6p` / `p2_9p` are the same phase split by tier-bonus count, so
     the leading `pN` is the phase and the suffix is a variant. The same split
@@ -1335,7 +1335,7 @@ def _faction_key(name: str) -> str:
 
 
 def faction_ids_by_key() -> dict[str, int]:
-    """Normalised faction name -> Faction.dbc id, from data/faction_ids.json.
+    """Normalized faction name -> Faction.dbc id, from data/faction_ids.json.
 
     Prose rep rows arrive as a display string with no id ("Requires Exalted with
     Lower City"). db.json can only resolve the 10 factions wowsims models, and
@@ -1494,7 +1494,7 @@ def map_db_source(
         if boss and GARBLED_NPC_NAME_RE.search(str(boss)):
             boss = str(boss).split('"]', 1)[0]
         if zone:
-            # Without this the heroic drops were labelled `raid` and then
+            # Without this the heroic drops were labeled `raid` and then
             # dropped at membership for naming a zone phase_raids.json has
             # never listed -- the item did not look excluded, it looked like a
             # raid drop from a raid that does not exist.
@@ -1577,7 +1577,7 @@ def carries_locus(source: dict) -> bool:
     return bool(source.get("kind") == "heroic" and source.get("dungeon"))
 
 
-# Wowhead's own typos, folded onto the phase_raids.json spelling. A misspelt
+# Wowhead's own typos, folded onto the phase_raids.json spelling. A misspelled
 # zone is not merely cosmetic: it never matches a zone-keyed lookup, so the
 # item advertises a raid that does not exist, and add_source keeps it as a
 # second row beside the correct one.
@@ -1656,11 +1656,11 @@ def drop_boss(phrase: str) -> str:
 
 # The guides write the profession two lossy ways (carry-forward 53): a trailing
 # note off the same " - " splice as ticket 48 ("Leatherworking - BoP only"), and
-# a leading specialisation ("Master Swordsmith Blacksmithing"). Both make a real
+# a leading specialization ("Master Swordsmith Blacksmithing"). Both make a real
 # profession fail equality against itself, which is only display-noise until
 # something groups or filters by it.
 #
-# The specialisation is dropped rather than relocated: no consumer reads it, and
+# The specialization is dropped rather than relocated: no consumer reads it, and
 # db.json's own crafted sources carry the bare enum name with no field for it, so
 # keeping it would mean a field only the prose path can ever populate.
 #
@@ -1675,7 +1675,7 @@ CRAFT_PROFESSIONS = frozenset(
 def canonical_profession(phrase: str) -> str | None:
     """Bare profession name from a guide phrase, or None if it names none."""
     head = phrase.split(TOKEN_BOSS_SEPARATOR, 1)[0].strip()
-    # The specialisation is a prefix, so the profession is the last word.
+    # The specialization is a prefix, so the profession is the last word.
     tail = head.split()[-1] if head.split() else ""
     for known in CRAFT_PROFESSIONS:
         if tail.lower() == known.lower():
@@ -1757,7 +1757,7 @@ def parse_wowhead_source(text: str | None) -> list[dict]:
         out.append({"kind": "pvp", "via": "arena"})
     elif "honor points" in lower or ("pvp:" in lower and "honor" in lower):
         honor: dict = {"kind": "pvp", "via": "honor"}
-        # "Vendor: Honor Points (Season 3)": the season tells one honour item
+        # "Vendor: Honor Points (Season 3)": the season tells one honor item
         # from another in the tab, as it does for arena rows (ticket 681).
         season = re.search(r"season\s*(\d)", text, re.I)
         if season:
@@ -2374,7 +2374,7 @@ def assemble(
     #
     # `unknown` rather than a guessed badge cost or faction: the origin really
     # is unrecorded, and carrying no zone is what keeps these out of the raid
-    # and boss filters, which is the behaviour these items need.
+    # and boss filters, which is the behavior these items need.
     curated_unsourced: set[int] = set()
     # A curated item can also have a *real* source that is still list-only
     # shaped -- e.g. 28430 Lionheart Executioner's db.json source is a genuine

@@ -604,7 +604,7 @@ def relevant_paths(changed_files: set[str], ticket_paths: set[str]) -> list[str]
     Set intersection, so cost is O(len(ticket_paths)) per ticket rather than
     anything walking the diff; the diff is hashed once by the caller.
 
-    Both sides are normalised to posix. `git diff --name-only` already emits
+    Both sides are normalized to posix. `git diff --name-only` already emits
     forward slashes on Windows, but tickets are handwritten and a Windows
     backslash in one would otherwise silently never match.
 
@@ -1403,7 +1403,7 @@ def check_relevance_reports_every_matched_path() -> list[str]:
     return [] if got == want else [f"matched: got {got}, want {want}"]
 
 
-def check_relevance_normalises_windows_separators() -> list[str]:
+def check_relevance_normalizes_windows_separators() -> list[str]:
     """Tickets are handwritten; a backslash path must still match a diff."""
     got = relevant_paths({"packages/core/src/rank.ts"}, {"packages\\core\\src\\rank.ts"})
     return [] if got == ["packages/core/src/rank.ts"] else [f"winsep: got {got}"]
@@ -2525,7 +2525,7 @@ CHECKS = (
     check_ignores_nested_and_vendored_copies,
     check_relevance_matches_only_on_overlap,
     check_relevance_reports_every_matched_path,
-    check_relevance_normalises_windows_separators,
+    check_relevance_normalizes_windows_separators,
     check_extract_takes_dot_slash_prefix,
     check_extract_still_rejects_nested_copies,
     check_relevance_ignores_case,

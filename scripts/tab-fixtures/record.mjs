@@ -431,7 +431,7 @@ async function main() {
       `${Math.round((Date.now() - started) / 1000)}s`
     );
 
-    // Serialised in the page with a replacer that throws on NaN/Infinity:
+    // Serialized in the page with a replacer that throws on NaN/Infinity:
     // returnByValue would silently turn them into null.
     const got = await evaluate(
       send,

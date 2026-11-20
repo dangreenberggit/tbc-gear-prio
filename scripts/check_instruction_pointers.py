@@ -231,7 +231,7 @@ def _match_heading(heads: list[tuple[int, str]], rest: str) -> tuple[list[str], 
     """Headings that the text after `§ ` names, and how many characters of
     `rest` the match used. Full text first (longest wins), then a number."""
     flat = rest[:400].replace("\n", " ")
-    # Map each normalised character back to its index in flat.
+    # Map each normalized character back to its index in flat.
     normed, index = [], []
     prev_space = True
     for i, ch in enumerate(flat):
@@ -372,7 +372,7 @@ def pointers_in(site: Doc, world: World) -> list[Pointer]:
                 # The heading's end is unknown (skipped or dead target). A
                 # numbered heading's "1." and code in the heading are not a
                 # sentence break, nor is a "." inside a heading ("vs. advisory");
-                # a "." before a capitalised word, and other punctuation, are.
+                # a "." before a capitalized word, and other punctuation, are.
                 # After a ~/ pointer CI skipped, the chain is always followed:
                 # the local run knows the heading's end and checks the chain
                 # exactly, so CI never fails text that passes locally.
@@ -580,7 +580,7 @@ def run_refs(world: World, arg: str, out, err, sites: bool = True) -> int:
 
 def run_mermaid(world: World, focus: str | None, out) -> int:
     """A file-level chart: one node per file, one edge per file pair,
-    labelled with its pointer count; an edge with any dead pointer is red."""
+    labeled with its pointer count; an edge with any dead pointer is red."""
     pointers, _ = collect(world)
     edges: dict[tuple[str, str], list[Pointer]] = {}
     for p in pointers:
@@ -698,7 +698,7 @@ def t_missing_target_file_fails():
     assert rc == 1 and "docs/agents/nope.md" in err and "missing" in err, (rc, err)
 
 
-def t_full_heading_normalised_and_wrapped():
+def t_full_heading_normalized_and_wrapped():
     rc, out, err = _check(
         {
             "docs/workflow.md": (
@@ -824,7 +824,7 @@ def t_style_skill_name():
         assert rc == 1 and "1 style" in out and "SKILL.md" in err, (text, out, err)
 
 
-def t_style_parenthesised():
+def t_style_parenthesized():
     rc, out, err = _style("See `docs/agents/a.md` (§ Heading one).\n")
     assert rc == 1 and "1 style" in out and "parentheses" in err, (out, err)
 

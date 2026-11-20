@@ -1,7 +1,7 @@
 /**
  * Stub for the fork's `virtual:i18next-loader` module.
  *
- * That specifier is not a file. The fork's Vite build materialises it with the
+ * That specifier is not a file. The fork's Vite build materializes it with the
  * `vite-plugin-i18next-loader` plugin, which walks its locale directories and
  * emits the bundled translation resources. Vitest runs the fork's `.ts` files
  * through its own Vite pipeline without that plugin, so the import resolves

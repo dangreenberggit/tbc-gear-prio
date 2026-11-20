@@ -10,7 +10,7 @@ import os from "node:os";
 
 export const USE_PROCESS_GROUPS = process.platform !== "win32";
 
-// The group is signalled even after the server has exited: its children
+// The group is signaled even after the server has exited: its children
 // (tsc --watch) are still running in it. A child that was not started
 // detached leads no group, so it falls back to a plain kill.
 export function killTree(child, group = USE_PROCESS_GROUPS) {

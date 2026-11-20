@@ -6,17 +6,17 @@ ranking engine into vendor/tbc-new-fork/ui/features/upgrades/model/engine/.
 E-W3 (the fixture-parity test, packages/core/test/wowsims-fork-parity.test.ts)
 is the only thing that proves the port still *behaves* like packages/core.
 Per plan §8's "E-W3 runs here, not in the fork" decision, E-W3 lives in this
-repo rather than travelling with the fork, so a fork-only edit to a ported
-file could change its behaviour with nothing inside the fork noticing.
+repo rather than traveling with the fork, so a fork-only edit to a ported
+file could change its behavior with nothing inside the fork noticing.
 
 This script is the compensating control named there: it re-hashes every file
 engine.md lists and fails loudly the moment a file's content no longer
 matches its recorded hash. Read that sentence carefully -- a hash match is
-NOT proof of correct behaviour. It only proves nobody has touched the file's
+NOT proof of correct behavior. It only proves nobody has touched the file's
 bytes since the hash was recorded. Someone can still break the port while
 staying byte-identical to a *stale but wrong* hash (if the hash itself was
 never regenerated after the last real edit), and this script cannot see
-that. Only E-W3 tests behaviour; this only tests "did anything change
+that. Only E-W3 tests behavior; this only tests "did anything change
 without anyone re-running E-W3 and updating the table."
 
 Two failure modes this script distinguishes, matching engine.md's job:

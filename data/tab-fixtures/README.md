@@ -45,7 +45,7 @@ only a bonus that is active, from a slot that holds a piece of that set; its
 piece counts are the gear's; and it crosses or reaches only a count at which
 its set has a bonus. The generator reads those counts from the fork's Go set
 definitions (`sim/**/*.go`). Every set row is marked as valued on its bonus
-gear (`bonusGearMeasured`), as on a real run, and a row that more pieces of its set would take to a bonus lists
+gear (`usesBonusGear`), as on a real run, and a row that more pieces of its set would take to a bonus lists
 that bonus, so the popover shows the bonuses a row can reach.
 `mock-set-bonus` is on the warrior page because no feral preset wears a set
 one piece short of a bonus, and a crossing row needs that.

@@ -88,7 +88,7 @@ type MockSetContext = {
   piecesAfterSwap: number;
   nextThreshold: number | null;
   crossesThreshold: boolean;
-  bonusGearMeasured: true;
+  usesBonusGear: true;
   singleDeltaDps: number;
   singleBreaks?: SetBreak[];
   futureBonuses?: MockFuture[];
@@ -807,7 +807,7 @@ class Builder {
         piecesAfterSwap: after,
         nextThreshold: counts.find((t) => t > after) ?? null,
         crossesThreshold: crosses,
-        bonusGearMeasured: true,
+        usesBonusGear: true,
         singleDeltaDps: deltaDps,
         ...(singleBreaks.length > 0 ? { singleBreaks } : {}),
         ...(futures.length > 0
