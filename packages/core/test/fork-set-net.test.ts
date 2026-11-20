@@ -358,9 +358,7 @@ type Scenario = {
    * differs from sim to sim (ticket 863).
    */
   failStack?: (call: number) => string;
-  /** `Deps.partnerRule` (ticket 511); absent means the engine's default. */
-  partnerRule?: string;
-  /** `Deps.setScreenMode` (ticket 511, K5R); absent means off. */
+  /** `Deps.setScreenMode` (ticket 511, K5ON): "on" or "off"; absent means off. */
   setScreenMode?: string;
   /** A store shared between runs, to see what the ranking cache serves. */
   store?: Record<string, unknown>;
@@ -455,20 +453,6 @@ type ForkRanking = {
     dps?: number;
     cleared: boolean;
   }>;
-  partnerAudit?: Array<{
-    itemId: number;
-    setId: number;
-    threshold: number;
-    audit: {
-      combinations: Array<{
-        itemIds: number[];
-        deltaDps: number | null;
-        estimate: number | null;
-        plainEstimate: number | null;
-      }>;
-      chosen: { itemIds: number[]; deltaDps: number };
-    };
-  }>;
   setBonuses?: Array<{
     setId: number;
     threshold: number;
@@ -497,28 +481,8 @@ type ForkRanking = {
     unmeasured?: string;
     counted: boolean;
   }>;
-  setScreen?: {
-    mode: string;
-    seed: number;
-    pairIterations: number[];
-    countIterations: number[];
-    sets: Array<{
-      setId: number;
-      worn: number;
-      reach: number;
-      packageItemIds: number[];
-      pairs: Array<{ iterations: number; dps?: number; pairedSe?: number }>;
-      countSims: Array<{
-        iterations: number;
-        count: number;
-        dps?: number;
-        se?: number;
-        pairedSeToPrev?: number;
-      }>;
-    }>;
-    simmed: number;
-    fromStore: number;
-  };
+  /** The set screen's "on" readings (`OnScreen`, below). */
+  setScreen?: OnScreen;
 };
 
 async function runScenario(scenario: Scenario): Promise<{
@@ -688,7 +652,6 @@ async function runScenario(scenario: Scenario): Promise<{
     itemEp: await statsOnlyItemEp(feralWeights),
     pool,
     ...(scenario.measureSetBonuses ? { measureSetBonuses: true } : {}),
-    ...(scenario.partnerRule ? { partnerRule: scenario.partnerRule } : {}),
     ...(scenario.setScreenMode
       ? { setScreenMode: scenario.setScreenMode }
       : {}),
@@ -871,8 +834,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     const viewMod = await importForkUpgrades<{
       rankableSetPotential: (
         item: { setContext?: unknown },
-        cutoff: { absDps: number },
-        setCredit?: "full" | "split"
+        cutoff: { absDps: number }
       ) => number;
     }>("engine/view.ts");
     // Malorne 2pc worn in hands+legs, Thunderheart pool in those slots, and
@@ -899,9 +861,9 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
       { setId: 640, threshold: 2, dps: 40 },
     ]);
     expect(near(hands.deltaDps, 60, 0.5)).toBe(true);
-    expect(
-      near(viewMod.rankableSetPotential(hands, FLOOR, "full"), 430, 0.5)
-    ).toBe(true);
+    expect(near(viewMod.rankableSetPotential(hands, FLOOR), 430, 0.5)).toBe(
+      true
+    );
   });
 
   it("case 8: flag absent — no brokenSetValues; the flag adds only the ladder, check and bonus-gear sims", async () => {
@@ -930,15 +892,15 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
     expect(on.runCount - off.runCount).toBe(2 + 6 + 5 + 1);
   });
 
-  it("case 9: split credit reorders via applyView", async () => {
+  it("case 9: set credit reorders via applyView", async () => {
     const viewMod = await importForkUpgrades<{
       applyView: (
         r: unknown,
-        v: { withSetPotential?: boolean; setCredit?: "full" | "split" }
+        v: { withSetPotential?: boolean }
       ) => { rows: Array<{ itemId: number }> };
     }>("engine/view.ts");
-    // A Ranking with two set rows whose full vs split ordering differs, plus a
-    // non-set row that sits between them under split.
+    // A Ranking with a set row and a non-set row whose order the set credit
+    // reverses.
     const ranking = {
       baseline: { dps: 3000 },
       cutoff: { absDps: 3.4, absPct: 0.1 },
@@ -970,21 +932,12 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
         },
       ],
     };
-    // full: row1 = 10 + 200 = 210 > row2 = 65 -> [1, 2].
-    const full = viewMod.applyView(ranking, {
-      withSetPotential: true,
-      setCredit: "full",
-    });
-    expect(full.rows.map((r) => r.itemId)).toEqual([1, 2]);
-    // split: row1 = 10 + 200/4 = 60 < row2 = 65 -> reorders to [2, 1].
-    const split = viewMod.applyView(ranking, {
-      withSetPotential: true,
-      setCredit: "split",
-    });
-    expect(split.rows.map((r) => r.itemId)).toEqual([2, 1]);
-    // omitted setCredit behaves as full.
-    const dflt = viewMod.applyView(ranking, { withSetPotential: true });
-    expect(dflt.rows.map((r) => r.itemId)).toEqual([1, 2]);
+    // With set potential: row1 = 10 + 200 = 210 > row2 = 65 -> [1, 2].
+    const withCredit = viewMod.applyView(ranking, { withSetPotential: true });
+    expect(withCredit.rows.map((r) => r.itemId)).toEqual([1, 2]);
+    // Without it: row1 = 10 < row2 = 65 -> [2, 1].
+    const without = viewMod.applyView(ranking, { withSetPotential: false });
+    expect(without.rows.map((r) => r.itemId)).toEqual([2, 1]);
   });
 });
 
@@ -992,13 +945,12 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
  * Pure view functions (no adapter): credit views and the fallback rule.
  * ------------------------------------------------------------------ */
 
-describe.skipIf(!forkPresent)("rankableSetPotential credit views (467)", () => {
-  it("full and split credit; commit-break subtraction; missing-dps fallback", async () => {
+describe.skipIf(!forkPresent)("rankableSetPotential credit (467)", () => {
+  it("credit; commit-break subtraction; missing-dps fallback", async () => {
     const viewMod = await importForkUpgrades<{
       rankableSetPotential: (
         item: { setContext?: unknown },
-        cutoff: { absDps: number },
-        setCredit?: "full" | "split"
+        cutoff: { absDps: number }
       ) => number;
     }>("engine/view.ts");
     const { rankableSetPotential } = viewMod;
@@ -1012,10 +964,7 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit views (467)", () => {
         ],
       },
     };
-    // full = 50 + 80 = 130; split = 50/2 + 80/4 = 25 + 20 = 45.
-    expect(rankableSetPotential(ctx, floor, "full")).toBe(130);
-    expect(rankableSetPotential(ctx, floor, "split")).toBe(45);
-    // Default is full.
+    // 50 + 80 = 130.
     expect(rankableSetPotential(ctx, floor)).toBe(130);
 
     // A break on the future's own path subtracts (490).
@@ -1031,7 +980,7 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit views (467)", () => {
         ],
       },
     };
-    expect(rankableSetPotential(withBreak, floor, "full")).toBe(40);
+    expect(rankableSetPotential(withBreak, floor)).toBe(40);
     // A measured break on the top package alone is disclosure, not charged:
     // the row's own path may not need it (490).
     const topPackageOnly = {
@@ -1040,7 +989,7 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit views (467)", () => {
         commitBreaks: [{ setId: 640, threshold: 2, dps: 40 }],
       },
     };
-    expect(rankableSetPotential(topPackageOnly, floor, "full")).toBe(80);
+    expect(rankableSetPotential(topPackageOnly, floor)).toBe(80);
 
     // Fallback: any future bonus lacking dps -> whole credit 0.
     const unmeasured = {
@@ -1048,8 +997,7 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit views (467)", () => {
         futureBonuses: [{ threshold: 4, piecesNeeded: 4 }],
       },
     };
-    expect(rankableSetPotential(unmeasured, floor, "full")).toBe(0);
-    expect(rankableSetPotential(unmeasured, floor, "split")).toBe(0);
+    expect(rankableSetPotential(unmeasured, floor)).toBe(0);
 
     // Below-floor component is dropped.
     const tiny = {
@@ -1057,7 +1005,7 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit views (467)", () => {
         futureBonuses: [{ threshold: 2, piecesNeeded: 2, dps: 4 }],
       },
     };
-    expect(rankableSetPotential(tiny, floor, "full")).toBe(0);
+    expect(rankableSetPotential(tiny, floor)).toBe(0);
   });
 });
 
@@ -1077,8 +1025,7 @@ const FLOOR = { absDps: 5 };
 type ViewMod = {
   rankableSetPotential: (
     item: { setContext?: unknown },
-    cutoff: { absDps: number },
-    setCredit?: "full" | "split"
+    cutoff: { absDps: number }
   ) => number;
 };
 
@@ -1181,12 +1128,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
         { threshold: 4, piecesNeeded: 4, dps: 80 },
       ]);
       // 502: each row shows the whole 4pc swap, 30 + 390 = pkgΔ4 420.
-      expect(
-        near(view.rankableSetPotential(row, FLOOR, "full"), 390, 0.5)
-      ).toBe(true);
-      expect(near(view.rankableSetPotential(row, FLOOR, "split"), 5, 0.5)).toBe(
-        true
-      );
+      expect(near(view.rankableSetPotential(row, FLOOR), 390, 0.5)).toBe(true);
     }
     // One ladder rung per worn Malorne piece (4), two check sims for each of
     // the counts 2, 3 and 4 (tickets 511 and 512), and the bonus gears no
@@ -1196,19 +1138,14 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     // that newly loses Malorne 2pc (Gauntlets + Cover, shared by those two
     // rows; Gauntlets + Chestguard; Gauntlets + Pauldrons).
     expect(on.runCount - off.runCount).toBe(4 + 6 + 5 + 3);
-    // C31 / ADR-0034: rows are not additive in either credit view. Each row
-    // shows the whole swap; four rows sum to 1560 under full and 20 under split.
+    // C31 / ADR-0034: rows are not additive. Each row shows the whole swap;
+    // four rows sum to 1560.
     const rows = TH_FOUR_IDS.map((id) => thRow(r, id));
     const fullSum = rows.reduce(
-      (s, row) => s + view.rankableSetPotential(row, FLOOR, "full"),
-      0
-    );
-    const splitSum = rows.reduce(
-      (s, row) => s + view.rankableSetPotential(row, FLOOR, "split"),
+      (s, row) => s + view.rankableSetPotential(row, FLOOR),
       0
     );
     expect(near(fullSum, 1560, 2)).toBe(true);
-    expect(near(splitSum, 20, 2)).toBe(true);
   });
 
   it("476-B: worn Malorne 5 — both thresholds lost by the package, net4 sign fixed", async () => {
@@ -1233,9 +1170,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
       { setId: 640, threshold: 2, dps: 40 },
     ]);
     // 502: 50 + 100 − 70, then + 80 + 200 − 40.
-    expect(near(view.rankableSetPotential(row, FLOOR, "full"), 320, 0.5)).toBe(
-      true
-    );
+    expect(near(view.rankableSetPotential(row, FLOOR), 320, 0.5)).toBe(true);
   });
 
   it("477-P: a commit break without a measured B zeroes the credit", async () => {
@@ -1246,8 +1181,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
         commitBreaks: [{ setId: 640, threshold: 2 }],
       },
     };
-    expect(view.rankableSetPotential(item, FLOOR, "full")).toBe(0);
-    expect(view.rankableSetPotential(item, FLOOR, "split")).toBe(0);
+    expect(view.rankableSetPotential(item, FLOOR)).toBe(0);
   });
 
   it("477-T: the legs row's substituted package breaks Malorne 2pc — measured, net shown", async () => {
@@ -1301,9 +1235,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     for (const f of legs.setContext?.futureBonuses ?? []) {
       expect(f.breaks ?? []).toEqual([]);
     }
-    expect(near(view.rankableSetPotential(legs, FLOOR, "full"), 580, 0.5)).toBe(
-      true
-    );
+    expect(near(view.rankableSetPotential(legs, FLOOR), 580, 0.5)).toBe(true);
     // The ladder sims one rung per worn Malorne piece (3), however many rows
     // share a break; (640,3) reads 0 and is not counted, so one B is kept.
     // The others are the checks of counts 2 to 5 (8, ticket 511) and the
@@ -1323,9 +1255,9 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     ] as const) {
       const row = thRow(r, id);
       expect(row.setContext?.commitBreaks ?? []).toEqual([]);
-      expect(
-        near(view.rankableSetPotential(row, FLOOR, "full"), credit, 0.5)
-      ).toBe(true);
+      expect(near(view.rankableSetPotential(row, FLOOR), credit, 0.5)).toBe(
+        true
+      );
     }
   });
 
@@ -1416,17 +1348,14 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     expect(owned.setContext?.piecesWornBefore).toBe(2);
     expect(owned.setContext?.piecesAfterSwap).toBe(2);
     expect(owned.setContext?.futureBonuses).toBeUndefined();
-    expect(view.rankableSetPotential(owned, FLOOR, "full")).toBe(0);
-    expect(view.rankableSetPotential(owned, FLOOR, "split")).toBe(0);
+    expect(view.rankableSetPotential(owned, FLOOR)).toBe(0);
     const head = thRow(r, THUNDERHEART.head);
     expect((head.setContext?.futureBonuses ?? []).map(fut)).toEqual([
       { threshold: 4, piecesNeeded: 2, dps: 80 },
       { threshold: 5, piecesNeeded: 3, dps: undefined },
     ]);
     // 502: 80 + the chest's own 100.
-    expect(near(view.rankableSetPotential(head, FLOOR, "full"), 180, 0.5)).toBe(
-      true
-    );
+    expect(near(view.rankableSetPotential(head, FLOOR), 180, 0.5)).toBe(true);
   });
 });
 
@@ -1458,20 +1387,12 @@ function bonusOf(ranking: ForkRanking, setId: number, threshold: number) {
   );
 }
 
-type SetCreditRule = "highest-credit" | "full-path";
-
 type SubLineMod = ViewMod & {
-  setPotentialCredit: (
-    ctx: unknown,
-    cutoff: { absDps: number },
-    setCredit?: "full" | "split",
-    rule?: SetCreditRule
-  ) => number;
+  setPotentialCredit: (ctx: unknown, cutoff: { absDps: number }) => number;
   setCreditUnmeasured: (ctx: unknown) => boolean;
   setPotentialTerms: (
     ctx: unknown,
-    cutoff: { absDps: number },
-    rule?: SetCreditRule
+    cutoff: { absDps: number }
   ) => {
     credit: number;
     creditedThreshold: number;
@@ -1493,7 +1414,7 @@ type SubLineMod = ViewMod & {
   ) => "not_counted" | "hover_hint" | null;
   applyView: (
     r: unknown,
-    v: { withSetPotential?: boolean; setCredit?: "full" | "split" }
+    v: { withSetPotential?: boolean }
   ) => { rows: Array<{ itemId: number }> };
 };
 
@@ -1559,12 +1480,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       ]);
       expect(row.setContext?.commitBreaks ?? []).toEqual([]);
       // 502: 40 + the 2pc partner's own 100; the 4pc floors to 0.
-      expect(
-        near(view.rankableSetPotential(row, FLOOR, "full"), 140, 0.5)
-      ).toBe(true);
-      expect(
-        near(view.rankableSetPotential(row, FLOOR, "split"), 20, 0.5)
-      ).toBe(true);
+      expect(near(view.rankableSetPotential(row, FLOOR), 140, 0.5)).toBe(true);
     }
     for (const id of [MALORNE.hands, MALORNE.legs]) {
       const row = thRow(r, id);
@@ -1587,9 +1503,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
         [5, []],
       ]);
       // 502: 40 + the chest's own 100.
-      expect(
-        near(view.rankableSetPotential(row, FLOOR, "full"), 140, 0.5)
-      ).toBe(true);
+      expect(near(view.rankableSetPotential(row, FLOOR), 140, 0.5)).toBe(true);
     }
     const top3 = view
       .applyView(r, { withSetPotential: true })
@@ -1611,39 +1525,11 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       { threshold: 4, piecesNeeded: 4, dps: 30, breaks: [TH2_BREAK] },
       { threshold: 5, piecesNeeded: 5, dps: undefined, breaks: [] },
     ]);
-    // Each rule on this row directly, so the rule the engine does not ship
-    // still runs. Since 502 the path pieces' own stats count: R_2 = 40 + 100,
-    // R_4 = 140 + 30 + 100 + 0 − 50 = 220, so both rules credit the 4pc
-    // (full 220, split 20 + 7.5 − 50 = −22.5). 502-B separates the rules.
+    // Since 502 the path pieces' own stats count: R_2 = 40 + 100,
+    // R_4 = 140 + 30 + 100 + 0 − 50 = 220, so the 4pc is credited.
     const ctx = chest.setContext;
-    expect(
-      near(view.setPotentialCredit(ctx, FLOOR, "full", "full-path"), 220, 0.5)
-    ).toBe(true);
-    expect(
-      near(
-        view.setPotentialCredit(ctx, FLOOR, "split", "full-path"),
-        -22.5,
-        0.5
-      )
-    ).toBe(true);
-    expect(
-      near(
-        view.setPotentialCredit(ctx, FLOOR, "full", "highest-credit"),
-        220,
-        0.5
-      )
-    ).toBe(true);
-    expect(
-      near(
-        view.setPotentialCredit(ctx, FLOOR, "split", "highest-credit"),
-        -22.5,
-        0.5
-      )
-    ).toBe(true);
-    const full = view.rankableSetPotential(chest, FLOOR, "full");
-    const split = view.rankableSetPotential(chest, FLOOR, "split");
-    expect(near(full, 220, 0.5)).toBe(true);
-    expect(near(split, -22.5, 0.5)).toBe(true);
+    expect(near(view.setPotentialCredit(ctx, FLOOR), 220, 0.5)).toBe(true);
+    expect(near(view.rankableSetPotential(chest, FLOOR), 220, 0.5)).toBe(true);
   });
 
   it("490-C: a Nordrassil row whose only bonus needs the Thunderheart 2pc break gets ON = OFF", async () => {
@@ -1666,8 +1552,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
         { threshold: 5, piecesNeeded: 5, dps: undefined, breaks: [] },
       ]);
       expect(row.setContext!.commitPackageDeltaDps).toBeUndefined();
-      expect(view.rankableSetPotential(row, FLOOR, "full")).toBe(0);
-      expect(view.rankableSetPotential(row, FLOOR, "split")).toBe(0);
+      expect(view.rankableSetPotential(row, FLOOR)).toBe(0);
     }
   });
 
@@ -1755,12 +1640,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
       { threshold: 4, piecesNeeded: 3, dps: 80 },
     ]);
     // 502: 80 + chest and legs, each 150 − 50 = 100 of own stats.
-    expect(near(view.rankableSetPotential(head, FLOOR, "full"), 280, 0.5)).toBe(
-      true
-    );
-    expect(near(view.rankableSetPotential(head, FLOOR, "split"), 20, 0.5)).toBe(
-      true
-    );
+    expect(near(view.rankableSetPotential(head, FLOOR), 280, 0.5)).toBe(true);
     expect(runCount).toBe(PRE_FIX_492_RUNS + 1);
   });
 });
@@ -1830,9 +1710,7 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
       ]);
       // 502: 80 + two other pieces at 150 − 50 = 100 each − 40. K5: the
       // credited gear's sim, 3530 − 3140 = 390, less the row's 150.
-      expect(
-        near(view.rankableSetPotential(row, FLOOR, "full"), 240, 0.5)
-      ).toBe(true);
+      expect(near(view.rankableSetPotential(row, FLOOR), 240, 0.5)).toBe(true);
     }
   });
 
@@ -1880,10 +1758,7 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
       expect(future[1]!.dps).toBeUndefined();
       expect(future[1]!.bonusGearDps).toBeCloseTo(390, 9);
       expect(row.deltaDps).toBeCloseTo(d, 9);
-      expect(view.rankableSetPotential(row, FLOOR, "full")).toBeCloseTo(
-        credit,
-        9
-      );
+      expect(view.rankableSetPotential(row, FLOOR)).toBeCloseTo(credit, 9);
       expect(view.setBonusSubLine(row.setContext, true)).toBe("hover_hint");
     }
   });
@@ -1954,7 +1829,7 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
         [4, "break-unmeasured"],
       ]);
       expect(futures.every((f) => f.bonusGearDps === undefined)).toBe(true);
-      expect(view.rankableSetPotential(row, FLOOR, "full")).toBe(0);
+      expect(view.rankableSetPotential(row, FLOOR)).toBe(0);
       expect(view.setBonusSubLine(row.setContext, true)).toBe("not_counted");
     }
   });
@@ -2097,9 +1972,10 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
     expect(p4!.packageDeltaDps!).toBeCloseTo(320, 9);
     for (const id of p4!.packageItemIds!) {
       const row = thRow(r, id);
-      expect(
-        row.deltaDps + view.rankableSetPotential(row, FLOOR, "full")
-      ).toBeCloseTo(p4!.packageDeltaDps!, 9);
+      expect(row.deltaDps + view.rankableSetPotential(row, FLOOR)).toBeCloseTo(
+        p4!.packageDeltaDps!,
+        9
+      );
     }
   });
 
@@ -2123,7 +1999,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
         ],
       },
     };
-    expect(view.rankableSetPotential(allFloored, FLOOR, "full")).toBe(0);
+    expect(view.rankableSetPotential(allFloored, FLOOR)).toBe(0);
 
     const twoFloored = {
       futureBonuses: [
@@ -2137,11 +2013,12 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
       ],
     };
     expect(
-      view.rankableSetPotential({ setContext: twoFloored }, FLOOR, "full")
+      view.rankableSetPotential({ setContext: twoFloored }, FLOOR)
     ).toBeCloseTo(105, 9);
     expect(view.setPotentialTerms(twoFloored, FLOOR).creditedThreshold).toBe(4);
 
-    // The rules differ when a later eligible increment lowers the total.
+    // A later eligible increment that lowers the total is not credited: the
+    // credit stops at the bonus where the total is highest.
     const discriminator = {
       futureBonuses: [
         {
@@ -2159,18 +2036,10 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
         },
       ],
     };
-    expect(
-      view.setPotentialCredit(discriminator, FLOOR, "full", "highest-credit")
-    ).toBeCloseTo(140, 9);
-    expect(
-      view.setPotentialCredit(discriminator, FLOOR, "split", "highest-credit")
-    ).toBeCloseTo(20, 9);
-    expect(
-      view.setPotentialCredit(discriminator, FLOOR, "full", "full-path")
-    ).toBeCloseTo(-30, 9);
-    expect(
-      view.setPotentialCredit(discriminator, FLOOR, "split", "full-path")
-    ).toBeCloseTo(-172.5, 9);
+    expect(view.setPotentialCredit(discriminator, FLOOR)).toBeCloseTo(140, 9);
+    expect(view.setPotentialTerms(discriminator, FLOOR).creditedThreshold).toBe(
+      2
+    );
   });
 
   it("502-C: a path piece's own stats are its single plus what it breaks alone, less a 2pc it crosses alone", async () => {
@@ -2382,9 +2251,9 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
     const res = view.setPotentialTerms(chest.setContext, FLOOR);
     expect(res.creditedThreshold).toBe(4);
     expect(res.terms.filter((t) => t.kind === "break")).toEqual([]);
-    expect(view.rankableSetPotential(chest, FLOOR, "full")).toBeCloseTo(268, 9);
+    expect(view.rankableSetPotential(chest, FLOOR)).toBeCloseTo(268, 9);
     expect(
-      chest.deltaDps + view.rankableSetPotential(chest, FLOOR, "full")
+      chest.deltaDps + view.rankableSetPotential(chest, FLOOR)
     ).toBeCloseTo(p4!.packageDeltaDps!, 9);
   });
 });
@@ -2789,7 +2658,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
         ],
       },
     ]);
-    const credit = view.rankableSetPotential(mantle, FLOOR, "full");
+    const credit = view.rankableSetPotential(mantle, FLOOR);
     expect(credit).toBeCloseTo(380, 9);
     expect(mantle.deltaDps + credit).toBeCloseTo(
       bonusOf(r, 640, 4)!.packageDeltaDps!,
@@ -3210,7 +3079,7 @@ describe.skipIf(!forkPresent)(
       // G10-4: a within-noise count among the futures does not zero the row.
       expect(futureOf(hands, 3)?.belowNoise).toBe(true);
       expect(view.setCreditUnmeasured(hands.setContext)).toBe(false);
-      const credit = view.rankableSetPotential(hands, FLOOR, "full");
+      const credit = view.rankableSetPotential(hands, FLOOR);
       expect(credit).toBeCloseTo(390, 9);
       // W-S1: ON = the credited gear's sim = the 4-piece package delta.
       expect(hands.deltaDps + credit).toBeCloseTo(490, 9);
@@ -3242,7 +3111,7 @@ describe.skipIf(!forkPresent)(
       // W-S1 on every row.
       for (const id of TH_FOUR) {
         const row = thRow(r, id);
-        const c = view.rankableSetPotential(row, FLOOR, "full");
+        const c = view.rankableSetPotential(row, FLOOR);
         const credited = outcomeTerms(view, row).find((t) => t.isCredited)!;
         expect(row.deltaDps + c).toBeCloseTo(credited.bonusGearDps, 6);
       }
@@ -3269,7 +3138,7 @@ describe.skipIf(!forkPresent)(
         [4, false],
       ]);
       // ON = model(G + Gauntlets + Chestguard) − model(G) = 200 + 50.
-      const credit = view.rankableSetPotential(hands, FLOOR, "full");
+      const credit = view.rankableSetPotential(hands, FLOOR);
       expect(hands.deltaDps + credit).toBeCloseTo(250, 9);
       expect(futureOf(hands, 2)?.pieces?.map((p) => p.itemId)).toEqual([
         THUNDERHEART.chest,
@@ -3299,7 +3168,7 @@ describe.skipIf(!forkPresent)(
         { setId: 640, threshold: 2, dps: 40 },
       ]);
       // Credited gear: four Thunderheart, Malorne at 0: 3530 − 3040 = 490.
-      const credit = view.rankableSetPotential(hands, FLOOR, "full");
+      const credit = view.rankableSetPotential(hands, FLOOR);
       expect(credit).toBeCloseTo(430, 9);
       expect(hands.deltaDps + credit).toBeCloseTo(490, 9);
       expect(
@@ -3321,7 +3190,7 @@ describe.skipIf(!forkPresent)(
           itemValue: withValues([[THUNDERHEART.wrist, v]]),
         });
         const row = thRow(ranking, THUNDERHEART.wrist);
-        return row.deltaDps + view.rankableSetPotential(row, FLOOR, "full");
+        return row.deltaDps + view.rankableSetPotential(row, FLOOR);
       };
       const at10 = await on(10);
       // W-S4: the credited gear is wrist + Gauntlets + Chestguard + Leggings:
@@ -3602,16 +3471,6 @@ describe.skipIf(!forkPresent)(
       ]);
       // model(G + Pauldrons + Chestguard) − model(G) = 3070 − 3090.
       expect(futureOf(pauldrons, 2)?.bonusGearDps).toBeCloseTo(-20, 9);
-      const { ranking: t } = await runScenario({
-        ...PS_SCENARIO,
-        partnerRule: "single-swap",
-      });
-      const todays = thRow(t, THUNDERHEART.shoulder);
-      expect(futureOf(todays, 2)?.pieces?.map((p) => p.itemId)).toEqual([
-        THUNDERHEART.hands,
-      ]);
-      // Pauldrons + Gauntlets keep the Malorne chest: 3064 − 3090.
-      expect(futureOf(todays, 2)?.bonusGearDps).toBeCloseTo(-26, 9);
       // K6: the Gauntlets row, as on the owner's demo. 2pc with the
       // Leggings: 6 − 12 + 50 = 44, an increment of 38. 4pc with the Pauldrons and
       // Chestguard: 6 + 8 + 12 − 12 + 50 + 80 − 90 = 54, an increment of 10 that
@@ -3651,15 +3510,6 @@ describe.skipIf(!forkPresent)(
         measureSetBonuses: true,
       };
       const z = thRow((await runScenario(scenario)).ranking, THUNDERHEART.legs);
-      const z0 = thRow(
-        (
-          await runScenario({
-            ...scenario,
-            partnerRule: "sum-of-singles-plain",
-          })
-        ).ranking,
-        THUNDERHEART.legs
-      );
       // Z keeps the Wastewalker 2pc (one replacer): 100 + 310 + 130 = 540.
       expect(futureOf(z, 4)?.pieces?.map((p) => p.itemId)).toEqual([
         THUNDERHEART.chest,
@@ -3668,82 +3518,26 @@ describe.skipIf(!forkPresent)(
       ]);
       expect(futureOf(z, 4)?.breaks ?? []).toEqual([]);
       expect(futureOf(z, 4)?.bonusGearDps).toBeCloseTo(540, 9);
-      // Z0 takes both replacers and loses it: 100 + 320 + 130 − 30 = 520.
-      expect(futureOf(z0, 4)?.pieces?.map((p) => p.itemId)).toEqual([
-        THUNDERHEART.shoulder,
-        THUNDERHEART.chest,
-        THUNDERHEART.wrist,
-      ]);
-      expect((futureOf(z0, 4)?.breaks ?? []).map(brk)).toEqual([
-        { setId: 659, threshold: 2, dps: 30 },
-      ]);
-      expect(futureOf(z0, 4)?.bonusGearDps).toBeCloseTo(520, 9);
     });
 
-    it("511-PR: the partner rule is swapped in one place, and each rule has its own cache key", async () => {
-      // Scenario kind: the check hook scoring the rules on one character.
-      // Example: PS_SCENARIO on one shared store.
+    it("511-PR: the partner rule is close-calls, has no cache key, and sims each close partner set once", async () => {
+      // Scenario kind: the tab's run on one character, run twice on one
+      // shared store. Example: PS_SCENARIO.
       const storeMod = await importForkUpgrades<{
         MemoryStore: new () => Record<string, unknown>;
       }>("engine/seams/store.ts");
       const store = new storeMod.MemoryStore();
-      const unset = await runScenario({ ...PS_SCENARIO, store });
-      expect(unset.ranking.bonusGearSims?.partnerRule).toBe("close-calls");
-      // W-H1: unset, the hashed object has no partnerRule key, as before K5.
-      expect(unset.ranking.contentHash).not.toContain('"partnerRule"');
+      const first = await runScenario({ ...PS_SCENARIO, store });
+      expect(first.ranking.bonusGearSims?.partnerRule).toBe("close-calls");
+      // W-H1: the hashed object has no partnerRule key, as before K5.
+      expect(first.ranking.contentHash).not.toContain('"partnerRule"');
       const again = await runScenario({ ...PS_SCENARIO, store });
       expect(again.runCount).toBe(0);
-      expect(again.ranking.contentHash).toBe(unset.ranking.contentHash);
-      // Another rule on the same store is not served the cached ranking.
-      const single = await runScenario({
-        ...PS_SCENARIO,
-        store,
-        partnerRule: "single-swap",
-      });
-      expect(single.ranking.contentHash).toContain(
-        '"partnerRule":"single-swap"'
-      );
-      expect(single.ranking.bonusGearSims?.partnerRule).toBe("single-swap");
-      // pathToThreshold's pieces: the 2pc package is Gauntlets + Leggings, so
-      // the Pauldrons row adds the better of the two.
-      expect(
-        sortedIds(bonusOf(single.ranking, 676, 2)?.packageItemIds)
-      ).toEqual([THUNDERHEART.hands, THUNDERHEART.legs]);
-      expect(
-        futureOf(thRow(single.ranking, THUNDERHEART.shoulder), 2)?.pieces?.map(
-          (p) => p.itemId
-        )
-      ).toEqual([THUNDERHEART.hands]);
-
-      const every = await runScenario({
-        ...PS_SCENARIO,
-        partnerRule: "every-combination",
-      });
-      const audit = every.ranking.partnerAudit ?? [];
-      // One entry per row and eligible bonus: four rows, counts 2 and 4.
-      expect(audit).toHaveLength(8);
-      for (const entry of audit) {
-        expect(entry.audit.combinations).toHaveLength(
-          entry.threshold === 2 ? 3 : 1
-        );
-        for (const combination of entry.audit.combinations)
-          expect(combination.deltaDps).not.toBeNull();
-      }
-      const p2 = audit.find(
-        (e) => e.itemId === THUNDERHEART.shoulder && e.threshold === 2
-      )!;
-      // Each partner's total over 3090: Chestguard 3070, Gauntlets 3064,
-      // Leggings 3046 (Malorne chest kept in the last two); Z's estimates
-      // −82 + d_p, plus 90 back for the shared Malorne loss.
-      expect(
-        p2.audit.combinations.map((s) => [s.itemIds[0], s.deltaDps, s.estimate])
-      ).toEqual([
-        [THUNDERHEART.chest, -20, -70],
-        [THUNDERHEART.hands, -26, -76],
-        [THUNDERHEART.legs, -44, -94],
-      ]);
-      expect(p2.audit.chosen.itemIds).toEqual([THUNDERHEART.chest]);
-      // Every partner set of that row is simmed once.
+      expect(again.ranking.contentHash).toBe(first.ranking.contentHash);
+      // The Pauldrons row's three 2pc partner sets are estimated at −70
+      // (Chestguard), −76 (Gauntlets) and −94 (Leggings): −82 + d_p, plus 90
+      // back for the shared Malorne loss. All are within the close-call
+      // margin of −70, so each partner set of that row is simmed once.
       for (const partner of [
         { chest: THUNDERHEART.chest },
         { chest: MALORNE.chest, hands: THUNDERHEART.hands },
@@ -3753,7 +3547,7 @@ describe.skipIf(!forkPresent)(
           idsOf({ shoulder: THUNDERHEART.shoulder, ...partner })
         );
         expect(
-          every.calls.filter((ids) => JSON.stringify(ids) === gear)
+          first.calls.filter((ids) => JSON.stringify(ids) === gear)
         ).toHaveLength(1);
       }
     });
@@ -3871,9 +3665,9 @@ describe.skipIf(!forkPresent)(
 );
 
 /* ------------------------------------------------------------------ *
- * The set screen in record mode (ticket 511, stage K5R). Literals are
- * derived in docs/set-bonus-fixture-derivations.md, "The set screen in
- * record mode".
+ * The set screen's sims (ticket 511). SR_SCENARIO's gear is derived in
+ * docs/set-bonus-fixture-derivations.md, "The set screen in record mode", a
+ * mode since removed; the on mode's literals are in "The set screen's on mode".
  * ------------------------------------------------------------------ */
 
 // Worn: Thunderheart Gauntlets (Thunderheart at 1) and Malorne shoulder and
@@ -3896,9 +3690,6 @@ const SR_SCENARIO: Scenario = {
   reportsSetBonuses: true,
 };
 
-const SCREEN_PAIR_N = [10, 100, 300, 1000];
-const SCREEN_COUNT_N = [100, 300, 1000];
-
 /** Everything the screen must leave alone, from one run. */
 async function screenFreeParts(ranking: ForkRanking) {
   const view = await bonusGearView();
@@ -3912,215 +3703,73 @@ async function screenFreeParts(ranking: ForkRanking) {
       itemId: row.itemId,
       deltaDps: row.deltaDps,
       setContext: row.setContext,
-      on: row.deltaDps + view.rankableSetPotential(row, FLOOR, "full"),
+      on: row.deltaDps + view.rankableSetPotential(row, FLOOR),
     })),
   };
 }
 
-describe.skipIf(!forkPresent)(
-  "the set screen in record mode (511, K5R)",
-  () => {
-    it("511-SR: record mode filters nothing, and records each reading with its paired error", async () => {
-      // Scenario kind: a check run with the screen in record mode, on gear
-      // that has a worn-set ladder, a crossing check and a set to collect.
-      const off = await runScenario(SR_SCENARIO);
-      const on = await runScenario({ ...SR_SCENARIO, setScreenMode: "record" });
-      expect(off.ranking.setScreen).toBeUndefined();
-      expect(off.ranking.wornSetLadder?.length).toBeGreaterThan(0);
-      expect(off.ranking.crossingChecks?.length).toBeGreaterThan(0);
-      // W-SR1: the screen changes nothing else in the ranking.
-      expect(await screenFreeParts(on.ranking)).toEqual(
-        await screenFreeParts(off.ranking)
-      );
-      // Only screen sims ask for per-iteration values, and every other
-      // request, with its options, is the run without the screen.
-      expect(off.callOpts.some((o) => "saveAllValues" in o)).toBe(false);
-      const screenCalls = on.callOpts.filter((o) => o.saveAllValues === true);
-      expect(
-        on.calls.filter((_, i) => on.callOpts[i]!.saveAllValues !== true)
-      ).toEqual(off.calls);
-      expect(on.callOpts.filter((o) => o.saveAllValues !== true)).toEqual(
-        off.callOpts
-      );
-      // W-H1: the two runs have different hashes.
-      expect(off.ranking.contentHash).not.toContain('"setScreen"');
-      expect(on.ranking.contentHash).toContain('"setScreen":"record"');
-      // W-SR4, store keys: only a run that asks for per-iteration values gets
-      // a new key; every other key is as before.
-      const { simCacheKey } = await importForkUpgrades<{
-        simCacheKey: (
-          req: RaidSimRequest,
-          simVersion: string,
-          opts: SimRunOpts
-        ) => string;
-      }>("engine/seams/sim-runner.ts");
-      const req = { raid: {} };
-      const plainKey = `${JSON.stringify(req)}:${SIM_VERSION}:11:300`;
-      expect(simCacheKey(req, SIM_VERSION, { seed: 11, iterations: 300 })).toBe(
-        plainKey
-      );
-      expect(
-        simCacheKey(req, SIM_VERSION, {
-          seed: 11,
-          iterations: 300,
-          saveAllValues: false,
-        })
-      ).toBe(plainKey);
-      expect(
-        simCacheKey(req, SIM_VERSION, {
-          seed: 11,
-          iterations: 300,
-          saveAllValues: true,
-        })
-      ).toBe(`${plainKey}:all`);
+describe.skipIf(!forkPresent)("the set screen's sims (511)", () => {
+  it("511-SR: only the screen's sims ask for per-iteration values, under their own store key", async () => {
+    // Scenario kind: the tab's run with the screen on and off, on gear that
+    // has a worn-set ladder, a crossing check and a set to collect.
+    const off = await runScenario(SR_SCENARIO);
+    const on = await runScenario({ ...SR_SCENARIO, setScreenMode: "on" });
+    expect(off.callOpts.some((o) => "saveAllValues" in o)).toBe(false);
+    expect(on.callOpts.some((o) => o.saveAllValues === true)).toBe(true);
+    // W-SR4, store keys: only a run that asks for per-iteration values gets
+    // a new key; every other key is as before.
+    const { simCacheKey } = await importForkUpgrades<{
+      simCacheKey: (
+        req: RaidSimRequest,
+        simVersion: string,
+        opts: SimRunOpts
+      ) => string;
+    }>("engine/seams/sim-runner.ts");
+    const req = { raid: {} };
+    const plainKey = `${JSON.stringify(req)}:${SIM_VERSION}:11:300`;
+    expect(simCacheKey(req, SIM_VERSION, { seed: 11, iterations: 300 })).toBe(
+      plainKey
+    );
+    expect(
+      simCacheKey(req, SIM_VERSION, {
+        seed: 11,
+        iterations: 300,
+        saveAllValues: false,
+      })
+    ).toBe(plainKey);
+    expect(
+      simCacheKey(req, SIM_VERSION, {
+        seed: 11,
+        iterations: 300,
+        saveAllValues: true,
+      })
+    ).toBe(`${plainKey}:all`);
+  });
 
-      const screen = on.ranking.setScreen!;
-      expect(screen.mode).toBe("record");
-      expect(screen.seed).toBe(11);
-      expect(screen.pairIterations).toEqual(SCREEN_PAIR_N);
-      expect(screen.countIterations).toEqual(SCREEN_COUNT_N);
-      expect(
-        screen.sets.map((s) => [s.setId, s.worn, s.reach, s.packageItemIds])
-      ).toEqual([
-        [
-          676,
-          1,
-          4,
-          [THUNDERHEART.shoulder, THUNDERHEART.chest, THUNDERHEART.legs],
-        ],
-      ]);
-      const set = screen.sets[0]!;
-      // The pair: count 4 against count 1 on the 4-piece gear, 50 + 80.
-      expect(set.pairs).toEqual(
-        SCREEN_PAIR_N.map((n) => ({ iterations: n, dps: 130, pairedSe: 0 }))
-      );
-      // Rungs at counts 1 … 4: 3000 + four pieces' 400, plus the bonuses on.
-      expect(
-        set.countSims.map((r) => [
-          r.iterations,
-          r.count,
-          r.dps,
-          r.pairedSeToPrev,
-        ])
-      ).toEqual(
-        SCREEN_COUNT_N.flatMap((n) => [
-          [n, 1, 3400, undefined],
-          [n, 2, 3450, 0],
-          [n, 3, 3450, 0],
-          [n, 4, 3530, 0],
-        ])
-      );
-      for (const countSim of set.countSims) {
-        expect(countSim.se).toBeCloseTo(30 / Math.sqrt(countSim.iterations), 9);
-      }
-      // 8 + 3·(R − w − 1) sims; the ladder's rungs 1 and 4 at each of its
-      // three counts come from the store.
-      expect(screen.simmed).toBe(8 + 3 * (4 - 1 - 1));
-      expect(screen.fromStore).toBe(6);
-      expect(screenCalls).toHaveLength(screen.simmed);
-      for (const o of screenCalls) {
-        expect(o.seed).toBe(11);
-        expect(SCREEN_PAIR_N).toContain(o.iterations);
-      }
-    });
-
-    it("511-SZ: a set with no bonus in reach reads exactly 0 at every N", async () => {
-      // Scenario kind: a set whose bonuses do nothing for this spec, whose
-      // pieces' stats are worth more worn together (511-M's Justicar: model
-      // bonuses 0, +17 when all four are worn).
-      const { ranking: r } = await runScenario({
-        worn: wornGear({}),
-        pool: setPool(JUSTICAR),
-        itemValue: withValues(
-          Object.values(JUSTICAR).map((id) => [id, -30] as const)
-        ),
-        setBonuses: { ...SET_BONUSES, 626: { b2: 0, b4: 0 } },
-        interactions: [{ ids: Object.values(JUSTICAR), dps: 17 }],
-        measureSetBonuses: true,
-        setScreenMode: "record",
-        reportsSetBonuses: true,
-      });
-      const screen = r.setScreen!;
-      expect(screen.sets.map((s) => [s.setId, s.worn, s.reach])).toEqual([
-        [626, 0, 4],
-      ]);
-      const set = screen.sets[0]!;
-      // W-SR2: every rung wears the same four stats (copies count as their
-      // originals in the interaction): 3000 − 120 + 17.
-      expect(set.pairs.map((p) => [p.iterations, p.dps])).toEqual(
-        SCREEN_PAIR_N.map((n) => [n, 0])
-      );
-      expect(new Set(set.countSims.map((countSim) => countSim.dps))).toEqual(
-        new Set([2897])
-      );
-      expect(screen.simmed).toBe(8 + 3 * (4 - 0 - 1));
-    });
-
-    it("511-SF: a failed screen sim loses only that one reading", async () => {
-      // Scenario kind: a sim that fails mid-screen. Example: 511-SR's gear;
-      // the rung at count 2 (Pauldrons set-kept, Chestguard and Leggings
-      // set-less) fails at N = 300.
-      const off = await runScenario(SR_SCENARIO);
-      const on = await runScenario({
-        ...SR_SCENARIO,
-        setScreenMode: "record",
-        failWhen: (ids, opts) =>
-          opts.saveAllValues === true &&
-          opts.iterations === 300 &&
-          ids[SHOULDER_SLOT] === SET_KEPT_OFFSET + THUNDERHEART.shoulder &&
-          ids[CHEST_SLOT] === COPY_OFFSET + THUNDERHEART.chest,
-      });
-      expect(await screenFreeParts(on.ranking)).toEqual(
-        await screenFreeParts(off.ranking)
-      );
-      const set = on.ranking.setScreen!.sets[0]!;
-      // W-SR3: only that rung's reading is lost; its two paired errors need it.
-      expect(
-        set.countSims
-          .filter((r) => r.dps === undefined)
-          .map((r) => [r.iterations, r.count, r.se])
-      ).toEqual([[300, 2, undefined]]);
-      expect(
-        set.countSims
-          .filter((r) => r.count > 1 && r.pairedSeToPrev === undefined)
-          .map((r) => [r.iterations, r.count])
-      ).toEqual([
-        [300, 2],
-        [300, 3],
-      ]);
-      expect(set.pairs.map((p) => p.dps)).toEqual([130, 130, 130, 130]);
-      // Ticket 863: the screen sim's own error reaches the player.
-      expect(setSkipLines(on.ranking)).toEqual([screenFailedLine]);
-      // The failed sim was sent, so it counts as simmed.
-      expect(on.ranking.setScreen!.simmed).toBe(14);
-      expect(on.ranking.setScreen!.fromStore).toBe(6);
-    });
-
-    it("513-A6: pairedSe is sd(a_i − b_i)/√N on values that spread", async () => {
-      // The fake sim gives every iteration one value, so 511-SR only ever
-      // reads a paired error of 0. These values spread.
-      const { pairedSe } = await importForkUpgrades<{
-        pairedSe: (
-          a: readonly number[] | undefined,
-          b: readonly number[] | undefined,
-          iterations: number
-        ) => number | undefined;
-      }>("engine/set-screen.ts");
-      // Differences 1, 2, 1, 4: mean 2, squared deviations 1 + 0 + 1 + 4 = 6,
-      // sample variance 6/3 = 2, so sd = √2 and sd/√4 = √2/2.
-      expect(pairedSe([10, 12, 14, 20], [9, 10, 13, 16], 4)).toBeCloseTo(
-        Math.SQRT2 / 2,
-        12
-      );
-      // Each side spreads by 100 but the difference is constant: a paired
-      // error is 0 where an unpaired one would not be.
-      expect(pairedSe([100, 200, 300], [90, 190, 290], 3)).toBe(0);
-      expect(pairedSe([1, 2, 3], [1, 2], 3)).toBeUndefined();
-      expect(pairedSe([1], [2], 1)).toBeUndefined();
-      expect(pairedSe(undefined, [1, 2], 2)).toBeUndefined();
-    });
-  }
-);
+  it("513-A6: pairedSe is sd(a_i − b_i)/√N on values that spread", async () => {
+    // The fake sim gives every iteration one value, so 511-SR only ever
+    // reads a paired error of 0. These values spread.
+    const { pairedSe } = await importForkUpgrades<{
+      pairedSe: (
+        a: readonly number[] | undefined,
+        b: readonly number[] | undefined,
+        iterations: number
+      ) => number | undefined;
+    }>("engine/set-screen.ts");
+    // Differences 1, 2, 1, 4: mean 2, squared deviations 1 + 0 + 1 + 4 = 6,
+    // sample variance 6/3 = 2, so sd = √2 and sd/√4 = √2/2.
+    expect(pairedSe([10, 12, 14, 20], [9, 10, 13, 16], 4)).toBeCloseTo(
+      Math.SQRT2 / 2,
+      12
+    );
+    // Each side spreads by 100 but the difference is constant: a paired
+    // error is 0 where an unpaired one would not be.
+    expect(pairedSe([100, 200, 300], [90, 190, 290], 3)).toBe(0);
+    expect(pairedSe([1, 2, 3], [1, 2], 3)).toBeUndefined();
+    expect(pairedSe([1], [2], 1)).toBeUndefined();
+    expect(pairedSe(undefined, [1, 2], 2)).toBeUndefined();
+  });
+});
 
 /* ------------------------------------------------------------------ *
  * The close-calls partner rule (ticket 511, stage K5S). Literals are
@@ -4172,23 +3821,6 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
       gears: 2,
       simmed: 2,
       fromStore: 6,
-    });
-
-    // Rule Z alone keeps its estimate's choice: 100 + 110 + 50.
-    const { ranking: z } = await runScenario({
-      ...PC_SCENARIO,
-      partnerRule: "sum-of-singles",
-    });
-    const zHands = thRow(z, THUNDERHEART.hands);
-    expect(futureOf(zHands, 2)?.pieces?.map((p) => p.itemId)).toEqual([
-      THUNDERHEART.chest,
-    ]);
-    expect(futureOf(zHands, 2)?.bonusGearDps).toBeCloseTo(260, 9);
-    expect(z.bonusGearSims).toEqual({
-      partnerRule: "sum-of-singles",
-      gears: 2,
-      simmed: 1,
-      fromStore: 1,
     });
   });
 
@@ -4254,19 +3886,6 @@ describe.skipIf(!forkPresent)("the close-calls partner rule (511, K5S)", () => {
     expect(view.setCreditUnmeasured(bothHands.setContext)).toBe(true);
     // Ticket 863: the bonus-gear sims' error reaches the player.
     expect(setSkipLines(both.ranking)).toContainEqual(simFailedLine(2, true));
-    // The every-combination rule finds no partner set when every sim fails,
-    // so the row is unmeasured and the line still names the bonus.
-    const every = await runScenario({
-      ...PC_SCENARIO,
-      partnerRule: "every-combination",
-      failWhen: (ids) =>
-        isGear(ids, [THUNDERHEART.hands, THUNDERHEART.legs]) ||
-        isGear(ids, [THUNDERHEART.chest, THUNDERHEART.hands]),
-    });
-    const everyHands = thRow(every.ranking, THUNDERHEART.hands);
-    expect(futureOf(everyHands, 2)?.pieces).toBeUndefined();
-    expect(futureOf(everyHands, 2)?.bonusGearDps).toBeUndefined();
-    expect(setSkipLines(every.ranking)).toContainEqual(simFailedLine(2, true));
   });
 });
 
@@ -4898,17 +4517,12 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
       ...SR_SCENARIO,
       setScreenMode: "off",
     });
-    const record = await runScenario({
-      ...SR_SCENARIO,
-      setScreenMode: "record",
-    });
     const hashes = new Set([
       on.ranking.contentHash,
       explicitOff.ranking.contentHash,
-      record.ranking.contentHash,
       unset.ranking.contentHash,
     ]);
-    expect(hashes.size).toBe(4);
+    expect(hashes.size).toBe(3);
   });
 });
 

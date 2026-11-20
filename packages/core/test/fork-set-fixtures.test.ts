@@ -100,13 +100,11 @@ type ViewMod = {
     r: Ranking,
     v: {
       withSetPotential?: boolean;
-      setCredit?: "full" | "split";
     }
   ) => { rows: Row[]; shortlist: Row[] };
   rankableSetPotential: (
     item: { setContext?: SetContext },
-    cutoff: Cutoff,
-    setCredit?: "full" | "split"
+    cutoff: Cutoff
   ) => number;
   setCreditUnmeasured: (ctx: SetContext | undefined) => boolean;
   setPotentialTerms: (
@@ -321,7 +319,7 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
         if (ctx?.usesBonusGear) {
           // 3s. the shipped credit equals the bonus-gear rule's reference walk
           const ref = referenceBonusGear(ctx, bonusGearFloor);
-          const credit = view.rankableSetPotential(row, ranking.cutoff, "full");
+          const credit = view.rankableSetPotential(row, ranking.cutoff);
           expect(Math.abs(credit - ref.credit), `${where} credit`).toBeLessThan(
             1e-9
           );
@@ -361,7 +359,7 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
         // 3. the shipped credit equals the reference walk, and the popover
         // terms add up to it
         const ref = referenceR1(ctx, fourSimFloor);
-        const credit = view.rankableSetPotential(row, ranking.cutoff, "full");
+        const credit = view.rankableSetPotential(row, ranking.cutoff);
         expect(Math.abs(credit - ref.credit), `${where} credit`).toBeLessThan(
           1e-9
         );
@@ -398,7 +396,6 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
       if (pinned) {
         const on = view.applyView(ranking, {
           withSetPotential: true,
-          setCredit: "full",
         });
         const got = on.shortlist
           .slice(0, 16)
@@ -406,8 +403,7 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
             (r) =>
               [
                 r.name,
-                r.deltaDps +
-                  view.rankableSetPotential(r, ranking.cutoff, "full"),
+                r.deltaDps + view.rankableSetPotential(r, ranking.cutoff),
               ] as const
           );
         expect(got.map((g) => g[0])).toEqual(pinned.map((p) => p[0]));
@@ -420,7 +416,6 @@ describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
       }
       const off = view.applyView(ranking, {
         withSetPotential: false,
-        setCredit: "full",
       });
       const byDelta = [...ranking.items].sort(
         (a, b) =>

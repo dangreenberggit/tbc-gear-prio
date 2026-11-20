@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: docs/reviews/feat-run-progress-panel.md (finding M3, round 2); owner 2026-10-03: "Note the fork formatter issue as something blocking pre-pr."
 Blocks: pre-pr
@@ -79,3 +79,17 @@ ticket 885 § What should ship ("Formatting of `model/data/*.json`"): an
 This ticket does the work once that is ruled.
 No gate runs oxfmt yet; once the JSON is settled, adding
 `oxfmt --check` to `scripts/check_fork_lint.py` keeps this from going stale.
+
+## Closed 2026-11-20 (ticket 885, branch `chore/885-pre-pr-cleanup`)
+
+The owner ruled the JSON way out in ticket 885 (§ Rulings): the sync script
+writes oxfmt's layout on both sides, and the fork's `.oxfmtrc.json` is not
+edited. The 22 `model/data/*.json` copies moved to that layout (fork
+`a46cb03fd`), with their sources here. The gate question is decided: yes.
+`scripts/check_fork_lint.py` now runs the fork's `oxfmt --check` over every
+file the fork changed since `branchedFrom`, so the check cannot go stale.
+The "layout gate re-run" item named `upgrades_tab.tsx`, which no longer
+exists; the tab files that replaced it changed in this branch only where
+review fixes needed it, and `pnpm verify` runs on the re-pin.
+
+Verified by: `pnpm run fork-lint:check` ("fork lint check ok at fork commit dadfad891b40: ... oxfmt clean over the 247 files changed since 24606be6bae2") and `npx oxfmt --check .` in the fork ("All matched files use the correct format", 1512 files) on tbc-new-fork@dadfad891b40a1832245cf47c32d2500057deaa4; review in docs/reviews/chore-885-pre-pr-cleanup.md

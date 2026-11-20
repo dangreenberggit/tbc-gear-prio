@@ -1,4 +1,4 @@
-Status: blocked
+Status: closed
 Type: task
 Origin: docs/reviews/chore-344-pr-prep.md (ticket 344's pass, 2026-11-17)
 Blocks: pre-pr
@@ -94,3 +94,74 @@ only the owner can move them.
 
 Each item above has the owner's ruling, recorded here, and the ones ruled
 "change" are done on a branch with their tests.
+
+## Rulings (owner, 2026-11-20)
+
+The coordinator proposed, per item:
+
+- Error and disclosure text that cites `PLAN.md` and ticket numbers (`se.ts`, `disclosure.ts`): rewrite it in plain words.
+- 28 test names with ticket numbers or ADR-0037: rename them.
+- JSON `_comment`s naming this repo: remove them.
+- The test that reads a recording from this repo and always skips in wowsims: bring the fixture into the fork, or leave the test out of the PR.
+- `tools/` and the fixture dev path: leave out of the PR.
+- 22 `model/data/*.json` failing upstream's `oxfmt --check`: have the sync script (`scripts/sync_fork_universes.py`) write oxfmt's layout on both sides, not edit the fork's `.oxfmtrc.json`.
+- Partner rules, set-screen `record` mode and the audit, reached only by our tests: remove them from the fork. Fold in 886/887's question: the `'split'` credit view and the `'full-path'` rule, which the tab never uses, get removed too.
+- Two unused engine fixtures, one with a real character's name: delete them.
+- No cap on the iterations field: match upstream, the same warning the Bulk tab shows above `WEB_ITERATIONS_LIMIT`.
+
+Owner's reply: "Sure, yes (don't bring a fixture into the fork, we can leave it in the parent repo)".
+
+## What was done (branch `chore/885-pre-pr-cleanup`, fork branch of the same name)
+
+- **Text.** The two `DegenerateSeedsError` messages and the imbue assumption
+  no longer cite `PLAN.md` or tickets (fork `3215ba095`). The `PLAN.md §14`
+  disclosure text at `disclosure.ts:113` was already gone (ticket 887).
+- **Test names.** 27 names under `ui/features/upgrades/` and the tab body
+  lose their ticket or ADR numbers (fork `1200948d9`); the 28th was the
+  recording test below.
+- **JSON `_comment`s.** Removed from both pool fixtures (fork `1200948d9`);
+  their text, the record of every re-pin, moved to
+  `docs/fork-provenance/data.md` § Pool fixture notes moved here, and the
+  fork's `testing/db_pool.ts` and `model/pool_source.test.ts` now say how to
+  re-pin without naming this repo. Not done, because the ruling named
+  `_comment`s: the ep-weights copies' `notes` (some cite ticket 803 and "this
+  repo's CLI") and `tier-exchange.json`'s `generatedBy`. They are left for
+  the owner.
+- **Recording test.** Moved out of the fork to
+  `packages/core/test/fork-results-view-recording.test.ts`, which runs it
+  against the fork's `results_view.ts` with the fixture where it is; the fork
+  copy, which always skipped there, is deleted (fork `1200948d9`).
+- **`tools/` and the fixture dev path.** Kept on the fork branch and left
+  out when the PR is cut, because removing them now breaks
+  `pnpm equip-eligibility:check` (a `verify` step), the layout gate,
+  `pnpm tab-review` and `pnpm tab-fixtures:smoke`. Ticket 889 holds the step
+  and the file list.
+- **oxfmt layout.** `scripts/sync_fork_universes.py --write` rewrites each
+  source in oxfmt's JSON layout before copying it, `--check` fails on a source
+  out of layout, and `scripts/generate_fork_exchange.py` writes the same
+  layout; the 22 copies and their sources moved (fork `a46cb03fd`), content
+  unchanged. `pnpm fork-lint:check` now runs the fork's `oxfmt --check` over
+  every file the fork changed since `branchedFrom` (closes ticket 544).
+- **Options only tests reach.** Removed: the partner rules other than
+  close-calls, `Deps.partnerRule`, the partner audit, set-screen record mode,
+  the `'split'` view and the `'full-path'` rule (fork `ac2353f6f`). This
+  repo's tests that only exercised them are gone (511-SZ, 511-SF); the rest
+  check the tab's options. What the tab runs and its cache keys are
+  unchanged.
+- **Engine fixtures.** Already deleted by ticket 887 (fork `57035ec23`).
+- **Review fixes.** The last ticket number in shipping code, a `set-screen.ts`
+  comment, is gone, and a pool test comment names its two policies (fork
+  `dadfad891`). Review: `docs/reviews/chore-885-pre-pr-cleanup.md`.
+- **Iterations.** No cap. When the run's iterations in all (the baseline
+  plus each eligible candidate, under the candidate cap, times the
+  iterations per sim) pass 1,000,000 on the web sim, the field shows the
+  Bulk tab's own warning, as the Bulk tab weighs a batch's combinations
+  times its iterations; built from wowsims' pieces
+  (`bulkLimitForHost`, `WEB_ITERATIONS_LIMIT`, the
+  `bulk_tab.warning.iterations_limit` text and `CombinationsCount.tsx:28-54`'s
+  icon and tooltip); it never blocks the run (fork `300e10e4b`, weighed in all after
+  review in `294c57a84`). Unlike the
+  Bulk tab it shows nothing in the downloaded sim, whose higher limit would
+  pair with advice to download the sim.
+
+Verified by: `pnpm run fork-lint:check` ("oxfmt clean over the 247 files changed since 24606be6bae2"), `pnpm run fork-tests:check`, `python scripts/check_sync_fork_universes.py` (9 checks) and `pnpm exec vitest run packages/core/test/fork-results-view-recording.test.ts packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/wowsims-fork-parity.test.ts` on tbc-new-fork@dadfad891b40a1832245cf47c32d2500057deaa4; review in docs/reviews/chore-885-pre-pr-cleanup.md

@@ -15,6 +15,12 @@ This script closes it, scoped to **our** files only:
     and fixtures, and the tab's components, hooks and run model.
   - `ui/app/tabs/UpgradesTabBody.tsx` -- the tab body.
 
+**Formatting** runs the fork's own `oxfmt --check` over every file the fork
+branch added or changed since `branchedFrom` in
+`data/wowsims-fork.lock.json`, because upstream CI runs `oxfmt . --check`
+and an upstream pull request carries exactly those files (tickets 544 and
+885). The fork's `.oxfmtrc.json` ignore list still applies.
+
 The tab has no stylesheet of its own: upstream's React UI styles with
 Tailwind utilities, so the old SCSS partial and its stylelint run are
 gone (ticket 558).
@@ -61,6 +67,7 @@ run.
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -74,6 +81,7 @@ FORK_ROOT = ROOT / "vendor/tbc-new-fork"
 FORK_MODULES = FORK_ROOT / "node_modules"
 BIN_DIR = FORK_MODULES / ".bin"
 TSC = FORK_MODULES / "typescript/bin/tsc"
+FORK_LOCK = ROOT / "data/wowsims-fork.lock.json"
 
 CHECK_NAME = "fork lint check"
 
@@ -90,6 +98,16 @@ TS_PATHS = (
 def missing_ts_paths(fork_root: Path) -> list[str]:
     """The TS_PATHS entries absent under `fork_root`."""
     return [p for p in TS_PATHS if not (fork_root / p).exists()]
+
+
+def changed_files(branched_from: str) -> tuple[int, list[str], str]:
+    """Files the fork branch added or changed since `branched_from`, as
+    (returncode, paths, git output)."""
+    rc, output = run(
+        ["git", "diff", "--name-only", "--diff-filter=d", branched_from, "HEAD"],
+        "git diff",
+    )
+    return rc, [line for line in output.splitlines() if line.strip()], output
 
 
 def binary(name: str) -> Path:
@@ -151,7 +169,8 @@ def main() -> int:
         return 2
 
     oxlint = binary("oxlint")
-    missing = [p for p in (oxlint, TSC) if not p.is_file()]
+    oxfmt = binary("oxfmt")
+    missing = [p for p in (oxlint, oxfmt, TSC) if not p.is_file()]
     if missing:
         names = ", ".join(str(p.relative_to(FORK_ROOT)) for p in missing)
         print(
@@ -193,9 +212,23 @@ def main() -> int:
         report("tsc --noEmit (the fork's whole project)", output)
         failures += 1
 
+    branched_from = json.loads(FORK_LOCK.read_text(encoding="utf-8"))["branchedFrom"]
+    rc, changed, output = changed_files(branched_from)
+    if rc != 0:
+        print(f"{CHECK_NAME}: could not list the fork's changed files: {output}", file=sys.stderr)
+        return 2
+    rc, output = run([str(oxfmt), "--check", *changed], "oxfmt")
+    if rc != 0:
+        report(
+            f"oxfmt --check (the {len(changed)} files changed since "
+            f"{branched_from[:12]}; fix with `npx oxfmt <file>` in the fork)",
+            output,
+        )
+        failures += 1
+
     if failures:
         print(
-            f"\n{CHECK_NAME}: {failures} of 2 checks failed at fork commit "
+            f"\n{CHECK_NAME}: {failures} of 3 checks failed at fork commit "
             f"{pin[:12]}. Fix the files named above -- they are ours. If a "
             "failure names a path outside "
             "ui/features/upgrades and the tab body, it came from "
@@ -207,7 +240,8 @@ def main() -> int:
 
     print(
         f"{CHECK_NAME} ok at fork commit {pin[:12]}: oxlint clean over "
-        f"{', '.join(TS_PATHS)} (--deny-warnings), fork type-check clean"
+        f"{', '.join(TS_PATHS)} (--deny-warnings), fork type-check clean, "
+        f"oxfmt clean over the {len(changed)} files changed since {branched_from[:12]}"
     )
     return 0
 
