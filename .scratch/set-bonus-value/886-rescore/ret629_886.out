@@ -1,0 +1,8 @@
+set 629: worn 1 reach 5; crossing 2.1436258943103894; pair -3.5968941774217456; sigma 9.79632597076386
+  t=2: pieces [30132]; singles [-13.146]; estimate -13.1456; fixed -15.2893
+  t=3: pieces [30131, 30132]; singles [-16.24, -13.146]; estimate -29.3858; fixed -33.6731
+  t=4: pieces [30131, 30133, 30132]; singles [-16.24, -17.751, -13.146]; estimate -47.1369; fixed -53.5678
+  t=5: pieces [30131, 30133, 30130, 30132]; singles [-16.24, -17.751, -25.281, -13.146]; estimate -72.4180; fixed -80.9925
+bestStats stored -13.14564331722977; recomputed -13.14564331722977
+measure stored -16.742537494651515; fixed -18.886163388961904
+fixed measure + 2 sigma = 0.7065 (ranked)

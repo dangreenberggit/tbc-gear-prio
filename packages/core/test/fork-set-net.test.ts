@@ -4395,8 +4395,9 @@ const SB_SCENARIO: Scenario = {
 };
 
 // 511-SD: worn Gauntlets of Malorne (Malorne at 1). Malorne's three pool
-// pieces are worth −155 each, so its best case is −115 + 110 = −5; its
-// crossing check still clears (2pc 40). Thunderheart wrist, waist and feet
+// pieces are worth −155 each; each single is −115 because it reaches the 2pc
+// alone, and the screen takes that 2pc out (ticket 886), so its best case is
+// −155 + 110 = −45; its crossing check still clears (2pc 40). Thunderheart wrist, waist and feet
 // (−15, −15, −100) measure −30 + 50 = 20; Gladiator's Pursuit chest and
 // hands (−12.375 each, 2pc 20) measure −4.75.
 const SD_SCENARIO: Scenario = {
@@ -4555,7 +4556,8 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
       ])
     ).toEqual([
       [626, 0, 4, 0, 0, -100, -100],
-      [676, 1, 4, 130, 0, 410, 540],
+      // The singles' 2pc is taken out: 410 − 3 · 50 (ticket 886).
+      [676, 1, 4, 130, 0, 260, 390],
     ]);
     expect(verdictsOf(screen)).toEqual([
       [626, false, "exact-zero"],
@@ -4659,7 +4661,7 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
       screen.sets.map((s) => [s.setId, s.worn, s.reach, s.pair.dps, s.measure])
     ).toEqual([
       [586, 0, 2, 20, -4.75],
-      [640, 1, 4, 110, -5],
+      [640, 1, 4, 110, -45],
       // The pool fills 3 Thunderheart slots, but the sim lists no 3pc bonus,
       // so the reach is the 2pc (ticket 644).
       [676, 0, 2, 50, 20],
@@ -4753,6 +4755,124 @@ describe.skipIf(!forkPresent)("the set screen's on mode (511, K5ON)", () => {
       await screenFreeParts(offB.ranking)
     );
     expectOnModeSims(onB, 1);
+  });
+
+  // Ticket 886. A single swap of a set worn at w reaches w + 1 pieces, so when
+  // w + 1 is a bonus count each piece's single already holds that bonus. The
+  // screen's estimate is meant to hold none of the set's own bonuses (the pair
+  // adds them), so the estimate at t must count that bonus 0 times and the
+  // measure exactly once.
+  const singleOf = (ranking: ForkRanking, itemId: number) => {
+    const row = thRow(ranking, itemId);
+    return row.setContext?.singleDeltaDps ?? row.deltaDps;
+  };
+
+  it("886-W1: at worn 1 the screen counts the 2pc once, not once per added piece plus the pair", async () => {
+    // Scenario kind: a set worn at 1 whose pool reaches the 4pc. Example:
+    // Thunderheart Gauntlets worn; pool Pauldrons, Chestguard, Leggings at
+    // V_TH each, nothing displaced, 2pc B2_TH, 4pc B4_TH.
+    const pieces = [
+      THUNDERHEART.shoulder,
+      THUNDERHEART.chest,
+      THUNDERHEART.legs,
+    ];
+    const { ranking } = await runScenario({
+      worn: wornGear({ hands: THUNDERHEART.hands }),
+      pool: setPool({
+        shoulder: THUNDERHEART.shoulder,
+        chest: THUNDERHEART.chest,
+        legs: THUNDERHEART.legs,
+      }),
+      measureSetBonuses: true,
+      reportsSetBonuses: true,
+      setScreenMode: "on",
+    });
+    // Each single reaches 2 pieces, so it holds the 2pc once.
+    for (const id of pieces) {
+      expect(singleOf(ranking, id)).toBeCloseTo(V_TH + B2_TH, 9);
+    }
+    const set = onScreenOf(ranking)!.sets.find((s) => s.setId === 676)!;
+    expect([set.worn, set.reach]).toEqual([1, 4]);
+    // The pair: 2pc and 4pc, each once.
+    expect(set.pair.dps).toBeCloseTo(B2_TH + B4_TH, 9);
+    // The best estimate is all three pieces' own value, with no 2pc in it.
+    const twoPcTimesInEstimate = (set.bestStats! - 3 * V_TH) / B2_TH;
+    expect(twoPcTimesInEstimate).toBeCloseTo(0, 9);
+    // The measure counts the 2pc once: 300 + 50 + 80 = 430.
+    const twoPcTimesInMeasure = (set.measure! - 3 * V_TH - B4_TH) / B2_TH;
+    expect(twoPcTimesInMeasure).toBeCloseTo(1, 9);
+    expect(set.measure).toBeCloseTo(3 * V_TH + B2_TH + B4_TH, 9);
+  });
+
+  it("886-W3: at worn 3 of a set with a 6pc, the screen counts the 4pc once", async () => {
+    // Scenario kind: a set worn at 3 whose bonus at 4 is reached by every
+    // single swap, and whose pool reaches a higher bonus, so the screen runs.
+    // Example: Cryptstalker 530 (model 2pc 10, 4pc 20, 6pc 30, 8pc 40) worn
+    // head, shoulder, chest; pool wrist, hands, waist at 100 each.
+    const B4 = 20;
+    const B6 = 30;
+    const pieces = [CRYPTSTALKER.wrist, CRYPTSTALKER.hands, CRYPTSTALKER.waist];
+    const { ranking } = await runScenario({
+      worn: wornGear({
+        head: CRYPTSTALKER.head,
+        shoulder: CRYPTSTALKER.shoulder,
+        chest: CRYPTSTALKER.chest,
+      }),
+      pool: setPool({
+        wrist: CRYPTSTALKER.wrist,
+        hands: CRYPTSTALKER.hands,
+        waist: CRYPTSTALKER.waist,
+      }),
+      itemValue: withValues(
+        Object.values(CRYPTSTALKER).map((id) => [id, 100] as const)
+      ),
+      setBonuses: {
+        ...SET_BONUSES,
+        530: { b2: 10, b4: B4, b6: B6, b8: 40 },
+      },
+      measureSetBonuses: true,
+      reportsSetBonuses: true,
+      setScreenMode: "on",
+    });
+    // Each single reaches 4 pieces, so it holds the 4pc once.
+    for (const id of pieces) {
+      expect(singleOf(ranking, id)).toBeCloseTo(100 + B4, 9);
+    }
+    const set = onScreenOf(ranking)!.sets.find((s) => s.setId === 530)!;
+    expect([set.worn, set.reach]).toEqual([3, 6]);
+    expect(set.pair.dps).toBeCloseTo(B4 + B6, 9);
+    const fourPcTimesInEstimate = (set.bestStats! - 3 * 100) / B4;
+    expect(fourPcTimesInEstimate).toBeCloseTo(0, 9);
+    const fourPcTimesInMeasure = (set.measure! - 3 * 100 - B6) / B4;
+    expect(fourPcTimesInMeasure).toBeCloseTo(1, 9);
+  });
+
+  it("886-WU: when the crossing check at worn + 1 has no value, the screen keeps the set unread", async () => {
+    // Scenario kind: 886-W1's gear, with the crossing check's sim failing, so
+    // the bonus each single holds is unknown and the estimate cannot take it
+    // out. Example: the check's "off" sim fails: one Thunderheart piece and
+    // one set-less copy of another, the only request with that mix.
+    const th: readonly number[] = Object.values(THUNDERHEART);
+    const { ranking } = await runScenario({
+      worn: wornGear({ hands: THUNDERHEART.hands }),
+      pool: setPool({
+        shoulder: THUNDERHEART.shoulder,
+        chest: THUNDERHEART.chest,
+        legs: THUNDERHEART.legs,
+      }),
+      measureSetBonuses: true,
+      reportsSetBonuses: true,
+      setScreenMode: "on",
+      failWhen: (ids, opts) =>
+        opts.saveAllValues !== true &&
+        ids.filter((id) => th.includes(id)).length === 1 &&
+        ids.filter((id) => th.includes(id - COPY_OFFSET)).length === 1,
+    });
+    const crossing = ranking.crossingChecks?.filter((c) => c.setId === 676);
+    expect(crossing?.map((c) => [c.count, c.dps])).toEqual([[2, undefined]]);
+    const set = onScreenOf(ranking)!.sets.find((s) => s.setId === 676)!;
+    expect(set.bestStats).toBeUndefined();
+    expect([set.kept, set.reason]).toEqual([true, "readings-absent"]);
   });
 
   it('511-SH: "on" has its own content hash, and unset hashes as before', async () => {
@@ -6317,7 +6437,7 @@ describe.skipIf(!forkPresent)("counts a set has no bonus at (644)", () => {
       expect(
         warn.mock.calls.some(([line]) =>
           String(line).includes(
-            "set 640: its bonus counts were not read, the package's gem repair failed"
+            "set 640: its bonus counts were not read, the added pieces' gem repair failed"
           )
         )
       ).toBe(true);

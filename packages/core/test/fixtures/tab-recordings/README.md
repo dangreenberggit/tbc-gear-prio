@@ -39,6 +39,12 @@ by script, with no re-record and no value change: `stepRanking` →
 to `usesBonusGear` the same way, since the key marks how the ranking valued
 its bonuses, not that each one was measured.
 
+Ticket 887 (2026-11-20) rewrote the stored `plausibilityWarnings` text the
+same way, to match the fork's new wording: the dead-slot cause
+`set-break-toll` is now `set-break-cost`, and the messages no longer say
+"plausibility band", "suspected confound", "package" or "toll". No number
+changed.
+
 ## When a rule changes on purpose
 
 Test 536-X compares the fork's `ownSwapBreaks` and `setBonusNote` with

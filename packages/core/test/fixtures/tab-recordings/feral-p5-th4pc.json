@@ -24381,30 +24381,30 @@
       {
         "kind": "dead-slot",
         "slot": "shoulder",
-        "cause": "set-break-toll",
+        "cause": "set-break-cost",
         "wornItemName": "Thunderheart Pauldrons",
-        "message": "No positive candidate in shoulder: every alternative displaces Thunderheart Pauldrons and pays Thunderheart Harness's lost bonus. Check that toll is real before trusting the slot."
+        "message": "No positive candidate in shoulder: every alternative displaces Thunderheart Pauldrons and loses a Thunderheart Harness bonus. Check that this lost bonus is real before trusting the slot."
       },
       {
         "kind": "dead-slot",
         "slot": "hands",
-        "cause": "set-break-toll",
+        "cause": "set-break-cost",
         "wornItemName": "Thunderheart Gauntlets",
-        "message": "No positive candidate in hands: every alternative displaces Thunderheart Gauntlets and pays Thunderheart Harness's lost bonus. Check that toll is real before trusting the slot."
+        "message": "No positive candidate in hands: every alternative displaces Thunderheart Gauntlets and loses a Thunderheart Harness bonus. Check that this lost bonus is real before trusting the slot."
       },
       {
         "kind": "dead-slot",
         "slot": "chest",
-        "cause": "set-break-toll",
+        "cause": "set-break-cost",
         "wornItemName": "Thunderheart Chestguard",
-        "message": "No positive candidate in chest: every alternative displaces Thunderheart Chestguard and pays Thunderheart Harness's lost bonus. Check that toll is real before trusting the slot."
+        "message": "No positive candidate in chest: every alternative displaces Thunderheart Chestguard and loses a Thunderheart Harness bonus. Check that this lost bonus is real before trusting the slot."
       },
       {
         "kind": "dead-slot",
         "slot": "legs",
-        "cause": "set-break-toll",
+        "cause": "set-break-cost",
         "wornItemName": "Thunderheart Leggings",
-        "message": "No positive candidate in legs: every alternative displaces Thunderheart Leggings and pays Thunderheart Harness's lost bonus. Check that toll is real before trusting the slot."
+        "message": "No positive candidate in legs: every alternative displaces Thunderheart Leggings and loses a Thunderheart Harness bonus. Check that this lost bonus is real before trusting the slot."
       }
     ],
     "complete": true,
