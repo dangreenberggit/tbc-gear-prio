@@ -254,7 +254,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": 30.03,
           "singleBreaks": [
             {
@@ -278,8 +278,8 @@
                   "name": "Wastewalker Shoulderpads"
                 }
               ],
-              "stepGearDps": 42.53,
-              "stepGearSe": 2
+              "bonusGearDps": 42.53,
+              "bonusGearSe": 2
             }
           ]
         }

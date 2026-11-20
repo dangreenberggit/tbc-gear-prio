@@ -68,7 +68,7 @@ def check_target_length_budget() -> list[str]:
     return problems
 
 
-# Modelled on `git worktree list --porcelain` (git 2.42, Windows): one block
+# Modeled on `git worktree list --porcelain` (git 2.42, Windows): one block
 # per worktree, blank-line separated, forward-slash paths. The third block's
 # HEAD and pid are made up.
 PORCELAIN = """worktree C:/Users/dgree/Code/lulz/tbc-gear-prio
@@ -369,7 +369,7 @@ def check_processes_using_the_pair_are_found() -> list[str]:
     """A program inside the pair (tsc.exe under node_modules, the backend) or a
     command line naming the pair can hold files there open, and Windows then
     refuses the delete half-way. The unpair run itself and the shells that
-    started it are not counted. Rows are modelled on Get-CimInstance
+    started it are not counted. Rows are modeled on Get-CimInstance
     Win32_Process; the pids are made up."""
     root = "C:\\Users\\dgree\\Code\\lulz\\tbc-wt\\probe"
     procs = [

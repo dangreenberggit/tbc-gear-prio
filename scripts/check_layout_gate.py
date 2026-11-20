@@ -32,7 +32,7 @@ React tab's own source under `ui/features/upgrades/` (components, hooks, model
 including the ranking engine whose view code renders the rows the fixture pass
 measures, and the pool data), the tab body and its registration point, the
 upstream ui-kit modules they import, and the theme CSS the tab's measured
-geometry and contrast resolve through (breakpoints, colours, spacing,
+geometry and contrast resolve through (breakpoints, colors, spacing,
 typography, the two-column frame) -- see `_iter_layout_files` -- into one digest, and
 compares it to the digest recorded the last time the gate ran green
 (`data/wowsims-fork-layout.lock.json`, `testedTabHash`). Equal digest ->
@@ -175,7 +175,7 @@ LOCAL_ONLY_FILES = frozenset({"local.wcl-credentials.ts"})
 #   - ui/styles/theme/spacing.css, typography.css -- the spacing scale and
 #     the root font size every rem-based width (the results column widths
 #     among them) resolves through.
-#   - ui/styles/theme/colors.css, vars.css -- the colour tokens the axe pass's
+#   - ui/styles/theme/colors.css, vars.css -- the color tokens the axe pass's
 #     contrast checks resolve through.
 #   - ui/styles/theme/specs.css -- each spec's `--color-primary`, which those
 #     contrast checks also resolve through (ticket 580).
@@ -658,7 +658,7 @@ def _parse_verdict(stdout: str) -> dict | None:
 
     None means the gate predates the verdict contract (an older fork clone) --
     the caller falls back to the exit code, which is the pre-existing
-    behaviour.
+    behavior.
     """
     found = None
     for line in stdout.splitlines():

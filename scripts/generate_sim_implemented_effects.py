@@ -116,7 +116,7 @@ ACTIVE_STRUCT_LITERAL_RE = re.compile(
 
 # A third registration shape: the effect is not registered through a call at
 # all, it is read off the equipped set at runtime -- `HasItemEquipped(8345,
-# ...)` gates Wolfshead Helm's feral energy behaviour in
+# ...)` gates Wolfshead Helm's feral energy behavior in
 # sim/druid/feralcat/rotation.go and sim/druid/forms.go. The item is as
 # implemented as any NewItemEffect one, but neither call regex saw it, so it
 # reported stub-only (ticket 233).

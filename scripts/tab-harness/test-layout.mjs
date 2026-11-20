@@ -269,7 +269,7 @@ const postRunExpression = `(async () => {
 		const nameLines = itemName ? (() => { const r = document.createRange(); r.selectNodeContents(itemName); return [...r.getClientRects()].filter(x => x.width > 0); })() : [];
 		const lastLine = nameLines.at(-1);
 		const gaps = [];
-		for (const badge of lastLine ? tr.querySelectorAll('[data-testid="upgrades-bis-badge"]') : []) {
+		for (const badge of lastLine ? tr.querySelectorAll('[data-testid="upgrades-row-badge"]') : []) {
 			const b = badge.getBoundingClientRect();
 			if (b.top >= lastLine.top + lastLine.height / 2) gaps.push(b.top - lastLine.bottom);
 		}
@@ -325,8 +325,8 @@ const postRunExpression = `(async () => {
 // Check 17's hover target and what it reads once the popover is open. The
 // popover is portaled, so it is looked up in the document, not the tab root.
 const SET_BONUS_FIGURE = `${RESULT_ROW}:has(small[data-testid="upgrades-set-bonus"]) [data-testid="upgrades-delta-cell"] button`;
-const SET_BONUS_TIP = '[data-testid="upgrades-set-bonus-tip"]';
-const figureCentreExpression = `(async () => {
+const SET_BONUS_POPOVER = '[data-testid="upgrades-set-bonus-popover"]';
+const figureCenterExpression = `(async () => {
 	${PAGE_HELPERS}
 	// Only the rows near the view are rendered (rows.mjs), so walk the page's
 	// scroll box down until a row with a set-bonus figure renders.
@@ -348,15 +348,15 @@ const figureCentreExpression = `(async () => {
 })()`;
 const popoverExpression = `(async () => {
 	${PAGE_HELPERS}
-	const tip = await waitFor(() => document.querySelector(${JSON.stringify(SET_BONUS_TIP)}), 2000);
-	if (!tip) return { error: 'no popover after hovering the figure' };
+	const popover = await waitFor(() => document.querySelector(${JSON.stringify(SET_BONUS_POPOVER)}), 2000);
+	if (!popover) return { error: 'no popover after hovering the figure' };
 	await sleep(300);
 	const figure = [...openPane().querySelectorAll(${JSON.stringify(SET_BONUS_FIGURE)})].find(el => el.matches(':hover')) ?? null;
 	// Measured as SetBonusPopover.tsx's sideFor measures it.
 	const room = figure ? (document.documentElement.clientWidth || window.innerWidth) - figure.getBoundingClientRect().right : null;
 	return {
-		side: tip.closest('[data-testid="sim-popover-positioner"]')?.getAttribute('data-side') ?? null,
-		tipRect: rect(tip), figureRect: rect(figure), vw: document.documentElement.clientWidth,
+		side: popover.closest('[data-testid="sim-popover-positioner"]')?.getAttribute('data-side') ?? null,
+		popoverRect: rect(popover), figureRect: rect(figure), vw: document.documentElement.clientWidth,
 		room, rootPx: parseFloat(getComputedStyle(document.documentElement).fontSize) || 16,
 	};
 })()`;
@@ -367,7 +367,7 @@ async function moveMouse(send, x, y) {
 
 /** Check 17: hovers the first set-bonus figure in the open pane, reads where its popover opened, then closes it. */
 async function judgePopover(send, width) {
-  const at = await H.evaluate(send, figureCentreExpression);
+  const at = await H.evaluate(send, figureCenterExpression);
   if (!at) {
     check(17, width, false, { error: "no set-bonus figure in the open pane" });
     return;
@@ -392,7 +392,7 @@ async function judgePopover(send, width) {
     POPOVER_WIDEST_REM * m.rootPx + POPOVER_GAP_PX + POPOVER_FLIP_MARGIN_PX
       ? "right"
       : "top";
-  const t = m.tipRect;
+  const t = m.popoverRect;
   const f = m.figureRect;
   const insideViewport = t.left >= -TOL && t.right <= m.vw + TOL;
   const besideFigure =

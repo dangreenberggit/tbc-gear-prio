@@ -477,7 +477,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 2,
@@ -492,15 +492,15 @@
                   "name": "Thunderheart Leggings"
                 }
               ],
-              "stepGearDps": 56.53021214104638,
-              "stepGearSe": 2.0330120899646245
+              "bonusGearDps": 56.53021214104638,
+              "bonusGearSe": 2.0330120899646245
             },
             {
               "threshold": 3,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 1.9164516861791208,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 4,
@@ -531,8 +531,8 @@
                   "dps": 88.37040387444813
                 }
               ],
-              "stepGearDps": 107.66643865691367,
-              "stepGearSe": 2.0209983760134684,
+              "bonusGearDps": 107.66643865691367,
+              "bonusGearSe": 2.0209983760134684,
               "bonusOffDps": -1.9437862010390745,
               "bonusOffSe": 1.9875481864130171,
               "bonusOff": [
@@ -547,7 +547,7 @@
               "piecesNeeded": 5,
               "sameGearDps": 0,
               "sameGearSe": 2.2004507200038064,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitBreaks": [
@@ -870,7 +870,7 @@
           "piecesAfterSwap": 2,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "commitPackageDeltaDps": -44.47604913598707,
           "singleDeltaDps": 0
         }
@@ -920,7 +920,7 @@
           "piecesAfterSwap": 2,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "commitPackageDeltaDps": -44.47604913598707,
           "singleDeltaDps": 0
         }
@@ -2117,7 +2117,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 2,
@@ -2132,15 +2132,15 @@
                   "name": "Thunderheart Gauntlets"
                 }
               ],
-              "stepGearDps": 56.53021214104638,
-              "stepGearSe": 2.0330120899646245
+              "bonusGearDps": 56.53021214104638,
+              "bonusGearSe": 2.0330120899646245
             },
             {
               "threshold": 3,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 1.9164516861791208,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 4,
@@ -2171,8 +2171,8 @@
                   "dps": 88.37040387444813
                 }
               ],
-              "stepGearDps": 107.66643865691367,
-              "stepGearSe": 2.0209983760134684,
+              "bonusGearDps": 107.66643865691367,
+              "bonusGearSe": 2.0209983760134684,
               "bonusOffDps": -1.9437862010390745,
               "bonusOffSe": 1.9875481864130171,
               "bonusOff": [
@@ -2187,7 +2187,7 @@
               "piecesNeeded": 5,
               "sameGearDps": 0,
               "sameGearSe": 2.2004507200038064,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitBreaks": [
@@ -2390,7 +2390,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -14.734127593089397
         }
       },
@@ -2466,7 +2466,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -14.943495927873755
         }
       },
@@ -2615,7 +2615,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -17.219335264209803
         }
       },
@@ -2761,21 +2761,21 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 2,
               "piecesNeeded": 2,
               "sameGearDps": 0,
               "sameGearSe": 2.0272436471821083,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 3,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 1.9186834027176658,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 4,
@@ -2806,15 +2806,15 @@
                   "dps": 88.37040387444813
                 }
               ],
-              "stepGearDps": -54.137911085680116,
-              "stepGearSe": 2.0116419279743196
+              "bonusGearDps": -54.137911085680116,
+              "bonusGearSe": 2.0116419279743196
             },
             {
               "threshold": 5,
               "piecesNeeded": 5,
               "sameGearDps": 0,
               "sameGearSe": 2.0662743664075025,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitBreaks": [
@@ -3070,21 +3070,21 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 2,
               "piecesNeeded": 2,
               "sameGearDps": 0,
               "sameGearSe": 2.0272436471821083,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 3,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 1.9186834027176658,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 4,
@@ -3115,15 +3115,15 @@
                   "dps": 88.37040387444813
                 }
               ],
-              "stepGearDps": -54.137911085680116,
-              "stepGearSe": 2.0116419279743196
+              "bonusGearDps": -54.137911085680116,
+              "bonusGearSe": 2.0116419279743196
             },
             {
               "threshold": 5,
               "piecesNeeded": 5,
               "sameGearDps": 0,
               "sameGearSe": 2.0662743664075025,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitBreaks": [
@@ -3340,7 +3340,7 @@
           "piecesAfterSwap": 3,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 4,
@@ -3355,15 +3355,15 @@
                   "name": "Greaves of Malorne"
                 }
               ],
-              "stepGearDps": -44.47604913598707,
-              "stepGearSe": 2.0370000067964624
+              "bonusGearDps": -44.47604913598707,
+              "bonusGearSe": 2.0370000067964624
             },
             {
               "threshold": 5,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 2.231431378136164,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitPackageDeltaDps": -44.47604913598707,
@@ -4069,7 +4069,7 @@
           "piecesAfterSwap": 3,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 4,
@@ -4084,15 +4084,15 @@
                   "name": "Gauntlets of Malorne"
                 }
               ],
-              "stepGearDps": -44.47604913598707,
-              "stepGearSe": 2.0370000067964624
+              "bonusGearDps": -44.47604913598707,
+              "bonusGearSe": 2.0370000067964624
             },
             {
               "threshold": 5,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 2.231431378136164,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitPackageDeltaDps": -44.47604913598707,
@@ -4153,7 +4153,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -42.47200291937543
         }
       },
@@ -4183,7 +4183,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -42.47200291937543
         }
       },
@@ -4261,7 +4261,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -42.69652049966635
         }
       },
@@ -4708,7 +4708,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -44.741607028483486
         }
       },
@@ -4879,7 +4879,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -47.7765945795818
         }
       },
@@ -5078,7 +5078,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -48.46098167417449
         }
       },
@@ -5902,7 +5902,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -51.41745838515999
         }
       },
@@ -6698,7 +6698,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -53.523829238543385
         }
       },
@@ -7262,7 +7262,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -55.54004551825619
         }
       },
@@ -7902,7 +7902,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -58.506422292465686
         }
       },
@@ -8063,7 +8063,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -59.13332126256819
         }
       },
@@ -8485,7 +8485,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -60.0351142357099
         }
       },
@@ -8962,7 +8962,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -9608,7 +9608,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -62.758883377118764
         }
       },
@@ -9646,7 +9646,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -66.29452084945524
         }
       },
@@ -9684,7 +9684,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -66.66089959588771
         }
       },
@@ -9725,7 +9725,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -9756,15 +9756,15 @@
                   "dps": 88.37040387444813
                 }
               ],
-              "stepGearDps": 42.3023871494147,
-              "stepGearSe": 1.9773341621342062
+              "bonusGearDps": 42.3023871494147,
+              "bonusGearSe": 1.9773341621342062
             },
             {
               "threshold": 3,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 1.9164516861791208,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 4,
@@ -9795,15 +9795,15 @@
                   "dps": 88.37040387444813
                 }
               ],
-              "stepGearDps": 107.66643865691367,
-              "stepGearSe": 2.0209983760134684
+              "bonusGearDps": 107.66643865691367,
+              "bonusGearSe": 2.0209983760134684
             },
             {
               "threshold": 5,
               "piecesNeeded": 5,
               "sameGearDps": 0,
               "sameGearSe": 2.2004507200038064,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitPackageDeltaDps": 107.66643865691367,
@@ -9873,7 +9873,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -9922,7 +9922,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -9953,15 +9953,15 @@
                   "dps": 88.37040387444813
                 }
               ],
-              "stepGearDps": 42.3023871494147,
-              "stepGearSe": 1.9773341621342062
+              "bonusGearDps": 42.3023871494147,
+              "bonusGearSe": 1.9773341621342062
             },
             {
               "threshold": 3,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 1.9164516861791208,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 4,
@@ -9992,15 +9992,15 @@
                   "dps": 88.37040387444813
                 }
               ],
-              "stepGearDps": 107.66643865691367,
-              "stepGearSe": 2.0209983760134684
+              "bonusGearDps": 107.66643865691367,
+              "bonusGearSe": 2.0209983760134684
             },
             {
               "threshold": 5,
               "piecesNeeded": 5,
               "sameGearDps": 0,
               "sameGearSe": 2.2004507200038064,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitPackageDeltaDps": 107.66643865691367,
@@ -10080,7 +10080,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -75.73349402869826
         }
       },
@@ -10140,7 +10140,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -75.97208755825523
         }
       },
@@ -10202,7 +10202,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -76.17128433747712
         }
       },
@@ -10240,7 +10240,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -76.33930349668026
         }
       },
@@ -10324,7 +10324,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -10339,14 +10339,14 @@
               "piecesNeeded": 2,
               "sameGearDps": 0,
               "sameGearSe": 2.0272436471821083,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 3,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 1.9186834027176658,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 4,
@@ -10377,15 +10377,15 @@
                   "dps": 88.37040387444813
                 }
               ],
-              "stepGearDps": -54.137911085680116,
-              "stepGearSe": 2.0116419279743196
+              "bonusGearDps": -54.137911085680116,
+              "bonusGearSe": 2.0116419279743196
             },
             {
               "threshold": 5,
               "piecesNeeded": 5,
               "sameGearDps": 0,
               "sameGearSe": 2.0662743664075025,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitPackageDeltaDps": -54.137911085680116,
@@ -10872,7 +10872,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -10887,14 +10887,14 @@
               "piecesNeeded": 2,
               "sameGearDps": 0,
               "sameGearSe": 2.0272436471821083,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 3,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 1.9186834027176658,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 4,
@@ -10925,15 +10925,15 @@
                   "dps": 88.37040387444813
                 }
               ],
-              "stepGearDps": -54.137911085680116,
-              "stepGearSe": 2.0116419279743196
+              "bonusGearDps": -54.137911085680116,
+              "bonusGearSe": 2.0116419279743196
             },
             {
               "threshold": 5,
               "piecesNeeded": 5,
               "sameGearDps": 0,
               "sameGearSe": 2.0662743664075025,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitPackageDeltaDps": -54.137911085680116,
@@ -11286,7 +11286,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -84.13968572074873
         }
       },
@@ -11466,7 +11466,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -84.64317262490749
         }
       },
@@ -11520,7 +11520,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -84.70997797763994
         }
       },
@@ -11596,7 +11596,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -85.32435913880909
         }
       },
@@ -11770,7 +11770,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -86.57870508916585
         }
       },
@@ -11824,7 +11824,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -88.6882069965377
         }
       },
@@ -11904,7 +11904,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -94.28046694345448
         }
       },
@@ -11937,7 +11937,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -11978,7 +11978,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -12445,7 +12445,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -101.30750390418552
         }
       },
@@ -12483,7 +12483,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -101.40517936377728
         }
       },
@@ -12521,7 +12521,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -101.60105629558848
         }
       },
@@ -12554,7 +12554,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -12600,7 +12600,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -102.0788051371901
         }
       },
@@ -12633,7 +12633,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -12674,7 +12674,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -12949,7 +12949,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -111.16972155766143
         }
       },
@@ -12981,7 +12981,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -111.53025196722547
         }
       },
@@ -13111,7 +13111,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -112.112224583037
         }
       },
@@ -13163,7 +13163,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -112.1735873103762
         }
       },
@@ -13195,7 +13195,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -112.24406304567992
         }
       },
@@ -13227,7 +13227,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -112.25950922963693
         }
       },
@@ -13259,7 +13259,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -112.44626557271977
         }
       },
@@ -13291,7 +13291,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -112.56587142251146
         }
       },
@@ -13475,7 +13475,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -13522,7 +13522,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -13594,7 +13594,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -13641,7 +13641,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -13688,7 +13688,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -13729,7 +13729,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -13776,7 +13776,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -13817,7 +13817,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -13858,7 +13858,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -13949,7 +13949,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14032,7 +14032,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14073,7 +14073,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14114,7 +14114,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14155,7 +14155,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14202,7 +14202,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14249,7 +14249,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14296,7 +14296,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14337,7 +14337,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14384,7 +14384,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14425,7 +14425,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14466,7 +14466,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14532,7 +14532,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14579,7 +14579,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14620,7 +14620,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14667,7 +14667,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14708,7 +14708,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14749,7 +14749,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14857,7 +14857,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -14994,7 +14994,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -15133,7 +15133,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -15268,7 +15268,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -15357,7 +15357,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleBreaks": [
             {
               "setId": 640,
@@ -15471,7 +15471,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -167.54315132022612
         }
       },
@@ -15763,7 +15763,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 2,
@@ -15778,15 +15778,15 @@
                   "name": "Thunderheart Gauntlets"
                 }
               ],
-              "stepGearDps": -12.672186871306167,
-              "stepGearSe": 2.076556306689719
+              "bonusGearDps": -12.672186871306167,
+              "bonusGearSe": 2.076556306689719
             },
             {
               "threshold": 3,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 1.9164516861791208,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 4,
@@ -15817,8 +15817,8 @@
                   "dps": 88.37040387444813
                 }
               ],
-              "stepGearDps": 42.02828327370662,
-              "stepGearSe": 2.141856734929318,
+              "bonusGearDps": 42.02828327370662,
+              "bonusGearSe": 2.141856734929318,
               "bonusOffDps": -67.51497837729039,
               "bonusOffSe": 2.0735327361612605,
               "bonusOff": [
@@ -15833,7 +15833,7 @@
               "piecesNeeded": 5,
               "sameGearDps": 0,
               "sameGearSe": 2.2004507200038064,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitBreaks": [
@@ -16039,21 +16039,21 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 2,
               "piecesNeeded": 2,
               "sameGearDps": 0,
               "sameGearSe": 2.0272436471821083,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 3,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 1.9186834027176658,
-              "belowGate": true
+              "belowNoise": true
             },
             {
               "threshold": 4,
@@ -16084,15 +16084,15 @@
                   "dps": 88.37040387444813
                 }
               ],
-              "stepGearDps": -245.8965438777127,
-              "stepGearSe": 2.0680711542985946
+              "bonusGearDps": -245.8965438777127,
+              "bonusGearSe": 2.0680711542985946
             },
             {
               "threshold": 5,
               "piecesNeeded": 5,
               "sameGearDps": 0,
               "sameGearSe": 2.0662743664075025,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitBreaks": [
@@ -16149,7 +16149,7 @@
           "piecesAfterSwap": 3,
           "nextThreshold": 4,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "futureBonuses": [
             {
               "threshold": 4,
@@ -16164,15 +16164,15 @@
                   "name": "Gauntlets of Malorne"
                 }
               ],
-              "stepGearDps": -184.160238547875,
-              "stepGearSe": 2.1529762990387282
+              "bonusGearDps": -184.160238547875,
+              "bonusGearSe": 2.1529762990387282
             },
             {
               "threshold": 5,
               "piecesNeeded": 3,
               "sameGearDps": 0,
               "sameGearSe": 2.231431378136164,
-              "belowGate": true
+              "belowNoise": true
             }
           ],
           "commitPackageDeltaDps": -44.47604913598707,
@@ -16269,7 +16269,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -200.87853074934128
         }
       },
@@ -16371,7 +16371,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -212.90286153909847
         }
       },
@@ -16545,7 +16545,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -241.09820767990777
         }
       },
@@ -16658,7 +16658,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -243.1805807881119
         }
       },
@@ -16746,7 +16746,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -244.94498540012682
         }
       },
@@ -16792,7 +16792,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -245.36105662093087
         }
       },
@@ -16918,7 +16918,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -245.89141089926534
         }
       },
@@ -16964,7 +16964,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -247.41369038237008
         }
       },
@@ -17016,7 +17016,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -248.48956618713555
         }
       },
@@ -17062,7 +17062,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -249.11699109505753
         }
       },
@@ -17108,7 +17108,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -249.2227363802749
         }
       },
@@ -17192,7 +17192,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -249.55421759635738
         }
       },
@@ -17244,7 +17244,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -249.67919517075234
         }
       },
@@ -17324,7 +17324,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -251.82238110672824
         }
       },
@@ -17700,7 +17700,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -284.83593345141344
         }
       },
@@ -17756,7 +17756,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -290.961778472466
         }
       },
@@ -17788,7 +17788,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": null,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": -293.67378428205893
         }
       },
@@ -18480,7 +18480,7 @@
         "packageDeltaDps": 0,
         "sameGearDps": 0,
         "sameGearSe": 1.9164516861791208,
-        "belowGate": true
+        "belowNoise": true
       },
       {
         "setId": 676,
@@ -18513,7 +18513,7 @@
         "packageDeltaDps": 0,
         "sameGearDps": 0,
         "sameGearSe": 2.2004507200038064,
-        "belowGate": true
+        "belowNoise": true
       },
       {
         "setId": 641,
@@ -18524,7 +18524,7 @@
         "packageDeltaDps": 0,
         "sameGearDps": 0,
         "sameGearSe": 2.0272436471821083,
-        "belowGate": true
+        "belowNoise": true
       },
       {
         "setId": 641,
@@ -18535,7 +18535,7 @@
         "packageDeltaDps": 0,
         "sameGearDps": 0,
         "sameGearSe": 1.9186834027176658,
-        "belowGate": true
+        "belowNoise": true
       },
       {
         "setId": 641,
@@ -18568,7 +18568,7 @@
         "packageDeltaDps": 0,
         "sameGearDps": 0,
         "sameGearSe": 2.0662743664075025,
-        "belowGate": true
+        "belowNoise": true
       },
       {
         "setId": 640,
@@ -18601,7 +18601,7 @@
         "packageDeltaDps": 0,
         "sameGearDps": 0,
         "sameGearSe": 2.231431378136164,
-        "belowGate": true
+        "belowNoise": true
       },
       {
         "setId": 619,
@@ -18839,7 +18839,7 @@
         "counted": true
       }
     ],
-    "crossingGates": [
+    "crossingChecks": [
       {
         "setId": 640,
         "count": 3,
@@ -18849,7 +18849,7 @@
         "cleared": false
       }
     ],
-    "setStepSims": {
+    "bonusGearSims": {
       "partnerRule": "close-calls",
       "gears": 9,
       "simmed": 14,
@@ -18860,7 +18860,7 @@
       "simmed": 2,
       "fromStore": 0,
       "failedGears": 0,
-      "skippedSteps": 0,
+      "skippedIncrements": 0,
       "beforeInStore": 2
     },
     "setScreen": {

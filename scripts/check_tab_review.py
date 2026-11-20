@@ -51,7 +51,7 @@ from check_layout_gate import (  # noqa: E402
 REVIEW_TEST = HARNESS_DIR / "test-review.mjs"
 
 # The tagged verdict line test-review.mjs prints just before it exits, the
-# capture-side analogue of the layout gate's LAYOUT_GATE_VERDICT: outcome
+# capture-side analog of the layout gate's LAYOUT_GATE_VERDICT: outcome
 # "captured" (with an errors count) or "unmeasured" (crashed before any capture).
 VERDICT_TAG_REVIEW = "TAB_REVIEW_VERDICT"
 

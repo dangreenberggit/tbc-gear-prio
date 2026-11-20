@@ -56,7 +56,7 @@ def main() -> int:
     # upstream's default differs in ways that matter -- it hardcodes the bite
     # trick at 2 combo points where the owner's APL branches on Wolfshead Helm.
     # So feral's drift check compares against that export. Ret still tracks the
-    # pinned vendor APL, and a spec with no entry here keeps the old behaviour.
+    # pinned vendor APL, and a spec with no entry here keeps the old behavior.
     APL_SOURCES = {
         "feral": (
             ROOT / "data/presets/feral/owner-p2.settings-export.json",

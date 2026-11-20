@@ -415,7 +415,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 3,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": 11.08,
           "singleBreaks": [
             {
@@ -443,8 +443,8 @@
                   "name": "Spellfire Robe"
                 }
               ],
-              "stepGearDps": 23.58,
-              "stepGearSe": 2
+              "bonusGearDps": 23.58,
+              "bonusGearSe": 2
             }
           ]
         }

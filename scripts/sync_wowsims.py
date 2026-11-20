@@ -92,7 +92,7 @@ VENDOR = "vendor/wowsims"
 # its BiS rows from an older set silently presents a stale curated set as the
 # current one. p4/p5 stay untracked until a universe is assembled for them —
 # the point is to cover the phases we rank, not to mirror upstream's whole
-# catalogue.
+# catalog.
 #
 # The `_6p`/`_9p` suffix is a hit percentage, not a piece count (carry-forward
 # 88). Only the BiS pair per phase is tracked; upstream's Alt/Realistic

@@ -212,7 +212,7 @@ git -C vendor/tbc-new-fork diff --name-only --diff-filter=A 24606be6b 60a4735ea 
 - `ui/features/upgrades/model/data/.gitattributes`: git reads it only inside
   the fork.
 - The dev code compiled into the tab (`utils/dev_flags.ts`, `utils/fixture.ts`,
-  `hooks/useFixtureAutoload.ts`, `utils/select_run_fn.ts`, `model/replay_run.ts`,
+  `hooks/useFixtureWindowHooks.ts`, `utils/run_fn_for_flags.ts`, `model/replay_run.ts`,
   `components/DevTools/`, `components/CandidateCapPicker/`,
   `model/engine/fixtures/*.ts`): the gates load recorded rankings into the page
   through these hooks. The replay link, the file-upload box and the two

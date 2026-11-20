@@ -74,6 +74,7 @@ the review `2026-11-18-general-task-344-pr-prep-review.md`; the fixes
    seven small problems, P1–P7.
 6. **P1–P7.** An Opus `general-task` fixed P1–P6 in fork `99c27adc8`
    (comments only) and P7 in the tickets, re-pinned, and wrote this file.
+7. **Two renames (follow-up).** See § Follow-up 2026-11-18: two renames.
 
 ## Check output
 
@@ -157,6 +158,8 @@ Check of the fixes (P), at fork `b23f50100`:
 | P5  | Standards | fixed       | `99c27adc8`: "Passed as undefined for a spec with no ranking data, which has no defaults."                                                                                                                                                                                                   |
 | P6  | Standards | fixed       | `99c27adc8`: both restating comments deleted. "noise check" is now "the same-gear check" in all four `rank.ts` comments, the name the code uses (`clearsSameGearGate`), and one names `measureSameGearBonus`                                                                                 |
 | P7  | Standards | fixed       | 885 and 344 now cite `se.ts:49`, `:74` and `rank.ts:159`, `:167`, `:529`, each re-read at `99c27adc8`                                                                                                                                                                                        |
+| Q3a | Standards | fixed       | `1283e6eb7`: `statsAt` is `sumOfSinglesDpsAt` (§ Follow-up 2026-11-18: two renames)                                                                                                                                                                                                          |
+| Q3b | Standards | fixed       | `1283e6eb7`: the tab's `DEFAULT_ITERATIONS` is `TAB_DEFAULT_ITERATIONS` (§ Follow-up 2026-11-18: two renames)                                                                                                                                                                                |
 
 ## Notes
 
@@ -189,8 +192,8 @@ Check of the fixes (P), at fork `b23f50100`:
   review report § Notes, with no ruling.
 - **Names the check left alone:** `statsAt` (`set-screen.ts`, `rank.ts`)
   returns a DPS estimate, not stats; two `DEFAULT_ITERATIONS` (engine 5000,
-  tab field 3000) share a name. Neither was in the approved set; untested
-  whether the owner wants them renamed.
+  tab field 3000) share a name. Neither was in the approved set. The owner
+  then asked for both to be fixed; see § Follow-up 2026-11-18: two renames.
 - Not re-measured by the checker: the density figures, and reasons the
   helper reports kept but did not verify (listed in
   `2026-11-18-general-task-344-pr-prep-fixes.md` § Comments whose reason was
@@ -198,3 +201,179 @@ Check of the fixes (P), at fork `b23f50100`:
 - The reviewer detached the fork worktree's HEAD once by mistake while
   measuring density and restored it at once; no gate ran while it was
   detached (review report § Process note).
+
+## Follow-up 2026-11-18: two renames
+
+The owner, about both names in § Notes: "that sounds like it needs fixing
+and is just wrong". Both claims were true, and fork `1283e6eb7` renames
+them. The report is
+`2026-11-18-general-task-344-q3-renames.md`.
+
+- **Q3a.** `statsAt` returns `sumOfSinglesEstimate(...)`, a DPS figure
+  (`rank.ts:1815-1844`, `partner-choice.ts:96-100`), so it is now
+  `sumOfSinglesDpsAt`. Its local `stats` in `set-screen.ts` is now
+  `estimate`. The recorded field `bestStats` keeps its name
+  (`testing/set_bonus_tip_on.snapshot.json`), and its doc now says it holds
+  DPS. The field's doc is now two lines, because the name says what the
+  value is.
+- **Q3b.** `run_state.ts`'s `DEFAULT_ITERATIONS` (3000) is the tab field's
+  default, and `rank.ts`'s (5000) is the engine's, used when a caller passes
+  no count. The tab always passes one (`run.ts:102`). The tab's constant is
+  now `TAB_DEFAULT_ITERATIONS`, after the `TAB_REPLICATE_SEED_COUNT` /
+  `DEFAULT_SEED_COUNT` split. The engine's keeps the name that core's
+  `rank.ts:537` and two `packages/core/test` comments use. Its comment said
+  "the ranking's published numbers come from a full per-candidate sim at
+  this count"; that was wrong for the tab, so it now says the tab passes
+  its own count.
+- **Renames** were made with the TypeScript 5.9.3 language service: 4
+  `statsAt` sites, 4 `stats`, 6 `DEFAULT_ITERATIONS`. After the renames,
+  `git grep -w statsAt` finds nothing in the fork. `DEFAULT_ITERATIONS`
+  appears only in `rank.ts`, 3 times. Core has no `statsAt`. No string,
+  `Pick`/`Omit` key, spread or fixture held either name. No edited file
+  exists in `upstream/master`.
+
+| Check                            | Commit                      | Result                                                                                                                                                                                  |
+| -------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AST, no map                      | fork `99c27adc8..1283e6eb7` | `files=5 ast-equal=0 differ=5`, each differing only on the renamed names                                                                                                                |
+| AST, old-to-new map              | fork `99c27adc8..1283e6eb7` | `{statsAt, stats}`: `rank.ts` and `set-screen.ts` equal; `{DEFAULT_ITERATIONS}`: `run_state.ts`, `run_state.test.ts`, `useUpgradesStore.ts` equal. Each file is equal under its own map |
+| E-W3 + run progress              | fork `1283e6eb7`            | v22.23.2, rc 0, `Test Files 2 passed (2)`, `Tests 59 passed (59)`; also green before the hashes moved                                                                                   |
+| `TBC_VERIFY_FRESH=1 pnpm verify` | pair, fork `1283e6eb7`      | v22.23.2, rc 0, `gates: 1742 ran, 0 skipped`, `engine port drift check ok: 36 ported files match engine.md`, `fork tests check ok ... Tests 907 passed`                                 |
+| oxfmt, oxlint on the five files  | fork `1283e6eb7`            | rc 0, rc 0                                                                                                                                                                              |
+
+## Pre-merge review 2026-11-19: the naming review
+
+After the 344 pass merged into `dev` (`c0b41049`), this branch ran the
+naming review the owner asked for on 2026-11-18. It renames names, rewrites
+comments in the tab's code and re-pins the fork. Where the owner's words are
+(all in the main checkout, gitignored):
+
+- the owner's words and the five rules:
+  `.scratch/plans/2026-11-18-naming-review-reviewer-brief.md`;
+- the decisions:
+  `.scratch/agent-reports/2026-11-18-general-task-naming-review-decisions.md`;
+- the rulings since then ("tip" becomes "popover"; stop, step and gate;
+  "recolour is too British"): `.scratch/plans/2026-11-18-naming-review-pause.md`
+  § Owner rulings since the decisions.
+
+**Range.** Ours `c0b41049..b5d48f5f` (7 commits), plus this review's
+uncommitted re-pin. Fork `99c27adc8..e08efd6ec` on fork branch
+`chore/344-pr-prep` (49 commits). The last four are this review's fixes:
+`9f8dd091a`, `c88709a9e`, `50fc3ed3b` and `e08efd6ec`.
+
+**Reviewers.** Two fresh Opus `general-task` agents at effort xhigh. Neither
+took part in the batches. Their reports are in the main checkout's
+`.scratch/agent-reports/`:
+
+- names and comments, against the five rules, the decisions and the rulings:
+  `2026-11-19-general-task-pre-merge-names-axis.md`;
+- behaviour, stored files and the upstream check:
+  `2026-11-19-general-task-pre-merge-behaviour-axis.md`.
+
+The stored-file proof, the upstream check and the pin check also ran in the
+review session itself, so none of the brief's claims was taken on trust.
+
+### Check output (2026-11-19)
+
+A rename or comment fix counts as checked when the token proof finds no
+structural change and no binding mismatch, and the tests pass.
+
+| Check                                               | Range or commit                                                                        | Result                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Stored files, key by key                            | ours `c0b41049..b5d48f5f`: 6 recordings, 11 mock fixtures, the fork's popover snapshot | 18 files, `bad=0`. Line counts and CRLF unchanged. Keys renamed one to one: `belowGate`→`belowNoise` 174, `stepRanking`→`bonusGearMeasured` 707, `stepGearDps`→`bonusGearDps` 104, `stepGearSe`→`bonusGearSe` 104, `crossingGates`→`crossingChecks` 6, `setStepSims`→`bonusGearSims` 6, `skippedSteps`→`skippedIncrements` 6, `tip`→`popover` 16. One value change: `"form": "step"` to `"increment"`, 21 times. No old key is left and no new key existed before, so every `contentHash` is unchanged                                                   |
+| Upstream check                                      | fork `99c27adc8..e08efd6ec`                                                            | `git cat-file -e upstream/master:<path>` on every changed path: 156 checked, 0 in `upstream/master` (`24606be6b`). A known upstream path passes the same check                                                                                                                                                                                                                                                                                                                                                                                           |
+| Token proof, batches                                | fork `99c27adc8..33e84fabc`                                                            | 137 code pairs: 12 identical, 69 equal after renames, 46 differ only in strings, 10 with structural hunks (shorthand keys, the deleted `GemColour` alias, one `;`), each judged harmless (behaviour report)                                                                                                                                                                                                                                                                                                                                              |
+| Token proof, ours                                   | `c0b41049..b5d48f5f`                                                                   | 11 code pairs, 0 binding mismatches, 3 structural hunks (each a type-literal `;`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| i18n, batches                                       | fork `99c27adc8..33e84fabc`                                                            | 38 keys renamed, same English text. Selectors and hooks match. Test, expect and skip counts unchanged (fork 596/1232/2, ours 231/1047/74)                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Token proof, this review's fixes                    | fork `33e84fabc..e08efd6ec`                                                            | 13 code pairs, 0 structural hunks, 0 binding mismatches. The only string changes are two i18n keys and one heading id                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| i18n fail-first                                     | fork `50fc3ed3b`                                                                       | Code side alone: `set_bonus_labels.test.ts` and `GearSetChips.test.tsx` fail 2 of 31 (`Received "upgrades_tab.settings.gear_set_in_pool"`). With the locale and schema: 31 of 31 pass, and `test-locales.mjs` passes                                                                                                                                                                                                                                                                                                                                     |
+| Pin at `33e84fabc`                                  | pair `b5d48f5f`                                                                        | Drift check ok (36 files). Regenerating `sim-implemented-effects.json` gives no diff. All 22 changed engine hashes are in `engine.md`                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| E-W3 + fork-loading tests                           | fork `50fc3ed3b`, before the hashes moved                                              | 6 files, 251 passed, rc 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Fork tests and checks                               | fork `50fc3ed3b`                                                                       | vitest 75 files, 910 passed. tsc rc 0, oxfmt rc 0, oxlint rc 0, line endings `i/lf w/lf`                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| Fork tests and checks                               | fork `e08efd6ec`                                                                       | vitest on `utils`, `model` and the popover: 38 files, 669 passed. tsc rc 0. oxfmt and oxlint on the two files: rc 0                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| Drift after the re-pin                              | pair, fork `e08efd6ec`                                                                 | `engine port drift check ok: 36 ported files match engine.md`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `TBC_VERIFY_FRESH=1 pnpm verify`                    | pair, fork `50fc3ed3b`                                                                 | v22.23.2, rc 0, `gates: 1742 ran, 0 skipped`, `fork lint check ok at fork commit 50fc3ed3b770`, `fork tests check ok ... Tests 907 passed (907)`. Layout skipped: no `dist/` in the pair                                                                                                                                                                                                                                                                                                                                                                 |
+| Step 3: fixes re-checked by a fresh agent           | pair, fork `e08efd6ec`                                                                 | Opus `general-task`, report `2026-11-19-general-task-naming-review-check-fixes.md`. i18n fail-first again: with the locale and schema at `33e84fabc`, rc 1, `Tests 2 failed \| 29 passed (31)`, naming the two new keys; restored, rc 0, `31 passed (31)`, and `test-locales.mjs` rc 0. Token proof `33e84fabc..e08efd6ec`: 0 structural hunks, 0 binding mismatches. 15 changed paths, none in `upstream/master`. Drift ok, all 36 `engine.md` hashes equal the files' sha256, and regenerating `sim-implemented-effects.json` leaves it byte-identical |
+| `TBC_VERIFY_FRESH=1 pnpm verify`                    | pair, fork `e08efd6ec`                                                                 | v22, rc 0, `gates: 1742 ran, 0 skipped`, `fork lint check ok at fork commit e08efd6ece44`, `fork tests check ok ... Tests 907 passed (907)`. Layout skipped: no `dist/` (step-3 agent)                                                                                                                                                                                                                                                                                                                                                                   |
+| Layout gate (`scripts/tab-harness/test-layout.mjs`) | pair, fork `e08efd6ec`                                                                 | rc 0, `"outcome":"measured","pass":true,"failed":0,"a11yFailed":0`, 496 PASS, 0 FAIL, widths 375/653/768/1280, 11 fixtures. `dist/` built with `make wasm` (with `GOFLAGS=-buildvcs=false`) and the assets rule, not `make host`, which serves forever; run with the pwshim headless browser; run directly, so no digest was recorded. A plain run could not start Chromium in the sandbox (step-3 agent)                                                                                                                                                |
+| Desktop gate (`pnpm desktop-gate:check`)            | pair, fork `e08efd6ec`                                                                 | Retry: rc 0, `desktop-gate: PASS (ret PASS, mage PASS, rogue PASS, enh PASS)`, `142 files compared, 0 mismatches`. The first run failed in the sandbox before any check (`listen EPERM` in `make wowsimtbc`); the bundle was built by hand first, as the 11-09 report did (step-3 agent)                                                                                                                                                                                                                                                                 |
+| `TBC_VERIFY_FRESH=1 pnpm verify`, last              | pair, fork `e08efd6ec`, after the `engine.md` rename note and the lock comment fix     | v22.23.2, rc 0, `gates: 1742 ran, 0 skipped`, `engine port drift check ok: 36 ported files match engine.md`, `fork tests check ok ... Tests 907 passed (907)`, `verify: pass stamp written`. `layout: would run`, since `dist/` now exists                                                                                                                                                                                                                                                                                                               |
+
+### Findings (2026-11-19)
+
+Names axis (N), at fork `33e84fabc`:
+
+- **N-1 (moderate):** `bonusGearMeasured` (`rank.ts:286`) is set on every row
+  of a ranking made with `measureSetBonuses`, even when a bonus went
+  unmeasured. So `setCreditUnmeasured(ctx) && ctx.bonusGearMeasured`
+  (`set_bonus_popover.ts:123`) reads as "unmeasured and measured". It marks
+  how the ranking was made, not a result.
+- **N-2 (moderate):** an increment's `dps` can be negative, and no comment
+  said so.
+- **N-3:** `SetPotentialIncrement.isCredited` is true only on the last
+  increment, though every increment counts toward the credit. No comment said
+  so.
+- **N-4 (minor, broad):** made-up words ("package", "single", "ladder",
+  "rung") remain in our fork-loading tests and in
+  `scripts/tab-harness/test-stop.mjs`.
+- **N-5:** "total" named a bonus gear's gain after the glossary dropped the
+  word: the heading id `set_potential_totals`, the key
+  `popover_set_potential_totals`, comments in `view.ts` and
+  `set_bonus_popover.ts`, and our test local `creditedTotal`.
+- **N-6:** `hitCap` holds the hit budget (`meta-repair.ts`; `wornHitCap` in
+  `rank.ts`).
+- **N-7:** `have` and `owned` where the tab says "worn":
+  `SetPotentialTerm.have` (`view.ts:52`) and the local `owned` in
+  `dead-slots.ts:65`.
+- **N-8:** "lost" where the glossary says "broken":
+  `thresholdLostByDroppingOnePiece`, the locals `lost` and `lostSets`, and
+  "newly loses" in the increment doc.
+- **N-9:** "set" alone for a gear set: "default sets" in two comments, and
+  the key `settings.sets_in_pool`.
+- **N-10:** `nextPieceMeasured` reads as a boolean but holds a sim result.
+- **N-11:** `placements` (`pool.ts:249, 267`) and `est` (`partner-choice.ts`)
+  sit next to sites the decided renames changed to `simSlots` and `estimate`.
+
+Behaviour axis (B), at fork `33e84fabc`:
+
+- **B-1:** `set-screen.ts:226` said "rung K is not a screened rung" and now
+  says "count K is not a screened count". The brief did not list this shown
+  text. It appears only on an internal error, in the run-failed toast.
+- **B-2:** `packages/core/test/fixtures/tab-recordings/README.md:33-37` lists
+  six of the seven renamed keys. `stepGearSe` → `bonusGearSe` is missing.
+
+## Disposition (2026-11-19 naming review)
+
+| ID   | Axis      | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ---- | --------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| N-1  | Names     | fixed       | `a58638ea1`: `bonusGearMeasured` is `usesBonusGear`, since it marks how the ranking valued its bonuses. The 6 recordings, the 11 mock fixtures (regenerated) and the popover snapshot carry the new key, 707 keys renamed and no other change (proof in ticket 888's closing note); our `fork-set-net`, `fork-set-fixtures` and `make-mock-fixtures.ts` follow                                                                                                                                                                              |
+| N-2  | Names     | fixed       | `9f8dd091a`: the `SetPotentialIncrement` doc says `dps` is its bonus gear's DPS minus the previous increment's, and can be negative                                                                                                                                                                                                                                                                                                                                                                                                         |
+| N-3  | Names     | fixed       | `9f8dd091a`: `isCredited` has a doc: "True only on the last increment, the one that reaches the credited bonus. Every increment counts toward the credit."                                                                                                                                                                                                                                                                                                                                                                                  |
+| N-4  | Names     | wontfix     | Not a problem for this branch: the naming review covers the tab's code, which ships in the fork. The decisions scoped our tests to following the fork's renames (names report N-4, citing decisions line 378). The names report lists every site for a later test pass                                                                                                                                                                                                                                                                      |
+| N-5  | Names     | fixed       | `50fc3ed3b`: heading id `set_potential_outcomes` and key `popover_set_potential_outcomes`, shown text unchanged. `9f8dd091a` and `e08efd6ec`: the comments say "outcome" and "one line per bonus". Our test local `creditedTotal` stays, for N-4's reason                                                                                                                                                                                                                                                                                   |
+| N-6  | Names     | fixed       | `d9fb4b7f2`: meta repair's `hitCap` option is `hitBudget`, and `rank.ts`'s `wornHitCap` is `wornHitBudget`. Our `fork-meta-repair.test.ts` and `meta-repair-oracle.ts` follow. The cache-key literal `metaRepairHitCap` stays                                                                                                                                                                                                                                                                                                               |
+| N-7a | Names     | fixed       | `c88709a9e`: the local `owned` in `dead-slots.ts` is `worn`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| N-7b | Names     | fixed       | `e7f36edd0`: the bonus term's `have` is `worn`. Our `fork-set-net.test.ts` follows                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| N-8  | Names     | fixed       | `c88709a9e`: `thresholdBrokenByDroppingOnePiece`, locals `broken` and `brokenSets`. `e08efd6ec`: `brokenNames`' parameter is `broken`. `9f8dd091a`: "newly breaks". The verb "loses" elsewhere is plain English about a swap and stays. Core's `packages/core/src/dead-slots.ts` keeps `thresholdLostByDroppingOnePiece`, like every name the naming review changed only in the fork; `engine.md` now lists it with the others                                                                                                              |
+| N-9  | Names     | fixed       | `50fc3ed3b`: "default gear sets" in both comments, and the key `settings.gear_set_in_pool` (singular, because each chip counts one gear set's pieces). Shown text unchanged                                                                                                                                                                                                                                                                                                                                                                 |
+| N-10 | Names     | fixed       | `c88709a9e`: `nextPieceResult`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| N-11 | Names     | fixed       | `c88709a9e`: `simSlots` and `estimate`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| B-1  | Behaviour | wontfix     | Not a problem: decision N14 replaced "rung" with "count", and the message appears only when the set screen is asked for a count it did not screen, an internal error. The merge account lists it beside the three "recolor" messages                                                                                                                                                                                                                                                                                                        |
+| B-2  | Behaviour | fixed       | Our `packages/core/test/fixtures/tab-recordings/README.md` lists `stepGearSe` → `bonusGearSe`, and the N-1 rename                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| S-1  | Names     | fixed       | Owner, 2026-11-19: "recolour" is too British, and "I don't need to decide I already did". Fork `e1374cb4f`..`93027b6c9` spell the tab's identifiers, comments, test titles and three i18n keys the American way (memoized, flavor, itemized, favorite, normalize, virtualize, behavior, labeled, canceled and others); our fork-loading tests and `scripts/` follow. The saved setting key `exportFlavour` keeps its name, with a comment. Strings that land in stored files or core's text, wowsims' names and game names (Judgement) stay |
+
+### Notes (2026-11-19)
+
+- **The four pending rows (N-1, N-6, N-7b, B-2) are fixed on this branch**,
+  so ticket 888 is closed. The fixer's report:
+  `.scratch/agent-reports/2026-11-19-general-task-naming-review-888-and-spelling.md`
+  in the main checkout.
+- **British spellings beyond "colour":** the owner had already ruled
+  (row S-1). A saved key would need a migration, so `exportFlavour` stays.
+- Old recordings under `.scratch/` keep the old keys, and
+  `FIXTURE_SCHEMA_VERSION` was not bumped. Only dev tools read those files
+  (behaviour report § Notes).
+- `useTokenIds` (`ExportPanel.tsx:46`) looks like a hook but is the toggle's
+  boolean, named after its label "Use tier token ids", and used on the same
+  line. Left as is.
+- The fork branch `chore/344-pr-prep` is at `93027b6c9` on disk only. The
+  lock says `pushed: false`.

@@ -10,7 +10,7 @@
 // headless Chromium over CDP, the way the round-2b scenario captures did
 // (.scratch/.../set-rule-scenarios/tools/capture3.mjs): set the page phase,
 // load the gear, run the tab, wait for "Took", then read the finished Ranking
-// through the dev-only `window.__upgradesRanking()` hook and write it to
+// through the dev-only `window.__upgradesRecording()` hook and write it to
 // .scratch/tab-recordings/<spec>-p<phase>-<name>.json, or under --out.
 // Refuses an --out inside the made-up fixtures' folder (MOCK_DIR), and
 // --allow-dirty with an --out inside the frozen recordings' folder
@@ -431,13 +431,13 @@ async function main() {
       `${Math.round((Date.now() - started) / 1000)}s`
     );
 
-    // Serialised in the page with a replacer that throws on NaN/Infinity:
+    // Serialized in the page with a replacer that throws on NaN/Infinity:
     // returnByValue would silently turn them into null.
     const got = await evaluate(
       send,
       `(() => {
-        if (typeof window.__upgradesRanking !== 'function') return { error: 'no window.__upgradesRanking (fixture hooks not in this build)' };
-        const r = window.__upgradesRanking();
+        if (typeof window.__upgradesRecording !== 'function') return { error: 'no window.__upgradesRecording (fixture hooks not in this build)' };
+        const r = window.__upgradesRecording();
         if (!r) return { error: 'no finished ranking on the page' };
         try {
           return { json: JSON.stringify(r, (k, v) => { if (typeof v === 'number' && !Number.isFinite(v)) throw new Error('non-finite number at key "' + k + '"'); return v; }) };

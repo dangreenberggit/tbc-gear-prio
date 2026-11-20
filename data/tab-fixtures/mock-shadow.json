@@ -379,7 +379,7 @@
           "piecesAfterSwap": 2,
           "nextThreshold": 3,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": 16.76,
           "singleBreaks": [
             {
@@ -403,8 +403,8 @@
                   "name": "Frozen Shadoweave Robe"
                 }
               ],
-              "stepGearDps": 29.26,
-              "stepGearSe": 2
+              "bonusGearDps": 29.26,
+              "bonusGearSe": 2
             }
           ]
         }

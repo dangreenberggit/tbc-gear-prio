@@ -10,7 +10,7 @@
  * output, no `node_modules`) passes the folder test but still skips the
  * fork suites, so a local run also fails when any gate skipped.
  *
- * CI is recognised by GITHUB_ACTIONS, which GitHub sets to "true". GitHub's
+ * CI is recognized by GITHUB_ACTIONS, which GitHub sets to "true". GitHub's
  * "Default environment variables" table
  * (https://docs.github.com/en/actions/reference/workflows-and-actions/variables#default-environment-variables)
  * says "You can't overwrite the value of the default environment variables

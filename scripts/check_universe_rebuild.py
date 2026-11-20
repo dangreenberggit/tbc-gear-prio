@@ -2,7 +2,7 @@
 """Check that the committed universes are what the builder builds (ticket 679).
 
 For every committed `data/universes/<spec>-p<N>.json` this calls the builder's
-`assemble()` in this process, serialises the universe and its report the way
+`assemble()` in this process, serializes the universe and its report the way
 `assemble_universe.py`'s `main()` writes them, and byte-compares both with the
 committed files. It then has the builder write its weapon-type exclusions
 manifest to a temporary file and byte-compares that with
@@ -48,7 +48,7 @@ exit_if_missing(every_locked_file=True)
 import assemble_universe as A  # noqa: E402
 
 
-def serialise(obj: object) -> bytes:
+def serialize(obj: object) -> bytes:
     # The same text main() writes with encoding="utf-8", newline="\n".
     return (json.dumps(obj, indent=2) + "\n").encode("utf-8")
 
@@ -88,7 +88,7 @@ def main() -> int:
         file_failed = False
         for target, obj in ((path, payload), (report_path, report)):
             checked += 1
-            if not target.is_file() or target.read_bytes() != serialise(obj):
+            if not target.is_file() or target.read_bytes() != serialize(obj):
                 print(f"MISMATCH data/universes/{target.name} -- run {rerun}")
                 mismatches.append(target.name)
                 file_failed = True

@@ -1,7 +1,7 @@
 /**
  * The Upgrades tab's run progress tracker (ticket 542), on the fork.
  *
- * `run_progress.ts` turns the engine's `Progress` events into the phase the
+ * `run_progress.ts` turns the engine's `Progress` events into the activity the
  * progress component names, the bar's ratio and a remaining-time estimate.
  *
  * Two blocks:
@@ -11,7 +11,7 @@
  *   controlled sim and the engine's default seeds, the way the tab calls it
  *   (no `seeds`), on a seven- and a twelve-candidate pool, a pool where no
  *   row clears the cutoff and a capped pool, and checks the tracker's
- *   set-phase boundary, phases and replication count, and that each run ends
+ *   set-phase boundary, activities and replication count, and that each run ends
  *   on `done === total`, against the events the engine really sends.
  *
  * The fork is gitignored (`vendor/`), so both blocks skip when the module is
@@ -46,34 +46,39 @@ type Progress =
   | { kind: "row"; row: unknown }
   | { stage: "ranking" };
 
-type RunPhase =
+type RunActivity =
   "preparing" | "candidates" | "set-bonuses" | "replication" | "ranking";
 
 type EstimatorConfig =
   | { kind: "linear" }
-  | { kind: "phased"; kappa: number; psi: number; slowdown: number };
+  | {
+      kind: "phased";
+      replicationSimCost: number;
+      setBonusStageCandidates: number;
+      slowdown: number;
+    };
 
 type RunTimeline = {
   sims: ReadonlyArray<{ t: number; done: number; afterRanking: boolean }>;
   rankingAt: number | undefined;
   total: number;
-  lastCandidateDone: number | null;
+  doneAtLastCandidate: number | null;
   concurrency: number;
   now: number;
-  qualifyingRows: number;
+  replicableRowCount: number;
   seedCount: number;
   topN: number;
   finalTotal?: number;
 };
 
 type RunProgressView = {
-  phase: RunPhase;
+  activity: RunActivity;
   stage: string;
   done?: number;
   total?: number;
-  lastCandidateDone: number | null;
+  doneAtLastCandidate: number | null;
   remainingMs?: number;
-  qualifyingRows: number;
+  replicableRowCount: number;
 };
 
 type Tracker = {
@@ -85,7 +90,7 @@ type Tracker = {
 
 type RunProgressModule = {
   TAB_REPLICATE_SEED_COUNT: number;
-  lastCandidateDoneFor(
+  doneAtLastCandidateFor(
     total: number,
     seedCount: number,
     topN: number
@@ -153,7 +158,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     });
   });
 
-  describe("lastCandidateDoneFor", () => {
+  describe("doneAtLastCandidateFor", () => {
     // total = 1 + c + 4 * (1 + min(8, c)) with five seeds and top-N 8,
     // written out by hand for each c.
     it.each([
@@ -166,23 +171,23 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       [277, 241], // c = 240: 1 + 240 + 36
       [401, 365], // c = 364: run 1's total and boundary
     ])("total %i gives boundary %i", (total, boundary) => {
-      expect(mod.lastCandidateDoneFor(total, 5, 8)).toBe(boundary);
+      expect(mod.doneAtLastCandidateFor(total, 5, 8)).toBe(boundary);
     });
 
     it("returns the total itself with a single seed", () => {
-      expect(mod.lastCandidateDoneFor(57, 1, 8)).toBe(57);
+      expect(mod.doneAtLastCandidateFor(57, 1, 8)).toBe(57);
     });
 
     it.each([7, 38])("returns null for total %i, which no c gives", (total) => {
-      expect(mod.lastCandidateDoneFor(total, 5, 8)).toBeNull();
+      expect(mod.doneAtLastCandidateFor(total, 5, 8)).toBeNull();
     });
   });
 
-  describe("phases follow the engine's event order", () => {
+  describe("activities follow the engine's event order", () => {
     // T = 57 is c = 20 candidates: 1 + 20 + 4 * 9, so B = 21.
     it("names each pre-sim stage as preparing", () => {
       const t = tracker({ kind: "linear" });
-      expect(t.view().phase).toBe("preparing");
+      expect(t.view().activity).toBe("preparing");
       for (const stage of [
         "resolving",
         "reading-gear",
@@ -190,10 +195,10 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
         "building-pool",
       ] as const) {
         t.observe({ stage }, 10);
-        expect(t.view()).toMatchObject({ phase: "preparing", stage });
+        expect(t.view()).toMatchObject({ activity: "preparing", stage });
       }
       expect(t.view().done).toBeUndefined();
-      expect(t.view().lastCandidateDone).toBeNull();
+      expect(t.view().doneAtLastCandidate).toBeNull();
     });
 
     it("walks candidates, set bonuses, replication and ranking", () => {
@@ -201,42 +206,42 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       t.observe({ stage: "building-pool" }, 0);
       t.observe(sim(1, 57), 100);
       expect(t.view()).toMatchObject({
-        phase: "candidates",
+        activity: "candidates",
         done: 1,
         total: 57,
-        lastCandidateDone: 21,
+        doneAtLastCandidate: 21,
       });
       t.observe(sim(20, 57), 200);
-      expect(t.view().phase).toBe("candidates");
+      expect(t.view().activity).toBe("candidates");
       // Eight rows clear the cutoff, so all 36 replication sims are expected.
       for (let i = 0; i < 8; i++) t.observe(row(false), 210);
-      expect(t.view()).toMatchObject({ phase: "candidates", done: 20 });
+      expect(t.view()).toMatchObject({ activity: "candidates", done: 20 });
       t.observe(sim(21, 57), 300);
-      expect(t.view()).toMatchObject({ phase: "set-bonuses", done: 21 });
+      expect(t.view()).toMatchObject({ activity: "set-bonuses", done: 21 });
       t.observe(RANKING, 400);
       expect(t.view()).toMatchObject({
-        phase: "replication",
+        activity: "replication",
         stage: "ranking",
         done: 21,
       });
       // The engine restates the total: eight rows re-simmed, 21 + 4 * 9 = 57.
       t.observe(sim(21, 57), 450);
       expect(t.view()).toMatchObject({
-        phase: "replication",
+        activity: "replication",
         done: 21,
         total: 57,
       });
       t.observe(sim(40, 57), 500);
-      expect(t.view().phase).toBe("replication");
+      expect(t.view().activity).toBe("replication");
       t.observe(sim(57, 57), 600);
-      expect(t.view()).toMatchObject({ phase: "ranking", done: 57 });
+      expect(t.view()).toMatchObject({ activity: "ranking", done: 57 });
     });
 
     it("names a ranking with no sim count, a cached ranking, ranking", () => {
       const t = tracker({ kind: "linear" });
       t.observe({ stage: "resolving" }, 0);
       t.observe(RANKING, 50);
-      expect(t.view()).toMatchObject({ phase: "ranking", stage: "ranking" });
+      expect(t.view()).toMatchObject({ activity: "ranking", stage: "ranking" });
       expect(t.view().done).toBeUndefined();
     });
 
@@ -246,9 +251,9 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       t.observe(sim(8, 57), 200);
       t.noteStop();
       t.observe(sim(9, 57), 300);
-      expect(t.view().phase).toBe("candidates");
+      expect(t.view().activity).toBe("candidates");
       t.observe(RANKING, 400);
-      expect(t.view()).toMatchObject({ phase: "ranking", done: 9 });
+      expect(t.view()).toMatchObject({ activity: "ranking", done: 9 });
     });
 
     it("drops the boundary when a candidate count passes it", () => {
@@ -256,17 +261,17 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       t.observe(sim(1, 57), 100);
       t.observe(sim(22, 57), 200);
       expect(t.view()).toMatchObject({
-        phase: "candidates",
-        lastCandidateDone: null,
+        activity: "candidates",
+        doneAtLastCandidate: null,
       });
       // The boundary stays dropped, so done == 21 is not the set phase.
       t.observe(sim(21, 57), 250);
       expect(t.view()).toMatchObject({
-        phase: "candidates",
-        lastCandidateDone: null,
+        activity: "candidates",
+        doneAtLastCandidate: null,
       });
       t.observe(RANKING, 300);
-      expect(t.view().phase).toBe("replication");
+      expect(t.view().activity).toBe("replication");
     });
   });
 
@@ -289,12 +294,12 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
   });
 
   describe("phased estimate", () => {
-    // kappa 0.5 at concurrency 4 gives k = 2 candidate-times per replication
-    // sim. T = 57 is c = 20, so B = 21 and R = T - B = 36. psi = 20.
+    // replicationSimCost 0.5 at concurrency 4 gives k = 2 candidate-times per replication
+    // sim. T = 57 is c = 20, so B = 21 and R = T - B = 36. setBonusStageCandidates = 20.
     const phased: EstimatorConfig = {
       kind: "phased",
-      kappa: 0.5,
-      psi: 20,
+      replicationSimCost: 0.5,
+      setBonusStageCandidates: 20,
       slowdown: 0,
     };
 
@@ -313,7 +318,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       // A ninth qualifying row in the silent set phase is counted, but the
       // count is already at top-N 8, so R and the estimate stay the same.
       t.observe(row(false), 4_000);
-      expect(t.view().qualifyingRows).toBe(9);
+      expect(t.view().replicableRowCount).toBe(9);
       expect(t.view().remainingMs).toBe(9_200);
       // b = 21; r_B * k * (T - b) = 100 * 2 * 36
       t.observe(RANKING, 5_000);
@@ -349,10 +354,10 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
 
   describe("slowdown term in the candidate estimate", () => {
     // Five events, four candidates done (n = 4) at 250 ms each. T = 47 is
-    // c = 10, so B = 11 and R = 36. kappa 0.25 at concurrency 4 gives k = 1;
-    // psi = 2. With S(x) = x(x + 1)/2: a = tau / (n + s S(n)),
+    // c = 10, so B = 11 and R = 36. replicationSimCost 0.25 at concurrency 4 gives k = 1;
+    // setBonusStageCandidates = 2. With S(x) = x(x + 1)/2: a = tau / (n + s S(n)),
     // C = a ((c - n) + s (S(c) - S(n))), rbar = (tau + C) / c and the
-    // estimate is C + rbar (psi + k R).
+    // estimate is C + rbar (setBonusStageCandidates + k R).
     const sims = [0, 250, 500, 750, 1_000].map((t, i) => ({
       t,
       done: i + 1,
@@ -364,23 +369,23 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       sims,
       rankingAt: undefined,
       total: 47,
-      lastCandidateDone: 11,
+      doneAtLastCandidate: 11,
       concurrency: 4,
       now: 1_000,
-      qualifyingRows: 4,
+      replicableRowCount: 4,
       seedCount: 5,
       topN: 8,
       ...over,
     });
     const config = (slowdown: number): EstimatorConfig => ({
       kind: "phased",
-      kappa: 0.25,
-      psi: 2,
+      replicationSimCost: 0.25,
+      setBonusStageCandidates: 2,
       slowdown,
     });
 
     it("uses the boundary the tab solves for total 47", () => {
-      expect(mod.lastCandidateDoneFor(47, 5, 8)).toBe(11);
+      expect(mod.doneAtLastCandidateFor(47, 5, 8)).toBe(11);
     });
 
     it.each([
@@ -405,7 +410,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
         const atBoundary = run({
           sims: [...sims, { t: 3_000, done: 11, afterRanking: false }],
           now: 3_000,
-          qualifyingRows: 8,
+          replicableRowCount: 8,
         });
         expect(
           mod.estimateRemainingMs(config(slowdown), atBoundary)
@@ -420,7 +425,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
         expect(
           mod.estimateRemainingMs(
             config(slowdown),
-            run({ lastCandidateDone: null })
+            run({ doneAtLastCandidate: null })
           )
         ).toBeCloseTo(10_500, 6);
       }
@@ -429,8 +434,8 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     it("ships the round-4 constants fitted on run 1", () => {
       expect(mod.RUN_PROGRESS_ESTIMATOR).toEqual({
         kind: "phased",
-        kappa: 0.3221,
-        psi: 50.993,
+        replicationSimCost: 0.3221,
+        setBonusStageCandidates: 50.993,
         slowdown: 0.003064,
       });
       expect(mod.RUN_PROGRESS_SHOW_FROM_FRACTION).toBe(0.35);
@@ -439,13 +444,13 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
   });
 
   describe("replication count from rows that clear the cutoff", () => {
-    // kappa 0.5 at concurrency 4 gives k = 2; psi = 20; T = 57 is c = 20,
+    // replicationSimCost 0.5 at concurrency 4 gives k = 2; setBonusStageCandidates = 20; T = 57 is c = 20,
     // so B = 21. Five seeds and top-N 8: each re-simmed row and the baseline
     // take 4 sims, so R = 4 * (1 + min(8, Q)), or 0 when Q = 0.
     const config: EstimatorConfig = {
       kind: "phased",
-      kappa: 0.5,
-      psi: 20,
+      replicationSimCost: 0.5,
+      setBonusStageCandidates: 20,
       slowdown: 0,
     };
 
@@ -455,7 +460,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       for (let i = 0; i < 9; i++) t.observe(row(true), 1_500);
       // A row Stop left unsimmed is never re-simmed.
       t.observe(row(false, false), 1_500);
-      expect(t.view().qualifyingRows).toBe(0);
+      expect(t.view().replicableRowCount).toBe(0);
       // r = 100; R = 0: 100 * ((21 - 11) + 20 + 0)
       t.observe(sim(11, 57), 2_000);
       expect(t.view().remainingMs).toBeCloseTo(3_000, 6);
@@ -464,7 +469,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       expect(t.view().remainingMs).toBeCloseTo(2_000, 6);
       // Expected final done = B = 21, so ranking: 100 * 2 * (21 - 21)
       t.observe(RANKING, 5_000);
-      expect(t.view().phase).toBe("ranking");
+      expect(t.view().activity).toBe("ranking");
       expect(t.view().remainingMs).toBeCloseTo(0, 6);
     });
 
@@ -483,12 +488,12 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       expect(t.view().remainingMs).toBeCloseTo(5_200, 6);
       // Expected final done 37: 100 * 2 * 16
       t.observe(RANKING, 5_000);
-      expect(t.view().phase).toBe("replication");
+      expect(t.view().activity).toBe("replication");
       expect(t.view().remainingMs).toBeCloseTo(3_200, 6);
       // The engine restates the total as 21 + 4 * (1 + 3) = 37, the count
       // already expected: m = 0, 100 * 2 * (37 - 21)
       t.observe(sim(21, 37), 5_000);
-      expect(t.view()).toMatchObject({ phase: "replication", total: 37 });
+      expect(t.view()).toMatchObject({ activity: "replication", total: 37 });
       expect(t.view().remainingMs).toBeCloseTo(3_200, 6);
       // m = 1: 100 * 2 * (37 - 22)
       t.observe(sim(22, 37), 5_300);
@@ -497,7 +502,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       t.observe(sim(23, 37), 5_700);
       expect(t.view().remainingMs).toBeCloseTo(4_900, 6);
       t.observe(sim(37, 37), 9_000);
-      expect(t.view().phase).toBe("ranking");
+      expect(t.view().activity).toBe("ranking");
       expect(t.view().remainingMs).toBeCloseTo(0, 6);
     });
 
@@ -513,12 +518,12 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       expect(t.view().remainingMs).toBeCloseTo(3_600, 6);
       // Expected final done 29: 100 * 2 * 8
       t.observe(RANKING, 5_000);
-      expect(t.view().phase).toBe("replication");
+      expect(t.view().activity).toBe("replication");
       expect(t.view().remainingMs).toBeCloseTo(1_600, 6);
       // N4. The engine restates 33 = 21 + 4 * (1 + 2): two rows, not the one
       // counted. Its total replaces the projection: m = 0, 100 * 2 * (33 - 21)
       t.observe(sim(21, 33), 5_000);
-      expect(t.view()).toMatchObject({ phase: "replication", total: 33 });
+      expect(t.view()).toMatchObject({ activity: "replication", total: 33 });
       expect(t.view().remainingMs).toBeCloseTo(2_400, 6);
       // m = 1: 100 * 2 * (33 - 22)
       t.observe(sim(22, 33), 5_300);
@@ -528,10 +533,10 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       expect(t.view().remainingMs).toBeCloseTo(3_500, 6);
       // 30 is past the projected 29 but short of 33: m = 9, 3000 / 9 * 3
       t.observe(sim(30, 33), 8_000);
-      expect(t.view().phase).toBe("replication");
+      expect(t.view().activity).toBe("replication");
       expect(t.view().remainingMs).toBeCloseTo(1_000, 6);
       t.observe(sim(33, 33), 9_000);
-      expect(t.view().phase).toBe("ranking");
+      expect(t.view().activity).toBe("ranking");
       expect(t.view().remainingMs).toBeCloseTo(0, 6);
     });
 
@@ -544,10 +549,10 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       ],
       rankingAt: 5_000,
       total: 57,
-      lastCandidateDone: 21,
+      doneAtLastCandidate: 21,
       concurrency: 4,
       now: 8_000,
-      qualifyingRows: 1,
+      replicableRowCount: 1,
       seedCount: 5,
       topN: 8,
       ...over,
@@ -832,7 +837,7 @@ describe.skipIf(!forkPresent || !moduleExists())(
   () => {
     let mod: RunProgressModule;
     let topN: number;
-    // Seven candidates take the small-pool branch of `lastCandidateDoneFor`.
+    // Seven candidates take the small-pool branch of `doneAtLastCandidateFor`.
     // Twelve, all above the cutoff, take the large-pool branch and pass the
     // top-N cap on re-simmed rows.
     const recordings: Record<"seven" | "twelve", RecordedEvent[]> = {
@@ -896,12 +901,12 @@ describe.skipIf(!forkPresent || !moduleExists())(
             p.row as { belowCutoff?: boolean; simmed?: boolean; owned?: true }
         );
     /** Rows replication can re-sim: rank.ts `replicateTopItems`' filter. */
-    const qualifyingRows = (from: RecordedEvent[]) =>
+    const replicableRowCount = (from: RecordedEvent[]) =>
       landedRows(from).filter(
         (r) => r.belowCutoff === false && r.simmed !== false
       ).length;
 
-    /** Feeds a recording to a tracker; returns it and the phases it named. */
+    /** Feeds a recording to a tracker; returns it and the activities it named. */
     const replay = (
       from: RecordedEvent[],
       estimator: EstimatorConfig = { kind: "linear" }
@@ -912,13 +917,14 @@ describe.skipIf(!forkPresent || !moduleExists())(
         minCandidatesDone: 1,
       });
       tracker.setConcurrency(1);
-      const phases: RunPhase[] = [tracker.view().phase];
+      const activities: RunActivity[] = [tracker.view().activity];
       from.forEach((e, i) => {
         tracker.observe(e.progress, (i + 1) * 100);
-        const phase = tracker.view().phase;
-        if (phases[phases.length - 1] !== phase) phases.push(phase);
+        const activity = tracker.view().activity;
+        if (activities[activities.length - 1] !== activity)
+          activities.push(activity);
       });
-      return { tracker, phases };
+      return { tracker, activities };
     };
 
     it("records one pool within top-N and one past it, with more rows above the cutoff than top-N", () => {
@@ -947,7 +953,7 @@ describe.skipIf(!forkPresent || !moduleExists())(
         const candidates = sims.length - 1;
         expect(candidates).toBeGreaterThan(0);
         expect(
-          mod.lastCandidateDoneFor(
+          mod.doneAtLastCandidateFor(
             first.total,
             mod.TAB_REPLICATE_SEED_COUNT,
             topN
@@ -993,11 +999,11 @@ describe.skipIf(!forkPresent || !moduleExists())(
     );
 
     it.each(pools)(
-      "gives the tracker the phases preparing, candidates, set bonuses, replication, ranking (%s candidates)",
+      "gives the tracker the activities preparing, candidates, set bonuses, replication, ranking (%s candidates)",
       (name) => {
         // The run ends on the done the tracker expects, so the last
         // replication sim names the final ranking.
-        expect(replay(recordings[name]).phases).toEqual([
+        expect(replay(recordings[name]).activities).toEqual([
           "preparing",
           "candidates",
           "set-bonuses",
@@ -1011,7 +1017,7 @@ describe.skipIf(!forkPresent || !moduleExists())(
       "re-sims the baseline and each row the tracker counts, at most top-N (%s candidates)",
       (name) => {
         const from = recordings[name];
-        const q = replay(from).tracker.view().qualifyingRows;
+        const q = replay(from).tracker.view().replicableRowCount;
         expect(q).toBeGreaterThan(0);
         // The first event after ranking restates the total; the rest are sims.
         expect(simmingAfterRanking(from).slice(1)).toHaveLength(
@@ -1039,11 +1045,11 @@ describe.skipIf(!forkPresent || !moduleExists())(
         zeroQualifyEvents[zeroQualifyEvents.length - 1]!.simCallsSoFar
       ).toBe(ranking.simCallsSoFar);
 
-      const { tracker, phases } = replay(
+      const { tracker, activities } = replay(
         zeroQualifyEvents,
         mod.RUN_PROGRESS_ESTIMATOR
       );
-      expect(phases).toEqual([
+      expect(activities).toEqual([
         "preparing",
         "candidates",
         "set-bonuses",
@@ -1056,7 +1062,7 @@ describe.skipIf(!forkPresent || !moduleExists())(
       const candidates = simmingBeforeRanking(cappedEvents).length - 1;
       const owned = landedRows(cappedEvents).filter((r) => r.owned).length;
       expect(candidates).toBe(CAPPED_CANDIDATES + owned);
-      const q = qualifyingRows(cappedEvents);
+      const q = replicableRowCount(cappedEvents);
       expect(q).toBeGreaterThan(0);
       expect(q).toBeLessThan(CAPPED_CANDIDATES);
       expect(q).toBeLessThan(topN);
@@ -1078,7 +1084,7 @@ describe.skipIf(!forkPresent || !moduleExists())(
       const last = sims[sims.length - 1]!;
       expect(last.done).toBe(last.total);
       const candidates = simmingBeforeRanking(events).length - 1;
-      const rows = Math.min(topN, qualifyingRows(events));
+      const rows = Math.min(topN, replicableRowCount(events));
       expect(last.total).toBe(
         1 +
           candidates +

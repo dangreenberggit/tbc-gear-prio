@@ -194,7 +194,7 @@ def main() -> int:
     buffs = json.loads(BUFF_DEFAULTS.read_text(encoding="utf-8"))
 
     # DiscardUnknown: true means the pinned binary drops a field it doesn't
-    # recognise instead of erroring -- so check before the copy, not after.
+    # recognize instead of erroring -- so check before the copy, not after.
     # Only the four fields this script actually carries forward (APL_KEYS)
     # matter here; unrelated top-level keys in the vendor APL file (if any)
     # are never read.

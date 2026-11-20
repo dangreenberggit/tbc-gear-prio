@@ -228,7 +228,7 @@ def build_enchants_index(db: dict) -> dict[str, list[dict]]:
 
 def build_gem_palette(db: dict) -> list[dict]:
     """PLAN.md 9 R4 palette filtering: JC-restricted gems excluded outright
-    (professions aren't modelled, so a JC-only recommendation is a dead end
+    (professions aren't modeled, so a JC-only recommendation is a dead end
     for anyone else). Phase and `unique` are kept as fields rather than
     filtered here -- same "each entry carries its own phase, filtering
     happens at rank time" pattern as data/pools/<spec>.json (PLAN.md 8.3),

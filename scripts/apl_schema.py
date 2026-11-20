@@ -2,7 +2,7 @@
 
 The pinned wowsimcli binary (v0.0.101) unmarshals JSON with
 `protojson.UnmarshalOptions{DiscardUnknown: true}` -- a field name it
-doesn't recognise is dropped, not rejected, so a copy-forward of upstream's
+doesn't recognize is dropped, not rejected, so a copy-forward of upstream's
 APL JSON can silently lose an action or condition and still produce a
 plausible (wrong) DPS number. build_feral_skeleton.py's regen never runs the
 binary itself to notice; it just writes JSON. This module gives it something

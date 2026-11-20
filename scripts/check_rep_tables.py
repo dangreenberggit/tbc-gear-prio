@@ -21,7 +21,7 @@ witness for some vendor items -- and are reported as unchecked rather than
 counted as passing.
 
 Re-derived here rather than asserted, so drift in ui.proto, in db.json, or in
-the display table fails loudly instead of silently mislabelling a source.
+the display table fails loudly instead of silently mislabeling a source.
 
 Run via `pnpm verify` (`pnpm rep-tables:check`). Exits 2 when
 `vendor/wowsims/db.json` is missing.
@@ -60,15 +60,15 @@ def _atlasloot_factions() -> dict[str, int]:
 
 
 def _atlasloot_ids_by_key() -> dict[str, int]:
-    """Normalised faction key -> id. The lookup `rep_source` actually uses."""
+    """Normalized faction key -> id. The lookup `rep_source` actually uses."""
     return {_faction_key(name): fid for name, fid in _atlasloot_factions().items()}
 
 
 # id -> the exact display spelling a shipped row must use. Only the ten wowsims
-# models have one; AtlasLoot carries no English display text (it localises
+# models have one; AtlasLoot carries no English display text (it localizes
 # through `ALIL[]`), so for the other ten there is no authority on punctuation
 # or articles and an exact test would be inventing one. Those fall back to the
-# normalised-key check below.
+# normalized-key check below.
 FACTION_NAMES_BY_ID = dict(REP_FACTION_NAMES)
 
 

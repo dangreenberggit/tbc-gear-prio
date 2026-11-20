@@ -217,11 +217,11 @@ def main():
             all_gem_ids.append((idx, gem["id"]))
 
     unresolved = [(i, gid) for i, gid in all_gem_ids if gid not in gems]
-    colours = Counter()
+    colors = Counter()
     for i, gid in all_gem_ids:
         rec = gems.get(gid)
         if rec:
-            colours[rec.get("color")] += 1
+            colors[rec.get("color")] += 1
     print(f"  {len(all_gem_ids)} gems socketed, {len(unresolved)} unresolved")
     for i, gid in all_gem_ids:
         rec = gems.get(gid)
@@ -235,7 +235,7 @@ def main():
                   f"phase={rec.get('phase'):<2} {rec['name'][:34]:<34} {' '.join(flags)}")
         else:
             print(f"  [{i:>2}] {gid:>6}  *** NOT IN db.json ***")
-    print(f"\n  colour histogram: {dict(colours)}")
+    print(f"\n  colour histogram: {dict(colors)}")
 
     max_phase = max((gems[g].get("phase", 1) for _, g in all_gem_ids if g in gems),
                     default=None)

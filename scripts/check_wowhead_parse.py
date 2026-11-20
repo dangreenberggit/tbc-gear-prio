@@ -6,7 +6,7 @@ depends on are pinned here and run by `pnpm verify`
 (`pnpm wowhead-parse:check`). A universe row would only show a wrong parse
 after a regeneration, and a reader could not tell which input caused it.
 
-The honour cases are ticket 681: an honour vendor row that names a season
+The honor cases are ticket 681: an honor vendor row that names a season
 must carry it, as an arena row does, so the tab can print "Honor, season 3".
 The badge cases pin the two badge forms the cross-spec index (ticket 676)
 chooses between: a priced row and the cost-0 "Badges of Justice" row.

@@ -917,7 +917,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": 9.39,
           "singleBreaks": [
             {
@@ -941,8 +941,8 @@
                   "name": "Wastewalker Gloves"
                 }
               ],
-              "stepGearDps": 21.89,
-              "stepGearSe": 2
+              "bonusGearDps": 21.89,
+              "bonusGearSe": 2
             },
             {
               "threshold": 4,
@@ -965,8 +965,8 @@
                   "name": "Wastewalker Tunic"
                 }
               ],
-              "stepGearDps": 27.89,
-              "stepGearSe": 2
+              "bonusGearDps": 27.89,
+              "bonusGearSe": 2
             }
           ]
         }

@@ -408,7 +408,7 @@ def parse_faction_items(
 
     The Factions module groups each faction's loot under standing sub-tables
     marked by a `{ -- Exalted` comment. That comment is the only thing naming
-    the standing -- the `name = ALIL["Exalted"]` line beside it is a localisation
+    the standing -- the `name = ALIL["Exalted"]` line beside it is a localization
     lookup, so the comment is what a Lua-less parser can read.
 
     Items are keyed by id and standings resolve to the same names `ui.proto`'s

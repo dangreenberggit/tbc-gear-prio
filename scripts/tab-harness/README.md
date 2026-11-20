@@ -86,11 +86,11 @@ node scripts/tab-harness/run-tab-cdp.mjs --origin http://localhost:3333 --candid
 The harness finds every element by its `data-testid` (the React tab, ticket
 560): the tab button, the phase selector (`phase-selector`, inside the settings
 column, opened through `upgrades-run-settings-summary` below `xl`), the
-candidates and iterations pickers (`upgrades-candidates-picker`, always in the
+candidates and iterations pickers (`upgrades-candidate-cap-picker`, always in the
 DOM inside a wrapper hidden unless `?upgrades-dev`; `upgrades-iterations-picker`),
 the eligible count (`upgrades-eligible-count`, its `data-count`), the run button,
 the status line (`upgrades-status`) and the rows of the Upgrades list pane
-(`#upgrades-pane-shopping-list`, below-cutoff group opened first). Each picker
+(`#upgrades-pane-all-slots`, below-cutoff group opened first). Each picker
 value is read back after it is set and the run stops with "did not stick" when
 it differs.
 

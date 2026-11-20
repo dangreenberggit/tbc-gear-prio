@@ -11,7 +11,7 @@ never the clone's checked-out HEAD: forkCommit is compared against the pin, and
 the id sets are rebuilt from the fork tree **at that same pin** via git rather
 than from the working tree. Clone-ahead-of-pin is the expected mid-slice state
 (docs/plans/wowsims-tab/candidate-pool.md section 9.1a). Reading the id sets
-from disk while labelling them with the pin gave the gate a state with no legal
+from disk while labeling them with the pin gave the gate a state with no legal
 move: the check called the artifact stale and demanded a regeneration that the
 generator refused to perform while HEAD differed from the pin. Tickets 213, 215.
 

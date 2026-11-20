@@ -59,7 +59,7 @@ _ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
 
 
 def summary_lines(output: str) -> list[str]:
-    """Vitest's closing "Test Files" and "Tests" count lines, without colour codes."""
+    """Vitest's closing "Test Files" and "Tests" count lines, without color codes."""
     plain = _ANSI_RE.sub("", output)
     return [
         line.strip()

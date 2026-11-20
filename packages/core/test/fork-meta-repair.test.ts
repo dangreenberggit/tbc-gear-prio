@@ -2,8 +2,8 @@
  * Meta repair with a hit budget and an exact search (ticket 535), on the
  * fork's ported engine.
  *
- * The fork's repair picks, by exact search, the best set of recolours that
- * switches the meta back on, counting every socket bonus the recolours switch
+ * The fork's repair picks, by exact search, the best set of recolors that
+ * switches the meta back on, counting every socket bonus the recolors switch
  * on or off. For a spec with a hit budget (ret and feral on melee hit; mage,
  * shadow and warlock on spell hit), when the runner can read character
  * stats, hit counts only up to the character's remaining hit cap. These cases
@@ -42,7 +42,7 @@ import {
  * repair scores layouts (`meta-repair.ts` `valueModel`), and a version read of
  * 1e308 percent still repaired, so the test fakes the failure instead.
  * While `belowRemaining` is set, a repair whose hit budget is below it throws
- * the fork's own `MetaStepBudgetExceededError`; every other repair, and every
+ * the fork's own `MetaRecolorLimitExceededError`; every other repair, and every
  * other test, gets the real one.
  */
 const repairFault = vi.hoisted(() => ({
@@ -53,22 +53,22 @@ const repairFault = vi.hoisted(() => ({
 vi.mock(
   "../../../vendor/tbc-new-fork/ui/features/upgrades/model/engine/meta-repair.ts",
   async (importOriginal) => {
-    type Repair = (opts: { hitCap?: { remaining: number } }) => unknown;
+    type Repair = (opts: { hitBudget?: { remaining: number } }) => unknown;
     const real = await importOriginal<{
-      repairAndMinimize: Repair;
-      MetaStepBudgetExceededError: new (message: string) => Error;
+      repairMetaGems: Repair;
+      MetaRecolorLimitExceededError: new (message: string) => Error;
     }>();
-    const repairAndMinimize: Repair = (opts) => {
+    const repairMetaGems: Repair = (opts) => {
       const below = repairFault.belowRemaining;
-      if (below !== undefined && (opts.hitCap?.remaining ?? 0) < below) {
+      if (below !== undefined && (opts.hitBudget?.remaining ?? 0) < below) {
         repairFault.fired += 1;
-        throw new real.MetaStepBudgetExceededError(
-          "meta repair exceeded step budget"
+        throw new real.MetaRecolorLimitExceededError(
+          "meta repair exceeded its recolor limit"
         );
       }
-      return real.repairAndMinimize(opts);
+      return real.repairMetaGems(opts);
     };
-    return { ...real, repairAndMinimize };
+    return { ...real, repairMetaGems };
   }
 );
 
@@ -228,22 +228,22 @@ describe.skipIf(!forkPresent)("repair hit budget (535)", () => {
 type SimItemSpec = { id?: number; enchant?: number; gems: number[] };
 type GemEntry = {
   id: number;
-  colour: number;
+  color: number;
   stats: number[];
   unique: boolean;
   quality: number;
 };
 type GemContext = {
-  readonly fillPalette: readonly GemEntry[];
+  readonly fillGems: readonly GemEntry[];
   readonly weights: Readonly<Record<string, number>>;
   readonly spec?: string;
-  readonly repairHitCap?: {
+  readonly repairHitBudget?: {
     readonly stat: number;
     readonly baselineRemaining: number;
     readonly baselineGearHit: number;
   };
 };
-type RepairSwap = {
+type GemRecolor = {
   itemId: number;
   itemIndex: number;
   socketIndex: number;
@@ -252,7 +252,7 @@ type RepairSwap = {
 };
 type SwapOutcome = {
   equipment: SimItemSpec[];
-  swaps: readonly RepairSwap[];
+  recolors: readonly GemRecolor[];
 };
 type FixtureRow = {
   itemId: number;
@@ -291,7 +291,7 @@ type Engine = {
   };
   cg: {
     gemContext: (
-      palette: readonly GemEntry[],
+      phaseGems: readonly GemEntry[],
       weights: Readonly<Record<string, number>>,
       spec?: string
     ) => GemContext;
@@ -319,7 +319,7 @@ type Engine = {
 type SocketedItem = { itemId: number; gems: number[] };
 type RepairLayout = {
   items: SocketedItem[];
-  changes: RepairSwap[];
+  recolors: GemRecolor[];
   value: number;
   work: number;
 };
@@ -328,28 +328,32 @@ type MetaRepairMod = {
   bestMinimalRepair: (opts: {
     items: readonly SocketedItem[];
     weights: Readonly<Record<string, number>>;
-    palette: readonly GemEntry[];
-    hitCap?: HitCapBudget;
+    allowedGems: readonly GemEntry[];
+    hitBudget?: HitCapBudget;
     maxChanges: number;
     workLimit?: number;
   }) => RepairLayout | { overLimit: true; work: number } | undefined;
-  repairAndMinimize: (opts: {
+  repairMetaGems: (opts: {
     items: readonly SocketedItem[];
     epWeights: Readonly<Record<string, number>>;
-    palette: readonly GemEntry[];
-    hitCap?: HitCapBudget;
+    allowedGems: readonly GemEntry[];
+    hitBudget?: HitCapBudget;
     workLimit?: number;
-  }) => { items: SocketedItem[]; metaAdjusted: boolean; swaps: RepairSwap[] };
+  }) => {
+    items: SocketedItem[];
+    metaAdjusted: boolean;
+    recolors: GemRecolor[];
+  };
 };
-type ColourCounts = { red: number; yellow: number; blue: number };
+type GemColorCounts = { red: number; yellow: number; blue: number };
 type MetaMod = {
   metaStatus: (
     headSockets: readonly number[],
     gemIds: readonly number[]
-  ) => { kind: string; metaId?: number; counts?: ColourCounts };
-  metaDeficit: (metaId: number, counts: ColourCounts) => number;
-  gemColorCounts: (gemIds: readonly number[]) => ColourCounts;
-  isMetaConditionMet: (metaId: number, counts: ColourCounts) => boolean;
+  ) => { kind: string; metaId?: number; counts?: GemColorCounts };
+  metaDeficit: (metaId: number, counts: GemColorCounts) => number;
+  gemColorCounts: (gemIds: readonly number[]) => GemColorCounts;
+  isMetaConditionMet: (metaId: number, counts: GemColorCounts) => boolean;
   socketBonusActive: (
     sockets: readonly number[],
     gemIds: readonly number[]
@@ -559,7 +563,7 @@ async function retCapped() {
   )!;
   const capped: GemContext = {
     ...gems,
-    repairHitCap: {
+    repairHitBudget: {
       stat: MELEE_HIT,
       baselineRemaining: budget.remaining,
       baselineGearHit: 52,
@@ -569,7 +573,7 @@ async function retCapped() {
 }
 
 /**
- * The fork's rogue P2 preset gear with coloured gems removed in slot order,
+ * The fork's rogue P2 preset gear with colored gems removed in slot order,
  * then socket order, skipping a removal that would take the meta's deficit
  * past `target`, until the deficit is `target`.
  */
@@ -681,7 +685,7 @@ describe.skipIf(!forkPresent)("exact repair (535)", () => {
     ]);
   });
 
-  it("535-C1: a recolour that switches a socket bonus on earns it: the Nightseye goes to the boots or the belt, not the shoulder", async () => {
+  it("535-C1: a recolor that switches a socket bonus on earns it: the Nightseye goes to the boots or the belt, not the shoulder", async () => {
     // Oracle: Sovereign Nightseye is purple, so in boots 30104 socket 0 or
     // belt 30106 socket 1 it switches on that item's +3 Agility bonus.
     // Today's greedy puts it in 30055.
@@ -714,7 +718,7 @@ describe.skipIf(!forkPresent)("exact repair (535)", () => {
     const found = e.mr.bestMinimalRepair({
       items,
       weights: ctx.weights,
-      palette: ctx.fillPalette,
+      allowedGems: ctx.fillGems,
       maxChanges: 7,
     });
     const ms = performance.now() - t0;
@@ -725,10 +729,10 @@ describe.skipIf(!forkPresent)("exact repair (535)", () => {
 
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
-      const repaired = e.mr.repairAndMinimize({
+      const repaired = e.mr.repairMetaGems({
         items,
         epWeights: ctx.weights,
-        palette: ctx.fillPalette,
+        allowedGems: ctx.fillGems,
         workLimit: 1000,
       });
       expect(metaOf(e, repaired.items).status.kind).toBe("active");
@@ -937,7 +941,7 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
         fx.spec === "ret" ? budget.remaining : FERAL_CAP_RATING - gBase;
       const cappedFx: GemContext = {
         ...gemsFx,
-        repairHitCap: {
+        repairHitBudget: {
           stat: MELEE_HIT,
           baselineRemaining: rBase,
           baselineGearHit: gBase,
@@ -975,8 +979,8 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
             const opts = {
               items: pre.socketed,
               weights: gemsFx.weights,
-              palette: gemsFx.fillPalette,
-              hitCap: { stat: MELEE_HIT, remaining },
+              allowedGems: gemsFx.fillGems,
+              hitBudget: { stat: MELEE_HIT, remaining },
             };
             const atD = e.mr.bestMinimalRepair({ ...opts, maxChanges: d });
             const atD1 = e.mr.bestMinimalRepair({ ...opts, maxChanges: d + 1 });
@@ -1034,7 +1038,7 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
               expect(
                 brute !== undefined && Math.abs(own - brute) <= 1e-9,
                 `${where}: search ${own}, brute force ${brute}, layout ${JSON.stringify(
-                  layoutD.changes.map((c) => [
+                  layoutD.recolors.map((c) => [
                     c.itemId,
                     c.socketIndex,
                     c.from,
@@ -1049,7 +1053,7 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
               const full = bruteForceBestValue(fork, oracleOpts(1), "full");
               expect(
                 full !== undefined && Math.abs(full - layoutD.value) <= 1e-9,
-                `${where}: search ${layoutD.value}, full-palette brute force ${full}`
+                `${where}: search ${layoutD.value}, full gem list brute force ${full}`
               ).toBe(true);
             }
           }
@@ -1075,7 +1079,7 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
     // on ret-p3-p2 (crafted sets the run-time pool admits: piece 1 of 552,
     // piece 2 of 553 and 554, pieces 2 and 3 of 619) and 4 on
     // feral-p3-th-hands-legs (piece 4 of sets 640, 584, 585 and 685; the
-    // last three are arena sets). The feral files step rankings, so their
+    // last three are arena sets). The feral files are bonus-gear rankings, so their
     // set packages are jobs of their own.
     expect(deficitOne).toBe(54);
     console.log(
@@ -1097,12 +1101,12 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
     const found = e.mr.bestMinimalRepair({
       items: pre.socketed,
       weights: gems.weights,
-      palette: gems.fillPalette,
-      hitCap: { stat: MELEE_HIT, remaining: 93 },
+      allowedGems: gems.fillGems,
+      hitBudget: { stat: MELEE_HIT, remaining: 93 },
       maxChanges: 3,
     });
     expect(isLayout(found)).toBe(true);
-    const changes = (found as RepairLayout).changes;
+    const changes = (found as RepairLayout).recolors;
     expect(changes.map((c) => `${c.from}->${c.to}`).sort()).toEqual([
       `${BOLD}->${RIGID}`,
       `${BOLD}->${RIGID}`,
@@ -1124,7 +1128,7 @@ type RankedRow = {
     futureBonuses?: Array<{
       threshold: number;
       bonusOffDps?: number;
-      stepGearDps?: number;
+      bonusGearDps?: number;
     }>;
   };
 };
@@ -1133,7 +1137,7 @@ type RunRanking = {
   contentHash?: string;
   baseline?: { metaAdjusted: boolean };
   items: RankedRow[];
-  setBonusOffSims?: { skippedSteps: number; gears: number };
+  setBonusOffSims?: { skippedIncrements: number; gears: number };
   setScreen?: { sets: Array<{ setId: number; pair: { dps?: number } }> };
   substitutions: Array<{ field: string; detail: string; error?: string }>;
 };
@@ -1178,7 +1182,7 @@ type SpecRun = {
   dps?: (req: RaidSimRequest) => number;
   store?: unknown;
   measureSetBonuses?: boolean;
-  setScreen?: string;
+  setScreenMode?: string;
   controller?: AbortController;
   /** The raid sim skeleton; defaults to the ret P2 preset's. */
   skeleton?: RaidSimRequest;
@@ -1296,7 +1300,7 @@ async function runSpec(o: SpecRun) {
       itemEp: await statsOnlyItemEp(o.epWeights ?? retWeights),
       pool,
       ...(o.measureSetBonuses ? { measureSetBonuses: true } : {}),
-      ...(o.setScreen ? { setScreen: o.setScreen } : {}),
+      ...(o.setScreenMode ? { setScreenMode: o.setScreenMode } : {}),
       ...(o.controller ? { signal: o.controller.signal } : {}),
       ...(o.simDatabaseFor ? { simDatabaseFor: o.simDatabaseFor } : {}),
     }
@@ -1956,7 +1960,7 @@ const BR_POOL = [
 
 /**
  * DPS for the Burning Rage scenarios: 2000, plus 5 per Ragesteel piece worn
- * (a copy counts), plus 30 when Burning Rage counts two pieces, so its gate
+ * (a copy counts), plus 30 when Burning Rage counts two pieces, so its check
  * clears and the screen keeps the set.
  */
 function brDps(req: RaidSimRequest): number {
@@ -1989,7 +1993,7 @@ function multisetMinus(a: readonly number[], b: readonly number[]): number[] {
   return out;
 }
 
-/** The received requests that are the screen's top (set-kept) and bottom (set-less) rungs. */
+/** The received requests that are the screen's top (set-kept) and bottom (set-less) count sims. */
 function brVersions(requests: readonly RaidSimRequest[]) {
   const all = requests.map(requestItems);
   const kept = all.filter(
@@ -2025,7 +2029,7 @@ async function brRun(
   return runSpec({
     pool: BR_POOL,
     measureSetBonuses: true,
-    setScreen: "on",
+    setScreenMode: "on",
     dps: brDps,
     controller: new AbortController(),
     computeStats: (req) => {
@@ -2117,7 +2121,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
   it("535-V3: one stats read per distinct request", async () => {
     // Oracle: the set phase reads each distinct request's stats once and
     // reuses the read for a repeat of the same request. V6's
-    // run is checked in 535-V6, which builds a step's version twice.
+    // run is checked in 535-V6, which builds an increment's version twice.
     const run = await brRun(20);
     const keys = run.statsRequests.map(gearKey);
     expect(new Set(keys).size).toBe(keys.length);
@@ -2125,12 +2129,12 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
 
   it.each(["on", "off"])(
     "852-V: a failed set-version read fails the run with the sim's error (set screen %s)",
-    async (setScreen) => {
+    async (setScreenMode) => {
       // Oracle: a set version's read is a sim call, so its failure ends the
       // run with the sim's own message, as a failed baseline sim does. No
       // version goes on with the shared layout under a note of the tab's own
       // wording. The screen reads the first version when it is on; with it
-      // off, the package's same-gear gate does.
+      // off, the package's same-gear check does.
       const stats = await scriptedStats({
         baselineGearHit: 52,
         baselineHitPercent: BASELINE_HIT_PERCENT,
@@ -2147,7 +2151,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       };
       let versionReads = 0;
       await expect(
-        brRun(20, { setScreen }, (req) => {
+        brRun(20, { setScreenMode }, (req) => {
           if (!isPackage(req)) return Promise.resolve(stats(req));
           versionReads += 1;
           return Promise.reject(new Error("worker died"));
@@ -2159,7 +2163,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
 
   it.each(["off", "on"])(
     "852-R: a gem repair that fails on a set version skips that set bonus, as on its own build (set screen %s)",
-    async (setScreen) => {
+    async (setScreenMode) => {
       // Oracle: a failed gem repair is no failed sim. On a set package's own
       // build it skips the package with the meta-off note (`rank.ts`, the
       // package loop); the same failure while rebuilding one of the
@@ -2172,7 +2176,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       let run;
       try {
-        run = await brRun(1000, { setScreen });
+        run = await brRun(1000, { setScreenMode });
       } finally {
         repairFault.belowRemaining = undefined;
         warn.mockRestore();
@@ -2185,7 +2189,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
         field: "Burning Rage 2-piece set bonus",
         detail:
           "The Burning Rage 2-piece set bonus was not measured, because no " +
-          "gem swap could turn your meta gem on.\nmeta repair exceeded step budget",
+          "gem swap could turn your meta gem on.\nmeta repair exceeded its recolor limit",
       });
       expect(
         run.ranking.substitutions.map((s) => s.detail).join("\n")
@@ -2195,7 +2199,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
 
   it.each(["off", "on"])(
     "852-R every line: a gem repair that fails on a set version gives no line with an error and none that says a request was not built (set screen %s)",
-    async (setScreen) => {
+    async (setScreenMode) => {
       // Oracle: the run's error toast shows the first line with an `error`
       // (`run_session.ts`), so a failed gem repair, which is no failed call,
       // must give no such line, and each caller says what it says for a
@@ -2208,7 +2212,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
       let run;
       try {
-        run = await brRun(1000, { setScreen });
+        run = await brRun(1000, { setScreenMode });
       } finally {
         repairFault.belowRemaining = undefined;
         warn.mockRestore();
@@ -2264,14 +2268,14 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     expect(run.ranking.complete).toBe(false);
   });
 
-  it("535-V6: the step after a rebuilt step keeps its break split", async () => {
-    // Oracle: the step break split keeps its pairing: `plain` is the
-    // request the first step simmed, so the store holds it.
-    const s = await stepScenario("V6");
+  it("535-V6: the increment after a rebuilt increment keeps its break split", async () => {
+    // Oracle: the increment's break split keeps its pairing: `plain` is the
+    // request the first increment simmed, so the store holds it.
+    const s = await incrementScenario("V6");
     const e = s.e;
     const hands = SIM_ORDER.indexOf("hands");
     const legs = SIM_ORDER.indexOf("legs");
-    // Check 1: the first step's gear (the Gauntlets row plus the Greaves)
+    // Check 1: the first increment's gear (the Gauntlets row plus the Greaves)
     // needs a meta repair.
     const afterRow = e.rank.candidateSwapWithRepairs(
       s.worn,
@@ -2286,15 +2290,15 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       s.gems
     );
     expect(metaOf(e, pre.socketed).status.kind).toBe("inactive");
-    // Check 2: the first step's simmed request differs in gems from the
+    // Check 2: the first increment's simmed request differs in gems from the
     // default build, so the per-version rebuild ran.
-    const defaultStep = e.rank.candidateSwapWithRepairs(
+    const defaultFirstIncrement = e.rank.candidateSwapWithRepairs(
       afterRow,
       legs,
       JUSTICAR.legs,
       s.gems
     ).equipment;
-    const stepRequests = s.run.requests
+    const firstIncrementRequests = s.run.requests
       .map(requestItems)
       .filter(
         (items) =>
@@ -2303,30 +2307,30 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
           items[SHOULDER]?.id === RAGESTEEL_SHOULDERS &&
           items[CHEST]?.id === RAGESTEEL_BREASTPLATE
       );
-    expect(stepRequests.length).toBeGreaterThan(0);
-    for (const items of stepRequests) {
+    expect(firstIncrementRequests.length).toBeGreaterThan(0);
+    for (const items of firstIncrementRequests) {
       expect(items.map((spec) => spec.gems)).not.toEqual(
-        defaultStep.map((spec) => spec.gems)
+        defaultFirstIncrement.map((spec) => spec.gems)
       );
     }
-    // Check 3: the steps cleared their gates, so the 4pc step is split.
+    // Check 3: the increments cleared their checks, so the 4pc increment is split.
     const row = s.run.ranking.items.find((r) => r.itemId === JUSTICAR.hands)!;
     const four = row.setContext?.futureBonuses?.find((f) => f.threshold === 4);
-    expect(four?.stepGearDps).toBeDefined();
+    expect(four?.bonusGearDps).toBeDefined();
     expect(four?.bonusOffDps).toBeDefined();
-    expect(s.run.ranking.setBonusOffSims?.skippedSteps).toBe(0);
-    // 535-V3 on this run: the first step's version is built for its own sim
-    // and again as the 4pc step's `plain`, and read once.
+    expect(s.run.ranking.setBonusOffSims?.skippedIncrements).toBe(0);
+    // 535-V3 on this run: the first increment's version is built for its own sim
+    // and again as the 4pc increment's `plain`, and read once.
     const keys = s.run.statsRequests.map(gearKey);
     expect(new Set(keys).size).toBe(keys.length);
   });
 
-  it("535-V7: a first step whose gear before has set hit the run's budget missed is skipped, not mismeasured", async () => {
-    // Oracle: a first step's split pairs with the gear before built on the
+  it("535-V7: a first increment whose gear before has set hit the run's budget missed is skipped, not mismeasured", async () => {
+    // Oracle: a first increment's split pairs with the gear before built on the
     // run's budget. Here the row's single swap completes Justicar 2pc, whose
     // hit that budget misses, so `requestsPerLayout`' entry 0 is a rebuild that
     // differs from it, and the split is skipped.
-    const s = await stepScenario("V7");
+    const s = await incrementScenario("V7");
     const e = s.e;
     const legs = SIM_ORDER.indexOf("legs");
     const hands = SIM_ORDER.indexOf("hands");
@@ -2339,16 +2343,16 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       s.gems
     );
     expect(metaOf(e, pre.socketed).status.kind).toBe("inactive");
-    const cap = s.gems.repairHitCap!;
+    const hitBudget = s.gems.repairHitBudget!;
     const rebuilt = e.rank.candidateSwapWithRepairs(
       s.worn,
       legs,
       JUSTICAR.legs,
       {
         ...s.gems,
-        repairHitCap: {
-          ...cap,
-          baselineRemaining: cap.baselineRemaining - V_BONUS_HIT,
+        repairHitBudget: {
+          ...hitBudget,
+          baselineRemaining: hitBudget.baselineRemaining - V_BONUS_HIT,
         },
       }
     ).equipment;
@@ -2359,7 +2363,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
       s.gems
     ).equipment;
     expect(rebuilt.map((x) => x.gems)).not.toEqual(single.map((x) => x.gems));
-    // No request is the first step's bonus-off version: the row's gear with
+    // No request is the first increment's bonus-off version: the row's gear with
     // the Burning Rage pieces set-less.
     const bonusOff = s.run.requests
       .map(requestItems)
@@ -2373,14 +2377,14 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     expect(bonusOff).toEqual([]);
     const row = s.run.ranking.items.find((r) => r.itemId === JUSTICAR.legs)!;
     const four = row.setContext?.futureBonuses?.find((f) => f.threshold === 4);
-    expect(four?.stepGearDps).toBeDefined();
+    expect(four?.bonusGearDps).toBeDefined();
     expect(four?.bonusOffDps).toBeUndefined();
-    expect(s.run.ranking.setBonusOffSims?.skippedSteps).toBe(1);
+    expect(s.run.ranking.setBonusOffSims?.skippedIncrements).toBe(1);
   });
 });
 
 /* ------------------------------------------------------------------ *
- * The step scenarios of 535-V6 and 535-V7
+ * The increment scenarios of 535-V6 and 535-V7
  * ------------------------------------------------------------------ */
 
 // Justicar Battlegear 626 (ret plate), Burning Rage 566's worn pieces, and
@@ -2405,7 +2409,7 @@ const V_BONUS_HIT = 40;
  * copy): Justicar 2pc 50 and 4pc 80, Burning Rage 2pc 90. The pieces' own
  * values are 511-PS's (Pauldrons 8, Chestguard 12, Gauntlets 6, Leggings −12).
  */
-async function stepDps() {
+async function incrementScenarioDps() {
   const e = await engine();
   const value = new Map<number, number>([
     [JUSTICAR.shoulder, 8],
@@ -2444,7 +2448,7 @@ async function stepDps() {
  * row completes Justicar 2pc. The baseline reads 31.5 rating under the cap,
  * so a default repair places Rigid where the Justicar 2pc rebuild does not.
  */
-async function stepScenario(kind: "V6" | "V7") {
+async function incrementScenario(kind: "V6" | "V7") {
   const e = await engine();
   const fx = loadFixture("ret-p3-p2");
   const worn = equipmentOf(fx);
@@ -2475,7 +2479,7 @@ async function stepScenario(kind: "V6" | "V7") {
   )!;
   const gems: GemContext = {
     ...e.cg.gemContext(e.gems.gemsForPhase(3), retWeights, "ret"),
-    repairHitCap: {
+    repairHitBudget: {
       stat: MELEE_HIT,
       baselineRemaining: budget.remaining,
       baselineGearHit,
@@ -2491,7 +2495,7 @@ async function stepScenario(kind: "V6" | "V7") {
     worn,
     pool,
     measureSetBonuses: true,
-    dps: await stepDps(),
+    dps: await incrementScenarioDps(),
     controller: new AbortController(),
     computeStats: (req) => Promise.resolve(stats(req)),
   });
@@ -2611,18 +2615,18 @@ describe.skipIf(!forkPresent)(
       // Oracle: V7's Leggings row completes Justicar 2pc (+40, scripted),
       // which the run's budget misses; the row's sim wears the layout repaired
       // on that budget minus 40, not the one on the run's budget.
-      const s = await stepScenario("V7");
+      const s = await incrementScenario("V7");
       const legs = SIM_ORDER.indexOf("legs");
-      const cap = s.gems.repairHitCap!;
+      const hitBudget = s.gems.repairHitBudget!;
       const own = s.e.rank.candidateSwapWithRepairs(
         s.worn,
         legs,
         JUSTICAR.legs,
         {
           ...s.gems,
-          repairHitCap: {
-            ...cap,
-            baselineRemaining: cap.baselineRemaining - V_BONUS_HIT,
+          repairHitBudget: {
+            ...hitBudget,
+            baselineRemaining: hitBudget.baselineRemaining - V_BONUS_HIT,
           },
         }
       ).equipment;

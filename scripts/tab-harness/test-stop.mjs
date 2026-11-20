@@ -2,7 +2,7 @@
 // real page, Stop is pressed once a few rows have landed, and the tab must end
 // in the stopped state with those rows kept and no console error. Run it before
 // any fork commit that changes the run path (model/run.ts, model/run_state.ts,
-// hooks/useUpgradesRun.ts, utils/select_run_fn.ts).
+// hooks/useUpgradesRun.ts, utils/run_fn_for_flags.ts).
 //
 // It needs a running dev server with the WASM worker, which it does not start:
 //   WASM_WORKER=1 node node_modules/vite/bin/vite.js serve --port 5174 --strictPort
@@ -132,7 +132,7 @@ const runAndStopExpression = (rows, timeoutMs) => `(async () => {
 			if (!table) return { error: 'no in-flight results table to read' };
 			const count = tableRowCount(table);
 			const read = await collectRows(table, tr => ({
-				owned: tr.dataset.owned === 'true',
+				owned: tr.dataset.worn === 'true',
 				name: tr.querySelector('[data-testid="upgrades-item-name"]')?.textContent.trim(),
 			}));
 			if (!read.error && tableRowCount(table) === count) return { count, rows: read.rows };

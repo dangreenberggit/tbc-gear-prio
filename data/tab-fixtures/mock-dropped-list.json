@@ -297,7 +297,7 @@
           "piecesAfterSwap": 1,
           "nextThreshold": 2,
           "crossesThreshold": false,
-          "stepRanking": true,
+          "usesBonusGear": true,
           "singleDeltaDps": 23.5,
           "futureBonuses": [
             {
@@ -313,8 +313,8 @@
                   "name": "Ragesteel Shoulders"
                 }
               ],
-              "stepGearDps": 36,
-              "stepGearSe": 2
+              "bonusGearDps": 36,
+              "bonusGearSe": 2
             }
           ]
         }

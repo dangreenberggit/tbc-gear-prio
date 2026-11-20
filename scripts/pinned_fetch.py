@@ -75,7 +75,7 @@ def verify(blob: bytes, meta: dict) -> str | None:
 def is_crlf_drift(blob: bytes, meta: dict) -> bool:
     """True if `blob` only fails the lock digest because of CRLF line endings.
 
-    `.gitattributes` normalises checked-in text (e.g. data/proto/**) to LF, but
+    `.gitattributes` normalizes checked-in text (e.g. data/proto/**) to LF, but
     that rule does not retroactively fix a worktree that was checked out before
     the rule applied -- a stale Windows clone stays CRLF forever until someone
     re-checks-out the tree. That misreports as a tampered pin (ticket 26)

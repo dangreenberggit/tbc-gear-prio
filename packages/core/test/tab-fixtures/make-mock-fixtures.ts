@@ -10,7 +10,7 @@
  *
  * The figures are made up. The rows are real: every row is an (item id, slot)
  * pair read from the spec's own preset gear files, so icons and quality
- * colours resolve, and the gear is a copy of one preset file. Item names come
+ * colors resolve, and the gear is a copy of one preset file. Item names come
  * from the fork's item database. The set rows are swaps the game allows on that
  * gear: the piece counts come from the gear, and the bonus counts from the
  * fork's Go set definitions. The output is deterministic.
@@ -36,8 +36,8 @@ import {
 } from "../../src/slots-sim-order.generated.js";
 import type { Race } from "../../src/types.js";
 
-/** The fork's line, which keeps a failed call's own error apart (ticket 874). */
-type ForkSubstitution = Substitution & { error?: string };
+/** The fork's `RunNote`, which keeps a failed call's own error apart (ticket 874). */
+type ForkRunNote = Substitution & { error?: string };
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../../../..");
 const FORK = join(ROOT, "vendor/tbc-new-fork");
@@ -77,8 +77,8 @@ type MockFuture = {
   partnerRule: "close-calls";
   pieces: Array<{ itemId: number; name: string }>;
   breaks?: SetBreak[];
-  stepGearDps: number;
-  stepGearSe: number;
+  bonusGearDps: number;
+  bonusGearSe: number;
 };
 
 type MockSetContext = {
@@ -88,7 +88,7 @@ type MockSetContext = {
   piecesAfterSwap: number;
   nextThreshold: number | null;
   crossesThreshold: boolean;
-  stepRanking: true;
+  usesBonusGear: true;
   singleDeltaDps: number;
   singleBreaks?: SetBreak[];
   futureBonuses?: MockFuture[];
@@ -124,7 +124,7 @@ type MockRanking = {
   };
   baseline: { dps: number; stdev: number; metaAdjusted: boolean };
   assumptions: Assumptions;
-  substitutions: ForkSubstitution[];
+  substitutions: ForkRunNote[];
   items: MockRow[];
   complete: true;
   durationMs: number;
@@ -807,7 +807,7 @@ class Builder {
         piecesAfterSwap: after,
         nextThreshold: counts.find((t) => t > after) ?? null,
         crossesThreshold: crosses,
-        stepRanking: true,
+        usesBonusGear: true,
         singleDeltaDps: deltaDps,
         ...(singleBreaks.length > 0 ? { singleBreaks } : {}),
         ...(futures.length > 0
@@ -821,8 +821,8 @@ class Builder {
                 partnerRule: "close-calls" as const,
                 pieces: f.pieces,
                 ...(f.breaks.length > 0 ? { breaks: f.breaks } : {}),
-                stepGearDps: round2(deltaDps + 12.5 + 6 * f.k),
-                stepGearSe: 2,
+                bonusGearDps: round2(deltaDps + 12.5 + 6 * f.k),
+                bonusGearSe: 2,
               })),
             }
           : {}),
@@ -923,14 +923,14 @@ class Builder {
   /**
    * Two 704 headings and ten item lines, every line's field and detail
    * distinct (review R4). An item line is written as the fork's
-   * `candidateSkipSubstitution` writes it: the item id after the sentence,
+   * `candidateSkipNote` writes it: the item id after the sentence,
    * and a failed sim's error apart in `error`. The page shows the sentence
    * only.
    */
-  private droppedList(pairs: Pair[], chosen: Pair[]): ForkSubstitution[] {
+  private droppedList(pairs: Pair[], chosen: Pair[]): ForkRunNote[] {
     const rowIds = new Set(chosen.map((p) => p.itemId));
     const seenIds = new Set<number>();
-    const lines: ForkSubstitution[] = [
+    const lines: ForkRunNote[] = [
       {
         field: "One-handed weapons",
         detail:

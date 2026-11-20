@@ -46,7 +46,7 @@ export const ROW_HELPERS = `
 	};
 	const collectRows = async (table, readRow) => {
 		const box = document.querySelector(${JSON.stringify(SCROLL_BOX)}) ?? document.scrollingElement;
-		// A scroll reaches the virtualiser on the next frame and its rows render in that frame; the timeout
+		// A scroll reaches the virtualizer on the next frame and its rows render in that frame; the timeout
 		// keeps a page whose frames have stopped (a hidden tab) from hanging the walk.
 		const settle = () => new Promise(resolve => {
 			let done = false;

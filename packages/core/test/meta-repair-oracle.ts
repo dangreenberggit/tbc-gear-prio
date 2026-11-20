@@ -5,17 +5,17 @@
  * repair's value V (`repairValue`) and the six conditions a repair must meet
  * (each stated where `bruteForceBestValue` checks it), and finds the best
  * layout by trying every one. Ticket 535's comment holds the measurements. It
- * calls only the fork's lookups and colour rules (`getItem`, `getGem`, `socketBonusActive`, `gemColorCounts`,
+ * calls only the fork's lookups and color rules (`getItem`, `getGem`, `socketBonusActive`, `gemColorCounts`,
  * `isMetaConditionMet`), never the repair code it checks.
  */
 
 /** `GemColor.GemColorMeta` in the fork's proto (`proto/common.ts`). */
-const META_COLOUR = 1;
+const META_COLOR = 1;
 
 export type OracleItem = { itemId: number; gems: number[] };
 export type OracleGem = {
   id: number;
-  colour: number;
+  color: number;
   stats: readonly number[];
   unique: boolean;
 };
@@ -45,8 +45,8 @@ export type OracleOpts = {
   /** The gear before repair, in SIM_ORDER; the head (index 0) holds the meta. */
   items: readonly OracleItem[];
   weights: Readonly<Record<string, number>>;
-  palette: readonly OracleGem[];
-  hitCap?: { stat: number; remaining: number };
+  allowedGems: readonly OracleGem[];
+  hitBudget?: { stat: number; remaining: number };
   maxChanges: number;
 };
 
@@ -106,7 +106,7 @@ export function repairValue(
   opts: OracleOpts,
   layout: readonly OracleItem[]
 ): number {
-  const stat = opts.hitCap?.stat ?? MELEE_HIT_RATING;
+  const stat = opts.hitBudget?.stat ?? MELEE_HIT_RATING;
   const nonHit = (stats: readonly number[]) =>
     weighted(stats, opts.weights, stat);
   let v = 0;
@@ -130,8 +130,8 @@ export function repairValue(
   }
   const w = opts.weights[String(stat)] ?? 0;
   const dH = layoutHit(fork, layout, stat) - layoutHit(fork, opts.items, stat);
-  if (opts.hitCap) {
-    const r = opts.hitCap.remaining;
+  if (opts.hitBudget) {
+    const r = opts.hitBudget.remaining;
     v += w * (Math.min(dH, r) - Math.min(0, r));
   } else {
     v += w * dH;
@@ -148,33 +148,33 @@ function metaIdOf(fork: OracleFork, items: readonly OracleItem[]) {
   const head = items[0];
   const item = head ? fork.getItem(head.itemId) : undefined;
   if (!head || !item) return undefined;
-  const socket = item.sockets.indexOf(META_COLOUR);
+  const socket = item.sockets.indexOf(META_COLOR);
   if (socket < 0) return undefined;
   const id = head.gems[socket] ?? 0;
   return id > 0 ? id : undefined;
 }
 
 /**
- * The candidate gems for every socket. "full" is every non-meta palette gem.
- * "reduced" is, for each (colour, hit amount) group, the non-unique gem with
- * the highest non-hit EP (the first in palette order on a tie), plus each
+ * The candidate gems for every socket. "full" is every non-meta allowed gem.
+ * "reduced" is, for each (color, hit amount) group, the non-unique gem with
+ * the highest non-hit EP (the first in allowed-gems order on a tie), plus each
  * unique gem whose non-hit EP beats it.
  */
 export function candidatePool(
   opts: OracleOpts,
   pool: "reduced" | "full"
 ): OracleGem[] {
-  const coloured = opts.palette.filter((g) => g.colour !== META_COLOUR);
-  if (pool === "full") return coloured;
-  const stat = opts.hitCap?.stat ?? MELEE_HIT_RATING;
-  const hitOf = (g: OracleGem) => (opts.hitCap ? (g.stats[stat] ?? 0) : 0);
+  const colored = opts.allowedGems.filter((g) => g.color !== META_COLOR);
+  if (pool === "full") return colored;
+  const stat = opts.hitBudget?.stat ?? MELEE_HIT_RATING;
+  const hitOf = (g: OracleGem) => (opts.hitBudget ? (g.stats[stat] ?? 0) : 0);
   const nonHit = (g: OracleGem) =>
-    opts.hitCap
+    opts.hitBudget
       ? weighted(g.stats, opts.weights, stat)
       : weighted(g.stats, opts.weights, -1);
   const groups = new Map<string, OracleGem[]>();
-  for (const g of coloured) {
-    const key = `${g.colour}|${hitOf(g)}`;
+  for (const g of colored) {
+    const key = `${g.color}|${hitOf(g)}`;
     groups.set(key, [...(groups.get(key) ?? []), g]);
   }
   const out: OracleGem[] = [];
@@ -196,7 +196,7 @@ type Socket = { item: number; socket: number };
 
 /**
  * The highest V over every layout that changes at most `opts.maxChanges`
- * coloured sockets to gems of `pool` and meets conditions 1–6, or undefined
+ * colored sockets to gems of `pool` and meets conditions 1–6, or undefined
  * when none does. `visit`, when given, sees every qualifying layout and its V.
  */
 export function bruteForceBestValue(
@@ -212,13 +212,13 @@ export function bruteForceBestValue(
   for (let i = 0; i < opts.items.length; i++) {
     const item = fork.getItem(opts.items[i]!.itemId);
     if (!item) continue;
-    item.sockets.forEach((colour, s) => {
-      if (colour !== META_COLOUR) sockets.push({ item: i, socket: s });
+    item.sockets.forEach((color, s) => {
+      if (color !== META_COLOR) sockets.push({ item: i, socket: s });
     });
   }
   const held = new Set(allGemIds(opts.items));
   const counts = (ids: readonly number[]) => fork.gemColorCounts(ids);
-  const colourOf = (gemId: number) => counts(gemId > 0 ? [gemId] : []);
+  const colorOf = (gemId: number) => counts(gemId > 0 ? [gemId] : []);
   const active = (layout: readonly OracleItem[]) =>
     fork.isMetaConditionMet(metaId, counts(allGemIds(layout)));
 
@@ -227,9 +227,9 @@ export function bruteForceBestValue(
     for (const c of changed) {
       const from = opts.items[c.item]!.gems[c.socket] ?? 0;
       const to = layout[c.item]!.gems[c.socket]!;
-      const a = colourOf(from);
-      const b = colourOf(to);
-      // Condition 2: the change alters its socket's colour.
+      const a = colorOf(from);
+      const b = colorOf(to);
+      // Condition 2: the change alters its socket's color.
       if (a.red === b.red && a.yellow === b.yellow && a.blue === b.blue) {
         return false;
       }
@@ -273,7 +273,7 @@ export function bruteForceBestValue(
     const c = chosen[k]!;
     const from = opts.items[c.item]!.gems[c.socket] ?? 0;
     for (const g of gems) {
-      // Condition 1: a non-meta palette gem, and a change, not the same gem.
+      // Condition 1: a non-meta allowed gem, and a change, not the same gem.
       if (g.id === from) continue;
       layout[c.item]!.gems[c.socket] = g.id;
       assign(k + 1);
