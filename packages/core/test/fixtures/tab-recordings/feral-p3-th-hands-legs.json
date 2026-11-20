@@ -18820,16 +18820,16 @@
       {
         "kind": "dead-slot",
         "slot": "hands",
-        "cause": "set-break-toll",
+        "cause": "set-break-cost",
         "wornItemName": "Thunderheart Gauntlets",
-        "message": "No positive candidate in hands: every alternative displaces Thunderheart Gauntlets and pays Thunderheart Harness's lost bonus. Check that toll is real before trusting the slot."
+        "message": "No positive candidate in hands: every alternative displaces Thunderheart Gauntlets and loses a Thunderheart Harness bonus. Check that this lost bonus is real before trusting the slot."
       },
       {
         "kind": "dead-slot",
         "slot": "legs",
-        "cause": "set-break-toll",
+        "cause": "set-break-cost",
         "wornItemName": "Thunderheart Leggings",
-        "message": "No positive candidate in legs: every alternative displaces Thunderheart Leggings and pays Thunderheart Harness's lost bonus. Check that toll is real before trusting the slot."
+        "message": "No positive candidate in legs: every alternative displaces Thunderheart Leggings and loses a Thunderheart Harness bonus. Check that this lost bonus is real before trusting the slot."
       }
     ],
     "complete": true,

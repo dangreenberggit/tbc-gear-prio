@@ -213,11 +213,11 @@ git -C vendor/tbc-new-fork diff --name-only --diff-filter=A 24606be6b 60a4735ea 
   the fork.
 - The dev code compiled into the tab (`utils/dev_flags.ts`, `utils/fixture.ts`,
   `hooks/useFixtureWindowHooks.ts`, `utils/run_fn_for_flags.ts`, `model/replay_run.ts`,
-  `components/DevTools/`, `components/CandidateCapPicker/`,
-  `model/engine/fixtures/*.ts`): the gates load recorded rankings into the page
-  through these hooks. The replay link, the file-upload box and the two
-  `model/engine/fixtures/*.ts` files have no caller; the owner ruled "Unused dev
-  features: ignore them", so they stay as they are.
+  `components/DevTools/`, `components/CandidateCapPicker/`): the gates load
+  recorded rankings into the page through these hooks. The replay link and the
+  file-upload box have no caller; the owner ruled "Unused dev features: ignore
+  them", so they stay as they are. The two `model/engine/fixtures/*.ts` files,
+  also without a caller, were deleted in ticket 887 (2026-11-20).
 
 ### Moved to this repo
 

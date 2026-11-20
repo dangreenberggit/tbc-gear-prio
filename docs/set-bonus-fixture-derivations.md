@@ -1043,7 +1043,10 @@ package loop, and keeps the gain side only for the sets the rule keeps.
   estimate at `t`, plus the pair. The estimate is rule Z's
   (`sumOfSinglesEstimate`): the sum of the package pieces' single-swap
   figures, plus `v_b · (m_b − L_b)` for each counted worn bonus `b`, with
-  the package's first added piece as the row.
+  the package's first added piece as the row, minus the set's own crossing
+  check value (its bonus at `w + 1`) once per added piece, since each
+  single reached `w + 1` alone (ticket 886). A crossing check that ran and
+  has no value leaves the estimate absent.
 - **σ** = `√2 · stdev / √300` with the baseline's stdev. The model's stdev
   is 30, so σ = 2.449490, the band `√2 · σ` = 3.464102 and `2σ` =
   4.898979.
@@ -1096,9 +1099,12 @@ model bonuses 0.
   and bonuses of 0, so the pair is exactly 0, `pairedSe` 0: measure −100,
   exact-zero.
 - Thunderheart (`w 1`, `R 4`). Singles: Pauldrons and Chestguard
-  `100 + 50 − 40 = 110`, Leggings `100 + 50 = 150`. Estimates: 150; 260
-  (Chestguard, the lower id, `m − L = 0`); `110 + 110 + 150 + 40 = 410`.
-  Pair 130 (511-SR). Measure 540, top-k (the only ranked set).
+  `100 + 50 − 40 = 110`, Leggings `100 + 50 = 150`. Each single holds the
+  2pc it reaches alone; the crossing check reads it at 50 and the screen
+  takes it out once per added piece (ticket 886). Estimates: `150 − 50 =
+100`; `260 − 100 = 160` (Chestguard, the lower id, `m − L = 0`);
+  `110 + 110 + 150 + 40 − 150 = 260`. Pair 130 (511-SR). Measure 390,
+  top-k (the only ranked set). (Before ticket 886: 410 and 540.)
 - Sims: 4 screen sims, all simmed. After the singles, only those two
   Justicar sims wear a Justicar copy; the off run also sends Justicar's
   gate sims.
@@ -1122,9 +1128,12 @@ Crystalforge has only its marker at 2. 8 screen sims.
 (Malorne at 1).
 
 - Malorne (`w 1`, `R 4`): Mantle, Breastplate and Greaves at −155 each;
-  each single adds the second piece, `−155 + 40 = −115`. Estimates −115,
-  −230, −345 (no worn bonus is lost). Pair: count 4 against 1, `40 + 70 =
-110`. Measure −5; `−5 + 4.898979 = −0.101 < 0`: below-zero.
+  each single adds the second piece, `−155 + 40 = −115`. The crossing check
+  reads the 2pc at 40, taken out once per added piece (ticket 886), so the
+  estimates are −155, −310, −465 (no worn bonus is lost). Pair: count 4
+  against 1, `40 + 70 = 110`. Measure −45; `−45 + 4.898979 < 0`:
+  below-zero. (Before ticket 886 the estimate kept the singles' 2pc and the
+  measure was −5.)
 - Thunderheart (`w 0`, `R 3`): wrist −15, waist −15, feet −100. Estimates
   −30 and −130. Pair: count 3 against 0, the 2pc 50. Measure 20.
 - Gladiator's Pursuit 586 (`w 0`, `R 2`): chest and hands −12.375 each,

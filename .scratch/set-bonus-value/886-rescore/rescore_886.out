@@ -1,0 +1,38 @@
+Sets with a self-crossing correction (worn >= 1):
+  C1 set 672 worn 1 reach 8: B(w+1) 10.012438941375422 (N=1000); M2@300 before 215.81745230377237 after 178.4053899427695
+  C5 set 632 worn 2 reach 5: B(w+1) 0.0 (N=1000); M2@300 before -9.753171576692239 after -9.753171576692239
+  C5 set 635 worn 3 reach 5: B(w+1) -1.86310204328106 (N=1000); M2@300 before 3.473009561625304 after 7.199213648187424
+  C6 set 676 worn 2 reach 5: B(w+1) 0.0 (N=1000); M2@300 before 103.41237544535625 after 103.41237544535625
+  C3 set 530 worn 3 reach 8: B(w+1) 40.51109197714686 (N=1000); M2@300 before 40.911305466185695 after 0.40021348903883336
+  C3 set 669 worn 2 reach 8: B(w+1) 0.0 (N=1000); M2@300 before 315.5346699465217 after 315.5346699465217
+  C7 set 640 worn 2 reach 5: B(w+1) 0.0 (N=1000); M2@300 before 1.4898210250312331 after 1.4898210250312331
+  P5-8 set 640 worn 2 reach 5: B(w+1) 0.0 (N=1000); M2@300 before 1.4898210250312331 after 1.4898210250312331
+  W3-TH set 676 worn 3 reach 8: B(w+1) 78.78836915896318 (N=1000); M2@300 before 333.06539010807364 after 103.47155330187115
+  FER-P3P5 set 676 worn 4 reach 8: B(w+1) 0.0 (N=1000); M2@300 before 15.388123859085226 after 15.388123859085226
+
+Tab rule M2 N=300 K=2 c=1 rule1=on:
+  before: pass=True keepsAll=True meanKept=2.091 near=[]
+  after:  pass=True keepsAll=True meanKept=2.091 near=[]
+
+Kept per character (before -> after), truths:
+  C1: [530, 672] -> [530, 672]; missed [] -> []; band [] -> []; truths [672]
+  C5: [530, 617, 635, 684] -> [530, 617, 635, 684]; missed [] -> []; band [617] -> [617]; truths [684]
+  C6: [640, 676] -> [640, 676]; missed [] -> []; band [] -> []; truths [640, 676]
+  C2: [629, 680] -> [629, 680]; missed [] -> []; band [] -> []; truths []
+  C3: [652, 669] -> [652, 669]; missed [] -> []; band [] -> []; truths [652, 669]
+  C4: [668, 699] -> [668, 699]; missed [] -> []; band [] -> []; truths [668, 699]
+  C7: [640, 641, 676] -> [640, 641, 676]; missed [] -> []; band [640] -> [640]; truths [676]
+  P5-8: [640, 641, 676] -> [640, 641, 676]; missed [] -> []; band [640] -> [640]; truths [676]
+  W3-TH: [676] -> [676]; missed [] -> []; band [] -> []; truths []
+  FER-P3P5: [640] -> [640]; missed [] -> []; band [] -> []; truths []
+  WCL-M5: [671] -> [671]; missed [] -> []; band [] -> []; truths []
+
+Passing rules: before 117, after 116
+Chosen by `choose` before: M2 N=10 K=1 c=3 rule1=on
+Chosen by `choose` after:  M2 N=300 K=2 c=1 rule1=on
+
+C203 checks for the tab rule (pass / keepsAll / meanKept):
+  bound/keep: before True True 2.09 near []; after True True 2.09 near []; kept sets moved on none
+  bound1.5/keep: before True True 2.27 near []; after True True 2.27 near []; kept sets moved on none
+  own/keep: before True True 1.82 near []; after True True 1.82 near []; kept sets moved on none
+  bound/drop: before True True 1.91 near []; after True True 1.91 near []; kept sets moved on none

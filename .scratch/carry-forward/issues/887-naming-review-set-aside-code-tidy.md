@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Verified by: `pnpm run fork-lint:check` and `pnpm run fork-tests:check` (74 files, 907 tests passed), `pnpm exec vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/fork-meta-repair.test.ts packages/core/test/wowsims-fork-parity.test.ts` (189 passed) on tbc-new-fork@57035ec239b65eea2788add01f80f2e194258e3f (review rewording in tbc-new-fork@6ca79f308bf44d2f7f079a84ecc197a24c64b757); review in docs/reviews/fix-886-887-set-screen-and-tidy.md
 Type: task
 Origin: .scratch/agent-reports/2026-11-18-general-task-naming-review-decisions.md
 Blocked by: none
@@ -6,7 +7,8 @@ Blocked by: none
 # Set-aside code-tidy items from the Upgrades-tab naming review
 
 The naming review (decisions doc above, part D) set these aside: each is a
-code change beyond a rename, so the rename batches left them. Not started.
+code change beyond a rename, so the rename batches left them. Closed
+2026-11-20; see Resolution.
 None blocks the upstream PR; they are tidy and small-design items to look at
 when convenient.
 
@@ -107,3 +109,46 @@ start with `packages/`. Line numbers were re-checked against the fork at
   step-word work, not filed here.
 - **D12** is ticket 886 (set-screen may count a set's own bonus two or three
   times); already filed.
+
+## Resolution (2026-11-20, fork `57035ec23`)
+
+Each claim was checked again against the fork before the change.
+
+- **D1:** done. Deleted `model/engine/fixtures/`; its two
+  `docs/fork-provenance/engine.md` rows are gone, and
+  `docs/fork-upstream-touchpoints.md` no longer says the files stay. The
+  owner's 2026-10-08 "Unused dev features: ignore them" left them in place;
+  this ticket's ask is read as overriding that for these two files.
+- **D2:** done. Every listed symbol was used only in its own file, mostly not
+  at all, so each is deleted rather than un-exported (an unused private would
+  fail the fork lint). `hideWorn` went from `view.ts` and from
+  `packages/core/test/fork-set-fixtures.test.ts`. `poolFromUniverse`'s main-repo
+  hits are core's own copy, which stays. `slamaltmanOfflineRecordings` went
+  with D1.
+- **D3:** done. `SimSlotName` is now `SimOrderName` (the two unions were the
+  same 17 names). The name `SimSlotName` stays as an alias: about 30 uses
+  across the engine and the tab's results view, and core's own copy, use it,
+  so renaming them all is churn with no second copy left to drift.
+- **D5:** done. Nothing read `GemRecolor.cost`, and no recording stores it;
+  the field and both writers are gone. `Move.cost` stays.
+- **D6:** done, by deleting `DeadSlot.poolSize`: nothing read it. (At the two
+  `slotRows.length` sites the slot has no worn row, so all three counts meant
+  the candidates.)
+- **D7:** done. `set-bonus.ts` imports `setCounts` and `setNameOf` from
+  `set-value.ts`.
+- **D9:** done. The messages say "limit for a believable set bonus",
+  "suspected measurement problem", "which worn bonuses the added pieces
+  break", "loses a <set> bonus" and "Check that this lost bonus is real"; the
+  cause `set-break-toll` is `set-break-cost`. The five feral recordings were updated in place (text
+  only) and their README says so. Core's own copy keeps the old text.
+- **D11:** no change. `'split'` and `'full-path'` are never chosen by the tab
+  (`set_bonus_popover.ts` asks for `'full'` and the default rule), but about
+  26 assertions in `packages/core/test/fork-set-net.test.ts` and
+  `fork-set-fixtures.test.ts` use them, and `view.ts` calls the credit view
+  "a player's choice, not a game rule". Removing them is a product decision,
+  so it is left to the owner.
+- **Unused `needed` and `pool`:** done. `estimateCombinedDelta` takes
+  `Pick<PartnerQuery, 'row' | 'brokenBy' | 'breakDps'>`.
+- **"package" in log text:** done. The three `rank.ts` lines say "added
+  pieces", and the test match in `fork-set-net.test.ts` follows.
+  `setPotentialDisclosureLine` went with D2.

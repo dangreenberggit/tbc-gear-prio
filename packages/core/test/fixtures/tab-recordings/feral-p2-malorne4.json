@@ -14347,16 +14347,16 @@
       {
         "kind": "dead-slot",
         "slot": "chest",
-        "cause": "set-break-toll",
+        "cause": "set-break-cost",
         "wornItemName": "Breastplate of Malorne",
-        "message": "No positive candidate in chest: every alternative displaces Breastplate of Malorne and pays Malorne Harness's lost bonus. Check that toll is real before trusting the slot."
+        "message": "No positive candidate in chest: every alternative displaces Breastplate of Malorne and loses a Malorne Harness bonus. Check that this lost bonus is real before trusting the slot."
       },
       {
         "kind": "dead-slot",
         "slot": "shoulder",
-        "cause": "set-break-toll",
+        "cause": "set-break-cost",
         "wornItemName": "Mantle of Malorne",
-        "message": "No positive candidate in shoulder: every alternative displaces Mantle of Malorne and pays Malorne Harness's lost bonus. Check that toll is real before trusting the slot."
+        "message": "No positive candidate in shoulder: every alternative displaces Mantle of Malorne and loses a Malorne Harness bonus. Check that this lost bonus is real before trusting the slot."
       }
     ],
     "complete": true,

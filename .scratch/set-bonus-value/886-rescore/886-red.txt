@@ -1,0 +1,9 @@
+AssertionError: expected 3 to be close to +0, received difference is 3, but expected 5e-10
+ ❯ packages/core/test/fork-set-net.test.ts:4798:34
+    4796|     // The best estimate is all three pieces' own value, with no 2pc i…
+    4797|     const twoPcTimesInEstimate = (set.bestStats! - 3 * V_TH) / B2_TH;
+--
+AssertionError: expected 3 to be close to +0, received difference is 3, but expected 5e-10
+ ❯ packages/core/test/fork-set-net.test.ts:4847:35
+    4845|     expect(set.pair.dps).toBeCloseTo(B4 + B6, 9);
+    4846|     const fourPcTimesInEstimate = (set.bestStats! - 3 * 100) / B4;
