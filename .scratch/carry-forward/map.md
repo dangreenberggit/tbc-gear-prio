@@ -237,7 +237,7 @@ file contention, worker prompt. This file stays the chronological log.
 - 429 Sim-sets group: relabel to 'Sim sets', quieter explainer, chip styling vs gear tab (owner screenshot 2026-09-18, refines 424)
 - 430 Result-row tag redundant (BiS + grey) and mislabeled; unify to one correct short tag — BiS IS set membership (owner screenshot 2026-09-18, refines 424; domain call)
 - 431 Set-bonus 'incl.' line confusing/verbose; keep the total, move detail to tooltip (owner screenshot 2026-09-18, refines 419)
-- 432 Fork locale gate red on tip (419 added set_bonus.total sans schema) + not in pnpm verify (found in tab-ui-refinements review)
+- 432 CLOSED 2026-11-20, fix/locale-keys-fork-gate — `fork-tests:check` now runs the fork's `test-locales.mjs` after its whole unit suite. Was: fork locale gate red on tip (419 added set_bonus.total sans schema) + not in pnpm verify (found in tab-ui-refinements review)
 - 433 Sim-sets starts empty; default-select the old 'BiS' set per phase (owner review 2026-09-18; folded into tab-ui-refinements; may move desktop golden)
 - 434 Desktop gate leaves stray wowsimtbc.exe on :3333 blocking next run; executor perm-denied to kill it (recurring 3x); fix gate teardown + document trap
 - 435 Upgrades tab tippy instances not destroyed on re-render (premerge R2 adversarial, minor, deferred)
@@ -463,7 +463,7 @@ file contention, worker prompt. This file stays the chronological log.
 - 861 The layout gate's Chromium aborts inside the Claude Code sandbox (`socket() failed`), so an agent's merge skips the gate (ticket 860) 2026-11-08
 - 862 No agent has yet removed a pair through the unpair sandbox fallback in `paired-worktrees.md` § Remove it (`docs/reviews/docs-unpair-after-merge.md` IR1) 2026-11-08; CLOSED 2026-11-08, an agent removed the pair `unpair-doc` after its merge through the fallback, with no owner step
 - 865 A stale result's gear-set badges name the new phase's sets after a phase change (`docs/reviews/fix-852-810-sim-errors-bis-labels.md` X1) 2026-11-08
-- 866 The fork's locale-key test fails on two plural keys that exist in `upgrades.json` (wowsims catch-up to v0.0.155, `docs/reviews/feat-wowsims-catchup-2026-11-09.md` B1) 2026-11-09
+- 866 CLOSED 2026-11-20, fix/locale-keys-fork-gate — fixed in our keys (fork d94930daa), upstream's test unchanged. Was: The fork's locale-key test fails on two plural keys that exist in `upgrades.json` (wowsims catch-up to v0.0.155, `docs/reviews/feat-wowsims-catchup-2026-11-09.md` B1) 2026-11-09
 - 867 A set whose bonus read (`activeSetBonuses`) fails is dropped with no line for the player (ticket 863 fix) 2026-11-10; CLOSED 2026-11-10, fix/867-870-tab-errors, a line gives the read's error
 - 868 A run whose sim panics shows the whole Go stack trace in the status line (ticket 621 check) 2026-11-10; reopened 2026-11-11 on the owner's ruling; CLOSED 2026-11-11, fix/867-870-tab-errors, one error toast with the error's own message, as wowsims' bulk sim; the status line says "Ranking failed."
 - 869 A set-phase sim request that cannot be built (set screen, same-gear gate) shows no error (`docs/reviews/fix-621-863-865-tab.md` P2) 2026-11-10; CLOSED 2026-11-10, fix/867-870-tab-errors, versionGears carries the error to the screen and gate lines
