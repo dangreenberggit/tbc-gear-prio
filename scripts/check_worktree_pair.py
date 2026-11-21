@@ -52,18 +52,22 @@ def check_name_refuses_paths_and_odd_characters() -> list[str]:
 
 def check_unpair_hint_is_the_plain_command() -> list[str]:
     """The sandbox lets `pnpm wt:unpair *` out only as the plain command
-    text; `pnpm -C <folder> wt:unpair` stays inside and stops half-way on
-    the read-only .git/worktrees. So the hint names the folder separately."""
+    text; `pnpm -C <folder> wt:unpair` or `cd <folder> && ...` stays inside
+    and stops half-way on the read-only .git/worktrees. A subagent's folder
+    is fixed for each call, so a hint that names one folder to run from
+    pushes it into one of those forms. The script finds the main checkout
+    itself, so the hint names only the folder it must not run from: the
+    pair."""
     problems = []
-    main = Path("/home/u/tbc-gear-prio")
+    pair_dir = Path("/home/u/tbc-wt/probe")
     for force, want in ((False, "pnpm wt:unpair probe"), (True, "pnpm wt:unpair probe --force")):
-        got = wp.unpair_hint(main, "probe", force=force)
+        got = wp.unpair_hint(pair_dir, "probe", force=force)
         if not got.startswith(f"`{want}`"):
             problems.append(f"unpair_hint must start with `{want}`, got {got!r}")
         if "-C" in got or "cd " in got:
             problems.append(f"unpair_hint must not change folder in the command, got {got!r}")
-        if main.as_posix() not in got:
-            problems.append(f"unpair_hint must name the main folder, got {got!r}")
+        if "any checkout" not in got or pair_dir.as_posix() not in got:
+            problems.append(f"unpair_hint must say any checkout but the pair will do, got {got!r}")
     return problems
 
 

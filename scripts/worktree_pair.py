@@ -517,11 +517,14 @@ def pnpm_in(folder: Path) -> str:
     return f'pnpm -C "{folder.as_posix()}"'
 
 
-def unpair_hint(main_dir: Path, name: str, force: bool = False) -> str:
-    # Plain text, no -C: the sandbox exclusion for `pnpm wt:unpair *` matches
-    # only the plain command, and a -C form fails on the read-only .git/worktrees.
+def unpair_hint(target: Path, name: str, force: bool = False) -> str:
+    # Plain text, no -C or cd: the sandbox exclusion for `pnpm wt:unpair *`
+    # matches only the plain command, and any other form fails on the
+    # read-only .git/worktrees. Unpair finds the main checkout itself, so the
+    # hint names only the folder it refuses to run from; naming one folder to
+    # run from pushes a subagent, whose folder is fixed, into a cd or -C form.
     cmd = f"pnpm wt:unpair {name}" + (" --force" if force else "")
-    return f"`{cmd}` from {main_dir.as_posix()}"
+    return f"`{cmd}`, sent alone, from any checkout of this repo but {target.as_posix()}"
 
 
 def pair(args: argparse.Namespace) -> int:
@@ -534,7 +537,7 @@ def pair(args: argparse.Namespace) -> int:
     if target.exists():
         raise Refusal(
             f"{target} already exists; pick another name or run "
-            f"{unpair_hint(main_dir, args.name)}"
+            f"{unpair_hint(target, args.name)}"
         )
     if args.fork_detached == bool(args.fork_branch):
         raise Refusal("give exactly one of <fork-branch> or --fork-detached")
@@ -621,7 +624,7 @@ def pair(args: argparse.Namespace) -> int:
         say(f"FAILED: {exc}")
         say(
             f"the pair is partly made at {target}; remove it with "
-            f"{unpair_hint(main_dir, args.name, force=True)}"
+            f"{unpair_hint(target, args.name, force=True)}"
         )
         return 1
 
@@ -639,7 +642,7 @@ def pair(args: argparse.Namespace) -> int:
         say(f"  WARNING: {warning}")
     say(f"open a session in {target} (desktop app: pick that folder; terminal: run `claude` there)")
     say("that session starts with no memory notes: memory is kept per folder")
-    say(f"remove the pair with {unpair_hint(main_dir, args.name)}")
+    say(f"remove the pair with {unpair_hint(target, args.name)}")
     return 0
 
 
