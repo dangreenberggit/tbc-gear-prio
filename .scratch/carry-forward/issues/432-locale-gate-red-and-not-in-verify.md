@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Verified by: `python scripts/check_fork_tests.py` (prints `test-locales.mjs passed`); docs/reviews/fix-locale-keys-fork-gate.md
 Type: bug
 Origin: stage-gate tab-ui-refinements plan review, 2026-09-18
 Blocks: none
@@ -66,3 +67,12 @@ STAYS OPEN for item 2 only: the process decision on whether to wire
 `test-locales.mjs` into `pnpm verify` (or a fork gate it already runs) so a
 future locale/schema drift fails CI rather than sitting latent — the batch
 deliberately did NOT wire it, leaving that call here.
+
+## Closed 2026-11-20 — item 2 wired into `fork-tests:check`
+
+Branch `fix/locale-keys-fork-gate` makes `scripts/check_fork_tests.py`
+(`pnpm fork-tests:check`, inside `pnpm verify`) run `node test-locales.mjs`
+in the fork after the whole unit suite, because upstream CI runs both
+(`.github/workflows/run_tests.yml` in the fork). A locale/schema drift now
+fails verify. On fork commit d94930daa it passed for all four en locale
+files.

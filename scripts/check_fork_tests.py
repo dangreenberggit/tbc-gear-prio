@@ -139,6 +139,7 @@ def main() -> int:
     )
     return 0
 
+
 if __name__ == "__main__":
     try:
         sys.stdout.reconfigure(encoding="utf-8")

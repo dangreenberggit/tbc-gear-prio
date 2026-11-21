@@ -237,7 +237,7 @@ file contention, worker prompt. This file stays the chronological log.
 - 429 Sim-sets group: relabel to 'Sim sets', quieter explainer, chip styling vs gear tab (owner screenshot 2026-09-18, refines 424)
 - 430 Result-row tag redundant (BiS + grey) and mislabeled; unify to one correct short tag — BiS IS set membership (owner screenshot 2026-09-18, refines 424; domain call)
 - 431 Set-bonus 'incl.' line confusing/verbose; keep the total, move detail to tooltip (owner screenshot 2026-09-18, refines 419)
-- 432 Fork locale gate red on tip (419 added set_bonus.total sans schema) + not in pnpm verify (found in tab-ui-refinements review)
+- 432 CLOSED 2026-11-20, fix/locale-keys-fork-gate — `fork-tests:check` now runs the fork's `test-locales.mjs` after its whole unit suite. Was: fork locale gate red on tip (419 added set_bonus.total sans schema) + not in pnpm verify (found in tab-ui-refinements review)
 - 433 Sim-sets starts empty; default-select the old 'BiS' set per phase (owner review 2026-09-18; folded into tab-ui-refinements; may move desktop golden)
 - 434 Desktop gate leaves stray wowsimtbc.exe on :3333 blocking next run; executor perm-denied to kill it (recurring 3x); fix gate teardown + document trap
 - 435 Upgrades tab tippy instances not destroyed on re-render (premerge R2 adversarial, minor, deferred)
