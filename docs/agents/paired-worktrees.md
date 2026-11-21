@@ -210,19 +210,20 @@ stop it (a reading of `merge_to_dev.py`, untested).
 pnpm wt:unpair <name>
 ```
 
-**Run it as plain text.** In Claude Code, run exactly
-`pnpm wt:unpair <name>`, with nothing before or after it in the call: no
-`-C`, no `cd … &&`, no `; echo`. Only that text matches `pnpm wt:unpair *`
-in `sandbox.excludedCommands` of `~/.claude_router/settings.json` (added
+**Send it as plain text.** In Claude Code, send `pnpm wt:unpair <name>` as
+the whole call: no `-C`, no `cd … &&`, no `; echo`; the tool result gives
+the exit code. Only that text matches `pnpm wt:unpair *` in
+`sandbox.excludedCommands` of `~/.claude_router/settings.json` (added
 2026-11-21), so only it runs outside the sandbox. Any other form runs
 inside, where `.git/worktrees` is read-only: unpair can remove the fork half
 and then stop on `.git/worktrees/<name>` with `Read-only file system` or
-`Device or resource busy`. After that error, finish from the main checkout
-with two plain calls: `git worktree remove <pair path>` (also excluded),
-then `pnpm wt:unpair <name>` again, which deletes the unpair mark.
+`Device or resource busy`. After that error, send two more plain calls:
+`git worktree remove <parent of the main checkout>/tbc-wt/<name>` (also
+excluded), then `pnpm wt:unpair <name>` again, which deletes the unpair mark.
 
-Run it from the main checkout or from another pair; it refuses to run from
-inside the pair it removes. Without `--force` it refuses when:
+Run it from any checkout of this repo but the pair it removes: it finds the
+main checkout itself and refuses to run from inside that pair. Without
+`--force` it refuses when:
 
 - either worktree has uncommitted or untracked files;
 - either worktree has ignored files that pair setup did not write, such as
