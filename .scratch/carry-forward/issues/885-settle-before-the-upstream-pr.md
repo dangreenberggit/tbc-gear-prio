@@ -154,14 +154,20 @@ Owner's reply: "Sure, yes (don't bring a fixture into the fork, we can leave it 
   `dadfad891`). Review: `docs/reviews/chore-885-pre-pr-cleanup.md`.
 - **Iterations.** No cap. When the run's iterations in all (the baseline
   plus each eligible candidate, under the candidate cap, times the
-  iterations per sim) pass 1,000,000 on the web sim, the field shows the
+  iterations per sim) pass the Bulk tab's limit for the host (1,000,000 on
+  the web sim, 10,000,000 in the downloaded sim), the field shows the
   Bulk tab's own warning, as the Bulk tab weighs a batch's combinations
   times its iterations; built from wowsims' pieces
-  (`bulkLimitForHost`, `WEB_ITERATIONS_LIMIT`, the
+  (`bulkIterationsLimit`, the
   `bulk_tab.warning.iterations_limit` text and `CombinationsCount.tsx:28-54`'s
   icon and tooltip); it never blocks the run (fork `300e10e4b`, weighed in all after
-  review in `294c57a84`). Unlike the
-  Bulk tab it shows nothing in the downloaded sim, whose higher limit would
-  pair with advice to download the sim.
+  review in `294c57a84`). The downloaded sim's limit was added after the
+  owner's standing ruling "match wowsims, don't invent"; at first the tab
+  showed nothing there.
+- **Data notes.** The `notes` of seven ep-weights sources (feral p1,
+  hunter fallback and SV p1, warrior fallback, p2 and Arms p3) no longer
+  name this repo's code, CLI, data file names or ticket 803 (they name wowsims presets instead), and `tier-exchange.json`'s
+  `generatedBy` says in words what it is built from. The fork copies follow
+  through `scripts/sync_fork_universes.py --write` (fork `94fc69429`).
 
-Verified by: `pnpm run fork-lint:check` ("oxfmt clean over the 247 files changed since 24606be6bae2"), `pnpm run fork-tests:check`, `python scripts/check_sync_fork_universes.py` (9 checks) and `pnpm exec vitest run packages/core/test/fork-results-view-recording.test.ts packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/wowsims-fork-parity.test.ts` on tbc-new-fork@dadfad891b40a1832245cf47c32d2500057deaa4; review in docs/reviews/chore-885-pre-pr-cleanup.md
+Verified by: `pnpm run fork-lint:check` ("oxfmt clean over the 247 files changed since 24606be6bae2"), `pnpm run fork-tests:check`, `python scripts/check_sync_fork_universes.py` (9 checks) and `pnpm exec vitest run packages/core/test/fork-results-view-recording.test.ts packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/wowsims-fork-parity.test.ts` on tbc-new-fork@94fc694293dc134a78f0c83fea02827d8cbc7247, plus `python scripts/sync_fork_universes.py --check` and `python scripts/generate_fork_exchange.py --check` after the data notes; review in docs/reviews/chore-885-pre-pr-cleanup.md

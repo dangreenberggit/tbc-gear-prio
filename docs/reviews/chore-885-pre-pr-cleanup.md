@@ -133,37 +133,85 @@ fail --check with rc 1, got 0`; with the bytes decode: 9 checks ok.
   ok, and set-net, set-fixtures, the recording test and E-W3: `Tests  130
 passed (130)`, each rc 0.
 
+## Follow-up: the warning's desktop limit and the data notes
+
+Two later changes on this branch, checked by one fresh Opus reviewer
+(`.scratch/agent-reports/2026-11-20-general-task-review-steps-3-4-885.md`
+in the pair).
+
+- **W1.** The owner asked the tab to warn in the downloaded sim as the Bulk
+  tab does, under the standing ruling "match wowsims, don't invent". Fork
+  `16edf6320`: the limit is `bulkIterationsLimit(sim.isNative)`
+  (`features/bulk/model/limits.ts:15`), the same call as
+  `CombinationsCount.tsx:28`, so 1,000,000 on the web sim and 10,000,000 in
+  the downloaded sim (`sim/bulk/types.ts:6-7`), with the same text.
+- **N1.** The owner asked that the bundled data notes stop naming this repo
+  or a ticket. Seven ep-weights sources and `tier-exchange.json`'s
+  `generatedBy` are reworded in `data/`, and the sync copies them (fork
+  `94fc69429`).
+
+Reviewer findings:
+
+- **R1.** This file's note pointed to rows W1 and N1 that did not exist.
+- **R2.** Ticket 885's `Verified by:` line still named fork `dadfad891`.
+- **R3.** Five notes still named this repo's data file names (for example
+  `sv-p1.ep-weights.json`), which the fork holds under other names.
+- **R4.** The SV note said a change "shows up" without the check that made
+  it show up, which the fork does not have.
+- **R5.** The new `generatedBy` left out the check against wowsims' item
+  database and read as if the Sunmote pairs were not from AtlasLoot.
+- **R6.** 16 notes still say "on the fork branch feat/upgrades-tab" and give
+  old `ui/<class>/` paths.
+- **R7.** The hunter notes said "has the most talent points"; the tab needs
+  strictly more than each other tree (`model/data/data.ts:43`).
+
+Evidence: W1's new test failed with the component at `16edf6320^` (1
+failed, 9 passed) and passes at HEAD (10 passed), run by the reviewer. For
+N1, `sync_fork_universes.py --check` (22 copies byte-match),
+`generate_fork_exchange.py --check` and `check_ep_presets.py` pass, and the
+generator writes identical bytes on two runs (`cmp`).
+
 ## Disposition
 
-| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                               |
-| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A1  | Adversarial | fixed       | Fork `294c57a84`; new `RunControls.test.tsx` cases failed on the per-sim code, pass on the fix.                                                                                                                                                             |
-| A2  | Adversarial | fixed       | `check_layout_passes_the_forks_oxfmt` in `scripts/check_sync_fork_universes.py`.                                                                                                                                                                            |
-| A3  | Adversarial | fixed       | `check_write_is_all_or_nothing_on_a_parse_error`; failed before the pre-pass.                                                                                                                                                                               |
-| A4  | Adversarial | fixed       | `check_crlf_source_fails_check`; failed before the bytes decode.                                                                                                                                                                                            |
-| A5  | Adversarial | fixed       | `packages/core/test/fork-results-view-recording.test.ts`; fails with BiS-only off.                                                                                                                                                                          |
-| D1  | Domain      | fixed       | Same as A1.                                                                                                                                                                                                                                                 |
-| D2  | Domain      | fixed       | `engine.md`: "every remaining caller set to true".                                                                                                                                                                                                          |
-| D3  | Domain      | fixed       | Fork `dadfad891`: "the exclude and include heroic five-man policies".                                                                                                                                                                                       |
-| S1  | Standards   | fixed       | Same as A1.                                                                                                                                                                                                                                                 |
-| S2  | Standards   | fixed       | Ticket 544 closed with a `Verified by:` line.                                                                                                                                                                                                               |
-| S3  | Spec        | wontfix     | The ruling named JSON `_comment`s; `notes` and `generatedBy` are data fields the ruling did not cover. Left for the owner as a question in this branch's report, with a recommendation to reword them in the `data/` sources so both sides stay byte-equal. |
-| S4  | Standards   | fixed       | Fork `dadfad891`: the comment no longer names a ticket.                                                                                                                                                                                                     |
-| S5  | Spec        | wontfix     | The stored tab recordings and mock fixtures carry the field; dropping it changes the stored ranking shape for no change a player or the PR reviewer sees. The value is true: the tab's rule is close-calls.                                                 |
-| S6  | Standards   | fixed       | `engine.md`: "the rows in § Ported files".                                                                                                                                                                                                                  |
-| S7  | Standards   | fixed       | `engine.md`: the row reads "adapted", and the 885 section retires the `cmp` check.                                                                                                                                                                          |
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                               |
+| --- | ----------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A1  | Adversarial | fixed       | Fork `294c57a84`; new `RunControls.test.tsx` cases failed on the per-sim code, pass on the fix.                                                                                                             |
+| A2  | Adversarial | fixed       | `check_layout_passes_the_forks_oxfmt` in `scripts/check_sync_fork_universes.py`.                                                                                                                            |
+| A3  | Adversarial | fixed       | `check_write_is_all_or_nothing_on_a_parse_error`; failed before the pre-pass.                                                                                                                               |
+| A4  | Adversarial | fixed       | `check_crlf_source_fails_check`; failed before the bytes decode.                                                                                                                                            |
+| A5  | Adversarial | fixed       | `packages/core/test/fork-results-view-recording.test.ts`; fails with BiS-only off.                                                                                                                          |
+| D1  | Domain      | fixed       | Same as A1.                                                                                                                                                                                                 |
+| D2  | Domain      | fixed       | `engine.md`: "every remaining caller set to true".                                                                                                                                                          |
+| D3  | Domain      | fixed       | Fork `dadfad891`: "the exclude and include heroic five-man policies".                                                                                                                                       |
+| S1  | Standards   | fixed       | Same as A1.                                                                                                                                                                                                 |
+| S2  | Standards   | fixed       | Ticket 544 closed with a `Verified by:` line.                                                                                                                                                               |
+| S3  | Spec        | fixed       | The owner then asked for it: N1 rewords the `notes` and `generatedBy` in the `data/` sources, so both sides stay byte-equal.                                                                                |
+| S4  | Standards   | fixed       | Fork `dadfad891`: the comment no longer names a ticket.                                                                                                                                                     |
+| S5  | Spec        | wontfix     | The stored tab recordings and mock fixtures carry the field; dropping it changes the stored ranking shape for no change a player or the PR reviewer sees. The value is true: the tab's rule is close-calls. |
+| S6  | Standards   | fixed       | `engine.md`: "the rows in § Ported files".                                                                                                                                                                  |
+| S7  | Standards   | fixed       | `engine.md`: the row reads "adapted", and the 885 section retires the `cmp` check.                                                                                                                          |
+| W1  | Follow-up   | fixed       | Fork `16edf6320`; the downloaded-sim test failed before, passes after.                                                                                                                                      |
+| N1  | Follow-up   | fixed       | Fork `94fc69429` and the seven `data/presets` sources; S3 is settled by it.                                                                                                                                 |
+| R1  | Follow-up   | fixed       | This section adds W1 and N1.                                                                                                                                                                                |
+| R2  | Follow-up   | fixed       | Ticket 885's `Verified by:` names fork `94fc69429`.                                                                                                                                                         |
+| R3  | Follow-up   | fixed       | The notes name the wowsims presets (`P1_SV_EP_PRESET`, `P1_BM_EP_PRESET`, `P3_ARMS_EP_PRESET`, `P1_FURY_EP_PRESET`); fork `94fc69429`.                                                                      |
+| R4  | Follow-up   | fixed       | The SV note now says the set is kept so each follows upstream if the two ever differ.                                                                                                                       |
+| R5  | Follow-up   | fixed       | `generatedBy`: "Built from AtlasLoot's tier token and Sunmote upgrade tables, checked against wowsims' item database; do not edit by hand."                                                                 |
+| R6  | Follow-up   | wontfix     | Outside the ask, which was this repo and tickets; these name the wowsims fork's branch. Left for the owner in this branch's report, with a recommendation.                                                  |
+| R7  | Follow-up   | fixed       | The hunter and warrior notes say "strictly more talent points than each other tree".                                                                                                                        |
 
 ## Notes
 
 - Ticket 578 (every tab file must pass wowsims' `oxfmt . --check`) is
   closed too: its done-when is met at fork `dadfad891` with `.oxfmtrc.json`
   unchanged.
-- The warning shows nothing in the downloaded sim. The Bulk tab shows the
-  same text there above 10,000,000, but the text advises downloading the
-  sim, which is untrue there. It departs from "match upstream", so the owner
-  should confirm it. With the total reading, a default run (3,000
-  iterations) shows the warning once more than about 333 candidates are
-  eligible.
+- The warning first showed nothing in the downloaded sim. Fork `16edf6320`
+  makes it show there above 10,000,000 with the same text, as the Bulk tab
+  does, under the owner's standing ruling "match wowsims, don't invent"
+  (rows W1 and N1 below). With the total reading, a default run (3,000
+  iterations) shows the warning on the web sim once more than 332
+  candidates are eligible, and in the downloaded sim once more than 3,332
+  are.
 - `tools/` and the fixture dev path stay on the fork branch, because
   removing them now breaks `pnpm equip-eligibility:check` (a `verify` step),
   the layout gate, `pnpm tab-review` and `pnpm tab-fixtures:smoke`. Ticket

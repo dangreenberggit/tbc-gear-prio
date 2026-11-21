@@ -84,7 +84,7 @@ def build() -> str:
     db_by_id = {int(item["id"]): item for item in db["items"]}
     doc = {
         "kind": "tier-exchange",
-        "generatedBy": "scripts/generate_fork_exchange.py",
+        "generatedBy": "Built from AtlasLoot's tier token and Sunmote upgrade tables, checked against wowsims' item database; do not edit by hand.",
         "tokens": token_rows(token_maps),
         "sunmote": sunmote_upgrade_pairs(load(SUNMOTE_PAIRS), db_by_id),
     }
