@@ -28,6 +28,7 @@
  * skip when `forkPresent` is false.
  */
 
+import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash } from "node:crypto";
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
@@ -178,13 +179,39 @@ export function zeroHitStats(): Promise<{
 const TRACED_SIM_METHODS = new Set(["run", "computeStats", "activeSetBonuses"]);
 
 /** `JSON.stringify` that keeps bigints, which some proto fields hold. */
-function stableJson(value: unknown): string {
+function jsonWithBigints(value: unknown): string {
   return JSON.stringify(value, (_key, v: unknown) =>
     typeof v === "bigint" ? `${v}n` : v
   );
 }
 
 const traceCalls = new Map<string, number>();
+
+/**
+ * The warnings list of the traced run whose async context is current. Some
+ * suites run several rankings at once (`fork-set-net.test.ts` uses
+ * `Promise.all`), so one `console.warn` hook is shared while any traced run is
+ * in flight, and each warning goes to the run that issued it.
+ */
+const warningsOfRun = new AsyncLocalStorage<unknown[]>();
+let runsInFlight = 0;
+let warnBeforeTrace: typeof console.warn | undefined;
+
+function hookWarn(): void {
+  if (runsInFlight++ > 0) return;
+  const warn = console.warn;
+  warnBeforeTrace = warn;
+  console.warn = (...args: unknown[]) => {
+    warningsOfRun.getStore()?.push(args[0]);
+    warn(...args);
+  };
+}
+
+function unhookWarn(): void {
+  if (--runsInFlight > 0) return;
+  console.warn = warnBeforeTrace!;
+  warnBeforeTrace = undefined;
+}
 
 /**
  * `rank` itself unless `TBC_RANK_TRACE_DIR` is set. When it is, the returned
@@ -224,34 +251,33 @@ export function tracedRank<F extends (...args: any[]) => Promise<unknown>>(
         if (typeof value !== "function") return value;
         return (...args: unknown[]): unknown => {
           const hash = createHash("sha256")
-            .update(stableJson(args))
+            .update(jsonWithBigints(args))
             .digest("hex");
           sims.push([prop, hash]);
           return (value as (...a: unknown[]) => unknown).apply(target, args);
         };
       },
     });
-    const warn = console.warn;
-    console.warn = (...args: unknown[]) => {
-      warnings.push(args[0]);
-      warn(...args);
-    };
+    hookWarn();
     const line: Record<string, unknown> = { test, call };
     try {
-      const ranking = await rank(input, { ...deps, sim }, ...rest);
+      const ranking = await warningsOfRun.run(warnings, () =>
+        rank(input, { ...deps, sim }, ...rest)
+      );
       line.ranking = ranking;
       return ranking;
     } catch (err) {
-      const e = err as { name?: unknown; message?: unknown; code?: unknown };
-      line.error = { name: e?.name, message: e?.message, code: e?.code };
+      // `kind` is how the fork's RankError says which failure it is.
+      const e = err as { name?: unknown; message?: unknown; kind?: unknown };
+      line.error = { name: e?.name, message: e?.message, kind: e?.kind };
       throw err;
     } finally {
-      console.warn = warn;
+      unhookWarn();
       line.sims = sims;
       line.warnings = warnings;
       mkdirSync(dir, { recursive: true });
       const file = basename(state.testPath ?? "unknown-test-file");
-      appendFileSync(join(dir, `${file}.jsonl`), `${stableJson(line)}\n`);
+      appendFileSync(join(dir, `${file}.jsonl`), `${jsonWithBigints(line)}\n`);
     }
   };
   return traced as F;

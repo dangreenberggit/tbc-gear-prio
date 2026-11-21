@@ -100,15 +100,51 @@ describe("tracedRank", () => {
 
   it("records a rejected run and rethrows the same error", async () => {
     const d = traceTo();
-    const boom = Object.assign(new Error("no sim"), { code: "sim-failed" });
+    // The fork's RankError carries `kind` (rank-types.ts), so the trace must
+    // record it to tell a sim failure from an internal one.
+    const boom = Object.assign(new Error("no sim"), { kind: "sim-failed" });
     const rank = (_input: unknown, _deps: unknown): Promise<never> =>
       Promise.reject(boom);
     await expect(
       tracedRank(rank)({}, { sim: { run: () => Promise.resolve() } })
     ).rejects.toBe(boom);
     expect(lines(d)[0]).toMatchObject({
-      error: { name: "Error", message: "no sim", code: "sim-failed" },
+      error: { name: "Error", message: "no sim", kind: "sim-failed" },
     });
+  });
+
+  it("keeps each warning with its own run when traced runs overlap", async () => {
+    // fork-set-net.test.ts runs three rankings at once (Promise.all), so two
+    // traced runs can be in flight together.
+    const d = traceTo();
+    const warn = console.warn;
+    const quiet = (): void => {};
+    console.warn = quiet;
+    let releaseA!: () => void;
+    const gateA = new Promise<void>((r) => (releaseA = r));
+    const rank = async (
+      input: { id: string },
+      _deps: unknown
+    ): Promise<string> => {
+      if (input.id === "a") await gateA;
+      else await Promise.resolve();
+      console.warn(`from ${input.id}`);
+      return input.id;
+    };
+    const sim = { run: () => Promise.resolve() };
+    try {
+      const a = tracedRank(rank)({ id: "a" }, { sim });
+      const b = tracedRank(rank)({ id: "b" }, { sim });
+      await b;
+      releaseA();
+      await a;
+      expect(console.warn).toBe(quiet);
+    } finally {
+      console.warn = warn;
+    }
+    const byRanking = new Map(lines(d).map((l) => [l.ranking, l.warnings]));
+    expect(byRanking.get("a")).toEqual(["from a"]);
+    expect(byRanking.get("b")).toEqual(["from b"]);
   });
 
   it("leaves a runner without computeStats without it", async () => {
