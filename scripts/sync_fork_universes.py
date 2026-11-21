@@ -76,14 +76,52 @@ ROW = re.compile(
 )
 
 
+# The fork's `.oxfmtrc.json`: `printWidth` 160, `tabWidth` 4 (a tab counts
+# as 4 columns when oxfmt measures a line).
+PRINT_WIDTH = 160
+TAB_WIDTH = 4
+
+
 def oxfmt_json(text: str) -> str:
     """`text` in the JSON layout oxfmt writes under the fork's `.oxfmtrc.json`
-    (`useTabs`) for the copies' shapes: tab indent, objects and arrays
-    expanded, non-ASCII kept, one trailing newline. oxfmt keeps an array on
-    one line when it fits, and writes a number such as `1e-5` as written where
-    this writes `1e-05`, so either would differ; no copy has one, and the
-    fork's oxfmt check in `scripts/check_fork_lint.py` would catch it."""
-    return json.dumps(json.loads(text), indent="\t", ensure_ascii=False) + "\n"
+    for the copies' shapes: tab indent, objects expanded, non-ASCII kept, one
+    trailing newline. An array of plain values goes on one line when that line,
+    with its key and trailing comma, fits in `PRINT_WIDTH`; otherwise one item
+    per line. Arrays of objects are always expanded, because their objects are.
+    Two known gaps, which no copy has and the fork's oxfmt check in
+    `scripts/check_fork_lint.py` would catch: oxfmt writes a number such as
+    `1e-5` as written where this writes `1e-05`, and it counts a wide (East
+    Asian) character as 2 columns where this counts 1."""
+    return _layout(json.loads(text), 0, 0, False) + "\n"
+
+
+def _layout(value: object, depth: int, prefix: int, comma: bool) -> str:
+    """`value` laid out at `depth` tabs, after `prefix` columns of key text on
+    its first line, followed by a comma when `comma`."""
+    inner = "\t" * (depth + 1)
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        items = list(value.items())
+        lines = []
+        for i, (key, item) in enumerate(items):
+            key_text = json.dumps(key, ensure_ascii=False) + ": "
+            last = i == len(items) - 1
+            lines.append(inner + key_text + _layout(item, depth + 1, len(key_text), not last) + ("" if last else ","))
+        return "{\n" + "\n".join(lines) + "\n" + "\t" * depth + "}"
+    if isinstance(value, list):
+        if not value:
+            return "[]"
+        if not any(isinstance(item, (dict, list)) for item in value):
+            flat = "[" + ", ".join(json.dumps(item, ensure_ascii=False) for item in value) + "]"
+            if depth * TAB_WIDTH + prefix + len(flat) + (1 if comma else 0) <= PRINT_WIDTH:
+                return flat
+        lines = [
+            inner + _layout(item, depth + 1, 0, i < len(value) - 1) + ("," if i < len(value) - 1 else "")
+            for i, item in enumerate(value)
+        ]
+        return "[\n" + "\n".join(lines) + "\n" + "\t" * depth + "]"
+    return json.dumps(value, ensure_ascii=False)
 
 
 def parse_provenance(text: str) -> dict[str, str]:

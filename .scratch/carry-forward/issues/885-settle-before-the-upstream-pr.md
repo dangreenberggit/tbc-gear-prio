@@ -169,5 +169,8 @@ Owner's reply: "Sure, yes (don't bring a fixture into the fork, we can leave it 
   name this repo's code, CLI, data file names or ticket 803 (they name wowsims presets instead), and `tier-exchange.json`'s
   `generatedBy` says in words what it is built from. The fork copies follow
   through `scripts/sync_fork_universes.py --write` (fork `94fc69429`).
+  Then, with the owner's approval, 17 notes that named the fork branch
+  `feat/upgrades-tab`, and feral's old `ui/<class>/` paths, now cite only
+  the current `ui/specs/...` files (fork `568d9f8fb`).
 
-Verified by: `pnpm run fork-lint:check` ("oxfmt clean over the 247 files changed since 24606be6bae2"), `pnpm run fork-tests:check`, `python scripts/check_sync_fork_universes.py` (9 checks) and `pnpm exec vitest run packages/core/test/fork-results-view-recording.test.ts packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/wowsims-fork-parity.test.ts` on tbc-new-fork@94fc694293dc134a78f0c83fea02827d8cbc7247, plus `python scripts/sync_fork_universes.py --check` and `python scripts/generate_fork_exchange.py --check` after the data notes; review in docs/reviews/chore-885-pre-pr-cleanup.md
+Verified by: `pnpm run fork-lint:check` ("oxfmt clean over the 247 files changed since 24606be6bae2"), `pnpm run fork-tests:check`, `python scripts/check_sync_fork_universes.py` (9 checks) and `pnpm exec vitest run packages/core/test/fork-results-view-recording.test.ts packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/wowsims-fork-parity.test.ts` on tbc-new-fork@568d9f8fb12742f18679a01557a8cb2e34da0575, plus `python scripts/sync_fork_universes.py --check` and `python scripts/generate_fork_exchange.py --check` after the data notes; review in docs/reviews/chore-885-pre-pr-cleanup.md

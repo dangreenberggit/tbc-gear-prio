@@ -94,17 +94,25 @@ def check_extra_json_fails_write() -> list[str]:
 
 
 # The shapes the copies have: nested objects, an array too long for one
-# 160-column line (as the ep-weights `notes` are), a float, non-ASCII text.
+# 160-column line, a float, non-ASCII text, and string arrays that fit on one
+# line (as most ep-weights `notes` do). oxfmt counts a tab as 4 columns and
+# the trailing comma: "f" fills exactly 160 columns and stays on one line,
+# "g" needs 161 and breaks (measured with the fork's oxfmt, 2026-11-20).
 LONG = "x" * 150
-SAMPLE = '{"a": {"b": ["%s", "\u00e9"]}, "c": 1.0}' % LONG
+FITS = "x" * 141
+OVER = "x" * 142
+SAMPLE = '{"a": {"b": ["%s", "\u00e9"]}, "f": ["a", "%s"], "g": ["a", "%s"], "c": 1.0}' % (LONG, FITS, OVER)
 SAMPLE_LAID_OUT = (
-    '{\n\t"a": {\n\t\t"b": [\n\t\t\t"%s",\n\t\t\t"\u00e9"\n\t\t]\n\t},\n\t"c": 1.0\n}\n' % LONG
+    '{\n\t"a": {\n\t\t"b": [\n\t\t\t"%s",\n\t\t\t"\u00e9"\n\t\t]\n\t},\n'
+    '\t"f": ["a", "%s"],\n'
+    '\t"g": [\n\t\t"a",\n\t\t"%s"\n\t],\n'
+    '\t"c": 1.0\n}\n' % (LONG, FITS, OVER)
 )
 
 
 def check_layout_is_tab_indented_json() -> list[str]:
-    """Tab indent, objects and long arrays expanded, non-ASCII kept, one
-    trailing newline."""
+    """Tab indent, objects and long arrays expanded, arrays that fit on one
+    line, non-ASCII kept, one trailing newline."""
     got = sfu.oxfmt_json(SAMPLE)
     if got != SAMPLE_LAID_OUT:
         return [f"oxfmt_json gave {got!r}, want {SAMPLE_LAID_OUT!r}"]
