@@ -50,6 +50,23 @@ def check_name_refuses_paths_and_odd_characters() -> list[str]:
     return problems
 
 
+def check_unpair_hint_is_the_plain_command() -> list[str]:
+    """The sandbox lets `pnpm wt:unpair *` out only as the plain command
+    text; `pnpm -C <folder> wt:unpair` stays inside and stops half-way on
+    the read-only .git/worktrees. So the hint names the folder separately."""
+    problems = []
+    main = Path("/home/u/tbc-gear-prio")
+    for force, want in ((False, "pnpm wt:unpair probe"), (True, "pnpm wt:unpair probe --force")):
+        got = wp.unpair_hint(main, "probe", force=force)
+        if not got.startswith(f"`{want}`"):
+            problems.append(f"unpair_hint must start with `{want}`, got {got!r}")
+        if "-C" in got or "cd " in got:
+            problems.append(f"unpair_hint must not change folder in the command, got {got!r}")
+        if main.as_posix() not in got:
+            problems.append(f"unpair_hint must name the main folder, got {got!r}")
+    return problems
+
+
 def check_target_length_budget() -> list[str]:
     """The deepest file a pair holds sits 196 characters below its root
     (measured 2026-10-10 with the command in the comment above
@@ -703,6 +720,7 @@ CHECKS = (
     check_unpair_mark_round_trip,
     check_processes_using_the_pair_are_found,
     check_locked_file_is_named_and_rerun_is_offered,
+    check_unpair_hint_is_the_plain_command,
 )
 
 
