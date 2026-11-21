@@ -28,9 +28,12 @@
  * skip when `forkPresent` is false.
  */
 
-import { existsSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { createHash } from "node:crypto";
+import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+
+import { expect } from "vitest";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -169,4 +172,87 @@ export function zeroHitStats(): Promise<{
     stats: [],
     pseudoStats: new Array<number>(25).fill(0),
   });
+}
+
+/** The sim methods `tracedRank` records; the rest of the runner passes through. */
+const TRACED_SIM_METHODS = new Set(["run", "computeStats", "activeSetBonuses"]);
+
+/** `JSON.stringify` that keeps bigints, which some proto fields hold. */
+function stableJson(value: unknown): string {
+  return JSON.stringify(value, (_key, v: unknown) =>
+    typeof v === "bigint" ? `${v}n` : v
+  );
+}
+
+const traceCalls = new Map<string, number>();
+
+/**
+ * `rank` itself unless `TBC_RANK_TRACE_DIR` is set. When it is, the returned
+ * function records one JSON line per call in `<dir>/<test file>.jsonl`: the
+ * test's name, its call number within that test, the ranking or the error,
+ * each sim call in the order it was sent (method and a sha256 of request plus
+ * options), and the first argument of each `console.warn`. The readability
+ * refactor's K2 check diffs these files between chunks
+ * (`.scratch/agent-reports/2026-11-21-design-task-upgrades-readability-plan.md`
+ * § Checks). The recorders return the runner's own promise, so the trace adds
+ * no await and cannot change the order of sims. Empty the directory before a
+ * run: lines are appended.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- any engine's rankUpgrades, typed by its caller
+export function tracedRank<F extends (...args: any[]) => Promise<unknown>>(
+  rank: F
+): F {
+  const dir = process.env.TBC_RANK_TRACE_DIR;
+  if (!dir) return rank;
+  const traced = async (
+    input: unknown,
+    deps: { sim: object },
+    ...rest: unknown[]
+  ): Promise<unknown> => {
+    const state = expect.getState();
+    const test = state.currentTestName ?? "(outside a test)";
+    const call = (traceCalls.get(test) ?? 0) + 1;
+    traceCalls.set(test, call);
+    const sims: Array<[string, string]> = [];
+    const warnings: unknown[] = [];
+    const sim = new Proxy(deps.sim, {
+      get(target, prop, receiver) {
+        const value: unknown = Reflect.get(target, prop, receiver);
+        if (typeof prop !== "string" || !TRACED_SIM_METHODS.has(prop)) {
+          return typeof value === "function" ? value.bind(target) : value;
+        }
+        if (typeof value !== "function") return value;
+        return (...args: unknown[]): unknown => {
+          const hash = createHash("sha256")
+            .update(stableJson(args))
+            .digest("hex");
+          sims.push([prop, hash]);
+          return (value as (...a: unknown[]) => unknown).apply(target, args);
+        };
+      },
+    });
+    const warn = console.warn;
+    console.warn = (...args: unknown[]) => {
+      warnings.push(args[0]);
+      warn(...args);
+    };
+    const line: Record<string, unknown> = { test, call };
+    try {
+      const ranking = await rank(input, { ...deps, sim }, ...rest);
+      line.ranking = ranking;
+      return ranking;
+    } catch (err) {
+      const e = err as { name?: unknown; message?: unknown; code?: unknown };
+      line.error = { name: e?.name, message: e?.message, code: e?.code };
+      throw err;
+    } finally {
+      console.warn = warn;
+      line.sims = sims;
+      line.warnings = warnings;
+      mkdirSync(dir, { recursive: true });
+      const file = basename(state.testPath ?? "unknown-test-file");
+      appendFileSync(join(dir, `${file}.jsonl`), `${stableJson(line)}\n`);
+    }
+  };
+  return traced as F;
 }

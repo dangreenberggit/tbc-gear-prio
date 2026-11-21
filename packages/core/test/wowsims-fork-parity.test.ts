@@ -66,6 +66,7 @@ import {
 } from "../src/seams/sim-runner.js";
 import { MemoryStore } from "../src/seams/store.js";
 import { mapWclGearToSim, SIM_ORDER, type WclGearEntry } from "../src/slots.js";
+import { tracedRank } from "./fork-engine-harness.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const forkRoot = join(root, "vendor/tbc-new-fork");
@@ -897,7 +898,7 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
         gemContext: forkCandidateGems.gemContext,
         gemsForPhase: forkGems.gemsForPhase,
         SIM_ORDER: forkSlots.SIM_ORDER,
-        rankUpgrades: forkRank.rankUpgrades,
+        rankUpgrades: tracedRank(forkRank.rankUpgrades),
         RecordedGearSource: forkGearSource.RecordedGearSource,
         // The fork's runner must read stats (ticket 830). A 0% hit read
         // gives ret its whole hit cap as budget, so the fork's repairs value

@@ -30,6 +30,7 @@ import {
   forkUpgradesDir,
   importForkUpgrades,
   statsOnlyItemEp,
+  tracedRank,
   zeroHitStats,
 } from "./fork-engine-harness.js";
 
@@ -807,7 +808,7 @@ async function recordRun(
   };
 
   const events: RecordedEvent[] = [];
-  await rankMod.rankUpgrades(
+  await tracedRank(rankMod.rankUpgrades)(
     {
       character: FERAL_CHAR,
       spec: "feral",

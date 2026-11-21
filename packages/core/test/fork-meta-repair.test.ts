@@ -29,6 +29,7 @@ import {
   forkUpgradesDir,
   importForkUpgrades,
   statsOnlyItemEp,
+  tracedRank,
 } from "./fork-engine-harness.js";
 import {
   bruteForceBestValue,
@@ -1280,7 +1281,7 @@ async function runSpec(o: SpecRun) {
     };
   }
 
-  const ranking = await rankMod.rankUpgrades(
+  const ranking = await tracedRank(rankMod.rankUpgrades)(
     {
       character: RET_CHAR,
       spec,
