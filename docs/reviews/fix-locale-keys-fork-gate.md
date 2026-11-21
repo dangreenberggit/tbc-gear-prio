@@ -27,7 +27,9 @@ and close the gate gap that let the failure through.
   upstream's `test-locales.mjs`. Upstream CI runs both
   (`.github/workflows/run_tests.yml` in the fork). The lock moves to
   `d94930daa` and `data/sim-implemented-effects.json` follows. Ticket 432
-  (locale check not in verify) closes with it.
+  (locale check not in verify) closes with it. So does ticket 866, which
+  recorded this same `locale_keys.test.ts` failure on 2026-11-09; it closes by
+  the fork fix, with upstream's test unchanged (`pnpm merge-ready` named it).
 
 ## Review
 

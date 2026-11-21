@@ -1,4 +1,5 @@
-Status: open
+Status: closed
+Verified by: tbc-new-fork@d94930daa; `node node_modules/vitest/vitest.mjs run ui/i18n/locale_keys.test.ts` in the fork (2 passed); docs/reviews/fix-locale-keys-fork-gate.md
 Serves: none (general wowsims fix, not part of the Upgrades tab; owner 2026-11-12)
 Type: bug
 Origin: wowsims catch-up to v0.0.155, 2026-11-09 (fork unit-test baseline at `3055fa71a`)
@@ -92,3 +93,15 @@ passes `count`, so a call without `count` to a key that exists only in plural
 forms would pass the test and show the raw key. No such call exists today.
 Source: `.scratch/agent-reports/2026-11-12-general-task-866-locale-plural-test.md`
 § Addendum: stricter diff (main checkout, gitignored).
+
+## Closed 2026-11-20 — fixed in our files, not in upstream's test
+
+Fork commit `d94930daa` (branch `fix/upgrades-locale-plurals`, merged into
+`feat/upgrades-tab-react`) drops the plural keys. `BelowCutoffGroup` now picks
+a `_singular` or `_count` key in code, as upstream's
+`ui/features/bulk/components/BulkSettings/CombinationsCount.tsx:34-36` does,
+so upstream's `locale_keys.test.ts` passes unchanged. The test still fails
+on a key with no entry: on `c2a0d88c3` it failed on the two old keys. The
+diff above is no longer needed. `fork-tests:check` now runs the fork's whole
+unit suite, so a test like this one fails `pnpm verify`
+(`docs/reviews/fix-locale-keys-fork-gate.md`).
