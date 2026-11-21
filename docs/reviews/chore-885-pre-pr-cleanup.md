@@ -215,19 +215,21 @@ generator writes identical bytes on two runs (`cmp`).
 | R6  | Follow-up   | fixed       | The owner approved the rewording; done in N2.                                                                                                                                                                                                                                                                                                                                                |
 | R7  | Follow-up   | fixed       | The hunter and warrior notes say "strictly more talent points than each other tree".                                                                                                                                                                                                                                                                                                         |
 | N2  | Follow-up   | fixed       | Owner-approved (R6). Fork `568d9f8fb`: 17 notes that named the fork branch `feat/upgrades-tab`, and feral's note with old `ui/<class>/` paths, now cite the current `ui/specs/...` files and lines; edited in the `data/` sources, `sync_fork_universes.py --check` byte-matches all 22. `oxfmt_json` now keeps short arrays on one line, as oxfmt does; its new sample cases failed before. |
+| X1  | Follow-up   | fixed       | Owner's ruling "Remove it" (ticket 885 § Iterations ruling). Fork `c2a0d88c3` removes the warning from `300e10e4b`, `294c57a84` and `16edf6320` with its tests; the four files match `300e10e4b^` (`git diff 300e10e4b^ c2a0d88c3` over them is empty).                                                                                                                                      |
+| X2  | Follow-up   | fixed       | Removal reviewer's R1: ticket 885 keeps the owner-approved proposal word for word and notes after it that the later ruling replaces the iterations item.                                                                                                                                                                                                                                     |
 
 ## Notes
 
 - Ticket 578 (every tab file must pass wowsims' `oxfmt . --check`) is
   closed too: its done-when is met at fork `dadfad891` with `.oxfmtrc.json`
   unchanged.
-- The warning first showed nothing in the downloaded sim. Fork `16edf6320`
-  makes it show there above 10,000,000 with the same text, as the Bulk tab
-  does, under the owner's standing ruling "match wowsims, don't invent"
-  (rows W1 and N1 below). With the total reading, a default run (3,000
-  iterations) shows the warning on the web sim once more than 332
-  candidates are eligible, and in the downloaded sim once more than 3,332
-  are.
+- The iterations warning is removed (row X1). Every DPS spec's default run
+  was over the web sim's limit, and the owner ruled "Remove it" (ticket
+  885 § Iterations ruling). Rows A1, D1, S1 and W1 record the warning as it
+  was built and fixed before that. One fresh Opus reviewer checked only the
+  removal (`.scratch/agent-reports/2026-11-20-general-task-review-warning-removal-885.md`
+  in the pair): nothing left behind, nothing else changed, one minor finding
+  (row X2).
 - `tools/` and the fixture dev path stay on the fork branch, because
   removing them now breaks `pnpm equip-eligibility:check` (a `verify` step),
   the layout gate, `pnpm tab-review` and `pnpm tab-fixtures:smoke`. Ticket

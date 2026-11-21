@@ -111,6 +111,19 @@ The coordinator proposed, per item:
 
 Owner's reply: "Sure, yes (don't bring a fixture into the fork, we can leave it in the parent repo)".
 
+The owner's later iterations ruling, below, replaces the last item: no warning.
+
+### Iterations ruling (owner, 2026-11-20, later)
+
+The warning was built, then measured: at the default 3,000 iterations every
+DPS spec's default run is over the web sim's 1,000,000 (the table is in the
+pair's `.scratch/agent-reports/2026-11-20-general-task-default-run-candidates.md`).
+The coordinator asked: "Raise the limit or remove the warning?", with 10
+times the Bulk limit or removal as the options. The owner answered:
+"Remove it". Earlier the owner had said: "A lot of sims is expected and
+honestly I get the default iteration count for our tab sim is pretty low and
+on the iffy side ... so players may often opt for a higher count".
+
 ## What was done (branch `chore/885-pre-pr-cleanup`, fork branch of the same name)
 
 - **Text.** The two `DegenerateSeedsError` messages and the imbue assumption
@@ -152,18 +165,10 @@ Owner's reply: "Sure, yes (don't bring a fixture into the fork, we can leave it 
 - **Review fixes.** The last ticket number in shipping code, a `set-screen.ts`
   comment, is gone, and a pool test comment names its two policies (fork
   `dadfad891`). Review: `docs/reviews/chore-885-pre-pr-cleanup.md`.
-- **Iterations.** No cap. When the run's iterations in all (the baseline
-  plus each eligible candidate, under the candidate cap, times the
-  iterations per sim) pass the Bulk tab's limit for the host (1,000,000 on
-  the web sim, 10,000,000 in the downloaded sim), the field shows the
-  Bulk tab's own warning, as the Bulk tab weighs a batch's combinations
-  times its iterations; built from wowsims' pieces
-  (`bulkIterationsLimit`, the
-  `bulk_tab.warning.iterations_limit` text and `CombinationsCount.tsx:28-54`'s
-  icon and tooltip); it never blocks the run (fork `300e10e4b`, weighed in all after
-  review in `294c57a84`). The downloaded sim's limit was added after the
-  owner's standing ruling "match wowsims, don't invent"; at first the tab
-  showed nothing there.
+- **Iterations.** No cap and no warning, per the iterations ruling above.
+  The warning (fork `300e10e4b`, `294c57a84`, `16edf6320`) is removed with
+  its tests, and `RunControls`, `RunSettingsPanel` and their tests are back
+  as they were before `300e10e4b`.
 - **Data notes.** The `notes` of seven ep-weights sources (feral p1,
   hunter fallback and SV p1, warrior fallback, p2 and Arms p3) no longer
   name this repo's code, CLI, data file names or ticket 803 (they name wowsims presets instead), and `tier-exchange.json`'s
