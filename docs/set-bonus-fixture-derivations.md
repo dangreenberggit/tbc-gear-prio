@@ -26,6 +26,15 @@ The fixture tests in `packages/core/test/fork-set-net.test.ts` passed at the
 reported 95 tests passed), and pass at the ticket 623 gate (2026-11-12, fork `adf591743`: the same
 command reported 120 tests passed).
 
+**Removed options, 2026-11-20 (ticket 885).** The fork no longer has the
+set screen's record mode, the partner rules other than close-calls (and
+`Deps.partnerRule`), the partner audit, the split credit view or the
+full-path credit rule; only these tests reached them. The sections below
+that derive cases for them are history. 511-SZ and 511-SF were deleted;
+511-SR, 511-PR, case 9, 490-B and 502-B now check the tab's options (screen
+on, close-calls, the full view at the highest-credit bonus); 511-SH compares
+three hashes (unset, "off", "on").
+
 The suite is fork-gated and CI skips it (`docs/agents/known-traps.md`). To
 run it locally with the fork clone present:
 
@@ -883,6 +892,10 @@ Concentration 462 rings 19893 and 19905, own value 100, model 2pc 40.
 
 ## The set screen in record mode
 
+Record mode was removed on 2026-11-20 (ticket 885); this section is
+history. 511-SR now runs with the screen on and keeps its store-key
+checks; 511-SZ and 511-SF are gone.
+
 These are the K5R cases of the same plan. With the flag and
 `Deps.setScreen` "record", the engine runs the screen after the worn-set
 ladder and before the package loop, records `Ranking.setScreen`, and
@@ -1164,7 +1177,8 @@ everything 511-SA compares is equal. 2 screen sims.
 before K5R. "on" adds `"setScreen":"on"`; on the store of an unset run it
 is not served the cached ranking, and it sends exactly its 2 screen sims
 (new `:all` keys at N = 300); every other sim comes from the store.
-Unset, "off", "record" and "on" give four different hashes.
+Unset, "off" and "on" give three different hashes ("record" gave a
+fourth until ticket 885 removed it).
 
 ## The popover's steps (K6)
 

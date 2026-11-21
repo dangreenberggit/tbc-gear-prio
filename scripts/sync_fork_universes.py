@@ -22,11 +22,18 @@ declared verbatim, and a byte check also catches a reformat or an encoding
 change that a parsed comparison would call equal while the bundle shipped
 different bytes.
 
-  --check   exit 1 naming every drifted file and its per-file delta, and
-            every JSON file in the fork's data folder that data.md does not
-            list.
-  --write   copy each source over its fork counterpart; still exit 1 when
-            an unlisted JSON file is present, since a copy cannot fix that.
+Both sides are kept in the fork formatter's JSON layout (`oxfmt_json`), so the
+copies pass upstream's `oxfmt --check` and stay byte-equal to their sources
+(ticket 885: the owner chose this over an ignore entry in the fork's
+`.oxfmtrc.json`). `scripts/check_fork_lint.py` runs oxfmt itself on the fork,
+which catches a source whose shape `oxfmt_json` lays out differently.
+
+  --check   exit 1 naming every drifted file and its per-file delta, every
+            source not in oxfmt's layout, and every JSON file in the fork's
+            data folder that data.md does not list.
+  --write   rewrite each source in oxfmt's layout, then copy it over its
+            fork counterpart; still exit 1 when an unlisted JSON file is
+            present, since a copy cannot fix that.
 
 Skips cleanly (exit 0, with a message) when `vendor/tbc-new-fork` is absent.
 The clone is gitignored and is NOT restored in CI, so absence is an ordinary
@@ -67,6 +74,54 @@ ROW = re.compile(
     r"^\|\s*`([\w.-]+\.json)`\s*\|\s*`(data/[\w./-]+\.json)`\s*\|\s*$",
     re.MULTILINE,
 )
+
+
+# The fork's `.oxfmtrc.json`: `printWidth` 160, `tabWidth` 4 (a tab counts
+# as 4 columns when oxfmt measures a line).
+PRINT_WIDTH = 160
+TAB_WIDTH = 4
+
+
+def oxfmt_json(text: str) -> str:
+    """`text` in the JSON layout oxfmt writes under the fork's `.oxfmtrc.json`
+    for the copies' shapes: tab indent, objects expanded, non-ASCII kept, one
+    trailing newline. An array of plain values goes on one line when that line,
+    with its key and trailing comma, fits in `PRINT_WIDTH`; otherwise one item
+    per line. Arrays of objects are always expanded, because their objects are.
+    Two known gaps, which no copy has and the fork's oxfmt check in
+    `scripts/check_fork_lint.py` would catch: oxfmt writes a number such as
+    `1e-5` as written where this writes `1e-05`, and it counts a wide (East
+    Asian) character as 2 columns where this counts 1."""
+    return _layout(json.loads(text), 0, 0, False) + "\n"
+
+
+def _layout(value: object, depth: int, prefix: int, comma: bool) -> str:
+    """`value` laid out at `depth` tabs, after `prefix` columns of key text on
+    its first line, followed by a comma when `comma`."""
+    inner = "\t" * (depth + 1)
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        items = list(value.items())
+        lines = []
+        for i, (key, item) in enumerate(items):
+            key_text = json.dumps(key, ensure_ascii=False) + ": "
+            last = i == len(items) - 1
+            lines.append(inner + key_text + _layout(item, depth + 1, len(key_text), not last) + ("" if last else ","))
+        return "{\n" + "\n".join(lines) + "\n" + "\t" * depth + "}"
+    if isinstance(value, list):
+        if not value:
+            return "[]"
+        if not any(isinstance(item, (dict, list)) for item in value):
+            flat = "[" + ", ".join(json.dumps(item, ensure_ascii=False) for item in value) + "]"
+            if depth * TAB_WIDTH + prefix + len(flat) + (1 if comma else 0) <= PRINT_WIDTH:
+                return flat
+        lines = [
+            inner + _layout(item, depth + 1, 0, i < len(value) - 1) + ("," if i < len(value) - 1 else "")
+            for i, item in enumerate(value)
+        ]
+        return "[\n" + "\n".join(lines) + "\n" + "\t" * depth + "]"
+    return json.dumps(value, ensure_ascii=False)
 
 
 def parse_provenance(text: str) -> dict[str, str]:
@@ -140,10 +195,28 @@ def run(write: bool, *, root: Path, data_dir: Path, provenance_md: Path) -> int:
         )
         return 1
 
+    # Every source is read and laid out before anything is written, so a
+    # source that does not parse stops --write with nothing changed. Bytes are
+    # decoded as they are, without newline translation, so a CRLF source reads
+    # as out of layout: oxfmt rejects CRLF.
+    laid_by_source: dict[str, tuple[str, str]] = {}
+    for source_rel in sorted(set(mapping.values())):
+        source = root / source_rel
+        if not source.is_file():
+            continue
+        text = source.read_bytes().decode("utf-8")
+        try:
+            laid_by_source[source_rel] = (text, oxfmt_json(text))
+        except json.JSONDecodeError as exc:
+            print(f"  could not parse {source_rel}: {exc}", file=sys.stderr)
+            return 2
+
     missing_source: list[str] = []
     drifted: list[tuple[str, str, str]] = []
+    out_of_layout: list[str] = []
     same: list[str] = []
     written: list[str] = []
+    laid_out: list[str] = []
 
     for copy_name, source_rel in sorted(mapping.items()):
         source = root / source_rel
@@ -151,6 +224,14 @@ def run(write: bool, *, root: Path, data_dir: Path, provenance_md: Path) -> int:
         if not source.is_file():
             missing_source.append(f"{copy_name} <- {source_rel}")
             continue
+        text, laid = laid_by_source[source_rel]
+        if laid != text:
+            if write:
+                with source.open("w", encoding="utf-8", newline="\n") as handle:
+                    handle.write(laid)
+                laid_out.append(source_rel)
+            else:
+                out_of_layout.append(source_rel)
         if copy.is_file() and source.read_bytes() == copy.read_bytes():
             same.append(copy_name)
             continue
@@ -171,6 +252,8 @@ def run(write: bool, *, root: Path, data_dir: Path, provenance_md: Path) -> int:
     unlisted = unlisted_json(data_dir, mapping)
 
     if write:
+        for line in laid_out:
+            print(f"  laid out: {line}")
         for line in written:
             print(f"  wrote: {line}")
         print(
@@ -182,7 +265,7 @@ def run(write: bool, *, root: Path, data_dir: Path, provenance_md: Path) -> int:
             return 1
         return 0
 
-    if not drifted and not missing_source and not unlisted:
+    if not drifted and not missing_source and not unlisted and not out_of_layout:
         print(
             f"fork data copies check ok: {len(same)} bundled copies byte-match "
             "their data/ sources; no unlisted JSON"
@@ -197,6 +280,17 @@ def run(write: bool, *, root: Path, data_dir: Path, provenance_md: Path) -> int:
         )
     for copy_name, source_rel, delta in drifted:
         print(f"  drifted: {copy_name} vs {source_rel}\n    {delta}", file=sys.stderr)
+    for source_rel in out_of_layout:
+        print(f"  not in oxfmt's layout: {source_rel}", file=sys.stderr)
+    if out_of_layout:
+        print(
+            f"\n{len(out_of_layout)} source(s) are not in the fork formatter's "
+            "JSON layout, so their copies would fail upstream's `oxfmt --check`. "
+            "Lay out both sides with:\n"
+            "\n"
+            f"    python \"{root.as_posix()}/scripts/sync_fork_universes.py\" --write\n",
+            file=sys.stderr,
+        )
     if drifted or missing_source:
         print(
             f"\n{len(drifted)} of {len(mapping)} bundled copies no longer match "

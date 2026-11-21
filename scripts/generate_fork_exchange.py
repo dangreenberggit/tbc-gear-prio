@@ -37,6 +37,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from assemble_universe import sunmote_upgrade_pairs  # noqa: E402
+from sync_fork_universes import oxfmt_json  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 TWO_HOP = ROOT / "data/two-hop"
@@ -83,11 +84,13 @@ def build() -> str:
     db_by_id = {int(item["id"]): item for item in db["items"]}
     doc = {
         "kind": "tier-exchange",
-        "generatedBy": "scripts/generate_fork_exchange.py",
+        "generatedBy": "Built from AtlasLoot's tier token and Sunmote upgrade tables, checked against wowsims' item database; do not edit by hand.",
         "tokens": token_rows(token_maps),
         "sunmote": sunmote_upgrade_pairs(load(SUNMOTE_PAIRS), db_by_id),
     }
-    return json.dumps(doc, indent=2, ensure_ascii=False) + "\n"
+    # In the fork formatter's layout, because the sync copies it into the fork
+    # byte for byte and upstream CI runs `oxfmt --check` there.
+    return oxfmt_json(json.dumps(doc, ensure_ascii=False))
 
 
 def main() -> int:

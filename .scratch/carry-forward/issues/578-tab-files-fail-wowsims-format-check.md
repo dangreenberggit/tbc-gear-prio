@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task
 Origin: stage-gate cleanup-upstream-footprint, Gate B row R4-1 and owner ruling of 2026-10-08T22:16Z (`.scratch/stage-gate/cleanup-upstream-footprint/decision-log.md`; gitignored, owner's checkout)
 Blocks: none
@@ -68,3 +68,13 @@ EP-weight copies and the new `tier-exchange.json`, written by
 ```
 cd vendor/tbc-new-fork && node node_modules/oxfmt/bin/oxfmt --check .   # rc 1, "Format issues found in above 57 files"
 ```
+
+2026-11-20 (ticket 885, branch `chore/885-pre-pr-cleanup`): done. The ported
+engine files were formatted in ticket 344's pass (fork `5d688dd2a`); the 22
+`model/data/*.json` copies moved to oxfmt's layout on both sides through the
+sync script (fork `a46cb03fd`), as the owner ruled in ticket 885.
+`.oxfmtrc.json` is unchanged since `branchedFrom`
+(`git diff --stat 24606be6bae2 HEAD -- .oxfmtrc.json` is empty), and
+`pnpm run fork-lint:check` now runs oxfmt over every file the fork changed.
+
+Verified by: `node node_modules/oxfmt/bin/oxfmt --check .` in the fork ("All matched files use the correct format", 1512 files, rc 0) and `node --version; pnpm verify` ("gates: 1744 ran, 0 skipped", rc 0) on tbc-new-fork@dadfad891b40a1832245cf47c32d2500057deaa4; review in docs/reviews/chore-885-pre-pr-cleanup.md
