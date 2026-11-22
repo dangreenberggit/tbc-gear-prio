@@ -901,7 +901,7 @@ describe.skipIf(!forkPresent || !moduleExists())(
           (p) =>
             p.row as { belowCutoff?: boolean; simmed?: boolean; owned?: true }
         );
-    /** Rows replication can re-sim: rank.ts `replicateTopItems`' filter. */
+    /** Rows replication can re-sim: rank-replication.ts `replicateTopItems`' filter. */
     const replicableRowCount = (from: RecordedEvent[]) =>
       landedRows(from).filter(
         (r) => r.belowCutoff === false && r.simmed !== false

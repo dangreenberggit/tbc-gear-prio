@@ -1324,7 +1324,7 @@ more sim per distinct bonus-off request; no other literal moves.
 
 ## Ticket 536: own-swap breaks on rows with no setContext
 
-`singleSwapBreaks` (fork `engine/view.ts`) lists the worn bonuses one row's
+`ownSwapBreaks` (fork `engine/set-potential.ts`) lists the worn bonuses one row's
 own swap breaks, for a row with no `setContext`. Its counts come from
 `brokenSetBonuses`: the item in the swapped slot, and each `removedItems`
 slot, is displaced; the row's own item adds a piece of its set. A lost
