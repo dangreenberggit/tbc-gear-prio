@@ -50,7 +50,7 @@ const GENERATOR = "packages/core/test/tab-fixtures/make-mock-fixtures.ts";
 // Local types for the fork-only fields the tab reads. packages/core's
 // `Ranking` cannot express them, and the fork's own type cannot be imported
 // here (CI has no fork). Source: the fork's `RankedItem`, `SetContext` and
-// `Ranking` types in `ui/features/upgrades/model/engine/rank.ts`, plus the
+// `Ranking` types in `ui/features/upgrades/model/engine/rank-types.ts`, plus the
 // `durationMs` that `ui/features/upgrades/model/run.ts` adds to the ranking;
 // precedent: `packages/core/test/feral-rank-fixture.ts:60-85`.
 type MockSource =

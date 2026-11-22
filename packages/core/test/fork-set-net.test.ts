@@ -30,6 +30,7 @@ import {
   forkPresent,
   importForkUpgrades,
   statsOnlyItemEp,
+  tracedRank,
   zeroHitStats,
 } from "./fork-engine-harness.js";
 
@@ -642,7 +643,7 @@ async function runScenario(scenario: Scenario): Promise<{
     candidateCap: 100,
   };
 
-  const ranking = await rankMod.rankUpgrades(input, {
+  const ranking = await tracedRank(rankMod.rankUpgrades)(input, {
     gear: gearSource,
     sim,
     store: scenario.store ?? new storeMod.MemoryStore(),
