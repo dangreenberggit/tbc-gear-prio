@@ -299,7 +299,10 @@ const FIXTURES: Array<{ name: string; identityRows: number }> = [
 describe.skipIf(!forkPresent)("set potential on tab fixtures (502)", () => {
   for (const { name, identityRows } of FIXTURES) {
     it(name, async () => {
-      const view = await importForkUpgrades<ViewMod>("engine/view.ts");
+      const view = {
+        ...(await importForkUpgrades<ViewMod>("engine/view.ts")),
+        ...(await importForkUpgrades<ViewMod>("engine/set-potential.ts")),
+      };
       const { setBonusNoiseFloorDps } =
         await importForkUpgrades<CutoffMod>("engine/cutoff.ts");
       const ranking = load(name);
@@ -471,8 +474,9 @@ const byNameThenCount = (a: [string, number], b: [string, number]) =>
 
 describe.skipIf(!forkPresent)("own-swap breaks on tab fixtures (536)", () => {
   it("536-X: the render-time rule reproduces the engine's breaks on every fixture row", async () => {
-    const { ownSwapBreaks } =
-      await importForkUpgrades<SwapBreaksMod>("engine/view.ts");
+    const { ownSwapBreaks } = await importForkUpgrades<SwapBreaksMod>(
+      "engine/set-potential.ts"
+    );
     const { SIM_ORDER } = await importForkUpgrades<SlotsMod>("engine/slots.ts");
 
     for (const { name } of FIXTURES) {

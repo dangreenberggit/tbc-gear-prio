@@ -837,7 +837,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
         item: { setContext?: unknown },
         cutoff: { absDps: number }
       ) => number;
-    }>("engine/view.ts");
+    }>("engine/set-potential.ts");
     // Malorne 2pc worn in hands+legs, Thunderheart pool in those slots, and
     // NO neutral candidate. Before ticket 512 the vacate had nothing to
     // vacate to and B was unmeasured; the ladder needs no replacement.
@@ -953,7 +953,7 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit (467)", () => {
         item: { setContext?: unknown },
         cutoff: { absDps: number }
       ) => number;
-    }>("engine/view.ts");
+    }>("engine/set-potential.ts");
     const { rankableSetPotential } = viewMod;
     const floor = { absDps: 5 };
 
@@ -1031,7 +1031,18 @@ type ViewMod = {
 };
 
 async function viewModule(): Promise<ViewMod> {
-  return importForkUpgrades<ViewMod>("engine/view.ts");
+  return importForkUpgrades<ViewMod>("engine/set-potential.ts");
+}
+
+/**
+ * `applyView` (view.ts) and the set-potential credit it sorts by
+ * (set-potential.ts), as one object, for tests that read both.
+ */
+async function viewWithSetPotential<T>(): Promise<T> {
+  return {
+    ...(await importForkUpgrades<object>("engine/view.ts")),
+    ...(await importForkUpgrades<object>("engine/set-potential.ts")),
+  } as T;
 }
 
 /** Runs a scenario with the B flag off and on, for the sim-count invariant. */
@@ -1447,7 +1458,7 @@ const TH2_BREAK = { setId: 676, threshold: 2, dps: 50 };
 
 describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
   it("490-A: a Malorne head/shoulder/chest row is not charged the Thunderheart 2pc its 2pc does not need", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     const { off, on } = await runMalorneOverThunderheart2pc({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 0 },
@@ -1514,7 +1525,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
   });
 
   it("490-B: a real 4pc worth less than the break it needs", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     const { on } = await runMalorneOverThunderheart2pc({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 30 },
@@ -1558,7 +1569,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
   });
 
   it("491-P: setCreditUnmeasured covers future breaks and commit breaks", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     const first = {
       futureBonuses: [{ threshold: 4, piecesNeeded: 4, dps: 80 }],
       commitBreaks: [{ setId: 640, threshold: 2 }],
@@ -1590,7 +1601,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
   });
 
   it("491-L: the tab's sub-line choice follows the view's zero rule", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     const first = {
       futureBonuses: [{ threshold: 4, piecesNeeded: 4, dps: 80 }],
       commitBreaks: [{ setId: 640, threshold: 2 }],
@@ -1655,7 +1666,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
 
 describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
   it("492-J: a pair that breaks a worn set only together is not used for B2", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     const { off, on } = await runOffOn({
       worn: wornGear({
         hands: THUNDERHEART.hands,
@@ -1716,7 +1727,7 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
   });
 
   it("492-N: with no break-free pair the worn-1 4pc net stays unset; the bonus-gear rule credits the rows from their bonus gear", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     const { ranking: r } = await runScenario({
       worn: wornGear({
         hands: THUNDERHEART.hands,
@@ -1765,7 +1776,7 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
   });
 
   it("476-D: a failed ladder sim leaves that break unmeasured and the row not counted", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     // 476-A's worn Malorne 4 with the model sim failing on the one ladder
     // rung that sends the Malorne hands as a set-kept copy: R(4). Before
     // ticket 512 this case pinned the vacate's dependent-unmeasured rule;
@@ -1962,7 +1973,7 @@ const piece = (itemId: number, name: string, dps?: number) => ({
 
 describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
   it("502-A: a package member's ON figure equals the measured package delta", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     const { on } = await runMalorneOverThunderheart2pc({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 30 },
@@ -1981,7 +1992,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
   });
 
   it("502-B: an increment whose bonus floors to 0 is never the credited bonus, but its pieces still count", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     const allFloored = {
       setContext: {
         futureBonuses: [
@@ -2090,7 +2101,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
   });
 
   it("502-D: the terms are itemized by increment, add up to the credit and end at the credited bonus", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     const M = "Malorne Harness";
     const ctx = (bDps: number) => ({
       setName: "Thunderheart Harness",
@@ -2177,7 +2188,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
   });
 
   it("502-E: a piece without a figure zeroes the credit; a future with no pieces field is credited as before", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     const noFigure = {
       futureBonuses: [
         { threshold: 4, piecesNeeded: 4, dps: 80, pieces: [piece(1, "A")] },
@@ -2203,7 +2214,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
   });
 
   it("502-F: with Set potential off, set rows sort on deltaDps alone", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     const { on } = await runMalorneOverThunderheart2pc({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 30 },
@@ -2222,7 +2233,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
     // hands piece's own stats (its single, −2) hold the loss. The bonus is
     // worth 2, below the 3 DPS bar; it was 4 while the check's floor was
     // √2 × 3 (ticket 623).
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineMod>();
     const { on } = await runMalorneOverThunderheart2pc({
       676: { b2: 2, b4: B4_TH },
       640: { b2: 40, b4: 30 },
@@ -2668,8 +2679,9 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
     // K5 (bonus-gear rule): the credited bonus is the 4pc, and its term names the
     // Wastewalker bonuses its gear loses. ON = model(credited gear) − model(G):
     // four Malorne pieces 400 + 40 + 70 and no Wastewalker, 3510 − 3050.
-    const bonusGearView =
-      await importForkUpgrades<BonusGearViewMod>("engine/view.ts");
+    const bonusGearView = await importForkUpgrades<BonusGearViewMod>(
+      "engine/set-potential.ts"
+    );
     const outcomes = bonusGearView
       .setPotentialTerms(mantle.setContext, FLOOR)
       .terms.filter((t) => t.kind === "outcome");
@@ -2918,7 +2930,7 @@ type BonusGearViewMod = ViewMod & {
 };
 
 async function bonusGearView(): Promise<BonusGearViewMod> {
-  return importForkUpgrades<BonusGearViewMod>("engine/view.ts");
+  return importForkUpgrades<BonusGearViewMod>("engine/set-potential.ts");
 }
 
 /** The `"outcome"` terms of a bonus-gear ranking's row, in count order. */
@@ -5320,7 +5332,8 @@ type SwapBreaksMod = {
 describe.skipIf(!forkPresent)(
   "own-swap breaks on rows without a setContext (536)",
   () => {
-    const view = () => importForkUpgrades<SwapBreaksMod>("engine/view.ts");
+    const view = () =>
+      importForkUpgrades<SwapBreaksMod>("engine/set-potential.ts");
     // Derivations: docs/set-bonus-fixture-derivations.md § Ticket 536.
     const MALORNE_4 = idsOf({
       shoulder: MALORNE.shoulder,

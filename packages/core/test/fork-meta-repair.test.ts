@@ -363,7 +363,7 @@ type MetaMod = {
 
 async function engine(): Promise<Engine> {
   return {
-    rank: await importForkUpgrades<Engine["rank"]>("engine/rank.ts"),
+    rank: await importForkUpgrades<Engine["rank"]>("engine/gear-swap.ts"),
     caps: await importForkUpgrades<Engine["caps"]>("engine/caps.ts"),
     cg: await importForkUpgrades<Engine["cg"]>("engine/candidate-gems.ts"),
     gems: await importForkUpgrades<Engine["gems"]>("engine/gems.ts"),
