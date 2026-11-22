@@ -290,18 +290,22 @@ before their hashes moved.
 
 ## Store faults are internal (tickets 890 and 891, 2026-11-22)
 
-Fork `8628857ec`; core keeps its own copies. A store read or write that fails
-now stops the run with `RankError('internal')` wherever it happens, as the sim
-cache's own calls already did:
+Fork `8628857ec` (test fixture tidied in `82d0c5818`); core keeps its own
+copies. A store read or write that fails now stops the run with
+`RankError('internal')`, as the sim cache's own calls already did. The one
+exception is the job row's "error" update after a run has already failed: its
+failure is swallowed so it cannot replace the error being rethrown.
 
-- `rank.ts`: `rankUpgrades`' own store calls (the saved-ranking read and
-  write, the job row's create and updates) go through `asInternal`, which
-  `sim-calls.ts` now exports.
+- `rank.ts`: `rankUpgrades`' other store calls (the saved-ranking read and
+  write, the job row's create, its "running" update and both "done" updates)
+  go through `asInternal`, which `sim-calls.ts` now exports.
 - `set-phase.ts`, `set-less-copies.ts`, `set-screen.ts`: the set sims'
   runners return a failed sim as `{ simError }` in place of throwing it, so
   `measureSameGearBonus`, `measureWornSetCounts` and the set screen catch
   nothing and a store fault is no longer taken as a failed sim.
   `sim-calls.ts`'s `runSimAt` is gone; the set screen calls `simOrFailure`.
+  The rows in § Ported files still name `runSimAt` and the throwing runners
+  as history.
 
 E-W3 (`packages/core/test/wowsims-fork-parity.test.ts`) passed on these files
 before their hashes moved.

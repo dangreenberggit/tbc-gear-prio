@@ -69,17 +69,18 @@ nothing, and a store fault reaches the caller as `RankError('internal')`.
 
 What the player sees after a store fault in a set-bonus sim: the run stops
 with the status line "Ranking failed." and a toast with the store's own
-error text, as for any failed run (`model/run_session.ts`, which follows
-wowsims' bulk sim, upstream `ui/features/bulk/model/run.ts:301-310`). No
-"its sim failed" note. Runs with no store fault are unchanged: the trace of
-the 246 engine tests (`.scratch/store-faults/k2k3.sh`) is byte-equal before
-and after.
+error text (no toast after Stop, as wowsims shows none after a cancel), as
+for any failed run (`model/run_session.ts`, which follows wowsims' bulk sim,
+upstream `ui/features/bulk/model/run.ts:301-310`). No "its sim failed" note.
+Runs with no store fault are unchanged: the trace of the 246 engine tests
+(`.scratch/store-faults/k2k3.sh`, gitignored, main checkout) is byte-equal
+before and after.
 
 Test: `ui/features/upgrades/model/rank_store_faults.test.ts`, "in a set-bonus
 sim stops the run with an internal RankError, not a note that the sim
 failed". Red before the fix: 20 of the 42 set-phase store calls ended in a
 ranking with an "its sim failed" or "the check's sim failed" note
-(`.scratch/store-faults/red.log`, gitignored).
+(`.scratch/store-faults/red.log`, gitignored, main checkout).
 
 Verified by: tbc-new-fork@8628857ec97158316d418bc11361cbaeacee61c8;
 `node node_modules/vitest/vitest.mjs run ui/features/upgrades/model/rank_store_faults.test.ts`

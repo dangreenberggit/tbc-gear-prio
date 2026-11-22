@@ -56,19 +56,21 @@ fault and checks `kind`.
 in the set sims and the job row"), branch `fix/890-891-store-faults`. The
 hypothesis held: all of `rankUpgrades`' own store calls were bare, and a
 fault in any of them threw a plain `Error` (red: calls 1, 2, 3, 123 and 124
-of the test's run, `.scratch/store-faults/red.log`). Each now goes through
+of the test's run, `.scratch/store-faults/red.log`, gitignored, main
+checkout). Each now goes through
 `asInternal` (exported from `sim-calls.ts`): the saved-ranking read and
 write, the job row's create, its "running" update and both "done" updates
 (complete and after Stop). The "error" update in the `catch` stays bare on
 purpose: its failure is swallowed so it cannot replace the error rethrown.
 
 What the player sees is unchanged: "Ranking failed." and a toast with the
-store's own error text. The error now carries `kind: 'internal'`.
+store's own error text (no toast after Stop). The error now carries
+`kind: 'internal'`.
 
 Tests: `ui/features/upgrades/model/rank_store_faults.test.ts`, "in the run's
 own calls (the saved ranking, the job row) stops the run with an internal
 RankError" and "in the job row's "done" update after Stop stops the run
-with an internal RankError" (`.scratch/store-faults/red-stop.log`).
+with an internal RankError" (`.scratch/store-faults/red-stop.log`, gitignored, main checkout).
 
 Verified by: tbc-new-fork@8628857ec97158316d418bc11361cbaeacee61c8;
 `node node_modules/vitest/vitest.mjs run ui/features/upgrades/model/rank_store_faults.test.ts`
