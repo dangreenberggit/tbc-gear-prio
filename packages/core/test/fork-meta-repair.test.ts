@@ -273,7 +273,7 @@ type Fixture = {
 };
 
 type Engine = {
-  rank: {
+  gearSwap: {
     candidateSwapWithRepairs: (
       equipment: readonly SimItemSpec[],
       slotIndex: number,
@@ -363,7 +363,9 @@ type MetaMod = {
 
 async function engine(): Promise<Engine> {
   return {
-    rank: await importForkUpgrades<Engine["rank"]>("engine/gear-swap.ts"),
+    gearSwap: await importForkUpgrades<Engine["gearSwap"]>(
+      "engine/gear-swap.ts"
+    ),
     caps: await importForkUpgrades<Engine["caps"]>("engine/caps.ts"),
     cg: await importForkUpgrades<Engine["cg"]>("engine/candidate-gems.ts"),
     gems: await importForkUpgrades<Engine["gems"]>("engine/gems.ts"),
@@ -510,7 +512,7 @@ describe.skipIf(!forkPresent)("gear hit matches the sim (535)", () => {
     const { e, equipment, gems } = await retInputs();
     const asBuilt = (itemId: number) =>
       e.caps.gearHitRating(
-        e.rank.candidateSwapWithRepairs(equipment, CHEST, itemId, gems)
+        e.gearSwap.candidateSwapWithRepairs(equipment, CHEST, itemId, gems)
           .equipment,
         MELEE_HIT
       );
@@ -524,13 +526,13 @@ describe.skipIf(!forkPresent)("gear hit matches the sim (535)", () => {
 
   it("535-L2: the Burning Rage package sums to the set-less reading, 54; the set-kept 74 is out of reach because set-bonus hit is in Go code", async () => {
     const { e, equipment, gems } = await retInputs();
-    const shoulders = e.rank.candidateSwapWithRepairs(
+    const shoulders = e.gearSwap.candidateSwapWithRepairs(
       equipment,
       SHOULDER,
       RAGESTEEL_SHOULDERS,
       gems
     ).equipment;
-    const pkg = e.rank.candidateSwapWithRepairs(
+    const pkg = e.gearSwap.candidateSwapWithRepairs(
       shoulders,
       CHEST,
       RAGESTEEL_BREASTPLATE,
@@ -613,7 +615,7 @@ describe.skipIf(!forkPresent)("exact repair (535)", () => {
     // (ticket 535's measurement §4), and the credited optimum.
     const { e, equipment, capped } = await retCapped();
     for (const { itemId } of CAPPED_CHESTS) {
-      const out = e.rank.candidateSwapWithRepairs(
+      const out = e.gearSwap.candidateSwapWithRepairs(
         equipment,
         CHEST,
         itemId,
@@ -632,7 +634,7 @@ describe.skipIf(!forkPresent)("exact repair (535)", () => {
     // Oracle: Rigid beat every alternative by 17.1–19.8 DPS on these rows.
     const { e, equipment, capped } = await retCapped();
     for (const itemId of UNCAPPED_CHESTS) {
-      const out = e.rank.candidateSwapWithRepairs(
+      const out = e.gearSwap.candidateSwapWithRepairs(
         equipment,
         CHEST,
         itemId,
@@ -649,7 +651,7 @@ describe.skipIf(!forkPresent)("exact repair (535)", () => {
     // Oracle: at full weight Rigid gains 9.2 EP over Bold, more than any other
     // rare gem that adds yellow.
     const { e, equipment, gems } = await retInputs();
-    const out = e.rank.candidateSwapWithRepairs(
+    const out = e.gearSwap.candidateSwapWithRepairs(
       equipment,
       CHEST,
       32365,
@@ -667,14 +669,14 @@ describe.skipIf(!forkPresent)("exact repair (535)", () => {
     // One of each was also the
     // best measured set-less layout.
     const { e, equipment, capped } = await retCapped();
-    const shoulders = e.rank.candidateSwapWithRepairs(
+    const shoulders = e.gearSwap.candidateSwapWithRepairs(
       equipment,
       SHOULDER,
       RAGESTEEL_SHOULDERS,
       capped
     ).equipment;
     expect(changesBetween(equipment, shoulders, SHOULDER)).toEqual([]);
-    const pkg = e.rank.candidateSwapWithRepairs(
+    const pkg = e.gearSwap.candidateSwapWithRepairs(
       shoulders,
       CHEST,
       RAGESTEEL_BREASTPLATE,
@@ -691,7 +693,7 @@ describe.skipIf(!forkPresent)("exact repair (535)", () => {
     // belt 30106 socket 1 it switches on that item's +3 Agility bonus.
     // Today's greedy puts it in 30055.
     const { e, equipment, capped } = await retCapped();
-    const out = e.rank.candidateSwapWithRepairs(
+    const out = e.gearSwap.candidateSwapWithRepairs(
       equipment,
       WRIST,
       32574,
@@ -959,11 +961,11 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
         for (let k = 0; k < job.steps.length; k++) {
           const { idx, id } = job.steps[k]!;
           const where = `${name} ${job.label} piece ${k + 1} (${id}@${idx})`;
-          const pre = e.rank.candidateSwapPreRepair(cur, idx, id, cappedFx);
+          const pre = e.gearSwap.candidateSwapPreRepair(cur, idx, id, cappedFx);
           const { status, deficit: d } = metaOf(e, pre.socketed);
           let out: SimItemSpec[];
           try {
-            out = e.rank.candidateSwapWithRepairs(
+            out = e.gearSwap.candidateSwapWithRepairs(
               cur,
               idx,
               id,
@@ -1098,7 +1100,12 @@ describe.skipIf(!forkPresent)("repair matches brute force (535)", () => {
     // Oracle: a third Bold → Rigid would add 9.2 EP at full weight, but the
     // meta does not need it, so a minimal set excludes it.
     const { e, equipment, gems } = await retInputs();
-    const pre = e.rank.candidateSwapPreRepair(equipment, CHEST, 32365, gems);
+    const pre = e.gearSwap.candidateSwapPreRepair(
+      equipment,
+      CHEST,
+      32365,
+      gems
+    );
     const found = e.mr.bestMinimalRepair({
       items: pre.socketed,
       weights: gems.weights,
@@ -2166,8 +2173,8 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     "852-R: a gem repair that fails on a set version skips that set bonus, as on its own build (set screen %s)",
     async (setScreenMode) => {
       // Oracle: a failed gem repair is no failed sim. On a set package's own
-      // build it skips the package with the meta-off note (`rank.ts`, the
-      // package loop); the same failure while rebuilding one of the
+      // build it skips the package with the meta-off note
+      // (`set-bonus-values.ts`, the package loop); the same failure while rebuilding one of the
       // package's versions does the same, and the run goes on. Every
       // version's rebuild goes through the one catch in `requestsPerLayout`.
       // Burning Rage's 1000 hit puts each set-kept version's budget near
@@ -2278,13 +2285,13 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     const legs = SIM_ORDER.indexOf("legs");
     // Check 1: the first increment's gear (the Gauntlets row plus the Greaves)
     // needs a meta repair.
-    const afterRow = e.rank.candidateSwapWithRepairs(
+    const afterRow = e.gearSwap.candidateSwapWithRepairs(
       s.worn,
       hands,
       JUSTICAR.hands,
       s.gems
     ).equipment;
-    const pre = e.rank.candidateSwapPreRepair(
+    const pre = e.gearSwap.candidateSwapPreRepair(
       afterRow,
       legs,
       JUSTICAR.legs,
@@ -2293,7 +2300,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     expect(metaOf(e, pre.socketed).status.kind).toBe("inactive");
     // Check 2: the first increment's simmed request differs in gems from the
     // default build, so the per-version rebuild ran.
-    const defaultFirstIncrement = e.rank.candidateSwapWithRepairs(
+    const defaultFirstIncrement = e.gearSwap.candidateSwapWithRepairs(
       afterRow,
       legs,
       JUSTICAR.legs,
@@ -2337,7 +2344,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     const hands = SIM_ORDER.indexOf("hands");
     // The row's single swap needs a repair, and its rebuild for the set's
     // hit changes a gem.
-    const pre = e.rank.candidateSwapPreRepair(
+    const pre = e.gearSwap.candidateSwapPreRepair(
       s.worn,
       legs,
       JUSTICAR.legs,
@@ -2345,7 +2352,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
     );
     expect(metaOf(e, pre.socketed).status.kind).toBe("inactive");
     const hitBudget = s.gems.repairHitBudget!;
-    const rebuilt = e.rank.candidateSwapWithRepairs(
+    const rebuilt = e.gearSwap.candidateSwapWithRepairs(
       s.worn,
       legs,
       JUSTICAR.legs,
@@ -2357,7 +2364,7 @@ describe.skipIf(!forkPresent)("set versions get their own repair (535)", () => {
         },
       }
     ).equipment;
-    const single = e.rank.candidateSwapWithRepairs(
+    const single = e.gearSwap.candidateSwapWithRepairs(
       s.worn,
       legs,
       JUSTICAR.legs,
@@ -2549,7 +2556,7 @@ async function warlockRun(o: {
     number
   >;
   const gems = e.cg.gemContext(e.gems.gemsForPhase(3), weights, spec);
-  const pre = e.rank.candidateSwapPreRepair(worn, HANDS, RET_HANDS, gems);
+  const pre = e.gearSwap.candidateSwapPreRepair(worn, HANDS, RET_HANDS, gems);
   expect(metaOf(e, pre.socketed).status.kind).toBe("inactive");
   const wornGearHit = e.caps.gearHitRating(worn, SPELL_HIT);
   const gearChange = e.caps.gearHitRating(pre.swapped, SPELL_HIT) - wornGearHit;
@@ -2619,7 +2626,7 @@ describe.skipIf(!forkPresent)(
       const s = await incrementScenario("V7");
       const legs = SIM_ORDER.indexOf("legs");
       const hitBudget = s.gems.repairHitBudget!;
-      const own = s.e.rank.candidateSwapWithRepairs(
+      const own = s.e.gearSwap.candidateSwapWithRepairs(
         s.worn,
         legs,
         JUSTICAR.legs,
@@ -2631,7 +2638,7 @@ describe.skipIf(!forkPresent)(
           },
         }
       ).equipment;
-      const runBudget = s.e.rank.candidateSwapWithRepairs(
+      const runBudget = s.e.gearSwap.candidateSwapWithRepairs(
         s.worn,
         legs,
         JUSTICAR.legs,

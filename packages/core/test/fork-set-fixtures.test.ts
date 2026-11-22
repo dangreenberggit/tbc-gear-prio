@@ -2,11 +2,11 @@
  * Set potential on the frozen Upgrades-tab recordings (ticket 502).
  *
  * fork-set-net checks the credit rule on a controlled additive sim. This suite
- * checks the shipped fork `view.ts` against every row of the six real sim
+ * checks the shipped fork `set-potential.ts` against every row of the six real sim
  * recordings in `fixtures/tab-recordings/`, so a wrong figure on a row no
  * render captured, or one below the popover's 0.1 DPS resolution, still fails.
  * The reference walk below is written from the rule's statement (design.md §1
- * of the 502 stage, ADR-0034), not from `view.ts`. A bonus-gear ranking (ticket 511:
+ * of the 502 stage, ADR-0034), not from `set-potential.ts`. A bonus-gear ranking (ticket 511:
  * rows carry `setContext.usesBonusGear`) is checked against `referenceBonusGear`,
  * written from plan 511-512-set-credit's rule for one row, instead.
  *

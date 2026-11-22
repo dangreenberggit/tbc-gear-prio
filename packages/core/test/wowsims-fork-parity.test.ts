@@ -951,7 +951,7 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
 
     // The assertion E-W3 exists for: same deltas, same SE, same rank — not
     // a deep-equal on the whole Ranking, since assumptions.presetId is
-    // deliberately spelled differently between the two (rank.ts's doc
+    // deliberately spelled differently between the two (rank-setup.ts's doc
     // comment: the fork has no on-disk skeleton file to name).
     expect(thisRepoRanking.baseline.dps).toBe(forkRanking.baseline.dps);
     expect(

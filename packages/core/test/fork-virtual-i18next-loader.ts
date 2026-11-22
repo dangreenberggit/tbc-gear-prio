@@ -7,7 +7,7 @@
  * through its own Vite pipeline without that plugin, so the import resolves
  * nowhere and the module graph dies before any test body runs.
  *
- * It reaches the engine by a long transitive edge — `engine/rank.ts` imports
+ * It reaches the engine by a long transitive edge — the engine imports
  * `items.ts`, which imports `proto_utils/database.ts`, which eventually pulls in
  * the fork's i18n config — and nothing on that path is what the engine tests
  * measure. An empty resource bundle is the honest stand-in: i18next accepts it,
