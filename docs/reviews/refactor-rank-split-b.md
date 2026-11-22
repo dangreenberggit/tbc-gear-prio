@@ -150,6 +150,8 @@ behaviour change. All findings are low: comments, names and organisation.
 | S9  | Standards   | fixed       | Fork `04bf9faf8`: early return; `measureCrossingChecks` 77 lines                                                                                                                                                                                             |
 | P1  | Spec        | fixed       | Fork `04bf9faf8`: `runSetPhase` and `SetPhaseOutcome` moved word for word to `set-phase.ts` (K1: moved, unchanged); `rank.ts` 413 lines and still exports the same 41 names                                                                                  |
 | P2  | Spec        | wontfix     | By `docs/agents/paired-worktrees.md` § Land it on dev the merging agent sets `pushed: true` after the merge, as Phase A did (`3635b122`)                                                                                                                     |
+| N2a | Adversarial | defer       | `.scratch/carry-forward/issues/890-set-bonus-store-fault-reported-as-sim-failed.md`: older than Phase B; a store fault in the set-bonus sims becomes an "its sim failed" note                                                                                |
+| N2b | Adversarial | defer       | `.scratch/carry-forward/issues/891-ranking-cache-read-fault-throws-plain-error.md`: older than Phase B; the ranking-cache read throws a plain `Error`, not `RankError('internal')`                                                                           |
 
 ## Notes
 
@@ -167,7 +169,8 @@ behaviour change. All findings are low: comments, names and organisation.
   (`set-less-copies.ts`, untouched); a store fault in the ranking-cache read
   throws a plain `Error` rather than `RankError('internal')` (base
   `rank.ts:319`, tip `rank.ts:162`). Changing either is a behaviour change,
-  which this branch must not make.
+  which this branch must not make. Filed as tickets 890 (the "its sim
+  failed" note) and 891 (the plain `Error`); Disposition rows N2a and N2b.
 - **Comments in files Phase B did not change** still point at `rank.ts` for
   moved code (`promise-pool.ts:2`, `se.ts:18`, `meta-repair.ts:54`,
   `pool.ts:155`, `run_progress.ts:32`, `set-value.ts:317`). Plan chunk C3
