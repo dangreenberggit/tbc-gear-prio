@@ -24,6 +24,9 @@ and the summary `2026-11-23-general-task-893-pre-merge-review.md`.
 
 ## What changed
 
+As reviewed. The branch's final fork commit, `7ad984d47`, drops the time-left
+line again; see § After the review.
+
 - Fork `ec6d15d31`:
   - `progressBarOf` (`utils/format.ts`) gives the bar no count in the
     set-bonus stage, so the bar is unmeasured: no fill and no `663/699`.
@@ -109,6 +112,42 @@ or the screen says plainly that this stage has no count": met as wowsims shows
 it, with no count and an empty bar, and no sentence saying so; wowsims has
 none either. "Match what wowsims' own bulk sim shows": met.
 
+## After the review
+
+The live web run (below) showed that the restored time-left line was far off,
+so it was taken out again and the two fork commits were squashed into
+`7ad984d47` "Show no count while set bonuses are measured (893)". The final
+fork diff `2438dd874..7ad984d47` keeps only the set-stage change: it touches
+`model/run_progress.ts`, `utils/format.ts`, `utils/format.test.ts` and the
+new `components/RunProgress/RunProgressDialog.test.tsx` (three cases: count
+while candidates are simmed, no count in the set stage, count again in
+replication). `RunProgressDialog.tsx` is back to its `2438dd874` text, and
+`RunProgressMessage.tsx`, `useRunProgress.ts` and `timeLeftText` are gone.
+So in the table above the time-left parts of the Message column no longer
+show, the Notes "0s remaining while ranking" and "Desktop reads high" no
+longer reach the screen, and "What the branch adds that nothing asked for"
+is empty. Red then green for the set-stage count, with `progressBarOf` put
+back to its old body: 2 failed, then 41 of 41 passed
+(`.scratch/893/red-check.sh`, log `.scratch/893/red-check.log`).
+
+Live run, web (WASM) build at `ec6d15d31` (it differs from `7ad984d47` only
+by the time-left line), feral phase 3 from the Phase 2 "BiS 6%" preset,
+harness rc=0, 646 rows, done at 3381.2 s. Readbacks in the pair's gitignored
+`.scratch/893/web/` (`analysis.txt`, `feral-p3-from-p2bis/tail.jsonl`,
+`shot-*.png`):
+
+- Set stage 3016.6 s to 3248.5 s (231.9 s): all 463 samples read no counter,
+  no time left and an unmeasured bar, while the elapsed time went from
+  50m 17s to 54m 08s. Screenshots at 3017.8, 3078.5, 3139.1 and 3199.8 s.
+- Replication started at 663/699 and moved to 698/699.
+- Rankings: `rows-equal.py` against the 2026-11-23 web feral readback and the
+  2026-11-23 desktop feral readback both print
+  `rows a=646 b=646 differing=0 baseline a=2448.7 b=2448.7`, rc=0.
+- Time left while candidates were simmed, shown against really left:
+  1h 05m 13s vs 2198 s at 1183 s; 59m 31s vs 2029 s at 1353 s;
+  45m 05s vs 1690 s at 1691 s; 22m 39s vs 846 s at 2536 s; 5m 35s vs 365 s
+  at the last candidate. That is 55-79% high mid-run, row L1.
+
 ## Disposition
 
 | ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -118,6 +157,7 @@ none either. "Match what wowsims' own bulk sim shows": met.
 | A2  | Adversarial | wontfix     | Upstream's bar ties the fill to the count (`ProgressTrackerBar.tsx`: `measured` gates both the bar's `value` and the `663/699` text), so keeping the fill keeps the frozen count that 893 reports. The empty track is how wowsims' own bar shows a stage with no count. Any other look needs an edit to the upstream `ui-kit` bar, which needs the owner's approval of that exact edit                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | S1  | Standards   | wontfix     | The two are different outputs: the bar's count (`view.done` and `view.total`, read only by `progressBarOf`) and the time left. Each is decided where it is computed. Moving the bar's decision into `RunProgressTracker.view()` would change no behaviour                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | S2  | Standards   | wontfix     | Every stage already sends the bar a new object on each update (`{ current, total }`), so the set stage costs no more than the others, and an update re-renders only the bar leaf                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| L1  | Live run    | defer       | [894](../../.scratch/carry-forward/issues/894-run-dialog-time-left-line-missing-and-estimate-high.md). The restored time-left line read 55-79% high on the live web run, so fork `7ad984d47` takes it back out; the screen is as at `2438dd874` apart from the set stage's count. Showing the line again with a refit estimate is ticket 894                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 ## Notes
 
