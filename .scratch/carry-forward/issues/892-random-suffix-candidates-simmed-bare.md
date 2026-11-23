@@ -52,7 +52,7 @@ Either fix needs the pool entry, the candidate swap (`swapItemAt`,
 
 ## Closed (2026-11-22)
 
-Fixed with option 1 on `fix/892-suffix-candidates` (fork `1676cdf81`). Each
+Fixed with option 1 on `fix/892-suffix-candidates` (fork `1676cdf81`, and `ae63bb593` from the review). Each
 candidate with random-suffix options is simmed with the suffix the player
 wears on it, or else its option with the highest EP under the run's weights,
 the gear picker's rule (`computeItemEP`, `ui/sim/player/player.ts:1188-1203`).
@@ -70,4 +70,4 @@ Tiger"), Glider's Greaves from -58.9 to -3.8, Lurker's Belt from -110.4 to
 
 Verified by: `pnpm exec vitest run packages/core/test/fork-random-suffix.test.ts`
 (RS-2 worn row name, RS-4 candidate suffix and name, RS-5 ranking key) and
-tbc-new-fork@1676cdf81
+tbc-new-fork@ae63bb593

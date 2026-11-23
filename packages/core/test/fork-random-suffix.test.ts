@@ -273,6 +273,22 @@ describe.skipIf(!forkPresent)("a worn random suffix reaches the sim", () => {
     expect(wornRow?.name).toBe("Ravager's Bracers of the Tiger");
   });
 
+  it("RS-6: the same holds when the pool leaves the worn suffix item out (an excluded source, Prune, a later phase)", async () => {
+    const skeleton = readJson(RET);
+    const store = await newStore();
+    await runRanking(skeleton, 28795, { store, wornInPool: false });
+    const second = await runRanking(skeleton, 28795, {
+      store,
+      wornSuffix: OF_THE_TIGER,
+      wornInPool: false,
+    });
+
+    expect(second.requests.length).toBeGreaterThan(0);
+    expect(equipmentOf(second.requests[0]!)[WRIST]?.randomSuffix).toBe(
+      OF_THE_TIGER
+    );
+  });
+
   it("RS-3: the candidate order scores the worn item with its suffix's stats", async () => {
     const { itemEpFor } = await importForkUpgrades<{
       itemEpFor: (weights: {
@@ -309,7 +325,8 @@ async function runRanking(
   {
     wornSuffix = OF_THE_BEAST,
     store,
-  }: { wornSuffix?: number | "none"; store?: Json } = {}
+    wornInPool = true,
+  }: { wornSuffix?: number | "none"; store?: Json; wornInPool?: boolean } = {}
 ): Promise<{ requests: RaidSimRequest[]; ranking: Ranking }> {
   const rankMod = await importForkUpgrades<{
     rankUpgrades: (input: Json, deps: Json) => Promise<Ranking>;
@@ -400,17 +417,19 @@ async function runRanking(
         { itemId: wristCandidate, slot: "wrist" },
         { itemId: 30131, slot: "head" }, // Crystalforge War-Helm
         { itemId: RAVAGERS_BRACERS, slot: "wrist" }, // worn: the pool holds it
-      ].map((p) => ({
-        ...p,
-        // The bracers keep their db.json name, as the tab's pool does, so the
-        // row's suffixed name can be checked whole.
-        name:
-          p.itemId === RAVAGERS_BRACERS
-            ? "Ravager's Bracers"
-            : `item ${p.itemId}`,
-        phase: 1,
-        source: { kind: "badge" as const, cost: 1 },
-      })),
+      ]
+        .filter((p) => wornInPool || p.itemId !== RAVAGERS_BRACERS)
+        .map((p) => ({
+          ...p,
+          // The bracers keep their db.json name, as the tab's pool does, so the
+          // row's suffixed name can be checked whole.
+          name:
+            p.itemId === RAVAGERS_BRACERS
+              ? "Ravager's Bracers"
+              : `item ${p.itemId}`,
+          phase: 1,
+          source: { kind: "badge" as const, cost: 1 },
+        })),
       simDatabaseFor: simDatabaseResolverFor(stubPlayer(), skeleton),
     }
   );
