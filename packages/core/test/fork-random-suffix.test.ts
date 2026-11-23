@@ -39,6 +39,11 @@ const RET = join(root, "data/presets/ret/p2.raid-sim-skeleton.json");
 
 const RAVAGERS_BRACERS = 30687;
 const OF_THE_BEAST = -41;
+// The bracers' best suffix for ret's P2 weights: strength and crit outweigh
+// "of the Beast"'s strength, agility and stamina (computed by hand from
+// db.json and data/presets/ret/p2.ep-weights.json: 11665.5 against 9203.25,
+// before the item's random property points scale both alike).
+const OF_THE_TIGER = -14;
 const WRIST = SIM_ORDER.indexOf("wrist");
 const SIM_VERSION = "v0.0.101";
 
@@ -51,7 +56,14 @@ type ItemSpecJson = {
   gems?: number[];
 };
 type DbJson = { randomSuffixes?: Array<{ id?: number }> };
-type Ranking = { items: Array<{ itemId: number; deltaDps: number }> };
+type Ranking = {
+  items: Array<{
+    itemId: number;
+    deltaDps: number;
+    name: string;
+    randomSuffix?: number;
+  }>;
+};
 type ProtoMsg<T> = {
   fromJson(json: unknown, opts?: { ignoreUnknownFields: boolean }): T;
   toJson(msg: T): unknown;
@@ -203,6 +215,62 @@ describe.skipIf(!forkPresent)("a worn random suffix reaches the sim", () => {
       (row) => row.itemId === RAVAGERS_BRACERS
     );
     expect(wornRow?.deltaDps).toBe(0);
+    // The worn row is the player's own copy, named with the suffix they wear,
+    // not the spec's best one ("of the Tiger").
+    expect(wornRow?.name).toBe("Ravager's Bracers of the Beast");
+    expect(wornRow?.randomSuffix).toBe(OF_THE_BEAST);
+  });
+
+  it("RS-4: a random-suffix candidate the player does not wear is simmed with its best suffix for the spec, and its row names that suffix", async () => {
+    const skeleton = readJson(RET);
+    const { requests, ranking } = await runRanking(skeleton, 28795, {
+      wornSuffix: "none",
+    });
+
+    const swaps = requests.filter(
+      (req) => equipmentOf(req)[WRIST]?.id === RAVAGERS_BRACERS
+    );
+    expect(swaps.length).toBeGreaterThanOrEqual(1);
+    for (const req of swaps) {
+      expect(equipmentOf(req)[WRIST]?.randomSuffix).toBe(OF_THE_TIGER);
+      const db = (playerOf(req).database ?? {}) as DbJson;
+      expect((db.randomSuffixes ?? []).map((row) => row.id)).toEqual([
+        OF_THE_TIGER,
+      ]);
+    }
+    // Requests without the bracers carry no suffix row.
+    for (const req of requests.filter((r) => !swaps.includes(r))) {
+      const db = (playerOf(req).database ?? {}) as DbJson;
+      expect(db.randomSuffixes ?? []).toEqual([]);
+    }
+    const row = ranking.items.find((r) => r.itemId === RAVAGERS_BRACERS);
+    // wowsims' own name for a suffixed item: the item's name, a space, the
+    // suffix's name (`ItemDetailCell`, ui/features/gear/components/ItemCell).
+    expect(row?.name).toBe("Ravager's Bracers of the Tiger");
+    expect(row?.randomSuffix).toBe(OF_THE_TIGER);
+    // A candidate with no suffix options keeps its plain name and no field.
+    const helm = ranking.items.find((r) => r.itemId === 30131);
+    expect(helm?.name).toBe("item 30131");
+    expect(helm).not.toHaveProperty("randomSuffix");
+  });
+
+  it("RS-5: a run after the worn suffix changes is simmed again, not answered from the previous run's saved ranking", async () => {
+    const skeleton = readJson(RET);
+    const store = await newStore();
+    await runRanking(skeleton, 28795, { store });
+    const second = await runRanking(skeleton, 28795, {
+      store,
+      wornSuffix: OF_THE_TIGER,
+    });
+
+    expect(second.requests.length).toBeGreaterThan(0);
+    expect(equipmentOf(second.requests[0]!)[WRIST]?.randomSuffix).toBe(
+      OF_THE_TIGER
+    );
+    const wornRow = second.ranking.items.find(
+      (row) => row.itemId === RAVAGERS_BRACERS
+    );
+    expect(wornRow?.name).toBe("Ravager's Bracers of the Tiger");
   });
 
   it("RS-3: the candidate order scores the worn item with its suffix's stats", async () => {
@@ -223,17 +291,29 @@ describe.skipIf(!forkPresent)("a worn random suffix reaches the sim", () => {
   });
 });
 
-/** Ranks ret P2 gear with Ravager's Bracers of the Beast on the wrist, and returns every request. */
+async function newStore(): Promise<Json> {
+  const storeMod = await importForkUpgrades<{
+    MemoryStore: new () => Json;
+  }>("engine/seams/store.ts");
+  return new storeMod.MemoryStore();
+}
+
+/**
+ * Ranks ret P2 gear and returns every request. The wrist holds Ravager's
+ * Bracers with `wornSuffix` (default "of the Beast"), or with `"none"` the
+ * preset's own wrist item.
+ */
 async function runRanking(
   skeleton: Json,
-  wristCandidate: number
+  wristCandidate: number,
+  {
+    wornSuffix = OF_THE_BEAST,
+    store,
+  }: { wornSuffix?: number | "none"; store?: Json } = {}
 ): Promise<{ requests: RaidSimRequest[]; ranking: Ranking }> {
   const rankMod = await importForkUpgrades<{
     rankUpgrades: (input: Json, deps: Json) => Promise<Ranking>;
   }>("engine/rank.ts");
-  const storeMod = await importForkUpgrades<{
-    MemoryStore: new () => Json;
-  }>("engine/seams/store.ts");
   const gearMod = await importForkUpgrades<{
     RecordedGearSource: new (data: {
       fights: ReadonlyMap<string, unknown[]>;
@@ -256,11 +336,11 @@ async function runRanking(
   const worn = equipmentOf(skeleton);
   const loggedGear = {
     items: SIM_ORDER.map((slot, i) =>
-      i === WRIST
+      i === WRIST && wornSuffix !== "none"
         ? {
             id: RAVAGERS_BRACERS,
             slot,
-            randomSuffix: OF_THE_BEAST,
+            randomSuffix: wornSuffix,
             enchant: 2647,
           }
         : {
@@ -311,7 +391,7 @@ async function runRanking(
     {
       gear: gearSource,
       sim,
-      store: new storeMod.MemoryStore(),
+      store: store ?? (await newStore()),
       clock: () => new Date("2026-10-01T12:00:00.000Z"),
       raidSimSkeleton: skeleton,
       epWeights: weights,
@@ -322,7 +402,12 @@ async function runRanking(
         { itemId: RAVAGERS_BRACERS, slot: "wrist" }, // worn: the pool holds it
       ].map((p) => ({
         ...p,
-        name: `item ${p.itemId}`,
+        // The bracers keep their db.json name, as the tab's pool does, so the
+        // row's suffixed name can be checked whole.
+        name:
+          p.itemId === RAVAGERS_BRACERS
+            ? "Ravager's Bracers"
+            : `item ${p.itemId}`,
         phase: 1,
         source: { kind: "badge" as const, cost: 1 },
       })),
