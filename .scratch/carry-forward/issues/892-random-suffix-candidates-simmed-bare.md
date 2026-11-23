@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug
 Origin: docs/reviews/fix-random-suffix.md
 Blocks: none
@@ -49,3 +49,25 @@ to carry, because the pool holds item ids only (`PoolEntry`,
 
 Either fix needs the pool entry, the candidate swap (`swapItemAt`,
 `engine/gear-swap.ts`) and the row label to carry a suffix id.
+
+## Closed (2026-11-22)
+
+Fixed with option 1 on `fix/892-suffix-candidates` (fork `1676cdf81`, and `ae63bb593` from the review). Each
+candidate with random-suffix options is simmed with the suffix the player
+wears on it, or else its option with the highest EP under the run's weights,
+the gear picker's rule (`computeItemEP`, `ui/sim/player/player.ts:1188-1203`).
+The row shows the item's name and the suffix's name, as the gear picker's item
+cell does (`ItemDetailCell.tsx:111-112`), and its wowhead link and Batch Sim
+entry carry the suffix. A worn or candidate suffix is now part of the ranking
+key, so a run after a suffix change is simmed again.
+
+Live ret run, P2 gear, tab phase 3
+(`.scratch/suffix-cand/before-readback.json` and `after-readback.json` in the
+main checkout): the 12 candidate requests went from no suffix to a suffix with
+its database row each; Ravager's Bracers went from -48.3 to -7.4 ("of the
+Tiger"), Glider's Greaves from -58.9 to -3.8, Lurker's Belt from -110.4 to
+-55.6. None is an upgrade on P2 gear.
+
+Verified by: `pnpm exec vitest run packages/core/test/fork-random-suffix.test.ts`
+(RS-2 worn row name, RS-4 candidate suffix and name, RS-5 ranking key) and
+tbc-new-fork@ae63bb593
