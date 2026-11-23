@@ -1,7 +1,7 @@
 # Pre-merge review — fix/web-run-speed
 
 Diffed against: our repo `64e07bf0..HEAD` (`64e07bf0` is `dev` when the pair
-was made; the branch re-pins the fork three times, adds tests, opens ticket 892 and
+was made; the branch re-pins the fork three times, adds tests, opens ticket 893 and
 adds this file), and the fork `82d0c5818..0a332e475` on fork branch
 `fix/web-run-speed` (`82d0c5818` is the pin on `dev`). The fork diff touches
 only the tab's files under `ui/features/upgrades/model/`; none of the eight
@@ -49,7 +49,7 @@ readbacks and scripts: the pair's `.scratch/wsp/` (gitignored).
   four workers sat idle: on the web run before the fix, the set stage was
   527 s at 1.02 sims in flight and replication 523 s at 1.00. The set stage
   also sends no progress events, so the counter stood at 663/699 (ticket
-  892).
+  893).
 
 ## What changed
 
@@ -68,7 +68,7 @@ readbacks and scripts: the pair's `.scratch/wsp/` (gitignored).
 - Fork `0a332e475`: `oxfmt` puts one type alias in `set-bonus-gear.ts` on
   one line (the fork lint check in `pnpm verify` flagged it).
 - Our repo: the lock re-pins and the regenerated effects file,
-  `docs/fork-provenance/engine.md` (seven hashes and notes), the tests, ticket 892.
+  `docs/fork-provenance/engine.md` (seven hashes and notes), the tests, ticket 893.
 
 No player-facing text changed.
 
@@ -160,7 +160,7 @@ store-fault suite at concurrency 4 (4 of 4).
   read, so a store fault on only that read is not seen.
 - **Store faults surface after running set tasks finish** (adversarial N5);
   Stop is not affected.
-- **The set stage's counter and time left stand still**: ticket 892. Now
+- **The set stage's counter and time left stand still**: ticket 893. Now
   about 4 minutes on web, 15 s on desktop.
 - **Desktop runs 4 requests at once**, each split over every core, where
   wowsims' own page uses one (`ui/sim/sim.ts:163-166`, "Local sim has native
