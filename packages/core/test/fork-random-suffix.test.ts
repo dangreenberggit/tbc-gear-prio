@@ -155,7 +155,7 @@ describe.skipIf(!forkPresent)("a worn random suffix reaches the sim", () => {
       enchant: 2647,
     });
     // No suffix, no field: logged gear without suffixes keeps its old shape,
-    // and with it the ranking cache key.
+    // so the requests built from it stay byte for byte the same.
     expect(logged.items[0]).toEqual({
       id: 29073,
       slot: "head",
