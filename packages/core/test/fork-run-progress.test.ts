@@ -446,13 +446,14 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       }
     );
 
-    it("ships the round-4 constants fitted on run 1", () => {
-      // Run 1 replicated one sim at a time at concurrency 4, so its fitted
-      // 0.3221 per sim per worker is 4 * 0.3221 candidate-times per sim.
+    it("ships the constants fitted on the web feral run of 2026-11-22", () => {
+      // The set phase and replication now run their sims at the runner's
+      // concurrency, so those two costs were refitted on that run
+      // (docs/reviews/fix-web-run-speed.md); slowdown is still run 1's.
       expect(mod.RUN_PROGRESS_ESTIMATOR).toEqual({
         kind: "phased",
-        replicationSimCost: 1.2884,
-        setBonusStageCandidates: 50.993,
+        replicationSimCost: 0.75,
+        setBonusStageCandidates: 45.34,
         slowdown: 0.003064,
       });
       expect(mod.RUN_PROGRESS_SHOW_FROM_FRACTION).toBe(0.35);
