@@ -51,3 +51,35 @@ The run dialog shows the time left again in the Bulk dialog's words, and on
 one live web and one live desktop feral run the figure shown at 50% done is
 within a bound stated before the runs, with the error written in the close
 note.
+
+## Bound for the live runs (stated 2026-11-24, before either run)
+
+At 50% of the run's wall time (Run click to the dialog closing), the time
+left the dialog shows is within 25% of the time the run really has left:
+`|shown - left| / left <= 0.25`. That is ticket 542's gate (`BOUND` in
+`.scratch/handoffs/542-run-progress/replay.mjs`). The runs: one web and one
+desktop feral run, phase 3 from the Phase 2 "BiS 6%" preset, each with
+nothing else simming on the machine.
+
+## Fix (fork 77a6fe461, branch fix/894-time-left)
+
+- The dialog shows the time left again, in the Bulk dialog's words and place
+  (`upstream/master` `ui/features/bulk/components/BulkProgress/BulkProgressMessage.tsx`).
+- `run_progress.ts` drops the `slowdown` term: the candidates left cost the
+  time per candidate so far.
+
+Replay of the fork's real `RunProgressTracker` over five recorded feral runs
+(error at 50% of wall time, shipped slowdown → none):
+
+| Run | Shipped | No slowdown |
+| --- | --- | --- |
+| web 2026-11-23, 893 pair | +0.600 | +0.011 |
+| web 2026-11-22, `w2-after` | +0.538 | -0.024 |
+| desktop 2026-11-23, e2e-final | +0.548 | -0.018 |
+| desktop 2026-11-23, `d2-after` | +1.747 | +0.649 |
+| web 2026-11-23, e2e-final | no figure yet | no figure yet |
+
+The last two ran while other sims shared the machine: the e2e-final web run
+overlapped the desktop gate and a web ret run (both started at 14:18 UTC), so
+its first half ran at about half the second half's pace; `d2-after`'s pace
+also doubled late in the run, cause not found.

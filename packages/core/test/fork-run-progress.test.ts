@@ -56,7 +56,6 @@ type EstimatorConfig =
       kind: "phased";
       replicationSimCost: number;
       setBonusStageCandidates: number;
-      slowdown: number;
     };
 
 type RunTimeline = {
@@ -301,7 +300,6 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       kind: "phased",
       replicationSimCost: 2,
       setBonusStageCandidates: 20,
-      slowdown: 0,
     };
 
     it("applies the candidate, boundary, ranking and replication rules", () => {
@@ -367,12 +365,12 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     });
   });
 
-  describe("slowdown term in the candidate estimate", () => {
+  describe("the candidate estimate", () => {
     // Five events, four candidates done (n = 4) at 250 ms each. T = 47 is
     // c = 10, so B = 11 and R = 36. replicationSimCost 1 gives k = 1;
-    // setBonusStageCandidates = 2. With S(x) = x(x + 1)/2: a = tau / (n + s S(n)),
-    // C = a ((c - n) + s (S(c) - S(n))), rbar = (tau + C) / c and the
-    // estimate is C + rbar (setBonusStageCandidates + k R).
+    // setBonusStageCandidates = 2. The estimate is the time per candidate so
+    // far times the candidates left, the set stage and replication:
+    // r ((c - n) + setBonusStageCandidates + k R).
     const sims = [0, 250, 500, 750, 1_000].map((t, i) => ({
       t,
       done: i + 1,
@@ -392,71 +390,70 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       topN: 8,
       ...over,
     });
-    const config = (slowdown: number): EstimatorConfig => ({
+    const config: EstimatorConfig = {
       kind: "phased",
       replicationSimCost: 1,
       setBonusStageCandidates: 2,
-      slowdown,
-    });
+    };
 
     it("uses the boundary the tab solves for total 47", () => {
       expect(mod.doneAtLastCandidateFor(47, 5, 8)).toBe(11);
     });
 
-    it.each([
-      // Round 3's rule: 250 * (11 - 5 + 2 + 36)
-      [0, 11_000],
-      // a = 1000 / (4 + 0.1 * 10) = 200; C = 200 * (6 + 0.1 * 45) = 2100;
-      // rbar = 3100 / 10 = 310; 2100 + 310 * 38
-      [0.1, 13_880],
-      // a = 1000 / 6; C = a * (6 + 0.2 * 45) = 2500; rbar = 350; 2500 + 350 * 38
-      [0.2, 15_800],
-    ])("with slowdown %f reads %i", (slowdown, expected) => {
-      expect(mod.estimateRemainingMs(config(slowdown), run())).toBeCloseTo(
-        expected,
-        6
-      );
+    it("reads the candidates, set stage and replication left at the pace so far", () => {
+      // 250 * ((11 - 5) + 2 + 36)
+      expect(mod.estimateRemainingMs(config, run())).toBeCloseTo(11_000, 6);
     });
 
-    it.each([0, 0.1])(
-      "gives no time left in the set stage, which sends no count (slowdown %f)",
-      (slowdown) => {
-        const atBoundary = run({
-          sims: [...sims, { t: 3_000, done: 11, afterRanking: false }],
-          now: 3_000,
-          replicableRowCount: 8,
-        });
-        expect(
-          mod.estimateRemainingMs(config(slowdown), atBoundary)
-        ).toBeUndefined();
-      }
-    );
+    it("gives no time left in the set stage, which sends no count", () => {
+      const atBoundary = run({
+        sims: [...sims, { t: 3_000, done: 11, afterRanking: false }],
+        now: 3_000,
+        replicableRowCount: 8,
+      });
+      expect(mod.estimateRemainingMs(config, atBoundary)).toBeUndefined();
+    });
 
-    it.each([0, 0.1])(
-      "stays linear without a boundary (slowdown %f)",
-      (slowdown) => {
-        // 1000 / 4 * (47 - 5)
-        expect(
-          mod.estimateRemainingMs(
-            config(slowdown),
-            run({ doneAtLastCandidate: null })
-          )
-        ).toBeCloseTo(10_500, 6);
-      }
-    );
+    it("stays linear without a boundary", () => {
+      // 1000 / 4 * (47 - 5)
+      expect(
+        mod.estimateRemainingMs(config, run({ doneAtLastCandidate: null }))
+      ).toBeCloseTo(10_500, 6);
+    });
 
     it("ships the constants fitted on the web feral run of 2026-11-22", () => {
-      // The set phase and replication now run their sims at the runner's
-      // concurrency, so those two costs were refitted on that run
-      // (docs/reviews/fix-web-run-speed.md); slowdown is still run 1's.
+      // The set phase and replication run their sims at the runner's
+      // concurrency, so those two costs were fitted on that run
+      // (docs/reviews/fix-web-run-speed.md). Candidates no longer slow as the
+      // run goes on, so the estimate has no slowdown term (ticket 894).
       expect(mod.RUN_PROGRESS_ESTIMATOR).toEqual({
         kind: "phased",
         replicationSimCost: 0.75,
         setBonusStageCandidates: 45.34,
-        slowdown: 0.003064,
       });
       expect(mod.RUN_PROGRESS_SHOW_FROM_FRACTION).toBe(0.35);
       expect(mod.RUN_PROGRESS_MIN_CANDIDATES_DONE).toBe(10);
+    });
+
+    it("reads a steady run's time left at half its candidates with the shipped constants", () => {
+      // 100 candidates at 250 ms each: T = 1 + 100 + 4 * 9 = 137, B = 101.
+      // At n = 50, eight qualifying rows give Q = 16, capped at 8, so R = 36.
+      // 250 * ((100 - 50) + 45.34 + 0.75 * 36) = 250 * 122.34
+      const steady = Array.from({ length: 51 }, (_, i) => ({
+        t: 250 * i,
+        done: i + 1,
+        afterRanking: false,
+      }));
+      expect(
+        mod.estimateRemainingMs(mod.RUN_PROGRESS_ESTIMATOR, {
+          ...run(),
+          sims: steady,
+          total: 137,
+          doneAtLastCandidate: 101,
+          now: 12_500,
+          replicableRowCount: 8,
+        })
+      ).toBeCloseTo(30_585, 6);
     });
   });
 
@@ -468,7 +465,6 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       kind: "phased",
       replicationSimCost: 2,
       setBonusStageCandidates: 20,
-      slowdown: 0,
     };
 
     it("N1: expects no replication when no row qualifies", () => {
