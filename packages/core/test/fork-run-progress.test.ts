@@ -56,7 +56,6 @@ type EstimatorConfig =
       kind: "phased";
       replicationSimCost: number;
       setBonusStageCandidates: number;
-      slowdown: number;
     };
 
 type RunTimeline = {
@@ -301,7 +300,6 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       kind: "phased",
       replicationSimCost: 2,
       setBonusStageCandidates: 20,
-      slowdown: 0,
     };
 
     it("applies the candidate, boundary, ranking and replication rules", () => {
@@ -313,14 +311,14 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       // r = (2000 - 1000) / 10 = 100; 100 * ((21 - 11) + 20 + 2 * 36)
       t.observe(sim(11, 57), 2_000);
       expect(t.view().remainingMs).toBe(10_200);
-      // r_B = (3000 - 1000) / 20 = 100; 100 * (20 + 2 * 36)
+      // The set stage sends no count, so it has no time left (ticket 893).
       t.observe(sim(21, 57), 3_000);
-      expect(t.view().remainingMs).toBe(9_200);
+      expect(t.view().remainingMs).toBeUndefined();
       // A ninth qualifying row in the silent set phase is counted, but the
-      // count is already at top-N 8, so R and the estimate stay the same.
+      // count is already at top-N 8, so R stays the same.
       t.observe(row(false), 4_000);
       expect(t.view().replicableRowCount).toBe(9);
-      expect(t.view().remainingMs).toBe(9_200);
+      expect(t.view().remainingMs).toBeUndefined();
       // b = 21; r_B * k * (T - b) = 100 * 2 * 36
       t.observe(RANKING, 5_000);
       expect(t.view().remainingMs).toBe(7_200);
@@ -367,12 +365,12 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     });
   });
 
-  describe("slowdown term in the candidate estimate", () => {
+  describe("the candidate estimate", () => {
     // Five events, four candidates done (n = 4) at 250 ms each. T = 47 is
     // c = 10, so B = 11 and R = 36. replicationSimCost 1 gives k = 1;
-    // setBonusStageCandidates = 2. With S(x) = x(x + 1)/2: a = tau / (n + s S(n)),
-    // C = a ((c - n) + s (S(c) - S(n))), rbar = (tau + C) / c and the
-    // estimate is C + rbar (setBonusStageCandidates + k R).
+    // setBonusStageCandidates = 2. The estimate is the time per candidate so
+    // far times the candidates left, the set stage and replication:
+    // r ((c - n) + setBonusStageCandidates + k R).
     const sims = [0, 250, 500, 750, 1_000].map((t, i) => ({
       t,
       done: i + 1,
@@ -392,72 +390,71 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       topN: 8,
       ...over,
     });
-    const config = (slowdown: number): EstimatorConfig => ({
+    const config: EstimatorConfig = {
       kind: "phased",
       replicationSimCost: 1,
       setBonusStageCandidates: 2,
-      slowdown,
-    });
+    };
 
     it("uses the boundary the tab solves for total 47", () => {
       expect(mod.doneAtLastCandidateFor(47, 5, 8)).toBe(11);
     });
 
-    it.each([
-      // Round 3's rule: 250 * (11 - 5 + 2 + 36)
-      [0, 11_000],
-      // a = 1000 / (4 + 0.1 * 10) = 200; C = 200 * (6 + 0.1 * 45) = 2100;
-      // rbar = 3100 / 10 = 310; 2100 + 310 * 38
-      [0.1, 13_880],
-      // a = 1000 / 6; C = a * (6 + 0.2 * 45) = 2500; rbar = 350; 2500 + 350 * 38
-      [0.2, 15_800],
-    ])("with slowdown %f reads %i", (slowdown, expected) => {
-      expect(mod.estimateRemainingMs(config(slowdown), run())).toBeCloseTo(
-        expected,
-        6
-      );
+    it("reads the candidates, set stage and replication left at the pace so far", () => {
+      // 250 * ((11 - 5) + 2 + 36)
+      expect(mod.estimateRemainingMs(config, run())).toBeCloseTo(11_000, 6);
     });
 
-    it.each([0, 0.1])(
-      "leaves the boundary rule unchanged (slowdown %f)",
-      (slowdown) => {
-        // r_B = 3000 / 10 = 300; 300 * (2 + 36)
-        const atBoundary = run({
-          sims: [...sims, { t: 3_000, done: 11, afterRanking: false }],
-          now: 3_000,
-          replicableRowCount: 8,
-        });
-        expect(
-          mod.estimateRemainingMs(config(slowdown), atBoundary)
-        ).toBeCloseTo(11_400, 6);
-      }
-    );
+    it("gives no time left in the set stage, which sends no count", () => {
+      const atBoundary = run({
+        sims: [...sims, { t: 3_000, done: 11, afterRanking: false }],
+        now: 3_000,
+        replicableRowCount: 8,
+      });
+      expect(mod.estimateRemainingMs(config, atBoundary)).toBeUndefined();
+    });
 
-    it.each([0, 0.1])(
-      "stays linear without a boundary (slowdown %f)",
-      (slowdown) => {
-        // 1000 / 4 * (47 - 5)
-        expect(
-          mod.estimateRemainingMs(
-            config(slowdown),
-            run({ doneAtLastCandidate: null })
-          )
-        ).toBeCloseTo(10_500, 6);
-      }
-    );
+    it("stays linear without a boundary", () => {
+      // 1000 / 4 * (47 - 5)
+      expect(
+        mod.estimateRemainingMs(config, run({ doneAtLastCandidate: null }))
+      ).toBeCloseTo(10_500, 6);
+    });
 
     it("ships the constants fitted on the web feral run of 2026-11-22", () => {
-      // The set phase and replication now run their sims at the runner's
-      // concurrency, so those two costs were refitted on that run
-      // (docs/reviews/fix-web-run-speed.md); slowdown is still run 1's.
+      // The set phase and replication run their sims at the runner's
+      // concurrency, so those two costs were fitted on that run
+      // (docs/reviews/fix-web-run-speed.md). On three recorded feral runs
+      // candidates took the same time early and late, so the estimate has no
+      // slowdown term (ticket 894).
       expect(mod.RUN_PROGRESS_ESTIMATOR).toEqual({
         kind: "phased",
         replicationSimCost: 0.75,
         setBonusStageCandidates: 45.34,
-        slowdown: 0.003064,
       });
       expect(mod.RUN_PROGRESS_SHOW_FROM_FRACTION).toBe(0.35);
       expect(mod.RUN_PROGRESS_MIN_CANDIDATES_DONE).toBe(10);
+    });
+
+    it("reads a steady run's time left at half its candidates with the shipped constants", () => {
+      // 100 candidates at 250 ms each: T = 1 + 100 + 4 * 9 = 137, B = 101.
+      // At n = 50, eight qualifying rows give Q = 16, capped at 8, so R = 36.
+      // 250 * ((100 - 50) + 45.34 + 0.75 * 36) = 250 * 122.34
+      const steady = Array.from({ length: 51 }, (_, i) => ({
+        t: 250 * i,
+        done: i + 1,
+        afterRanking: false,
+      }));
+      expect(
+        mod.estimateRemainingMs(mod.RUN_PROGRESS_ESTIMATOR, {
+          ...run(),
+          sims: steady,
+          total: 137,
+          doneAtLastCandidate: 101,
+          now: 12_500,
+          replicableRowCount: 8,
+        })
+      ).toBeCloseTo(30_585, 6);
     });
   });
 
@@ -469,7 +466,6 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       kind: "phased",
       replicationSimCost: 2,
       setBonusStageCandidates: 20,
-      slowdown: 0,
     };
 
     it("N1: expects no replication when no row qualifies", () => {
@@ -482,9 +478,9 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       // r = 100; R = 0: 100 * ((21 - 11) + 20 + 0)
       t.observe(sim(11, 57), 2_000);
       expect(t.view().remainingMs).toBeCloseTo(3_000, 6);
-      // r_B = 100; 100 * (20 + 0)
+      // The set stage has no time left.
       t.observe(sim(21, 57), 3_000);
-      expect(t.view().remainingMs).toBeCloseTo(2_000, 6);
+      expect(t.view().remainingMs).toBeUndefined();
       // Expected final done = B = 21, so ranking: 100 * 2 * (21 - 21)
       t.observe(RANKING, 5_000);
       expect(t.view().activity).toBe("ranking");
@@ -501,9 +497,9 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       expect(t.view().remainingMs).toBeCloseTo(8_600, 6);
       for (let i = 0; i < 10; i++) t.observe(row(true), 2_500);
       expect(t.view().remainingMs).toBeCloseTo(8_600, 6);
-      // Q = 3 at the boundary, R = 16: 100 * (20 + 2 * 16)
+      // Q = 3 at the boundary, R = 16. The set stage has no time left.
       t.observe(sim(21, 57), 3_000);
-      expect(t.view().remainingMs).toBeCloseTo(5_200, 6);
+      expect(t.view().remainingMs).toBeUndefined();
       // Expected final done 37: 100 * 2 * 16
       t.observe(RANKING, 5_000);
       expect(t.view().activity).toBe("replication");
@@ -528,12 +524,13 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       const t = tracker(config, 4);
       t.observe(sim(1, 57), 1_000);
       for (let i = 0; i < 10; i++) t.observe(row(true), 1_500);
-      // r_B = 100; Q = 0: 100 * 20
+      // Q = 0. The set stage has no time left.
       t.observe(sim(21, 57), 3_000);
-      expect(t.view().remainingMs).toBeCloseTo(2_000, 6);
-      // Q = 1, R = 8, recomputed at the boundary event: 100 * (20 + 2 * 8)
+      expect(t.view().remainingMs).toBeUndefined();
+      // Q = 1, R = 8; still the set stage, so still no time left.
       t.observe(row(false), 3_010);
-      expect(t.view().remainingMs).toBeCloseTo(3_600, 6);
+      expect(t.view().replicableRowCount).toBe(1);
+      expect(t.view().remainingMs).toBeUndefined();
       // Expected final done 29: 100 * 2 * 8
       t.observe(RANKING, 5_000);
       expect(t.view().activity).toBe("replication");

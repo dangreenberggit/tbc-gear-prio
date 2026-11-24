@@ -29,7 +29,9 @@ Options: `--repo <path>` checks another repo; `--home-overlay <dir>` reads
 The file sets below are globs read at run time; no list of pointers is
 stored anywhere. On CI (`CI` set) every pointer whose site or target is
 under `~/` is skipped and counted. Off CI a missing or unreadable
-`~/.claude` fails, so a stubbed HOME cannot pass silently.
+`~/.claude` fails, so a stubbed HOME cannot pass silently. Skills the
+skills CLI installed (`~/.agents/.skill-lock.json`) are not sites, and the
+summary counts their files.
 
 Not seen: code that reads headings by name (for example a hook that reads a
 routing.md section). `refs` cannot list those readers.
@@ -39,6 +41,7 @@ from __future__ import annotations
 
 import argparse
 import io
+import json
 import os
 import re
 import sys
@@ -66,6 +69,10 @@ HOME_SITE_GLOBS = (
     ".claude_router/agents/*.md",
 )
 HOME_SKIP_PARTS = (".trash",)
+# The skills CLI (`npx skills add`) records each skill it installs from
+# someone else's repo here. Those files are their authors' text: an update
+# overwrites any edit, so they are not sites. Pointers into them still are.
+SKILL_LOCK = ".agents/.skill-lock.json"
 
 FENCE = re.compile(r"^\s*(`{3,}|~{3,})")
 HEADING = re.compile(r"^(#{1,6})\s+(.*?)\s*#*\s*$")
@@ -137,6 +144,7 @@ class World:
     ci: bool
     overlay: Path | None = None
     docs: dict[str, Doc | None] = field(default_factory=dict)
+    installed: tuple[int, int] = (0, 0)  # files and skills site_keys left out
     _stems: set[str] | None = None
 
     def stems(self) -> set[str]:
@@ -192,7 +200,9 @@ def _glob(base: Path, pattern: str, errors: list[str]) -> list[Path]:
 
 
 def site_keys(world: World, errors: list[str] | None = None) -> tuple[list[str], list[str]]:
-    """Repo site keys and home site keys; read errors go in errors."""
+    """Repo site keys and home site keys; read errors go in errors. Files
+    of installed skills are left out, and their count goes in
+    world.installed for the summary."""
     errors = [] if errors is None else errors
     repo = []
     for g in REPO_SITE_GLOBS:
@@ -209,7 +219,26 @@ def site_keys(world: World, errors: list[str] | None = None) -> tuple[list[str],
                     "~/.claude/" + p.relative_to(world.overlay).as_posix()
                     for p in _glob(world.overlay, g[len(".claude/"):], errors)
                 ]
-    return sorted(set(repo)), sorted(set(home))
+    names = installed_skills(world, errors)
+    prefixes = tuple(f"~/.claude/skills/{n}/" for n in names)
+    left_out = {k for k in home if k.startswith(prefixes)}
+    world.installed = (len(left_out), len({k.split("/")[3] for k in left_out}))
+    return sorted(set(repo)), sorted(set(home) - left_out)
+
+
+def installed_skills(world: World, errors: list[str]) -> set[str]:
+    """Names of the skills the skills CLI installed; none when it has no
+    lock file. A lock that cannot be read goes in errors, so a broken one
+    never checks the installed skills as the owner's own."""
+    path = world.home / SKILL_LOCK
+    if not path.exists():
+        return set()
+    try:
+        skills = json.loads(path.read_text())["skills"]
+        return {n for n in skills if n and "/" not in n}
+    except (OSError, ValueError, KeyError, TypeError) as e:
+        errors.append(f"{path}: cannot read ({e})")
+        return set()
 
 
 def _spans(text: str) -> list[tuple[int, int, str]]:
@@ -505,6 +534,9 @@ def run_check(world: World, out, err) -> int:
         summary += f"; {home_skipped} into ~/.claude skipped (CI)"
     if scratch_skipped:
         summary += f"; {scratch_skipped} into .scratch skipped"
+    files, skills = world.installed
+    if files:
+        summary += f"; {files} file{'s' * (files != 1)} in {skills} installed skill{'s' * (skills != 1)} skipped"
     print(summary, file=out)
     return 1 if bad or errors else 0
 
@@ -875,6 +907,27 @@ def t_home_pointers_and_home_sites():
     # repo 1 + routing 1 + general-task 1 (dead) + skill 1 + glm 1; .trash skipped
     assert rc == 1 and "5 checked, 1 dead" in out, (out, err)
     assert "~/.claude/agents/general-task.md:1:" in err and "Gone" in err, err
+
+
+def t_installed_skill_is_not_a_site():
+    """A skill the skills CLI installed from someone else's repo (listed in
+    ~/.agents/.skill-lock.json, such as mobile-native's `(see §5)`) is not a
+    site: its text is its author's. A pointer into it is still checked."""
+    home = {
+        ".agents/.skill-lock.json": '{"version": 3, "skills": {"pack": {"source": "someone/skills"}}}',
+        ".claude/AGENTS.md": "## A\n",
+        ".claude/skills/pack/SKILL.md": "### 1. Hover\n\nPress feedback (see §5).\n\n### 5. Press\n",
+        ".claude/skills/pack/more/x.md": "Also `~/.claude/AGENTS.md` § Gone.\n",
+        ".claude/skills/packed/SKILL.md": "See §5.\n",
+    }
+    rc, out, err = _check({"AGENTS.md": "See `~/.claude/skills/pack/SKILL.md` § 5.\n"}, home_files=home)
+    # repo 1 + packed 1 (style; a name that only starts with "pack" is a site)
+    assert rc == 1 and "2 checked, 0 dead, 1 style; 2 files in 1 installed skill skipped" in out, (out, err)
+    assert "packed/SKILL.md:1:" in err and "/pack/" not in err, err
+    # A home with nothing else wrong, so only the broken lock can fail it.
+    broken = {".agents/.skill-lock.json": "{not json", ".claude/AGENTS.md": "## A\n"}
+    rc, out, err = _check({"AGENTS.md": "x\n"}, home_files=broken)
+    assert rc == 1 and ".skill-lock.json: cannot read" in err and "0 dead, 0 style" in out, (out, err)
 
 
 def t_ci_skips_and_counts_home_pointers():
