@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: task (tooling)
 Origin: the fix/893-set-stage-progress merge, 2026-11-24 (`.scratch/agent-reports/2026-11-24-general-task-893-merge.md`)
 Blocks: none
@@ -40,3 +40,18 @@ here read. The owner edited the skill to "§ 5" and the merge went through
 
 - A skill the repo doesn't own cannot fail the merge gate.
 - Dead-pointer checks on the files agents here are pointed at still run.
+
+## Comments
+
+2026-11-24, closed by `fix/pointers-skip-stray-home-skills` (reviewed in
+`docs/reviews/fix-pointers-skip-stray-home-skills.md`). The pointer check now
+skips the skills the skills CLI lists in `~/.agents/.skill-lock.json`, so a
+third-party skill under `~/.claude/skills/` cannot fail it; owned skills, and
+pointers from our files into installed skills, are still checked, and a lock
+that cannot be read fails the check. On the branch merged with `dev`, the
+check printed `pointers: 271 checked, 0 dead, 0 style; 1 into .scratch
+skipped; 22 files in 11 installed skills skipped`, rc=0, and its self-test
+printed `check_instruction_pointers.py self-test ok (49 tests)`.
+
+Verified by: `python scripts/check_instruction_pointers.py --self-test` and
+`pnpm run pointers:check`, and `docs/reviews/fix-pointers-skip-stray-home-skills.md`.
