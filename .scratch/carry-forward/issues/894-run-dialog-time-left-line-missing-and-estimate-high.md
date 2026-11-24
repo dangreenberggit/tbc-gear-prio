@@ -121,5 +121,7 @@ against 3381 s on 2026-11-23.
 
 Verified by: `python3 .scratch/894/analyze.py .scratch/894/web/run/tail.jsonl`
 and `python3 .scratch/894/analyze.py .scratch/894/desktop/run/tail.jsonl` in
-the pair `tbc-wt/time-left-894` (gitignored readbacks), and
+the pair `tbc-wt/time-left-894` (gitignored readbacks; the pair is removed,
+and its `.scratch/894/` is now `.scratch/worktree-archive/time-left-894/894/`
+in the main checkout), and
 `docs/reviews/fix-894-time-left.md`.
