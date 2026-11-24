@@ -30,6 +30,7 @@ import {
   forkPresent,
   importForkUpgrades,
   statsOnlyItemEp,
+  tracedRank,
   zeroHitStats,
 } from "./fork-engine-harness.js";
 
@@ -393,6 +394,16 @@ type Scenario = {
   databaseOmits?: (ids: readonly number[]) => readonly number[];
   /** Composing a request for gear whose equipped ids match throws (ticket 872). */
   composeFailsWhen?: (ids: readonly number[]) => boolean;
+  /**
+   * `Deps.concurrency`. With it the fake sim answers a macrotask later, so
+   * sims the engine sends together are in flight together.
+   */
+  concurrency?: number;
+  /**
+   * With `concurrency`, extra milliseconds before a sim answers, so a test
+   * can make one set's sims finish after another's.
+   */
+  extraDelayMs?: (ids: number[]) => number;
 };
 
 type ForkRanking = {
@@ -496,6 +507,10 @@ async function runScenario(scenario: Scenario): Promise<{
   requests: RaidSimRequest[];
   /** For each `activeSetBonuses` call, how many sims had run before it. */
   setBonusReadRuns: number[];
+  /** For each fake sim call, how many sims were in flight once it started. */
+  inFlightAtStart: number[];
+  /** For each fake sim call, the stack it was made from. */
+  stackAtStart: string[];
 }> {
   // The fake sim answers in microtasks, so without this the file never gives
   // the event loop back. Since every feral run reads hit (ticket 830), the
@@ -563,6 +578,9 @@ async function runScenario(scenario: Scenario): Promise<{
   }));
 
   let runCount = 0;
+  let inFlight = 0;
+  const inFlightAtStart: number[] = [];
+  const stackAtStart: string[] = [];
   const calls: number[][] = [];
   const callOpts: SimRunOpts[] = [];
   const requests: RaidSimRequest[] = [];
@@ -579,15 +597,45 @@ async function runScenario(scenario: Scenario): Promise<{
     computeStats: zeroHitStats,
     run: (req: RaidSimRequest, opts: SimRunOpts): Promise<SimObservation> => {
       runCount += 1;
+      if (scenario.concurrency !== undefined) {
+        inFlight += 1;
+        inFlightAtStart.push(inFlight);
+        // Which engine step sent the sim: its async callers are in the
+        // stack, below more frames than the default limit of 10 keeps.
+        const limit = Error.stackTraceLimit;
+        Error.stackTraceLimit = 100;
+        stackAtStart.push(new Error().stack ?? "");
+        Error.stackTraceLimit = limit;
+      }
       const ids = equippedIds(req);
       calls.push(ids);
       callOpts.push({ ...opts });
       requests.push(structuredClone(req));
       if (runCount - 1 === scenario.stopDuringCall) controller?.abort();
+      // Of each five sims, a later one answers sooner, so sims finish in a
+      // different order than they started, as browser workers can.
+      const delayMs =
+        2 * (5 - (runCount % 5)) + (scenario.extraDelayMs?.(ids) ?? 0);
+      const answer = <T>(settle: () => T): Promise<T> =>
+        scenario.concurrency === undefined
+          ? new Promise((resolve) => resolve(settle()))
+          : new Promise((resolve, reject) =>
+              setTimeout(() => {
+                inFlight -= 1;
+                try {
+                  resolve(settle());
+                } catch (err) {
+                  reject(err);
+                }
+              }, delayMs)
+            );
       if (scenario.failWhen?.(ids, opts)) {
-        return Promise.reject(
-          new Error(MODEL_SIM_ERROR + (scenario.failStack?.(runCount) ?? ""))
+        const error = new Error(
+          MODEL_SIM_ERROR + (scenario.failStack?.(runCount) ?? "")
         );
+        return answer(() => {
+          throw error;
+        });
       }
       const dps = modelDps(
         ids,
@@ -599,7 +647,7 @@ async function runScenario(scenario: Scenario): Promise<{
       );
       // Per-iteration values only when asked, as the worker runner does: the
       // model is exact, so every iteration reads the model DPS.
-      return Promise.resolve({
+      const observation = {
         dps,
         stdev: 30,
         iterationsDone: opts.iterations,
@@ -607,7 +655,8 @@ async function runScenario(scenario: Scenario): Promise<{
         ...(opts.saveAllValues === true
           ? { allValues: new Array<number>(opts.iterations).fill(dps) }
           : {}),
-      });
+      };
+      return answer(() => observation);
     },
     ...(scenario.reportsSetBonuses
       ? {
@@ -642,7 +691,7 @@ async function runScenario(scenario: Scenario): Promise<{
     candidateCap: 100,
   };
 
-  const ranking = await rankMod.rankUpgrades(input, {
+  const ranking = await tracedRank(rankMod.rankUpgrades)(input, {
     gear: gearSource,
     sim,
     store: scenario.store ?? new storeMod.MemoryStore(),
@@ -656,6 +705,9 @@ async function runScenario(scenario: Scenario): Promise<{
       ? { setScreenMode: scenario.setScreenMode }
       : {}),
     ...(controller ? { signal: controller.signal } : {}),
+    ...(scenario.concurrency === undefined
+      ? {}
+      : { concurrency: scenario.concurrency }),
     ...(scenario.databaseWithout ||
     scenario.databaseOmits ||
     scenario.composeFailsWhen
@@ -679,7 +731,16 @@ async function runScenario(scenario: Scenario): Promise<{
       : {}),
   });
 
-  return { ranking, runCount, calls, callOpts, requests, setBonusReadRuns };
+  return {
+    ranking,
+    runCount,
+    calls,
+    callOpts,
+    requests,
+    setBonusReadRuns,
+    inFlightAtStart,
+    stackAtStart,
+  };
 }
 
 /** A full 17-slot worn set, some slots filled by the given specs. */
@@ -836,7 +897,7 @@ describe.skipIf(!forkPresent)("fork set-bonus net value (467)", () => {
         item: { setContext?: unknown },
         cutoff: { absDps: number }
       ) => number;
-    }>("engine/view.ts");
+    }>("engine/set-potential.ts");
     // Malorne 2pc worn in hands+legs, Thunderheart pool in those slots, and
     // NO neutral candidate. Before ticket 512 the vacate had nothing to
     // vacate to and B was unmeasured; the ladder needs no replacement.
@@ -952,7 +1013,7 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit (467)", () => {
         item: { setContext?: unknown },
         cutoff: { absDps: number }
       ) => number;
-    }>("engine/view.ts");
+    }>("engine/set-potential.ts");
     const { rankableSetPotential } = viewMod;
     const floor = { absDps: 5 };
 
@@ -1022,15 +1083,26 @@ describe.skipIf(!forkPresent)("rankableSetPotential credit (467)", () => {
  */
 const FLOOR = { absDps: 5 };
 
-type ViewMod = {
+type SetPotentialMod = {
   rankableSetPotential: (
     item: { setContext?: unknown },
     cutoff: { absDps: number }
   ) => number;
 };
 
-async function viewModule(): Promise<ViewMod> {
-  return importForkUpgrades<ViewMod>("engine/view.ts");
+async function setPotentialModule(): Promise<SetPotentialMod> {
+  return importForkUpgrades<SetPotentialMod>("engine/set-potential.ts");
+}
+
+/**
+ * `applyView` (view.ts) and the set-potential credit it sorts by
+ * (set-potential.ts), as one object, for the cases that read both.
+ */
+async function viewWithSetPotential<T>(): Promise<T> {
+  return {
+    ...(await importForkUpgrades<object>("engine/view.ts")),
+    ...(await importForkUpgrades<object>("engine/set-potential.ts")),
+  } as T;
 }
 
 /** Runs a scenario with the B flag off and on, for the sim-count invariant. */
@@ -1099,7 +1171,7 @@ const TH_FOUR_IDS = [
 
 describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
   it("476-A: worn Malorne 4 — both thresholds measured, B_2 solved exactly", async () => {
-    const view = await viewModule();
+    const view = await setPotentialModule();
     const { off, on } = await runOffOn({
       worn: wornGear(MALORNE_4),
       pool: TH_OVER_MALORNE_POOL,
@@ -1149,7 +1221,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
   });
 
   it("476-B: worn Malorne 5 — both thresholds lost by the package, net4 sign fixed", async () => {
-    const view = await viewModule();
+    const view = await setPotentialModule();
     const { ranking: r } = await runScenario({
       worn: wornGear({ ...MALORNE_4, legs: MALORNE.legs }),
       pool: TH_OVER_MALORNE_POOL,
@@ -1174,7 +1246,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
   });
 
   it("477-P: a commit break without a measured B zeroes the credit", async () => {
-    const view = await viewModule();
+    const view = await setPotentialModule();
     const item = {
       setContext: {
         futureBonuses: [{ threshold: 4, piecesNeeded: 4, dps: 80 }],
@@ -1188,7 +1260,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     // D3: Malorne chest, hands, legs worn (2pc active). Thunderheart wrist,
     // waist, feet at 150 let the 4pc package avoid all but one Malorne slot, so
     // only the legs row's substituted package breaks the 2pc.
-    const view = await viewModule();
+    const view = await setPotentialModule();
     const itemValue = new Map(ITEM_VALUE);
     for (const id of [
       THUNDERHEART.wrist,
@@ -1328,7 +1400,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
 
   it("A4: an owned row's swap adds no piece, so it gets no future credit", async () => {
     // D4: Thunderheart hands + legs worn; the pool holds the worn hands (owned).
-    const view = await viewModule();
+    const view = await setPotentialModule();
     const { ranking: r } = await runScenario({
       worn: wornGear({ hands: THUNDERHEART.hands, legs: THUNDERHEART.legs }),
       pool: [
@@ -1387,7 +1459,7 @@ function bonusOf(ranking: ForkRanking, setId: number, threshold: number) {
   );
 }
 
-type SubLineMod = ViewMod & {
+type SubLineMod = SetPotentialMod & {
   setPotentialCredit: (ctx: unknown, cutoff: { absDps: number }) => number;
   setCreditUnmeasured: (ctx: unknown) => boolean;
   setPotentialTerms: (
@@ -1412,6 +1484,9 @@ type SubLineMod = ViewMod & {
     ctx: unknown,
     on: boolean
   ) => "not_counted" | "hover_hint" | null;
+};
+
+type SubLineViewMod = SubLineMod & {
   applyView: (
     r: unknown,
     v: { withSetPotential?: boolean }
@@ -1446,7 +1521,7 @@ const TH2_BREAK = { setId: 676, threshold: 2, dps: 50 };
 
 describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
   it("490-A: a Malorne head/shoulder/chest row is not charged the Thunderheart 2pc its 2pc does not need", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineViewMod>();
     const { off, on } = await runMalorneOverThunderheart2pc({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 0 },
@@ -1513,7 +1588,9 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
   });
 
   it("490-B: a real 4pc worth less than the break it needs", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await importForkUpgrades<SubLineMod>(
+      "engine/set-potential.ts"
+    );
     const { on } = await runMalorneOverThunderheart2pc({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 30 },
@@ -1533,7 +1610,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
   });
 
   it("490-C: a Nordrassil row whose only bonus needs the Thunderheart 2pc break gets ON = OFF", async () => {
-    const view = await viewModule();
+    const view = await setPotentialModule();
     const { ranking: r } = await runScenario({
       worn: TH_HANDS_LEGS,
       pool: [...setPool(NORDRASSIL), ...NEUTRAL_HANDS_LEGS],
@@ -1557,7 +1634,9 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
   });
 
   it("491-P: setCreditUnmeasured covers future breaks and commit breaks", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await importForkUpgrades<SubLineMod>(
+      "engine/set-potential.ts"
+    );
     const first = {
       futureBonuses: [{ threshold: 4, piecesNeeded: 4, dps: 80 }],
       commitBreaks: [{ setId: 640, threshold: 2 }],
@@ -1589,7 +1668,9 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
   });
 
   it("491-L: the tab's sub-line choice follows the view's zero rule", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await importForkUpgrades<SubLineMod>(
+      "engine/set-potential.ts"
+    );
     const first = {
       futureBonuses: [{ threshold: 4, piecesNeeded: 4, dps: 80 }],
       commitBreaks: [{ setId: 640, threshold: 2 }],
@@ -1621,7 +1702,7 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
     // Run count before the 492 fix, recorded from the red run
     // (docs/set-bonus-fixture-derivations.md, 492-F: 6).
     const PRE_FIX_492_RUNS = 6;
-    const view = await viewModule();
+    const view = await setPotentialModule();
     const { ranking: r, runCount } = await runScenario({
       worn: wornGear({ hands: THUNDERHEART.hands }),
       pool: TH_POOL.filter((p) => p.slot !== "hands"),
@@ -1654,7 +1735,9 @@ describe.skipIf(!forkPresent)("commit breaks per future (490-493)", () => {
 
 describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
   it("492-J: a pair that breaks a worn set only together is not used for B2", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await importForkUpgrades<SubLineMod>(
+      "engine/set-potential.ts"
+    );
     const { off, on } = await runOffOn({
       worn: wornGear({
         hands: THUNDERHEART.hands,
@@ -1715,7 +1798,9 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
   });
 
   it("492-N: with no break-free pair the worn-1 4pc net stays unset; the bonus-gear rule credits the rows from their bonus gear", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await importForkUpgrades<SubLineMod>(
+      "engine/set-potential.ts"
+    );
     const { ranking: r } = await runScenario({
       worn: wornGear({
         hands: THUNDERHEART.hands,
@@ -1764,7 +1849,9 @@ describe.skipIf(!forkPresent)("engine review fixes (A1, A2, A4)", () => {
   });
 
   it("476-D: a failed ladder sim leaves that break unmeasured and the row not counted", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await importForkUpgrades<SubLineMod>(
+      "engine/set-potential.ts"
+    );
     // 476-A's worn Malorne 4 with the model sim failing on the one ladder
     // rung that sends the Malorne hands as a set-kept copy: R(4). Before
     // ticket 512 this case pinned the vacate's dependent-unmeasured rule;
@@ -1961,7 +2048,9 @@ const piece = (itemId: number, name: string, dps?: number) => ({
 
 describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
   it("502-A: a package member's ON figure equals the measured package delta", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await importForkUpgrades<SubLineMod>(
+      "engine/set-potential.ts"
+    );
     const { on } = await runMalorneOverThunderheart2pc({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 30 },
@@ -1980,7 +2069,9 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
   });
 
   it("502-B: an increment whose bonus floors to 0 is never the credited bonus, but its pieces still count", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await importForkUpgrades<SubLineMod>(
+      "engine/set-potential.ts"
+    );
     const allFloored = {
       setContext: {
         futureBonuses: [
@@ -2089,7 +2180,9 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
   });
 
   it("502-D: the terms are itemized by increment, add up to the credit and end at the credited bonus", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await importForkUpgrades<SubLineMod>(
+      "engine/set-potential.ts"
+    );
     const M = "Malorne Harness";
     const ctx = (bDps: number) => ({
       setName: "Thunderheart Harness",
@@ -2176,7 +2269,9 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
   });
 
   it("502-E: a piece without a figure zeroes the credit; a future with no pieces field is credited as before", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await importForkUpgrades<SubLineMod>(
+      "engine/set-potential.ts"
+    );
     const noFigure = {
       futureBonuses: [
         { threshold: 4, piecesNeeded: 4, dps: 80, pieces: [piece(1, "A")] },
@@ -2202,7 +2297,7 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
   });
 
   it("502-F: with Set potential off, set rows sort on deltaDps alone", async () => {
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await viewWithSetPotential<SubLineViewMod>();
     const { on } = await runMalorneOverThunderheart2pc({
       676: { b2: B2_TH, b4: B4_TH },
       640: { b2: 40, b4: 30 },
@@ -2221,7 +2316,9 @@ describe.skipIf(!forkPresent)("other set pieces' own stats (502)", () => {
     // hands piece's own stats (its single, −2) hold the loss. The bonus is
     // worth 2, below the 3 DPS bar; it was 4 while the check's floor was
     // √2 × 3 (ticket 623).
-    const view = await importForkUpgrades<SubLineMod>("engine/view.ts");
+    const view = await importForkUpgrades<SubLineMod>(
+      "engine/set-potential.ts"
+    );
     const { on } = await runMalorneOverThunderheart2pc({
       676: { b2: 2, b4: B4_TH },
       640: { b2: 40, b4: 30 },
@@ -2600,7 +2697,7 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
     // (dungeon, crafted, other classes' sets), and an upgrade package takes
     // some of its pieces. Example: Wastewalker 659 worn 4/4, model 2pc 30 and
     // 4pc 20, broken by a Malorne package.
-    const view = await viewModule();
+    const view = await setPotentialModule();
     const { ranking: r } = await runScenario({
       worn: wornGear(WASTEWALKER),
       pool: setPool({
@@ -2667,8 +2764,9 @@ describe.skipIf(!forkPresent)("set breaks with no list (512)", () => {
     // K5 (bonus-gear rule): the credited bonus is the 4pc, and its term names the
     // Wastewalker bonuses its gear loses. ON = model(credited gear) − model(G):
     // four Malorne pieces 400 + 40 + 70 and no Wastewalker, 3510 − 3050.
-    const bonusGearView =
-      await importForkUpgrades<BonusGearViewMod>("engine/view.ts");
+    const bonusGearView = await importForkUpgrades<BonusGearViewMod>(
+      "engine/set-potential.ts"
+    );
     const outcomes = bonusGearView
       .setPotentialTerms(mantle.setContext, FLOOR)
       .terms.filter((t) => t.kind === "outcome");
@@ -2894,7 +2992,7 @@ type IncrementTerm = {
   isCredited: boolean;
 };
 
-type BonusGearViewMod = ViewMod & {
+type BonusGearViewMod = SetPotentialMod & {
   setPotentialTerms: (
     ctx: unknown,
     cutoff: { absDps: number }
@@ -2917,7 +3015,7 @@ type BonusGearViewMod = ViewMod & {
 };
 
 async function bonusGearView(): Promise<BonusGearViewMod> {
-  return importForkUpgrades<BonusGearViewMod>("engine/view.ts");
+  return importForkUpgrades<BonusGearViewMod>("engine/set-potential.ts");
 }
 
 /** The `"outcome"` terms of a bonus-gear ranking's row, in count order. */
@@ -5319,7 +5417,8 @@ type SwapBreaksMod = {
 describe.skipIf(!forkPresent)(
   "own-swap breaks on rows without a setContext (536)",
   () => {
-    const view = () => importForkUpgrades<SwapBreaksMod>("engine/view.ts");
+    const view = () =>
+      importForkUpgrades<SwapBreaksMod>("engine/set-potential.ts");
     // Derivations: docs/set-bonus-fixture-derivations.md § Ticket 536.
     const MALORNE_4 = idsOf({
       shoulder: MALORNE.shoulder,
@@ -6456,3 +6555,116 @@ describe.skipIf(!forkPresent)(
     });
   }
 );
+
+/**
+ * The web build runs each sim on one WASM worker, so a step that sends its
+ * sims one at a time leaves the other workers idle; on 2026-11-22 the
+ * set-bonus and replication steps of a feral web run took 509 s and 540 s,
+ * one sim at a time (`docs/reviews/fix-web-run-speed.md`).
+ */
+describe.skipIf(!forkPresent)("Sims at the runner's concurrency", () => {
+  const piecesOf = (set: Record<string, number>, ids: readonly number[]) =>
+    ids.filter((id) => Object.values(set).includes(id)).length;
+  const REPLICATION_SCENARIO: Scenario = {
+    ...SR_SCENARIO,
+    setScreenMode: "on",
+    seeds: "engine-default",
+    iterations: 3000,
+  };
+  // Three sets the pool can each add two or more pieces of.
+  const THREE_SETS_SCENARIO: Scenario = {
+    worn: wornGear({}),
+    pool: [
+      ...TH_POOL,
+      ...(["head", "shoulder", "hands", "legs", "chest"] as const).flatMap(
+        (slot) => [
+          { itemId: MALORNE[slot], slot },
+          { itemId: NORDRASSIL[slot], slot },
+        ]
+      ),
+    ],
+    measureSetBonuses: true,
+    reportsSetBonuses: true,
+    setScreenMode: "on",
+  };
+  const SCENARIOS: ReadonlyArray<readonly [string, Scenario]> = [
+    ...STOP_SCENARIOS,
+    ["511-SR gear, five seeds", REPLICATION_SCENARIO],
+    ["three sets, screen on", THREE_SETS_SCENARIO],
+    [
+      "three sets, flag off",
+      { ...THREE_SETS_SCENARIO, measureSetBonuses: false },
+    ],
+    // Run notes are part of the ranking. Two sets' sims fail, the first
+    // set's last, so their notes must not follow the finish order.
+    [
+      "three sets, two sets' sims failing",
+      {
+        ...THREE_SETS_SCENARIO,
+        failWhen: (ids) =>
+          [THUNDERHEART, MALORNE].some((set) => piecesOf(set, ids) >= 2),
+        extraDelayMs: (ids) => (piecesOf(THUNDERHEART, ids) >= 2 ? 30 : 0),
+      },
+    ],
+  ];
+
+  it("runs the replication sims up to the runner's concurrency at once", async () => {
+    const run = await runScenario({ ...REPLICATION_SCENARIO, concurrency: 4 });
+    // Replication is the only step that sims at a seed other than the first.
+    const replication = run.callOpts.flatMap((o, i) =>
+      o.seed === 11 ? [] : [run.inFlightAtStart[i]!]
+    );
+    expect(replication.length).toBeGreaterThan(4);
+    expect(Math.max(...replication)).toBe(4);
+  });
+
+  it("runs the set screen's sims for different sets at once", async () => {
+    const run = await runScenario({ ...THREE_SETS_SCENARIO, concurrency: 4 });
+    // Only the screen asks for per-iteration values.
+    const screen = run.callOpts.flatMap((o, i) =>
+      o.saveAllValues === true ? [run.inFlightAtStart[i]!] : []
+    );
+    expect(screen.length).toBeGreaterThan(2);
+    expect(Math.max(...screen)).toBeGreaterThan(1);
+  });
+
+  it("runs the set-bonus value sims for different sets at once", async () => {
+    // With the flag off no screen, worn-set or bonus-gear sim runs. Nothing
+    // is worn, so a candidate sim wears one item and a set-bonus value sim
+    // two or more.
+    const run = await runScenario({
+      ...THREE_SETS_SCENARIO,
+      measureSetBonuses: false,
+      concurrency: 4,
+    });
+    const setPhase = run.calls.flatMap((ids, i) =>
+      ids.filter((id) => id > 0).length >= 2 ? [run.inFlightAtStart[i]!] : []
+    );
+    expect(setPhase.length).toBeGreaterThan(2);
+    expect(Math.max(...setPhase)).toBeGreaterThan(1);
+  });
+
+  it("runs the partner choice's sims for different rows at once", async () => {
+    const run = await runScenario({ ...THREE_SETS_SCENARIO, concurrency: 4 });
+    // V8 rebuilds only part of an async stack, so a partner-choice sim's stack
+    // names either its step (`choosePartnerGears`) or its own sim call
+    // (`simCloseCall`).
+    const partnerChoice = run.stackAtStart.flatMap((stack, i) =>
+      /\b(choosePartnerGears|simCloseCall)\b/.test(stack)
+        ? [run.inFlightAtStart[i]!]
+        : []
+    );
+    expect(partnerChoice.length).toBeGreaterThan(2);
+    expect(Math.max(...partnerChoice)).toBeGreaterThan(1);
+  });
+
+  it.each(SCENARIOS)(
+    "%s: gives the same ranking at concurrency 4 as one sim at a time",
+    async (_name, scenario) => {
+      const serial = await runScenario(scenario);
+      const parallel = await runScenario({ ...scenario, concurrency: 4 });
+      expect(parallel.ranking).toEqual(serial.ranking);
+    },
+    120_000
+  );
+});

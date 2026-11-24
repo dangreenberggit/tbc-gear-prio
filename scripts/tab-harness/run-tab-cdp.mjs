@@ -710,7 +710,7 @@ const installSimCapture = `(async () => {
 })()`;
 
 // Runs the page's own Simulate at the tab baseline's seed and iterations. 11 is
-// the tab's baseline seed (`DEFAULT_SEED_BASE` in engine/rank.ts). The inputs
+// the tab's baseline seed (`DEFAULT_SEED_BASE` in engine/rank-setup.ts). The inputs
 // are read back because a scripted value on the hidden settings-menu input is
 // not known to stick; a wrong seed would make the comparison meaningless.
 const runPageSim = (iterations, timeoutMs) => `(async () => {

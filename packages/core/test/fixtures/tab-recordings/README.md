@@ -5,8 +5,8 @@ after a full sim run on one spec page, saved by the recorder
 (`scripts/tab-fixtures/record.mjs`). Two engine tests read them as frozen test
 data:
 
-- `packages/core/test/fork-set-fixtures.test.ts` checks the fork's `view.ts`
-  set-bonus figures against every row of all six files.
+- `packages/core/test/fork-set-fixtures.test.ts` checks the fork's
+  `set-potential.ts` set-bonus figures against every row of all six files.
 - `packages/core/test/fork-meta-repair.test.ts` reads `ret-p3-p2` and the four
   feral files it names.
 

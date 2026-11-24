@@ -30,6 +30,7 @@ import {
   forkUpgradesDir,
   importForkUpgrades,
   statsOnlyItemEp,
+  tracedRank,
   zeroHitStats,
 } from "./fork-engine-harness.js";
 
@@ -294,11 +295,11 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
   });
 
   describe("phased estimate", () => {
-    // replicationSimCost 0.5 at concurrency 4 gives k = 2 candidate-times per replication
-    // sim. T = 57 is c = 20, so B = 21 and R = T - B = 36. setBonusStageCandidates = 20.
+    // replicationSimCost 2 gives k = 2 candidate-times per replication sim.
+    // T = 57 is c = 20, so B = 21 and R = T - B = 36. setBonusStageCandidates = 20.
     const phased: EstimatorConfig = {
       kind: "phased",
-      replicationSimCost: 0.5,
+      replicationSimCost: 2,
       setBonusStageCandidates: 20,
       slowdown: 0,
     };
@@ -350,11 +351,25 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       t.observe(RANKING, 4_000);
       expect(t.view().remainingMs).toBe(7_000);
     });
+
+    it("costs a replication sim the same at any concurrency", () => {
+      // Replication sims run at the runner's concurrency, as candidates do,
+      // so a replication sim costs the same candidate-times however many run
+      // at once. At ranking, b = 21: r_B * k * (T - b) = 100 * 2 * 36.
+      for (const concurrency of [1, 4]) {
+        const t = tracker(phased, concurrency);
+        t.observe(sim(1, 57), 1_000);
+        for (let i = 0; i < 8; i++) t.observe(row(false), 1_500);
+        t.observe(sim(21, 57), 3_000);
+        t.observe(RANKING, 5_000);
+        expect(t.view().remainingMs).toBe(7_200);
+      }
+    });
   });
 
   describe("slowdown term in the candidate estimate", () => {
     // Five events, four candidates done (n = 4) at 250 ms each. T = 47 is
-    // c = 10, so B = 11 and R = 36. replicationSimCost 0.25 at concurrency 4 gives k = 1;
+    // c = 10, so B = 11 and R = 36. replicationSimCost 1 gives k = 1;
     // setBonusStageCandidates = 2. With S(x) = x(x + 1)/2: a = tau / (n + s S(n)),
     // C = a ((c - n) + s (S(c) - S(n))), rbar = (tau + C) / c and the
     // estimate is C + rbar (setBonusStageCandidates + k R).
@@ -379,7 +394,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     });
     const config = (slowdown: number): EstimatorConfig => ({
       kind: "phased",
-      replicationSimCost: 0.25,
+      replicationSimCost: 1,
       setBonusStageCandidates: 2,
       slowdown,
     });
@@ -431,11 +446,14 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       }
     );
 
-    it("ships the round-4 constants fitted on run 1", () => {
+    it("ships the constants fitted on the web feral run of 2026-11-22", () => {
+      // The set phase and replication now run their sims at the runner's
+      // concurrency, so those two costs were refitted on that run
+      // (docs/reviews/fix-web-run-speed.md); slowdown is still run 1's.
       expect(mod.RUN_PROGRESS_ESTIMATOR).toEqual({
         kind: "phased",
-        replicationSimCost: 0.3221,
-        setBonusStageCandidates: 50.993,
+        replicationSimCost: 0.75,
+        setBonusStageCandidates: 45.34,
         slowdown: 0.003064,
       });
       expect(mod.RUN_PROGRESS_SHOW_FROM_FRACTION).toBe(0.35);
@@ -444,12 +462,12 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
   });
 
   describe("replication count from rows that clear the cutoff", () => {
-    // replicationSimCost 0.5 at concurrency 4 gives k = 2; setBonusStageCandidates = 20; T = 57 is c = 20,
+    // replicationSimCost 2 gives k = 2; setBonusStageCandidates = 20; T = 57 is c = 20,
     // so B = 21. Five seeds and top-N 8: each re-simmed row and the baseline
     // take 4 sims, so R = 4 * (1 + min(8, Q)), or 0 when Q = 0.
     const config: EstimatorConfig = {
       kind: "phased",
-      replicationSimCost: 0.5,
+      replicationSimCost: 2,
       setBonusStageCandidates: 20,
       slowdown: 0,
     };
@@ -807,7 +825,7 @@ async function recordRun(
   };
 
   const events: RecordedEvent[] = [];
-  await rankMod.rankUpgrades(
+  await tracedRank(rankMod.rankUpgrades)(
     {
       character: FERAL_CHAR,
       spec: "feral",
@@ -900,7 +918,7 @@ describe.skipIf(!forkPresent || !moduleExists())(
           (p) =>
             p.row as { belowCutoff?: boolean; simmed?: boolean; owned?: true }
         );
-    /** Rows replication can re-sim: rank.ts `replicateTopItems`' filter. */
+    /** Rows replication can re-sim: rank-replication.ts `replicateTopItems`' filter. */
     const replicableRowCount = (from: RecordedEvent[]) =>
       landedRows(from).filter(
         (r) => r.belowCutoff === false && r.simmed !== false

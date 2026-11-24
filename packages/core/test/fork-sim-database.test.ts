@@ -36,6 +36,7 @@ import {
   importForkUpgrades,
   loadForkEngineEnvironment,
   statsOnlyItemEp,
+  tracedRank,
   zeroHitStats,
 } from "./fork-engine-harness.js";
 
@@ -424,7 +425,7 @@ async function runRanking(skeleton: RaidSimRequest): Promise<RaidSimRequest[]> {
     }
   ).weights;
 
-  await rankMod.rankUpgrades(
+  await tracedRank(rankMod.rankUpgrades)(
     {
       character: CHAR,
       spec: "feral",

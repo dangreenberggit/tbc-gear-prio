@@ -165,7 +165,7 @@ class GatedRun:
 # applies the worn-gear hand rule the fixture does not (hand_rule_off_hand_only
 # and hand_rule_one_handers): while the main hand is a two-hander it leaves out
 # the off-hand-only items and the one-handed weapons, as a run does
-# (model/settings_pool.ts eligibleCount, model/engine/rank.ts). The rule came in with fork commits 213fc11db
+# (model/settings_pool.ts eligibleCount, model/engine/rank-setup.ts). The rule came in with fork commits 213fc11db
 # (off-hand) and 5ec8def25 (one-handers). The off-hand and one-hander counts
 # come from listing each exclude pool (testing/db_pool.ts dbPoolFor(spec, 4,
 # "exclude"), whose size the fixture pins) and reading each weapon's handType
@@ -178,7 +178,7 @@ class GatedRun:
 # capped_rows: the measured row count of a capped run, per cap: the rows the
 # Upgrades list pane shows. Since fork b71e25086 the cap sims the first N
 # candidates in EP order that the player does not wear, plus every worn item
-# (model/engine/rank.ts), and owned rows stay out of the list pane
+# (model/engine/rank-candidates.ts), and owned rows stay out of the list pane
 # (model/results_view.ts paneRows), so a capped run shows N rows whenever the
 # eligible pool holds at least N items the player does not wear. Before that
 # fork commit a worn item inside the first N took a cap place, so a run showed
@@ -268,7 +268,7 @@ GATED: dict[tuple[str, int], GatedRun] = {
     # fork 690fcdeb5, as ret's). "P3 Preset" wears two 32262 Syphon of the
     # Nathrezim, one-handers: 1037.
     # Rows at cap 40, measured as mage's: of 16 distinct worn ids (32262 is
-    # worn in both hands, and the cap keeps worn items by id, rank.ts
+    # worn in both hands, and the cap keeps worn items by id, rank-candidates.ts
     # equippedIds), the pane shows 40 at fork b603564ee, so none is inside;
     # every row was a main-hand weapon and a loss (tickets 820, 821). At fork
     # 6cc79f742, which counts weapon damage, the owner's run of 2026-11-07

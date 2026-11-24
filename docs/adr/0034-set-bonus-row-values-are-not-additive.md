@@ -103,7 +103,7 @@ cover issue." The cover point became its own ticket.
   figure), then builds each row's path with `pathToThreshold`: the whole
   package when the row is in it, otherwise the row plus the best other
   package pieces outside the row's slot. A row outside the package is
-  substituted into it. Fork `rank.ts` `applySetContext` attaches these
+  substituted into it. Fork `set-context.ts` `applySetContext` attaches these
   path pieces to each future as `pieces`, emitted (even when empty)
   whenever it builds a path for that future.
 - **Own stats of a piece p.** `own(p)` is p's single delta, read before

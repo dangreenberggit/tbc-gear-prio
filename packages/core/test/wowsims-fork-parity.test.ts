@@ -66,6 +66,7 @@ import {
 } from "../src/seams/sim-runner.js";
 import { MemoryStore } from "../src/seams/store.js";
 import { mapWclGearToSim, SIM_ORDER, type WclGearEntry } from "../src/slots.js";
+import { tracedRank } from "./fork-engine-harness.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const forkRoot = join(root, "vendor/tbc-new-fork");
@@ -821,6 +822,9 @@ async function loadForkEngine() {
   const forkRank = await import(
     pathToFileURL(join(forkEngineDir, "rank.ts")).href
   );
+  const forkGearSwap = await import(
+    pathToFileURL(join(forkEngineDir, "gear-swap.ts")).href
+  );
   const forkCompose = await import(
     pathToFileURL(join(forkEngineDir, "compose.ts")).href
   );
@@ -851,6 +855,7 @@ async function loadForkEngine() {
 
   return {
     forkRank,
+    forkGearSwap,
     forkCompose,
     forkCandidateGems,
     forkGems,
@@ -879,6 +884,7 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
 
     const {
       forkRank,
+      forkGearSwap,
       forkCompose,
       forkCandidateGems,
       forkGems,
@@ -893,11 +899,11 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
     const { ranking: forkRanking, composedRequests: forkRequests } =
       await buildRecordingsAndRun<Awaited<ReturnType<typeof rankUpgrades>>>({
         compose: forkCompose.compose,
-        equipmentForCandidateSwap: forkRank.equipmentForCandidateSwap,
+        equipmentForCandidateSwap: forkGearSwap.equipmentForCandidateSwap,
         gemContext: forkCandidateGems.gemContext,
         gemsForPhase: forkGems.gemsForPhase,
         SIM_ORDER: forkSlots.SIM_ORDER,
-        rankUpgrades: forkRank.rankUpgrades,
+        rankUpgrades: tracedRank(forkRank.rankUpgrades),
         RecordedGearSource: forkGearSource.RecordedGearSource,
         // The fork's runner must read stats (ticket 830). A 0% hit read
         // gives ret its whole hit cap as budget, so the fork's repairs value
@@ -945,7 +951,7 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
 
     // The assertion E-W3 exists for: same deltas, same SE, same rank — not
     // a deep-equal on the whole Ranking, since assumptions.presetId is
-    // deliberately spelled differently between the two (rank.ts's doc
+    // deliberately spelled differently between the two (rank-setup.ts's doc
     // comment: the fork has no on-disk skeleton file to name).
     expect(thisRepoRanking.baseline.dps).toBe(forkRanking.baseline.dps);
     expect(
