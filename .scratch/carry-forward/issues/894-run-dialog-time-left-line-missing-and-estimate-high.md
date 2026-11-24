@@ -56,17 +56,33 @@ note.
 
 At 50% of the run's wall time (Run click to the dialog closing), the time
 left the dialog shows is within 25% of the time the run really has left:
-`|shown - left| / left <= 0.25`. That is ticket 542's gate (`BOUND` in
-`.scratch/handoffs/542-run-progress/replay.mjs`). The runs: one web and one
-desktop feral run, phase 3 from the Phase 2 "BiS 6%" preset, each with
+`|shown - left| / left <= 0.25`. The 0.25 is ticket 542's limit (`BOUND` in
+`.scratch/handoffs/542-run-progress/replay.mjs:32`). The runs: one web and
+one desktop feral run, phase 3 from the Phase 2 "BiS 6%" preset, each with
 nothing else simming on the machine.
 
-## Fix (fork 77a6fe461, branch fix/894-time-left)
+Added after the desktop run, at review (finding F1); the measuring point
+above is unchanged:
+
+- "50% done" in § Done when means 50% of wall time, as above. 542 measured
+  at the first sample with done/T >= 0.5 (`replay.mjs:546`); this ticket
+  does not.
+- The sample judged is the one `analyze.py` picks (`.scratch/894/` in the
+  pair, copied from the 893 pair): of the 500 ms samples that show a figure,
+  the one nearest half the wall time. If that sample is more than 5% of the
+  wall time away from the half, the run fails the bound.
+- "Nothing else simming" could not be enforced: other agents share the
+  machine. `.scratch/894/loadavg.log` records the load every 30 s.
+
+## Fix (fork 77a6fe461 and a29f3cd28, branch fix/894-time-left)
 
 - The dialog shows the time left again, in the Bulk dialog's words and place
   (`upstream/master` `ui/features/bulk/components/BulkProgress/BulkProgressMessage.tsx`).
 - `run_progress.ts` drops the `slowdown` term: the candidates left cost the
   time per candidate so far.
+- The line shows only while candidates or the top rows are simmed
+  (a29f3cd28, from the review): once the results are ranked it read "0s
+  remaining" while the dialog was still open.
 
 Replay of the fork's real `RunProgressTracker` over five recorded feral runs
 (error at 50% of wall time, shipped slowdown → none):

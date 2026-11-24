@@ -424,8 +424,9 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     it("ships the constants fitted on the web feral run of 2026-11-22", () => {
       // The set phase and replication run their sims at the runner's
       // concurrency, so those two costs were fitted on that run
-      // (docs/reviews/fix-web-run-speed.md). Candidates no longer slow as the
-      // run goes on, so the estimate has no slowdown term (ticket 894).
+      // (docs/reviews/fix-web-run-speed.md). On three recorded feral runs
+      // candidates took the same time early and late, so the estimate has no
+      // slowdown term (ticket 894).
       expect(mod.RUN_PROGRESS_ESTIMATOR).toEqual({
         kind: "phased",
         replicationSimCost: 0.75,
