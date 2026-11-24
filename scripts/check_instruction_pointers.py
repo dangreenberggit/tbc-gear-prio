@@ -200,7 +200,9 @@ def _glob(base: Path, pattern: str, errors: list[str]) -> list[Path]:
 
 
 def site_keys(world: World, errors: list[str] | None = None) -> tuple[list[str], list[str]]:
-    """Repo site keys and home site keys; read errors go in errors."""
+    """Repo site keys and home site keys; read errors go in errors. Files
+    of installed skills are left out, and their count goes in
+    world.installed for the summary."""
     errors = [] if errors is None else errors
     repo = []
     for g in REPO_SITE_GLOBS:
@@ -922,9 +924,10 @@ def t_installed_skill_is_not_a_site():
     # repo 1 + packed 1 (style; a name that only starts with "pack" is a site)
     assert rc == 1 and "2 checked, 0 dead, 1 style; 2 files in 1 installed skill skipped" in out, (out, err)
     assert "packed/SKILL.md:1:" in err and "/pack/" not in err, err
-    home[".agents/.skill-lock.json"] = "{not json"
-    rc, out, err = _check({"AGENTS.md": "x\n"}, home_files=home)
-    assert rc == 1 and ".skill-lock.json" in err, (out, err)
+    # A home with nothing else wrong, so only the broken lock can fail it.
+    broken = {".agents/.skill-lock.json": "{not json", ".claude/AGENTS.md": "## A\n"}
+    rc, out, err = _check({"AGENTS.md": "x\n"}, home_files=broken)
+    assert rc == 1 and ".skill-lock.json: cannot read" in err and "0 dead, 0 style" in out, (out, err)
 
 
 def t_ci_skips_and_counts_home_pointers():
