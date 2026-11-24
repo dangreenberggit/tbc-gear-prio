@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug (display)
 Origin: fix/893-set-stage-progress, 2026-11-23 (live web feral run; docs/reviews/fix-893-set-stage-progress.md)
 Blocks: none
@@ -99,3 +99,27 @@ The last two ran while other sims shared the machine: the e2e-final web run
 overlapped the desktop gate and a web ret run (both started at 14:18 UTC), so
 its first half ran at about half the second half's pace; `d2-after`'s pace
 also doubled late in the run, cause not found.
+
+## Close note (2026-11-24)
+
+Both live runs at fork `tbc-new-fork@77a6fe461` meet the bound. Feral, phase
+3 from the Phase 2 "BiS 6%" preset, error at the sample nearest half the wall
+time (`analyze.py`):
+
+| Run | Wall time | At | Shown | Really left | Error |
+| --- | --- | --- | --- | --- | --- |
+| desktop (`wowsimtbc` on :3333) | 296.8 s | 148.2 s | 113 s | 148.6 s | -0.240 |
+| web (WASM, `dist/` on :8196) | 3817.9 s | 1909.1 s | 2144 s | 1908.8 s | +0.123 |
+
+Away from half the run the figure is looser, which the bound does not
+judge: desktop read -0.19 at 40%, +0.48 at 75% and +0.28 at 90%; web read
++0.22, +0.27 and -0.04. Both runs showed no time left in all of the set
+stage's samples (desktop 27, web 514), and a figure in every re-sim sample.
+The machine was shared: the 1-minute load average ran from 4.4 to 49.9 on
+20 cores, median 9.4 (`.scratch/894/loadavg.log`). The web run took 3818 s
+against 3381 s on 2026-11-23.
+
+Verified by: `python3 .scratch/894/analyze.py .scratch/894/web/run/tail.jsonl`
+and `python3 .scratch/894/analyze.py .scratch/894/desktop/run/tail.jsonl` in
+the pair `tbc-wt/time-left-894` (gitignored readbacks), and
+`docs/reviews/fix-894-time-left.md`.
