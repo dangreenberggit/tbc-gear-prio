@@ -13,9 +13,14 @@ record why they are two pins. ADR-0036 lets them move separately:
 
 Both procedures run in a pair (`docs/agents/paired-worktrees.md`).
 `<main-folder>` is the main checkout's folder.
-`pnpm -C <main-folder> wt:pair <name> <main-branch> <fork-branch> -b --new-fork-branch`
-makes the main branch from `dev` and the fork branch at the fork lock's
-`commit`. Give that call a 600000 ms timeout. It is done when it prints
+Make the pair by sending
+`pnpm wt:pair <name> <main-branch> <fork-branch> -b --new-fork-branch`
+as the whole call: no `-C`, no `cd … &&`, no `; echo`. Only that plain text
+matches `sandbox.excludedCommands` in `~/.claude_router/settings.json`, which
+lets it write `.git/worktrees`. It runs from any checkout of this repo, because
+the script finds the main checkout itself. It makes the main branch from `dev`
+and the fork branch at the fork lock's `commit`. Give that call a
+600000 ms timeout. It is done when it prints
 `pair ready` with no `WARNING` line after it. `<pair>` is the pair's folder as
 an absolute path, and `<fork>` is `<pair>/vendor/tbc-new-fork`.
 
