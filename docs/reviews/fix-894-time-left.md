@@ -131,7 +131,21 @@ figures.
 
 ## Gates
 
-GATES
+`node --version` printed v22.23.2. Logs in the pair's `.scratch/894/`.
+
+- `pnpm layout-gate:check` at fork `a29f3cd28` (dist rebuilt there): rc=0,
+  `layout gate: PASSED`, 11 fixtures at widths 375, 653, 768 and 1280; the
+  baseline advance is committed (`d793f844`).
+- `pnpm verify` at `d793f844`: rc=0, `pointers: 272 checked, 0 dead, 0
+style`, `gates: 1765 ran, 0 skipped`. The pointer check that failed earlier
+  on `~/.claude/skills/mobile-native/SKILL.md:72` passed by this run.
+- `pnpm merge-ready` with a fresh temporary index (the pair's own index is
+  stale, because the sandbox makes its `.git/worktrees` folder read-only):
+  rc=0, `merge-ready: ok (this checkout's copy and dev's copy)`.
+- A first `node scripts/run_verify.mjs` run failed one test,
+  `verify_cache.test.mjs` "moves with 'a GO variable'", because that shell
+  exported `GOFLAGS=-buildvcs=false`, the value the test sets. Without it the
+  test passes.
 
 ## Notes
 
