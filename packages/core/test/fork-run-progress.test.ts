@@ -313,14 +313,14 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       // r = (2000 - 1000) / 10 = 100; 100 * ((21 - 11) + 20 + 2 * 36)
       t.observe(sim(11, 57), 2_000);
       expect(t.view().remainingMs).toBe(10_200);
-      // r_B = (3000 - 1000) / 20 = 100; 100 * (20 + 2 * 36)
+      // The set stage sends no count, so it has no time left (ticket 893).
       t.observe(sim(21, 57), 3_000);
-      expect(t.view().remainingMs).toBe(9_200);
+      expect(t.view().remainingMs).toBeUndefined();
       // A ninth qualifying row in the silent set phase is counted, but the
-      // count is already at top-N 8, so R and the estimate stay the same.
+      // count is already at top-N 8, so R stays the same.
       t.observe(row(false), 4_000);
       expect(t.view().replicableRowCount).toBe(9);
-      expect(t.view().remainingMs).toBe(9_200);
+      expect(t.view().remainingMs).toBeUndefined();
       // b = 21; r_B * k * (T - b) = 100 * 2 * 36
       t.observe(RANKING, 5_000);
       expect(t.view().remainingMs).toBe(7_200);
@@ -419,9 +419,8 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     });
 
     it.each([0, 0.1])(
-      "leaves the boundary rule unchanged (slowdown %f)",
+      "gives no time left in the set stage, which sends no count (slowdown %f)",
       (slowdown) => {
-        // r_B = 3000 / 10 = 300; 300 * (2 + 36)
         const atBoundary = run({
           sims: [...sims, { t: 3_000, done: 11, afterRanking: false }],
           now: 3_000,
@@ -429,7 +428,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
         });
         expect(
           mod.estimateRemainingMs(config(slowdown), atBoundary)
-        ).toBeCloseTo(11_400, 6);
+        ).toBeUndefined();
       }
     );
 
@@ -482,9 +481,9 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       // r = 100; R = 0: 100 * ((21 - 11) + 20 + 0)
       t.observe(sim(11, 57), 2_000);
       expect(t.view().remainingMs).toBeCloseTo(3_000, 6);
-      // r_B = 100; 100 * (20 + 0)
+      // The set stage has no time left.
       t.observe(sim(21, 57), 3_000);
-      expect(t.view().remainingMs).toBeCloseTo(2_000, 6);
+      expect(t.view().remainingMs).toBeUndefined();
       // Expected final done = B = 21, so ranking: 100 * 2 * (21 - 21)
       t.observe(RANKING, 5_000);
       expect(t.view().activity).toBe("ranking");
@@ -501,9 +500,9 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       expect(t.view().remainingMs).toBeCloseTo(8_600, 6);
       for (let i = 0; i < 10; i++) t.observe(row(true), 2_500);
       expect(t.view().remainingMs).toBeCloseTo(8_600, 6);
-      // Q = 3 at the boundary, R = 16: 100 * (20 + 2 * 16)
+      // Q = 3 at the boundary, R = 16. The set stage has no time left.
       t.observe(sim(21, 57), 3_000);
-      expect(t.view().remainingMs).toBeCloseTo(5_200, 6);
+      expect(t.view().remainingMs).toBeUndefined();
       // Expected final done 37: 100 * 2 * 16
       t.observe(RANKING, 5_000);
       expect(t.view().activity).toBe("replication");
@@ -528,12 +527,13 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       const t = tracker(config, 4);
       t.observe(sim(1, 57), 1_000);
       for (let i = 0; i < 10; i++) t.observe(row(true), 1_500);
-      // r_B = 100; Q = 0: 100 * 20
+      // Q = 0. The set stage has no time left.
       t.observe(sim(21, 57), 3_000);
-      expect(t.view().remainingMs).toBeCloseTo(2_000, 6);
-      // Q = 1, R = 8, recomputed at the boundary event: 100 * (20 + 2 * 8)
+      expect(t.view().remainingMs).toBeUndefined();
+      // Q = 1, R = 8; still the set stage, so still no time left.
       t.observe(row(false), 3_010);
-      expect(t.view().remainingMs).toBeCloseTo(3_600, 6);
+      expect(t.view().replicableRowCount).toBe(1);
+      expect(t.view().remainingMs).toBeUndefined();
       // Expected final done 29: 100 * 2 * 8
       t.observe(RANKING, 5_000);
       expect(t.view().activity).toBe("replication");
