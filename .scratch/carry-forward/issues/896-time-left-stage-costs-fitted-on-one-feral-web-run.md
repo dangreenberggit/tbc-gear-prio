@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug (display)
 Origin: the review of fix/894-time-left-2 (not merged; archived as .scratch/worktree-archive/tl-894/main-commits/0003-Add-the-pre-merge-review-of-fix-894-time-left-2.patch)
 Blocks: none
@@ -100,3 +100,50 @@ rule itself reads -0.43..+0.09 at 10-50% of the candidates, -0.18..+0.43 at
 every one of those runs feral's candidates run about 1.2-1.4 times slower in
 the 3rd tenth of the list and 1.5-2 times slower in the 4th and 7th (.scratch/agent-reports/2026-11-24-time-left-per-stage/pace-by-tenth.txt). No ret trace without load
 exists, so ret's figures are judged on the same bounds with no measured base.
+
+## Close note (2026-11-24)
+
+Both live runs at `tbc-new-fork@24e9ca02e` (branch `fix/896-stage-time-left`)
+meet every bound set before them, checked by `tl_check.py`:
+
+- feral desktop (`wowsimtbc` on :3333), Phase 3 from the Phase 2 "BiS 6%"
+  preset: 662 candidates in 232.4 s;
+- ret web (WASM, `dist/` on :8193), Phase 4 from the Phase 3 "P3" preset:
+  1012 candidates in 2131.6 s.
+
+The 1-minute load average peaked at 26.1 during the desktop run (its own 20
+sim threads) and at 8.7 during the web run, and I started nothing else during either
+(`.scratch/agent-reports/2026-11-24-time-left-per-stage/feral-desktop-final/load.log`, `.scratch/agent-reports/2026-11-24-time-left-per-stage/ret-web/load.log` in the main
+checkout). Rankings match the `8c67fccf4` runs row for row: feral 646 of
+646, ret 997 of 997 (`strict_same.py`).
+
+`RUN_PROGRESS_ESTIMATOR` and its fitted stage costs are gone; the figure
+prices only the stage under way. Errors (shown / really left - 1) at the
+share of the stage's candidates landed:
+
+| Run | 10% | 25% | 50% | 75% | 90% | Figures outside wowsims' rule (B5) |
+| --- | --- | --- | --- | --- | --- | --- |
+| feral desktop | -0.160 | -0.171 | -0.033 | +0.163 | +0.007 | 0 of 438 |
+| ret web | -0.104 | +0.171 | +0.207 | +0.136 | +0.081 | 0 of 4292 |
+| bound | 0.45 | 0.45 | 0.45 | 0.50 | 0.30 | 0 |
+
+No sample read "0s remaining", and none showed a time left while
+preparing, measuring set bonuses, or after the dialog closed (B6).
+
+The first live run, feral desktop at `cb4bbfc94`, read "6m 53s remaining"
+as the re-sims began, in a 10 s stage: the clock started when the stage was
+named, not at its first report as wowsims' Bulk sim restarts it
+(`upstream/master` `ui/features/bulk/model/core_sim.ts:48-51`). Fixed
+test-first in `e77e8ff7c`; that run's trace is
+`.scratch/agent-reports/2026-11-24-time-left-per-stage/feral-desktop/run/tail.jsonl`.
+
+One thing no bound judges: on ret web, 7.8 s into the candidates, the
+figure doubled to 1h 01m 55s for a few seconds as the first candidates
+landed. Filed as 900.
+
+Verified by: `python3 -I .scratch/agent-reports/2026-11-24-time-left-per-stage/tl_check.py .scratch/agent-reports/2026-11-24-time-left-per-stage/feral-desktop-final/run/tail.jsonl`
+and `... .scratch/agent-reports/2026-11-24-time-left-per-stage/ret-web/run/tail.jsonl` in the main checkout (both print
+`"verdict": "PASS"`; saved as `tl_check.json` beside each run), and
+`python3 -I .scratch/worktree-archive/e2e-8c67/e2e/strict_same.py` against
+each run's `result.json` (`same-vs-8c67.txt`, `IDENTICAL: True`);
+`tbc-new-fork@24e9ca02e`; `docs/reviews/fix-896-stage-time-left.md`.

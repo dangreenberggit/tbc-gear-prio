@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug (display)
 Origin: the review of fix/894-time-left-2 (not merged; archived as .scratch/worktree-archive/tl-894/main-commits/0003-Add-the-pre-merge-review-of-fix-894-time-left-2.patch)
 Blocks: none
@@ -92,3 +92,40 @@ rule itself reads -0.43..+0.09 at 10-50% of the candidates, -0.18..+0.43 at
 every one of those runs feral's candidates run about 1.2-1.4 times slower in
 the 3rd tenth of the list and 1.5-2 times slower in the 4th and 7th (.scratch/agent-reports/2026-11-24-time-left-per-stage/pace-by-tenth.txt). No ret trace without load
 exists, so ret's figures are judged on the same bounds with no measured base.
+
+## Close note (2026-11-24)
+
+Both live runs at `tbc-new-fork@24e9ca02e` (branch `fix/896-stage-time-left`)
+meet every bound set before them, checked by `tl_check.py`:
+
+- feral desktop (`wowsimtbc` on :3333), Phase 3 from the Phase 2 "BiS 6%"
+  preset: 662 candidates in 232.4 s;
+- ret web (WASM, `dist/` on :8193), Phase 4 from the Phase 3 "P3" preset:
+  1012 candidates in 2131.6 s.
+
+The 1-minute load average peaked at 26.1 during the desktop run (its own 20
+sim threads) and at 8.7 during the web run, and I started nothing else during either
+(`.scratch/agent-reports/2026-11-24-time-left-per-stage/feral-desktop-final/load.log`, `.scratch/agent-reports/2026-11-24-time-left-per-stage/ret-web/load.log` in the main
+checkout). Rankings match the `8c67fccf4` runs row for row: feral 646 of
+646, ret 997 of 997 (`strict_same.py`).
+
+On ret web the re-sims took 38.1 s, and all 76 samples showed a figure.
+Of the 56 more than 10 s before the stage ended, the worst error was
++0.099 (bound 0.30); none held one value for more than 5 s, and none rose
+between two samples by more than the larger of 3 s and 20% (B8). The re-sims' figures are among the 4292 that lie
+within wowsims' rule on the run's own counts (B5). On feral desktop the
+re-sims took 10.6 s: the first figure read 14s with about 10 s left, then
+counted down steadily to 1s.
+
+The runner part of `ab3d5a732` fitted and is in, unchanged apart from a
+line reference: it tells listeners each sim's iterations by request id,
+and the run stops listening when it ends. Its count of the re-sims only was
+widened to the candidates, for 898; ticket 900 is what that costs at the
+candidates' start on web.
+
+Verified by: `python3 -I .scratch/agent-reports/2026-11-24-time-left-per-stage/tl_check.py .scratch/agent-reports/2026-11-24-time-left-per-stage/feral-desktop-final/run/tail.jsonl`
+and `... .scratch/agent-reports/2026-11-24-time-left-per-stage/ret-web/run/tail.jsonl` in the main checkout (both print
+`"verdict": "PASS"`; saved as `tl_check.json` beside each run), and
+`python3 -I .scratch/worktree-archive/e2e-8c67/e2e/strict_same.py` against
+each run's `result.json` (`same-vs-8c67.txt`, `IDENTICAL: True`);
+`tbc-new-fork@24e9ca02e`; `docs/reviews/fix-896-stage-time-left.md`.
