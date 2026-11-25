@@ -62,6 +62,7 @@ type RunTimeline = {
   topN: number;
   finalTotal?: number;
   inFlight?: number;
+  stageStartedAt?: number;
 };
 
 type RunProgressView = {
@@ -112,6 +113,9 @@ const sim = (done: number, total: number): Progress => ({
   total,
 });
 const RANKING: Progress = { stage: "ranking" };
+/** A sim's first report, with no iterations done yet: it starts the stage's clock. */
+const startClock = (t: Tracker, nowMs: number) =>
+  t.observeIterations("clock", 0, 1_000, nowMs);
 const row = (belowCutoff: boolean, simmed?: boolean): Progress => ({
   kind: "row",
   row: { belowCutoff, ...(simmed === undefined ? {} : { simmed }) },
@@ -260,19 +264,65 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     });
   });
 
+  describe("the stage's clock, from its first progress report", () => {
+    // The Bulk sim restarts its clock at the first progress report of a new
+    // stage (`features/bulk/model/core_sim.ts:48-51`), not when the stage is
+    // named, so the time spent sending the stage's sims out is not priced.
+    it("starts the candidates' clock at their first report, with no figure at it", () => {
+      const t = tracker(4);
+      t.observe(sim(1, 57), 1_000);
+      for (const id of ["a", "b", "c", "d"])
+        t.observeIterations(id, 0, 1_000, 1_500);
+      // No time has passed on the stage's clock, so no figure, not "0s".
+      expect(t.view().remainingMs).toBeUndefined();
+      // Four sims a quarter done 500 ms in: one candidate's worth, 500 / 1 * (20 - 1)
+      for (const id of ["a", "b", "c", "d"])
+        t.observeIterations(id, 250, 1_000, 2_000);
+      expect(t.view().remainingMs).toBe(9_500);
+    });
+
+    it("starts the re-sims' clock at their first report, not at the ranking event", () => {
+      const t = tracker(4);
+      t.observe(sim(1, 57), 1_000);
+      for (let i = 0; i < 8; i++) t.observe(row(false), 1_500);
+      t.observe(sim(21, 57), 3_000);
+      t.observe(RANKING, 5_000);
+      t.observe(sim(21, 57), 5_000);
+      for (const id of ["a", "b", "c", "d"])
+        t.observeIterations(id, 0, 500, 5_400);
+      expect(t.view().remainingMs).toBeUndefined();
+      // Four re-sims half done 2 s after their first report: two re-sims'
+      // worth, 34 left: 2000 / 2 * (36 - 2)
+      for (const id of ["a", "b", "c", "d"])
+        t.observeIterations(id, 250, 500, 7_400);
+      expect(t.view().remainingMs).toBe(34_000);
+    });
+
+    it("starts the clock at a counted step when no sim reported before it", () => {
+      const t = tracker(4);
+      t.observe(sim(1, 57), 1_000);
+      t.observe(sim(2, 57), 1_100);
+      expect(t.view().remainingMs).toBeUndefined();
+      // n = 11 at 2100 ms, 10 of them since the clock started: 1000 / 11 * (20 - 11)
+      t.observe(sim(12, 57), 2_100);
+      expect(t.view().remainingMs).toBeCloseTo((1_000 / 11) * 9, 6);
+    });
+  });
+
   describe("the time left of the stage under way (896)", () => {
-    // T = 57 is c = 20 candidates: 1 + 20 + 4 * 9, so B = 21. The candidate
-    // stage starts at the first event, which carries the total.
+    // T = 57 is c = 20 candidates: 1 + 20 + 4 * 9, so B = 21. Each test's
+    // first report starts the stage's clock (the describe above).
     it("prices the candidates left at the pace of the candidates so far, and no later stage", () => {
       const t = tracker(4);
       t.observe(sim(1, 57), 1_000);
+      startClock(t, 1_000);
       for (let i = 0; i < 8; i++) t.observe(row(false), 1_500);
       // n = 10 at 2000 ms: (2000 - 1000) / 10 * (20 - 10)
       t.observe(sim(11, 57), 2_000);
       expect(t.view().remainingMs).toBe(1_000);
     });
 
-    it("prices the re-sims left at the pace of the re-sims so far, from the ranking event", () => {
+    it("prices the re-sims left at the pace of the re-sims so far, from their first report", () => {
       const t = tracker(4);
       t.observe(sim(1, 57), 1_000);
       for (let i = 0; i < 8; i++) t.observe(row(false), 1_500);
@@ -281,6 +331,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       // The engine restates the total: eight rows re-simmed, 21 + 4 * 9 = 57,
       // so the stage holds 36 re-sims.
       t.observe(sim(21, 57), 5_000);
+      startClock(t, 5_000);
       // m = 4 at 5800 ms: (5800 - 5000) / 4 * (36 - 4)
       t.observe(sim(25, 57), 5_800);
       expect(t.view().remainingMs).toBe(6_400);
@@ -289,6 +340,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     it("gives no time left in the set stage, which sends no count, nor before a re-sim is done", () => {
       const t = tracker(4);
       t.observe(sim(1, 57), 1_000);
+      startClock(t, 1_000);
       for (let i = 0; i < 8; i++) t.observe(row(false), 1_500);
       t.observe(sim(11, 57), 2_000);
       expect(t.view().remainingMs).toBeDefined();
@@ -307,6 +359,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     it("shows the time left from the first candidate done, as the Bulk sim does from its first step (898)", () => {
       const t = tracker(4);
       t.observe(sim(1, 57), 1_000);
+      startClock(t, 1_000);
       expect(t.view().remainingMs).toBeUndefined();
       // n = 1 at 1100 ms: 100 / 1 * (20 - 1)
       t.observe(sim(2, 57), 1_100);
@@ -316,6 +369,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     it("counts the candidates under way by their iterations done, so the figure moves between landings", () => {
       const t = tracker(4);
       t.observe(sim(1, 57), 1_000);
+      startClock(t, 1_000);
       // Four sims a quarter done at 1500 ms: one candidate's worth in 500 ms,
       // 19 left: 500 / 1 * (20 - 1)
       for (const id of ["a", "b", "c", "d"])
@@ -343,6 +397,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       expect(t.view().remainingMs).toBeUndefined();
       t.observe(RANKING, 5_000);
       t.observe(sim(21, 57), 5_000);
+      startClock(t, 5_000);
       // Four re-sims half done 2 s in: two re-sims' worth, 34 left:
       // 2000 / 2 * (36 - 2)
       for (const id of ["a", "b", "c", "d"])
@@ -355,6 +410,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     it("gives no time left once a candidate count passes the boundary, since the stage's size is then unknown", () => {
       const t = tracker(4);
       t.observe(sim(1, 57), 1_000);
+      startClock(t, 1_000);
       t.observe(sim(11, 57), 2_000);
       expect(t.view().remainingMs).toBeDefined();
       // done 22 > B 21 drops the boundary.
@@ -382,6 +438,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
           replicableRowCount: 8,
           seedCount: 5,
           topN: 8,
+          stageStartedAt: 0,
         })
       ).toBeCloseTo(12_500, 6);
     });
@@ -415,6 +472,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       expect(t.view().activity).toBe("replication");
       // The engine restates the total as 21 + 4 * (1 + 3) = 37: 16 re-sims.
       t.observe(sim(21, 37), 5_000);
+      startClock(t, 5_000);
       expect(t.view()).toMatchObject({ activity: "replication", total: 37 });
       // m = 2 at 5700 ms: (5700 - 5000) / 2 * (16 - 2)
       t.observe(sim(23, 37), 5_700);
@@ -436,6 +494,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       // N4. The engine restates 33 = 21 + 4 * (1 + 2): two rows, not the one
       // counted, so the stage holds 12 re-sims.
       t.observe(sim(21, 33), 5_000);
+      startClock(t, 5_000);
       expect(t.view()).toMatchObject({ activity: "replication", total: 33 });
       // 30 is past the projected 29 but short of 33: m = 9, 3000 / 9 * (12 - 9)
       t.observe(sim(30, 33), 8_000);
@@ -477,6 +536,7 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     it("hides the estimate from a Stop on", () => {
       const t = tracker();
       t.observe(sim(1, 100), 0);
+      startClock(t, 0);
       t.observe(sim(20, 100), 1_900);
       expect(t.view().remainingMs).toBeDefined();
       t.noteStop();
