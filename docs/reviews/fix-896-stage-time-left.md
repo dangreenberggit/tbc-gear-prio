@@ -140,3 +140,60 @@ and nothing else; what it checked is under Notes.
 - The pair's own index is stale (it matches `15dc77ed` while the files and
   branch match the tip), as the sandbox makes its `.git/worktrees` folder
   read-only; commits here go through a temporary index.
+
+## Round 2: each stage's clock from its first report
+
+Diffed against: fork `cb4bbfc94..e77e8ff7c` ("Start each stage's clock at its
+first report, as Bulk does (896)": `run_progress.ts`, `run.test.ts`) and our
+repo `db927382..478e7d33` (`7b6a4f56` advances the layout baseline;
+`478e7d33` re-pins and updates `packages/core/test/fork-run-progress.test.ts`).
+Reviewed by the round 1 adversarial reviewer, who did not write this fix.
+
+Why the fix: the live feral desktop run at `cb4bbfc94` read "Re-simming the
+top rows / 6m 53s remaining" at s=232.1 with 0 re-sims done, then 14 s at
+s=232.6, in a stage that ended by s=242.2
+(`.scratch/agent-reports/2026-11-24-time-left-per-stage/feral-desktop/run/tail.jsonl`
+in the main checkout). The clock had started at the `ranking` event, before
+the re-sims went out. wowsims' Bulk sim restarts its clock at the first
+progress report of a new stage (`upstream/master`
+`ui/features/bulk/model/core_sim.ts:48-51`), which the fix now follows.
+
+What the review checked:
+
+- The first report comes at a sim's start. The Go sim sends a report with
+  `TotalIterations` set and no iterations done when its presim begins and
+  again when it ends (`sim/core/sim.go:148-153`, `:166-170`), and the pool
+  passes every report to `onProgress` (`ui/sim/workers/worker_pool.ts:312-314`).
+  So the clock starts when the first sim starts, and the shares done are not
+  counted against a shorter clock. On the desktop transport this holds by
+  reading only; the live run shows it.
+- The fallback, a counted step with no report before it, happens only for
+  steps with no sim (a candidate whose slots all skip) or with a stored sim,
+  and both land at the stage's start.
+- The stage boundaries: the clock is cleared at `ranking`, the event that
+  restates the total after it does not start it (`namesStage`), and the
+  set-bonus stage gives no figure whatever the clock holds (`stageUnderWay`).
+- The new pure tests fail on the `cb4bbfc94` code by reading: "starts the
+  re-sims' clock at their first report" gives 2400 / 2 * 34 = 40 800 there,
+  not 34 000; "starts the candidates' clock at their first report" gives
+  1000 / 1 * 19 = 19 000, not 9 500. Not rerun against the old fork.
+
+Check output (`node --version` printed v22.23.2): fork at `e77e8ff7c`,
+`npx vitest run ui/features/upgrades ui/app/tabs` `Tests 939 passed (939)`,
+rc=0; `npx tsc --noEmit -p tsconfig.json` rc=0. Our repo at `478e7d33`,
+`npx vitest run packages/core/test/fork-run-progress.test.ts
+packages/core/test/wowsims-fork-parity.test.ts` `Tests 55 passed (55)`,
+rc=0.
+
+- **F8**: two comments on the new field are not quite true.
+  `RunTimeline.stageStartedAt` (`run_progress.ts:61-64`) says "Undefined
+  before one, or between stages", and the tracker's field
+  (`run_progress.ts:168`) says "cleared when a stage is named". The tracker
+  clears it only at `ranking` (`:202`), so through the set-bonus stage it
+  still holds the candidates' start.
+
+## Disposition (round 2)
+
+| ID  | Axis        | Disposition | Ticket / note                                                                                                                                                                                                                                                                                                                                                                               |
+| --- | ----------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F8  | Adversarial | wontfix     | No behaviour rides on it: in the set-bonus stage `stageUnderWay` returns undefined, so no figure shows whatever the clock holds. Correcting the two comments would move the fork and the layout gate's `testedTabHash`, which covers every non-test `.ts` under the tab, for a comment. Fold the wording ("cleared at `ranking`") into the next fork commit that touches `run_progress.ts`. |
