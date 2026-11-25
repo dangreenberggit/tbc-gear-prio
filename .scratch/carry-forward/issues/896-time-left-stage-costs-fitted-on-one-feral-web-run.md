@@ -67,3 +67,36 @@ use a direct signal, for the owner to choose between:
 The owner has chosen how the stages that have not started are priced, and on
 a live ret web run and a live feral desktop run the figure at 90% of the
 candidates is within |error| <= 0.30.
+
+## Done when (amended 2026-11-24)
+
+The owner chose the stage-only figure. Owner, 2026-11-24, on Q1: "a sounds
+fine. if the progress isnt done and doesn't show its actually done ("close
+to" 0?) then it's not wrong at least". The orchestrator's brief: the time left
+of the current stage only, as wowsims' Bulk sim does, with
+`RUN_PROGRESS_ESTIMATOR` removed rather than refitted.
+
+Done when `RUN_PROGRESS_ESTIMATOR` is gone, the figure prices only the stage
+under way by wowsims' rule, it never reads "0s remaining" while the dialog is
+open, and on both live runs:
+
+- at 10%, 25% and 50% of the stage's candidates landed, |error| <= 0.45;
+- at 75%, |error| <= 0.50, and at 90%, |error| <= 0.30 (the bound above, kept);
+- every figure from 10 s into a counted stage lies within wowsims' rule on
+  the run's own counts (`tl_check.py` B5);
+- no time left shows while preparing, measuring set bonuses, ranking or
+  cancelling, nor after the dialog closes.
+
+Bounds set 2026-11-24, before the live runs at the final fork commit (feral
+desktop and ret web, from the previous phase's preset gear), and not to be
+changed after them. They are checked by `python3 -I .scratch/agent-reports/2026-11-24-time-left-per-stage/tl_check.py
+<tail.jsonl>` in the main checkout, which fails both old traces it was tried on
+(.scratch/agent-reports/2026-11-24-time-left-per-stage/neg-control-*.json). The numbers come from replaying wowsims' rule over the
+13 recorded feral traces that show no machine load, with the sims under way
+modelled as half of the 20 workers' sims done (.scratch/agent-reports/2026-11-24-time-left-per-stage/replay-inflight-K20.txt;
+the traces hold no iteration counts, so that part is a model). On those, the
+rule itself reads -0.43..+0.09 at 10-50% of the candidates, -0.18..+0.43 at
+75-90%, and as low as -0.47 from 5% to 35% of the stage's wall time, because on
+every one of those runs feral's candidates run about 1.2-1.4 times slower in
+the 3rd tenth of the list and 1.5-2 times slower in the 4th and 7th (.scratch/agent-reports/2026-11-24-time-left-per-stage/pace-by-tenth.txt). No ret trace without load
+exists, so ret's figures are judged on the same bounds with no measured base.

@@ -52,3 +52,30 @@ so it wants its own live check.
 
 The time left shows from the tenth candidate, and on a live web feral run
 every figure shown from then until 35% of the run is within |error| <= 0.30.
+
+## Done when (amended 2026-11-24)
+
+The orchestrator's brief: "match when wowsims first shows its figure".
+wowsims' Bulk sim shows one once a step is done, counting the sims under way
+by their iterations (`upstream/master` `ui/features/bulk/model/progress.ts:34`,
+`:60-67`). The ten-candidate floor and the 35% hold both go.
+
+Done when, on both live runs, the first figure shows within 5 s of the
+candidates' start, and every figure from 5% to 35% of the stage's wall time
+is within |error| <= 0.50. The bound above (0.30 from the tenth candidate to
+35% of the run) was met by the fitted estimator 896 removes; the rule alone
+reaches -0.47 on the replays below, so it is not kept.
+
+Bounds set 2026-11-24, before the live runs at the final fork commit (feral
+desktop and ret web, from the previous phase's preset gear), and not to be
+changed after them. They are checked by `python3 -I .scratch/agent-reports/2026-11-24-time-left-per-stage/tl_check.py
+<tail.jsonl>` in the main checkout, which fails both old traces it was tried on
+(.scratch/agent-reports/2026-11-24-time-left-per-stage/neg-control-*.json). The numbers come from replaying wowsims' rule over the
+13 recorded feral traces that show no machine load, with the sims under way
+modelled as half of the 20 workers' sims done (.scratch/agent-reports/2026-11-24-time-left-per-stage/replay-inflight-K20.txt;
+the traces hold no iteration counts, so that part is a model). On those, the
+rule itself reads -0.43..+0.09 at 10-50% of the candidates, -0.18..+0.43 at
+75-90%, and as low as -0.47 from 5% to 35% of the stage's wall time, because on
+every one of those runs feral's candidates run about 1.2-1.4 times slower in
+the 3rd tenth of the list and 1.5-2 times slower in the 4th and 7th (.scratch/agent-reports/2026-11-24-time-left-per-stage/pace-by-tenth.txt). No ret trace without load
+exists, so ret's figures are judged on the same bounds with no measured base.
