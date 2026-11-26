@@ -59,3 +59,65 @@ candidates on this run, past 898's bound of 5 s.
 On a live ret web run from the previous phase's preset gear, from the
 candidates' first figure on, the figure never rises between two samples by
 more than the larger of 3 s and 20% of the figure before.
+
+## Cause (confirmed 2026-11-26)
+
+The hypothesis above is the cause. The web build runs 4 sims at once: the
+tab's worker count is 4 when the site's setting is absent
+(`worker_pool_sim_runner.ts:24`, `:64`). The figure the trace shows gives
+the work done it was priced on, d = el × 1012 / (figure + el). Before the
+first landing, d grows at 0.546 per second, which is 4 sims of 7.3 s, the
+gap between landing waves. At each wave, d drops by exactly one sim for
+each sim that ended without its step landing: the first sim of a ring or
+trinket candidate. In the first seven waves that is 4 minus the steps
+landed. The losses are whole sims, which no other mechanism gives.
+
+| Wave | At (s) | Steps landed | 4 − steps | Credit lost | Figure before → after |
+| ---- | ------ | ------------ | --------- | ----------- | --------------------- |
+| 1    | 14.94  | 2            | 2         | 2.02        | 1868 s → 3715 s (+98.9%) |
+| 2    | 22.23  | 4            | 0         | 0.03        | 2482 s → 2465 s       |
+| 3    | 29.48  | 3            | 1         | 1.01        | 2216 s → 2436 s (+9.9%) |
+| 4    | 36.65  | 4            | 0         | 0.03        | 2265 s → 2240 s       |
+| 5    | 43.94  | 3            | 1         | 1.02        | 2149 s → 2274 s (+5.8%) |
+| 6    | 50.97  | 4            | 0         | 0.05        | 2184 s → 2172 s       |
+| 7    | 58.40  | 4            | 0         | 0.03        | 2115 s → 2105 s       |
+
+From wave 8 on, the waves drift apart and a wave mixes first and second
+sims, so 4 − steps no longer predicts the loss, but each loss is still a
+whole sim (1.01, 0.99, 1.00). Script and output:
+`.scratch/agent-reports/2026-11-26-900-time-left-jump/wave_credit.py` in
+the main checkout. The first wave lost half the credit, so the figure
+doubled; later the same loss is one sim among dozens.
+
+## Fix (2026-11-26)
+
+Count the candidates in sims, as wowsims' Bulk sim counts its sim stage
+(`upstream/master` `ui/features/bulk/model/progress.ts:60-66`, with
+`useSimCountProgress` set in `ui/features/bulk/model/core_sim.ts:59`): the
+stage's size is its sims, and the sims done count by their iterations, a
+finished sim as one. A sim that ends then keeps its credit. The engine
+sends the candidates' sim count with their progress events, one per legal
+slot of each candidate. New, with why: a slot the store answers, or whose
+gem read or repair fails, runs no sim, so it leaves the count when its
+candidate is counted; Bulk's sim stage has neither. The re-sims stay as
+they are: each re-sim step is one sim, so its end and its step come
+together.
+
+## Done when (amended 2026-11-26, before the live run)
+
+Checked by `tl_check_900.py` (in the evidence folder above), on a live ret
+web run, Phase 4 from the Phase 3 "P3" preset, at the final fork commit,
+with the machine idle:
+
+- **B9 (this ticket):** in the candidates, from the first figure on, the
+  figure never rises between two samples by more than the larger of 3 s
+  and 20% of the figure before. The 896 trace fails it (+98.9% at
+  15.17 s).
+- **896's bounds B1, B2, B3, B4, B6, B7 and B8 hold unchanged**
+  (`tl_check.py`, 2026-11-24).
+- **B5 holds for the re-sims, unchanged.** For the candidates B5 no longer
+  applies: its band is wowsims' rule on the steps the dialog shows, and the
+  rule now counts sims, which the trace does not show. The engine-order
+  test checks the candidates' figure against the rule on the runner's own
+  sims instead, exactly.
+- The ranking matches the 896 ret web run row for row.
