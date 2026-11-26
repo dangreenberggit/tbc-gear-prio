@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug (display)
 Origin: the review of fix/894-time-left-2 (not merged; archived as .scratch/worktree-archive/tl-894/main-commits/0003-Add-the-pre-merge-review-of-fix-894-time-left-2.patch)
 Blocks: none
@@ -52,3 +52,59 @@ so it wants its own live check.
 
 The time left shows from the tenth candidate, and on a live web feral run
 every figure shown from then until 35% of the run is within |error| <= 0.30.
+
+## Done when (amended 2026-11-24)
+
+The orchestrator's brief: "match when wowsims first shows its figure".
+wowsims' Bulk sim shows one once a step is done, counting the sims under way
+by their iterations (`upstream/master` `ui/features/bulk/model/progress.ts:34`,
+`:60-67`). The ten-candidate floor and the 35% hold both go.
+
+Done when, on both live runs, the first figure shows within 5 s of the
+candidates' start, and every figure from 5% to 35% of the stage's wall time
+is within |error| <= 0.50. The bound above (0.30 from the tenth candidate to
+35% of the run) was met by the fitted estimator 896 removes; the rule alone
+reaches -0.47 on the replays below, so it is not kept.
+
+Bounds set 2026-11-24, before the live runs at the final fork commit (feral
+desktop and ret web, from the previous phase's preset gear), and not to be
+changed after them. They are checked by `python3 -I .scratch/agent-reports/2026-11-24-time-left-per-stage/tl_check.py
+<tail.jsonl>` in the main checkout, which fails both old traces it was tried on
+(.scratch/agent-reports/2026-11-24-time-left-per-stage/neg-control-*.json). The numbers come from replaying wowsims' rule over the
+13 recorded feral traces that show no machine load, with the sims under way
+modelled as half of the 20 workers' sims done (.scratch/agent-reports/2026-11-24-time-left-per-stage/replay-inflight-K20.txt;
+the traces hold no iteration counts, so that part is a model). On those, the
+rule itself reads -0.43..+0.09 at 10-50% of the candidates, -0.18..+0.43 at
+75-90%, and as low as -0.47 from 5% to 35% of the stage's wall time, because on
+every one of those runs feral's candidates run about 1.2-1.4 times slower in
+the 3rd tenth of the list and 1.5-2 times slower in the 4th and 7th (.scratch/agent-reports/2026-11-24-time-left-per-stage/pace-by-tenth.txt). No ret trace without load
+exists, so ret's figures are judged on the same bounds with no measured base.
+
+## Close note (2026-11-24)
+
+Both live runs at `tbc-new-fork@24e9ca02e` (branch `fix/896-stage-time-left`)
+meet every bound set before them, checked by `tl_check.py`:
+
+- feral desktop (`wowsimtbc` on :3333), Phase 3 from the Phase 2 "BiS 6%"
+  preset: 662 candidates in 232.4 s;
+- ret web (WASM, `dist/` on :8193), Phase 4 from the Phase 3 "P3" preset:
+  1012 candidates in 2131.6 s.
+
+The 1-minute load average peaked at 26.1 during the desktop run (its own 20
+sim threads) and at 8.7 during the web run, and I started nothing else during either
+(`.scratch/agent-reports/2026-11-24-time-left-per-stage/feral-desktop-final/load.log`, `.scratch/agent-reports/2026-11-24-time-left-per-stage/ret-web/load.log` in the main
+checkout). Rankings match the `8c67fccf4` runs row for row: feral 646 of
+646, ret 997 of 997 (`strict_same.py`).
+
+The ten-candidate floor and the 35% hold are gone. The first figure showed
+0.95 s after the candidates' start on feral desktop and 0.78 s after it on
+ret web (bound 5 s). From 5% to 35% of the stage's wall time the worst
+error was -0.271 on feral desktop (136 samples) and +0.175 on ret web
+(1276 samples); bound 0.50.
+
+Verified by: `python3 -I .scratch/agent-reports/2026-11-24-time-left-per-stage/tl_check.py .scratch/agent-reports/2026-11-24-time-left-per-stage/feral-desktop-final/run/tail.jsonl`
+and `... .scratch/agent-reports/2026-11-24-time-left-per-stage/ret-web/run/tail.jsonl` in the main checkout (both print
+`"verdict": "PASS"`; saved as `tl_check.json` beside each run), and
+`python3 -I .scratch/worktree-archive/e2e-8c67/e2e/strict_same.py` against
+each run's `result.json` (`same-vs-8c67.txt`, `IDENTICAL: True`);
+`tbc-new-fork@24e9ca02e`; `docs/reviews/fix-896-stage-time-left.md`.
