@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug (display)
 Origin: the live ret web run of fix/896-stage-time-left at tbc-new-fork@24e9ca02e, 2026-11-24
 Blocks: none
@@ -129,3 +129,46 @@ with the machine idle:
   test checks the candidates' figure against the rule on the runner's own
   sims instead, exactly.
 - The ranking matches the 896 ret web run row for row.
+
+## Close note (2026-11-26)
+
+The live ret web run at `tbc-new-fork@ed4f42caa` (branch
+`fix/900-time-left-jump`; WASM, `dist/` on :8193), Phase 4 from the Phase 3
+"P3" preset, meets every bound in the amended Done when, checked by
+`tl_check_900.py`: 1012 candidates in 2340.7 s, then 20 re-sims in 38.1 s.
+The 1-minute load average peaked at 6.7 and I started nothing else during
+the run (`load.log`).
+
+When the first candidates landed, at 15.12 s, the figure went from 36m 03s
+to 36m 22s (+0.9%), where the 896 run jumped from 31m 08s to 1h 01m 55s
+(+98.9%). The largest rise anywhere in the candidates was +1.3%
+(2212 s to 2241 s at 9.11 s).
+
+| Bound | Measured | Limit | Result |
+| --- | --- | --- | --- |
+| B9, candidates' largest rise between samples | +1.3% (29 s); 0 of 4672 pairs over the limit | max(3 s, 20%) | pass |
+| B1, error at 10% / 25% / 50% landed | -0.031 / -0.094 / -0.038 | 0.45 | pass |
+| B2, error at 75% / 90% landed | -0.016 / -0.020 | 0.50 / 0.30 | pass |
+| B3, worst error, 5%-35% of the stage's time | -0.120 (1402 samples) | 0.50 | pass |
+| B4, re-sims' worst error more than 10 s before the end | +0.137 | 0.30 | pass |
+| B5, re-sims outside wowsims' rule | 0 of 56 | 0 | pass |
+| B5, candidates | not applicable (counts sims) | | |
+| B6, "0s remaining" or a figure where none belongs | 0 of 4839 samples | 0 | pass |
+| B7, first figure after the candidates start | 0.25 s | 5 s | pass |
+| B8, re-sims' holds over 5 s / rises over the limit | 0 / 0 | 0 | pass |
+
+The ranking matches the 896 ret web run row for row: 997 of 997 rows, with
+the same baseline (2230.4), four rows above the cutoff, 1012 eligible and
+the same 16 worn items (`same-vs-896.txt`, `IDENTICAL: True`).
+
+The candidates ran 9.8% longer than on the 896 run (2340.7 s against
+2131.6 s), though the median 1-minute load was lower (4.4 against 5.6).
+Why is not known; no bound depends on the stage's length.
+
+Verified by: `python3 -I .scratch/agent-reports/2026-11-26-900-time-left-jump/tl_check_900.py .scratch/agent-reports/2026-11-26-900-live-ret-web/ret-web/run/tail.jsonl`
+(checker in the main checkout, trace in the `tl-jump-900` pair; prints
+`"verdict": "PASS"`, saved as `tl_check_900.json` beside the run), and
+`python3 -I .scratch/worktree-archive/e2e-8c67/e2e/strict_same.py .scratch/agent-reports/2026-11-24-time-left-per-stage/ret-web/run/result.json .scratch/agent-reports/2026-11-26-900-live-ret-web/ret-web/run/result.json ret-web`
+(the script and the 896 result in the main checkout, the new result in the
+pair; prints `IDENTICAL: True`); `tbc-new-fork@ed4f42caa`;
+`docs/reviews/fix-900-time-left-jump.md`.
