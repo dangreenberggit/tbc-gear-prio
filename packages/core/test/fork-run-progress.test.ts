@@ -495,8 +495,9 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
       t.observeIterations("d", 1_000, 1_000, 8_100);
       for (const id of ["c2", "d2", "e", "f"])
         t.observeIterations(id, 0, 1_000, 8_100);
-      // Four sims done: 7100 / 4 * (26 - 4). Counted by the 2 candidates
-      // landed, the figure would read 7100 / 2 * 18, over twice `before`.
+      // Four sims done: 7100 / 4 * (26 - 4). Counted in candidates, as before
+      // ticket 900, the figure would rise from 7000 / 3.8 * 16.2 at 8 s to
+      // 7100 / 2 * 18, over twice as high.
       expect(t.view().remainingMs).toBeCloseTo((7_100 / 4) * 22, 6);
       expect(t.view().remainingMs!).toBeLessThan(before);
     });
@@ -1134,7 +1135,7 @@ describe.skipIf(!forkPresent || !moduleExists())(
       ["rings and trinkets", () => mixedEvents],
       ["rings and trinkets, the rest from the store", () => storedEvents],
     ] as const)(
-      "sends the candidates' sims with each candidates event, ending on the sims the runner ran for them (900, %s)",
+      "sends the candidates' sims with each of the candidates' events, ending on the sims the runner ran for them (900, %s)",
       (_name, from) => {
         const events = from();
         const candidates = simmingBeforeRanking(events);
@@ -1179,7 +1180,7 @@ describe.skipIf(!forkPresent || !moduleExists())(
         end: () => void;
       };
       const running: Running[] = [];
-      const candidateSims: Array<{ startedAt: number; endedAt?: number }> = [];
+      const runnerSims: Array<{ startedAt: number; endedAt?: number }> = [];
       let simCount = 0;
       let inCandidates = false;
       let planned: number | undefined;
@@ -1193,7 +1194,7 @@ describe.skipIf(!forkPresent || !moduleExists())(
             const sim: { startedAt: number; endedAt?: number } = {
               startedAt: now,
             };
-            if (inCandidates) candidateSims.push(sim);
+            if (inCandidates) runnerSims.push(sim);
             tracker.observeIterations(id, 0, opts.iterations, now);
             running.push({
               id,
@@ -1276,13 +1277,13 @@ describe.skipIf(!forkPresent || !moduleExists())(
       // 15 sims planned; the head's meta repair fails as it is dispatched, so
       // the count the engine sends drops to the 14 the runner ran.
       expect(planned).toBe(15);
-      expect(candidateSims).toHaveLength(14);
+      expect(runnerSims).toHaveLength(14);
       expect(samples.at(-1)!.size).toBe(14);
-      const startedAt = candidateSims[0]!.startedAt;
+      const startedAt = runnerSims[0]!.startedAt;
       // wowsims' rule on the runner's own sims: a sim that ended counts as
       // one, one under way by its share (`progress.ts:60-67`).
       const rule = (at: number, size: number) => {
-        const done = candidateSims.reduce(
+        const done = runnerSims.reduce(
           (sum, s) =>
             sum +
             (s.endedAt !== undefined && s.endedAt <= at

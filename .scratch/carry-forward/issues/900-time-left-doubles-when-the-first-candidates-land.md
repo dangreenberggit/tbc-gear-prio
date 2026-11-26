@@ -98,10 +98,18 @@ stage's size is its sims, and the sims done count by their iterations, a
 finished sim as one. A sim that ends then keeps its credit. The engine
 sends the candidates' sim count with their progress events, one per legal
 slot of each candidate. New, with why: a slot the store answers, or whose
-gem read or repair fails, runs no sim, so it leaves the count when its
-candidate is counted; Bulk's sim stage has neither. The re-sims stay as
+hit read or repair fails, runs no sim, so it leaves the count when the
+candidate loop reaches it, and the tab hears of it with the next
+candidates' event; Bulk's sim stage has neither. The re-sims stay as
 they are: each re-sim step is one sim, so its end and its step come
 together.
+
+The progress bar still counts candidates (`utils/format.ts:208-209`),
+where Bulk's bar counts sims, as its time left does (`upstream/master`
+`ui/features/bulk/model/progress.ts:72-77`). New, with why: the bar counts
+whole candidates, which only grow, so it has no jump to fix, and this
+ticket leaves it as it was (review finding P1,
+`docs/reviews/fix-900-time-left-jump.md`).
 
 ## Done when (amended 2026-11-26, before the live run)
 
