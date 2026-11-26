@@ -43,7 +43,7 @@ type Progress =
   | { stage: "reading-gear" }
   | { stage: "composing" }
   | { stage: "building-pool" }
-  | { stage: "simming"; done: number; total: number }
+  | { stage: "simming"; done: number; total: number; candidateSims?: number }
   | { kind: "row"; row: unknown }
   | { stage: "ranking" };
 
@@ -63,6 +63,8 @@ type RunTimeline = {
   finalTotal?: number;
   inFlight?: number;
   stageStartedAt?: number;
+  candidateSims?: number;
+  candidateSimsEnded?: number;
 };
 
 type RunProgressView = {
@@ -107,15 +109,27 @@ type RunProgressModule = {
 const loadModule = async () =>
   (await import(pathToFileURL(runProgressModule).href)) as RunProgressModule;
 
-const sim = (done: number, total: number): Progress => ({
+/** A `simming` event; a candidates' event also says how many sims the candidates run. */
+const sim = (
+  done: number,
+  total: number,
+  candidateSims?: number
+): Progress => ({
   stage: "simming",
   done,
   total,
+  ...(candidateSims === undefined ? {} : { candidateSims }),
 });
 const RANKING: Progress = { stage: "ranking" };
 /** A sim's first report, with no iterations done yet: it starts the stage's clock. */
 const startClock = (t: Tracker, nowMs: number) =>
   t.observeIterations("clock", 0, 1_000, nowMs);
+/** Sims that end, each counted as one done, as the runner reports a sim's end. */
+const endSims = (t: Tracker, ids: readonly string[], nowMs: number) => {
+  for (const id of ids) t.observeIterations(id, 1_000, 1_000, nowMs);
+};
+const ids = (prefix: string, n: number) =>
+  Array.from({ length: n }, (_, i) => `${prefix}${i}`);
 const row = (belowCutoff: boolean, simmed?: boolean): Progress => ({
   kind: "row",
   row: { belowCutoff, ...(simmed === undefined ? {} : { simmed }) },
@@ -270,12 +284,13 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     // named, so the time spent sending the stage's sims out is not priced.
     it("starts the candidates' clock at their first report, with no figure at it", () => {
       const t = tracker(4);
-      t.observe(sim(1, 57), 1_000);
+      // 20 candidates of one slot each run 20 sims.
+      t.observe(sim(1, 57, 20), 1_000);
       for (const id of ["a", "b", "c", "d"])
         t.observeIterations(id, 0, 1_000, 1_500);
       // No time has passed on the stage's clock, so no figure, not "0s".
       expect(t.view().remainingMs).toBeUndefined();
-      // Four sims a quarter done 500 ms in: one candidate's worth, 500 / 1 * (20 - 1)
+      // Four sims a quarter done 500 ms in: one sim's worth, 500 / 1 * (20 - 1)
       for (const id of ["a", "b", "c", "d"])
         t.observeIterations(id, 250, 1_000, 2_000);
       expect(t.view().remainingMs).toBe(9_500);
@@ -300,12 +315,16 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
 
     it("starts the clock at a counted step when no sim reported before it", () => {
       const t = tracker(4);
-      t.observe(sim(1, 57), 1_000);
-      t.observe(sim(2, 57), 1_100);
+      t.observe(sim(1, 57, 20), 1_000);
+      // The store answered the first candidate's sim: it lands with no
+      // report, and the candidates have 19 sims left to run.
+      t.observe(sim(2, 57, 19), 1_100);
       expect(t.view().remainingMs).toBeUndefined();
-      // n = 11 at 2100 ms, 10 of them since the clock started: 1000 / 11 * (20 - 11)
-      t.observe(sim(12, 57), 2_100);
-      expect(t.view().remainingMs).toBeCloseTo((1_000 / 11) * 9, 6);
+      // Four sims half done at 2100 ms, two sims' worth since the clock
+      // started at 1100 ms: 1000 / 2 * (19 - 2)
+      for (const id of ["a", "b", "c", "d"])
+        t.observeIterations(id, 500, 1_000, 2_100);
+      expect(t.view().remainingMs).toBe(8_500);
     });
   });
 
@@ -314,11 +333,12 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
     // first report starts the stage's clock (the describe above).
     it("prices the candidates left at the pace of the candidates so far, and no later stage", () => {
       const t = tracker(4);
-      t.observe(sim(1, 57), 1_000);
+      t.observe(sim(1, 57, 20), 1_000);
       startClock(t, 1_000);
       for (let i = 0; i < 8; i++) t.observe(row(false), 1_500);
-      // n = 10 at 2000 ms: (2000 - 1000) / 10 * (20 - 10)
-      t.observe(sim(11, 57), 2_000);
+      // 10 sims done at 2000 ms: (2000 - 1000) / 10 * (20 - 10)
+      endSims(t, ids("s", 10), 2_000);
+      t.observe(sim(11, 57, 20), 2_000);
       expect(t.view().remainingMs).toBe(1_000);
     });
 
@@ -339,10 +359,11 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
 
     it("gives no time left in the set stage, which sends no count, nor before a re-sim is done", () => {
       const t = tracker(4);
-      t.observe(sim(1, 57), 1_000);
+      t.observe(sim(1, 57, 20), 1_000);
       startClock(t, 1_000);
       for (let i = 0; i < 8; i++) t.observe(row(false), 1_500);
-      t.observe(sim(11, 57), 2_000);
+      endSims(t, ids("s", 10), 2_000);
+      t.observe(sim(11, 57, 20), 2_000);
       expect(t.view().remainingMs).toBeDefined();
       t.observe(sim(21, 57), 3_000);
       expect(t.view().activity).toBe("set-bonuses");
@@ -358,31 +379,32 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
 
     it("shows the time left from the first candidate done, as the Bulk sim does from its first step (898)", () => {
       const t = tracker(4);
-      t.observe(sim(1, 57), 1_000);
+      t.observe(sim(1, 57, 20), 1_000);
       startClock(t, 1_000);
       expect(t.view().remainingMs).toBeUndefined();
-      // n = 1 at 1100 ms: 100 / 1 * (20 - 1)
-      t.observe(sim(2, 57), 1_100);
+      // 1 sim done at 1100 ms: 100 / 1 * (20 - 1)
+      endSims(t, ["a"], 1_100);
+      t.observe(sim(2, 57, 20), 1_100);
       expect(t.view().remainingMs).toBe(1_900);
     });
 
     it("counts the candidates under way by their iterations done, so the figure moves between landings", () => {
       const t = tracker(4);
-      t.observe(sim(1, 57), 1_000);
+      t.observe(sim(1, 57, 20), 1_000);
       startClock(t, 1_000);
-      // Four sims a quarter done at 1500 ms: one candidate's worth in 500 ms,
+      // Four sims a quarter done at 1500 ms: one sim's worth in 500 ms,
       // 19 left: 500 / 1 * (20 - 1)
       for (const id of ["a", "b", "c", "d"])
         t.observeIterations(id, 250, 1_000, 1_500);
       expect(t.view().remainingMs).toBe(9_500);
-      // Half done at 2000 ms: two candidates' worth, 1000 / 2 * (20 - 2)
+      // Half done at 2000 ms: two sims' worth, 1000 / 2 * (20 - 2)
       for (const id of ["a", "b", "c", "d"])
         t.observeIterations(id, 500, 1_000, 2_000);
       expect(t.view().remainingMs).toBe(9_000);
       // "a" ends and its candidate lands: 1 done plus three halves,
       // (2400 - 1000) / 2.5 * (20 - 2.5)
       t.observeIterations("a", 1_000, 1_000, 2_400);
-      t.observe(sim(2, 57), 2_400);
+      t.observe(sim(2, 57, 20), 2_400);
       expect(t.view().remainingMs).toBeCloseTo(9_800, 6);
     });
 
@@ -409,19 +431,21 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
   describe("each stage's own count", () => {
     it("gives no time left once a candidate count passes the boundary, since the stage's size is then unknown", () => {
       const t = tracker(4);
-      t.observe(sim(1, 57), 1_000);
+      t.observe(sim(1, 57, 20), 1_000);
       startClock(t, 1_000);
-      t.observe(sim(11, 57), 2_000);
+      endSims(t, ids("s", 10), 2_000);
+      t.observe(sim(11, 57, 20), 2_000);
       expect(t.view().remainingMs).toBeDefined();
       // done 22 > B 21 drops the boundary.
-      t.observe(sim(22, 57), 3_100);
+      t.observe(sim(22, 57, 20), 3_100);
       expect(t.view()).toMatchObject({ doneAtLastCandidate: null });
       expect(t.view().remainingMs).toBeUndefined();
     });
 
     it("prices only the candidates left at half a steady run's candidates", () => {
-      // 100 candidates at 250 ms each: T = 1 + 100 + 4 * 9 = 137, B = 101.
-      // At n = 50: 250 * (100 - 50). No set stage or re-sim is priced.
+      // 100 candidates of one sim at 250 ms each: T = 1 + 100 + 4 * 9 = 137,
+      // B = 101. At 50 sims done: 250 * (100 - 50). No set stage or re-sim
+      // is priced.
       const steady = Array.from({ length: 51 }, (_, i) => ({
         t: 250 * i,
         done: i + 1,
@@ -439,8 +463,68 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
           seedCount: 5,
           topN: 8,
           stageStartedAt: 0,
+          candidateSims: 100,
+          candidateSimsEnded: 50,
         })
       ).toBeCloseTo(12_500, 6);
+    });
+  });
+
+  describe("the candidates, counted in sims (900)", () => {
+    // Bulk's sim stage counts sims, the finished ones whole and the rest by
+    // their iterations (`features/bulk/model/progress.ts:60-66`). T = 57 is
+    // 20 candidates; 6 of them take two slots (a ring, a trinket), so the
+    // candidates run 26 sims.
+    it("keeps a finished sim's credit while its candidate's second slot runs, so the figure does not jump", () => {
+      const t = tracker(4);
+      t.observe(sim(1, 57, 26), 1_000);
+      for (const id of ["a", "b", "c", "d"])
+        t.observeIterations(id, 0, 1_000, 1_000);
+      // Four sims 95% done 7 s in: 3.8 sims, 7000 / 3.8 * (26 - 3.8)
+      for (const id of ["a", "b", "c", "d"])
+        t.observeIterations(id, 950, 1_000, 8_000);
+      const before = t.view().remainingMs!;
+      expect(before).toBeCloseTo((7_000 / 3.8) * 22.2, 6);
+      // "a" and "b" end and their candidates land. "c" and "d" were the
+      // first slots of two-slot candidates, whose second slots start.
+      t.observeIterations("a", 1_000, 1_000, 8_100);
+      t.observe(sim(2, 57, 26), 8_100);
+      t.observeIterations("b", 1_000, 1_000, 8_100);
+      t.observe(sim(3, 57, 26), 8_100);
+      t.observeIterations("c", 1_000, 1_000, 8_100);
+      t.observeIterations("d", 1_000, 1_000, 8_100);
+      for (const id of ["c2", "d2", "e", "f"])
+        t.observeIterations(id, 0, 1_000, 8_100);
+      // Four sims done: 7100 / 4 * (26 - 4). Counted by the 2 candidates
+      // landed, the figure would read 7100 / 2 * 18, over twice `before`.
+      expect(t.view().remainingMs).toBeCloseTo((7_100 / 4) * 22, 6);
+      expect(t.view().remainingMs!).toBeLessThan(before);
+    });
+
+    it("takes the sims the store answered out of the candidates' sims when their candidate lands", () => {
+      const t = tracker(4);
+      t.observe(sim(1, 57, 26), 1_000);
+      startClock(t, 1_000);
+      // A two-slot candidate the store answered lands at once and runs no sim.
+      t.observe(sim(2, 57, 24), 1_000);
+      // Four sims half done 1 s in: 1000 / 2 * (24 - 2)
+      for (const id of ["a", "b", "c", "d"])
+        t.observeIterations(id, 500, 1_000, 2_000);
+      expect(t.view().remainingMs).toBe(11_000);
+    });
+
+    it("counts a sim's end once, though the runner may report it twice", () => {
+      const t = tracker(4);
+      t.observe(sim(1, 57, 26), 1_000);
+      for (const id of ["a", "b", "c", "d"])
+        t.observeIterations(id, 0, 1_000, 1_000);
+      // The worker's last report and the runner's own both say "a" ended.
+      t.observeIterations("a", 1_000, 1_000, 2_000);
+      t.observeIterations("a", 1_000, 1_000, 2_000);
+      for (const id of ["b", "c", "d"])
+        t.observeIterations(id, 500, 1_000, 2_000);
+      // 1 done plus three halves: 1000 / 2.5 * (26 - 2.5)
+      expect(t.view().remainingMs).toBeCloseTo(9_400, 6);
     });
   });
 
@@ -535,9 +619,10 @@ describe.skipIf(!moduleExists())("run progress tracker (542), pure", () => {
   describe("when the estimate is shown", () => {
     it("hides the estimate from a Stop on", () => {
       const t = tracker();
-      t.observe(sim(1, 100), 0);
+      t.observe(sim(1, 100, 63), 0);
       startClock(t, 0);
-      t.observe(sim(20, 100), 1_900);
+      endSims(t, ids("s", 19), 1_900);
+      t.observe(sim(20, 100, 63), 1_900);
       expect(t.view().remainingMs).toBeDefined();
       t.noteStop();
       expect(t.view().remainingMs).toBeUndefined();
@@ -584,7 +669,8 @@ const ITEM_VALUE = new Map<number, number>([
   ...EXTRA.map((p) => [p.itemId, 100] as const),
 ]);
 
-type PoolSlot = { itemId: number; slot: SimOrderName };
+/** A pool entry's slot: a sim slot, or a ring's or trinket's, which has two. */
+type PoolSlot = { itemId: number; slot: SimOrderName | "finger" | "trinket" };
 
 const SMALL_POOL: readonly PoolSlot[] = [
   ...(["head", "shoulder", "chest", "hands", "legs"] as const).map((slot) => ({
@@ -595,6 +681,20 @@ const SMALL_POOL: readonly PoolSlot[] = [
   { itemId: NEUTRAL.legs, slot: "legs" },
 ];
 const LARGE_POOL: readonly PoolSlot[] = [...SMALL_POOL, ...EXTRA];
+// Rings and trinkets, each one candidate with two slots, so two sims
+// (Shapeshifter's Signet, Garona's Signet Ring, Dragonspine Trophy,
+// Bloodlust Brooch), and the small pool's one-slot candidates (ticket 900).
+const TWO_SLOT: readonly PoolSlot[] = [
+  { itemId: 30834, slot: "finger" },
+  { itemId: 28649, slot: "finger" },
+  { itemId: 28830, slot: "trinket" },
+  { itemId: 29383, slot: "trinket" },
+];
+const MIXED_POOL: readonly PoolSlot[] = [...TWO_SLOT, ...SMALL_POOL];
+const MIXED_VALUE = new Map<number, number>([
+  ...ITEM_VALUE,
+  ...TWO_SLOT.map((p) => [p.itemId, 100] as const),
+]);
 const SET_BONUSES: Record<number, { b2: number; b4: number }> = {
   676: { b2: 50, b4: 80 },
   640: { b2: 40, b4: 70 },
@@ -635,25 +735,33 @@ const FERAL_SUMMARY = {
 
 type RecordedEvent = { progress: Progress; simCallsSoFar: number };
 
+type RankUpgrades = (
+  input: Record<string, unknown>,
+  deps: Record<string, unknown>,
+  onProgress: (p: Progress) => void
+) => Promise<unknown>;
+
 /**
- * One cold run: Malorne 2pc worn in hands and legs, Thunderheart and neutral
- * candidates, the broken-bonus measurement on, and no `seeds`, as the tab
- * calls it. The worn gear holds no meta, so the baseline's is the only stats
- * read and it moves no gem. `candidateCap` defaults to 100, more than
- * any pool here, so only a run that passes a smaller one is capped.
+ * What every run here shares: Malorne 2pc worn in hands and legs, the pool
+ * given, the broken-bonus measurement on, and no `seeds`, as the tab calls
+ * it. The worn gear holds no meta, so the baseline's is the only stats read
+ * and it moves no gem. `candidateCap` defaults to 100, more than any pool
+ * here, so only a run that passes a smaller one is capped. `dpsOf` is the
+ * sim's answer: the base, each worn item's value and the set bonuses.
  */
-async function recordRun(
-  candidateValue: ReadonlyMap<number, number> = ITEM_VALUE,
-  poolSlots: readonly PoolSlot[] = SMALL_POOL,
-  { candidateCap = 100 }: { candidateCap?: number } = {}
-): Promise<RecordedEvent[]> {
-  const rankMod = await importForkUpgrades<{
-    rankUpgrades: (
-      input: Record<string, unknown>,
-      deps: Record<string, unknown>,
-      onProgress: (p: Progress) => void
-    ) => Promise<unknown>;
-  }>("engine/rank.ts");
+async function feralRun(
+  poolSlots: readonly PoolSlot[],
+  candidateCap = 100
+): Promise<{
+  rankUpgrades: RankUpgrades;
+  input: Record<string, unknown>;
+  deps: Record<string, unknown>;
+  newStore: () => Record<string, unknown>;
+  dpsOf: (req: RaidSimRequest, value: ReadonlyMap<number, number>) => number;
+}> {
+  const rankMod = await importForkUpgrades<{ rankUpgrades: RankUpgrades }>(
+    "engine/rank.ts"
+  );
   const storeMod = await importForkUpgrades<{
     MemoryStore: new () => Record<string, unknown>;
   }>("engine/seams/store.ts");
@@ -704,29 +812,69 @@ async function recordRun(
     source: { kind: "badge" as const, cost: 1 },
   }));
 
+  const dpsOf = (req: RaidSimRequest, value: ReadonlyMap<number, number>) => {
+    let dps = BASE_DPS;
+    const setCounts = new Map<number, number>();
+    for (const id of equippedIds(req)) {
+      if (!id) continue;
+      dps += value.get(id) ?? 0;
+      const setId = itemsMod.getItem(id)?.setId;
+      if (setId != null) setCounts.set(setId, (setCounts.get(setId) ?? 0) + 1);
+    }
+    for (const [setId, count] of setCounts) {
+      const bonus = SET_BONUSES[setId];
+      if (!bonus) continue;
+      if (count >= 2) dps += bonus.b2;
+      if (count >= 4) dps += bonus.b4;
+    }
+    return dps;
+  };
+
+  return {
+    rankUpgrades: tracedRank(rankMod.rankUpgrades),
+    input: {
+      character: FERAL_CHAR,
+      spec: "feral",
+      maxPhase: 5,
+      fight: fightRef,
+      iterations: 3000,
+      candidateCap,
+    },
+    deps: {
+      gear: gearSource,
+      clock: () => new Date("2026-10-03T12:00:00.000Z"),
+      raidSimSkeleton: feralSkeleton,
+      epWeights: feralWeights,
+      itemEp: await statsOnlyItemEp(feralWeights),
+      pool,
+      measureSetBonuses: true,
+    },
+    newStore: () => new storeMod.MemoryStore(),
+    dpsOf,
+  };
+}
+
+/**
+ * One run on `feralRun`'s setup, with a sim that answers at once: cold, unless
+ * it is given the store an earlier run filled.
+ */
+async function recordRun(
+  candidateValue: ReadonlyMap<number, number> = ITEM_VALUE,
+  poolSlots: readonly PoolSlot[] = SMALL_POOL,
+  {
+    candidateCap = 100,
+    store,
+  }: { candidateCap?: number; store?: Record<string, unknown> } = {}
+): Promise<RecordedEvent[]> {
+  const run = await feralRun(poolSlots, candidateCap);
   let simCalls = 0;
   const fakeSim = {
     version: () => Promise.resolve(SIM_VERSION),
     computeStats: zeroHitStats,
     run: (req: RaidSimRequest, opts: SimRunOpts) => {
       simCalls += 1;
-      let dps = BASE_DPS;
-      const setCounts = new Map<number, number>();
-      for (const id of equippedIds(req)) {
-        if (!id) continue;
-        dps += candidateValue.get(id) ?? 0;
-        const setId = itemsMod.getItem(id)?.setId;
-        if (setId != null)
-          setCounts.set(setId, (setCounts.get(setId) ?? 0) + 1);
-      }
-      for (const [setId, count] of setCounts) {
-        const bonus = SET_BONUSES[setId];
-        if (!bonus) continue;
-        if (count >= 2) dps += bonus.b2;
-        if (count >= 4) dps += bonus.b4;
-      }
       return Promise.resolve({
-        dps,
+        dps: run.dpsOf(req, candidateValue),
         stdev: 30,
         iterationsDone: opts.iterations,
         simVersion: SIM_VERSION,
@@ -735,26 +883,9 @@ async function recordRun(
   };
 
   const events: RecordedEvent[] = [];
-  await tracedRank(rankMod.rankUpgrades)(
-    {
-      character: FERAL_CHAR,
-      spec: "feral",
-      maxPhase: 5,
-      fight: fightRef,
-      iterations: 3000,
-      candidateCap,
-    },
-    {
-      gear: gearSource,
-      sim: fakeSim,
-      store: new storeMod.MemoryStore(),
-      clock: () => new Date("2026-10-03T12:00:00.000Z"),
-      raidSimSkeleton: feralSkeleton,
-      epWeights: feralWeights,
-      itemEp: await statsOnlyItemEp(feralWeights),
-      pool,
-      measureSetBonuses: true,
-    },
+  await run.rankUpgrades(
+    run.input,
+    { ...run.deps, sim: fakeSim, store: store ?? run.newStore() },
     (progress) => events.push({ progress, simCallsSoFar: simCalls })
   );
   return events;
@@ -776,6 +907,8 @@ describe.skipIf(!forkPresent || !moduleExists())(
     let zeroQualifyEvents: RecordedEvent[];
     const CAPPED_CANDIDATES = 4;
     let cappedEvents: RecordedEvent[];
+    let mixedEvents: RecordedEvent[];
+    let storedEvents: RecordedEvent[];
 
     beforeAll(async () => {
       mod = await importForkUpgrades<RunProgressModule>("run_progress.ts");
@@ -797,6 +930,13 @@ describe.skipIf(!forkPresent || !moduleExists())(
         LARGE_POOL,
         { candidateCap: CAPPED_CANDIDATES }
       );
+      mixedEvents = await recordRun(MIXED_VALUE, MIXED_POOL);
+      // The small pool's sims fill a store; the mixed pool then finds them
+      // there, so only the rings and trinkets run sims.
+      const runForStore = await feralRun(SMALL_POOL);
+      const store = runForStore.newStore();
+      await recordRun(MIXED_VALUE, SMALL_POOL, { store });
+      storedEvents = await recordRun(MIXED_VALUE, MIXED_POOL, { store });
     }, 240_000);
 
     const stageEvents = (from: RecordedEvent[]) =>
@@ -984,6 +1124,187 @@ describe.skipIf(!forkPresent || !moduleExists())(
       expect(q).toBeGreaterThan(0);
       expect(q).toBeLessThan(CAPPED_CANDIDATES);
       expect(q).toBeLessThan(topN);
+    });
+
+    it.each([
+      ["seven", () => recordings.seven],
+      ["twelve", () => recordings.twelve],
+      ["zero-qualify", () => zeroQualifyEvents],
+      ["capped", () => cappedEvents],
+      ["rings and trinkets", () => mixedEvents],
+      ["rings and trinkets, the rest from the store", () => storedEvents],
+    ] as const)(
+      "sends the candidates' sims with each candidates event, ending on the sims the runner ran for them (900, %s)",
+      (_name, from) => {
+        const events = from();
+        const candidates = simmingBeforeRanking(events);
+        const first = candidates[0]!;
+        const last = candidates[candidates.length - 1]!;
+        const sims = (e: RecordedEvent) =>
+          (e.progress as { candidateSims?: number }).candidateSims;
+        for (const e of candidates) expect(sims(e)).toEqual(expect.any(Number));
+        expect(sims(last)).toBe(last.simCallsSoFar - first.simCallsSoFar);
+      }
+    );
+
+    it("plans one sim per slot of a ring or trinket, and takes out the sims the store answers", () => {
+      const sims = (from: RecordedEvent[]) =>
+        simmingBeforeRanking(from).map(
+          (e) => (e.progress as { candidateSims: number }).candidateSims
+        );
+      // Seven one-slot candidates and four of two slots: 15 sims planned.
+      // The Thunderheart head's meta repair fails, so its slot runs none.
+      expect(sims(mixedEvents)[0]).toBe(15);
+      expect(sims(mixedEvents).at(-1)).toBe(14);
+      // The same 15 planned; the store answers the six one-slot sims the
+      // small pool ran, and the head's repair fails again.
+      expect(sims(storedEvents)[0]).toBe(15);
+      expect(sims(storedEvents).at(-1)).toBe(8);
+    });
+
+    it("prices the candidates by the runner's own sims, so a ring's or trinket's first sim keeps its credit (900)", async () => {
+      // Four workers, each sim 1 s, reported every 100 ms, as the runner
+      // reports a sim's iterations (`worker_pool_sim_runner.ts`).
+      const CONCURRENCY = 4;
+      const SIM_MS = 1_000;
+      const STEP_MS = 100;
+      const run = await feralRun(MIXED_POOL);
+      const tracker = new mod.RunProgressTracker();
+      tracker.setConcurrency(CONCURRENCY);
+      let now = 0;
+      type Running = {
+        id: string;
+        startedAt: number;
+        iterations: number;
+        end: () => void;
+      };
+      const running: Running[] = [];
+      const candidateSims: Array<{ startedAt: number; endedAt?: number }> = [];
+      let simCount = 0;
+      let inCandidates = false;
+      let planned: number | undefined;
+      let latest: number | undefined;
+      const fakeSim = {
+        version: () => Promise.resolve(SIM_VERSION),
+        computeStats: zeroHitStats,
+        run: (req: RaidSimRequest, opts: SimRunOpts) =>
+          new Promise((resolve) => {
+            const id = `sim${simCount++}`;
+            const sim: { startedAt: number; endedAt?: number } = {
+              startedAt: now,
+            };
+            if (inCandidates) candidateSims.push(sim);
+            tracker.observeIterations(id, 0, opts.iterations, now);
+            running.push({
+              id,
+              startedAt: now,
+              iterations: opts.iterations,
+              end: () => {
+                sim.endedAt = now;
+                resolve({
+                  dps: run.dpsOf(req, MIXED_VALUE),
+                  stdev: 30,
+                  iterationsDone: opts.iterations,
+                  simVersion: SIM_VERSION,
+                });
+              },
+            });
+          }),
+      };
+      const onProgress = (p: Progress) => {
+        tracker.observe(p, now);
+        if ("kind" in p || p.stage !== "simming") return;
+        if (planned === undefined) {
+          planned = p.candidateSims;
+          inCandidates = true;
+        } else if (p.done === 1 + MIXED_POOL.length) inCandidates = false;
+        if (inCandidates) latest = p.candidateSims;
+      };
+
+      const settle = () => new Promise<void>((r) => setImmediate(r));
+      let finished = false;
+      const ranking = run
+        .rankUpgrades(
+          run.input,
+          {
+            ...run.deps,
+            sim: fakeSim,
+            store: run.newStore(),
+            concurrency: CONCURRENCY,
+          },
+          onProgress
+        )
+        .finally(() => {
+          finished = true;
+        });
+      await settle();
+      const samples: Array<{
+        now: number;
+        shown: number | undefined;
+        size: number;
+      }> = [];
+      for (let guard = 0; !finished; guard++) {
+        if (guard > 10_000) throw new Error("the run did not end");
+        now += STEP_MS;
+        const due = running.filter((r) => now - r.startedAt >= SIM_MS);
+        for (const r of running) {
+          if (!due.includes(r))
+            tracker.observeIterations(
+              r.id,
+              ((now - r.startedAt) / SIM_MS) * r.iterations,
+              r.iterations,
+              now
+            );
+        }
+        for (const r of due) {
+          running.splice(running.indexOf(r), 1);
+          // The worker's last report and the runner's own both say it ended.
+          tracker.observeIterations(r.id, r.iterations, r.iterations, now);
+          tracker.observeIterations(r.id, r.iterations, r.iterations, now);
+          r.end();
+        }
+        await settle();
+        if (inCandidates)
+          samples.push({
+            now,
+            shown: tracker.view().remainingMs,
+            size: latest!,
+          });
+      }
+      await ranking;
+
+      // 15 sims planned; the head's meta repair fails as it is dispatched, so
+      // the count the engine sends drops to the 14 the runner ran.
+      expect(planned).toBe(15);
+      expect(candidateSims).toHaveLength(14);
+      expect(samples.at(-1)!.size).toBe(14);
+      const startedAt = candidateSims[0]!.startedAt;
+      // wowsims' rule on the runner's own sims: a sim that ended counts as
+      // one, one under way by its share (`progress.ts:60-67`).
+      const rule = (at: number, size: number) => {
+        const done = candidateSims.reduce(
+          (sum, s) =>
+            sum +
+            (s.endedAt !== undefined && s.endedAt <= at
+              ? 1
+              : Math.max(0, Math.min(1, (at - s.startedAt) / SIM_MS))),
+          0
+        );
+        return ((at - startedAt) / done) * (size - done);
+      };
+      // The candidates' sims start after the baseline's, which starts their
+      // clock: no figure at that first sample, then one at every sample.
+      const [first, ...rest] = samples;
+      expect(first!.now).toBe(startedAt);
+      expect(first!.shown).toBeUndefined();
+      expect(rest.length).toBeGreaterThan(10);
+      for (const s of rest) {
+        expect(s.shown).toBeDefined();
+        expect(s.shown!).toBeCloseTo(rule(s.now, s.size), 3);
+      }
+      // So the figure never rises while the candidates run.
+      for (let i = 1; i < rest.length; i++)
+        expect(rest[i]!.shown!).toBeLessThanOrEqual(rest[i - 1]!.shown! + 1e-6);
     });
 
     // Ticket 566: the first total budgets re-sims for min(top-N, candidates)
