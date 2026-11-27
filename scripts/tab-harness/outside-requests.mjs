@@ -58,16 +58,22 @@ export function fontAwesomeFile(url) {
 export async function serveFontAwesome(client, sessionId) {
   const missing = [];
   const send = (method, params) => client.send(method, params, sessionId);
+  // An answer sent as the socket closes at the end of a run rejects; left
+  // unhandled, that rejection would end the process before its verdict.
+  const answer = (method, params) => send(method, params).catch(() => {});
   client.onEvent((m) => {
     if (m.method !== "Fetch.requestPaused" || m.sessionId !== sessionId) return;
     const { requestId, request } = m.params;
     const file = fontAwesomeFile(request.url);
     if (!file) {
       missing.push(request.url);
-      send("Fetch.failRequest", { requestId, errorReason: "BlockedByClient" });
+      answer("Fetch.failRequest", {
+        requestId,
+        errorReason: "BlockedByClient",
+      });
       return;
     }
-    send("Fetch.fulfillRequest", {
+    answer("Fetch.fulfillRequest", {
       requestId,
       responseCode: 200,
       responseHeaders: [
