@@ -55,7 +55,26 @@ pwshim), including the current baseline `8cb2f52c`.
 
 ## Check output
 
-PENDING
+`pnpm merge-to-dev --check-only` at `f71ddfd5`, run inside the Claude Code
+sandbox. `env | grep -c '^PLAYWRIGHT'` printed 0 first, and node printed
+v22.23.2. Log:
+`.scratch/agent-reports/2026-11-26-901-layout-compare/checkonly2.log`
+(gitignored).
+
+- verify: `gates: 1780 ran, 0 skipped`.
+- merge-ready, both copies: `merge-ready: ok`,
+  `disposition rows: 10 parsed of 10 row-shaped lines in 1 section(s)`.
+- layout gate: `tab layout source changed since the last green run
+(recorded f03a6eaac9db..., now fdec1d674a26...) -- running the gate`;
+  verdict `"outcome":"measured","pass":true,"failed":0,"a11yFailed":0`, 4
+  widths, 11 fixtures, 496 PASS, 0 FAIL. `layout gate: PASSED. Advanced the
+baseline to fdec1d674a26...`. The lock advance is committed on this branch.
+- `check-only: ok (not merging)`, rc=0.
+
+New tests (fix check by a fresh agent,
+`.scratch/agent-reports/2026-11-26-general-task-901-fix-check.md`): all six
+fail on the code before their fix and pass at `f46b7cb4`.
+`node --version; pnpm exec vitest run scripts/tab-harness`: 16 passed.
 
 ## Findings
 

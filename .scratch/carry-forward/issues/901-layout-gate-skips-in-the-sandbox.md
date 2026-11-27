@@ -1,9 +1,9 @@
-Status: open
+Status: closed
 Type: bug (tooling)
 Origin: .scratch/agent-reports/2026-11-26-general-task-900-layout-gate.md
 Blocks: none
 Blocked by: none
-Related: 900
+Related: 861, 900, 902
 
 # The layout gate silently skips when `pnpm merge-to-dev` runs in the sandbox
 
@@ -45,3 +45,18 @@ own stderr in the gate's output in place of only the timeout.
 
 Untested: whether the headless shell lays the page out exactly like full
 Chromium. Every in-sandbox pass so far has used it.
+
+## Closed (2026-11-26, branch `fix/901-layout-gate-sandbox`)
+
+Every tab harness now launches Playwright's headless shell, and
+`launchChrome` quotes the browser's stderr when it fails to start.
+`pnpm merge-to-dev --check-only` in the sandbox, with no environment
+variable set, measured the layout and passed.
+
+The "Untested" question is answered: the two do not lay text out alike.
+Both pass every check, but 9301 of 21405 element boxes moved by more than
+2 px (`.scratch/agent-reports/2026-11-26-901-layout-compare/README.md`).
+Whether the desktop runs should change browser too was put to the user
+before the merge.
+
+Verified by: docs/reviews/fix-901-layout-gate-sandbox.md
