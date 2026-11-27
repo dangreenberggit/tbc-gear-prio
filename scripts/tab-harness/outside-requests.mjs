@@ -11,6 +11,9 @@
 // Font Awesome ones from the pinned npm package, which is byte-identical to
 // the CDN copy (the page's SRI hash checks the stylesheet). Every run then
 // measures the desktop page's geometry, whatever network it has.
+//
+// The tab-review capture (test-review.mjs, ticket 903) serves Font Awesome the
+// same way but does not block: its screenshots keep a desktop's item icons.
 
 import fs from "node:fs";
 import { createRequire } from "node:module";
@@ -105,9 +108,10 @@ export async function serveFontAwesome(client, sessionId) {
 }
 
 /**
- * The layout gate's check that the page got its Font Awesome. A failed check,
- * not an unmeasured run: merge-to-dev lets an unmeasured run through, and
- * without Font Awesome the gate measures icon buttons 0 px tall.
+ * Whether the page got its Font Awesome: the layout gate's check 24, and an
+ * entry error in the tab-review capture. In the gate a failed check, not an
+ * unmeasured run: merge-to-dev lets an unmeasured run through, and without
+ * Font Awesome the gate measures icon buttons 0 px tall.
  */
 export function fontAwesomeServed({ missing, unanswered }) {
   const ok = missing.length === 0 && unanswered.length === 0;

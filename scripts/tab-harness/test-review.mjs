@@ -35,6 +35,14 @@
 // the entries so a clean state comes first, or reset the state in the
 // interactions.
 //
+// Outside requests (ticket 903): each page gets Font Awesome from the pinned
+// npm package (outside-requests.mjs), because without it the row toggles are
+// 0 px tall and a sandbox capture would differ from a desktop one. Other
+// outside requests are left to the network, unlike the layout gate, so a
+// desktop capture keeps its item icons and Wowhead link colours; in the
+// sandbox they fail, which moves no box (measured for 902). A Font Awesome
+// file the package lacks is an error on that entry.
+//
 // Fact ops (rect, style, text, attr and prop read the first visible match, else the
 // first match): rect:<sel>; style:<sel>:<prop>; text:<sel> (trimmed
 // textContent); attr:<sel>:<name>; prop:<sel>:<name> (a DOM property, such as
@@ -47,6 +55,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 
+import { fontAwesomeServed, serveFontAwesome } from "./outside-requests.mjs";
 import * as H from "./test-tab-harness.mjs";
 
 const HEIGHT = 900;
@@ -265,9 +274,10 @@ async function captureEntry(
   baseline,
   matched
 ) {
-  const { send, targetId } = await H.attachPage(client);
+  const { send, targetId, sessionId } = await H.attachPage(client);
+  const fontAwesome = await serveFontAwesome(client, sessionId);
   try {
-    return await captureOnPage(
+    const record = await captureOnPage(
       send,
       base,
       outDir,
@@ -276,6 +286,12 @@ async function captureEntry(
       baseline,
       matched
     );
+    const served = fontAwesomeServed(fontAwesome);
+    if (!served.ok)
+      record.errors.push(
+        `${served.detail.error}: ${[...served.detail.missing, ...served.detail.unanswered].join(", ")}`
+      );
+    return record;
   } finally {
     await client.send("Target.closeTarget", { targetId });
   }

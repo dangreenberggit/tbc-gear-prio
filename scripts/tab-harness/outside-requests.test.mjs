@@ -162,6 +162,43 @@ describe.skipIf(!fs.existsSync(chromiumExecutablePath()))(
   }
 );
 
+// Ticket 903: the tab-review capture serves Font Awesome without the blocking
+// flags. Fetch answers the request inside the browser, so it loads even where
+// outside requests would fail at a proxy (the sandbox's). This tests the
+// helper in that launch, not test-review.mjs itself, which the capture's own
+// before/after evidence covers. The page asks for nothing else from outside,
+// so the test needs no network.
+describe.skipIf(!fs.existsSync(chromiumExecutablePath()))(
+  "a browser launched without the blocking flags, with Font Awesome served",
+  () => {
+    it("loads the stylesheet and its font", async () => {
+      const chrome = await launchChrome();
+      const client = cdp(chrome.wsUrl, { callTimeoutMs: 30000 });
+      try {
+        await client.ready;
+        const { send, sessionId } = await attachPage(client);
+        const fa = await serveFontAwesome(client, sessionId);
+        const html = `<link rel="stylesheet" href="${CDN}/css/all.min.css" crossorigin="anonymous"><i class="fa-solid fa-star"></i>`;
+        await send("Page.navigate", {
+          url: `data:text/html,${encodeURIComponent(html)}`,
+        });
+        const state = await evaluate(
+          send,
+          `(async () => { while (document.readyState !== 'complete') await new Promise((r) => setTimeout(r, 50)); await document.fonts.load('900 16px "Font Awesome 6 Free"'); await document.fonts.ready; const r = document.querySelector('i').getBoundingClientRect(); return { faFont: document.fonts.check('900 16px "Font Awesome 6 Free"'), w: r.width, h: r.height }; })()`
+        );
+        expect(state.faFont).toBe(true);
+        // The width is what fails without Font Awesome: fonts.check is also
+        // true when the stylesheet never loaded and no face matches.
+        expect(state.w).toBeGreaterThan(0);
+        expect(fontAwesomeServed(fa).ok).toBe(true);
+      } finally {
+        client.close();
+        chrome.kill();
+      }
+    }, 30000);
+  }
+);
+
 // Review finding N2/A4: a rejected answer to a paused request was swallowed,
 // which leaves the page on a fallback font with nothing said.
 describe("serveFontAwesome with a failing answer", () => {

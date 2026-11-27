@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug (tooling)
 Origin: ticket 902, branch `fix/902-layout-gate-outside-resources` (report in the delegated 902 session, 2026-11-26)
 Blocks: none
@@ -32,3 +32,11 @@ icons. (The 902 session's recommendation; untested.)
 
 A tab-review capture taken in the sandbox shows the row toggles' icons, with
 the same box sizes as a desktop capture.
+
+## Closed
+
+Fixed on `fix/903-tab-review-font-awesome`: `test-review.mjs` serves Font
+Awesome from the pinned package and blocks nothing else. Sandbox captures
+now give the row toggles 28×17.5 px, as the everything-loads capture does.
+
+Verified by: `docs/reviews/fix-903-tab-review-font-awesome.md`
