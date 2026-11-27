@@ -19,7 +19,7 @@ have not changed since this table was written — nothing about behaviour.**
 Only the parity test (E-W3, `packages/core/test/wowsims-fork-parity.test.ts`)
 proves behaviour is unchanged.
 
-## Two rows trace to a later core commit than the header
+## Two rows traced to a later core commit than the header
 
 History: both files were deleted from the fork on 2026-11-27 (§ Engine
 clean-up for the upstream PR), so their rows are gone from § Ported files.
@@ -37,8 +37,8 @@ The `worn-unrankable` feature landed in core after this table was written, so
 the two files sat stale while their "none (import paths only)" labels stayed
 literally accurate for the commit they were compared against — which is why
 neither gate could see it (ticket 214). The port was applied 2026-08-17 and
-both files now show zero comment-stripped code divergence from their core
-sources.
+both files then showed zero comment-stripped code divergence from their
+core sources.
 
 The header commit is stale for **every** row, not just these two. Re-baselining
 the whole table is deliberately not done here: it would assert a fresh
@@ -357,8 +357,9 @@ before their hashes moved.
 ## Engine clean-up for the upstream PR (2026-11-27)
 
 Fork-only changes before the upstream pull request, step 1 of the owner's
-plan; core keeps its own copies. Owner, approving the plan: "go". Nothing the
-tab shows changes.
+plan; core keeps its own copies. Owner, in chat on 2026-11-27, approving
+§ Owner decision of `.scratch/agent-reports/2026-11-27-general-task-engine-size.md`
+(gitignored; main checkout): "go". Nothing the tab shows changes.
 
 - Fork `40fe9105a`: `plausibility.ts` and `dead-slots.ts` are deleted, with
   `Ranking.plausibilityWarnings` (`rank-types.ts`) and its call in
