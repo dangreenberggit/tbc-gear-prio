@@ -62,7 +62,28 @@ the axe results a run with every outside resource gets.
 
 ## Check output
 
-CHECK_OUTPUT_PENDING
+`pnpm merge-to-dev --check-only` at `f7d2bedd`, run inside the Claude Code
+sandbox. `env | grep -c '^PLAYWRIGHT'` printed 0 first, and node printed
+v22.23.2. Log: `checkonly.log` in the evidence folder (gitignored).
+
+- verify: `gates: 1790 ran, 0 skipped`.
+- merge-ready, both copies: `merge-ready: ok`,
+  `disposition rows: 12 parsed of 12 row-shaped lines in 1 section(s)`.
+- layout gate: `tab layout source changed since the last green run
+(recorded fdec1d674a26..., now dd50b7cd847b...) -- running the gate`;
+  verdict `"outcome":"measured","pass":true,"failed":0,"a11yFailed":0`, 4
+  widths, 11 fixtures, 497 PASS (the 496 before plus `PASS (24) {}`), 0
+  FAIL. `layout gate: PASSED. Advanced the baseline to dd50b7cd847b...`. The
+  lock advance is committed on this branch.
+- `check-only: ok (not merging)`, rc=0.
+
+Fix check by a fresh agent (Sonnet; the GLM worker stopped on an expired
+API key): the four tests for A1, A2 and A4/N2, copied with the code of
+`6347da9c` (before the fixes), gave `Tests 4 failed | 6 passed (10)`; with
+`e2c02d10`, `Tests 10 passed (10)`.
+`node --version; pnpm exec vitest run scripts/tab-harness` at HEAD:
+`Tests 26 passed (26)`. Logs: `.scratch/fixcheck-902/before.log`,
+`after.log`.
 
 ## Findings
 
