@@ -261,10 +261,15 @@ export async function launchChrome({
   while (Date.now() < deadline) {
     if (spawnError) throw failure(`could not start: ${spawnError.message}`);
     if (proc.exitCode !== null || proc.signalCode !== null) {
-      // Let the last of stderr arrive before quoting it.
-      await new Promise((r) =>
-        proc.stderr.readableEnded ? r() : proc.stderr.once("close", r)
-      );
+      // Let the last of stderr arrive before quoting it, but not for long: a
+      // child the browser left behind (its crash handler) can hold the pipe
+      // open after the browser has gone.
+      await Promise.race([
+        new Promise((r) =>
+          proc.stderr.readableEnded ? r() : proc.stderr.once("close", r)
+        ),
+        sleep(1000),
+      ]);
       throw failure(
         `exited with ${proc.signalCode ? `signal ${proc.signalCode}` : `code ${proc.exitCode}`} before its CDP endpoint came up`
       );

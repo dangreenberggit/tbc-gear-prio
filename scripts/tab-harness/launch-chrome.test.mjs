@@ -30,6 +30,29 @@ describe.skipIf(process.platform === "win32")("launchChrome", () => {
     expect(Date.now() - t0).toBeLessThan(5000);
   });
 
+  // Real Chromium leaves a crashpad handler holding the same stderr, so the
+  // pipe can stay open after the browser itself has exited.
+  it("does not wait past its timeout for a child that keeps stderr open", async () => {
+    const exe = fakeChrome(
+      "dies-leaving-child",
+      `sleep 8 & echo '${FATAL}' >&2; exit 134`
+    );
+    const t0 = Date.now();
+    const err = await launchChrome({ exe, timeoutMs: 2000 }).catch((e) => e);
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toContain("exited with code 134");
+    expect(err.message).toContain(FATAL);
+    expect(Date.now() - t0).toBeLessThan(4000);
+  });
+
+  it("says it could not start a browser file that is missing", async () => {
+    const exe = path.join(dir, "no-such-chrome");
+    const err = await launchChrome({ exe, timeoutMs: 15000 }).catch((e) => e);
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toContain("could not start");
+    expect(err.message).toContain(exe);
+  });
+
   it("names the browser's stderr when its endpoint never comes up", async () => {
     const exe = fakeChrome(
       "hangs",

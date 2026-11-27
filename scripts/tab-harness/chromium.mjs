@@ -6,9 +6,10 @@
 //
 // Why the headless shell (ticket 901): full Chromium aborts at startup inside
 // the agent sandbox, whose seccomp filter refuses the Unix socket it needs,
-// and the two do not lay text out alike (the shell rounds each glyph's advance
-// to a whole pixel), so one browser everywhere keeps every run's geometry the
-// same. It is also what Playwright itself launches for headless Chromium
+// and the two do not lay text out alike (measured for ticket 901: the same
+// string is 284 px wide in the shell and 286.51 px in full Chromium, which
+// moves wrap points), so every run measures with one browser's text metrics.
+// It is also what Playwright itself launches for headless Chromium
 // (playwright-core lib/server/chromium/chromium.js, getExecutableName).
 //
 // package.json pins `playwright` to an exact version because each Playwright
@@ -46,7 +47,7 @@ const fromPlaywright = createRequire(
 );
 
 /**
- * The `chromium` entry (revision, browserVersion, any per-host overrides) of
+ * The `chromium-headless-shell` entry (revision, browserVersion, any per-host overrides) of
  * the browsers.json that the resolved `playwright` package's playwright-core
  * reads to choose the build it launches. It is the same on every OS, unlike
  * the executable path.

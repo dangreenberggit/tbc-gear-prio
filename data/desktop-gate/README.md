@@ -26,11 +26,12 @@ differs from its `GATED` entry.
 
 The wall times are the gate's own per-spec lines (harness start to verdict) on
 2026-11-06, fork `b603564ee`, 20 cores. The whole command, build included, took
-90-91 s. Those runs were in an agent's sandbox, where the harness failed with
-`cdp timeout` until `PLAYWRIGHT_BROWSERS_PATH` pointed at a headless-shell
-copy of Chrome,
-`/home/daniel/Code/lulz/tbc-gear-prio/.scratch/agent-reports/2026-11-03-p45-runs/pwshim`
-(gitignored, on that machine only).
+90-91 s. Those runs were in an agent's sandbox. Then, the harness failed with
+`cdp timeout` there unless `PLAYWRIGHT_BROWSERS_PATH` pointed at a pwshim
+folder holding the headless shell. Since ticket 901 the harness launches the
+headless shell itself, so leave `PLAYWRIGHT_BROWSERS_PATH` unset: the pwshim
+has no `chromium_headless_shell-*` folder, so with the variable set the
+harness finds no browser.
 
 - **Why these specs.** Ret was the only gated spec until ticket 800. Mage is the
   caster: spell hit cap, and its start preset wears a staff, so the tab holds
