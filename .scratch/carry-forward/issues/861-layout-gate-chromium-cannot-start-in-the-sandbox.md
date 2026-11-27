@@ -1,9 +1,9 @@
-Status: open
+Status: closed
 Type: gap
 Origin: ticket 860, 2026-11-08 (pair `tbc-wt/gate-pipe`, fork `68b2afacf`)
 Blocks: none
 Blocked by: none
-Related: 401, 754, 800, 860
+Related: 401, 754, 800, 860, 901
 
 # The layout gate's Chromium aborts inside the Claude Code sandbox
 
@@ -66,3 +66,6 @@ owner's decision).
   server started in one sandboxed command was unreachable from
   `preview_open` (`net::ERR_CONNECTION_REFUSED`) and from another
   command's `curl`. Reports: `.scratch/agent-reports/2026-11-13-general-task-pointer-check-finish.md`.
+- 2026-11-26, closed with ticket 901 on branch `fix/901-layout-gate-sandbox`, by the first way in above: `chromium.mjs` returns the headless shell, and the digest hashes its browsers.json entry. The geometry question is answered in 901's closing note. `pnpm tab-fixtures:smoke` uses the same launcher, so it starts too. The T3 browser-pane route (another command cannot reach a sandboxed server) is not changed.
+
+Verified by: docs/reviews/fix-901-layout-gate-sandbox.md

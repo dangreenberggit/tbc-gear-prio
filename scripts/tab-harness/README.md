@@ -8,8 +8,9 @@ directory.
 
 - `test-tab-harness.mjs`: shared CDP plumbing (Chromium, build, serve, fixture
   loading, axe-core).
-- `chromium.mjs`: the browser every script and the Python gates launch, asked
-  from the pinned `playwright` devDependency. Install it once per machine with
+- `chromium.mjs`: the browser every script and the Python gates launch,
+  Playwright's Chromium headless shell, asked from the pinned `playwright`
+  devDependency (why the shell: the comment at its top). Install it once per machine with
   `pnpm exec playwright install chromium`; until then the layout gate skips and
   the other scripts stop with that command in the error. The layout gate's
   digest includes the Chromium build that `playwright` names

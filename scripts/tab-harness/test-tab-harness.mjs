@@ -202,9 +202,15 @@ export async function serveTab() {
 // CDP session over the global WebSocket.
 // ---------------------------------------------------------------------------
 
-export async function launchChrome() {
+// How much of the browser's stderr a startup failure quotes: its last lines
+// hold the reason, and the rest is noise such as dbus warnings.
+const STDERR_TAIL_CHARS = 4000;
+
+export async function launchChrome({
+  exe = findChromium(),
+  timeoutMs = 20000,
+} = {}) {
   const port = await freePort();
-  const exe = findChromium();
   const userDataDir = await fsp.mkdtemp(path.join(os.tmpdir(), "tbc-tab-"));
   const proc = spawn(
     exe,
@@ -218,8 +224,24 @@ export async function launchChrome() {
       `--user-data-dir=${userDataDir}`,
       "about:blank",
     ],
-    { stdio: "ignore" }
+    { stdio: ["ignore", "ignore", "pipe"] }
   );
+  // Ticket 901: a browser that aborted at startup was reported only as a
+  // timeout. Its stderr is read for the whole run, so a full pipe never
+  // stalls it, and only the tail is kept for the error.
+  let stderr = "";
+  proc.stderr.setEncoding("utf8");
+  proc.stderr.on("data", (chunk) => {
+    stderr = (stderr + chunk).slice(-STDERR_TAIL_CHARS);
+  });
+  let spawnError = null;
+  proc.on("error", (err) => {
+    spawnError = err;
+  });
+  const failure = (what) =>
+    new Error(
+      `Chromium ${what} (${exe})${stderr.trim() ? `; its stderr ends:\n${stderr.trimEnd()}` : "; it printed nothing to stderr"}`
+    );
   // On Windows proc.kill() ends only the browser process, and a renderer stuck
   // in a page loop outlives it; taskkill /T ends the tree.
   let killed = false;
@@ -234,9 +256,24 @@ export async function launchChrome() {
   };
   process.on("exit", kill);
   exitOnSignals();
-  const deadline = Date.now() + 20000;
+  const deadline = Date.now() + timeoutMs;
   let wsUrl;
   while (Date.now() < deadline) {
+    if (spawnError) throw failure(`could not start: ${spawnError.message}`);
+    if (proc.exitCode !== null || proc.signalCode !== null) {
+      // Let the last of stderr arrive before quoting it, but not for long: a
+      // child the browser left behind (its crash handler) can hold the pipe
+      // open after the browser has gone.
+      await Promise.race([
+        new Promise((r) =>
+          proc.stderr.readableEnded ? r() : proc.stderr.once("close", r)
+        ),
+        sleep(1000),
+      ]);
+      throw failure(
+        `exited with ${proc.signalCode ? `signal ${proc.signalCode}` : `code ${proc.exitCode}`} before its CDP endpoint came up`
+      );
+    }
     try {
       const res = await fetch(`http://127.0.0.1:${port}/json/version`);
       if (res.ok) {
@@ -250,7 +287,7 @@ export async function launchChrome() {
   }
   if (!wsUrl) {
     kill();
-    throw new Error("Chromium CDP endpoint did not come up");
+    throw failure(`CDP endpoint did not come up in ${timeoutMs / 1000}s`);
   }
   return { proc, kill, port, wsUrl, userDataDir };
 }

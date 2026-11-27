@@ -1,7 +1,16 @@
-// The Chromium the tab harnesses drive: the one the pinned `playwright`
-// devDependency installs. Asking Playwright for the path, instead of
-// searching its cache folder, follows its own per-OS layout and the browser
-// revision this repo pins, and honors PLAYWRIGHT_BROWSERS_PATH.
+// The Chromium the tab harnesses drive: the headless shell the pinned
+// `playwright` devDependency installs beside full Chromium. Asking
+// Playwright's registry for the path, instead of searching its cache folder,
+// follows its own per-OS layout and the browser revision this repo pins, and
+// honors PLAYWRIGHT_BROWSERS_PATH.
+//
+// Why the headless shell (ticket 901): full Chromium aborts at startup inside
+// the agent sandbox, whose seccomp filter refuses the Unix socket it needs,
+// and the two do not lay text out alike (measured for ticket 901: the same
+// string is 284 px wide in the shell and 286.51 px in full Chromium, which
+// moves wrap points), so every run measures with one browser's text metrics.
+// It is also what Playwright itself launches for headless Chromium
+// (playwright-core lib/server/chromium/chromium.js, getExecutableName).
 //
 // package.json pins `playwright` to an exact version because each Playwright
 // release names its own Chromium build (in playwright-core's browsers.json),
@@ -14,7 +23,7 @@
 // and exits 2 (NOT_INSTALLED_EXIT). Any other failure, such as a `playwright`
 // package that cannot be imported, exits 1, so the Python gates
 // (check_layout_gate.py) can tell a missing browser from a broken lookup.
-// With `--build` it prints the Chromium entry of Playwright's browsers.json
+// With `--build` it prints the headless shell's entry of Playwright's browsers.json
 // as JSON.
 //
 // Install the browser once per machine:
@@ -25,42 +34,56 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { chromium } from "playwright";
-
+// Installs full Chromium and the headless shell (without --no-shell).
 export const INSTALL_HINT = "pnpm exec playwright install chromium";
+const BROWSER = "chromium-headless-shell";
 // check_layout_gate.py's CHROMIUM_NOT_INSTALLED_EXIT must match.
 const NOT_INSTALLED_EXIT = 2;
 const NOT_INSTALLED = "CHROMIUM_NOT_INSTALLED";
+// playwright-core is resolved from playwright's own folder because pnpm does
+// not link it into the root node_modules.
+const fromPlaywright = createRequire(
+  createRequire(import.meta.url).resolve("playwright")
+);
 
 /**
- * The `chromium` entry (revision, browserVersion, any per-host overrides) of
+ * The `chromium-headless-shell` entry (revision, browserVersion, any per-host overrides) of
  * the browsers.json that the resolved `playwright` package's playwright-core
  * reads to choose the build it launches. It is the same on every OS, unlike
  * the executable path.
  */
 export function chromiumBuild() {
-  // playwright-core is resolved from playwright's own folder because pnpm
-  // does not link it into the root node_modules.
-  const fromHere = createRequire(import.meta.url);
-  const fromPlaywright = createRequire(fromHere.resolve("playwright"));
   const coreDir = path.dirname(
     fromPlaywright.resolve("playwright-core/package.json")
   );
   const { browsers } = JSON.parse(
     fs.readFileSync(path.join(coreDir, "browsers.json"), "utf8")
   );
-  const entry = browsers.find((b) => b.name === "chromium");
-  if (!entry) throw new Error(`no chromium entry in ${coreDir}/browsers.json`);
+  const entry = browsers.find((b) => b.name === BROWSER);
+  if (!entry)
+    throw new Error(`no ${BROWSER} entry in ${coreDir}/browsers.json`);
   return entry;
 }
 
-/** The Chromium executable's path; throws when it is not installed. */
+/** Where the headless shell is, or would be once installed. */
+export function chromiumExecutablePath() {
+  // Playwright's public API names only full Chromium's path; the registry
+  // subpath is in playwright-core's package exports.
+  const { registry } = fromPlaywright(
+    "playwright-core/lib/server/registry/index"
+  );
+  const exe = registry.findExecutable(BROWSER)?.executablePath("javascript");
+  if (!exe) throw new Error(`Playwright's registry has no path for ${BROWSER}`);
+  return exe;
+}
+
+/** The headless shell's path; throws when it is not installed. */
 export function findChromium() {
-  const exe = chromium.executablePath();
+  const exe = chromiumExecutablePath();
   if (!fs.existsSync(exe))
     throw Object.assign(
       new Error(
-        `Playwright's Chromium is not installed (expected ${exe}). Run: ${INSTALL_HINT}`
+        `Playwright's Chromium headless shell is not installed (expected ${exe}). Run: ${INSTALL_HINT}`
       ),
       { code: NOT_INSTALLED }
     );
