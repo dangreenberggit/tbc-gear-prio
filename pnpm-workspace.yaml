@@ -4,3 +4,5 @@ packages:
 allowBuilds:
   "@bufbuild/buf": true
   esbuild: true
+  # Its postinstall only prints an attribution notice (attribution.js).
+  "@fortawesome/fontawesome-free": false

@@ -22,6 +22,7 @@ import { fileURLToPath } from "node:url";
 
 import { exitOnSignals } from "../process-group.mjs";
 import { findChromium } from "./chromium.mjs";
+import { OFFLINE_CHROME_FLAGS } from "./outside-requests.mjs";
 import { documentRowCountExpression, RESULT_ROW } from "./rows.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -206,9 +207,12 @@ export async function serveTab() {
 // hold the reason, and the rest is noise such as dbus warnings.
 const STDERR_TAIL_CHARS = 4000;
 
+// `offline` blocks every request to a host other than this machine
+// (outside-requests.mjs, ticket 902).
 export async function launchChrome({
   exe = findChromium(),
   timeoutMs = 20000,
+  offline = false,
 } = {}) {
   const port = await freePort();
   const userDataDir = await fsp.mkdtemp(path.join(os.tmpdir(), "tbc-tab-"));
@@ -222,6 +226,7 @@ export async function launchChrome({
       "--disable-dev-shm-usage",
       `--remote-debugging-port=${port}`,
       `--user-data-dir=${userDataDir}`,
+      ...(offline ? OFFLINE_CHROME_FLAGS : []),
       "about:blank",
     ],
     { stdio: ["ignore", "ignore", "pipe"] }
@@ -383,7 +388,7 @@ export async function attachPage(client) {
   const send = (method, params) => client.send(method, params, sessionId);
   await send("Page.enable", {});
   await send("Runtime.enable", {});
-  return { send, targetId };
+  return { send, targetId, sessionId };
 }
 
 // Evaluate an expression in the page and return its JSON value.

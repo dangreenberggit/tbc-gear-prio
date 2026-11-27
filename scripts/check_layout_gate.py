@@ -198,6 +198,9 @@ LOCAL_ONLY_FILES = frozenset({"local.wcl-credentials.ts"})
 #     whose gap check 13 measures.
 #   - assets/locales/en/upgrades.json -- the accessible names the axe pass
 #     reads are locale strings, so a copy edit can be an accessibility change.
+#   - ui/index_template.html -- the page itself, which names the outside
+#     resources it loads. The harness blocks them and serves the Font Awesome
+#     version it names from a pinned package (ticket 902).
 #   - vite.config.mts -- the gate's `vite build` reads it. Whether the fixture
 #     pass's code is in the bundle at all (finding A8) is now decided by the
 #     tab's own `utils/dev_flags.ts` and the harness's VITE_TBC_TAB_FIXTURES=1
@@ -224,6 +227,7 @@ LAYOUT_FILES = (
     "ui/styles/theme/z-index.css",
     "ui/ui-kit/TabPanelColumns/TabPanelColumns.css",
     "assets/locales/en/upgrades.json",
+    "ui/index_template.html",
     "vite.config.mts",
 )
 
@@ -243,11 +247,13 @@ MODULE_SUFFIXES = (".ts", ".tsx", ".css")
 # themselves: editing one changes the gate's verdict without touching a line of
 # tab source. `rows.mjs` is the row reader
 # `test-layout.mjs` and `test-tab-harness.mjs` import (ticket 580).
-# `chromium.mjs` decides which browser the harness launches; the build it
+# `outside-requests.mjs` decides which outside requests the page gets
+# (ticket 902). `chromium.mjs` decides which browser the harness launches; the build it
 # resolves is hashed too (`_chromium_build`), because a `playwright` bump
 # changes the browser without changing any file listed here.
 ROOT_GATE_FILES = (
     "scripts/tab-harness/chromium.mjs",
+    "scripts/tab-harness/outside-requests.mjs",
     "scripts/tab-harness/rows.mjs",
     "scripts/tab-harness/test-layout.mjs",
     "scripts/tab-harness/test-tab-harness.mjs",

@@ -70,6 +70,12 @@
 // Server: test-tab-harness.mjs `serveTab` (TBC_FORK_PORT reuses a running
 // server; otherwise the fixture-enabled bundle is built into dist/ and served).
 //
+// Outside requests (ticket 902): the browser reaches no host but this machine,
+// and Font Awesome, the only outside resource that moves the tab's geometry,
+// is served from the pinned npm package (outside-requests.mjs). So a desktop
+// run and a sandbox run measure the same page. A Font Awesome file the page
+// asks for and the package lacks stops the run as unmeasured.
+//
 // The run prints its own wall time (and the verdict holds wallMs) because the
 // gate's time budget is checked from that line. An agent may be able to run
 // the harness only as a bare command, with no `time` around it (the agent
@@ -78,6 +84,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { serveFontAwesome } from "./outside-requests.mjs";
 import { pageCoverage } from "./page-coverage.mjs";
 import { RESULT_ROW, ROW_HELPERS } from "./rows.mjs";
 import * as H from "./test-tab-harness.mjs";
@@ -603,11 +610,20 @@ async function main() {
   let fixtureAt = startedAt;
   let fixtureDoneAt = startedAt;
   const { base, stop } = await H.serveTab();
-  const chrome = await H.launchChrome();
+  const chrome = await H.launchChrome({ offline: true });
   const client = H.cdp(chrome.wsUrl, { callTimeoutMs: 120000 });
+  let fontAwesome = { missing: [] };
+  // Not Unmeasured: that skips one fixture, and this voids every check.
+  const requireFontAwesome = () => {
+    if (fontAwesome.missing.length)
+      throw new Error(
+        `the page asked for Font Awesome files the pinned @fortawesome/fontawesome-free package does not have (${fontAwesome.missing.join(", ")}); move the devDependency to the page's version`
+      );
+  };
   try {
     await client.ready;
-    const { send } = await H.attachPage(client);
+    const { send, sessionId } = await H.attachPage(client);
+    fontAwesome = await serveFontAwesome(client, sessionId);
     preRunAt = performance.now();
     for (const width of WIDTHS) {
       await setWidth(send, width);
@@ -621,6 +637,7 @@ async function main() {
       judgePreRun(width, await H.evaluate(send, preRunExpression(width)));
       await audit(send, "pre-run", width);
     }
+    requireFontAwesome();
     fixtureAt = performance.now();
     for (const { name, text } of fixtures) {
       const t0 = performance.now();
@@ -663,6 +680,7 @@ async function main() {
       const { ok, ...detail } = coverage;
       check(23, null, ok, detail);
     }
+    requireFontAwesome();
     fixtureDoneAt = performance.now();
   } finally {
     client.close();
