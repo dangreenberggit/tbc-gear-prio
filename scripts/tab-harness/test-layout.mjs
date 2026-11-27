@@ -57,6 +57,8 @@
 //     to load fails here, so the run is a failure, not "unmeasured". That
 //     each spec the fork's tab ranks has a page in PAGE_PATH_BY_SPEC is a
 //     vitest test, packages/core/test/fork-spec-pages.test.ts.
+//   (24) every Font Awesome file the page asked for was served from the
+//     pinned package (ticket 902; see "Outside requests" below).
 //
 // An unbaselined critical or serious WCAG violation fails the gate
 // (TBC_A11Y_BASELINE holds the accepted debt). The verdict is one
@@ -70,6 +72,12 @@
 // Server: test-tab-harness.mjs `serveTab` (TBC_FORK_PORT reuses a running
 // server; otherwise the fixture-enabled bundle is built into dist/ and served).
 //
+// Outside requests (ticket 902): the browser reaches no host but this machine,
+// and Font Awesome, the only outside resource that moves the tab's geometry,
+// is served from the pinned npm package (outside-requests.mjs). So a desktop
+// run and a sandbox run measure the same page. A Font Awesome file the page
+// asks for and the package lacks fails check 24.
+//
 // The run prints its own wall time (and the verdict holds wallMs) because the
 // gate's time budget is checked from that line. An agent may be able to run
 // the harness only as a bare command, with no `time` around it (the agent
@@ -78,6 +86,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { fontAwesomeServed, serveFontAwesome } from "./outside-requests.mjs";
 import { pageCoverage } from "./page-coverage.mjs";
 import { RESULT_ROW, ROW_HELPERS } from "./rows.mjs";
 import * as H from "./test-tab-harness.mjs";
@@ -603,11 +612,13 @@ async function main() {
   let fixtureAt = startedAt;
   let fixtureDoneAt = startedAt;
   const { base, stop } = await H.serveTab();
-  const chrome = await H.launchChrome();
+  const chrome = await H.launchChrome({ offline: true });
   const client = H.cdp(chrome.wsUrl, { callTimeoutMs: 120000 });
+  let fontAwesome = null;
   try {
     await client.ready;
-    const { send } = await H.attachPage(client);
+    const { send, sessionId } = await H.attachPage(client);
+    fontAwesome = await serveFontAwesome(client, sessionId);
     preRunAt = performance.now();
     for (const width of WIDTHS) {
       await setWidth(send, width);
@@ -663,6 +674,8 @@ async function main() {
       const { ok, ...detail } = coverage;
       check(23, null, ok, detail);
     }
+    const served = fontAwesomeServed(fontAwesome);
+    check(24, null, served.ok, served.detail);
     fixtureDoneAt = performance.now();
   } finally {
     client.close();

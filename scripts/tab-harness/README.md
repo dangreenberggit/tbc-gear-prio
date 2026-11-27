@@ -31,6 +31,13 @@ directory.
   autoload, added to upstream's Vite config without editing it.
 - `run-tab-cdp.mjs`: the desktop-transport gate's driver, below.
 - `rows.mjs`: how the scripts read result rows, below.
+- `outside-requests.mjs`: what the layout gate's page may load from outside
+  this machine (ticket 902). The gate blocks every outside request and serves
+  Font Awesome, the only one that moves the tab's geometry, from the pinned
+  `@fortawesome/fontawesome-free` devDependency, so a desktop run and a
+  sandbox run measure the same page. When the fork's `ui/index_template.html`
+  moves to another Font Awesome version, check 24 fails until the
+  devDependency follows.
 
 ## Reading result rows (`rows.mjs`)
 
