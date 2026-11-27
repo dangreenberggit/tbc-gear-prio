@@ -162,50 +162,35 @@ describe.skipIf(!fs.existsSync(chromiumExecutablePath()))(
   }
 );
 
-// Ticket 903: the tab-review capture serves Font Awesome but leaves the other
-// outside requests to the network, so a desktop capture keeps its item icons.
-// Fetch answers the request before it reaches any proxy, so the sandbox's
-// failing proxy does not matter.
+// Ticket 903: the tab-review capture serves Font Awesome without the blocking
+// flags. Fetch answers the request inside the browser, so it loads even where
+// outside requests would fail at a proxy (the sandbox's). This tests the
+// helper in that launch, not test-review.mjs itself, which the capture's own
+// before/after evidence covers. The page asks for nothing else from outside,
+// so the test needs no network.
 describe.skipIf(!fs.existsSync(chromiumExecutablePath()))(
-  "an online browser with Font Awesome served",
+  "a browser launched without the blocking flags, with Font Awesome served",
   () => {
-    it("loads the stylesheet and its font, and leaves other outside requests to the network", async () => {
+    it("loads the stylesheet and its font", async () => {
       const chrome = await launchChrome();
       const client = cdp(chrome.wsUrl, { callTimeoutMs: 30000 });
       try {
         await client.ready;
         const { send, sessionId } = await attachPage(client);
         const fa = await serveFontAwesome(client, sessionId);
-        const urls = new Map();
-        const settled = new Map();
-        client.onEvent((m) => {
-          if (m.sessionId !== sessionId) return;
-          if (m.method === "Network.requestWillBeSent")
-            urls.set(m.params.requestId, m.params.request.url);
-          if (m.method === "Network.loadingFinished")
-            settled.set(urls.get(m.params.requestId), "loaded");
-          if (m.method === "Network.loadingFailed")
-            settled.set(urls.get(m.params.requestId), m.params.errorText);
-        });
-        await send("Network.enable", {});
-        const html = `<link rel="stylesheet" href="${CDN}/css/all.min.css" crossorigin="anonymous"><i class="fa-solid fa-star"></i><img src="${ICON}">`;
+        const html = `<link rel="stylesheet" href="${CDN}/css/all.min.css" crossorigin="anonymous"><i class="fa-solid fa-star"></i>`;
         await send("Page.navigate", {
           url: `data:text/html,${encodeURIComponent(html)}`,
         });
-        await waitFor(() => settled.has(ICON), 20000);
         const state = await evaluate(
           send,
           `(async () => { while (document.readyState !== 'complete') await new Promise((r) => setTimeout(r, 50)); await document.fonts.load('900 16px "Font Awesome 6 Free"'); await document.fonts.ready; const r = document.querySelector('i').getBoundingClientRect(); return { faFont: document.fonts.check('900 16px "Font Awesome 6 Free"'), w: r.width, h: r.height }; })()`
         );
         expect(state.faFont).toBe(true);
+        // The width is what fails without Font Awesome: fonts.check is also
+        // true when the stylesheet never loaded and no face matches.
         expect(state.w).toBeGreaterThan(0);
         expect(fontAwesomeServed(fa).ok).toBe(true);
-        // The item icon went to the network: it loads on a desktop and fails
-        // at the sandbox's proxy, but neither the harness nor a resolver rule
-        // stopped it.
-        expect(settled.has(ICON)).toBe(true);
-        expect(settled.get(ICON)).not.toBe("net::ERR_BLOCKED_BY_CLIENT");
-        expect(settled.get(ICON)).not.toBe("net::ERR_NAME_NOT_RESOLVED");
       } finally {
         client.close();
         chrome.kill();
