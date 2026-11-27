@@ -78,8 +78,9 @@ Locally, `pnpm verify` fails when any of them skips (`skipGuard`,
 green local verify without `TBC_VERIFY_WITHOUT_FORK=1` ran them all: its
 tail line reads `gates: N ran, 0 skipped` (ticket 478, item A5).
 
-Do not run interactive `pnpm approve-builds`; declare builds via
-`pnpm.onlyBuiltDependencies`.
+Do not run interactive `pnpm approve-builds`; list each package with a
+build script under `allowBuilds` in `pnpm-workspace.yaml`, `true` to run
+it or `false` to skip it.
 
 ## Before any scripted or generated file edit
 
