@@ -37,7 +37,10 @@ directory.
   `@fortawesome/fontawesome-free` devDependency, so a desktop run and a
   sandbox run measure the same page. When the fork's `ui/index_template.html`
   moves to another Font Awesome version, check 24 fails until the
-  devDependency follows.
+  devDependency follows. The tab-review capture serves Font Awesome the same
+  way but leaves other outside requests to the network (ticket 903), so its
+  row toggles have their desktop size anywhere and a desktop capture keeps
+  its item icons; a Font Awesome file the package lacks is an entry error.
 
 ## Reading result rows (`rows.mjs`)
 
