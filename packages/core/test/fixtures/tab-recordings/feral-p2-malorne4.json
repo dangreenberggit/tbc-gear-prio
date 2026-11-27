@@ -14336,29 +14336,6 @@
       "simmed": 36,
       "fromStore": 0
     },
-    "plausibilityWarnings": [
-      {
-        "kind": "dead-slot",
-        "slot": "head",
-        "cause": "unique-effect",
-        "wornItemName": "Wolfshead Helm",
-        "message": "No positive candidate in head: nothing in a full pool matches Wolfshead Helm's effect. Expected for a unique effect, but worth confirming it is not a measurement fault."
-      },
-      {
-        "kind": "dead-slot",
-        "slot": "chest",
-        "cause": "set-break-cost",
-        "wornItemName": "Breastplate of Malorne",
-        "message": "No positive candidate in chest: every alternative displaces Breastplate of Malorne and loses a Malorne Harness bonus. Check that this lost bonus is real before trusting the slot."
-      },
-      {
-        "kind": "dead-slot",
-        "slot": "shoulder",
-        "cause": "set-break-cost",
-        "wornItemName": "Mantle of Malorne",
-        "message": "No positive candidate in shoulder: every alternative displaces Mantle of Malorne and loses a Malorne Harness bonus. Check that this lost bonus is real before trusting the slot."
-      }
-    ],
     "complete": true,
     "durationMs": 202593
   }

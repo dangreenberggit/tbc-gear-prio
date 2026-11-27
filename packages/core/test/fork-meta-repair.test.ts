@@ -1229,7 +1229,7 @@ async function runSpec(o: SpecRun) {
     }) => unknown;
     characterFightKey: (c: unknown, spec: string) => string;
     fightGearKey: (f: unknown) => string;
-  }>("engine/seams/gear-source.ts");
+  }>("../testing/recorded_gear_source.ts");
 
   const worn = o.worn ?? equipmentOf(loadFixture("ret-p3-p2"));
   const fightRef = {
