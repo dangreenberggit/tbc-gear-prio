@@ -3,7 +3,7 @@ Type: bug (tooling)
 Origin: ticket 901 investigation, .scratch/agent-reports/2026-11-26-901-layout-compare/
 Blocks: none
 Blocked by: none
-Related: 901
+Related: 861, 901
 
 # The layout gate's page loads outside resources, so sandbox and desktop runs measure different pages
 
