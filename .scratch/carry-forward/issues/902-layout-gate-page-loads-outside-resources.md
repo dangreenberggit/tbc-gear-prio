@@ -1,4 +1,4 @@
-Status: open
+Status: closed
 Type: bug (tooling)
 Origin: ticket 901 investigation, .scratch/agent-reports/2026-11-26-901-layout-compare/
 Blocks: none
@@ -38,3 +38,26 @@ Either a desktop run and a sandbox run of `pnpm layout-gate:check` are
 shown to measure the same geometry (a geometry dump like
 `geom-dump.mjs` in the folder above, diffed), or the harness makes every
 run see the same page, for example by blocking outside requests.
+
+## Closed (2026-11-26, branch `fix/902-layout-gate-outside-resources`)
+
+The "Not known" question is answered: Font Awesome moves the geometry,
+and nothing else does. The tab does use Font Awesome, through wowsims'
+`Icon` (`ui/features/upgrades/components/RowToggles/FavoriteToggle.tsx`,
+`BatchToggle.tsx`), which the `fa-` grep above could not see. Without its
+CSS the favorite and batch buttons are 0 px tall: 2528 of 21405 boxes
+differ, all of them those buttons, their icons and one icon span.
+
+The layout gate now blocks every outside request in the browser and serves
+Font Awesome from the pinned `@fortawesome/fontawesome-free@6.0.0`
+devDependency, which is byte-identical to the cdnjs files the page asks
+for. With that, all 21405 boxes, all 496 checks with their measured
+details, and the axe results equal a run where every outside resource
+loaded. Check 24 fails the gate if the page asks for a Font Awesome file
+the package does not have. Evidence:
+`.scratch/agent-reports/2026-11-26-902-outside-resources/README.md`.
+
+Not done: a real desktop run. The "all loaded" run was made in the
+sandbox through a local forward proxy, with the same browser.
+
+Verified by: docs/reviews/fix-902-layout-gate-outside-resources.md
