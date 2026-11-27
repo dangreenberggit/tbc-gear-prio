@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 import { chromiumExecutablePath } from "./chromium.mjs";
 import {
   fontAwesomeFile,
+  fontAwesomeServed,
   OFFLINE_CHROME_FLAGS,
   serveFontAwesome,
 } from "./outside-requests.mjs";
@@ -24,6 +25,14 @@ import {
 // gate serves it from the pinned npm package and blocks every other outside
 // request, so a desktop run and a sandbox run measure the same page.
 const CDN = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0";
+const ICON = "https://wow.zamimg.com/images/wow/icons/large/inv_mace_49.jpg";
+
+// Under `pnpm verify`'s parallel load, a fixed sleep was too short for the
+// browser's events to arrive.
+async function waitFor(pred, ms = 10000) {
+  const deadline = Date.now() + ms;
+  while (!pred() && Date.now() < deadline) await sleep(50);
+}
 const TEMPLATE = path.join(FORK_ROOT, "ui/index_template.html");
 
 describe("fontAwesomeFile", () => {
@@ -88,25 +97,21 @@ describe.skipIf(!fs.existsSync(chromiumExecutablePath()))(
             failed.set(urls.get(m.params.requestId), m.params.errorText);
         });
         await send("Network.enable", {});
-        const html = `<link rel="stylesheet" href="${CDN}/css/all.min.css" crossorigin="anonymous"><i class="fa-solid fa-star"></i><img src="https://wow.zamimg.com/images/wow/icons/large/inv_mace_49.jpg">`;
+        const html = `<link rel="stylesheet" href="${CDN}/css/all.min.css" crossorigin="anonymous"><i class="fa-solid fa-star"></i><img src="${ICON}">`;
         await send("Page.navigate", {
           url: `data:text/html,${encodeURIComponent(html)}`,
         });
-        await sleep(300);
+        await waitFor(() => failed.has(ICON));
         const state = await evaluate(
           send,
-          `(async () => { await document.fonts.ready; const r = document.querySelector('i').getBoundingClientRect(); return { faFont: document.fonts.check('900 16px "Font Awesome 6 Free"'), w: r.width, h: r.height }; })()`
+          `(async () => { while (document.readyState !== 'complete') await new Promise((r) => setTimeout(r, 50)); await document.fonts.load('900 16px "Font Awesome 6 Free"'); await document.fonts.ready; const r = document.querySelector('i').getBoundingClientRect(); return { faFont: document.fonts.check('900 16px "Font Awesome 6 Free"'), w: r.width, h: r.height }; })()`
         );
         expect(state.faFont).toBe(true);
         expect(state.w).toBeGreaterThan(0);
         expect(fa.missing).toEqual([]);
         // ~NOTFOUND in --host-resolver-rules: the same error on a desktop and
         // in the sandbox, whose proxy would give ERR_TUNNEL_CONNECTION_FAILED.
-        expect(
-          failed.get(
-            "https://wow.zamimg.com/images/wow/icons/large/inv_mace_49.jpg"
-          )
-        ).toBe("net::ERR_NAME_NOT_RESOLVED");
+        expect(failed.get(ICON)).toBe("net::ERR_NAME_NOT_RESOLVED");
       } finally {
         client.close();
         chrome.kill();
@@ -125,7 +130,29 @@ describe.skipIf(!fs.existsSync(chromiumExecutablePath()))(
         await send("Page.navigate", {
           url: `data:text/html,${encodeURIComponent(`<link rel="stylesheet" href="${other}">`)}`,
         });
-        await sleep(500);
+        await waitFor(() => fa.missing.length > 0);
+        expect(fa.missing).toEqual([other]);
+      } finally {
+        client.close();
+        chrome.kill();
+      }
+    }, 30000);
+
+    // Review finding A1: a page that moved Font Awesome to another CDN got it
+    // blocked by name lookup, with nothing recorded, and its icons at 0 px.
+    it("records Font Awesome asked for from another host", async () => {
+      const chrome = await launchChrome({ offline: true });
+      const client = cdp(chrome.wsUrl, { callTimeoutMs: 30000 });
+      try {
+        await client.ready;
+        const { send, sessionId } = await attachPage(client);
+        const fa = await serveFontAwesome(client, sessionId);
+        const other =
+          "https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css";
+        await send("Page.navigate", {
+          url: `data:text/html,${encodeURIComponent(`<link rel="stylesheet" href="${other}">`)}`,
+        });
+        await waitFor(() => fa.missing.length > 0);
         expect(fa.missing).toEqual([other]);
       } finally {
         client.close();
@@ -134,6 +161,49 @@ describe.skipIf(!fs.existsSync(chromiumExecutablePath()))(
     }, 30000);
   }
 );
+
+// Review finding N2/A4: a rejected answer to a paused request was swallowed,
+// which leaves the page on a fallback font with nothing said.
+describe("serveFontAwesome with a failing answer", () => {
+  it("records the request it could not answer, without an unhandled rejection", async () => {
+    let listener;
+    const client = {
+      onEvent: (fn) => (listener = fn),
+      send: (method) =>
+        method === "Fetch.enable"
+          ? Promise.resolve({})
+          : Promise.reject(new Error("CDP WebSocket closed (code 1006)")),
+    };
+    const fa = await serveFontAwesome(client, "S1");
+    listener({
+      method: "Fetch.requestPaused",
+      sessionId: "S1",
+      params: { requestId: "R1", request: { url: `${CDN}/css/all.min.css` } },
+    });
+    await waitFor(() => fa.unanswered.length > 0, 1000);
+    expect(fa.unanswered).toEqual([
+      `${CDN}/css/all.min.css: CDP WebSocket closed (code 1006)`,
+    ]);
+  });
+});
+
+// Review finding A2: a missing file stopped the gate as "unmeasured", which
+// merge-to-dev skips without blocking. It is now a failed check.
+describe("fontAwesomeServed", () => {
+  it("passes when every Font Awesome request was answered from the package", () => {
+    expect(fontAwesomeServed({ missing: [], unanswered: [] }).ok).toBe(true);
+  });
+
+  it("fails, naming the files, when one was missing or unanswered", () => {
+    const missing = fontAwesomeServed({ missing: ["u1"], unanswered: [] });
+    expect(missing.ok).toBe(false);
+    expect(missing.detail.missing).toEqual(["u1"]);
+    expect(missing.detail.error).toMatch(/@fortawesome\/fontawesome-free/);
+    expect(
+      fontAwesomeServed({ missing: [], unanswered: ["u2: closed"] }).ok
+    ).toBe(false);
+  });
+});
 
 describe.skipIf(process.platform === "win32")(
   "launchChrome({ offline })",
