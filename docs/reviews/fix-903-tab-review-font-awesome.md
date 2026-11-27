@@ -57,7 +57,20 @@ record, gave `Tests 1 failed | 10 skipped (11)`,
 `node --version; pnpm exec vitest run scripts/tab-harness` at `9540ecfd`:
 `v22.23.2`, `Tests 27 passed (27)`, rc=0.
 
-CHECKONLY_PLACEHOLDER
+`pnpm merge-to-dev --check-only` at `6d2aaf8f`, run inside the Claude Code
+sandbox. `env | grep -c '^PLAYWRIGHT'` printed 0 first, and node printed
+v22.23.2. Log: `checkonly.log` in the evidence folder (gitignored).
+
+- verify: `gates: 1791 ran, 0 skipped`.
+- merge-ready, both copies: `merge-ready: ok`,
+  `disposition rows: 8 parsed of 8 row-shaped lines in 1 section(s)`.
+- layout gate: `tab layout source changed since the last green run
+(recorded dd50b7cd847b..., now c950198e5014...) -- running the gate`;
+  verdict `"outcome":"measured","pass":true,"failed":0,"a11yFailed":0`, 4
+  widths, 11 fixtures, 497 PASS, 0 FAIL.
+  `layout gate: PASSED. Advanced the baseline to c950198e5014...`. The lock
+  advance is committed on this branch.
+- `check-only: ok (not merging)`, rc=0.
 
 ## Findings
 
