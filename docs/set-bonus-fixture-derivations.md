@@ -1,11 +1,21 @@
 # Set-bonus fixture derivations
 
-This file holds the hand derivations behind the literals in
-`packages/core/test/fork-set-net.test.ts`, for the fixtures of tickets
-476–478, 490–492, 502, 511 and 512 and the targeted engine review of
+This file holds the hand derivations behind the literals in the set-bonus
+fixture tests, for the fixtures of tickets
+476–478, 490–492, 502, 511, 512 and 536 and the targeted engine review of
 2026-09-25. The fixture
 sim is an exact model, so each expected value comes from the arithmetic
 below. None is recomputed the way the engine computes it.
+
+**Where the cases live (2026-11-27).** Most cases moved from
+`packages/core/test/fork-set-net.test.ts` into the fork, under
+`vendor/tbc-new-fork/ui/features/upgrades/model/` (the `rank_set_*` tests
+and `engine/*.test.ts`). The fork tests dropped the case ids from their
+names, so a `Test:` line under the first heading of each case below names
+the file and test that hold it. The slow cases 476-A, 476-B, 476-D, 492-J, 502-C, 511-L2 and
+512-N stayed in `packages/core/test/fork-set-net.test.ts` under their ids;
+536-X is in `packages/core/test/fork-set-fixtures.test.ts`. A case id that
+comes back in a later section carries no second pointer.
 
 The 476–478 and 490–492 sections were first written in the gitignored
 stage-gate plans `round-2/plan.md` and `round-2b/plan.md` (under
@@ -35,11 +45,18 @@ that derive cases for them are history. 511-SZ and 511-SF were deleted;
 on, close-calls, the full view at the highest-credit bonus); 511-SH compares
 three hashes (unset, "off", "on").
 
-The suite is fork-gated and CI skips it (`docs/agents/known-traps.md`). To
-run it locally with the fork clone present:
+The main-repo suites are fork-gated and CI skips them
+(`docs/agents/known-traps.md`). To run them locally with the fork clone
+present:
 
 ```sh
-npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/wowsims-fork-parity.test.ts; echo rc=$?
+npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/wowsims-fork-parity.test.ts; echo rc=$?
+```
+
+The moved cases run from `vendor/tbc-new-fork`:
+
+```sh
+npx vitest run ui/features/upgrades/model/; echo rc=$?
 ```
 
 ## The controlled model
@@ -109,6 +126,7 @@ Neutrals head 10150, shoulder 10153, chest 8283, hands 10140, legs 8289.
 **476-A: worn Malorne head, shoulder, chest and hands (4).** The pool holds
 Thunderheart and neutral pieces in those four slots. The baseline is
 `3000 + 40 + 70`.
+Test: `packages/core/test/fork-set-net.test.ts`, case 476-A.
 
 - A Thunderheart single takes Malorne from 4 to 3 and loses the 4pc:
   `100 − 70 = 30`. A neutral single: `120 − 70 = 50`.
@@ -138,6 +156,7 @@ Thunderheart and neutral pieces in those four slots. The baseline is
 **476-B: worn Malorne 5 (476-A plus legs).** The baseline is `3000 + 110`.
 Singles take Malorne 5→4 and lose nothing: Thunderheart `100`, neutral
 `120`.
+Test: `packages/core/test/fork-set-net.test.ts`, case 476-B.
 
 - 2pc (hands and head): 5→3 loses the 4pc: `pkgΔ2 = 250 − 70 = 180`,
   `raw2 = 180 − 200 = −20`.
@@ -163,6 +182,7 @@ Singles take Malorne 5→4 and lose nothing: Thunderheart `100`, neutral
 holds Thunderheart wrist, waist and feet at own value 150, Thunderheart
 hands and legs at 100, and neutral chest and hands. The baseline is
 `3000 + 40`.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_lost_thresholds.test.ts`, "the legs row's substituted package breaks Malorne 2pc — measured, net shown".
 
 - Singles: wrist, waist, feet `150`; hands and legs take Malorne 3→2 with
   no loss: `100`.
@@ -192,6 +212,7 @@ hands and legs at 100, and neutral chest and hands. The baseline is
 
 **A4: worn Thunderheart hands and legs (2); the pool holds the worn hands
 (owned), head, shoulder and chest.** The baseline is `3000 + 50`.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_lost_thresholds.test.ts`, "an owned row's swap adds no piece, so it gets no future credit".
 
 - Non-owned singles go 2→3, crossing nothing: `100`. The owned hands row
   is the same gear: `deltaDps 0`.
@@ -224,6 +245,7 @@ package, two per package since 512; in 490-A that is the Malorne 2pc and
 
 **490-A: Malorne with bonuses 2pc 40, 4pc 0.** Sorted singles: chest,
 head, shoulder (100), then hands, legs (−50).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_commit_breaks.test.ts`, "a Malorne head/shoulder/chest row is not charged the Thunderheart 2pc its 2pc does not need".
 
 - `P_2` is chest and head: `pkgΔ2 = 240`, `raw2 = 40`, net2 40, no breaks.
 - `P_4` is chest, head, shoulder and hands:
@@ -249,6 +271,7 @@ head, shoulder (100), then hands, legs (−50).
 **490-B: as 490-A with Malorne 4pc 30.** `pkgΔ4 = 320`,
 `raw4 = 320 − 250 − 40 = 30`. Chest futures `[{2, 2, 40, []}, {4, 4, 30,
 [(676,2) 50]}]`.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_commit_breaks.test.ts`, "a real 4pc worth less than the break it needs".
 
 - Full-path: full `40 + 30 − 50 = 20`, split `20 + 7.5 − 50 = −22.5`.
 - Best-stop (shipped): `R_2 = 40`, `R_4 = 20`, stop at 2: full 40, split 20.
@@ -269,12 +292,14 @@ shoulder and hands: `pkgΔ4 = 300 + 0 + 0 − 50 = 250`, `Σsingles 250`,
 `raw4 = 0`, net4 0. Chest, head and shoulder rows: futures
 `[{4, 4, 0, [(676,2) 50]}]`, `commitPackageDeltaDps 250`, credit 0 under
 either rule. Before 490 it was −50.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_commit_breaks.test.ts`, "a Nordrassil row whose only bonus needs the Thunderheart 2pc break gets ON = OFF".
 
 **492-F: worn Thunderheart hands (1); pool Thunderheart head, shoulder,
 chest and legs.** The baseline is `3100`. Each single crosses the 2pc:
 `100 + 50 = 150`. The 2pc package needs 1 piece:
 `unmeasurable-at-this-worn-count`. `P_4` is head, chest and legs:
 `pkgΔ4 = 300 + 50 + 80 = 430`, `Σsingles 450`, `raw4 = −20`.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_commit_breaks.test.ts`, "at worn 1 the 4pc value is recovered with one pair sim".
 
 - The pair is head and chest: `pkgΔpair = 200 + 50 = 250`,
   `Σsingles(pair) = 300`, `B2 = 50`, `bonusDps4 = −20 + 2·50 = 80`, net 80.
@@ -292,6 +317,7 @@ with value 80 and an unmeasured commit break, false once that break has
 futures. `setBonusSubLine` gives `not_counted` for the first case with ON,
 `hover_hint` with OFF, `null` for an empty context and `hover_hint` for a
 row that only crosses a threshold.
+Tests: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "covers future breaks and commit breaks" (491-P, under `setCreditUnmeasured`) and "the tab's sub-line choice follows the view's zero rule" (491-L).
 
 ## Engine review of 2026-09-25
 
@@ -299,6 +325,7 @@ row that only crosses a threshold.
 and chest (Malorne 3); pool Thunderheart head, shoulder, chest and legs,
 and neutral head, shoulder and chest.** The baseline is
 `3000 + 100 + 40 = 3140`.
+Test: `packages/core/test/fork-set-net.test.ts`, case 492-J.
 
 - Thunderheart singles: head, shoulder or chest take Malorne 3→2 and keep
   its 2pc; legs fills an empty slot. Each is `100 + 50 = 150`.
@@ -329,6 +356,7 @@ and neutral head, shoulder and chest.** The baseline is
 **492-N (finding A2): worn Thunderheart hands plus Malorne head and chest
 (Malorne 2); pool Thunderheart head, chest and legs, and neutral head and
 chest.** The baseline is `3140`.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_unmeasured_breaks.test.ts`, "with no break-free pair the worn-1 4pc net stays unset; the bonus-gear rule credits the rows from their bonus gear".
 
 - Singles: Thunderheart head and chest each break the Malorne 2pc:
   `100 + 50 − 40 = 110`. Legs: `150`.
@@ -357,6 +385,7 @@ break (640,4), whose B is missing, so neither 676 net is set. Every
 Thunderheart row keeps `deltaDps 30` and `singleBreaks [(640,4)]` without
 `dps`, has futures `[2, 4]` without `dps`, credit 0, and sub-line
 `not_counted`.
+Test: `packages/core/test/fork-set-net.test.ts`, case 476-D.
 
 ## Ticket 502
 
@@ -366,8 +395,10 @@ than the row, each with its own stats as `dps`.
 
 **502-A (identity):** see 490-B. Every `P_4` member's `deltaDps + credit`
 is `pkgΔ4 = 320`.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_piece_stats.test.ts`, "a package member's ON figure equals the measured package delta".
 
 **502-B (stop condition, pure).**
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "an increment whose bonus floors to 0 is never the credited bonus, but its pieces still count".
 
 - Both bonuses below the floor (2pc 4, 4pc 3), pieces A 30, B 20, C 10:
   no step can be the stop, so the credit is 0, not 60.
@@ -381,6 +412,7 @@ is `pkgΔ4 = 320`.
   `20 + 7.5 − 200 = −172.5`.
 
 **502-C (own stats, engine).**
+Test: `packages/core/test/fork-set-net.test.ts`, case 502-C.
 
 - 492-F head row: the 4pc pieces are chest (31042) and legs (31044), each
   `150 − 50 = 100`.
@@ -396,19 +428,23 @@ and C (−10) and also breaks Malorne Harness 2pc (40). `R_2 = 50 + 100 −
 summing to 130. With B at −100 instead, `R_4 = 10`, the stop is 2 and the
 terms end after Breaks 4pc −70 (credit 80). The second 502-B context has no
 2pc bonus term: its terms are A +10, bonus 4pc +80, B +20, C −5.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "the terms are itemized by increment, add up to the credit and end at the credited bonus".
 
 **502-E (unmeasured, pure).** A 4pc of 80 whose piece has no `dps` is
 unmeasured: credit 0. A 2pc of 50 with a 20 break and no `pieces` field is
 credited as before 502: `50 − 20 = 30`, and it is not unmeasured.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "a piece without a figure zeroes the credit; a future with no pieces field is credited as before".
 
 **502-F (OFF):** the 490-B ranking with Set potential off sorts on
 `deltaDps`: chest, head, shoulder (100), neutral legs 8289 and hands 10140
 (`120 − 100 − 50 = −30`), then Malorne hands and legs (−50).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_piece_stats.test.ts`, "with Set potential off, set rows sort on deltaDps alone".
 
 **502-G (a worn bonus below the gate; rewritten for ticket 512):** the
 490 geometry with the Thunderheart 2pc worth 2 and Malorne 2pc 40, 4pc 30.
 (Ticket 623 moved the 2pc from 4 to 2: the ladder's gate is now the 3 DPS
 bar, not √2 × the bar, and 4 would clear it.)
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_piece_stats.test.ts`, "a worn bonus within the noise is not a break; the pieces' own stats still hold it".
 
 - Singles: chest, head, shoulder 100; Malorne hands or legs
   `100 − 100 − 2 = −2`; neutral hands or legs `120 − 100 − 2 = 18`.
@@ -449,11 +485,13 @@ hands' row, the copy adds one row: the same fields with `id 1,031,034`,
 hands adds the real row with only `id` changed, to `2,031,034`. With no
 database, set-kept hands and set-less neutral legs swap ids only and sim at
 `3000 + 100 + 120 = 3220` (one Thunderheart piece, no bonus).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-less-copies.test.ts`, "a copy swaps the id, keeps the stats and drops the set".
 
 **511-I (the interaction hook, pure).** Thunderheart hands and legs with a
 term `{[hands, legs], 9}`: both worn `3000 + 200 + 50 + 9 = 3259`; hands
 alone `3100`; the hands' copy with the legs `3000 + 200 + 9 = 3209` (the
 term stays, the 2pc goes).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-less-copies.test.ts`, "an interaction term needs every listed id worn; a copy counts as its original".
 
 **511-G (the gate, two new sims).** Worn nothing; the pool holds only
 Thunderheart hands and legs. Singles `+100` each. The 2pc package is both
@@ -464,11 +502,13 @@ gate copies the hands (the first in slot order) in both sims: set-kept,
 worn is broken, so the flag adds exactly these two sims. The package
 request is simmed once. The hands row's 2pc future has 50 and 0.6; its
 4pc future has neither.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_same_gear_check.test.ts`, "the 2pc same-gear bonus is the bonus alone, for two new sims".
 
 **511-G2 (the gate leaves out interactions).** 511-G with the term
 `{[hands, legs], 9}`. The package sims at `3259`, so today's
 `bonusDps = 259 − 200 = 59`. Both copies keep the term:
 `sameGearDps = 3259 − 3209 = 50`, the bonus alone.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_same_gear_check.test.ts`, "the check leaves out stats worth more together; package minus singles keeps them".
 
 **511-H (an id effect among the pieces the gate changes).** Scenario kind:
 a set package in which a piece with a Go effect keyed by its item id is
@@ -477,6 +517,7 @@ are (`RegisterPvPGloveMod`). Until ticket 511's gain side leaves the
 six-set table, only a table set has a package to gate, so the example is
 Thunderheart Gauntlets 31034 with a model id effect of 15, and the
 Thunderheart 2pc of 50. Worn nothing.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_same_gear_check.test.ts`, "a set piece with an id-keyed effect changes no same-gear bonus".
 
 - Run (i): the pool holds the chest and the gauntlets. The package is both,
   and the gate copies the chest (first in slot order). On:
@@ -514,12 +555,14 @@ head (100), its path to 4 adds chest and shoulder (100 each), and its own
 (`400 + 50 + 80 − 40`). Case 8 (the same worn gear with neutrals): the flag
 adds the 2 ladder rungs and 2 gate sims for each of the Thunderheart 2pc
 and 4pc, 6 in all.
+Tests: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_net.test.ts`, "no neutral replacement is needed — the ladder measures B on the worn gear" (case 7) and "flag absent — no brokenSetValues; the flag adds only the ladder, check and bonus-gear sims" (case 8).
 
 **512-W — a worn bonus from a set that no hand-kept table lists.** Kind: a
 non-tier set with bonuses at 2 and 4 (dungeon, crafted, other classes'
 sets) that an upgrade package takes pieces from. Example: Wastewalker 659
 worn 4/4, model 2pc 30 and 4pc 20; the pool holds Malorne shoulder, chest,
 hands and legs at own value 100. The baseline is `3000 + 30 + 20 = 3050`.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_unlisted_breaks.test.ts`, "a worn bonus from a set no hand-kept table lists is measured and charged".
 
 - Ladder, slots shoulder, chest, hands, legs: R(1) to R(4) are `3000`,
   `3030`, `3030`, `3050`: (659,2) 30 counted, (659,3) 0 not counted,
@@ -543,6 +586,7 @@ hands and legs at own value 100. The baseline is `3000 + 30 + 20 = 3050`.
 crafted sets in cloth, leather and mail, which a `2 | 4` count type could
 not hold. Example: Primal Intent 619 worn 3/3, model 3pc 25; the pool holds
 a Thunderheart chest and the neutral chest 8283. The baseline is `3025`.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_unlisted_breaks.test.ts`, "a set whose only bonus needs 3 pieces is measured and charged".
 
 - Ladder, slots chest, wrist, waist: `3000`, `3000`, `3025`: (619,2) 0 not
   counted, (619,3) 25 counted.
@@ -552,6 +596,7 @@ a Thunderheart chest and the neutral chest 8283. The baseline is `3025`.
 **512-N — a swap that removes a piece but no bonus.** Kind: a worn count
 past the highest bonus, a count between two bonuses, or a set with no bonus
 at all. Three runs.
+Test: `packages/core/test/fork-set-net.test.ts`, case 512-N.
 
 - (a) Past the highest bonus, w = 5 → 4: 476-B's worn Malorne 5 and pool.
   Ladder (476-B): (640,2) 40, (640,3) 0, (640,4) 70, (640,5) 0; counts 3
@@ -575,6 +620,7 @@ and warrior PvP gloves (`RegisterPvPGloveMod`). Example: Gladiator's
 Pursuit 586 worn as chest 28334 and gloves 28335, model 2pc 40 and a model
 id effect of 15 on the gloves; the pool holds a Thunderheart chest and the
 neutral chest. The baseline is `3000 + 40 + 15 = 3055`.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_unlisted_breaks.test.ts`, "a set piece with its own id-keyed effect adds nothing to the charged break".
 
 - Ladder, slots chest, hands: R(1) sends the gloves set-less, `3000`; R(2)
   sends them set-kept, `3040`. Both rungs lack the 15, so (586,2) = 40. A
@@ -589,6 +635,7 @@ the pool holds Thunderheart shoulder, chest, hands and legs. (The
 Thunderheart head is left out: the engine drops it because its meta socket
 cannot be activated over this gemless gear.) The baseline is
 `3000 + 100 = 3100`.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_unlisted_breaks.test.ts`, "a set with bonuses above 4 pieces is measured at every worn count".
 
 - Ladder, eight slots: R(1) to R(8) are `3000`, `3010`, `3010`, `3030`,
   `3030`, `3060`, `3060`, `3100`, so counts 2 to 8 read 10, 0, 20, 0, 30,
@@ -653,6 +700,7 @@ The flag-on literals that K5 moves, with the arithmetic that moves them.
 - **Cases 2/3 (worn 1).** The pool reaches 5, so the futures are 3, 4 and 5;
   3 and 5 have no model bonus and are below the gate. The 4pc future still
   needs 3.
+  Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_net.test.ts`, "worn 1/2/3 futures shrink; worn 3 has none".
 - **Case 8.** Thunderheart shoulder and chest `+100`, hands and legs
   `100 − 40 = 60`; the pool reaches 4, so counts 2, 3 and 4: 6 gate sims.
   Step gears: the chest and shoulder rows' 2pc gear is the 2pc package
@@ -729,6 +777,7 @@ more together. Example: Justicar 626 Breastplate 29071, Shoulderplates
 29075, Gauntlets 29072 and Greaves 29074 (the Breastplate replaces the
 plan's Crown 29073, whose meta socket the engine cannot fill), own value
 −30 each, model bonuses 0, `+17` when all four are worn.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "a bonus that measures 0 on identical gear although its pieces combine earns nothing".
 
 - Without the flag the table measures the 4pc package: `−120 + 17 = −103`
   against singles `−120`: `bonusDps 17`.
@@ -741,6 +790,7 @@ plan's Crown 29073, whose meta socket the engine cannot fill), own value
 tier set whose pieces' stats interact, with a count that has no bonus
 between two that do. Example: Thunderheart shoulder, chest, hands and legs,
 model 2pc 50 and 4pc 80, `−40` when all four are worn.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "a row inside the 4-piece group is credited from its credited gear's sim, interaction included".
 
 - Gates: 2pc package hands + chest, `3250 − 3200 = 50`; 4pc package all
   four, on `400 + 130 − 40 = 3490`, off (shoulder set-less) `400 + 50 − 40 =
@@ -759,6 +809,7 @@ for the shoulder and legs. The 4pc gate reads `3140 − 3130 = 10`, above the
 gate. Hands row: 2pc partner the chest, `250`, `c 150`; 4pc gear
 `120 + 60 − 40 = 140`, `c 40`. The stop is the 2pc and ON is
 `model(G + hands + chest) − model(G) = 250`.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "a row whose 4pc does not pay is credited at the 2pc".
 
 **511-P4 — a row in the 4-piece group only.** Kind: a set piece outside
 the best 2-piece package whose own swap breaks a worn bonus. Example: worn
@@ -767,6 +818,7 @@ legs. The 2pc package is chest + shoulder. Hands row: `100 − 40 = 60`,
 `singleBreaks [(640,2) 40]`; 2pc partner the chest (ests tie at 160), gear
 `3250 − 3040 = 210`, `c 150`; 4pc gear four Thunderheart and no Malorne,
 `3530 − 3040 = 490`, `c 430`. ON 490.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "a row in the 4-piece group only keeps its own break and is credited from its credited gear".
 
 **511-O — a row outside the groups.** Kind: a set piece weaker than every
 package piece. Example: 511-R plus the Thunderheart Wristguards at own
@@ -774,9 +826,11 @@ value v. Wrist row: 2pc partner the hands (lowest id), `c 150`; 4pc
 partners hands, chest and legs (the lowest ids of four tied sets), gear
 `v + 300 + 50 + 80` (the interaction needs the shoulder), `c 430`. ON
 `v + 430`: 440 at `v = 10` and 465 at `v = 35`, a difference of 25 (W-S4).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "a row outside the groups moves one for one with its own value".
 
 **511-U — a failed sim.** Kind: a sim that fails mid-run. Example: 511-R's
 pool, no interaction.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "a failed check sim makes the set's rows unmeasured; a failed bonus-gear sim, only its row".
 
 - The (676, 4) gate's "off" sim is the only request with a set-less
   Pauldrons (the 2pc and 3pc packages copy the chest). It fails, so (676, 4)
@@ -791,6 +845,7 @@ tier set at 3). Example: worn Malorne hands and legs; Thunderheart shoulder,
 chest, hands, legs and wrist, model b2 and b4 only. Singles: shoulder,
 chest and wrist 100, hands and legs 60. Packages: 2 chest + shoulder; 3
 plus the wrist; 4 plus the hands; 5 all.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "a count with no bonus runs its two check sims and nothing else, and is never a package".
 
 - (676, 3) reads exactly 0 and is below the gate. Its gate copies the
   shoulder, so two requests wear the 3-piece gear with a shoulder copy
@@ -804,9 +859,11 @@ sets. Example: Primal Intent 619 chest, wrist and waist, own value 100, model
 3pc 25 only. Count 2 is below the gate; count 3 reads 25 and is eligible.
 Chest row: partners wrist and waist, the 3-piece package, `300 + 25 = 325`,
 credit 225, stop at 3.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "a set whose only bonus needs 3 pieces can be credited".
 
 **511-X — one added piece reaches a bonus.** Kind: a set worn one short of
 a bonus with a candidate in a free slot.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "one added piece crosses a bonus only when that count's crossing check clears".
 
 - Crystalforge 629 worn at 1 (chest), pool hands and legs, own value 100,
   model 2pc 30: the crossing gate at 2 on the hands (tied, lower id) reads
@@ -822,12 +879,14 @@ Example: Cryptstalker 530, all eight pieces, own value 100, model 2pc 10,
 are below the gate; 2, 4, 6, 8 read 10, 20, 30, 40. Hands row: `c_t =
 (t − 1) · 100 + Σ bonuses to t`: 110, 330, 560, 800. The stop is 8, credit
 800 (W-E1).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "a set with bonuses above 4 pieces gets every count, and a row can be credited at 8".
 
 **511-PS — two partners that share a worn-bonus loss pair best with each
 other.** Kind: two set pieces that each break the same worn bonus alone.
 Example: worn Malorne shoulder and chest, model 2pc 90; Thunderheart
 Pauldrons own 8, Chestguard 12, Gauntlets 6, Leggings −12, so the singles
 are `8 − 90 = −82`, `12 − 90 = −78`, `+6` and `−12` (feral P2 BiS).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "two partners that share a worn-bonus loss pair best with each other".
 
 - Pauldrons row, 2pc: Z's estimates are chest `−82 − 78 + 90 = −70`, hands
   `−82 + 6 = −76`, legs `−94`: the chest. Gear `8 + 12 + 50 = 3070` over
@@ -842,6 +901,7 @@ two lose it. Example: Wastewalker worn shoulder, chest and hands, model 2pc
 30 (`G = 3030`); Thunderheart Leggings row (100); 4pc partners from the
 Pauldrons and Chestguard (110, each replaces Wastewalker) and the
 Wristguards and Waistguard (100).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "a partner set that loses a worn bonus no single swap loses is charged for it".
 
 - Z: two replacers together lose the 2pc (`m 0`, `L 1`): `320 − 30 = 290`
   against `310` with one; ties go to chest, wrist, waist. Gear
@@ -851,6 +911,7 @@ Wristguards and Waistguard (100).
   (659,2) 30.
 
 **511-PR — the rule is swapped in one place, with a cache key per rule.**
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "the partner rule is close-calls, has no cache key, and sims each close partner set once".
 On PS_SCENARIO with one shared store:
 
 - Unset: `setStepSims.partnerRule` is "sum-of-singles" and the hashed
@@ -870,6 +931,7 @@ not in the best 4pc partner set. Example: worn Primal Intent 3/3, model
 2pc 50 and 3pc 30 (`G = 3080`); Thunderheart Leggings row (100); Gauntlets
 110 (replace nothing); Chestguard, Wristguards, Waistguard 120 (each replaces
 a Primal Intent piece, losing the 3pc alone: single 90).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "partner sets that do not nest are each valued by their own total".
 
 - 2pc: the hands (est 210) beat a replacer (190). Gear `100 + 110 + 50`
   with Primal Intent kept: `3340 − 3080 = 260`.
@@ -884,11 +946,13 @@ step context with `singleDeltaDps 30`, one eligible 2pc future at
 `170 − 30 = 140` with or without it; not unmeasured; the hover hint; a step
 context with only that commit break shows no sub-line; the only term is the
 stop, naming no break (W-CB1).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "a bonus-gear ranking's credit and disclosure do not read the top package's breaks".
 
 **511-A3R — two set rings key to one slot (known limit d).** Zanzil's
 Concentration 462 rings 19893 and 19905, own value 100, model 2pc 40.
 `selectPackage` keys both to finger1, so the set reaches 1 piece: one
 `insufficient-pieces` entry at 2, no step gear.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_bonus_gear.test.ts`, "two set rings key to one slot, so their 2pc is out of reach".
 
 ## The set screen in record mode
 
@@ -925,6 +989,7 @@ reaches 4: `w = 1`, `R = 4`, added pieces Pauldrons, Chestguard and
 Leggings in slot order. Every rung wears four Thunderheart stat sets and
 no Malorne piece: `3000 + 400`, plus 50 from count 2 and 80 more from
 count 4.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_screen.test.ts`, "only the screen's sims ask for per-iteration values, under their own store key".
 
 - Rungs at counts 1, 2, 3, 4: 3400, 3450, 3450, 3530 at each of N = 100,
   300 and 1000; `se = 30/√N`; `pairedSeToPrev` 0 above count 1.
@@ -942,6 +1007,7 @@ model bonuses 0, +17 when all four are worn), nothing worn: `w = 0`,
 `R = 4`. Every rung wears the four stat sets (copies count as their
 originals in the interaction): `3000 − 120 + 17 = 2897`. Every pair reads
 exactly 0 at every N (W-SR2). Sims `8 + 3 · 3 = 17`.
+Test: none; 511-SZ was deleted (ticket 885).
 
 **511-SF — a failed screen sim.** 511-SR's gear; the fake sim fails the
 rung at count 2 (Pauldrons set-kept, Chestguard and Leggings set-less) at
@@ -950,6 +1016,7 @@ count-3 rung's at N = 300 are absent, since each needs its values. Every
 other rung and every pair keep their readings (W-SR3). The failed sim was
 sent, so `simmed` is still 14. The rest of the ranking equals the run
 without the screen.
+Test: none; 511-SF was deleted (ticket 885).
 
 ## The close-calls partner rule
 
@@ -972,6 +1039,7 @@ choice moves only where an interaction term makes Z's estimate wrong.
 3; count 3 has no model bonus and is below the gate, so each row's only
 eligible future is the 2pc. The 2pc package is chest + hands (the best
 single, then the hands, which win their tie with the legs as in 511-R).
+Tests: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_partner_rule.test.ts`, "two partner sets within the margin are both simmed, and the better sim wins", "only a set within 31.87 of the best estimate is simmed" and "a candidate whose sim fails is skipped; when every one fails, the sum-of-singles choice stands".
 
 - Gauntlets row (`d 100`): estimates chest `210`, legs `200`, 10 apart:
   both are simmed. Chest gear `100 + 110 + 50 = 3260`, legs gear
@@ -1082,6 +1150,7 @@ margin is 4. Each map is what `apply_rule` gives for the same readings:
 `python .scratch/stage-gate/511-512-set-credit/k5on/rule_cases.py`
 (σ = 2.0 exactly in bound mode with n = 2 and stdev 2; the no-σ case uses
 `apply_rule`'s own-error mode with no paired error).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-screen.test.ts`, "the rule keeps and drops sets in order, ties included".
 
 - Ties: 101 at 40, 102 and 103 at 25. Ranked 101, 102 (lower id), 103:
   top-k, top-k, and 103 is tied with the second, so band.
@@ -1100,6 +1169,7 @@ margin is 4. Each map is what `apply_rule` gives for the same readings:
 Thunderheart Pauldrons, Chestguard, Leggings) plus Justicar 626's
 Breastplate, Shoulderplates, Gauntlets and Greaves at own value −30 each,
 model bonuses 0.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_screen.test.ts`, "a set with no bonus in reach is dropped and costs only its two screen sims".
 
 - Justicar (`w 0`, `R 4`). Singles: chest and shoulder `−30 − 40 = −70`
   (each breaks the worn Malorne 2pc, counted at 40), hands
@@ -1136,9 +1206,11 @@ Gauntlets 37, 2pc 20: 97. Crystalforge Breastplate 40 and Gauntlets 36,
 `100 − 3.464102 = 96.535898`, so Justicar (97) is band and Crystalforge
 (96) outside-band. Justicar's 2pc gate runs: `sameGearDps` 20.
 Crystalforge has only its marker at 2. 8 screen sims.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_screen.test.ts`, "a close third set survives in the band; the fourth does not".
 
 **511-SD — a best case below current gear.** Worn Gauntlets of Malorne
 (Malorne at 1).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_screen.test.ts`, "a set whose best case loses to current gear is dropped, even below K".
 
 - Malorne (`w 1`, `R 4`): Mantle, Breastplate and Greaves at −155 each;
   each single adds the second piece, `−155 + 40 = −115`. The crossing check
@@ -1164,6 +1236,7 @@ the screen's high rung (Pauldrons, Chestguard and Leggings set-kept, N =
 readings-absent, kept. `setBonuses`, `brokenSetValues`, `wornSetLadder`,
 `crossingGates`, `setStepSims`, every row and every ON figure equal the
 off run's.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_screen.test.ts`, "a set whose screen readings failed is kept and measured as with the screen off".
 
 **511-SL — only the gain-side set list changes.** (a) 511-SN's gear: the
 ladder, `brokenSetValues` and crossing gates equal the off run's. With the
@@ -1172,6 +1245,7 @@ sims (each wears a Justicar copy: its gate sims, all below the gate, so no
 package or step sim) taken out, the requests and options are equal, in
 order. 4 screen sims. (b) 511-SR's gear: Thunderheart is kept (top-k), and
 everything 511-SA compares is equal. 2 screen sims.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_screen.test.ts`, "the screen on changes only the gain-side set list".
 
 **511-SH — the hash.** Unset, the hashed object has no `setScreen` key, as
 before K5R. "on" adds `"setScreen":"on"`; on the store of an unset run it
@@ -1179,6 +1253,7 @@ is not served the cached ranking, and it sends exactly its 2 screen sims
 (new `:all` keys at N = 300); every other sim comes from the store.
 Unset, "off" and "on" give three different hashes ("record" gave a
 fourth until ticket 885 removed it).
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_screen.test.ts`, "\"on\" has its own content hash, and unset hashes as before".
 
 ## The popover's steps (K6)
 
@@ -1249,10 +1324,13 @@ Malorne 2pc. The gear before the 4pc step is Gauntlets + Leggings: 6 − 12
   before (Gauntlets + Leggings) is the 2pc step gear, already in the store.
   Exactly one call wears 1,029,100, 1,029,096, 31034 and 31044.
 
+Test (511-LS): `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_break_split.test.ts`, "an increment that newly loses a worn bonus is split into its Breaks line and its pieces line".
+
 **511-LN.** 511-R's scenario wears nothing, so no step loses a worn
 bonus: no line values, no `bonusOffDps`, and `setBonusOffSims` all zeros.
 The Gauntlets row's steps (150, 240) and `setStepSims` (gears 4, simmed
 5, from the store 11) are 511-R's.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_break_split.test.ts`, "increments that break nothing are not split and add no sim".
 
 **511-LR.** Worn Malorne shoulder and chest (own value 0, 2pc 90); pool
 Chestguard (12) and Gauntlets (6); Thunderheart 2pc 150. Baseline 3090.
@@ -1267,6 +1345,7 @@ request, simmed once, and its plain request (the Gauntlets single swap)
 is in the store. Request identity (C244): the bonus-off request with the
 copy id 1,029,096 set back to 29096 and its copy row dropped equals the
 request whose sim gave the Gauntlets single swap.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_break_split.test.ts`, "a first increment's bonus-off request is the row's single-swap request with copies".
 
 **511-L2.** Worn Malorne head, shoulder, chest and hands (own value 0,
 2pc 40, 4pc 70); pool Thunderheart Cover, Pauldrons and Chestguard (20
@@ -1286,6 +1365,7 @@ step replaces: 20 − 110 = −90. Breaks −90 − (−50) = −40; pieces 40 �
 (−90) = 130; −40 + 130 = 90. Four distinct requests (the Leggings row and
 the three others each have their own gear before), four sims, and each
 plain gear before is a single swap in the store.
+Test: `packages/core/test/fork-set-net.test.ts`, case 511-L2.
 
 **511-LF.** `PS_SCENARIO` with the fake sim failing every call that wears
 1,029,100 with 31034 and 31044, which only the bonus-off request does.
@@ -1294,6 +1374,7 @@ with no line values, and their 4pc futures get none of the three fields.
 `setBonusOffSims`: one request, 0 simmed, 1 failed; its plain gear before
 is in the store. The credits stay 511-PS's: Gauntlets 54 − 6 = 48,
 Leggings 54 + 12 = 66.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/rank_set_break_split.test.ts`, "a failed bonus-off sim leaves the increment unsplit".
 
 **511-LV.** A hand-built row: single 6; the 2pc future totals 44 with the
 Leggings; the 4pc future totals 54 with the Pauldrons, Chestguard and
@@ -1302,6 +1383,7 @@ Malorne 2pc: Breaks −46 − 44 = −90, pieces 54 − (−46) = 100. (b) The s
 value naming Malorne 4pc does not match the step's lost bonus: no line
 values, the step stays 10. (c) Neither field: K6's output, steps 38 and 10. (d) A `bonusOffDps` on the 2pc future, which loses nothing: no line
 values, the step stays 38.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "the view splits an increment only when the bonus-off sim names exactly its lost bonuses".
 
 **Moved sim counts.** Each scenario with a shown breaking step sends one
 more sim per distinct bonus-off request; no other literal moves.
@@ -1345,9 +1427,11 @@ its set ids. The logic under test does not read the class.
 Leggings of Murderous Intent (29995, no set) go in the legs and displace
 the Greaves of Malorne: Malorne 4 → 3. Lost count 4, which has an entry
 (23). Result: Malorne Harness 4, dps 23.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "a non-set legs swap over four Malorne pieces breaks the 4pc".
 
 **536-B.** 536-A's inputs on a row that has a `setContext`: the engine's
 `singleBreaks` are that row's source, so the result is empty.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "a row with a setContext keeps the engine's own singleBreaks".
 
 **536-C.** Worn 18203 main hand, 18202 off hand, 18204 back: Eskhandar 3.
 Brain Hacker (1263, a two-hander, feral) goes in the main hand and clears
@@ -1355,12 +1439,14 @@ the off hand (`removedItems`). Both claws are displaced: Eskhandar 3 → 1.
 Lost counts 3 and 2; only 2 has an entry (50). Result: Spirit of
 Eskhandar 2, dps 50. If the cleared off hand were not counted, the swap
 would be 3 → 2, losing only count 3, which has no entry: an empty result.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "a two-hander that clears the off hand counts the removed piece".
 
 **536-D.** Worn 11979 (no set) in finger1, 21393 in finger2, 21394 back:
 Unyielding 2. The Opal Ring (11980) goes in finger2 (`slotChoice`) and
 displaces the Signet: Unyielding 2 → 1. Lost count 2, entry 40. Result:
 Battlegear of Unyielding Strength 2, dps 40. Placed in finger1, it would
 displace the non-set ring and break nothing.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "a ring goes where the engine put it (slotChoice)".
 
 **536-E.** Worn off hand 18202, back 18204, neck 18205, main hand empty:
 Eskhandar 3. Rogue is a dual-wield spec, and the Distracting Dagger
@@ -1368,29 +1454,35 @@ Eskhandar 3. Rogue is a dual-wield spec, and the Distracting Dagger
 the off hand. It displaces the Left Claw: Eskhandar 3 → 2. Lost count 3,
 entry 30. Result: Spirit of Eskhandar 3, dps 30. Placed in the empty main
 hand, it would break nothing.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "with no slotChoice, the slot follows the spec and the item's hand".
 
 **536-F.** Worn Malorne shoulder, chest and hands: Malorne 3. The
 Shoulderpads of the Stranger (30055, no set) displace the Mantle: 3 → 2.
 Lost count 3, which has no entry (only 2 does), so no break: Malorne has
 no 3pc bonus that was active. Result empty.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "a lost count with no brokenSetValues entry was never active, so it is no break".
 
 **536-G.** Worn Malorne shoulder only: Malorne 1. 30055 makes it 1 → 0.
 No count of 2 or more is lost, and the one entry is for set 676 anyway.
 Result empty.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "one worn piece going to none breaks nothing".
 
 **536-H.** Worn Malorne shoulder and chest: Malorne 2. 30055 makes it
 2 → 1. Lost count 2; its entry has no `dps` (`unmeasured: "sim-failed"`).
 Result: Malorne Harness 2 with no `dps` key.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "an unmeasured break is listed with no dps".
 
 **536-I.** Worn Malorne shoulder and chest: Malorne 2. The Nordrassil
 Feral-Mantle (30230, set 641) displaces the Mantle: Malorne 2 → 1, and
 Nordrassil 0 → 1, which is no loss (and 641 is the completing set, which
 `brokenSetBonuses` skips). Lost Malorne count 2, entry 84. Result:
 Malorne Harness 2, dps 84, nothing for 641.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "a piece of another set breaks the worn set and not its own".
 
 **536-J.** 536-A's inputs, changed one at a time. An owned row, a row Stop
 left unsimmed (`simmed: false`), no `brokenSetValues`, no worn ids, and
 16 worn ids (not the 17 of `SIM_ORDER`) each give an empty result.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "an owned row, an unsimmed row, or missing inputs give no breaks".
 
 **536-K.** Worn 21392 main hand, 21393 finger1, 18202 off hand, 18204
 back: Unyielding 2, Eskhandar 2. Brain Hacker goes in the main hand and
@@ -1398,6 +1490,7 @@ clears the off hand: Unyielding 2 → 1 (the Sickle) and Eskhandar 2 → 1
 (the Left Claw). Lost: Eskhandar 2 (entry 50) and Unyielding 2 (entry 40).
 Sorted by set id: Spirit of Eskhandar 2, dps 50; then Battlegear of
 Unyielding Strength 2, dps 40.
+Test: `vendor/tbc-new-fork/ui/features/upgrades/model/engine/set-potential.test.ts`, "a two-hander that breaks two sets lists both, by set id".
 
 **536-X.** Every row of the five committed fixtures, with worn ids from
 each fixture's `gear.items` (0 for an empty slot) and its `spec`. A set row
@@ -1408,6 +1501,7 @@ an owned row must give nothing. In feral-p2-malorne4, `brokenSetValues`
 has (640, 4) at 22.857401253672833 and (640, 2) at 84.2835690558677, and
 row 29995 replaces worn 29099 (Malorne 4 → 3), so it gives exactly
 Malorne Harness 4 at 22.857401253672833.
+Test: `packages/core/test/fork-set-fixtures.test.ts`, case 536-X.
 
 The receipt for that row, with `tenths(v) = round(v.toFixed(1) × 10)` and
 `tipDelta` printing "+" before a positive value and one decimal:
