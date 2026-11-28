@@ -119,8 +119,9 @@ prints `merged`; then the agent that ran the merge removes it (§ Remove it).
 The owner does not.
 
 0. **Ask about other threads.** Run `t3_thread_search` with the branch name.
-   Any match that is another thread, is not archived, and has this branch as
-   its `branch` is working on this branch. For each one, stop and ask the
+   Any match that is a thread other than yours or the one that sent you, is
+   not archived, and has this branch as its `branch` is working on this
+   branch. For each one, stop and ask the
    owner before you merge, naming the thread by its `link`. Done when you
    have checked every match and the owner has answered for each one you
    found. With no T3 tools, return
