@@ -139,15 +139,15 @@ own range:
 2. Merge `dev` into `feat/engine-tests-move` and re-pin if the fork moved.
 3. Run `pnpm merge-to-dev --check-only` from this pair.
 
-`node --version; pnpm merge-ready` in the pair, as things stand: v22.23.2,
-rc=1. `disposition rows: 23 parsed of 23 row-shaped lines in 1 section(s)`.
-It fails on only the two `open` rows (P3, S5-prov), and that failure is
-correct until they are fixed. `changed vs dev merge base: 25 file(s)`
-includes the clean-up's files. Five open tickets are listed as advisory, and
-none bears on this branch:
+Steps 1 and 2 are done: `dev` at `f51dfa2c` merges the clean-up, and it is
+this branch's merge base. Step 3 has not run yet.
 
-- 165 and 351 match `wowsims-fork-parity.test.ts`, which only the clean-up
-  changes.
+`node --version; pnpm merge-ready` in the pair after `b5b13821` fixed P3 and
+S5-prov: v22.23.2, rc=0, `merge-ready: ok`.
+`disposition rows: 23 parsed of 23 row-shaped lines in 1 section(s)`.
+`changed vs dev merge base: 17 file(s)`, with no clean-up files now. Three
+open tickets are listed as advisory, and none bears on this branch:
+
 - 563 is about Stop aborting sims in the tab.
 - 795 is about verify failing under load, with no test failing.
 - 841 is a false sentence in `known-traps.md` about "Took". This branch
