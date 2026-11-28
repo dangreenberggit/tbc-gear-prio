@@ -118,6 +118,14 @@ The merge into `dev` runs from the main folder, and only when the owner asks
 prints `merged`; then the agent that ran the merge removes it (§ Remove it).
 The owner does not.
 
+0. **Ask about other threads.** Run `t3_thread_search` with the branch name.
+   Any match that is a thread other than yours or the one that sent you, is
+   not archived, and has this branch as its `branch` is working on this
+   branch. For each one, stop and ask the
+   owner before you merge, naming the thread by its `link`. Done when you
+   have checked every match and the owner has answered for each one you
+   found. With no T3 tools, return
+   `NEEDS_JUDGMENT: no T3 tools to check other threads`.
 1. **Pair folder: commit.** Commit everything on both branches. Done when
    `git -C <pair> status --porcelain` and
    `git -C <pair>/vendor/tbc-new-fork status --porcelain` print nothing.
@@ -205,6 +213,9 @@ the old fork commit. Step 3 runs its checks in the pair, so this does not
 stop it (a reading of `merge_to_dev.py`, untested).
 
 ## Remove it
+
+Run § Land it on dev step 0 again first. Another thread can commit after
+the merge.
 
 ```
 pnpm wt:unpair <name>
