@@ -35,3 +35,11 @@ Kept open: the fork's ported `engine/rank.ts:281-287` declares the same four kin
 ### 2026-10-19 — next step (pre-merge review of `chore/ticket-housekeeping`, A4/P1)
 
 The old `Blocked by:` line named the Warcraft Logs `GearSource`, which will not be built (`PLAN.md:934`), so it could never clear; it is now `none`. The "What to do" section above no longer applies. Next step in the fork: remove `character-not-found`, `gear-unreadable` and `wcl-budget-exhausted` from `RankErrorKind` in `ui/features/upgrades/model/engine/rank.ts`, or mark this wontfix if dead-union cleanup is judged out of scope.
+
+### 2026-11-27 — `RecordedGearSource` moved to the fork's test helpers
+
+Fork `2ea48446c` (branch `feat/engine-cleanup-step1`) moved
+`RecordedGearSource` out of `engine/seams/gear-source.ts`, unchanged, into
+`ui/features/upgrades/testing/recorded_gear_source.ts`. Its bare `Error` is
+now at `recorded_gear_source.ts:29`, in test code only. At fork `47d299441`
+the fork's `RankErrorKind` is at `engine/rank-types.ts:111`.
