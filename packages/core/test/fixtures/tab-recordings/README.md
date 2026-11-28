@@ -45,6 +45,11 @@ same way, to match the fork's new wording: the dead-slot cause
 "plausibility band", "suspected confound", "package" or "toll". No number
 changed.
 
+The engine clean-up for the upstream PR (2026-11-27) deleted the fork's
+plausibility warnings, so the stored `ranking.plausibilityWarnings` field was
+removed from all six files by script, with no re-record and no other value
+change. This repo's own engine keeps its warnings for its command-line report.
+
 ## When a rule changes on purpose
 
 Test 536-X compares the fork's `ownSwapBreaks` and `setBonusNote` with

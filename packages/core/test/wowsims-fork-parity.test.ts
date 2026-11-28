@@ -71,6 +71,7 @@ import { tracedRank } from "./fork-engine-harness.js";
 const root = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const forkRoot = join(root, "vendor/tbc-new-fork");
 const forkEngineDir = join(forkRoot, "ui/features/upgrades/model/engine");
+const forkTestingDir = join(forkRoot, "ui/features/upgrades/testing");
 const forkProtoDir = join(forkRoot, "ui/generated/proto");
 
 const forkPresent = existsSync(forkEngineDir);
@@ -838,10 +839,13 @@ async function loadForkEngine() {
     pathToFileURL(join(forkEngineDir, "slots.ts")).href
   );
   const forkGearSource = await import(
-    pathToFileURL(join(forkEngineDir, "seams/gear-source.ts")).href
+    pathToFileURL(join(forkTestingDir, "recorded_gear_source.ts")).href
   );
   const forkSimRunner = await import(
     pathToFileURL(join(forkEngineDir, "seams/sim-runner.ts")).href
+  );
+  const forkRecordedSimRunner = await import(
+    pathToFileURL(join(forkTestingDir, "recorded_sim_runner.ts")).href
   );
   const forkStore = await import(
     pathToFileURL(join(forkEngineDir, "seams/store.ts")).href
@@ -862,6 +866,7 @@ async function loadForkEngine() {
     forkSlots,
     forkGearSource,
     forkSimRunner,
+    forkRecordedSimRunner,
     forkStore,
     forkStats,
     forkItems,
@@ -891,6 +896,7 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
       forkSlots,
       forkGearSource,
       forkSimRunner,
+      forkRecordedSimRunner,
       forkStore,
       forkStats,
       forkItems,
@@ -899,7 +905,13 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
     const { ranking: forkRanking, composedRequests: forkRequests } =
       await buildRecordingsAndRun<Awaited<ReturnType<typeof rankUpgrades>>>({
         compose: forkCompose.compose,
-        equipmentForCandidateSwap: forkGearSwap.equipmentForCandidateSwap,
+        equipmentForCandidateSwap: (equipment, slotIndex, itemId, gems) =>
+          forkGearSwap.candidateSwapWithRepairs(
+            equipment,
+            slotIndex,
+            itemId,
+            gems
+          ).equipment,
         gemContext: forkCandidateGems.gemContext,
         gemsForPhase: forkGems.gemsForPhase,
         SIM_ORDER: forkSlots.SIM_ORDER,
@@ -908,7 +920,9 @@ describe.runIf(canRunForkSide)("wowsims-fork-parity (E-W3)", () => {
         // The fork's runner must read stats (ticket 830). A 0% hit read
         // gives ret its whole hit cap as budget, so the fork's repairs value
         // hit at full weight, as this repo's engine does.
-        RecordedSimRunner: class extends forkSimRunner.RecordedSimRunner {
+        RecordedSimRunner: class
+          extends forkRecordedSimRunner.RecordedSimRunner
+        {
           computeStats() {
             return Promise.resolve({
               stats: [],

@@ -1,4 +1,4 @@
-Status: open (part 1 done; part 2 remains)
+Status: wontfix
 Type: gap
 Origin: ret catch-up round, 2026-08-11
 (`.scratch/set-bonus-value/ret-catchup/03-verify.md` task 3)
@@ -74,3 +74,16 @@ to how `unknown-item` was carved out.
 ### 2026-10-19 — kept open in ticket housekeeping
 
 Kept open: the fork's ported `ui/features/upgrades/model/engine/dead-slots.ts` has the same classifier; part 2 was not re-measured (tbc-new-fork@bc3cca6a1).
+
+### 2026-11-27 — wontfix (pre-merge review of `feat/engine-cleanup-step1`)
+
+The 2026-10-19 housekeeping kept this open only because the fork had its own
+copy of the classifier. Fork `40fe9105a` (branch `feat/engine-cleanup-step1`)
+deleted that copy, `ui/features/upgrades/model/engine/dead-slots.ts`, with
+`plausibility.ts` and `Ranking.plausibilityWarnings`; nothing in the tab read
+them. What is left is core's `packages/core/src/dead-slots.ts`, which feeds
+only this repo's command-line output: the HTML report
+(`packages/core/src/rank-report.ts:312`) and the console (`packages/core/src/cli.ts:384-390`).
+Per the owner's 2026-10-16 scope ruling the work is the fork's Upgrades tab
+only (`PLAN.md:934`), so this closes as wontfix by the same rule as the
+2026-10-19 wontfix tickets. Part 2 was not re-measured.

@@ -19521,43 +19521,6 @@
       "simmed": 42,
       "fromStore": 0
     },
-    "plausibilityWarnings": [
-      {
-        "kind": "dead-slot",
-        "slot": "head",
-        "cause": "unique-effect",
-        "wornItemName": "Wolfshead Helm",
-        "message": "No positive candidate in head: nothing in a full pool matches Wolfshead Helm's effect. Expected for a unique effect, but worth confirming it is not a measurement fault."
-      },
-      {
-        "kind": "dead-slot",
-        "slot": "chest",
-        "cause": "set-break-cost",
-        "wornItemName": "Nordrassil Chestplate",
-        "message": "No positive candidate in chest: every alternative displaces Nordrassil Chestplate and loses a Nordrassil Harness bonus. Check that this lost bonus is real before trusting the slot."
-      },
-      {
-        "kind": "dead-slot",
-        "slot": "hands",
-        "cause": "set-break-cost",
-        "wornItemName": "Nordrassil Handgrips",
-        "message": "No positive candidate in hands: every alternative displaces Nordrassil Handgrips and loses a Nordrassil Harness bonus. Check that this lost bonus is real before trusting the slot."
-      },
-      {
-        "kind": "dead-slot",
-        "slot": "legs",
-        "cause": "set-break-cost",
-        "wornItemName": "Nordrassil Feral-Kilt",
-        "message": "No positive candidate in legs: every alternative displaces Nordrassil Feral-Kilt and loses a Nordrassil Harness bonus. Check that this lost bonus is real before trusting the slot."
-      },
-      {
-        "kind": "dead-slot",
-        "slot": "shoulder",
-        "cause": "set-break-cost",
-        "wornItemName": "Nordrassil Feral-Mantle",
-        "message": "No positive candidate in shoulder: every alternative displaces Nordrassil Feral-Mantle and loses a Nordrassil Harness bonus. Check that this lost bonus is real before trusting the slot."
-      }
-    ],
     "complete": true,
     "durationMs": 308104
   }

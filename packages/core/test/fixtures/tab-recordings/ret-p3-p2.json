@@ -23575,15 +23575,6 @@
       "simmed": 50,
       "fromStore": 0
     },
-    "plausibilityWarnings": [
-      {
-        "kind": "dead-slot",
-        "slot": "ranged",
-        "cause": "unidentified-worn-item",
-        "wornItemName": "unknown",
-        "message": "No positive candidate in ranged, and no row records which item is worn, so the slot could not be classified at all. This usually means an older saved report that predates per-item ownership; re-run the ranking before reading anything into this slot."
-      }
-    ],
     "complete": true,
     "durationMs": 180253
   }

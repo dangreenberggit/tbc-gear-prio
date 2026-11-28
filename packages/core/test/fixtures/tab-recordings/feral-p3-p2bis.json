@@ -19189,39 +19189,6 @@
       "simmed": 44,
       "fromStore": 0
     },
-    "plausibilityWarnings": [
-      {
-        "kind": "implausible-set-bonus",
-        "setId": 676,
-        "setName": "Thunderheart Harness",
-        "threshold": 4,
-        "bonusDps": 190.9177950921794,
-        "fractionOfBaseline": 0.07794698083978478,
-        "thresholdFraction": 0.075,
-        "message": "Thunderheart Harness 4pc reports 190.92 DPS — ~7.8% of a 2449.33 baseline, above the 7.5% limit for a believable set bonus. Treat it as a suspected measurement problem, not a bonus this large; check which worn bonuses the added pieces break."
-      },
-      {
-        "kind": "dead-slot",
-        "slot": "head",
-        "cause": "unique-effect",
-        "wornItemName": "Wolfshead Helm",
-        "message": "No positive candidate in head: nothing in a full pool matches Wolfshead Helm's effect. Expected for a unique effect, but worth confirming it is not a measurement fault."
-      },
-      {
-        "kind": "dead-slot",
-        "slot": "chest",
-        "cause": "set-break-cost",
-        "wornItemName": "Breastplate of Malorne",
-        "message": "No positive candidate in chest: every alternative displaces Breastplate of Malorne and loses a Malorne Harness bonus. Check that this lost bonus is real before trusting the slot."
-      },
-      {
-        "kind": "dead-slot",
-        "slot": "shoulder",
-        "cause": "set-break-cost",
-        "wornItemName": "Mantle of Malorne",
-        "message": "No positive candidate in shoulder: every alternative displaces Mantle of Malorne and loses a Malorne Harness bonus. Check that this lost bonus is real before trusting the slot."
-      }
-    ],
     "complete": true,
     "durationMs": 300695
   }

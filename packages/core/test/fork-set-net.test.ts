@@ -534,7 +534,7 @@ async function runScenario(scenario: Scenario): Promise<{
     }) => unknown;
     characterFightKey: (c: unknown, spec: string) => string;
     fightGearKey: (f: unknown) => string;
-  }>("engine/seams/gear-source.ts");
+  }>("../testing/recorded_gear_source.ts");
   const itemsMod = await importForkUpgrades<{
     getItem: (id: number) => { setId?: number } | undefined;
   }>("engine/items.ts");
@@ -1377,7 +1377,7 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
     // IMPLEMENTED_IN_SIM set sits in a two-slot item type (11 finger, 12
     // trinket), so a set piece never has two candidate slots. This pins it.
     const setValue = await importForkUpgrades<{
-      IMPLEMENTED_SET_IDS: readonly number[];
+      isBonusImplemented: (setId: number, threshold: number) => boolean;
     }>("engine/set-value.ts");
     const db = JSON.parse(
       readFileSync(
@@ -1385,9 +1385,18 @@ describe.skipIf(!forkPresent)("every lost set threshold (476-478)", () => {
         "utf8"
       )
     ) as { items: Array<{ id: number; type: number; setId?: number }> };
-    // Read from the engine so a set added to the table is covered too; an
-    // empty list would make the check below pass vacuously.
-    const implemented = new Set(setValue.IMPLEMENTED_SET_IDS);
+    // Asked of the engine so a set added to the table is covered too; an
+    // empty set would make the check below pass vacuously.
+    const implemented = new Set(
+      db.items
+        .map((i) => i.setId)
+        .filter(
+          (setId): setId is number =>
+            setId !== undefined &&
+            (setValue.isBonusImplemented(setId, 2) ||
+              setValue.isBonusImplemented(setId, 4))
+        )
+    );
     expect(implemented.size).toBeGreaterThan(0);
     const twoSlot = db.items.filter(
       (i) =>

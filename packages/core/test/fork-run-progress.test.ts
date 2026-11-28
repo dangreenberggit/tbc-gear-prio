@@ -773,7 +773,7 @@ async function feralRun(
     }) => unknown;
     characterFightKey: (c: unknown, spec: string) => string;
     fightGearKey: (f: unknown) => string;
-  }>("engine/seams/gear-source.ts");
+  }>("../testing/recorded_gear_source.ts");
   const itemsMod = await importForkUpgrades<{
     getItem: (id: number) => { setId?: number } | undefined;
   }>("engine/items.ts");

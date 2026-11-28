@@ -108,7 +108,7 @@ export async function buildRankFixture(): Promise<{
     }) => unknown;
     characterFightKey: (c: unknown, spec: string) => string;
     fightGearKey: (f: unknown) => string;
-  }>("engine/seams/gear-source.ts");
+  }>("../testing/recorded_gear_source.ts");
   // The WCL mapping comes from `packages/core`, not the fork: the fork's engine
   // reads the page rather than a log, so its `slots.ts` carries `SIM_ORDER` but
   // no WCL mapper. Both sides share the same slot order, and this is fixture

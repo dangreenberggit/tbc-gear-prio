@@ -1,4 +1,4 @@
-Status: open
+Status: wontfix
 Type: gap
 Origin: pre-merge review of `feat/set-bonus-value`, round 3, 2026-08-12 (domain axis, 3-D1)
 Blocks: none
@@ -55,3 +55,16 @@ so anchoring the band and fixing the disclosure want doing together.
 ### 2026-10-19 — kept open in ticket housekeeping
 
 Kept open: the fork's ported `ui/features/upgrades/model/engine/plausibility.ts:19,64` applies the same 7.5% band to both signs (tbc-new-fork@bc3cca6a1).
+
+### 2026-11-27 — wontfix (pre-merge review of `feat/engine-cleanup-step1`)
+
+The 2026-10-19 housekeeping kept this open only because the fork had its own
+copy of the band. Fork `40fe9105a` (branch `feat/engine-cleanup-step1`)
+deleted that copy, `ui/features/upgrades/model/engine/plausibility.ts`, with
+`dead-slots.ts` and `Ranking.plausibilityWarnings`; nothing in the tab read
+them. What is left is core's `packages/core/src/plausibility.ts`, which feeds
+only this repo's command-line output: the HTML report
+(`packages/core/src/rank-report.ts:312`) and the console (`packages/core/src/cli.ts:384-390`).
+Per the owner's 2026-10-16 scope ruling the work is the fork's Upgrades tab
+only (`PLAN.md:934`), so this closes as wontfix by the same rule as the
+2026-10-19 wontfix tickets.
