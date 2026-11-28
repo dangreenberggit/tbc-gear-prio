@@ -645,8 +645,13 @@ Added since:
   ("yes", decision-log line 227). Chunk K6B built it (fork `f09d218e`, main
   `7921a69a`); see "The popover: steps that add up".
 - Rows with no `setContext` show their own Breaks lines, from `singleSwapBreaks`
-  in `view.ts` at render time (ticket 536, fork `cdb423505`). Test:
-  `npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts -t "536"`.
+  in `view.ts` at render time (ticket 536, fork `cdb423505`). Tests: cases
+  536-A to 536-K now live in the fork's
+  `ui/features/upgrades/model/engine/set-potential.test.ts`; from
+  `vendor/tbc-new-fork`, run
+  `npx vitest run ui/features/upgrades/model/engine/set-potential.test.ts -t "own-swap breaks on rows without a setContext"`.
+  Case 536-X stays here:
+  `npx vitest run packages/core/test/fork-set-fixtures.test.ts -t "536"`.
 
 ## Relation to ticket 523
 
