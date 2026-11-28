@@ -68,8 +68,8 @@ only: `nvm use <v>`.
 
 **Fork-gated suites never run in CI.** Every suite that imports
 `forkPresent` — among them `fork-set-net.test.ts`,
-`fork-meta-repair.test.ts`, `fork-run-staleness.test.ts`, the `bulk-*`
-suites and `wowsims-fork-parity.test.ts` — is wrapped in
+`fork-meta-repair.test.ts`, `fork-caster-hit-sim.test.ts` and
+`wowsims-fork-parity.test.ts` — is wrapped in
 `describe.skipIf(!forkPresent)` (the parity suite in
 `describe.runIf(canRunForkSide)`), and `vendor/` is gitignored, so CI
 collects them and skips them. A green CI run is no evidence for them.

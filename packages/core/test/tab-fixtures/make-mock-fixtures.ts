@@ -51,8 +51,9 @@ const GENERATOR = "packages/core/test/tab-fixtures/make-mock-fixtures.ts";
 // `Ranking` cannot express them, and the fork's own type cannot be imported
 // here (CI has no fork). Source: the fork's `RankedItem`, `SetContext` and
 // `Ranking` types in `ui/features/upgrades/model/engine/rank-types.ts`, plus the
-// `durationMs` that `ui/features/upgrades/model/run.ts` adds to the ranking;
-// precedent: `packages/core/test/feral-rank-fixture.ts:60-85`.
+// `durationMs` that `ui/features/upgrades/model/run.ts` adds to the ranking.
+// `packages/core/test/fork-set-net.test.ts` declares its `ForkRanking` the
+// same way.
 type MockSource =
   | { kind: "raid"; zone: string; boss?: string }
   | { kind: "crafted"; profession: string }

@@ -56,8 +56,11 @@ What a clone does hold:
 
 - The fixtures. They are fork-gated: CI skips them, because the fork clone under
   `vendor/` is gitignored. With the fork present at the lock's `commit`, run
-  `npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/fork-sim-database.test.ts packages/core/test/wowsims-fork-parity.test.ts --reporter=verbose; echo rc=$?`.
+  `npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts packages/core/test/wowsims-fork-parity.test.ts --reporter=verbose; echo rc=$?`.
   A skipped file still exits 0, so the passing case lines are the check (C14).
+  Most set-net cases and the sim-database cases now live in the fork, under
+  `ui/features/upgrades/model/`; run `npx vitest run ui/features/upgrades/model/`
+  from `vendor/tbc-new-fork`.
 - The hand derivations of every literal, in `docs/set-bonus-fixture-derivations.md`.
 - The tickets named above.
 
@@ -489,8 +492,10 @@ confirmed it with item swap on.
 
 **Ticket 522 and the copies.** Since ticket 522, every tab request holds the run
 skeleton's consumable and spell-effect rows. `applyCopies` adds copy rows only to
-`player.database.items`, so those rows survive in every copy request. Test 522-G
-in `packages/core/test/fork-sim-database.test.ts` asserts it (C165).
+`player.database.items`, so those rows survive in every copy request. Test 522-G,
+now in the fork's `ui/features/upgrades/model/adapters/sim_database.test.ts`
+("every request of a ranking with a worn set, set-bonus copies included, carries
+the rows"), asserts it (C165).
 
 ## Non-additivity
 
@@ -640,8 +645,13 @@ Added since:
   ("yes", decision-log line 227). Chunk K6B built it (fork `f09d218e`, main
   `7921a69a`); see "The popover: steps that add up".
 - Rows with no `setContext` show their own Breaks lines, from `singleSwapBreaks`
-  in `view.ts` at render time (ticket 536, fork `cdb423505`). Test:
-  `npx vitest run packages/core/test/fork-set-net.test.ts packages/core/test/fork-set-fixtures.test.ts -t "536"`.
+  in `view.ts` at render time (ticket 536, fork `cdb423505`). Tests: cases
+  536-A to 536-K now live in the fork's
+  `ui/features/upgrades/model/engine/set-potential.test.ts`; from
+  `vendor/tbc-new-fork`, run
+  `npx vitest run ui/features/upgrades/model/engine/set-potential.test.ts -t "own-swap breaks on rows without a setContext"`.
+  Case 536-X stays here:
+  `npx vitest run packages/core/test/fork-set-fixtures.test.ts -t "536"`.
 
 ## Relation to ticket 523
 
